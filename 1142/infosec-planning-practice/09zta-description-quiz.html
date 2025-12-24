@@ -1,300 +1,342 @@
-import React, { useState } from 'react';
-import { BookOpen, CheckCircle, XCircle, AlertTriangle, Shield, Key, Search, Brain } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>零信任架構 (ZTA) 核心觀念突破</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-const ZTALesson = () => {
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 
-  const correctAnswer = 'C';
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-slate-50 p-4 md:p-8 text-slate-800">
 
-  const handleOptionChange = (value) => {
-    if (!isSubmitted) {
-      setSelectedOption(value);
-    }
-  };
-
-  const handleSubmit = () => {
-    if (selectedOption) {
-      setIsSubmitted(true);
-    }
-  };
-
-  const resetQuiz = () => {
-    setIsSubmitted(false);
-    setSelectedOption(null);
-  };
-
-  const getOptionStyle = (optionId) => {
-    if (!isSubmitted) {
-      return selectedOption === optionId
-        ? 'bg-blue-100 border-blue-500 text-blue-900'
-        : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-700';
-    }
-
-    if (optionId === correctAnswer) {
-      return 'bg-green-100 border-green-500 text-green-900 font-bold'; // The correct choice (which is the False statement)
-    }
-
-    if (selectedOption === optionId && selectedOption !== correctAnswer) {
-      return 'bg-red-100 border-red-500 text-red-900'; // Wrongly selected
-    }
-
-    return 'bg-gray-50 border-gray-200 text-gray-400 opacity-60';
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-800">
-      <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
+    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
         
-        {/* Header / Teacher Intro */}
-        <div className="bg-indigo-700 text-white p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 opacity-10 transform translate-x-10 -translate-y-10">
-            <Shield size={180} />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="bg-yellow-400 text-indigo-900 text-xs font-bold px-2 py-1 rounded uppercase">iPAS 必考重點</span>
-              <span className="flex items-center gap-1 text-indigo-200 text-sm"><BookOpen size={16} /> 資安概論</span>
+        <div class="bg-indigo-700 text-white p-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 opacity-10 transform translate-x-10 -translate-y-10">
+                <i data-lucide="shield" width="180" height="180"></i>
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">零信任架構 (ZTA) 核心觀念突破</h1>
-            <p className="text-indigo-100 opacity-90">補教名師帶你破解 NIST 標準與 PEP/PDP 架構陷阱！</p>
-          </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="bg-yellow-400 text-indigo-900 text-xs font-bold px-2 py-1 rounded uppercase">iPAS 必考重點</span>
+                    <span class="flex items-center gap-1 text-indigo-200 text-sm">
+                        <i data-lucide="book-open" width="16"></i> 資安概論
+                    </span>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold mb-2">零信任架構 (ZTA) 核心觀念突破</h1>
+                <p class="text-indigo-100 opacity-90">補教名師帶你破解 NIST 標準與 PEP/PDP 架構陷阱！</p>
+            </div>
         </div>
 
-        {/* Question Section */}
-        <div className="p-6 md:p-8">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <span className="flex items-center justify-center w-8 h-8 bg-indigo-100 text-indigo-700 rounded-full text-sm font-bold">Q</span>
-              精選試題
-            </h2>
-            <p className="text-lg text-slate-700 font-medium leading-relaxed p-4 bg-slate-50 rounded-lg border-l-4 border-indigo-500">
-              關於零信任架構（Zero Trust Architecture, ZTA）的描述，下列何者較<span className="text-red-600 font-bold underline decoration-wavy">「不」正確</span>？
-            </p>
-          </div>
+        <div class="p-6 md:p-8">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <span class="flex items-center justify-center w-8 h-8 bg-indigo-100 text-indigo-700 rounded-full text-sm font-bold">Q</span>
+                    精選試題
+                </h2>
+                <p class="text-lg text-slate-700 font-medium leading-relaxed p-4 bg-slate-50 rounded-lg border-l-4 border-indigo-500">
+                    關於零信任架構（Zero Trust Architecture, ZTA）的描述，下列何者較<span class="text-red-600 font-bold underline decoration-wavy">「不」正確</span>？
+                </p>
+            </div>
 
-          <div className="space-y-3 mb-8">
-            {[
-              { id: 'A', text: '(A) 相當適用於防禦內部攻擊或受到入侵後的橫向移動' },
-              { id: 'B', text: '(B) 存取資源時，由政策執行點（PEP）向政策決策點（PDP）詢問是否允許存取' },
-              { id: 'C', text: '(C) 詳細的 ZTA 架構說明描述於 NIST SP 800-217 中' },
-              { id: 'D', text: '(D) 端對端的加密通訊使得零信任架構的部署更具挑戰' }
-            ].map((option) => (
-              <div
-                key={option.id}
-                onClick={() => handleOptionChange(option.id)}
-                className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center gap-3 ${getOptionStyle(option.id)}`}
-              >
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 
-                  ${selectedOption === option.id ? 'border-current' : 'border-gray-300'}`}>
-                  {isSubmitted && option.id === correctAnswer && <CheckCircle size={16} className="text-green-600" />}
-                  {isSubmitted && selectedOption === option.id && selectedOption !== correctAnswer && <XCircle size={16} className="text-red-600" />}
-                  {!isSubmitted && selectedOption === option.id && <div className="w-3 h-3 bg-blue-500 rounded-full" />}
+            <div id="options-container" class="space-y-3 mb-8">
                 </div>
-                <span className="font-medium">{option.text}</span>
-              </div>
-            ))}
-          </div>
 
-          {!isSubmitted ? (
-            <button
-              onClick={handleSubmit}
-              disabled={!selectedOption}
-              className={`w-full py-3 rounded-lg font-bold text-lg transition-all shadow-md
-                ${selectedOption 
-                  ? 'bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer transform hover:-translate-y-1' 
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-            >
-              提交答案
+            <button id="submit-btn" onclick="submitQuiz()" disabled
+                class="w-full py-3 rounded-lg font-bold text-lg transition-all shadow-md flex items-center justify-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed">
+                提交答案
             </button>
-          ) : (
-            <div className="animate-fade-in">
-              <div className={`p-4 rounded-lg mb-8 flex items-start gap-4 ${selectedOption === correctAnswer ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-                {selectedOption === correctAnswer ? (
-                  <div className="bg-green-100 p-2 rounded-full text-green-600"><CheckCircle size={24} /></div>
-                ) : (
-                  <div className="bg-red-100 p-2 rounded-full text-red-600"><XCircle size={24} /></div>
-                )}
-                <div>
-                  <h3 className={`font-bold text-lg mb-1 ${selectedOption === correctAnswer ? 'text-green-800' : 'text-red-800'}`}>
-                    {selectedOption === correctAnswer ? '答對了！' : '答錯囉！'}
-                  </h3>
-                  <p className="text-slate-700">
-                    正確答案是 <strong>(C)</strong>。<br/>
-                    <span className="text-sm opacity-80">題目問的是「不正確」的選項。</span>
-                  </p>
+
+            <div id="result-section" class="hidden animate-fade-in mt-8">
                 </div>
-              </div>
 
-              {/* Analysis Section */}
-              <div className="space-y-8">
-                {/* Detailed Analysis */}
-                <section>
-                  <h3 className="text-xl font-bold text-indigo-800 mb-4 border-b border-indigo-200 pb-2 flex items-center gap-2">
-                    <Brain size={24} /> 名師詳解
-                  </h3>
-                  
-                  <div className="grid md:grid-cols-2 gap-4 mb-6">
-                    <div className="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
-                      <h4 className="font-bold text-red-600 flex items-center gap-2 mb-2">
-                        <XCircle size={18} /> 選項 (C) 解析（本題答案）
-                      </h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">
-                        這是一個經典的<strong className="text-slate-800">數字陷阱</strong>！<br/>
-                        NIST 發布的零信任架構標準文件是 <strong className="text-indigo-600 bg-indigo-50 px-1 rounded">SP 800-207</strong>，並非 SP 800-217。
-                        <br/><br/>
-                        <span className="text-xs text-gray-400 block border-t pt-2 mt-2">
-                          *註：SP 800-217 主要是關於其他議題（如 PIV 整合等草案），但在資安考試中看到 "Zero Trust"，請直接聯想 800-207。
-                        </span>
-                      </p>
-                    </div>
-
-                    <div className="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
-                      <h4 className="font-bold text-green-600 flex items-center gap-2 mb-2">
-                        <CheckCircle size={18} /> 選項 (A) 正確的原因
-                      </h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">
-                        零信任的核心假設是「網路環境已經被入侵」。<br/>
-                        因此，它極度強調微分割（Micro-segmentation）與持續驗證，能有效阻止攻擊者在攻破一個端點後，在內網進行<strong className="text-slate-800">橫向移動（Lateral Movement）</strong>。
-                      </p>
-                    </div>
-
-                    <div className="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
-                      <h4 className="font-bold text-green-600 flex items-center gap-2 mb-2">
-                        <CheckCircle size={18} /> 選項 (B) 正確的原因
-                      </h4>
-                      {/* Fixed: Changed <p> to <div> to avoid nesting <ul> inside <p> */}
-                      <div className="text-sm text-gray-600 leading-relaxed">
-                        這是 ZTA 的運作邏輯：
-                        <ul className="list-disc pl-5 mt-1 space-y-1">
-                          <li><strong>PEP (Policy Enforcement Point)：</strong> 守門員，負責攔截流量。</li>
-                          <li><strong>PDP (Policy Decision Point)：</strong> 大腦，負責決定准不准。</li>
-                        </ul>
-                        PEP 必須先問 PDP，PDP 說 OK，PEP 才放行。
-                      </div>
-                    </div>
-
-                    <div className="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
-                      <h4 className="font-bold text-green-600 flex items-center gap-2 mb-2">
-                        <CheckCircle size={18} /> 選項 (D) 正確的原因
-                      </h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">
-                        雖然加密很重要，但在零信任架構中，我們需要對流量進行深度檢查（可視性）。<br/>
-                        如果全是端對端加密（E2E），中間的資安設備可能看不懂內容，導致無法判斷惡意流量，增加了監控難度。
-                      </p>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Core Concept Diagram */}
-                <section className="bg-slate-800 text-white rounded-xl p-6">
-                  <h3 className="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-2">
-                    <Search size={20} /> 圖解 ZTA 運作流程 (必考概念)
-                  </h3>
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
-                    <div className="flex flex-col items-center bg-slate-700 p-3 rounded-lg w-full md:w-1/4 text-center border border-slate-600">
-                      <div className="text-3xl mb-2">💻</div>
-                      <div className="font-bold">主體 (Subject)</div>
-                      <div className="text-xs text-gray-400">使用者/設備</div>
-                    </div>
-
-                    <div className="flex flex-col items-center w-full md:w-1/3">
-                      <div className="text-xs text-gray-400 mb-1">流量請求</div>
-                      <div className="h-0.5 bg-gray-500 w-full relative">
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800 px-2">
-                          ▶
-                        </div>
-                      </div>
-                      
-                      <div className="my-3 bg-indigo-600 p-4 rounded-lg border-2 border-yellow-400 w-full text-center relative shadow-lg">
-                         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-indigo-900 text-xs font-bold px-2 rounded">
-                           PEP (執行點)
-                         </div>
-                         <div className="text-white font-bold mb-1">守門員</div>
-                         <div className="text-xs text-indigo-200">攔下請求，問大腦</div>
-                         
-                         {/* Connection to PDP */}
-                         <div className="absolute -right-2 top-1/2 w-4 h-0.5 bg-dashed border-t border-white md:hidden"></div>
-                      </div>
-
-                      <div className="h-8 w-0.5 bg-yellow-400 my-1 hidden md:block"></div>
-
-                      <div className="hidden md:block bg-slate-600 p-3 rounded-lg border border-slate-500 w-full text-center">
-                         <div className="font-bold text-yellow-300">PDP (決策點)</div>
-                         <div className="text-xs text-gray-300">大腦：核對政策/身分/信任分數</div>
-                      </div>
-                    </div>
-
-                    {/* Mobile PDP View */}
-                    <div className="md:hidden bg-slate-600 p-3 rounded-lg border border-slate-500 w-full text-center">
-                         <div className="font-bold text-yellow-300">PDP (決策點)</div>
-                         <div className="text-xs text-gray-300">大腦：核對政策/身分/信任分數</div>
-                    </div>
-
-                    <div className="flex flex-col items-center w-full md:w-1/3 md:pl-4">
-                      <div className="text-xs text-gray-400 mb-1">放行/拒絕</div>
-                      <div className="h-0.5 bg-gray-500 w-full relative">
-                        <div className="absolute top-1/2 right-0 transform -translate-y-1/2">
-                           ▶
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col items-center bg-slate-700 p-3 rounded-lg w-full md:w-1/4 text-center border border-slate-600">
-                      <div className="text-3xl mb-2">🗄️</div>
-                      <div className="font-bold">資源 (Resource)</div>
-                      <div className="text-xs text-gray-400">資料庫/應用程式</div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Exam Tips & Mnemonic */}
-                <section className="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-r-lg">
-                  <h3 className="text-xl font-bold text-yellow-800 mb-3 flex items-center gap-2">
-                    <AlertTriangle size={24} /> 老師的考前叮嚀
-                  </h3>
-                  <ul className="space-y-3 text-slate-700">
-                    <li className="flex items-start gap-2">
-                      <span className="bg-yellow-200 text-yellow-800 font-bold text-xs px-2 py-0.5 rounded mt-1 min-w-[60px] text-center">陷阱</span>
-                      看到 <strong>SP 800-207</strong> 才是正確的！它是 ZTA 的聖經。
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="bg-indigo-100 text-indigo-800 font-bold text-xs px-2 py-0.5 rounded mt-1 min-w-[60px] text-center">觀念</span>
-                      <strong>Never Trust, Always Verify</strong>（永不信任，始終驗證）是 ZTA 的精神標語。
-                    </li>
-                  </ul>
-                  
-                  <div className="mt-6 bg-white p-4 rounded-lg border border-yellow-200 shadow-sm">
-                    <h4 className="text-indigo-600 font-bold mb-2 flex items-center gap-2">
-                      <Key size={18} /> 記憶口訣
-                    </h4>
-                    <p className="text-lg font-medium text-slate-800 text-center py-2 bg-slate-50 rounded border border-dashed border-slate-300">
-                      「零信任找 <span className="text-red-600 font-bold">207</span>，<br className="md:hidden"/>驗證不過沒門進！」
-                    </p>
-                    <p className="text-xs text-gray-500 text-center mt-2">
-                      (NIST SP 800-207, 沒通過 PDP 驗證 PEP 不會開門)
-                    </p>
-                  </div>
-                </section>
-
-                <div className="text-center pt-4">
-                  <button 
-                    onClick={resetQuiz}
-                    className="text-indigo-600 font-medium hover:text-indigo-800 underline underline-offset-4"
-                  >
-                    重新練習此題
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
-      </div>
-      <div className="text-center text-slate-400 text-xs mt-8">
-        © iPAS 資安補教名師團隊 | Gemini Interactive Learning
-      </div>
     </div>
-  );
-};
+    
+    <div class="text-center text-slate-400 text-xs mt-8">
+        © iPAS 資安補教名師團隊 | HTML5 Standalone Version
+    </div>
 
-export default ZTALesson;
+    <script>
+        // Data
+        const correctAnswer = 'C';
+        const optionsData = [
+            { id: 'A', text: '(A) 相當適用於防禦內部攻擊或受到入侵後的橫向移動' },
+            { id: 'B', text: '(B) 存取資源時，由政策執行點（PEP）向政策決策點（PDP）詢問是否允許存取' },
+            { id: 'C', text: '(C) 詳細的 ZTA 架構說明描述於 NIST SP 800-217 中' },
+            { id: 'D', text: '(D) 端對端的加密通訊使得零信任架構的部署更具挑戰' }
+        ];
+
+        // State
+        let state = {
+            selectedOption: null,
+            isSubmitted: false
+        };
+
+        // Initialize
+        function init() {
+            renderOptions();
+            lucide.createIcons();
+        }
+
+        // Actions
+        function selectOption(id) {
+            if (state.isSubmitted) return;
+            state.selectedOption = id;
+            renderOptions();
+            updateSubmitButton();
+        }
+
+        function submitQuiz() {
+            if (!state.selectedOption) return;
+            state.isSubmitted = true;
+            renderOptions();
+            updateSubmitButton(); // Hide button
+            renderResult();
+            lucide.createIcons(); // Re-render icons for new content
+        }
+
+        function resetQuiz() {
+            state.selectedOption = null;
+            state.isSubmitted = false;
+            
+            // Show button again
+            const btn = document.getElementById('submit-btn');
+            btn.classList.remove('hidden');
+            
+            // Hide result
+            document.getElementById('result-section').classList.add('hidden');
+            
+            renderOptions();
+            updateSubmitButton();
+        }
+
+        // Renderers
+        function updateSubmitButton() {
+            const btn = document.getElementById('submit-btn');
+            if (state.isSubmitted) {
+                btn.classList.add('hidden');
+            } else {
+                btn.classList.remove('hidden');
+                if (state.selectedOption) {
+                    btn.disabled = false;
+                    btn.className = "w-full py-3 rounded-lg font-bold text-lg transition-all shadow-md flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer transform hover:-translate-y-1";
+                } else {
+                    btn.disabled = true;
+                    btn.className = "w-full py-3 rounded-lg font-bold text-lg transition-all shadow-md flex items-center justify-center gap-2 bg-gray-300 text-gray-500 cursor-not-allowed";
+                }
+            }
+        }
+
+        function renderOptions() {
+            const container = document.getElementById('options-container');
+            container.innerHTML = optionsData.map(option => {
+                let styleClass = "";
+                let iconHtml = "";
+
+                if (!state.isSubmitted) {
+                    // Not submitted state
+                    if (state.selectedOption === option.id) {
+                        styleClass = "bg-blue-100 border-blue-500 text-blue-900 shadow-sm ring-1 ring-blue-500";
+                        iconHtml = `<div class="w-3 h-3 bg-blue-500 rounded-full"></div>`;
+                    } else {
+                        styleClass = "bg-white hover:bg-gray-50 border-gray-200 text-gray-700 hover:border-blue-300";
+                        iconHtml = ``; // Empty
+                    }
+                } else {
+                    // Submitted state
+                    if (option.id === correctAnswer) {
+                        styleClass = "bg-green-100 border-green-500 text-green-900 font-bold ring-1 ring-green-500 cursor-default";
+                        iconHtml = `<i data-lucide="check-circle" class="text-green-600 w-4 h-4"></i>`;
+                    } else if (state.selectedOption === option.id) {
+                        styleClass = "bg-red-100 border-red-500 text-red-900 cursor-default";
+                        iconHtml = `<i data-lucide="x-circle" class="text-red-600 w-4 h-4"></i>`;
+                    } else {
+                        styleClass = "bg-gray-50 border-gray-200 text-gray-400 opacity-60 cursor-default";
+                        iconHtml = ``;
+                    }
+                }
+
+                return `
+                <button
+                    onclick="selectOption('${option.id}')"
+                    ${state.isSubmitted ? 'disabled' : ''}
+                    class="w-full text-left p-4 rounded-lg border-2 transition-all duration-200 flex items-center gap-3 outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500 ${styleClass}"
+                >
+                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${state.selectedOption === option.id ? 'border-current' : 'border-gray-300'}">
+                        ${iconHtml}
+                    </div>
+                    <span class="font-medium">${option.text}</span>
+                </button>
+                `;
+            }).join('');
+            
+            // Need to re-init icons if we re-render (though mostly handled by svg injection above, using simple html for icons in loop for performance)
+            if(state.isSubmitted) lucide.createIcons();
+        }
+
+        function renderResult() {
+            const resultSection = document.getElementById('result-section');
+            const isCorrect = state.selectedOption === correctAnswer;
+            
+            const feedbackHeader = isCorrect 
+                ? `<div class="bg-green-50 border border-green-200 p-4 rounded-lg mb-8 flex items-start gap-4">
+                     <div class="bg-green-100 p-2 rounded-full text-green-600 flex-shrink-0"><i data-lucide="check-circle" width="24"></i></div>
+                     <div>
+                        <h3 class="font-bold text-lg mb-1 text-green-800">答對了！</h3>`
+                : `<div class="bg-red-50 border border-red-200 p-4 rounded-lg mb-8 flex items-start gap-4">
+                     <div class="bg-red-100 p-2 rounded-full text-red-600 flex-shrink-0"><i data-lucide="x-circle" width="24"></i></div>
+                     <div>
+                        <h3 class="font-bold text-lg mb-1 text-red-800">答錯囉！</h3>`;
+
+            const feedbackBody = `
+                        <p class="text-slate-700">
+                            正確答案是 <strong>(C)</strong>。<br/>
+                            <span class="text-sm opacity-80">題目問的是「不正確」的選項。</span>
+                        </p>
+                    </div>
+                </div>`;
+
+            const analysisHTML = `
+                <div class="space-y-8">
+                    <section>
+                        <h3 class="text-xl font-bold text-indigo-800 mb-4 border-b border-indigo-200 pb-2 flex items-center gap-2">
+                            <i data-lucide="brain" width="24"></i> 名師詳解
+                        </h3>
+                        
+                        <div class="grid md:grid-cols-2 gap-4 mb-6">
+                            <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
+                                <h4 class="font-bold text-red-600 flex items-center gap-2 mb-2">
+                                    <i data-lucide="x-circle" width="18"></i> 選項 (C) 解析
+                                </h4>
+                                <p class="text-sm text-gray-600 leading-relaxed">
+                                    這是一個經典的<strong class="text-slate-800">數字陷阱</strong>！<br/>
+                                    NIST 發布的零信任架構標準文件是 <strong class="text-indigo-600 bg-indigo-50 px-1 rounded">SP 800-207</strong>，並非 SP 800-217。
+                                </p>
+                            </div>
+                            
+                            <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
+                                <h4 class="font-bold text-green-600 flex items-center gap-2 mb-2">
+                                    <i data-lucide="check-circle" width="18"></i> 選項 (B) 正確的原因
+                                </h4>
+                                <div class="text-sm text-gray-600 leading-relaxed">
+                                    這是 ZTA 的運作邏輯：
+                                    <ul class="list-disc pl-5 mt-1 space-y-1">
+                                        <li><strong>PEP (Policy Enforcement Point)：</strong> 守門員。</li>
+                                        <li><strong>PDP (Policy Decision Point)：</strong> 大腦。</li>
+                                    </ul>
+                                    PEP 必須先問 PDP，PDP 說 OK，PEP 才放行。
+                                </div>
+                            </div>
+
+                             <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
+                                <h4 class="font-bold text-green-600 flex items-center gap-2 mb-2">
+                                    <i data-lucide="check-circle" width="18"></i> 選項 (A) 正確的原因
+                                </h4>
+                                <div class="text-sm text-gray-600 leading-relaxed">
+                                    零信任假設網路已遭入侵，故極度強調微分割與持續驗證，能有效阻止攻擊者<strong>橫向移動</strong>。
+                                </div>
+                            </div>
+
+                            <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
+                                <h4 class="font-bold text-green-600 flex items-center gap-2 mb-2">
+                                    <i data-lucide="check-circle" width="18"></i> 選項 (D) 正確的原因
+                                </h4>
+                                <div class="text-sm text-gray-600 leading-relaxed">
+                                    端對端加密 (E2E) 雖安全，但導致中間資安設備無法檢查內容（可視性降低），讓威脅偵測變得更挑戰。
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="bg-slate-800 text-white rounded-xl p-6">
+                        <h3 class="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-2">
+                            <i data-lucide="search" width="20"></i> 圖解 ZTA 運作流程
+                        </h3>
+                         <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+                            <div class="flex flex-col items-center bg-slate-700 p-3 rounded-lg w-full md:w-1/4 text-center border border-slate-600">
+                                <div class="text-3xl mb-2">💻</div>
+                                <div class="font-bold">主體 (Subject)</div>
+                            </div>
+                            <div class="flex flex-col items-center w-full md:w-1/3">
+                                <div class="text-xs text-gray-400 mb-1">流量請求</div>
+                                <div class="h-0.5 bg-gray-500 w-full relative">
+                                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-800 px-2">▶</div>
+                                </div>
+                                <div class="my-3 bg-indigo-600 p-4 rounded-lg border-2 border-yellow-400 w-full text-center relative shadow-lg">
+                                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-indigo-900 text-xs font-bold px-2 rounded">PEP</div>
+                                    <div class="text-white font-bold">守門員</div>
+                                </div>
+                                <div class="hidden md:block bg-slate-600 p-3 rounded-lg border border-slate-500 w-full text-center mt-2">
+                                    <div class="font-bold text-yellow-300">PDP</div>
+                                    <div class="text-xs text-gray-300">大腦決策</div>
+                                </div>
+                            </div>
+                             <div class="flex flex-col items-center w-full md:w-1/3">
+                                <div class="text-xs text-gray-400 mb-1">放行/拒絕</div>
+                                <div class="h-0.5 bg-gray-500 w-full relative">
+                                    <div class="absolute top-1/2 right-0 transform -translate-y-1/2">▶</div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center bg-slate-700 p-3 rounded-lg w-full md:w-1/4 text-center border border-slate-600">
+                                <div class="text-3xl mb-2">🗄️</div>
+                                <div class="font-bold">資源 (Resource)</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-r-lg">
+                        <h3 class="text-xl font-bold text-yellow-800 mb-3 flex items-center gap-2">
+                            <i data-lucide="alert-triangle" width="24"></i> 老師的考前叮嚀
+                        </h3>
+                        <div class="mt-6 bg-white p-4 rounded-lg border border-yellow-200 shadow-sm text-center">
+                            <h4 class="text-indigo-600 font-bold mb-2 flex items-center justify-center gap-2">
+                                <i data-lucide="key" width="18"></i> 記憶口訣
+                            </h4>
+                            <p class="text-lg font-medium text-slate-800 py-2">
+                                「零信任找 <span class="text-red-600 font-bold">207</span>，驗證不過沒門進！」
+                            </p>
+                        </div>
+                    </section>
+
+                    <div class="text-center pt-4">
+                        <button onclick="resetQuiz()" class="text-indigo-600 font-medium hover:text-indigo-800 underline underline-offset-4 cursor-pointer">
+                            重新練習此題
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            resultSection.innerHTML = feedbackHeader + feedbackBody + analysisHTML;
+            resultSection.classList.remove('hidden');
+        }
+
+        // Run initialization
+        init();
+    </script>
+</body>
+</html>
