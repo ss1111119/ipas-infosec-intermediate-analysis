@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安【題組 5】第 37 題解析：DevSecOps 與 SAST</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #f0f4f8;
+            --accent-color: #17a2b8;
+            --text-color: #333;
+            --border-color: #ddd;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --bg-color: #f9f9f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding-bottom: 50px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            padding: 10px 0;
+            z-index: 100;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+
+        .progress-label {
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            text-align: right;
+            color: #666;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--success-color);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Scenario Section */
+        .scenario-box {
+            background-color: var(--secondary-color);
+            padding: 15px;
+            border-left: 5px solid var(--accent-color);
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .scenario-img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 15px auto;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Question Section */
+        .question-box {
+            margin-bottom: 30px;
+        }
+
+        .question-meta {
+            font-size: 0.85rem;
+            color: #fff;
+            background-color: #6c757d;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            text-align: left;
+            background-color: #fff;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #f1f8ff;
+            border-color: var(--primary-color);
+        }
+
+        .option-btn.selected-correct {
+            background-color: #d4edda;
+            border-color: var(--success-color);
+            color: #155724;
+        }
+
+        .option-btn.selected-wrong {
+            background-color: #f8d7da;
+            border-color: var(--error-color);
+            color: #721c24;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Feedback Area */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .feedback-hint {
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0 5px;
+            transition: background 0.3s;
+        }
+
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-reset:hover { background-color: #5a6268; }
+
+        /* Accordion / Collapsible Sections */
+        .accordion-container {
+            margin-top: 40px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #e2e6ea;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            background-color: #fff;
+        }
+
+        .accordion-item.active .accordion-content {
+            padding: 15px;
+            max-height: 1000px; /* Arbitrary large height for transition */
+        }
+
+        /* Content Styling inside Accordion */
+        .content-step h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .term-def {
+            margin-bottom: 10px;
+            padding-left: 15px;
+            border-left: 3px solid #ccc;
+        }
+
+        ul.styled-list {
+            list-style-type: disc;
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        ul.styled-list li {
+            margin-bottom: 8px;
+        }
+
+        .correct-answer-block {
+            background-color: #d1ecf1;
+            padding: 15px;
+            border-radius: 4px;
+            color: #0c5460;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        /* Self Check Section */
+        .self-check-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .self-check-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .toggle-answer-btn {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 0.85rem;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+
+        .self-check-answer {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.2rem; }
+            .question-text { font-size: 1rem; }
+            .option-btn { padding: 12px; font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安【題組 5】第 37 題互動解析</h1>
+        <p>DevSecOps 下 CI/CD 整合自動化原始碼檢測技術</p>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-label">學習進度：<span id="progress-text">0%</span></div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+    </div>
+
+    <!-- Scenario -->
+    <section class="scenario-box">
+        <span class="scenario-title">【題組情境】</span>
+        <p>情境說明：你需協助開發團隊建立自動化原始碼檢測機制以提前發現弱點，並考量 DevSecOps 的精神，希望能把安全檢測融入開發流程，越早發現問題越好。</p>
+        <img src="https://i.meee.com.tw/fKYFg1V.jpg" alt="DevSecOps 流程示意圖" class="scenario-img">
+    </section>
+
+    <!-- Interactive Quiz -->
+    <section class="question-box">
+        <div class="question-meta">題號：37 (單選題)</div>
+        <div class="question-text">
+            下列何種技術最適合整合至 CI/CD 工作流程中？
+        </div>
+
+        <div class="options-grid" id="options-container">
+            <button class="option-btn" onclick="checkAnswer('A')">(A) 靜態應用安全測試 (Static Application Security Testing, SAST)</button>
+            <button class="option-btn" onclick="checkAnswer('B')">(B) SQL 資料表比對工具</button>
+            <button class="option-btn" onclick="checkAnswer('C')">(C) 黑箱測試 (Black-box Testing)</button>
+            <button class="option-btn" onclick="checkAnswer('D')">(D) 動態應用安全測試 (Dynamic Application Security Testing, DAST)</button>
+        </div>
+
+        <div id="feedback" class="feedback-area">
+            <div id="feedback-msg"></div>
+        </div>
+
+        <div class="controls" id="controls" style="display:none;">
+            <button class="btn btn-reset" onclick="resetQuiz()">重設題目</button>
+        </div>
+    </section>
+
+    <!-- Explanations Accordion -->
+    <section class="accordion-container">
+        <h2 style="margin-bottom: 15px; font-size: 1.2rem; border-left: 4px solid var(--primary-color); padding-left: 10px;">完整解析與觀念</h2>
+
+        <!-- Step 1: Keywords -->
+        <div class="accordion-item">
+            <div class="accordion-header">第一步：找關鍵字</div>
+            <div class="accordion-content">
+                <div class="content-step">
+                    <h3>關鍵字拆解</h3>
+                    <div class="term-def">
+                        <span class="highlight">自動化原始碼檢測</span>：意思是不要人工看，且是直接看「程式碼 (Source Code)」找寫錯的地方。
+                    </div>
+                    <div class="term-def">
+                        <span class="highlight">DevSecOps</span> (Development, Security, Operations)：把資安工作融入軟體開發與維運的每一個環節，而不是等到最後才來補救。
+                    </div>
+                    <div class="term-def">
+                        <span class="highlight">CI/CD</span> (Continuous Integration / Continuous Deployment)：持續整合與部署，指的是每次工程師提交程式碼，系統就會自動建置、測試並發布的流水線。
+                    </div>
+                    <div class="term-def">
+                        <span class="highlight">提前發現弱點</span>：資安圈常說的「左移 (Shift Left)」，越早發現問題，修復成本越低。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Translation -->
+        <div class="accordion-item">
+            <div class="accordion-header">第二步：白話翻譯</div>
+            <div class="accordion-content">
+                <div class="content-step">
+                    <p style="font-size: 1.1rem; color: #444;">
+                        這題用白話文說就是：<br><br>
+                        <strong>「如果你想在程式碼一提交就自動檢查有沒有安全問題，哪一種技術最適合放進 CI/CD 這個自動化流程裡面一直跑？」</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Logic -->
+        <div class="accordion-item">
+            <div class="accordion-header">第三步：解題思路</div>
+            <div class="accordion-content">
+                <div class="content-step">
+                    <p><strong>這題在考什麼觀念？</strong><br>
+                    CI/CD 裡要放「快速、可自動化、直接掃原始碼」的安全檢測，SAST 最符合。</p>
+                    <br>
+                    <p><strong>解題步驟：</strong></p>
+                    <ul class="styled-list">
+                        <li><strong>先抓關鍵：</strong>題目說「原始碼檢測」→ 這直接對應 SAST 的定義。</li>
+                        <li><strong>再看 DevSecOps：</strong>強調「左移 (Shift Left)」，也就是越早做越好。SAST 是在程式還沒編譯或執行前就做的，時間點最早。</li>
+                        <li><strong>排除法：</strong>排除那些不是針對安全測試，或是需要把系統完整跑起來才能測的工具 (如 DAST)。</li>
+                    </ul>
+                    <br>
+                    <p><strong>原理與比喻：</strong></p>
+                    <ul class="styled-list">
+                        <li><strong>SAST</strong> 就像「看建築設計圖找錯誤」，房子還沒蓋好就能先抓出樑柱位置不對。</li>
+                        <li><strong>DAST</strong> 就像「房子蓋好後，派人去試踹門窗」，這通常要等部署到測試環境後才能做，速度較慢。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Options Analysis -->
+        <div class="accordion-item">
+            <div class="accordion-header">第四步：選項分析</div>
+            <div class="accordion-content">
+                <div class="content-step">
+                    <div class="term-def">
+                        <strong>(A) SAST (靜態應用安全測試) - 正確</strong><br>
+                        因為它直接掃描原始碼，不必等程式跑起來。非常適合工程師每次存檔或提交 (Push) 時自動檢查。符合 DevSecOps「早做、常做」的精神。
+                    </div>
+                    <div class="term-def">
+                        <strong>(B) SQL 資料表比對工具 - 錯誤</strong><br>
+                        這是用來維護資料庫結構一致性的工具，不是用來找安全漏洞的核心技術。
+                    </div>
+                    <div class="term-def">
+                        <strong>(C) 黑箱測試 (Black-box Testing) - 不最合適</strong><br>
+                        黑箱測試通常指不看程式碼，從外部測試功能。雖然可以自動化，但它不如 SAST 能夠在「最早期、最貼近原始碼」的階段發現問題。
+                    </div>
+                    <div class="term-def">
+                        <strong>(D) DAST (動態應用安全測試) - 不最合適</strong><br>
+                        DAST 需要把應用程式真的跑起來 (Run-time) 才能測試。雖然也是 CI/CD 的一環，但通常放在流程後段。題目強調「原始碼檢測」與「提前」，SAST 才是首選。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extension -->
+        <div class="accordion-item">
+            <div class="accordion-header">觀念補充與延伸</div>
+            <div class="accordion-content">
+                <div class="content-step">
+                    <h3>核心觀念定位</h3>
+                    <p>本題屬於「DevSecOps / CI/CD 安全左移 / AppSec 工具整合」的必考觀念題。</p>
+                    <br>
+                    <h3>重點定義</h3>
+                    <ul class="styled-list">
+                        <li><strong>Shift Left (安全左移)：</strong>把安全測試從開發週期的最後面（上線前），移動到最前面（寫程式時）。</li>
+                        <li><strong>SAST (白箱)：</strong>看原始碼、找語法或邏輯漏洞。優點是快、早；缺點是誤報多。</li>
+                        <li><strong>DAST (黑箱)：</strong>程式執行後，模擬駭客攻擊。優點是準確度高；缺點是慢、晚。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mnemonics -->
+        <div class="accordion-item">
+            <div class="accordion-header">記憶口訣與陷阱</div>
+            <div class="accordion-content">
+                <div class="content-step">
+                    <h3>記憶口訣</h3>
+                    <ul class="styled-list">
+                        <li>「看碼先 SAST，跑起來再 DAST」</li>
+                        <li>「CI 先掃碼，CD 再動測」</li>
+                    </ul>
+                    <br>
+                    <h3>常見陷阱</h3>
+                    <ul class="styled-list">
+                        <li><strong>容易搞混：</strong>看到「自動化」就想選 DAST？錯！SAST 也是高度自動化的，且題目指定「原始碼檢測」。</li>
+                        <li><strong>避坑指南：</strong>只要題目出現「原始碼」、「提前發現」這類字眼，請優先鎖定 SAST。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Answer Block -->
+        <div class="accordion-item">
+            <div class="accordion-header">正確答案</div>
+            <div class="accordion-content">
+                <div class="correct-answer-block">
+                    答案：(A)<br>
+                    理由：因為 SAST 可直接對原始碼做自動化掃描，最適合在 CI/CD 中早期且頻繁地執行。
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Self Check -->
+    <section class="accordion-container">
+        <h2 style="margin-bottom: 15px; font-size: 1.2rem; border-left: 4px solid var(--accent-color); padding-left: 10px;">自我檢測</h2>
+        
+        <div class="self-check-item">
+            <span class="self-check-question">1. 若你的應用程式還沒部署到測試環境 (還不能跑)，可以做 DAST 嗎？為什麼？</span>
+            <button class="toggle-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+            <div class="self-check-answer">
+                不行。因為 DAST (動態測試) 必須要跟「正在執行中」的應用程式互動才能抓漏洞。如果程式跑不起來，就只能做 SAST。
+            </div>
+        </div>
+
+        <div class="self-check-item">
+            <span class="self-check-question">2. SAST 常見會產生哪一種問題（例如誤報），你要怎麼處理？</span>
+            <button class="toggle-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+            <div class="self-check-answer">
+                SAST 容易產生「誤報 (False Positive)」，把沒問題的程式碼當成有問題。處理方式是需要人工檢視過濾，或是調校掃描規則。
+            </div>
+        </div>
+
+        <div class="self-check-item">
+            <span class="self-check-question">3. 如果要在部署後驗證「實際可被利用的漏洞」，應該選哪一類測試？</span>
+            <button class="toggle-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+            <div class="self-check-answer">
+                應該選 DAST 或滲透測試 (黑箱)。因為它們是模擬駭客從外部攻擊，確認漏洞是否真的能被觸發。
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // State management
+    const state = {
+        quizAnswered: false,
+        accordionOpened: false,
+        selfCheckViewed: false
+    };
+
+    // Correct answer configuration
+    const CORRECT_ANSWER = 'A';
+    
+    // Elements
+    const optionsContainer = document.getElementById('options-container');
+    const feedbackArea = document.getElementById('feedback');
+    const feedbackMsg = document.getElementById('feedback-msg');
+    const controls = document.getElementById('controls');
+    const progressText = document.getElementById('progress-text');
+    const progressFill = document.getElementById('progress-fill');
+
+    // Quiz Logic
+    function checkAnswer(selectedOption) {
+        if (state.quizAnswered) return; // Prevent multiple clicks
+
+        state.quizAnswered = true;
+        updateProgress();
+
+        const buttons = optionsContainer.querySelectorAll('.option-btn');
+        
+        buttons.forEach(btn => {
+            btn.disabled = true; // Disable all buttons
+            if (btn.textContent.includes(`(${selectedOption})`)) {
+                if (selectedOption === CORRECT_ANSWER) {
+                    btn.classList.add('selected-correct');
+                } else {
+                    btn.classList.add('selected-wrong');
+                }
+            }
+        });
+
+        feedbackArea.style.display = 'block';
+        controls.style.display = 'block';
+
+        if (selectedOption === CORRECT_ANSWER) {
+            feedbackArea.className = 'feedback-area feedback-correct';
+            feedbackMsg.innerHTML = '<strong>答對了！</strong> <br>提示：CI/CD 最適合先做「看原始碼」的 SAST 自動檢測，符合越早越好的精神。';
+        } else {
+            feedbackArea.className = 'feedback-area feedback-wrong';
+            // Find correct answer text to highlight
+            let correctBtn = Array.from(buttons).find(b => b.textContent.includes(`(${CORRECT_ANSWER})`));
+            correctBtn.classList.add('selected-correct'); // Show correct answer even if wrong
+            
+            feedbackMsg.innerHTML = '<strong>答錯了。</strong> <br>提示：題目關鍵字是「原始碼檢測」且要「自動化整合」。<br>黑箱或 DAST 通常要等系統跑起來 (部署後) 才能測，比較慢。請參考下方解析的「第一步：找關鍵字」。';
+        }
+    }
+
+    function resetQuiz() {
+        state.quizAnswered = false; // Reset state allows re-answering, but we keep progress logic monotonic (keep earned progress)
+        
+        const buttons = optionsContainer.querySelectorAll('.option-btn');
+        buttons.forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('selected-correct', 'selected-wrong');
+        });
+
+        feedbackArea.style.display = 'none';
+        controls.style.display = 'none';
+    }
+
+    // Accordion Logic
+    const accordions = document.querySelectorAll('.accordion-header');
+    accordions.forEach(acc => {
+        acc.addEventListener('click', function() {
+            this.parentElement.classList.toggle('active');
+            
+            // Mark progress on first open
+            if (!state.accordionOpened) {
+                state.accordionOpened = true;
+                updateProgress();
+            }
+        });
+    });
+
+    // Self Check Logic
+    function toggleSelfCheck(btn) {
+        const answerDiv = btn.nextElementSibling;
+        const isHidden = window.getComputedStyle(answerDiv).display === 'none';
+        
+        if (isHidden) {
+            answerDiv.style.display = 'block';
+            btn.textContent = '隱藏答案';
+            
+            if (!state.selfCheckViewed) {
+                state.selfCheckViewed = true;
+                updateProgress();
+            }
+        } else {
+            answerDiv.style.display = 'none';
+            btn.textContent = '顯示答案';
+        }
+    }
+
+    // Progress Bar Logic
+    function updateProgress() {
+        let score = 0;
+        if (state.quizAnswered) score += 34;
+        if (state.accordionOpened) score += 33;
+        if (state.selfCheckViewed) score += 33;
+
+        // Cap at 100
+        if (score > 100) score = 100;
+
+        progressFill.style.width = score + '%';
+        progressText.textContent = score + '%';
+    }
+
+    // Initial check
+    document.addEventListener('DOMContentLoaded', () => {
+        updateProgress();
+    });
+
+</script>
+
+</body>
+</html>

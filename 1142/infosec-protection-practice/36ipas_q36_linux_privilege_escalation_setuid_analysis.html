@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安【題組 4-36】Linux 權限提升偵察指令解析</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 專業深藍 */
+            --accent-color: #3498db; /* 亮藍 */
+            --highlight-color: #e74c3c; /* 重點紅 */
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --border-radius: 8px;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Microsoft JhengHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+        }
+
+        /* Header & Progress */
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-top: 25px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 15px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--success-color);
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            text-align: right;
+            margin-top: 2px;
+            color: #666;
+        }
+
+        /* Scenario Box */
+        .scenario-box {
+            background-color: #e8f4f8;
+            border: 1px solid #b3d7ff;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+        }
+
+        .code-block {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 10px 15px;
+            font-family: 'Courier New', monospace;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .scenario-img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            background-color: #fff;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .checkbox-label:hover {
+            background-color: #f5f5f5;
+        }
+
+        .checkbox-label input {
+            margin-top: 5px;
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-submit { background-color: var(--primary-color); color: white; }
+        .btn-answer { background-color: var(--warning-color); color: white; }
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-toggle { background-color: var(--accent-color); color: white; font-size: 0.9rem; padding: 5px 10px;}
+
+        .feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .feedback-partial { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .feedback-wrong { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Accordion */
+        .accordion {
+            background-color: #f1f1f1;
+            color: #444;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: 0.4s;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion:after {
+            content: '\002B'; /* Plus sign */
+            font-size: 1.5rem;
+            color: #777;
+            float: right;
+        }
+
+        .active:after {
+            content: "\2212"; /* Minus sign */
+        }
+
+        .accordion.active, .accordion:hover {
+            background-color: #ddd;
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .panel-content {
+            padding: 15px 0;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .term {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Self Check */
+        .self-check-item {
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 10px;
+        }
+
+        .self-check-answer {
+            margin-top: 10px;
+            color: var(--success-color);
+            display: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            h1 { font-size: 1.3rem; }
+            .btn-group { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安【題組 4】第 36 題解析</h1>
+        <div class="subtitle">主題：Linux 權限提升偵察指令判斷 (Privilege Escalation)</div>
+        <div class="progress-text">學習進度：<span id="progress-percent">0%</span></div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+    </header>
+
+    <!-- 題目情境 -->
+    <div class="scenario-box">
+        <h3>【題組情境】</h3>
+        <p>你是企業藍隊（防禦方）人員，正在調查一台疑似遭到指令注入攻擊的伺服器。</p>
+        <p>經測試，輸入 <code>127.0.0.1; whoami</code> 後，回傳結果為 <strong>www-data</strong>（代表這是 Web 服務帳號，通常權限較低）。</p>
+        <p>同時，你在作業系統指令日誌（Command Log）中發現攻擊者執行了以下指令：</p>
+        <div class="code-block">find / -perm -u=s -type f 2>/dev/null</div>
+        <p>此行為顯示攻擊者正在進行權限提升前的偵察。</p>
+        <img src="https://i.meee.com.tw/zmoyb9O.jpg" alt="日誌截圖" class="scenario-img">
+    </div>
+
+    <!-- 互動答題區 -->
+    <div class="quiz-section">
+        <div class="question-text">
+            <span style="background-color: var(--primary-color); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">複選題</span>
+            <br><br>
+            題目：請問攻擊者執行這個指令「find / -perm -u=s -type f 2>/dev/null」<br>
+            <span style="color: var(--highlight-color);">最不可能</span>做下列哪些攻擊行為？（請選擇最合適的選項）
+        </div>
+        
+        <form id="quiz-form">
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="option" value="A">
+                    (A) 尋找有被設定 setuid 的檔案，後續可嘗試用該檔案來把當前身分提升成為 root 權限
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="option" value="B">
+                    (B) 尋找有被設定 setgid 的檔案，後續可嘗試用該檔案來把當前身分提升成為 root 權限
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="option" value="C">
+                    (C) 尋找有被設定 sticky bit 的目錄，後續可嘗試用該目錄裡面的檔案來提升成為 root 權限
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="option" value="D">
+                    (D) 尋找有被設定為 root:root 的檔案與目錄，確認機敏資料在哪些地方
+                </label>
+            </div>
+        </form>
+
+        <div class="btn-group">
+            <button type="button" class="btn-submit" onclick="checkAnswer()">送出作答</button>
+            <button type="button" class="btn-answer" onclick="showAnswer()">顯示正解</button>
+            <button type="button" class="btn-reset" onclick="resetQuiz()">重設</button>
+        </div>
+
+        <div id="feedback" class="feedback-area"></div>
+    </div>
+
+    <!-- 解析區塊 (Accordion) -->
+    <h2>完整解析</h2>
+    <p>點擊下方標題展開詳細說明：</p>
+
+    <button class="accordion">第一步：找關鍵字</button>
+    <div class="panel">
+        <div class="panel-content">
+            <ul>
+                <li><span class="term">www-data</span>：Web 服務預設使用的帳號，通常權限受限，無法存取核心系統檔。</li>
+                <li><span class="term">find</span>：Linux 系統中用來搜尋檔案的指令。</li>
+                <li><span class="term">-perm -u=s</span>：這是本題核心。<code>-perm</code> 代表搜尋權限（Permission），<code>-u=s</code> 代表搜尋設定了 <strong>setuid</strong> 的檔案。</li>
+                <li><span class="term">setuid</span>：全名 Set User ID。當一個執行檔設定了此權限，任何人執行該檔案時，都會暫時獲得「該檔案擁有者（通常是 root）」的權限。</li>
+                <li><span class="term">2>/dev/null</span>：把錯誤訊息（如「權限不足」）丟掉不看，讓輸出畫面比較乾淨。</li>
+            </ul>
+        </div>
+    </div>
+
+    <button class="accordion">第二步：白話翻譯</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p>攻擊者發現自己現在的身分只是個權限很低的網頁服務員（www-data）。</p>
+            <p>所以他執行這個指令的意思是：<br>
+            <strong>「系統請幫我從根目錄（/）開始找，有哪些檔案是設定了 setuid 特權的？順便把那些我不能讀取的錯誤訊息都隱藏起來。」</strong></p>
+            <p>如果找到這類檔案（例如古老的 vim 版本或設定錯誤的程式），攻擊者就有機會利用它，讓自己瞬間變身成最高管理員（root）。</p>
+        </div>
+    </div>
+
+    <button class="accordion">第三步：解題思路與選項分析</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p><strong>這題在考什麼？</strong><br>
+            你需要辨識 <code>-u=s</code> 這個參數只能找到 setuid 檔案，無法找到 setgid 或 sticky bit。</p>
+            
+            <p><strong>題目問的是「最不可能做哪些行為」，所以我們要選出「指令功能以外」的選項。</strong></p>
+
+            <hr>
+            
+            <p><span class="highlight">(A) 尋找 setuid 檔案...（這是指令原本的功能）</span><br>
+            分析：指令中有 <code>-u=s</code>，這正是為了找 setuid。這是攻擊者最可能的目的，所以<strong>不選</strong>。</p>
+
+            <p><span class="highlight">(B) 尋找 setgid 檔案...（最不可能）</span><br>
+            分析：要找 setgid 需要使用 <code>-g=s</code> 參數。目前的指令找不到 setgid 檔案。所以這是正確答案之一（選）。</p>
+
+            <p><span class="highlight">(C) 尋找 sticky bit 目錄...（最不可能）</span><br>
+            分析：Sticky bit（黏滯位，常用於 /tmp）的參數是 <code>+t</code> 或數值 1000。目前的指令找不到這類目錄。所以這是正確答案之一（選）。</p>
+
+            <p><span class="highlight">(D) 尋找 root:root 的檔案...（最不可能）</span><br>
+            分析：雖然 setuid 檔案通常屬於 root，但該指令是針對「權限位元（s bit）」搜尋，而不是針對「擁有者（owner）」搜尋（那要用 <code>-user root</code>）。且找 root 檔案不一定能提權。所以這也不是該指令最直接的目的。這是正確答案之一（選）。</p>
+        </div>
+    </div>
+
+    <button class="accordion">觀念補充與記憶口訣</button>
+    <div class="panel">
+        <div class="panel-content">
+            <h4>觀念對照表</h4>
+            <table border="1" style="width:100%; border-collapse: collapse; margin-bottom: 15px;">
+                <tr style="background-color: #eee;">
+                    <th>名稱</th>
+                    <th>指令參數</th>
+                    <th>功能白話文</th>
+                </tr>
+                <tr>
+                    <td><strong>SUID (Set UID)</strong></td>
+                    <td><code>-u=s</code> 或 4000</td>
+                    <td>執行時變身為「檔案主人」。<br>（就像拿了尚方寶劍）</td>
+                </tr>
+                <tr>
+                    <td><strong>SGID (Set GID)</strong></td>
+                    <td><code>-g=s</code> 或 2000</td>
+                    <td>執行時變身為「檔案群組成員」。<br>（目錄共用協作常用）</td>
+                </tr>
+                <tr>
+                    <td><strong>Sticky Bit</strong></td>
+                    <td><code>+t</code> 或 1000</td>
+                    <td>只允許檔案主人刪除檔案。<br>（防刪保護，常用在 /tmp）</td>
+                </tr>
+            </table>
+
+            <h4>記憶口訣</h4>
+            <ul>
+                <li><strong>「-u 是 User，s 是 Set，合起來就是 setuid」</strong></li>
+                <li><strong>「題目問『不可能』，所以要把『跟 setuid 無關』的都勾起來！」</strong></li>
+            </ul>
+
+            <h4>常見陷阱</h4>
+            <p>有些同學看到 "root" 就覺得很危險，以為 (D) 是對的攻擊行為。但題目問的是「該特定指令」的功能。該指令並沒有指定 <code>-user root</code>，所以不能選 (D) 作為該指令的直接用途。</p>
+        </div>
+    </div>
+
+    <button class="accordion">自我檢測 (按鈕顯示答案)</button>
+    <div class="panel">
+        <div class="panel-content">
+            <div class="self-check-item">
+                <p><strong>Q1. 如果指令改成 <code>find / -perm -g=s</code>，最可能在找什麼？</strong></p>
+                <button class="btn-toggle" onclick="toggleSelfCheck(1)">看答案</button>
+                <div id="self-ans-1" class="self-check-answer">A1. 尋找被設定 setgid (Set Group ID) 的檔案。</div>
+            </div>
+
+            <div class="self-check-item">
+                <p><strong>Q2. 為什麼 setuid 檔案是駭客的最愛？</strong></p>
+                <button class="btn-toggle" onclick="toggleSelfCheck(2)">看答案</button>
+                <div id="self-ans-2" class="self-check-answer">A2. 因為如果該程式有漏洞，駭客就能利用執行時的 root 權限，突破原本 www-data 的限制，取得系統控制權。</div>
+            </div>
+
+            <div class="self-check-item">
+                <p><strong>Q3. 防禦端如何降低 setuid 風險？</strong></p>
+                <button class="btn-toggle" onclick="toggleSelfCheck(3)">看答案</button>
+                <div id="self-ans-3" class="self-check-answer">A3. (1) 定期掃描不必要的 setuid 檔案並移除權限；(2) 掛載分割區時使用 nosuid 參數（例如 /tmp 或 /home）。</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // 學習進度狀態
+    const state = {
+        quizDone: false,
+        accordionOpened: false,
+        selfCheckDone: false
+    };
+
+    // 正確答案 (複選)
+    const correctAnswers = ['B', 'C', 'D'];
+
+    function updateProgress() {
+        let completed = 0;
+        if (state.quizDone) completed++;
+        if (state.accordionOpened) completed++;
+        if (state.selfCheckDone) completed++;
+
+        const percent = Math.floor((completed / 3) * 100);
+        document.getElementById('progress-bar').style.width = percent + '%';
+        document.getElementById('progress-percent').innerText = percent + '%';
+    }
+
+    function checkAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        const userAnswers = Array.from(checkboxes).map(cb => cb.value).sort();
+        const feedback = document.getElementById('feedback');
+        
+        feedback.style.display = 'block';
+        feedback.className = 'feedback-area'; // 重置 class
+
+        // 判斷邏輯
+        if (userAnswers.length === 0) {
+            feedback.textContent = '⚠️ 請先選擇至少一個選項。';
+            feedback.classList.add('feedback-wrong');
+            return;
+        }
+
+        // 檢查是否包含錯誤選項 (A)
+        const hasA = userAnswers.includes('A');
+        
+        // 檢查是否完全匹配
+        const isExactMatch = JSON.stringify(userAnswers) === JSON.stringify(correctAnswers);
+
+        if (isExactMatch) {
+            feedback.textContent = '🎉 判斷正確！(B)(C)(D) 都與該指令 (找 setuid) 無關，故為最不可能的行為。';
+            feedback.classList.add('feedback-correct');
+            state.quizDone = true;
+            updateProgress();
+        } else if (hasA) {
+            feedback.innerHTML = '❌ 觀念錯誤：你選了 (A)。<br>指令中有 <code>-u=s</code>，這正是用來找 setuid 檔案的，所以 (A) 是最「可能」的行為，不該被選中。';
+            feedback.classList.add('feedback-wrong');
+        } else {
+            // 沒有選 A，但沒選全 B, C, D (例如只選了 B)
+            feedback.textContent = '⚠️ 部分正確：你避開了 (A) 是對的，但還有其他選項也是該指令做不到的行為，請再檢查是否有漏選。';
+            feedback.classList.add('feedback-partial');
+        }
+    }
+
+    function showAnswer() {
+        const feedback = document.getElementById('feedback');
+        feedback.style.display = 'block';
+        feedback.className = 'feedback-area feedback-correct';
+        feedback.innerHTML = '<strong>正確答案：(B)、(C)、(D)</strong><br>理由：題目問「最不可能」。該指令只針對 setuid (-u=s)，與 setgid (-g=s)、Sticky bit (+t) 或 root 擁有者無直接關聯。';
+        
+        // 自動勾選正確答案
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => {
+            cb.checked = correctAnswers.includes(cb.value);
+        });
+        
+        state.quizDone = true;
+        updateProgress();
+    }
+
+    function resetQuiz() {
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        document.getElementById('feedback').style.display = 'none';
+    }
+
+    function toggleSelfCheck(id) {
+        const ans = document.getElementById('self-ans-' + id);
+        if (ans.style.display === 'block') {
+            ans.style.display = 'none';
+        } else {
+            ans.style.display = 'block';
+            state.selfCheckDone = true;
+            updateProgress();
+        }
+    }
+
+    // Accordion 功能
+    const accordions = document.getElementsByClassName("accordion");
+    for (let i = 0; i < accordions.length; i++) {
+        accordions[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            const panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+                state.accordionOpened = true;
+                updateProgress();
+            } 
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_mail_outage_large_attachment_controls_q21.html - iPAS 資安衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --border-radius: 8px;
+            --spacing: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f7f6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        header .meta {
+            font-size: 0.9rem;
+            color: #666;
+            background: #eee;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        /* Question Section */
+        .question-area {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+        }
+
+        .q-header {
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .q-text {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .options label {
+            display: block;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .options label:hover {
+            background-color: #e2e6ea;
+            border-color: #adb5bd;
+        }
+
+        .options input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .action-bar {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+            display: none;
+        }
+
+        .btn-toggle {
+            background-color: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback.error {
+            background-color: #fdecea;
+            color: #c0392b;
+            border: 1px solid #f5c6cb;
+        }
+
+        .feedback.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* Explanation Section */
+        .explanation-area {
+            display: none; /* Initially Hidden */
+            margin-top: 30px;
+        }
+
+        .explanation-area.visible {
+            display: block;
+        }
+
+        details {
+            background-color: #fff;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 15px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Hide default marker */
+            position: relative;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            position: absolute;
+            right: 20px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            background-color: #e9ecef;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .details-content {
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        /* Highlights & Learning Aids */
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 8px;
+            margin: 2px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: white;
+        }
+        .tag-blue { background-color: #3498db; }
+        .tag-red { background-color: #e74c3c; }
+        .tag-green { background-color: #27ae60; }
+
+        /* Interactive Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .interactive-card {
+            border: 2px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .interactive-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .interactive-card.active {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .card-result {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #555;
+            display: none;
+        }
+        
+        .interactive-card.active .card-result {
+            display: block;
+        }
+
+        /* Checkbox list style */
+        .check-list-item {
+            margin-bottom: 8px;
+        }
+        .check-list-item input {
+            margin-right: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            header h1 {
+                font-size: 1.2rem;
+            }
+            .action-bar {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資訊安全規劃實務／防護實務 衝刺班</h1>
+        <div class="meta">檔名：ipas_mail_outage_large_attachment_controls_q21.html</div>
+        <div style="margin-top: 10px; font-weight: bold;">題號：21（複選題）</div>
+    </header>
+
+    <main>
+        <!-- 題目互動區 -->
+        <section class="question-area">
+            <div class="q-header">題目敘述</div>
+            <div class="q-text">
+                H 公司於上周發生公司 email 超過 4 個小時以上無法收發的資安事件，經 MIS 人員處理後發現，郵件伺服器因硬碟空間不足而無法正常運作。追蹤相關記錄中找出服務中斷前，系統正在處理一封寄給全公司 2000 位同仁的內部公告郵件，其之中被夾帶著 4GB 的附檔，但此附檔在防毒軟體和沙箱工具檢查後並無病毒或威脅性。刪除此郵件及相關衍生作業後，郵件伺服器恢復正常運作。檢討此次內部資安攻擊事件，確認為人員操作失誤所致。請問下列何項措施<strong>「無法」</strong>防範此類事件再度發生？（複選）
+            </div>
+
+            <div class="options">
+                <label>
+                    <input type="checkbox" name="option" value="A">
+                    (A) 儘快增購郵件伺服器的硬碟容量，避免再發生相同空間不足的問題再度發生
+                </label>
+                <label>
+                    <input type="checkbox" name="option" value="B">
+                    (B) 對員工加強資安教育訓練，避免錯誤的資訊系統操作行為
+                </label>
+                <label>
+                    <input type="checkbox" name="option" value="C">
+                    (C) 增加防火牆檢查細則，減少大量或敏感資料的傳輸與攻擊事件
+                </label>
+                <label>
+                    <input type="checkbox" name="option" value="D">
+                    (D) 郵件伺服器增設郵件處理容量限制，阻絕大檔案的傳送服務
+                </label>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn-submit" onclick="checkAnswer()">送出答案</button>
+                <button class="btn-retry" onclick="resetQuiz()">重作一次</button>
+                <button class="btn-toggle" onclick="toggleExplanation()">顯示／隱藏解析</button>
+            </div>
+
+            <div id="feedback-msg" class="feedback"></div>
+        </section>
+
+        <!-- 解析學習區 -->
+        <section id="explanation-box" class="explanation-area">
+            
+            <details open>
+                <summary>【題目】</summary>
+                <div class="details-content">
+                    <p>H 公司郵件服務中斷 > 4hr，主因：硬碟滿了。原因：有人寄 4GB 附件給 2000 人（無病毒，純人為失誤）。問：哪些措施「無法」防範再發？</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>【第一步：找關鍵字】</summary>
+                <div class="details-content">
+                    <p>請注意以下影響解題的關鍵字：</p>
+                    <ul>
+                        <li><span class="tag tag-red">現象</span> <strong>email 無法收發、4 小時、硬碟空間不足</strong>：代表「可用性 (Availability)」喪失，服務被塞爆。</li>
+                        <li><span class="tag tag-red">導火線</span> <strong>2000 位同仁、4GB 附檔</strong>：量體極大（2000 x 4GB = 8TB 瞬間需求），這是典型的「資源耗盡」。</li>
+                        <li><span class="tag tag-green">排除因素</span> <strong>無病毒、沙箱檢查無威脅</strong>：不是惡意程式攻擊，防毒軟體無用武之地。</li>
+                        <li><span class="tag tag-blue">根因</span> <strong>人員操作失誤</strong>：需要從「流程」與「教育」下手。</li>
+                        <li><span class="highlight">問句</span> <strong>無法防範</strong>：要選出「沒效」或「治標不治本」的選項。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>【第二步：白話翻譯】</summary>
+                <div class="details-content">
+                    <p><strong>老師翻譯給你聽：</strong></p>
+                    <p>「有人（天兵員工）寄了一封超級大的公告信給全公司所有的人，附件高達 4GB。這導致郵件伺服器瞬間要處理並儲存極大量的資料，結果硬碟被塞爆了，大家 4 個小時都不能收信。這附件不是病毒，純粹是操作錯誤。題目問：哪些做法其實<strong>沒辦法</strong>防止這種蠢事再發生？」</p>
+                    <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                    <p><strong>名詞解釋：</strong></p>
+                    <ul>
+                        <li><strong>郵件伺服器 (Mail Server)</strong>：公司用來收發 email 的電腦主機，硬碟滿了就不能收信。</li>
+                        <li><strong>沙箱 (Sandbox)</strong>：一個隔離的環境，用來把不明檔案丟進去跑跑看，看會不會炸，用來檢測病毒。本題已說沒病毒。</li>
+                        <li><strong>配額/容量限制 (Quota)</strong>：系統管理員設定的規則，例如「每封信不能超過 20MB」，超過就直接擋下來。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>【第三步：解題思路】</summary>
+                <div class="details-content">
+                    <p><strong>核心觀念：</strong>用「對因防護」判斷控制措施。本題根因是「超大附件 + 群發 + 缺乏系統限制」。</p>
+                    <p><strong>解題三步驟：</strong></p>
+                    <ol>
+                        <li><strong>先抓根因：</strong>這不是駭客攻擊，也不是病毒。這是「資源耗盡」與「操作流程問題」。</li>
+                        <li><strong>檢視選項：</strong>看哪個選項能直接「阻擋大檔」或「阻止群發」。</li>
+                        <li><strong>刪去法：</strong>凡是只在「邊界網路（防火牆）」或只「加硬體（擴充）」但不改控制規則的，通常無法真正防範。</li>
+                    </ol>
+                    <p><strong>原理說明：</strong></p>
+                    <p>這是典型的可用性 (Availability) 事件。要防範這種事，必須在「入口」就擋下不合理的請求（例如限制附件只能 10MB），或者教育使用者改用雲端連結分享大檔。</p>
+                </div>
+            </details>
+
+            <details open>
+                <summary>【第四步：選項分析】</summary>
+                <div class="details-content">
+                    <div style="margin-bottom: 15px;">
+                        <strong>(A) 儘快增購郵件伺服器的硬碟容量 <span class="tag tag-red">無法防範 (正確答案)</span></strong>
+                        <p style="margin-left: 20px; color: #555;">理由：這叫「止痛藥」，不叫治療。你加了硬碟，下次員工誤傳 10GB 影片給 3000 人，照樣塞爆。沒有設定「上限規則」，硬體再多都會被用光。</p>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>(B) 對員工加強資安教育訓練 <span class="tag tag-green">有效</span></strong>
+                        <p style="margin-left: 20px; color: #555;">理由：題目說根因是「人員操作失誤」。教育訓練（例如：教導大檔請用雲端連結、不要群發大附件）是針對「人」的有效控制措施。</p>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>(C) 增加防火牆檢查細則 <span class="tag tag-red">無法防範 (正確答案)</span></strong>
+                        <p style="margin-left: 20px; color: #555;">理由：防火牆通常管的是「網路連線 (Layer 3/4)」，雖然次世代防火牆可看應用層，但本題是「內部寄給內部」，流量可能根本不經過邊界防火牆。且防火牆不如郵件伺服器本身的「容量限制設定」來得直接有效。</p>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>(D) 郵件伺服器增設郵件處理容量限制 <span class="tag tag-green">有效</span></strong>
+                        <p style="margin-left: 20px; color: #555;">理由：這就是「對症下藥」。直接在 Server 設定「單封郵件上限 20MB」，那個 4GB 的檔案在寄出瞬間就會被系統拒絕 (Reject)，根本不會進入隊列塞爆硬碟。</p>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>【觀念補充與延伸】</summary>
+                <div class="details-content">
+                    <p><strong>iPAS 考點定位：</strong>可用性事件 (Availability) + 控制措施有效性。</p>
+                    <p><strong>關鍵定義：</strong></p>
+                    <ul>
+                        <li><strong>可用性 (Availability)：</strong>資訊系統必須在需要時可供使用。被大檔塞爆導致停機，就是喪失可用性。</li>
+                        <li><strong>資源耗盡 (Resource Exhaustion)：</strong>CPU、記憶體、硬碟空間被用光，導致服務當機。</li>
+                    </ul>
+                    <p><strong>觸類旁通：</strong></p>
+                    <ul>
+                        <li>如果題目改成「外部寄入大量垃圾信塞爆」，這時除了容量限制，可能還需要「郵件閘道 (Mail Gateway)」的防垃圾信功能。</li>
+                        <li>如果題目是「惡意程式」，那就要選防毒軟體或 EDR。但本題強調「無病毒」，所以選防毒無效。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>【記憶口訣】</summary>
+                <div class="details-content">
+                    <div style="background: #eef; padding: 15px; border-radius: 8px; font-size: 1.2rem; text-align: center;">
+                        「塞爆不一定毒，先管大小數」<br>
+                        「加硬碟是止痛，限大小才治本」
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>【常見陷阱】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>陷阱 1：</strong>看到「資安事件」就覺得要買防火牆。 (錯！內部邏輯錯誤防火牆管不到)</li>
+                        <li><strong>陷阱 2：</strong>覺得「空間不足」就要「加空間」。 (錯！這是無底洞，要設定 Quota 才是解法)</li>
+                        <li><strong>避坑指南：</strong>先問自己這事件是「惡意攻擊」還是「資源濫用」？若是資源濫用，優先選「限制／規則」而非「硬體／防護設備」。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>【正確答案】</summary>
+                <div class="details-content">
+                    <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent-color);">答案：A、C</p>
+                    <p>理由：A 只是延後塞爆時間、C 不對症（無法精準控制內部郵件容量）；真正有效的是 B（教育訓練）與 D（系統限制）。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>【自我檢測】</summary>
+                <div class="details-content">
+                    <p>試著回答以下問題（不提供答案，請自行思考）：</p>
+                    <ul>
+                        <li>若附件從 4GB 改成 200MB，但每天群發 50 封，最該先做什麼控制？</li>
+                        <li>若公司政策要求必須寄大檔（例如設計圖），怎麼設計替代流程才不會塞爆郵件主機？</li>
+                        <li>防火牆與郵件閘道（Mail Gateway）在控管附件大小上有何差異？</li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- 學習輔助互動區 -->
+            <div style="margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px;">
+                <h3>🎓 互動學習工具</h3>
+                
+                <p style="margin-top: 15px;"><strong>1. 事件根因分類卡 (點擊卡片)</strong></p>
+                <div class="card-grid">
+                    <div class="interactive-card" onclick="toggleCard(this, 'NO，題目說無病毒。')">惡意程式 (Malware)<div class="card-result"></div></div>
+                    <div class="interactive-card" onclick="toggleCard(this, 'YES! 題目說是人員失誤。')">人員誤操作 (Human Error)<div class="card-result"></div></div>
+                    <div class="interactive-card" onclick="toggleCard(this, 'YES! 硬碟空間不足即為此類。')">資源耗盡 (Resource Exhaustion)<div class="card-result"></div></div>
+                </div>
+
+                <p style="margin-top: 25px;"><strong>2. 控制點對照卡 (點擊查看有效性)</strong></p>
+                <div class="card-grid">
+                    <div class="interactive-card" onclick="toggleCard(this, '【極高】直接阻斷大檔源頭。')">郵件系統設定<br>(大小上限/配額)<div class="card-result"></div></div>
+                    <div class="interactive-card" onclick="toggleCard(this, '【中高】治標也治本，改變行為。')">使用者端<br>(教育訓練)<div class="card-result"></div></div>
+                    <div class="interactive-card" onclick="toggleCard(this, '【低】主要管網路，對內部郵件內容無力。')">網路邊界<br>(防火牆)<div class="card-result"></div></div>
+                </div>
+
+                <p style="margin-top: 25px;"><strong>3. 對因檢核清單 (勾選看看)</strong></p>
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px;">
+                    <div class="check-list-item"><label><input type="checkbox" onchange="checkListFeedback(this)"> 是否能直接阻擋超大附件？ (系統限制)</label></div>
+                    <div class="check-list-item"><label><input type="checkbox" onchange="checkListFeedback(this)"> 是否能降低群發造成的負載？ (配額管理)</label></div>
+                    <div class="check-list-item"><label><input type="checkbox" onchange="checkListFeedback(this)"> 是否能降低人員誤操作？ (教育訓練)</label></div>
+                    <div class="check-list-item"><label><input type="checkbox" onchange="checkListFeedback(this)"> 是否能在不改硬體的情況下立即上線？ (設定變更)</label></div>
+                    <div id="checklist-feedback" style="margin-top: 10px; color: var(--success-color); font-weight: bold; min-height: 20px;"></div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+</div>
+
+<script>
+    // 答案定義
+    const correctAnswers = ['A', 'C'];
+
+    function checkAnswer() {
+        // 取得使用者勾選項目
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        const userSelection = Array.from(checkboxes).map(cb => cb.value).sort();
+
+        const feedbackEl = document.getElementById('feedback-msg');
+        const retryBtn = document.querySelector('.btn-retry');
+        const submitBtn = document.querySelector('.btn-submit');
+        const explanationArea = document.getElementById('explanation-box');
+
+        // 判斷邏輯
+        // 必須完全相等：數量一樣，內容一樣
+        const isCorrect = JSON.stringify(userSelection) === JSON.stringify(correctAnswers);
+
+        feedbackEl.style.display = 'block';
+        
+        if (isCorrect) {
+            feedbackEl.className = 'feedback success';
+            feedbackEl.innerHTML = '🎉 <strong>答對了！</strong><br>正確答案是 A、C。<br>買硬碟和裝防火牆無法真正解決「內部人員誤傳大檔」的問題。<br>請往下看詳細解析！';
+            explanationArea.classList.add('visible');
+            submitBtn.style.display = 'none';
+            retryBtn.style.display = 'inline-block';
+            
+            // 自動展開解析區
+            setTimeout(() => {
+                window.scrollTo({
+                    top: document.getElementById('explanation-box').offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            }, 100);
+
+        } else {
+            feedbackEl.className = 'feedback error';
+            let msg = '❌ <strong>答錯囉！</strong><br>';
+            if (userSelection.length === 0) {
+                msg += '你沒有選擇任何選項。';
+            } else {
+                msg += `你選了：${userSelection.join('、')}。<br>`;
+            }
+            msg += '提示：問題核心在「郵件系統的大檔控制」與「人員操作」。<br>單純加硬體或網路邊界防火牆，無法根治這個內部流程問題。<br>再試一次看看！';
+            feedbackEl.innerHTML = msg;
+        }
+    }
+
+    function resetQuiz() {
+        // 清除勾選
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => cb.checked = false);
+
+        // 重置按鈕與顯示
+        document.querySelector('.btn-submit').style.display = 'inline-block';
+        document.querySelector('.btn-retry').style.display = 'none';
+        document.getElementById('feedback-msg').style.display = 'none';
+        
+        // 解析區可選擇是否要隱藏，這裡預設保留顯示，方便複習，若要隱藏可解開下面註解
+        // document.getElementById('explanation-box').classList.remove('visible');
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleExplanation() {
+        const el = document.getElementById('explanation-box');
+        el.classList.toggle('visible');
+    }
+
+    // 互動卡片功能
+    function toggleCard(card, text) {
+        // 先重置所有同層級的 active 狀態 (選用，若想單選)
+        // 這裡採用點擊切換顯示
+        card.classList.toggle('active');
+        const resultDiv = card.querySelector('.card-result');
+        if (card.classList.contains('active')) {
+            resultDiv.innerText = text;
+        } else {
+            resultDiv.innerText = '';
+        }
+    }
+
+    // 檢核清單回饋
+    function checkListFeedback(checkbox) {
+        const feedback = document.getElementById('checklist-feedback');
+        if (checkbox.checked) {
+            feedback.innerText = "沒錯！這些就是對症下藥的思考點。";
+        } else {
+            // 如果取消勾選，檢查是否還有其他被勾選，若無則清空
+            const anyChecked = document.querySelectorAll('.check-list-item input:checked').length > 0;
+            if (!anyChecked) feedback.innerText = "";
+        }
+    }
+</script>
+
+</body>
+</html>

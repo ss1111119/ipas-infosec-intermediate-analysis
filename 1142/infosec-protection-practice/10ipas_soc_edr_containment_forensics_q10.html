@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_soc_edr_containment_forensics_q10.html</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-color: #ddd;
+            --highlight-color: #fff9c4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        header .sub-info {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* Card Style */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Question Section */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* Buttons */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: #fff;
+            display: none; /* Hidden by default */
+        }
+
+        .btn-toggle-expl {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            margin-left: auto;
+        }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section */
+        #explanation-area {
+            display: none; /* Hidden by default */
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f1f3f5;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: normal;
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            background-color: #fff;
+        }
+
+        .accordion-item.active .accordion-content {
+            padding: 15px;
+            max-height: 1000px; /* Arbitrary large height */
+        }
+
+        /* Content Styling inside Accordion */
+        mark {
+            background-color: var(--highlight-color);
+            padding: 2px 4px;
+            border-radius: 2px;
+            color: #d35400;
+            font-weight: 500;
+        }
+
+        .content-block h4 {
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        /* Learning Tools */
+        .interactive-card {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-align: center;
+        }
+        
+        .interactive-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .hidden-answer {
+            display: none;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #555;
+            border-top: 1px dashed #eee;
+            padding-top: 8px;
+        }
+        
+        /* Checkbox Tool */
+        .checklist-item {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .checklist-item input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .maturity-score {
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn-toggle-expl {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>iPAS 資訊安全防護實務</h1>
+    <div class="sub-info">題號：10 | 事件應變與鑑識 | 檔名：ipas_soc_edr_containment_forensics_q10.html</div>
+</header>
+
+<div class="container">
+
+    <!-- 題目互動區 -->
+    <div class="card" id="quiz-section">
+        <div class="question-text">
+            10. 安全營運中心（SOC）接獲終端偵測與回應（EDR）警報，指出某個人電腦端點可能執行 Cobalt Strike Beacon。為在不影響業務的前提下「快速遏制」並「保全證據」，第一時間最適合採取下列何項作法？
+        </div>
+        
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                <span>(A) 立即關閉端點電源</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                <span>(B) 啟動端點重灌電腦</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                <span>(C) 隔離端點網路，並同時擷取 RAM 與磁碟的鑑識鏡像</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                <span>(D) 啟動端點防毒進行全碟掃描</span>
+            </label>
+        </div>
+
+        <div class="feedback" id="feedback-msg"></div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">送出答案</button>
+            <button class="btn-retry" onclick="resetQuiz()">重作一次</button>
+            <button class="btn-toggle-expl" onclick="toggleExplanation()">顯示／隱藏解析</button>
+        </div>
+    </div>
+
+    <!-- 解析學習區 -->
+    <div id="explanation-area">
+        
+        <!-- 0. 題目 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【題目】</div>
+            <div class="accordion-content">
+                <p>安全營運中心（SOC）接獲終端偵測與回應（EDR）警報，指出某個人電腦端點可能執行 Cobalt Strike Beacon。為在不影響業務的前提下「快速遏制」並「保全證據」，第一時間最適合採取下列何項作法？</p>
+            </div>
+        </div>
+
+        <!-- 1. 第一步：找關鍵字 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第一步：找關鍵字】</div>
+            <div class="accordion-content">
+                <p>請特別留意以下詞彙：</p>
+                <ul>
+                    <li><mark>SOC</mark>：安全營運中心。</li>
+                    <li><mark>EDR 警報</mark>：來自端點的偵測告警。</li>
+                    <li><mark>Cobalt Strike Beacon</mark>：一種常見的進階持續性威脅（APT）後門程式。</li>
+                    <li><mark>快速遏制</mark>：首要目標，阻止災害擴大。</li>
+                    <li><mark>不影響業務</mark>：不能直接拔電源導致工作全毀。</li>
+                    <li><mark>保全證據</mark>：要求鑑識完整性。</li>
+                    <li><mark>RAM</mark>：揮發性記憶體，關機即消失。</li>
+                    <li><mark>磁碟鑑識鏡像</mark>：完整的硬碟複製。</li>
+                </ul>
+                <p><strong>核心重點：</strong>題目同時要求兩件事：<strong>遏制（Containment）</strong> ＋ <strong>保全證據（Preservation）</strong>。</p>
+            </div>
+        </div>
+
+        <!-- 2. 第二步：白話翻譯 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第二步：白話翻譯】</div>
+            <div class="accordion-content">
+                <p>簡單來說，這題是在問：</p>
+                <p style="background-color: #f0f4f8; padding: 10px; border-left: 4px solid var(--accent-color); font-style: italic;">
+                    「公司發現某台電腦可能被駭客的遠端控制工具盯上了。現在要先把它『先隔離避免擴散』，又要『留下證據以便查清楚』，而且最好不要讓業務整個停擺，第一步該怎麼做？」
+                </p>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                <h4>名詞解釋：</h4>
+                <ul>
+                    <li><strong>SOC（安全營運中心）</strong>：負責全天候盯著警報並處理資安事件的團隊。</li>
+                    <li><strong>EDR（終端偵測與回應）</strong>：裝在電腦上的進階防毒軟體，能監控可疑行為並協助遠端處置。</li>
+                    <li><strong>Cobalt Strike Beacon</strong>：駭客常用的工具元件，用來建立後門並連回駭客的指揮中心。</li>
+                    <li><strong>遏制</strong>：先把問題電腦關進「數位監獄」，讓它不能連網攻擊別人，但電腦還開著。</li>
+                    <li><strong>保全證據</strong>：把犯罪現場（電腦狀態）完整封存，讓鑑識人員可以還原真相。</li>
+                    <li><strong>RAM（記憶體）</strong>：電腦正在跑的程式都在這，一斷電（關機）就像電視關掉一樣，畫面全沒了。</li>
+                    <li><strong>鑑識鏡像</strong>：把硬碟資料 1:1 完整複製一份（包含刪除的檔案），避免分析時弄壞原始硬碟。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 3. 第三步：解題思路 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第三步：解題思路】</div>
+            <div class="accordion-content">
+                <h4>這題在考什麼？</h4>
+                <p>事件應變第一時間的正確優先順序：<strong>先遏制、再保全（尤其是記憶體證據）</strong>。</p>
+                
+                <h4>解題步驟：</h4>
+                <ol>
+                    <li><strong>先符合「快速遏制」</strong>：隔離端點網路是 EDR 最常見的功能，能讓 Beacon 無法對外連線或橫向移動，達到止血效果。</li>
+                    <li><strong>再符合「保全證據」</strong>：證據有分「會消失的（RAM）」和「不會消失的（磁碟）」。必須先抓 RAM，再做磁碟鏡像。</li>
+                    <li><strong>排除錯誤動作</strong>：排除會破壞證據（如關機、重灌）或造成不必要停機的作法。</li>
+                </ol>
+                
+                <h4>原理規則：</h4>
+                <ul>
+                    <li><strong>RAM 證據是「揮發性」</strong>：像「正在播放的電視畫面」，插頭一拔（斷電）就什麼都沒了，必須趁開機時擷取。</li>
+                    <li><strong>磁碟鏡像是「非揮發性」</strong>：像「硬碟裡的錄影帶」，資料存在磁碟上，關機後還在。</li>
+                    <li><strong>隔離網路</strong>：可以把影響範圍縮小，不一定需要立刻關機，符合題目「不影響業務」的要求（至少機器還在運作，資料還可存取）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 4. 第四步：選項分析 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第四步：選項分析】</div>
+            <div class="accordion-content">
+                <ul>
+                    <li>
+                        <strong>(A) 立即關閉端點電源：<span style="color:var(--error-color)">錯誤</span></strong><br>
+                        雖然能遏制，但「拔插頭」會直接讓 RAM 中的證據（惡意程式執行狀態、連線 IP、加密金鑰等）瞬間消失，且強制關機可能中斷業務運作。
+                    </li>
+                    <li>
+                        <strong>(B) 啟動端點重灌電腦：<span style="color:var(--error-color)">錯誤</span></strong><br>
+                        重灌（Re-image）會毀損或覆寫大量證據，等於把犯罪現場清掃乾淨，是最不該在「鑑識前」做的事。
+                    </li>
+                    <li>
+                        <strong>(C) 隔離端點網路，並同時擷取 RAM 與磁碟的鑑識鏡像：<span style="color:var(--success-color)">正確</span></strong><br>
+                        這是一套標準組合拳。先透過網路隔離遏制擴散（Containment），接著按照證據揮發性順序（RAM 先，磁碟後）進行保全（Preservation），兼顧了業務影響與鑑識需求。
+                    </li>
+                    <li>
+                        <strong>(D) 啟動端點防毒進行全碟掃描：<span style="color:var(--error-color)">錯誤</span></strong><br>
+                        掃描可能會自動刪除或隔離惡意檔案，這會改變檔案系統的時間戳記與狀態，造成「證據污染」。此外，單純掃描不一定能切斷 Beacon 的連線，遏制效果較慢。
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 5. 觀念補充與延伸 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【觀念補充與延伸】</div>
+            <div class="accordion-content">
+                <h4>核心觀念定位</h4>
+                <p>這是 iPAS 防護實務中「事件處置（IR）× 鑑識（Forensics）× SOC 操作」的高頻題型。</p>
+                
+                <h4>定義補充</h4>
+                <ul>
+                    <li><strong>遏制（Containment）</strong>：控制事件擴散，先把影響範圍鎖住，例如拔網路線或軟體隔離。</li>
+                    <li><strong>保全證據（Preservation）</strong>：維持證據完整性（Integrity）與監管鏈（Chain of Custody）。</li>
+                    <li><strong>揮發性證據（Volatile Data）</strong>：依照消失速度排序：CPU 快取 > RAM > 網路連線 > 硬碟資料。</li>
+                </ul>
+                
+                <h4>觸類旁通</h4>
+                <ul>
+                    <li><strong>對比概念</strong>：隔離網路 vs 關機（前者保留 RAM，後者破壞揮發性證據）。</li>
+                    <li><strong>變化題型</strong>：
+                        <ul>
+                            <li>若題目問「正在加密大量檔案（勒索軟體）」，此時破壞加密行為優於保留 RAM，可能考慮強制斷電或中止程序。</li>
+                            <li>若題目只要求保全證據、不談業務影響，優先順序依然是先 RAM 後 Disk。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 6. 記憶口訣 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【記憶口訣】</div>
+            <div class="accordion-content">
+                <div style="background-color: #fff3cd; padding: 15px; border-radius: 6px; text-align: center; font-size: 1.1rem; color: #856404;">
+                    <strong>「先隔離、再取證；先 RAM、後硬碟」</strong>
+                </div>
+                <div style="margin-top: 10px; text-align: center; color: #666;">
+                    另一個比喻：「關機就像把監視器拔電，當下的畫面就沒了。」
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 常見陷阱 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【常見陷阱】</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>直覺錯誤 1</strong>：認為「關機最安全」。忽略了現代資安攻擊常駐留在記憶體中（Fileless Malware），一關機就找不到證據。</li>
+                    <li><strong>直覺錯誤 2</strong>：以為「掃毒越快越好」。忽略了掃毒軟體本身會修改檔案存取時間，甚至刪除關鍵樣本，造成證據污染。</li>
+                    <li><strong>避坑指南</strong>：只要題目出現「保全證據」與「第一時間」，腦中優先想到「隔離網路 ＋ RAM 鑑識」。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 8. 正確答案 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【正確答案】</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.2rem; font-weight: bold; color: var(--success-color);">
+                    (C) 隔離端點網路，並同時擷取 RAM 與磁碟的鑑識鏡像
+                </p>
+            </div>
+        </div>
+
+        <!-- 9. 自我檢測 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【自我檢測】</div>
+            <div class="accordion-content">
+                <p>試著回答以下問題（不提供標準答案，請反思）：</p>
+                <ol>
+                    <li>為什麼 RAM 會被稱為「揮發性證據」？這對鑑識有什麼影響？</li>
+                    <li>隔離端點網路有哪幾種常見做法（例如 EDR 隔離、實體拔線、交換器封鎖）？對業務各有何影響？</li>
+                    <li>在什麼極端情況下（例如硬體損毀或勒索軟體全速加密中），才可能需要優先考慮立即斷電關機？</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- 學習輔助互動區 -->
+        <div class="card" style="margin-top: 20px; border-left: 5px solid var(--accent-color);">
+            <h3>學習輔助互動工具</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">點擊卡片或勾選項目來強化記憶。</p>
+
+            <!-- 12. IR 優先順序互動卡 -->
+            <h4>1. IR 優先順序互動卡 (點擊翻牌)</h4>
+            <div class="card-grid">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <strong>遏制 (Containment)</strong>
+                    <div class="hidden-answer">先鎖住擴散<br>(如：隔離網路)</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <strong>保全 (Preservation)</strong>
+                    <div class="hidden-answer">先留證據<br>(如：Dump RAM)</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <strong>根除 (Eradication)</strong>
+                    <div class="hidden-answer">清除惡意<br>(如：刪除後門)</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <strong>復原 (Recovery)</strong>
+                    <div class="hidden-answer">回復服務<br>(如：系統上線)</div>
+                </div>
+            </div>
+
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+            <!-- 13. 揮發性 vs 非揮發性 -->
+            <h4>2. 證據屬性分類 (點擊查看)</h4>
+            <div class="card-grid">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <strong>RAM / 記憶體</strong>
+                    <div class="hidden-answer" style="color: #d35400;">極度揮發<br>斷電即失</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <strong>執行中程序</strong>
+                    <div class="hidden-answer" style="color: #d35400;">揮發性<br>關機即失</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <strong>網路連線狀態</strong>
+                    <div class="hidden-answer" style="color: #d35400;">揮發性<br>斷線即失</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <strong>磁碟檔案 / Log</strong>
+                    <div class="hidden-answer" style="color: #27ae60;">非揮發性<br>關機還在</div>
+                </div>
+            </div>
+
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+            <!-- 14. 檢核清單 -->
+            <h4>3. 遏制與取證檢核清單</h4>
+            <div style="margin-top: 10px;">
+                <label class="checklist-item">
+                    <input type="checkbox" onchange="updateMaturity(this)">
+                    <span>是否先隔離網路？(遏制)</span>
+                </label>
+                <label class="checklist-item">
+                    <input type="checkbox" onchange="updateMaturity(this)">
+                    <span>是否先擷取 RAM？(揮發性證據)</span>
+                </label>
+                <label class="checklist-item">
+                    <input type="checkbox" onchange="updateMaturity(this)">
+                    <span>是否做磁碟鑑識鏡像？(完整性)</span>
+                </label>
+                <label class="checklist-item">
+                    <input type="checkbox" onchange="updateMaturity(this)">
+                    <span>是否避免掃毒/重灌造成污染？</span>
+                </label>
+                <div id="maturity-display" class="maturity-score">處置成熟度：尚未開始</div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    // 答題邏輯
+    function checkAnswer() {
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackEl = document.getElementById('feedback-msg');
+        const retryBtn = document.querySelector('.btn-retry');
+        const submitBtn = document.querySelector('.btn-submit');
+        
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedbackEl.style.display = 'block';
+        feedbackEl.className = 'feedback'; // Reset classes
+
+        if (selectedValue === 'C') {
+            feedbackEl.classList.add('correct');
+            feedbackEl.innerHTML = '✅ 答對了！<br>正確觀念：隔離網路能快速遏制，擷取 RAM 與磁碟鏡像能完整保全證據。';
+        } else {
+            feedbackEl.classList.add('incorrect');
+            feedbackEl.innerHTML = `❌ 你選的是 ${selectedValue}，正確答案是 C。<br>提示：請回想「先遏制、再保全」原則，且不可以讓 RAM 的證據因斷電而消失。`;
+        }
+
+        // 顯示解析區
+        document.getElementById('explanation-area').style.display = 'block';
+        
+        // 切換按鈕狀態
+        submitBtn.style.display = 'none';
+        retryBtn.style.display = 'inline-block';
+        
+        // 鎖定選項
+        for (const option of options) {
+            option.disabled = true;
+        }
+    }
+
+    function resetQuiz() {
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+            option.disabled = false;
+        }
+        
+        document.getElementById('feedback-msg').style.display = 'none';
+        document.getElementById('explanation-area').style.display = 'none';
+        
+        document.querySelector('.btn-submit').style.display = 'inline-block';
+        document.querySelector('.btn-retry').style.display = 'none';
+        
+        // Reset checklist
+        const checkboxes = document.querySelectorAll('.checklist-item input');
+        checkboxes.forEach(cb => cb.checked = false);
+        document.getElementById('maturity-display').textContent = '處置成熟度：尚未開始';
+    }
+
+    // 顯示/隱藏解析 Toggle
+    function toggleExplanation() {
+        const explArea = document.getElementById('explanation-area');
+        if (explArea.style.display === 'none' || explArea.style.display === '') {
+            explArea.style.display = 'block';
+        } else {
+            explArea.style.display = 'none';
+        }
+    }
+
+    // Accordion 互動
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        item.classList.toggle('active');
+    }
+
+    // 互動卡片翻牌
+    function toggleCard(card) {
+        const answer = card.querySelector('.hidden-answer');
+        if (answer.style.display === 'block') {
+            answer.style.display = 'none';
+        } else {
+            answer.style.display = 'block';
+        }
+    }
+
+    // 成熟度檢查計算
+    function updateMaturity(checkbox) {
+        const allCheckboxes = document.querySelectorAll('.checklist-item input');
+        let checkedCount = 0;
+        allCheckboxes.forEach(cb => {
+            if(cb.checked) checkedCount++;
+        });
+
+        const display = document.getElementById('maturity-display');
+        
+        switch(checkedCount) {
+            case 0: display.textContent = "處置成熟度：尚未開始"; break;
+            case 1: display.textContent = "處置成熟度：初學者 (還漏了很多)"; break;
+            case 2: display.textContent = "處置成熟度：進步中 (加油)"; break;
+            case 3: display.textContent = "處置成熟度：接近專業 (只差一步)"; break;
+            case 4: display.textContent = "處置成熟度：資安專家等級！(完美流程)"; break;
+        }
+    }
+</script>
+
+</body>
+</html>

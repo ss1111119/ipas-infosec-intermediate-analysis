@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_tcp_syn_flood_mitigation_q19.html - iPAS資訊安全防護實務衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        header .sub-title {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 5px;
+            font-family: monospace;
+        }
+
+        /* Card Style */
+        .card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-header {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+
+        /* Scenario Image */
+        .scenario-img-container {
+            text-align: center;
+            margin-bottom: 15px;
+            background-color: #f9fafb;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed #d1d5db;
+        }
+
+        .scenario-img-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .img-caption {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Question Area */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f9ff;
+            border-color: var(--primary-color);
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-retry {
+            background-color: #9ca3af;
+            color: white;
+            display: none;
+        }
+
+        .btn-toggle-explain {
+            background-color: var(--accent-color);
+            color: white;
+            display: none;
+        }
+
+        /* Feedback Area */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #34d399;
+        }
+
+        .feedback.wrong {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #f87171;
+        }
+
+        /* Accordion (Explanation) */
+        .accordion {
+            display: none; /* Initially hidden */
+            margin-top: 20px;
+        }
+
+        .accordion-item {
+            border: 1px solid #e5e7eb;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f9fafb;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header:hover {
+            background-color: #e5e7eb;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            background-color: white;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+
+        .accordion-item.active .accordion-content {
+            padding: 15px;
+            max-height: 1000px; /* Arbitrary large number for slide effect */
+            border-top: 1px solid #e5e7eb;
+        }
+
+        /* Content Styling */
+        .highlight {
+            background-color: #fef08a; /* Yellow highlighter */
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            background-color: #dbeafe;
+            color: #1e40af;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .step-title {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資訊安全防護實務</h1>
+        <div class="sub-title">短期衝刺班 | 題組2 Q19 | ipas_tcp_syn_flood_mitigation_q19.html</div>
+    </header>
+
+    <!-- 1. Scenario Section -->
+    <div class="card">
+        <div class="card-header">情境描述</div>
+        
+        <div class="scenario-img-container">
+            <img src="https://i.meee.com.tw/F5HlAqh.jpg" alt="伺服器遭大量異常連線請求示意圖">
+            <div class="img-caption">附圖：展示伺服器遭大量異常連線請求，造成外部連線失敗之情境示意</div>
+        </div>
+
+        <p>某公司對外提供展示用的 Web 服務，供業務人員於公司外部進行產品展示。近期發現外部使用者無法正常連線，但公司內部上網與對外連線均正常。經分析網路側錄與連線紀錄後，判斷該展示服務遭受大量異常 TCP 連線請求，疑似為 TCP SYN Flood 類型的阻斷服務攻擊。</p>
+    </div>
+
+    <!-- 2. Question Interaction Section -->
+    <div class="card">
+        <div class="card-header">題號：19 (題組題)</div>
+        <div class="question-text">
+            題目：承上題，針對 TCP SYN Flood 攻擊，下列何項應對策略 <span style="color:red; text-decoration: underline;">可能無法有效緩解</span> 攻擊的影響？
+        </div>
+
+        <div class="options-group" id="quiz-form">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                (A) 啟用 DNS 反向代理
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                (B) 設定 TCP 連接速率限制
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                (C) 啟用 SYN Cookies 機制
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                (D) 將展示服務部署到內容派遣網路（CDN）上
+            </label>
+        </div>
+
+        <div class="feedback" id="feedback-area"></div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="submitAnswer()">送出答案</button>
+            <button class="btn-retry" onclick="resetQuiz()">重作一次</button>
+            <button class="btn-toggle-explain" onclick="toggleExplanationArea()">顯示/隱藏解析</button>
+        </div>
+    </div>
+
+    <!-- 3. Analysis Section (Accordion) -->
+    <div class="accordion" id="explanation-area">
+        
+        <!-- 題目重述 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleItem(this)">【題目】</div>
+            <div class="accordion-content">
+                <p>針對 TCP SYN Flood 攻擊，下列何項應對策略<strong>可能無法有效緩解</strong>攻擊的影響？</p>
+            </div>
+        </div>
+
+        <!-- 第一步：找關鍵字 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleItem(this)">【第一步：找關鍵字】</div>
+            <div class="accordion-content">
+                <p>請圈出以下重點：</p>
+                <div>
+                    <span class="keyword-tag">TCP SYN Flood</span>
+                    <span class="keyword-tag">三向交握</span>
+                    <span class="keyword-tag">半開連線</span>
+                    <span class="keyword-tag">連線資源耗盡</span>
+                    <span class="keyword-tag highlight">無法有效</span>
+                </div>
+                <p><strong>名師點評：</strong> 題目問的是「無法有效」，這是一題反向選擇題。你要找的是「做了也沒用」的選項，而不是找最好的防禦方法。</p>
+            </div>
+        </div>
+
+        <!-- 第二步：白話翻譯 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleItem(this)">【第二步：白話翻譯】</div>
+            <div class="accordion-content">
+                <span class="step-title">高中生秒懂版：</span>
+                <p>「這就像是有一堆奧客（攻擊者）一直打電話進來餐廳訂位（SYN請求），店員接起電話說『好喔請問幾位？』（SYN-ACK），結果對方就掛掉電話不說話了。餐廳的訂位本（連線資源）上寫滿了這些假名字，真正的客人反而訂不到位。」</p>
+                <p>題目問：「下面哪一招，對於解決這種『假訂位癱瘓餐廳』的狀況，基本上是<strong>沒什麼用</strong>的？」</p>
+                <hr style="border:0; border-top:1px dashed #ccc; margin:10px 0;">
+                <span class="step-title">專有名詞解釋：</span>
+                <ul>
+                    <li><strong>TCP SYN Flood：</strong> 惡意產生大量「只送出 SYN、不完成後續連線」的請求，塞爆伺服器的連線佇列。</li>
+                    <li><strong>SYN Cookies：</strong> 伺服器的一種聰明機制，「先不要把訂位寫在紙上」，而是給對方一個加密號碼牌（Cookie），等對方真的回來確認了，才分配資源。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 第三步：解題思路 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleItem(this)">【第三步：解題思路】</div>
+            <div class="accordion-content">
+                <p><strong>一句話核心：</strong> SYN Flood 是「傳輸層（Layer 4）」的連線攻擊，DNS 相關機制（Layer 7/基礎設施）無法直接處理單一 IP 被打爆的問題。</p>
+                <ol>
+                    <li>先確認攻擊類型：<strong>TCP SYN Flood</strong> 發生在 TCP 三向交握的第一階段。</li>
+                    <li>找出防禦層級：我們需要針對 TCP 協定或流量清洗的防禦。</li>
+                    <li>排除無效選項：DNS 反向代理主要處理「網域名稱解析」，當攻擊流量是直接針對 IP 發動 TCP 連線時，DNS 解析這一關根本擋不住，或者攻擊者早已解析完畢直接打 IP。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- 第四步：選項分析 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleItem(this)">【第四步：選項分析】</div>
+            <div class="accordion-content">
+                <ul>
+                    <li>
+                        <strong>(A) 啟用 DNS 反向代理 <span class="highlight">（正確答案：因為它無效）</span></strong><br>
+                        DNS 反向代理（或 DNS Proxy）處理的是客戶端查詢 Domain 對應 IP 的過程。雖然有些進階的 CDN 服務會結合 DNS 轉向，但純粹的「DNS 反向代理」無法阻止攻擊者對已經得知的 IP 發送大量 SYN 封包。SYN Flood 打的是伺服器的 TCP Stack，跟名字解析無關。
+                    </li>
+                    <li>
+                        <strong>(B) 設定 TCP 連接速率限制（Rate Limiting）</strong><br>
+                        這是有用的。限制同一個來源 IP 在一秒內只能發送幾次 SYN 請求，可以大幅降低攻擊流量的衝擊。
+                    </li>
+                    <li>
+                        <strong>(C) 啟用 SYN Cookies 機制</strong><br>
+                        這是<strong>最經典且有效</strong>的防禦。伺服器在收到 SYN 時不分配記憶體資源，而是透過雜湊計算回傳 Cookie，直到收到 ACK 驗證通過才建立連線，完美解決資源耗盡問題。
+                    </li>
+                    <li>
+                        <strong>(D) 將展示服務部署到 CDN 上</strong><br>
+                        這非常有效。CDN 擁有巨大的頻寬與分散式節點，可以在邊緣（Edge）就幫你擋下大量的惡意連線，只把合法的流量導回你的源站（Origin）。
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 觀念補充與延伸 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleItem(this)">【觀念補充與延伸】</div>
+            <div class="accordion-content">
+                <p><strong>核心觀念定位：</strong> iPAS 防護實務「SYN Flood 原理與防禦」是必考題型。</p>
+                <p><strong>對比概念：</strong></p>
+                <ul>
+                    <li><strong>應用層防護 (Layer 7)：</strong> 針對 HTTP GET/POST Flood（如 WAF）。</li>
+                    <li><strong>傳輸層防護 (Layer 4)：</strong> 針對 SYN/ACK/UDP Flood（如防火牆、SYN Cookies）。</li>
+                </ul>
+                <p>DNS 攻擊通常是指 NXDOMAIN Flood 或 DNS Amplification，那才是 DNS 防護該做的事。</p>
+            </div>
+        </div>
+
+        <!-- 記憶口訣 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleItem(this)">【記憶口訣】</div>
+            <div class="accordion-content">
+                <div style="background-color:#fffbeb; padding:10px; border-left:4px solid var(--accent-color);">
+                    <p style="margin:0; font-weight:bold; font-size:1.1rem;">「SYN 打連線，不打 DNS」</p>
+                    <p style="margin:5px 0 0;">「半開連線滿出來，快用 Cookie 擋下來」</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 常見陷阱 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleItem(this)">【常見陷阱】</div>
+            <div class="accordion-content">
+                <ul>
+                    <li>⚠️ <strong>看到 "Proxy" 就覺得可以擋：</strong> 反向代理有分種類，HTTP 反向代理（如 Nginx）可以擋，但選項特別寫 "DNS" 反向代理，這就是陷阱。</li>
+                    <li>⚠️ <strong>沒注意看題目問「無法」：</strong> 考試緊張時容易選成「最有效」的選項（很多人會選 C），結果痛失分數。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 正確答案 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleItem(this)">【正確答案】</div>
+            <div class="accordion-content">
+                <p style="font-size:1.5rem; color:var(--error-color); font-weight:bold; text-align:center;">(A)</p>
+            </div>
+        </div>
+
+        <!-- 自我檢測 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleItem(this)">【自我檢測】</div>
+            <div class="accordion-content">
+                <p>試著回答以下問題（不提供答案，請回想剛剛學的）：</p>
+                <ol>
+                    <li>SYN Flood 為什麼會造成伺服器資源（記憶體/連線表）耗盡？它是利用了 TCP 的哪個特性？</li>
+                    <li>如果題目改成遭受 "HTTP Flood" (Layer 7) 攻擊，那麼 (A) 選項會變得比較有關聯嗎？（提示：DNS 還是管不到 HTTP 內容，但 Web 反向代理可以）。</li>
+                    <li>CDN 在防禦 DDoS 時，主要依靠哪兩種優勢？（提示：頻寬、節點）。</li>
+                </ol>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>iPAS 資訊安全防護實務 | 短期衝刺班教材 | Generated for Learning Purpose</p>
+    </footer>
+</div>
+
+<script>
+    // 互動邏輯
+    function submitAnswer() {
+        // 取得使用者選擇
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const btnSubmit = document.querySelector('.btn-submit');
+        const btnRetry = document.querySelector('.btn-retry');
+        const btnExplain = document.querySelector('.btn-toggle-explain');
+        const explanationArea = document.getElementById('explanation-area');
+
+        // 未作答處理
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // 判斷對錯
+        feedbackArea.style.display = 'block';
+        btnSubmit.style.display = 'none';
+        btnRetry.style.display = 'inline-block';
+        btnExplain.style.display = 'inline-block';
+
+        if (selectedValue === 'A') {
+            feedbackArea.className = 'feedback correct';
+            feedbackArea.innerHTML = '✅ 恭喜答對！DNS 反向代理確實無法有效緩解 TCP 層的 SYN Flood 攻擊。';
+            // 答對自動展開解析
+            explanationArea.style.display = 'block';
+        } else {
+            feedbackArea.className = 'feedback wrong';
+            feedbackArea.innerHTML = `❌ 答錯囉！你選的是 (${selectedValue})。<br>正確答案是 (A)。<br>點擊「顯示解析」來看看為什麼吧！`;
+        }
+    }
+
+    function resetQuiz() {
+        // 清除選項
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // 重置 UI
+        document.getElementById('feedback-area').style.display = 'none';
+        document.querySelector('.btn-submit').style.display = 'inline-block';
+        document.querySelector('.btn-retry').style.display = 'none';
+        document.querySelector('.btn-toggle-explain').style.display = 'none';
+        
+        // 隱藏解析區（可選，若希望重作時不看到解析則保留下一行）
+        document.getElementById('explanation-area').style.display = 'none';
+        
+        // 捲動回題目區
+        document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleExplanationArea() {
+        const area = document.getElementById('explanation-area');
+        if (area.style.display === 'none' || area.style.display === '') {
+            area.style.display = 'block';
+            // 自動展開第一個 accordion item
+            area.querySelector('.accordion-item').classList.add('active');
+        } else {
+            area.style.display = 'none';
+        }
+    }
+
+    // Accordion 展開收合邏輯
+    function toggleItem(header) {
+        const item = header.parentElement;
+        item.classList.toggle('active');
+    }
+</script>
+
+</body>
+</html>

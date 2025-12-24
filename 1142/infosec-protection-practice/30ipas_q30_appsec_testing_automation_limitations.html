@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安單選題解析：應用程式安全測試侷限</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: #e0e0e0;
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--success-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 5px 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        /* Quiz Section */
+        .quiz-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .question-badge {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f7fb;
+            border-color: var(--accent-color);
+        }
+
+        .option-input {
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+
+        /* Feedback Section */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .feedback-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid #aaa;
+            color: #555;
+        }
+
+        .btn-outline:hover {
+            background-color: #eee;
+        }
+
+        /* Accordion Section */
+        .accordion {
+            margin-top: 30px;
+        }
+
+        .accordion-item {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 20px;
+            background-color: #fff;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+        }
+
+        .accordion-header:hover {
+            background-color: #f9f9f9;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: #fff;
+        }
+
+        .accordion-body {
+            padding: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .accordion-item.active .accordion-content {
+            max-height: 2000px; /* Large enough for content */
+            transition: max-height 0.5s ease-in;
+        }
+
+        .icon-plus::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .accordion-item.active .icon-plus::after {
+            content: '-';
+        }
+
+        /* Content Styles */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .term {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .analysis-step {
+            margin-bottom: 20px;
+        }
+
+        .analysis-title {
+            font-size: 1rem;
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        /* Self Check Section */
+        .self-check-card {
+            background: #eef2f5;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+        }
+
+        .check-answer {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .show-answer-btn {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0;
+            margin-top: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            .question-text {
+                font-size: 1rem;
+            }
+            .option-label {
+                padding: 10px;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Progress Tracking -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-text">學習進度：<span id="progressText">0</span>%</div>
+
+    <div class="container">
+        <header>
+            <h1>iPAS 資安單選題解析</h1>
+            <p class="subtitle">主題：應用程式安全測試 (AppSec)</p>
+        </header>
+
+        <!-- Quiz Section -->
+        <div class="quiz-card">
+            <span class="question-badge">第 30 題 | 單選題</span>
+            <div class="question-text">
+                應用程式安全測試若僅依賴自動化工具進行的成效通常有其侷限，下列描述何者最正確？
+            </div>
+
+            <div class="options-group" id="quizOptions">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A" class="option-input">
+                    <span>(A) 自動化工具可檢測常見問題，但對客製化商務邏輯了解有限而可能產生許多誤報</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B" class="option-input">
+                    <span>(B) 自動化工具的軟體授權成本較高，因此人工測試更具成本效益</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C" class="option-input">
+                    <span>(C) 自動化工具只能在應用程式處於運行狀態時執行，無法進行靜態程式碼分析</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D" class="option-input">
+                    <span>(D) 應用程式安全測試的報告無法由工具自動生成，必須由人工完成</span>
+                </label>
+            </div>
+
+            <div id="feedback" class="feedback-area">
+                <!-- Javascript will insert content here -->
+            </div>
+
+            <div class="controls">
+                <button class="btn-primary" onclick="checkAnswer()">送出答案</button>
+                <button class="btn-outline" onclick="resetQuiz()">重設</button>
+            </div>
+        </div>
+
+        <!-- Analysis Section (Accordion) -->
+        <div class="accordion">
+            
+            <!-- Step 1: Keywords -->
+            <div class="accordion-item" onclick="toggleAccordion(this, 'keywords')">
+                <div class="accordion-header">
+                    <span>第一步：找關鍵字</span>
+                    <span class="icon-plus"></span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <ul>
+                            <li><span class="highlight">應用程式安全測試</span>：找出網站或 App 的安全漏洞。</li>
+                            <li><span class="highlight">僅依賴自動化工具</span>：只靠掃描器軟體，沒有人去檢查。</li>
+                            <li><span class="highlight">侷限</span>：工具做不到、做不好，或做錯的地方。</li>
+                            <li><span class="highlight">商務邏輯</span> (Business Logic)：系統「怎麼做生意、怎麼判斷規則」的特殊流程。例如：「滿千送百」、「主管審核才能放行」。這是每家公司都不一樣的規則。</li>
+                            <li><span class="highlight">誤報</span> (False Positive)：工具大驚小怪，明明沒問題卻說有漏洞（像是放羊的孩子）。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Translation -->
+            <div class="accordion-item" onclick="toggleAccordion(this)">
+                <div class="accordion-header">
+                    <span>第二步：白話翻譯</span>
+                    <span class="icon-plus"></span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <p>這題其實在問：</p>
+                        <p style="margin-top: 10px; font-weight: bold; color: var(--primary-color);">
+                            「如果你只靠自動掃描機器人來做檢查，為什麼效果不夠好？機器人最容易在哪種問題上『卡關』或『亂叫』？」
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Logic -->
+            <div class="accordion-item" onclick="toggleAccordion(this)">
+                <div class="accordion-header">
+                    <span>第三步：解題思路</span>
+                    <span class="icon-plus"></span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <div class="analysis-step">
+                            <div class="analysis-title">核心觀念</div>
+                            <p>自動化工具擅長找「通用弱點」（大家都長一樣的錯誤），但不擅長理解「客製化流程」（你家獨有的規則）。</p>
+                        </div>
+                        <div class="analysis-step">
+                            <div class="analysis-title">生活比喻</div>
+                            <ul>
+                                <li><strong>自動化掃描像「機場金屬探測門」</strong>：它能快速掃出刀子、槍枝（通用危險特徵），效率很高。</li>
+                                <li><strong>商務邏輯漏洞像「壞人分三次把錢騙走」</strong>：這沒有金屬反應，探測門掃不出來。只有靠「航警（真人）」觀察行為邏輯才抓得到。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Options Analysis -->
+            <div class="accordion-item" onclick="toggleAccordion(this)">
+                <div class="accordion-header">
+                    <span>第四步：選項詳細分析</span>
+                    <span class="icon-plus"></span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <div class="analysis-step">
+                            <div class="analysis-title">(A) 正確原因</div>
+                            <p>工具可以快速掃描成千上萬行程式碼，找出 SQL 注入等常見問題。但工具「看不懂」你的生意規則。例如：一個購物網站允許使用者輸入負數數量導致退款，這在程式語法上沒錯，但在邏輯上是大漏洞。工具無法判斷這是不是你的本意，因此容易誤判。</p>
+                        </div>
+                        <div class="analysis-step">
+                            <div class="analysis-title">(B) 錯誤原因</div>
+                            <p>雖然商業掃描軟體很貴，但「人工測試」通常更貴（資安專家的人力成本極高）。且題目問的是「成效侷限」，不是在比價錢。</p>
+                        </div>
+                        <div class="analysis-step">
+                            <div class="analysis-title">(C) 錯誤原因</div>
+                            <p>自動化工具分很多種。除了跑起來測的 DAST，還有一種叫 <strong>SAST (靜態應用程式安全測試)</strong>，專門在程式沒執行時分析程式碼（就像看建築設計圖找問題），所以說「無法進行靜態分析」是錯的。</p>
+                        </div>
+                        <div class="analysis-step">
+                            <div class="analysis-title">(D) 錯誤原因</div>
+                            <p>工具最擅長的就是「自動產出報告」。雖然報告內容可能需要專家去蕪存菁，但絕對不是「無法生成」。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Concept Extensions -->
+            <div class="accordion-item" onclick="toggleAccordion(this)">
+                <div class="accordion-header">
+                    <span>觀念補充與記憶口訣</span>
+                    <span class="icon-plus"></span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <div class="analysis-step">
+                            <div class="analysis-title">必背名詞</div>
+                            <ul>
+                                <li><span class="term">SAST (Static Application Security Testing)</span>：靜態測試。程式不執行，直接看原始碼（Source Code）。優點是找得早，缺點是誤報多。</li>
+                                <li><span class="term">DAST (Dynamic Application Security Testing)</span>：動態測試。程式跑起來，從外部攻擊（像駭客一樣試探）。優點是模擬真實攻擊，缺點是覆蓋率可能不高。</li>
+                            </ul>
+                        </div>
+                        <div class="analysis-step">
+                            <div class="analysis-title">記憶口訣</div>
+                            <p><strong>「工具抓通用，人抓情境」</strong></p>
+                            <p><strong>「流程是規則洞，掃描不一定懂」</strong></p>
+                        </div>
+                        <div class="analysis-step">
+                            <div class="analysis-title">常見陷阱</div>
+                            <p>不要以為掃描報告「滿江紅」就代表系統爛透了，很多時候是工具看不懂你的設計而產生的「誤報」。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Self Check -->
+            <div class="accordion-item" onclick="toggleAccordion(this)">
+                <div class="accordion-header">
+                    <span>自我檢測 (點擊展開)</span>
+                    <span class="icon-plus"></span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <p style="margin-bottom: 15px;">試著回答以下問題，確認是否真正理解：</p>
+                        
+                        <div class="self-check-card">
+                            <p><strong>Q1: 若公司有「購物車折扣疊加」的特殊規則，為何工具可能掃不出其中的漏洞？</strong></p>
+                            <button class="show-answer-btn" onclick="toggleSelfCheck(this, 'check1')">看答案</button>
+                            <div id="check1" class="check-answer">
+                                因為這屬於「商務邏輯」。對工具來說，折扣計算只是數學運算，只要程式沒崩潰、語法沒錯，工具就會覺得正常，它無法理解「不能重複疊加」這個人類制定的規則。
+                            </div>
+                        </div>
+
+                        <div class="self-check-card">
+                            <p><strong>Q2: SAST 與 DAST 各自最擅長抓到什麼類型問題？</strong></p>
+                            <button class="show-answer-btn" onclick="toggleSelfCheck(this, 'check2')">看答案</button>
+                            <div id="check2" class="check-answer">
+                                SAST（靜態）擅長看程式碼結構，抓語法錯誤或寫死的密碼；DAST（動態）擅長在系統運作時，抓伺服器設定錯誤或執行時期的資料驗證問題。
+                            </div>
+                        </div>
+
+                        <div class="self-check-card">
+                            <p><strong>Q3: 如果工具掃出 50 個高風險項目，你會用哪 2 個步驟先做人工驗證？</strong></p>
+                            <button class="show-answer-btn" onclick="toggleSelfCheck(this, 'check3')">看答案</button>
+                            <div id="check3" class="check-answer">
+                                1. 排除誤報 (False Positives)：確認這些問題是否真的存在。<br>
+                                2. 確認影響程度：判斷這個漏洞是否真的能被利用，以及對公司的實際傷害有多大。
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- End Accordion -->
+
+        <footer style="margin-top: 50px; text-align: center; color: #888; font-size: 0.8rem;">
+            iPAS 資訊安全工程師能力鑑定 | AppSec 練習單元
+        </footer>
+    </div>
+
+    <script>
+        // Progress Tracking Variables
+        let progress = {
+            quizCompleted: false,
+            accordionOpened: false,
+            selfCheckUsed: false
+        };
+
+        function updateProgress() {
+            let completedCount = 0;
+            if (progress.quizCompleted) completedCount++;
+            if (progress.accordionOpened) completedCount++;
+            if (progress.selfCheckUsed) completedCount++;
+
+            const total = 3;
+            const percentage = Math.round((completedCount / total) * 100);
+
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressText').innerText = percentage;
+        }
+
+        // Quiz Logic
+        function checkAnswer() {
+            const options = document.getElementsByName('answer');
+            let selectedValue = null;
+
+            for (const option of options) {
+                if (option.checked) {
+                    selectedValue = option.value;
+                    break;
+                }
+            }
+
+            const feedbackDiv = document.getElementById('feedback');
+            feedbackDiv.style.display = 'block';
+            feedbackDiv.className = 'feedback-area'; // Reset classes
+
+            if (!selectedValue) {
+                feedbackDiv.innerHTML = "請先選擇一個答案！";
+                feedbackDiv.classList.add('feedback-error');
+                return;
+            }
+
+            if (selectedValue === 'A') {
+                feedbackDiv.innerHTML = "<strong>正確！</strong> <br>重點提示：工具擅長找通用語法弱點，但不具備人類的思考能力，無法理解你公司特有的「商務邏輯」規則。";
+                feedbackDiv.classList.add('feedback-success');
+            } else {
+                feedbackDiv.innerHTML = "<strong>錯誤。</strong> <br>提示：請思考機器人（工具）跟人類專家最大的差別在哪裡？機器人能懂你們公司的請款流程規則嗎？";
+                feedbackDiv.classList.add('feedback-error');
+            }
+
+            progress.quizCompleted = true;
+            updateProgress();
+        }
+
+        function resetQuiz() {
+            const options = document.getElementsByName('answer');
+            for (const option of options) {
+                option.checked = false;
+            }
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        // Accordion Logic
+        function toggleAccordion(element, type) {
+            element.classList.toggle('active');
+            progress.accordionOpened = true; // Mark as opened if user clicks any accordion
+            updateProgress();
+        }
+
+        // Self Check Logic
+        function toggleSelfCheck(btn, contentId) {
+            const content = document.getElementById(contentId);
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                btn.innerText = '看答案';
+            } else {
+                content.style.display = 'block';
+                btn.innerText = '收起答案';
+                progress.selfCheckUsed = true;
+                updateProgress();
+            }
+        }
+    </script>
+</body>
+</html>

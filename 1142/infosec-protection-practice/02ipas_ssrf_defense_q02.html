@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS《資訊安全防護實務》衝刺班 - Q02 SSRF 防護</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+
+        header .meta {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Interactive Quiz Area */
+        .quiz-section {
+            padding: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f4f8;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            margin-top: 4px;
+        }
+
+        .btn-area {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+            display: none;
+        }
+
+        .btn-toggle {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis Area */
+        .analysis-section {
+            padding: 30px;
+            display: none; /* Hidden by default */
+            background-color: #fff;
+        }
+
+        .accordion-item {
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .accordion-header {
+            background-color: #f1f3f5;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .accordion-header.active::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            padding: 15px;
+            display: none;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion-content.show {
+            display: block;
+        }
+
+        .highlight {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .concept-card {
+            background-color: #e8f4f8;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .trap-card {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        /* Learning Aids */
+        .aid-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 600px) {
+            .aid-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .aid-card {
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .aid-title {
+            font-weight: bold;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .checklist-item input {
+            margin-right: 10px;
+        }
+
+        #maturity-feedback {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--success-color);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS《資訊安全防護實務》短期衝刺</h1>
+        <div class="meta">
+            題號：2 | 科目：資訊安全防護實務 | 檔名：ipas_ssrf_defense_q02.html
+        </div>
+    </header>
+
+    <!-- Quiz Interaction -->
+    <section class="quiz-section">
+        <div class="question-text">
+            題目：伺服器端請求偽造（Server Side Request Forgery, SSRF）是過去幾年很流行的攻擊手法，下列關於 SSRF 的描述何項「錯誤」？
+        </div>
+        <div class="options">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                <span>(A) 有機會用來對內網進行 port scan</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                <span>(B) 有機會透過 file:// 協定讀取系統檔案，例如讀取 Linux 作業系統的 /etc/passwd</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                <span>(C) 只要使用正規表示式把 10.0.0.0–10.255.255.255、172.16.0.0–172.31.255.255、192.168.0.0–192.168.255.255 從參數內容過濾掉，攻擊者就無法透過 SSRF 存取內網</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                <span>(D) 有機會透過 dict:// 協定存取 Redis 資料庫</span>
+            </label>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="btn-area">
+            <button class="btn btn-submit" id="submitBtn">送出答案</button>
+            <button class="btn btn-retry" id="retryBtn">重作一次</button>
+            <button class="btn btn-toggle" id="toggleAnalysisBtn">顯示解析</button>
+        </div>
+    </section>
+
+    <!-- Analysis Section -->
+    <section class="analysis-section" id="analysisSection">
+        
+        <!-- Accordion Items -->
+        <div class="accordion-item">
+            <div class="accordion-header">【題目】</div>
+            <div class="accordion-content show">
+                <p>伺服器端請求偽造（Server Side Request Forgery, SSRF）是過去幾年很流行的攻擊手法，下列關於 SSRF 的描述何項「錯誤」？</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">【第一步：找關鍵字】</div>
+            <div class="accordion-content show">
+                <p>請留意以下關鍵字：</p>
+                <ul>
+                    <li><span class="highlight">SSRF</span>：考題核心，需了解其攻擊原理。</li>
+                    <li><span class="highlight">錯誤</span>：這題是要找「不正確」的敘述，不要選成正確的功能。</li>
+                    <li><span class="highlight">內網</span> / <span class="highlight">port scan</span>：SSRF 的常見用途。</li>
+                    <li><span class="highlight">file://</span> / <span class="highlight">dict://</span>：SSRF 常見使用的非 HTTP 協定。</li>
+                    <li><span class="highlight">正規表示式</span> / <span class="highlight">IP 過濾</span>：本題的防護手段陷阱。</li>
+                </ul>
+                <br>
+                <p><strong>強調：</strong>本題是「找錯的敘述」，不是找 SSRF 能做什麼。</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">【第二步：白話翻譯】</div>
+            <div class="accordion-content">
+                <p><strong>題目翻譯機：</strong></p>
+                <p>「駭客如果能控制伺服器幫他發請求，下面哪一個說法其實是『太天真、以為能防住』？」</p>
+                <br>
+                <p><strong>名詞解釋：</strong></p>
+                <ul>
+                    <li><strong>SSRF：</strong>簡單說就是「借刀殺人」。讓伺服器幫攻擊者去連線、拿資料，因為伺服器通常信任內網，所以能讀到外網讀不到的東西。</li>
+                    <li><strong>Port scan：</strong>像小偷去敲每一扇門，試探哪些內部服務（門）有開。</li>
+                    <li><strong>私有 IP：</strong>公司內部自己用的 IP 位址（如 192.168.x.x），平常外人連不到，但透過 SSRF 就能連到。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">【第三步：解題思路】</div>
+            <div class="accordion-content">
+                <div class="concept-card">
+                    <strong>本題考點：</strong>SSRF 的能力範圍與「錯誤的防護迷思」。
+                </div>
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>先確認哪些敘述「確實是 SSRF 常見能力」（選項 A, B, D 都是經典攻擊手法）。</li>
+                    <li>再找出哪個選項「把防護想得太簡單」。</li>
+                    <li>在資安題中，遇到「只要過濾字串就安全」這種過度武斷的語氣，通常就是錯誤答案。</li>
+                </ol>
+                <br>
+                <p><strong>原理與規則：</strong></p>
+                <ul>
+                    <li>SSRF 的核心風險在於「請求是由伺服器發出」。</li>
+                    <li>單純用正規表示式 (Regex) 過濾 IP 範圍，極易被繞過（例如用十進位 IP、DNS Rebinding 等技巧）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">【第四步：選項分析】</div>
+            <div class="accordion-content">
+                <ul>
+                    <li>
+                        <strong>(A) 正確敘述：</strong><br>
+                        SSRF 可以讓伺服器對內網 IP 的不同 Port 發送請求，藉由回應時間或錯誤訊息判斷 Port 是否開啟，間接達成 port scan 效果。
+                    </li>
+                    <br>
+                    <li>
+                        <strong>(B) 正確敘述：</strong><br>
+                        若應用程式沒有過濾協定（Protocol），攻擊者可輸入 <code>file:///etc/passwd</code> 來讀取 Linux 系統敏感檔案。
+                    </li>
+                    <br>
+                    <li>
+                        <strong>(C) 錯誤敘述（正確答案）：</strong><br>
+                        僅靠 Regex 過濾私有 IP 字串非常不安全，攻擊者有太多繞過方式：
+                        <ul>
+                            <li><strong>DNS 解析繞過：</strong>使用一個指向 127.0.0.1 的域名 (如 <code>localtest.me</code>)。</li>
+                            <li><strong>IPv6：</strong>使用 <code>[::1]</code>。</li>
+                            <li><strong>IP 變形：</strong>使用十進位 (<code>2130706433</code>) 或十六進位 IP。</li>
+                            <li><strong>短網址轉址：</strong>利用 HTTP 302 Redirect 跳轉回內網。</li>
+                        </ul>
+                    </li>
+                    <br>
+                    <li>
+                        <strong>(D) 正確敘述：</strong><br>
+                        SSRF 不只可用 HTTP，若支援 <code>dict://</code> 或 <code>gopher://</code>，攻擊者可以直接對內部的 Redis 資料庫下指令，甚至達成遠端代碼執行 (RCE)。
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">【觀念補充與延伸】</div>
+            <div class="accordion-content">
+                <div class="concept-card">
+                    <strong>SSRF 防護原則：</strong><br>
+                    不能只做字串過濾！必須結合：<br>
+                    1. 網路層隔離（防火牆規則）。<br>
+                    2. 限制允許的 Protocol（只准 http/https）。<br>
+                    3. 驗證 DNS 解析後的真實 IP（確保不落入內網區段）。<br>
+                    4. 禁止跟隨轉址（Disable Redirect）。
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">【記憶口訣】</div>
+            <div class="accordion-content">
+                <ul>
+                    <li>「SSRF 不怕你 regex，最怕你太天真」</li>
+                    <li>「能讓伺服器連，就一定能想辦法繞」</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">【常見陷阱】</div>
+            <div class="accordion-content">
+                <div class="trap-card">
+                    <strong>避坑指南：</strong><br>
+                    <ul>
+                        <li>以為把 "192.168" 字串擋掉就安全了（還有 10.x.x.x, 172.16.x.x, 127.0.0.1）。</li>
+                        <li>忽略了攻擊者可以使用 DNS 名稱來代表 IP。</li>
+                        <li>看到題目寫「只要...就無法...」這種絕對性語句，要特別警覺。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">【正確答案】</div>
+            <div class="accordion-content">
+                <p>正確答案是 <strong>(C)</strong></p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">【自我檢測】</div>
+            <div class="accordion-content">
+                <p>試著回答以下問題（不提供標準答案，請反思）：</p>
+                <ol>
+                    <li>為什麼 SSRF 比一般用戶端直接發請求更危險？（提示：防火牆信任誰？）</li>
+                    <li>除了 Regex 過濾，還有哪些方式可防 SSRF？</li>
+                    <li>為什麼內網服務（如 Redis, MongoDB）特別容易成為 SSRF 攻擊目標？（提示：預設驗證機制）</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Learning Aids -->
+        <h3 style="margin-top: 30px; border-bottom: 2px solid #ccc; padding-bottom: 5px;">學習輔助工具</h3>
+        <div class="aid-grid">
+            <div class="aid-card">
+                <div class="aid-title">SSRF 能力速覽卡</div>
+                <ul>
+                    <li>✅ <strong>內網掃描：</strong>探測內部 IP 與 Port 狀態。</li>
+                    <li>✅ <strong>讀取檔案：</strong>利用 <code>file://</code> 讀取本機機敏檔。</li>
+                    <li>✅ <strong>存取服務：</strong>利用 <code>dict://</code>, <code>gopher://</code> 打 Redis/SQL。</li>
+                </ul>
+            </div>
+            <div class="aid-card" style="background-color: #fff5f5;">
+                <div class="aid-title" style="color: #c0392b;">錯誤防護警示卡</div>
+                <ul>
+                    <li>❌ <strong>只過濾 IP 字串：</strong>容易被編碼或 DNS 繞過。</li>
+                    <li>❌ <strong>只用 Regex：</strong>規則很難寫到滴水不漏。</li>
+                    <li>❌ <strong>只擋 HTTP：</strong>忽略了其他危險協定。</li>
+                </ul>
+            </div>
+            <div class="aid-card" style="grid-column: 1 / -1;">
+                <div class="aid-title">防護成熟度檢核</div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check1" onclick="checkMaturity()">
+                    <label for="check1">是否限制可連線目標（Allowlist，只准連特定網域）？</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check2" onclick="checkMaturity()">
+                    <label for="check2">是否驗證實際 DNS 解析後的 IP（避免 Rebinding）？</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check3" onclick="checkMaturity()">
+                    <label for="check3">是否做網路層隔離（防火牆擋住 Server 對內網連線）？</label>
+                </div>
+                <div id="maturity-feedback">請勾選上方項目檢測成熟度...</div>
+            </div>
+        </div>
+
+    </section>
+
+    <footer>
+        <p>Copyright © 2025 iPAS 衝刺班教材 | 僅供學習使用</p>
+    </footer>
+</div>
+
+<script>
+    // Elements
+    const submitBtn = document.getElementById('submitBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const toggleAnalysisBtn = document.getElementById('toggleAnalysisBtn');
+    const feedback = document.getElementById('feedback');
+    const analysisSection = document.getElementById('analysisSection');
+    const options = document.getElementsByName('answer');
+
+    // Correct Answer
+    const CORRECT_ANSWER = 'C';
+
+    // Event Listeners
+    submitBtn.addEventListener('click', checkAnswer);
+    retryBtn.addEventListener('click', resetQuiz);
+    toggleAnalysisBtn.addEventListener('click', toggleAnalysis);
+
+    // Accordion Logic
+    const accHeaders = document.querySelectorAll('.accordion-header');
+    accHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            this.classList.toggle('active');
+            const content = this.nextElementSibling;
+            content.classList.toggle('show');
+        });
+    });
+
+    // Functions
+    function checkAnswer() {
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedback.style.display = 'block';
+        submitBtn.style.display = 'none';
+        retryBtn.style.display = 'inline-block';
+
+        if (selectedValue === CORRECT_ANSWER) {
+            feedback.className = 'feedback correct';
+            feedback.innerHTML = '<strong>答對了！</strong><br>沒錯，光靠正規表示式過濾 IP 是不夠的，攻擊者有多種繞過方式。';
+            // Auto show analysis on correct
+            analysisSection.style.display = 'block';
+            toggleAnalysisBtn.textContent = '隱藏解析';
+        } else {
+            feedback.className = 'feedback incorrect';
+            feedback.innerHTML = `<strong>答錯了！</strong><br>你選的是 ${selectedValue}，正確答案是 <strong>${CORRECT_ANSWER}</strong>。<br>提示：回想一下「SSRF 繞過技巧」，只有字串過濾真的安全嗎？`;
+        }
+    }
+
+    function resetQuiz() {
+        // Reset inputs
+        for (const option of options) {
+            option.checked = false;
+        }
+        
+        // Reset UI
+        feedback.style.display = 'none';
+        submitBtn.style.display = 'inline-block';
+        retryBtn.style.display = 'none';
+        
+        // Hide analysis (optional, keeps user focused)
+        analysisSection.style.display = 'none';
+        toggleAnalysisBtn.textContent = '顯示解析';
+        
+        // Scroll to top
+        document.querySelector('.quiz-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleAnalysis() {
+        if (analysisSection.style.display === 'none' || analysisSection.style.display === '') {
+            analysisSection.style.display = 'block';
+            toggleAnalysisBtn.textContent = '隱藏解析';
+        } else {
+            analysisSection.style.display = 'none';
+            toggleAnalysisBtn.textContent = '顯示解析';
+        }
+    }
+
+    function checkMaturity() {
+        const checks = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked');
+        const count = checks.length;
+        const msg = document.getElementById('maturity-feedback');
+
+        if (count === 0) {
+            msg.textContent = "請勾選上方項目檢測成熟度...";
+            msg.style.color = "#666";
+        } else if (count === 1) {
+            msg.textContent = "防護起步：還不夠安全，仍有被繞過風險。";
+            msg.style.color = "#e67e22";
+        } else if (count === 2) {
+            msg.textContent = "防護良好：已具備多層防禦觀念。";
+            msg.style.color = "#f1c40f"; // Goldish
+        } else if (count === 3) {
+            msg.textContent = "防護優秀：採用縱深防禦（Defense in Depth），SSRF 風險極低！";
+            msg.style.color = "#27ae60";
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_bia_nist_sp800_34_q11</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 專業深藍 */
+            --accent-color: #e67e22;  /* 重點橘 */
+            --highlight-bg: #fff3cd;  /* 螢光筆黃 */
+            --correct-color: #27ae60; /* 正確綠 */
+            --wrong-color: #c0392b;   /* 錯誤紅 */
+            --bg-color: #f4f6f7;      /* 背景灰 */
+            --card-bg: #ffffff;
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 標題區 */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* 卡片共用樣式 */
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        /* 題目區 */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .option-label:hover {
+            background-color: #f1f8ff;
+            border-color: var(--primary-color);
+        }
+
+        .option-label input {
+            margin-top: 5px;
+            margin-right: 12px;
+        }
+
+        /* 按鈕區 */
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #1a252f;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* 初始隱藏 */
+        }
+
+        .btn-toggle-explain {
+            background-color: var(--accent-color);
+            color: white;
+            display: none; /* 初始隱藏 */
+        }
+
+        /* 回饋區 */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區 Accordion */
+        #explanation-content {
+            display: none; /* 初始隱藏 */
+        }
+
+        details {
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        details[open] {
+            border-color: var(--primary-color);
+        }
+
+        summary {
+            background-color: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 移除預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            background-color: #eaf2f8;
+            color: var(--primary-color);
+        }
+
+        .detail-content {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #eee;
+        }
+
+        /* 內容樣式 */
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 0 4px;
+            border-bottom: 2px solid var(--accent-color);
+            font-weight: bold;
+        }
+
+        .quote-box {
+            background-color: #eef2f5;
+            padding: 15px;
+            border-left: 4px solid var(--accent-color);
+            font-style: italic;
+            margin: 10px 0;
+            color: #555;
+        }
+
+        .concept-tag {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        /* 選項分析樣式 */
+        .option-analysis-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .badge-correct { color: var(--correct-color); font-weight: bold; }
+        .badge-wrong { color: var(--wrong-color); font-weight: bold; }
+
+        /* 互動小卡片樣式 */
+        .cards-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .mini-card {
+            flex: 1 1 200px;
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .mini-card strong {
+            display: block;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        /* 檢核清單 */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .checklist-item input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        #checklist-feedback {
+            font-weight: bold;
+            color: var(--correct-color);
+            margin-top: 10px;
+            min-height: 1.6em;
+        }
+
+        /* RWD */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .card { padding: 15px; }
+            header h1 { font-size: 1.2rem; }
+            .action-area { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資訊安全規劃實務 - 題號 11</h1>
+        <p>科目：資訊安全【規劃實務 × 營運持續管理】</p>
+        <p style="font-size: 0.8rem; margin-top: 5px; color: #bdc3c7;">檔案：ipas_bia_nist_sp800_34_q11.html</p>
+    </header>
+
+    <!-- 題目互動區 -->
+    <main>
+        <section class="card" id="quiz-area">
+            <div class="question-text">
+                11. 依據美國國家標準技術研究院（NIST）特別出版品 800-34（SP 800-34）中的相關規定，在進行業務衝擊分析（Business Impact Analysis, BIA）時，下列何項最能正確描述 BIA 的核心目標？
+            </div>
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A">
+                    <span>(A) 評估資訊系統的技術漏洞，以便制定防護策略</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B">
+                    <span>(B) 確定關鍵業務流程及其對資源中斷的影響，並設定復原優先級</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C">
+                    <span>(C) 開發系統架構以確保業務流程的持續性</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D">
+                    <span>(D) 測試災難復原計劃的可行性，並提供改進建議</span>
+                </label>
+            </div>
+
+            <div class="action-area">
+                <button onclick="checkAnswer()" class="btn-submit" id="btn-submit">送出答案</button>
+                <button onclick="resetQuiz()" class="btn-retry" id="btn-retry">重作一次</button>
+                <button onclick="toggleExplanation()" class="btn-toggle-explain" id="btn-toggle-explain">顯示解析</button>
+            </div>
+
+            <div id="feedback-area"></div>
+        </section>
+
+        <!-- 解析學習區 -->
+        <section class="card" id="explanation-content">
+            
+            <details open>
+                <summary>【題目】</summary>
+                <div class="detail-content">
+                    <p>依據 NIST SP 800-34 規定，BIA 的核心目標為何？</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>【第一步：找關鍵字】</summary>
+                <div class="detail-content">
+                    <p>請注意以下考題中的關鍵字：</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><span class="highlight">NIST SP 800-34</span>：這是關於「IT 系統應變計畫指南」的標準。</li>
+                        <li><span class="highlight">BIA (業務衝擊分析)</span>：題目的核心主題。</li>
+                        <li><span class="highlight">核心目標</span>：不要選成「過程」或「工具」。</li>
+                        <li><span class="highlight">關鍵業務流程</span>：BIA 的對象是「業務」，不是純技術。</li>
+                        <li><span class="highlight">資源中斷、影響</span>：分析出事後的後果。</li>
+                        <li><span class="highlight">復原優先級</span>：這是 BIA 最重要的產出之一。</li>
+                    </ul>
+                    <p style="margin-top:10px;"><strong>小結：</strong>強調「影響分析 ＋ 排序優先順序」是 BIA 的判斷核心。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>【第二步：白話翻譯】</summary>
+                <div class="detail-content">
+                    <div class="quote-box">
+                        「公司如果出事停電、系統掛掉，哪些工作最重要？會造成多大影響？要先救哪一個？這就是這題在問的重點。」
+                    </div>
+                    <p><strong>名詞解釋：</strong></p>
+                    <ul>
+                        <li><strong>BIA（業務衝擊分析）：</strong>分析哪些業務不能停、停了會多嚴重。</li>
+                        <li><strong>復原優先級：</strong>出事時，資源有限，要先恢復哪個流程？（例如：先救結帳系統，再救員工打卡系統）。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>【第三步：解題思路】</summary>
+                <div class="detail-content">
+                    <p><strong>這題在考什麼？</strong><br>BIA 的目的不是技術修補，而是「找出不能停的業務並排序」。</p>
+                    <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                    <p><strong>解題步驟：</strong></p>
+                    <ol style="margin-left: 20px;">
+                        <li>先想 BIA 是在分析「業務」還是「技術」？（答案：業務）</li>
+                        <li>再看是否有提到「影響程度」與「優先順序」？</li>
+                        <li>能同時符合這兩點的選項就是正確答案。</li>
+                    </ol>
+                    <p style="margin-top:10px;"><strong>原理：</strong>在 NIST SP 800-34 中，BIA 是營運持續計畫（BCP/CP）的基礎。重點在於辨識關鍵流程、可接受中斷時間（RTO）、以及復原順序。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>【第四步：選項分析】</summary>
+                <div class="detail-content">
+                    <div class="option-analysis-item">
+                        <span class="badge-wrong">(A) 評估資訊系統的技術漏洞，以便制定防護策略</span>
+                        <p>錯誤。這屬於「風險評鑑（Risk Assessment）」或「弱點掃描」的範疇，不是 BIA 的核心。</p>
+                    </div>
+                    <div class="option-analysis-item">
+                        <span class="badge-correct">(B) 確定關鍵業務流程及其對資源中斷的影響，並設定復原優先級</span>
+                        <p>正確。這完整描述了 BIA 的三個重點：1.找出關鍵業務、2.分析中斷影響、3.決定復原優先順序。</p>
+                    </div>
+                    <div class="option-analysis-item">
+                        <span class="badge-wrong">(C) 開發系統架構以確保業務流程的持續性</span>
+                        <p>錯誤。架構設計是分析之後的「解決方案」或「策略選擇」，不是 BIA 本身（分析階段）要做的事。</p>
+                    </div>
+                    <div class="option-analysis-item">
+                        <span class="badge-wrong">(D) 測試災難復原計劃的可行性，並提供改進建議</span>
+                        <p>錯誤。這是「演練與測試（Test, Training, and Exercise）」階段的工作，發生在計畫寫好之後。</p>
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>【觀念補充與延伸】</summary>
+                <div class="detail-content">
+                    <p><span class="concept-tag">定位</span> iPAS 規劃實務「營運持續管理（BCM/BCP/DR）」必考基本題。</p>
+                    <p style="margin-top: 10px;"><strong>定義補充：</strong>BIA 簡單說就是分析「哪些業務最重要」與「不能停多久」。</p>
+                    <p style="margin-top: 10px;"><strong>觸類旁通：</strong></p>
+                    <ul>
+                        <li><strong>風險評鑑 vs BIA：</strong>前者找威脅（壞人是誰），後者找不能停的業務（誰最重要）。</li>
+                        <li><strong>BIA vs DR 演練：</strong>前者是紙上分析，後者是實際測試。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>【記憶口訣】</summary>
+                <div class="detail-content">
+                    <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary-color); text-align: center; padding: 10px;">
+                        「BIA 不修洞，只排命」
+                    </div>
+                    <p style="text-align: center;">（BIA 不負責修補漏洞，只負責排列業務的重要性/命脈）</p>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary-color); text-align: center; padding: 10px; margin-top: 10px;">
+                        「先找誰不能停，再決定先救誰」
+                    </div>
+                </div>
+            </details>
+
+            <details>
+                <summary>【常見陷阱】</summary>
+                <div class="detail-content">
+                    <ul style="margin-left: 20px;">
+                        <li>把 BIA 和技術面的「風險評估」混在一起。</li>
+                        <li>看到 NIST 編號（800-34）就直覺選技術相關選項，忘了這是管理規範。</li>
+                    </ul>
+                    <p style="margin-top: 10px; background: #fff3cd; padding: 5px;"><strong>避坑指南：</strong>題目只要出現「BIA」，腦中直接聯想到「業務影響 ＋ 優先順序」。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>【正確答案】</summary>
+                <div class="detail-content">
+                    <p style="font-size: 1.5rem; font-weight: bold; color: var(--correct-color); text-align: center;">(B)</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>【自我檢測】</summary>
+                <div class="detail-content">
+                    <p>試著回答以下問題（不提供標準答案，請自我反思）：</p>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>BIA 與風險評鑑（Risk Assessment）的最大差別是什麼？</li>
+                        <li>如果某業務流程的 RTO（復原時間目標）很短，代表什麼意思？</li>
+                        <li>BIA 的結果通常會被用在哪些後續計畫（如 DRP/BCP）中？</li>
+                    </ol>
+                </div>
+            </details>
+            
+            <!-- 學習輔助互動區 -->
+            <div style="margin-top: 30px; border-top: 2px solid #ddd; padding-top: 20px;">
+                <h3 style="margin-bottom: 15px;">學習輔助互動工具</h3>
+                
+                <h4>1. BIA 流程速記卡</h4>
+                <div class="cards-container">
+                    <div class="mini-card">
+                        <strong>Step 1</strong>
+                        辨識關鍵業務
+                    </div>
+                    <div class="mini-card">
+                        <strong>Step 2</strong>
+                        分析中斷影響
+                    </div>
+                    <div class="mini-card">
+                        <strong>Step 3</strong>
+                        排定復原優先順序
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 20px;">2. 營運持續概念對照卡</h4>
+                <div class="cards-container">
+                    <div class="mini-card" style="border-left: 4px solid #3498db;">
+                        <strong>BIA</strong>
+                        <span style="color: #7f8c8d">分析</span>
+                    </div>
+                    <div class="mini-card" style="border-left: 4px solid #f1c40f;">
+                        <strong>BCP</strong>
+                        <span style="color: #7f8c8d">規劃</span>
+                    </div>
+                    <div class="mini-card" style="border-left: 4px solid #27ae60;">
+                        <strong>DR</strong>
+                        <span style="color: #7f8c8d">復原</span>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 20px;">3. BIA 判斷檢核清單</h4>
+                <div style="background: #fff; padding: 15px; border-radius: 4px; margin-top: 10px; border: 1px solid #ddd;">
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check1" onchange="checkChecklist()">
+                        <label for="check1">是否以「業務」為主？（非純技術）</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check2" onchange="checkChecklist()">
+                        <label for="check2">是否分析「中斷造成的影響」？</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="check3" onchange="checkChecklist()">
+                        <label for="check3">是否涉及「復原優先順序」？</label>
+                    </div>
+                    <div id="checklist-feedback"></div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+</div>
+
+<script>
+    const correctAns = 'B';
+
+    function checkAnswer() {
+        const options = document.getElementsByName('answer');
+        let selected = null;
+        
+        for (const option of options) {
+            if (option.checked) {
+                selected = option.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const btnSubmit = document.getElementById('btn-submit');
+        const btnRetry = document.getElementById('btn-retry');
+        const btnExplain = document.getElementById('btn-toggle-explain');
+        
+        if (!selected) {
+            alert('請選擇一個答案！');
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+        btnSubmit.style.display = 'none';
+        btnRetry.style.display = 'inline-block';
+        btnExplain.style.display = 'inline-block';
+
+        if (selected === correctAns) {
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = `<strong>答對了！</strong><br>沒錯，BIA 就是在找關鍵業務並排定優先順序。`;
+        } else {
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.innerHTML = `<strong>答錯了...</strong><br>你選的是 ${selected}，正確答案是 ${correctAns}。<br>提示：回到「BIA 在做什麼」的關鍵觀念：它不是修補技術漏洞，而是決定誰該先被救活。`;
+        }
+    }
+
+    function resetQuiz() {
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const btnSubmit = document.getElementById('btn-submit');
+        const btnRetry = document.getElementById('btn-retry');
+        const btnExplain = document.getElementById('btn-toggle-explain');
+        const explainContent = document.getElementById('explanation-content');
+
+        feedbackArea.style.display = 'none';
+        btnSubmit.style.display = 'inline-block';
+        btnRetry.style.display = 'none';
+        
+        // 選擇是否要在重作時自動隱藏解析，這裡設定為不強制隱藏按鈕，但隱藏內容，讓體驗順暢
+        // 若要嚴格重置：
+        // btnExplain.style.display = 'none';
+        // explainContent.style.display = 'none';
+        // btnExplain.innerText = '顯示解析';
+    }
+
+    function toggleExplanation() {
+        const content = document.getElementById('explanation-content');
+        const btn = document.getElementById('btn-toggle-explain');
+        
+        if (content.style.display === 'none' || content.style.display === '') {
+            content.style.display = 'block';
+            btn.innerText = '隱藏解析';
+            
+            // 自動捲動到解析區
+            setTimeout(() => {
+                content.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        } else {
+            content.style.display = 'none';
+            btn.innerText = '顯示解析';
+        }
+    }
+
+    function checkChecklist() {
+        const c1 = document.getElementById('check1').checked;
+        const c2 = document.getElementById('check2').checked;
+        const c3 = document.getElementById('check3').checked;
+        const feedback = document.getElementById('checklist-feedback');
+
+        if (c1 && c2 && c3) {
+            feedback.innerText = "★ 完全正確！這三點同時具備就是 BIA 的精髓！";
+        } else {
+            feedback.innerText = "";
+        }
+    }
+</script>
+
+</body>
+</html>

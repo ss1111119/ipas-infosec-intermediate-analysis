@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_tlp_information_sharing_q22.html</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 深藍灰 */
+            --accent-color: #2980b9; /* 亮藍 */
+            --success-color: #27ae60; /* 綠 */
+            --error-color: #c0392b; /* 紅 */
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --border-radius: 8px;
+            --spacing: 15px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header Style */
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 5px 0;
+        }
+
+        header .meta {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Card Component */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Image Section */
+        .img-container {
+            text-align: center;
+            margin-bottom: var(--spacing);
+        }
+
+        .img-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .img-caption {
+            font-size: 0.9rem;
+            color: #555;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Scenario Section */
+        .scenario-box {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-left: 4px solid var(--accent-color);
+            margin-bottom: var(--spacing);
+            font-size: 0.95rem;
+        }
+
+        /* Question Section */
+        .question-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .options-group label {
+            display: block;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .options-group label:hover {
+            background-color: #f9f9f9;
+        }
+
+        .options-group input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #fff;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: #ecf0f1;
+        }
+
+        /* Result Box */
+        #result-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis Accordion */
+        #analysis-section {
+            display: none; /* Hidden by default */
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid #eee;
+        }
+
+        .accordion-header {
+            width: 100%;
+            padding: 15px 0;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            cursor: pointer;
+            outline: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .accordion-header.active::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 5px;
+        }
+
+        .accordion-content p, .accordion-content ul {
+            margin: 10px 0 20px 0;
+            font-size: 0.95rem;
+        }
+
+        /* Highlights */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+        
+        .keyword-tag {
+            display: inline-block;
+            background-color: #e8f6f3;
+            color: #16a085;
+            padding: 2px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            border: 1px solid #a3e4d7;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資訊安全規劃實務 - 考前衝刺</h1>
+        <div class="meta">
+            題號：22 | 科目：資訊安全規劃實務／防護實務 | 檔名：ipas_tlp_information_sharing_q22.html
+        </div>
+    </header>
+
+    <!-- Context & Scenario Card -->
+    <div class="card">
+        <div class="img-container">
+            <img src="https://i.meee.com.tw/wrXL5KH.jpg" alt="CERT/CSIRT TLP 紅綠燈協定示意圖">
+            <div class="img-caption">附圖：CERT／CSIRT 於情資分享時使用紅綠燈協定（TLP）之標示示意</div>
+        </div>
+
+        <div class="scenario-box">
+            <strong>【情境描述】</strong><br>
+            各地區或產業領域之電腦緊急應變小組（Computer Emergency Response Team, CERT）與電腦資安事件應變小組（Computer Security Incident Response Team, CSIRT），在進行資安事件協調與威脅情資分享時，常透過紅綠燈協定（Traffic Light Protocol, TLP）來標示資訊可分享的範圍，以避免敏感情資被不當擴散，同時又能促進有效的跨組織合作。
+        </div>
+
+        <div class="question-title">
+            題目：關於紅綠燈協定（Traffic Light Protocol, TLP）之敘述，下列何者「最不正確」？
+        </div>
+
+        <form id="quiz-form">
+            <div class="options-group">
+                <label>
+                    <input type="radio" name="option" value="A">
+                    (A) TLP:RED 僅供收件者本人查閱或聆聽，不得進一步揭露
+                </label>
+                <label>
+                    <input type="radio" name="option" value="B">
+                    (B) TLP:AMBER 收件者僅於組織內使用，且任何狀況都不得對客戶散播
+                </label>
+                <label>
+                    <input type="radio" name="option" value="C">
+                    (C) TLP:GREEN 收件者可於相關事件的特定社群中散播資訊
+                </label>
+                <label>
+                    <input type="radio" name="option" value="D">
+                    (D) TLP:CLEAR 收件者可以將此類資訊散播至任何地方，對揭露沒有限制
+                </label>
+            </div>
+
+            <button type="button" class="btn" onclick="checkAnswer()">送出答案</button>
+            <button type="button" class="btn btn-outline" onclick="resetQuiz()" style="display:none;" id="retry-btn">重作一次</button>
+            <button type="button" class="btn btn-outline" onclick="toggleAnalysis()" style="display:none;" id="analysis-btn">顯示解析</button>
+        </form>
+
+        <div id="result-box"></div>
+    </div>
+
+    <!-- Analysis Section (Accordion) -->
+    <div id="analysis-section" class="card">
+        <h2 style="font-size:1.2rem; border-bottom:2px solid #eee; padding-bottom:10px; margin-top:0;">詳細解析學習區</h2>
+
+        <!-- Block 1: Question -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【題目】</button>
+            <div class="accordion-content">
+                <p>關於紅綠燈協定（Traffic Light Protocol, TLP）之敘述，下列何者「最不正確」？</p>
+            </div>
+        </div>
+
+        <!-- Block 2: Keywords -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【第一步：找關鍵字】</button>
+            <div class="accordion-content">
+                <p>請用螢光筆將以下詞彙圈起來：</p>
+                <div>
+                    <span class="keyword-tag">CERT</span>
+                    <span class="keyword-tag">CSIRT</span>
+                    <span class="keyword-tag">威脅情資</span>
+                    <span class="keyword-tag">紅綠燈協定（TLP）</span>
+                    <span class="keyword-tag">RED</span>
+                    <span class="keyword-tag">AMBER</span>
+                    <span class="keyword-tag">GREEN</span>
+                    <span class="keyword-tag">CLEAR</span>
+                </div>
+                <p>最關鍵的是題目最後問 <span class="highlight">「最不正確」</span>。這是一個「反向題」，我們要找出四個選項中，哪一個對規則的描述是錯誤或不符合官方定義的。</p>
+            </div>
+        </div>
+
+        <!-- Block 3: Translation -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【第二步：白話翻譯】</button>
+            <div class="accordion-content">
+                <p>簡單來說，這題是在問：</p>
+                <p>「資安圈分享情資時，會用紅黃綠白四種顏色來標記這個消息能不能外傳。下面哪一個選項對這些顏色規則的解釋是 <span class="highlight">錯的</span> ？」</p>
+                <p><strong>名詞解釋：</strong><br>
+                TLP（Traffic Light Protocol）：就像交通號誌一樣，用顏色告訴你這個資安資訊可以傳到多遠的地方。是紅燈停（不傳）、還是綠燈行（社群內傳）。</p>
+            </div>
+        </div>
+
+        <!-- Block 4: Logic -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【第三步：解題思路】</button>
+            <div class="accordion-content">
+                <p><strong>這題在考什麼觀念？</strong><br>
+                → 考生是否正確理解 TLP 各顏色標籤的「可分享範圍」界線。</p>
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>先在腦中回想四種 TLP 顏色的基本規則（紅、黃、綠、白）。</li>
+                    <li>逐一檢查選項，看是否有「限制過頭」（把能傳的說成不能傳）或「放太寬」（把機密的說成公開）的情況。</li>
+                    <li>找出與官方標準定義明顯衝突的描述。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Block 5: Option Analysis -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【第四步：選項分析】</button>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>(A) 正確。</strong> <span class="highlight">TLP:RED</span> 代表「僅限個人」，只能給當下的收件者或會議參與者。就像悄悄話，絕對不能再傳出去。</li>
+                    <li><strong>(B) 錯誤（本題答案）。</strong> <span class="highlight">TLP:AMBER</span> 代表「有限制分享」。雖然主要在組織內部流通，但如果有必要（例如為了保護客戶），是可以「受控地」分享給客戶或合作夥伴的。選項說「任何狀況都不得對客戶散播」把規則說得太死、太嚴格，反而不符合資安防禦的實務需求。</li>
+                    <li><strong>(C) 正確。</strong> <span class="highlight">TLP:GREEN</span> 代表「社群內分享」。可以在特定的行業圈子（例如金融業 ISAC）或合作夥伴組織之間分享，但不能公開在網路上給大眾看。</li>
+                    <li><strong>(D) 正確。</strong> <span class="highlight">TLP:CLEAR</span>（舊版稱為 WHITE）代表「公開資訊」。沒有限制，可以貼在官網或新聞稿上讓全世界知道。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Block 6: Supplement -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【觀念補充與延伸】</button>
+            <div class="accordion-content">
+                <p><strong>核心觀念定位：</strong><br>
+                iPAS 考試非常喜歡考「資安治理 × 情資分享 × TLP 顏色判斷」，這屬於記憶＋理解型題目。</p>
+                <p><strong>官方定義白話整理：</strong></p>
+                <ul>
+                    <li><strong>RED：</strong>只給你，不准傳（眼睛看、耳朵聽，嘴巴閉起來）。</li>
+                    <li><strong>AMBER：</strong>組織內用，但為了「需要知道（Need-to-Know）」的人員，可在簽署保密協定或受控下分享給受影響的客戶。</li>
+                    <li><strong>GREEN：</strong>社群內可分享（同業、合作夥伴），不可公開上網。</li>
+                    <li><strong>CLEAR：</strong>完全公開資訊（Public）。</li>
+                </ul>
+                <p><strong>觸類旁通：</strong><br>
+                常見變形題會問：「某弱點已被公開在新聞上，應標示為何？」(答案：CLEAR) 或 「哪個標籤最嚴格？」(答案：RED)。</p>
+            </div>
+        </div>
+
+        <!-- Block 7: Mnemonic -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【記憶口訣】</button>
+            <div class="accordion-content">
+                <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold;">
+                    「紅不傳、黃內控、綠社群、白公開」
+                </p>
+            </div>
+        </div>
+
+        <!-- Block 8: Common Traps -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【常見陷阱】</button>
+            <div class="accordion-content">
+                <ul>
+                    <li>把 AMBER 誤以為「只能內部、完全不能對外」。事實上，如果客戶是受害者，必須告知他們，這時就在 AMBER 的允許範圍內。</li>
+                    <li>沒注意題目問的是「最不正確」，看到正確敘述就急著選。</li>
+                    <li>混淆 GREEN 和 CLEAR，誤以為 GREEN 就可以貼在臉書公開。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Block 9: Correct Answer -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【正確答案】</button>
+            <div class="accordion-content">
+                <p><strong>答案：B</strong></p>
+                <p>一句話理由：TLP:AMBER 並非完全禁止對客戶或合作對象分享，而是在「必要且受控」的情況下允許分享。</p>
+            </div>
+        </div>
+
+        <!-- Block 10: Self Check -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【自我檢測】</button>
+            <div class="accordion-content">
+                <p>請嘗試回答以下問題（不提供答案，請自行思考）：</p>
+                <ul>
+                    <li>若情資標示為 TLP:AMBER，是否可以提供給負責維運的外包 SOC 廠商？為什麼？</li>
+                    <li>TLP 與情資分級（如機密等級 Confidential/Top Secret）最大的差異是什麼？（提示：一個是分享範圍，一個是機密程度）</li>
+                    <li>若題目把 TLP:GREEN 改成「可在任何地方公開」，答案會不會改變？</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // 正確答案設定
+    const CORRECT_ANSWER = 'B';
+    const analysisSection = document.getElementById('analysis-section');
+    const resultBox = document.getElementById('result-box');
+    const retryBtn = document.getElementById('retry-btn');
+    const analysisBtn = document.getElementById('analysis-btn');
+    const inputs = document.querySelectorAll('input[name="option"]');
+
+    // 檢查答案邏輯
+    function checkAnswer() {
+        let selected = document.querySelector('input[name="option"]:checked');
+        
+        if (!selected) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        let userVal = selected.value;
+        let isCorrect = (userVal === CORRECT_ANSWER);
+
+        // 顯示結果
+        resultBox.style.display = 'block';
+        resultBox.className = isCorrect ? 'correct' : 'incorrect';
+        
+        if (isCorrect) {
+            resultBox.innerHTML = `恭喜答對！正確答案是 ${CORRECT_ANSWER}。<br>觀念正確，快看看詳細解析來加深印象！`;
+        } else {
+            resultBox.innerHTML = `答錯囉！你選的是 ${userVal}，正確答案是 ${CORRECT_ANSWER}。<br>別氣餒，點擊「顯示解析」來搞懂為什麼。`;
+        }
+
+        // 鎖定選項
+        inputs.forEach(input => input.disabled = true);
+
+        // 顯示按鈕
+        retryBtn.style.display = 'inline-block';
+        analysisBtn.style.display = 'inline-block';
+    }
+
+    // 重作一次邏輯
+    function resetQuiz() {
+        // 清除選擇
+        inputs.forEach(input => {
+            input.checked = false;
+            input.disabled = false;
+        });
+
+        // 隱藏結果與解析
+        resultBox.style.display = 'none';
+        analysisSection.style.display = 'none';
+        retryBtn.style.display = 'none';
+        analysisBtn.style.display = 'none';
+        
+        // 重置解析按鈕文字
+        analysisBtn.textContent = '顯示解析';
+        analysisBtn.classList.add('btn-outline');
+        analysisBtn.classList.remove('btn');
+    }
+
+    // 切換解析顯示邏輯
+    function toggleAnalysis() {
+        if (analysisSection.style.display === 'none' || analysisSection.style.display === '') {
+            analysisSection.style.display = 'block';
+            analysisBtn.textContent = '隱藏解析';
+            // 自動展開第一個解析區塊
+            const firstHeader = analysisSection.querySelector('.accordion-header');
+            if(firstHeader && !firstHeader.classList.contains('active')){
+                toggleAccordion(firstHeader);
+            }
+            // 滾動到解析區
+            analysisSection.scrollIntoView({behavior: 'smooth'});
+        } else {
+            analysisSection.style.display = 'none';
+            analysisBtn.textContent = '顯示解析';
+        }
+    }
+
+    // 手風琴效果邏輯
+    function toggleAccordion(header) {
+        header.classList.toggle('active');
+        let content = header.nextElementSibling;
+        
+        if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        }
+    }
+</script>
+
+</body>
+</html>

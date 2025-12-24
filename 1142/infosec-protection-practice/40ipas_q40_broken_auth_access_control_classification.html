@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安【題組 5】第 40 題解析 - 互動式教學</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e67e22;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --error-color: #c0392b;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Layout & Container */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: #666;
+            font-weight: normal;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background-color: var(--secondary-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: -20px;
+            margin-bottom: 20px;
+        }
+
+        /* Card Style */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        /* Image */
+        .scenario-img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 15px auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        /* Form Elements */
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .checkbox-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .checkbox-item input {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            flex: 2;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-show-answer {
+            background-color: var(--accent-color);
+            color: white;
+            flex: 1;
+        }
+
+        /* Feedback Area */
+        #feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-partial {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion (Collapsible Sections) */
+        .accordion {
+            background-color: #fff;
+            color: #444;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: 0.4s;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion:hover {
+            background-color: #f1f1f1;
+        }
+
+        .accordion:after {
+            content: '+';
+            font-size: 1.5rem;
+            color: #777;
+            float: right;
+            margin-left: 5px;
+        }
+
+        .accordion.active:after {
+            content: '-';
+        }
+
+        .accordion.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .accordion.active:after {
+            color: white;
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .panel-content {
+            padding: 20px 0;
+        }
+
+        /* Highlighting */
+        .highlight {
+            background-color: #fffacd;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        .keyword {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        /* Self Test Section */
+        .self-test-item {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 15px;
+        }
+
+        .self-test-question {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .self-test-answer {
+            display: none;
+            color: var(--success-color);
+            margin-top: 5px;
+            padding: 10px;
+            background: #f8fff9;
+            border-left: 3px solid var(--success-color);
+        }
+
+        .btn-reveal {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            background-color: #7f8c8d;
+            color: white;
+            margin-top: 5px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn-submit, .btn-reset, .btn-show-answer {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>iPAS 資安【題組 5】第 40 題完全解析</h1>
+            <h2>Broken Authentication / Access Control 分類判斷</h2>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text">學習進度：<span id="progressText">0%</span></div>
+
+        <!-- Scenario Section -->
+        <div class="card">
+            <div class="card-title">情境說明</div>
+            <p>你在進行<strong>系統原始碼掃描</strong>，需將發現的問題分類到 OWASP 常見風險類別中，特別是「<strong>Broken Authentication</strong>」（身分驗證壞掉／有缺陷）與「<strong>Access Control</strong>」（存取控制／權限控管）相關問題。</p>
+            <img src="https://i.meee.com.tw/fKYFg1V.jpg" alt="系統架構示意圖：使用者透過瀏覽器連接 Web Server，後端連接 Database" class="scenario-img">
+        </div>
+
+        <!-- Question Section -->
+        <div class="card">
+            <div class="card-title">題目 40（複選題）</div>
+            <p>進行系統原始碼掃描時，下列哪些情境可被歸類為「Broken Authentication」或「Access Control」相關問題？</p>
+            
+            <div class="checkbox-group" id="quizForm">
+                <label class="checkbox-item">
+                    <input type="checkbox" name="option" value="A">
+                    <span>(A) 密碼輸入不經雜湊儲存於資料庫</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="option" value="B">
+                    <span>(B) 可以修改自己帳號讀取到其他人帳號參數</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="option" value="C">
+                    <span>(C) 使用 Base64 加 SHA256 加鹽雜湊儲存密碼</span>
+                </label>
+                <label class="checkbox-item">
+                    <input type="checkbox" name="option" value="D">
+                    <span>(D) 以 GET 方法將帳號與密碼置於 URL 參數</span>
+                </label>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-submit" onclick="checkAnswer()">送出作答</button>
+                <button class="btn-show-answer" onclick="showAnswerDirectly()">顯示正解</button>
+                <button class="btn-reset" onclick="resetQuiz()">重設</button>
+            </div>
+
+            <div id="feedback"></div>
+        </div>
+
+        <!-- Accordion Sections -->
+        
+        <!-- Step 1 -->
+        <button class="accordion">第一步：找關鍵字</button>
+        <div class="panel">
+            <div class="panel-content">
+                <ul>
+                    <li><span class="keyword">原始碼掃描</span>：看程式碼找風險，不做實際攻擊。</li>
+                    <li><span class="keyword">Broken Authentication</span>（身分驗證壞掉）：指登入機制、密碼管理、Session 或憑證保護不當。簡單說就是「鎖太爛」或「鑰匙沒管好」。</li>
+                    <li><span class="keyword">Access Control</span>（存取控制）：指權限控管，該看的才看得到，不該看的看不到。</li>
+                    <li><span class="keyword">密碼儲存</span>：資料庫裡的密碼是否經過安全處理（如雜湊）。</li>
+                    <li><span class="keyword">參數竄改</span>：修改網址或封包裡的 ID（如 user_id=1 改成 user_id=2），看能不能越權。</li>
+                    <li><span class="keyword">GET + URL 參數</span>：網址列顯示帳密，敏感資訊會被瀏覽器歷史紀錄或 Proxy 伺服器記錄下來。</li>
+                    <li><span class="keyword">雜湊 (Hash)</span>：把資料變成固定長度的亂碼指紋，不可逆（無法還原）。</li>
+                    <li><span class="keyword">加鹽 (Salt)</span>：在密碼後面加一段隨機值再運算，避免駭客用彩虹表（Rainbow Table）秒解。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <button class="accordion">第二步：白話翻譯</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>這題其實在問：</p>
+                <div class="highlight" style="padding: 15px; border-left: 4px solid var(--accent-color);">
+                    「哪些選項的情況跟『<strong>登入/密碼保護做不好</strong>』或者『<strong>權限控管做不好</strong>』有關？<br>
+                    只要會讓帳號密碼外洩、讓驗證變弱，或者讓人可以越權看到不該看到的資料，就要選。」
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <button class="accordion">第三步：解題思路</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>這題在考什麼觀念？</strong></p>
+                <p>Broken Authentication 看「帳密/登入憑證保護」，Access Control 看「能否越權」。</p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>先把選項分成「密碼處理」與「權限/參數控制」。</li>
+                    <li>密碼明文、帳密放 URL → 屬於<strong>驗證/憑證保護不當 (Broken Authentication)</strong>。</li>
+                    <li>改參數讀別人資料 → 屬於<strong>越權 (Access Control)</strong>。</li>
+                </ol>
+                <p><strong>原理與比喻：</strong></p>
+                <ul>
+                    <li><strong>Broken Authentication</strong>：鎖本身太爛（密碼太簡單）或鑰匙被偷走（帳密外洩）。</li>
+                    <li><strong>Access Control</strong>：門禁規則壞掉，明明只是訪客，拿到通行證卻能進金庫。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <button class="accordion">第四步：選項分析</button>
+        <div class="panel">
+            <div class="panel-content">
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: var(--success-color);">(A) 為什麼要選？</strong>
+                    <p>密碼不雜湊就存入資料庫＝<strong>明文密碼</strong>。一旦資料庫外洩，所有人密碼直接曝光。這屬於身分驗證與憑證保護不當 (Broken Authentication)。</p>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: var(--success-color);">(B) 為什麼要選？</strong>
+                    <p>可以改自己帳號參數讀到別人的資料＝<strong>典型越權</strong>。代表缺少「伺服器端的權限檢查」。這屬於存取控制失效 (Access Control / IDOR 類型)。</p>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: var(--error-color);">(C) 為什麼不選？</strong>
+                    <p>雖然 Base64 本身不是加密（只是編碼），但題目描述「Base64 + SHA256 + 加鹽雜湊」。這是在做<strong>雜湊保護</strong>（有 Hash 也有 Salt），相比 A/B/D，這是一個較安全的密碼儲存實作，不應歸類為漏洞或問題。</p>
+                </div>
+                <div>
+                    <strong style="color: var(--success-color);">(D) 為什麼要選？</strong>
+                    <p>把帳號密碼放在 URL 參數（GET）會被瀏覽器歷史、伺服器 log、Proxy 等紀錄到。容易造成<strong>憑證外洩</strong>。屬於身分驗證資訊保護不當 (Broken Authentication)。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Concepts -->
+        <button class="accordion">觀念補充與延伸</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>Encoding vs Encryption (常考混淆)</strong></p>
+                <ul>
+                    <li><strong>編碼 (Encoding)</strong>：如 Base64。目的是為了傳輸方便，任何人都可以直接還原，<strong>沒有保密性</strong>。</li>
+                    <li><strong>加密 (Encryption)</strong>：如 AES。需要金鑰 (Key) 才能還原，目的是保密。</li>
+                </ul>
+                <p><strong>常見變化題型</strong></p>
+                <ul>
+                    <li>問「IDOR（不安全的直接物件參照）」屬於哪一類？ → 大多屬於 <strong>Access Control</strong>。</li>
+                    <li>問「Session 固定 / Token 洩漏」屬於哪一類？ → 大多屬於 <strong>Broken Authentication</strong>。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Memory Aids -->
+        <button class="accordion">記憶口訣與陷阱</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>記憶口訣：</strong></p>
+                <ul style="list-style-type: square; color: var(--primary-color); font-weight: bold;">
+                    <li>「帳密外洩算驗證壞，改參數越權算控管壞」</li>
+                    <li>「URL 放密碼，等於自曝」</li>
+                </ul>
+                <hr>
+                <p><strong>常見陷阱：</strong></p>
+                <p>容易看到 "Base64" 就以為不安全而選 C。但要注意題目後方還有 "SHA256" 和 "加鹽"。Base64 在這裡是作為雜湊後的輸出格式（把二進位轉文字），只要有做 SHA256 + Salt，就不算 Broken Authentication。</p>
+            </div>
+        </div>
+
+        <!-- Answer -->
+        <button class="accordion" id="answerAccordion">正確答案</button>
+        <div class="panel">
+            <div class="panel-content">
+                <h3 style="color: var(--success-color);">答案：A、B、D</h3>
+                <p><strong>總結理由：</strong></p>
+                <p>A 與 D 會讓帳密/驗證資訊暴露或保護不足（屬 Broken Authentication），B 是典型越權存取（屬 Access Control）。</p>
+            </div>
+        </div>
+
+        <!-- Self Test -->
+        <div class="card" style="margin-top: 20px; border-left-color: var(--accent-color);">
+            <div class="card-title">自我檢測（點擊按鈕查看答案）</div>
+            
+            <div class="self-test-item">
+                <span class="self-test-question">1) 為什麼 Base64 不能用來保護密碼？</span>
+                <button class="btn-reveal" onclick="toggleSelfTest(this)">看解答</button>
+                <div class="self-test-answer">
+                    因為 Base64 只是「編碼」（翻譯），不是加密。就像把中文翻成英文，懂英文的人直接翻譯回來就看光光了，沒有任何保密效果。
+                </div>
+            </div>
+
+            <div class="self-test-item">
+                <span class="self-test-question">2) 若系統用 POST 送帳密就一定安全嗎？</span>
+                <button class="btn-reveal" onclick="toggleSelfTest(this)">看解答</button>
+                <div class="self-test-answer">
+                    不一定！POST 只是讓帳密不出現在網址列（URL），避免被瀏覽器紀錄。但如果沒有搭配 <strong>HTTPS (TLS/SSL)</strong> 加密傳輸，駭客在網路上截聽封包一樣看得到明文。
+                </div>
+            </div>
+
+            <div class="self-test-item">
+                <span class="self-test-question">3) 什麼是「伺服器端權限檢查」？為什麼不能只靠前端限制？</span>
+                <button class="btn-reveal" onclick="toggleSelfTest(this)">看解答</button>
+                <div class="self-test-answer">
+                    前端限制（如隱藏按鈕）很容易被繞過。駭客可以直接發送 API 請求。所以「伺服器端」必須在接收到每一個請求時，都檢查「這個人是誰？他有沒有資格做這件事？」，這才是有效的 Access Control。
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>iPAS 資訊安全工程師能力鑑定 - 互動式練習教材</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- Logic and Variables ---
+        const correctAnswers = ['A', 'B', 'D'];
+        
+        // Progress Tracking
+        const progressState = {
+            answered: false,
+            explained: false,
+            selfTested: false
+        };
+
+        function updateProgress() {
+            let completed = 0;
+            if (progressState.answered) completed++;
+            if (progressState.explained) completed++;
+            if (progressState.selfTested) completed++;
+
+            const percentage = Math.round((completed / 3) * 100);
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressText').innerText = percentage + '% (完成項目：作答、閱讀解析、自我檢測)';
+        }
+
+        // Quiz Logic
+        function checkAnswer() {
+            // Get selected options
+            const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+            const selected = Array.from(checkboxes).map(cb => cb.value);
+            const feedbackEl = document.getElementById('feedback');
+            
+            // Logic for classification
+            // Find intersection (correctly selected)
+            const intersection = selected.filter(x => correctAnswers.includes(x));
+            // Find wrong selections (selected but shouldn't be)
+            const wrongSelections = selected.filter(x => !correctAnswers.includes(x));
+
+            let message = '';
+            let className = '';
+
+            if (selected.length === 0) {
+                alert('請至少選擇一個選項！');
+                return;
+            }
+
+            // Mark as answered for progress
+            progressState.answered = true;
+            updateProgress();
+
+            feedbackEl.style.display = 'block';
+            feedbackEl.className = ''; // reset class
+
+            // Perfect Match
+            if (intersection.length === correctAnswers.length && wrongSelections.length === 0) {
+                message = '判斷正確！A 與 D 會讓帳密/驗證資訊暴露或保護不足，B 是典型越權存取。';
+                className = 'feedback-correct';
+            } 
+            // All Wrong (Only selected wrong answers)
+            else if (intersection.length === 0) {
+                message = '判斷錯誤。請先分清楚：驗證問題 (Authentication) vs 權限問題 (Access Control)。請參考下方解析。';
+                className = 'feedback-wrong';
+            }
+            // Partial (Has some right, maybe some wrong, or missing some)
+            else {
+                message = '方向正確，但仍有漏選或誤選。再仔細檢查一下題目情境！';
+                className = 'feedback-partial';
+            }
+
+            feedbackEl.textContent = message;
+            feedbackEl.classList.add(className);
+        }
+
+        function resetQuiz() {
+            const checkboxes = document.querySelectorAll('input[name="option"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        function showAnswerDirectly() {
+            // Check correct boxes visually
+            const checkboxes = document.querySelectorAll('input[name="option"]');
+            checkboxes.forEach(cb => {
+                if (correctAnswers.includes(cb.value)) {
+                    cb.checked = true;
+                } else {
+                    cb.checked = false;
+                }
+            });
+            
+            // Show feedback manually
+            const feedbackEl = document.getElementById('feedback');
+            feedbackEl.style.display = 'block';
+            feedbackEl.textContent = '已顯示正確答案：A、B、D。';
+            feedbackEl.className = 'feedback-correct';
+
+            // Mark progress
+            progressState.answered = true;
+            updateProgress();
+
+            // Open the Answer Accordion
+            const ansAcc = document.getElementById('answerAccordion');
+            const ansPanel = ansAcc.nextElementSibling;
+            if (!ansAcc.classList.contains('active')) {
+                ansAcc.classList.add('active');
+                ansPanel.style.maxHeight = ansPanel.scrollHeight + "px";
+                progressState.explained = true;
+                updateProgress();
+            }
+        }
+
+        // Accordion Logic
+        const accordions = document.getElementsByClassName("accordion");
+        for (let i = 0; i < accordions.length; i++) {
+            accordions[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                const panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                    panel.style.maxHeight = null;
+                } else {
+                    panel.style.maxHeight = panel.scrollHeight + "px";
+                    // Mark progress logic
+                    progressState.explained = true;
+                    updateProgress();
+                }
+            });
+        }
+
+        // Self Test Toggle
+        function toggleSelfTest(btn) {
+            const answerDiv = btn.nextElementSibling;
+            if (answerDiv.style.display === "block") {
+                answerDiv.style.display = "none";
+                btn.textContent = "看解答";
+            } else {
+                answerDiv.style.display = "block";
+                btn.textContent = "隱藏解答";
+                // Mark progress
+                progressState.selfTested = true;
+                updateProgress();
+            }
+        }
+    </script>
+</body>
+</html>

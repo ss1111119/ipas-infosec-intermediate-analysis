@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資訊安全防護實務 - 題號 12 (OT/ICS 資安) - ipas_ics_sans_kill_chain_modbus_q12.html</title>
+    <style>
+        /* 全域變數設定 - 專業配色 */
+        :root {
+            --primary-color: #2c3e50; /* 深藍灰 */
+            --accent-color: #3498db;  /* 專業藍 */
+            --success-color: #27ae60; /* 綠色 */
+            --warning-color: #e67e22; /* 橘色 */
+            --danger-color: #c0392b;  /* 紅色 */
+            --bg-color: #f8f9fa;      /* 淺灰背景 */
+            --card-bg: #ffffff;       /* 卡片背景 */
+            --text-main: #333333;     /* 主要文字 */
+            --text-sub: #666666;      /* 次要文字 */
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* 基礎重置 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        /* 版面容器 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 標題區 */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        header .meta-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* 卡片樣式 */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--box-shadow);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        /* 題目區 */
+        .question-content {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f7ff;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input[type="radio"] {
+            margin-top: 5px;
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background 0.3s;
+            color: white;
+            text-align: center;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-retry {
+            background-color: var(--warning-color);
+            margin-right: 10px;
+        }
+
+        .btn-toggle {
+            background-color: var(--primary-color);
+        }
+
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* 回饋區 */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析手風琴樣式 */
+        .accordion {
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 10px;
+            background: #fff;
+        }
+
+        .accordion-header {
+            background-color: #f1f1f1;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            border-bottom: 1px solid transparent;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .accordion-header.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .accordion-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: #fff;
+        }
+
+        .accordion-content .inner-content {
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        /* 關鍵字螢光筆效果 */
+        .highlight {
+            background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 互動卡片區塊 */
+        .interactive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .info-card h4 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        /* 檢核清單互動 */
+        .checklist-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .checklist-item input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .status-msg {
+            font-weight: bold;
+            margin-top: 10px;
+            padding: 5px;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .status-valid {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .status-invalid {
+            background-color: #eee;
+            color: #888;
+        }
+
+        /* RWD 調整 */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.2rem; }
+            .card { padding: 15px; }
+            .btn { width: 100%; margin-bottom: 10px; }
+            .btn-retry { margin-right: 0; }
+            .action-area { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 1. Header 區塊 -->
+    <header>
+        <h1>iPAS 資訊安全防護實務 - 短期衝刺班</h1>
+        <div class="meta-info">
+            題號：12 | 科目：資訊安全【防護實務 × OT/ICS 資安】<br>
+            檔名：ipas_ics_sans_kill_chain_modbus_q12.html
+        </div>
+    </header>
+
+    <!-- 2. 題目互動區 -->
+    <section class="card" id="quiz-section">
+        <div class="question-content">
+            依據 SANS 工業控制系統殺戮鏈（SANS Industrial Control System Kill Chain），若在營運技術網路（Operational Technology, OT）偵測到大量 Modbus 功能碼 0x10（Write Multiple Registers）的非預期封包，下列何種即時防禦措施最符合「最小影響但高效遏制」原則？
+        </div>
+        <form id="quiz-form">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="option" value="A">
+                    <span>(A) 於核心路由器啟用 Geofencing 阻斷來源 IP</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="option" value="B">
+                    <span>(B) 立即更新所有 PLC 韌體</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="option" value="C">
+                    <span>(C) 立刻切斷工控網與 IT 網的所有連線</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="option" value="D">
+                    <span>(D) 於入侵防禦系統（IPS）套用 Modbus 深度解析規則，並將 Write 多筆暫存器行為設為只讀或阻斷</span>
+                </label>
+            </div>
+            <button type="button" class="btn btn-submit" onclick="checkAnswer()">送出答案</button>
+        </form>
+
+        <!-- 回饋訊息 -->
+        <div id="feedback" class="feedback-area"></div>
+        
+        <!-- 操作按鈕區（送出後顯示） -->
+        <div id="action-buttons" class="action-area" style="display: none;">
+            <button class="btn btn-retry" onclick="resetQuiz()">重作一次</button>
+            <button class="btn btn-toggle" onclick="toggleExplanation()">顯示／隱藏解析</button>
+        </div>
+    </section>
+
+    <!-- 3. 解析學習區 (預設隱藏) -->
+    <section id="explanation-area" style="display: none;">
+        
+        <!-- Accordion 區塊 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【題目】 <span class="toggle-icon">+</span></div>
+            <div class="accordion-content">
+                <div class="inner-content">
+                    若在 OT 網偵測到大量 Modbus 功能碼 0x10（Write Multiple Registers）的非預期封包，何種即時防禦措施最符合「最小影響但高效遏制」原則？
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第一步：找關鍵字】 <span class="toggle-icon">+</span></div>
+            <div class="accordion-content">
+                <div class="inner-content">
+                    <p>請特別注意以下題目中的高亮關鍵字：</p>
+                    <ul>
+                        <li><span class="highlight">SANS ICS Kill Chain</span>：強調工控殺戮鏈的防禦階段。</li>
+                        <li><span class="highlight">OT (Operational Technology)</span>：這是考工廠環境，不是辦公室 IT。</li>
+                        <li><span class="highlight">Modbus</span>：工控標準通訊協定，沒加密、易被利用。</li>
+                        <li><span class="highlight">功能碼 0x10 (Write Multiple Registers)</span>：寫入指令，極具破壞性。</li>
+                        <li><span class="highlight">非預期封包</span>：代表可能是攻擊或誤操作。</li>
+                        <li><span class="highlight">即時防禦</span>：現在就要擋住，不是等下次歲修。</li>
+                        <li><span class="highlight">最小影響</span>、<span class="highlight">高效遏制</span>：這是解題核心！不能隨便讓產線停機，但要有效擋住攻擊。</li>
+                        <li><span class="highlight">IPS</span>、<span class="highlight">深度解析 (DPI)</span>：技術手段。</li>
+                    </ul>
+                    <p style="margin-top:10px;"><strong>重點提示：</strong>這題考的是「OT 即時防禦」的權衡藝術，不是傳統 IT 的「全部封鎖」思維。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第二步：白話翻譯】 <span class="toggle-icon">+</span></div>
+            <div class="accordion-content">
+                <div class="inner-content">
+                    <p><strong>高中生也聽得懂的版本：</strong></p>
+                    <p>「工廠的控制網路突然出現很多『寫入暫存器』的異常指令（就像有人一直在亂按機台的設定按鈕），現在要立刻擋下來，又不能讓工廠隨便停工（因為停工損失幾千萬），哪個做法最聰明？」</p>
+                    <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+                    <p><strong>名詞解釋：</strong></p>
+                    <ul>
+                        <li><strong>OT（營運技術）：</strong>工廠裡實際控制機器手臂、輸送帶運作的網路系統。</li>
+                        <li><strong>Modbus：</strong>工控設備最常用的語言（通訊協定），就像工廠裡的通用英語。</li>
+                        <li><strong>Write Multiple Registers (0x10)：</strong>這是一句指令，意思是「一次修改多個控制參數」。如果被駭客利用，可以直接讓鍋爐過熱或馬達燒毀。</li>
+                        <li><strong>IPS（入侵防禦系統）：</strong>一種網路保全設備，可以看懂封包內容，即時把壞的封包丟掉。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第三步：解題思路】 <span class="toggle-icon">+</span></div>
+            <div class="accordion-content">
+                <div class="inner-content">
+                    <p><strong>考點核心：</strong>OT 環境中「即時遏制」要兼顧安全與營運不中斷（Availability）。</p>
+                    <p><strong>解題三步驟：</strong></p>
+                    <ol>
+                        <li><strong>確認風險行為：</strong>題目指出是 Modbus 的「寫入 (Write)」指令異常。這是高風險行為，必須處理。</li>
+                        <li><strong>判斷影響程度：</strong>
+                            <ul>
+                                <li>斷網、重開機、更新韌體 -> 都會導致產線中斷（影響太大）。</li>
+                                <li>封 IP -> 可能誤擋正常管理流量（不夠精準）。</li>
+                            </ul>
+                        </li>
+                        <li><strong>選擇最佳解：</strong>需要一個能「精準識別」Modbus 寫入指令，並且「只阻擋該指令」的手段。IPS 的深度封包檢測（DPI）正好符合。</li>
+                    </ol>
+                    <p style="margin-top:10px;"><strong>原理：</strong>OT 資安首重「可用性」。DPI 技術可以深入到應用層（Layer 7），分辨出這是一個「讀取（安全）」還是「寫入（危險）」的指令，進而只阻擋寫入，讓監控數據的讀取行為繼續運作，達成最小影響。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第四步：選項分析】 <span class="toggle-icon">+</span></div>
+            <div class="accordion-content">
+                <div class="inner-content">
+                    <ul>
+                        <li><strong>(A) 於核心路由器啟用 Geofencing 阻斷來源 IP：<span style="color:var(--danger-color)">[錯誤]</span></strong>
+                            <br>Geofencing（地理柵欄）是用來擋國外 IP 的。OT 攻擊常來自內網遭感染的電腦或跳板，且 IP 可能偽造。此法對內網攻擊無效，且若誤擋到遠端維護人員的 IP，影響範圍不可控。
+                        </li>
+                        <br>
+                        <li><strong>(B) 立即更新所有 PLC 韌體：<span style="color:var(--danger-color)">[錯誤]</span></strong>
+                            <br>更新韌體是「長期改善」措施，需要停機測試、驗證，絕不可能在攻擊當下「即時」進行。這違背了「最小影響」原則。
+                        </li>
+                        <br>
+                        <li><strong>(C) 立刻切斷工控網與 IT 網的所有連線：<span style="color:var(--danger-color)">[錯誤]</span></strong>
+                            <br>這是「拔網路線」的大絕招。雖然絕對能遏制攻擊，但會導致生產資訊中斷、ERP 系統無法抓資料，對營運衝擊極大，不符合「最小影響」。通常是最後手段（Last Resort）。
+                        </li>
+                        <br>
+                        <li><strong>(D) 於 IPS 套用 Modbus 深度解析規則，將 Write 行為設為只讀或阻斷：<span style="color:var(--success-color)">[正確]</span></strong>
+                            <br>利用 IPS 的 Modbus DPI 功能，精準鎖定功能碼 0x10。可以設定「Drop Write, Allow Read」，這樣攻擊者的破壞指令被擋下，但 HMI（人機介面）仍可讀取數據，產線監控不受影響。符合「最小影響」且「高效遏制」。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【觀念補充與延伸】 <span class="toggle-icon">+</span></div>
+            <div class="accordion-content">
+                <div class="inner-content">
+                    <p><strong>核心觀念定位：</strong>這是 iPAS 防護實務中「OT/ICS 即時防禦策略」的高鑑別度題型。</p>
+                    <p><strong>重要定義：</strong></p>
+                    <ul>
+                        <li><strong>最小影響 (Minimal Impact)：</strong>防禦措施實施後，對正常生產流程的干擾降到最低。</li>
+                        <li><strong>高效遏制 (Effective Containment)：</strong>能精準針對攻擊特徵（如特定功能碼）進行阻斷，而不誤殺無辜。</li>
+                    </ul>
+                    <p><strong>觸類旁通：</strong></p>
+                    <ul>
+                        <li><strong>IT vs OT 防禦思維：</strong>IT 看到攻擊常直接封 IP 或帳號；OT 則傾向「過濾指令」，保留連線但限制行為。</li>
+                        <li><strong>變化題型：</strong>如果題目考的是 DNP3 或 OPC UA 協定，原理一樣，都是找具備該協定 DPI 能力的防火牆或 IPS 來過濾寫入指令。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【記憶口訣】 <span class="toggle-icon">+</span></div>
+            <div class="accordion-content">
+                <div class="inner-content">
+                    <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold;">
+                        「OT 要不停，精準擋指令」<br>
+                        「寫入最危險，IPS 先下手」
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【常見陷阱】 <span class="toggle-icon">+</span></div>
+            <div class="accordion-content">
+                <div class="inner-content">
+                    <ul>
+                        <li>❌ <strong>一看到攻擊就想「全面斷線」：</strong>在 OT 這是大忌，除非威脅已危及人員安全。</li>
+                        <li>❌ <strong>把 IT 防禦思維套用：</strong>例如選 (A) 封 IP 或選 (B) 更新 patch，這些在 IT 很常見，但在 OT 應變中通常不是第一順位。</li>
+                    </ul>
+                    <p><strong>避坑指南：</strong>只要題目出現「最小影響」四個字，優先找「應用層 (Layer 7) 精準控制」的選項，通常是 DPI 或 IPS 相關。
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【正確答案】 <span class="toggle-icon">+</span></div>
+            <div class="accordion-content">
+                <div class="inner-content">
+                    <p style="font-size: 1.5rem; color: var(--success-color); font-weight: bold; text-align: center;">(D)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【自我檢測】 <span class="toggle-icon">+</span></div>
+            <div class="accordion-content">
+                <div class="inner-content">
+                    <p>試著回答以下問題（不提供標準答案，請反思）：</p>
+                    <ul>
+                        <li>為什麼 Modbus 的 Write 功能碼風險比 Read 高？</li>
+                        <li>若沒有 IPS，還有哪些方式能在 OT 中做到精準遏制？（提示：工業防火牆）</li>
+                        <li>為何 OT 資安常把 Availability (可用性) 放在 CIA 的第一順位？</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 互動學習卡片區 -->
+        <h3 style="margin-top: 30px; padding-left: 5px; border-left: 5px solid var(--accent-color);">學習輔助互動區</h3>
+        <div class="interactive-grid">
+            <!-- 卡片 1: Modbus 功能碼 -->
+            <div class="info-card">
+                <h4>Modbus 功能碼分類卡</h4>
+                <div style="margin-bottom: 10px;">
+                    <strong>🟢 Read 類 (低風險/監控用)</strong>
+                    <ul style="font-size: 0.9rem; margin-left: 20px;">
+                        <li>0x01 Read Coils</li>
+                        <li>0x03 Read Holding Registers</li>
+                        <li>0x04 Read Input Registers</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong>🔴 Write 類 (高風險/控制用)</strong>
+                    <ul style="font-size: 0.9rem; margin-left: 20px;">
+                        <li>0x05 Write Single Coil</li>
+                        <li>0x06 Write Single Register</li>
+                        <li>0x10 Write Multiple Registers (本題主角)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 卡片 2: 防禦層級 -->
+            <div class="info-card">
+                <h4>OT 防禦層級對照卡</h4>
+                <ul style="list-style: none;">
+                    <li>🎯 <strong>協定層 (Protocol)：</strong>
+                        <br><span style="font-size:0.9rem; color:#666;">針對功能碼過濾 (如本題解法) -> 最精準</span>
+                    </li>
+                    <li style="margin-top:8px;">🌐 <strong>網路層 (Network)：</strong>
+                        <br><span style="font-size:0.9rem; color:#666;">針對 IP/Port 封鎖 -> 範圍太大</span>
+                    </li>
+                    <li style="margin-top:8px;">⚙️ <strong>裝置層 (Device)：</strong>
+                        <br><span style="font-size:0.9rem; color:#666;">更新韌體/停機 -> 影響最大</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 卡片 3: 判斷清單 -->
+            <div class="info-card">
+                <h4>最小影響判斷清單</h4>
+                <p style="font-size:0.9rem; margin-bottom:10px;">請勾選你的策略是否符合：</p>
+                <div class="checklist-item">
+                    <label><input type="checkbox" class="defense-check" onchange="checkDefenseStatus()"> 避免造成產線全面停機</label>
+                </div>
+                <div class="checklist-item">
+                    <label><input type="checkbox" class="defense-check" onchange="checkDefenseStatus()"> 精準針對危險行為 (如 Write)</label>
+                </div>
+                <div class="checklist-item">
+                    <label><input type="checkbox" class="defense-check" onchange="checkDefenseStatus()"> 可即時套用不需長時間測試</label>
+                </div>
+                <div id="defense-status" class="status-msg status-invalid">尚未符合原則</div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // 檢查答案邏輯
+    function checkAnswer() {
+        const options = document.getElementsByName('option');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        if (!selectedValue) {
+            alert('請選擇一個答案！');
+            return;
+        }
+
+        const feedbackDiv = document.getElementById('feedback');
+        const actionButtons = document.getElementById('action-buttons');
+        const explanationArea = document.getElementById('explanation-area');
+
+        // 顯示按鈕區
+        actionButtons.style.display = 'flex';
+
+        if (selectedValue === 'D') {
+            feedbackDiv.className = 'feedback-area feedback-correct';
+            feedbackDiv.innerHTML = '<strong>恭喜答對！</strong><br>這正是利用 DPI 技術達到「最小影響、高效遏制」的最佳實務。';
+        } else {
+            feedbackDiv.className = 'feedback-area feedback-incorrect';
+            feedbackDiv.innerHTML = `<strong>答錯囉！</strong><br>你選的是 ${selectedValue}，正確答案是 <strong>(D)</strong>。<br>提示：請回想「最小影響 × 高效遏制」關鍵原則，避免不必要的停機。`;
+        }
+        
+        feedbackDiv.style.display = 'block';
+        
+        // 自動顯示解析區（如果不希望自動展開，可註解下面這行）
+        // explanationArea.style.display = 'block'; 
+    }
+
+    // 重置測驗
+    function resetQuiz() {
+        // 清空選項
+        const options = document.getElementsByName('option');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // 隱藏回饋與按鈕
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('action-buttons').style.display = 'none';
+        
+        // 隱藏解析區
+        document.getElementById('explanation-area').style.display = 'none';
+        
+        // 重置所有手風琴
+        const contents = document.querySelectorAll('.accordion-content');
+        const headers = document.querySelectorAll('.accordion-header');
+        contents.forEach(c => c.style.maxHeight = null);
+        headers.forEach(h => h.classList.remove('active'));
+
+        // 重置 checkbox
+        const checks = document.querySelectorAll('.defense-check');
+        checks.forEach(c => c.checked = false);
+        checkDefenseStatus();
+
+        // 捲動回頂端
+        document.getElementById('quiz-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 切換解析顯示
+    function toggleExplanation() {
+        const area = document.getElementById('explanation-area');
+        if (area.style.display === 'none') {
+            area.style.display = 'block';
+            // 捲動到解析區
+            area.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            area.style.display = 'none';
+        }
+    }
+
+    // 手風琴效果控制
+    function toggleAccordion(header) {
+        header.classList.toggle('active');
+        const content = header.nextElementSibling;
+        
+        if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        }
+    }
+
+    // 最小影響判斷清單邏輯
+    function checkDefenseStatus() {
+        const checks = document.querySelectorAll('.defense-check');
+        let allChecked = true;
+        checks.forEach(c => {
+            if (!c.checked) allChecked = false;
+        });
+
+        const statusDiv = document.getElementById('defense-status');
+        if (allChecked) {
+            statusDiv.textContent = "✅ 符合 OT 即時防禦原則";
+            statusDiv.className = "status-msg status-valid";
+        } else {
+            statusDiv.textContent = "尚未符合原則";
+            statusDiv.className = "status-msg status-invalid";
+        }
+    }
+</script>
+
+</body>
+</html>

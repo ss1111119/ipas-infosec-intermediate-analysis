@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題目解析 - Python XOR 混淆風險</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-radius: 8px;
+            --spacing-unit: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin: 20px 0 10px;
+            color: var(--primary-color);
+        }
+
+        h3 {
+            font-size: 18px;
+            margin: 15px 0 5px;
+            color: #555;
+        }
+
+        /* Progress Bar */
+        .progress-wrapper {
+            margin-bottom: 30px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--success-color);
+            transition: width 0.5s ease;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        /* Question Section */
+        .question-section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+        }
+
+        .question-desc {
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .code-image {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            margin: 15px 0;
+            display: block;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+            border-color: var(--accent-color);
+        }
+
+        .option-input {
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+
+        /* Feedback Styles */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none; /* Hidden by default */
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .btn-submit { background-color: var(--accent-color); color: white; }
+        .btn-submit:hover { background-color: #2980b9; }
+
+        .btn-reset { background-color: #95a5a6; color: white; display: none; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-show { background-color: #e67e22; color: white; display: none; }
+        .btn-show:hover { background-color: #d35400; }
+
+        /* Accordion Styles */
+        .accordion {
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .accordion-header {
+            background-color: #f1f1f1;
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .accordion.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: white;
+        }
+
+        .accordion.active .accordion-content {
+            padding: 15px;
+            max-height: 1000px; /* Arbitrary large height */
+            border-top: 1px solid #ddd;
+        }
+
+        /* Content highlighting */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .keyword-item {
+            margin-bottom: 10px;
+            padding-left: 10px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        /* Self Check Section */
+        .self-check-item {
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+        }
+
+        .answer-reveal {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f6f3;
+            border-radius: 5px;
+            display: none;
+            color: #0e6251;
+        }
+
+        .toggle-ans-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 5px 10px;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .toggle-ans-btn:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            h1 { font-size: 20px; }
+            .btn-group { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資安題庫解析 #29：Python XOR 混淆風險</h1>
+    
+    <!-- Progress Bar -->
+    <div style="margin-bottom: 5px; font-size: 14px; color: #666;">學習進度：</div>
+    <div class="progress-wrapper">
+        <div class="progress-bar" id="progressBar">0%</div>
+    </div>
+
+    <!-- Question Section -->
+    <div class="question-section">
+        <div style="background: #333; color: #fff; display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-bottom: 10px;">單選題</div>
+        <div class="question-desc">
+            <p><strong>題目敘述：</strong></p>
+            <p>如附圖所示是一段 Python 程式碼，你受聘於一個公司進行源碼檢測，需確認程式碼中是否隱藏潛在的惡意行為或漏洞。經分析發現，x() 函數對輸入執行了某種操作，並透過字串反轉進行額外處理。</p>
+            <p>下列何項最正確地描述該程式碼的功能具有潛在風險？</p>
+        </div>
+
+        <img src="https://i.meee.com.tw/sKZW9mD.jpg" alt="Python XOR Code Snippet" class="code-image">
+
+        <div class="options-group" id="quizOptions">
+            <label class="option-label">
+                <input type="radio" name="q29" value="A" class="option-input">
+                <span>(A) 程式碼使用一種簡單 XOR 加密，有容易被破解的風險</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q29" value="B" class="option-input">
+                <span>(B) 程式碼包含難以追蹤的邏輯漏洞，可能被用於後門驗證邏輯</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q29" value="C" class="option-input">
+                <span>(C) 程式碼進行了無法逆向的加密方式，無法直接解密字串 SYP{txf_ofq}</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q29" value="D" class="option-input">
+                <span>(D) 程式碼邏輯錯誤，t 的結果永遠無法等於 "}afq{noT_SPY"</span>
+            </label>
+        </div>
+
+        <div id="feedback" class="feedback-area"></div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="submitAnswer()">送出答案</button>
+            <button class="btn-show" id="showAnswerBtn" onclick="showCorrectAnswer()">顯示正解</button>
+            <button class="btn-reset" id="resetBtn" onclick="resetQuiz()">重設</button>
+        </div>
+    </div>
+
+    <!-- Analysis Section (Accordions) -->
+    <h2>完整解析與觀念引導</h2>
+    
+    <div class="accordion" onclick="toggleAccordion(this)">
+        <div class="accordion-header">第一步：找關鍵字</div>
+        <div class="accordion-content">
+            <div class="keyword-item">
+                <span class="highlight">Python 程式碼</span>：這段程式是可被閱讀、分析的，如果沒有進行編譯或混淆處理，攻擊者可以直接逆向推導（反推）邏輯。
+            </div>
+            <div class="keyword-item">
+                <span class="highlight">XOR (^ 運算子)</span>：互斥或運算。特性是用同一個金鑰做兩次運算會回到原值。這是一種可逆的運算，常被誤用為加密。
+            </div>
+            <div class="keyword-item">
+                <span class="highlight">0x42</span>：這是一個寫死在程式碼中的「固定常數」。代表沒有真正的金鑰管理機制（例如從外部安全讀取），任何人看到程式碼就知道鑰匙是 0x42。
+            </div>
+            <div class="keyword-item">
+                <span class="highlight">字串反轉 ([::-1])</span>：將字串倒著排。這屬於「混淆」（讓人看不懂）技術，完全不具備數學上的加密強度。
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion" onclick="toggleAccordion(this)">
+        <div class="accordion-header">第二步：白話翻譯 (高中生觀點)</div>
+        <div class="accordion-content">
+            <p style="margin-bottom: 15px;">把題目那段看似複雜的程式碼，用日常口語重說一次：</p>
+            <p class="highlight" style="display: inline-block;">
+                「這段程式把字串一個字一個字拿來跟數字 66 (0x42) 做 XOR 運算，最後再把結果倒過來放。題目要問的不是程式跑出來的結果對不對，而是：<strong>這樣的寫法在資安上有什麼風險？</strong>」
+            </p>
+        </div>
+    </div>
+
+    <div class="accordion" onclick="toggleAccordion(this)">
+        <div class="accordion-header">第三步：解題思路與原理</div>
+        <div class="accordion-content">
+            <h3>這題在考什麼觀念？</h3>
+            <p>簡單 XOR 與字串反轉只是「混淆」，並不是真正安全的「加密」。</p>
+            
+            <h3>解題步驟：</h3>
+            <ol style="margin-left: 20px; margin-top: 10px;">
+                <li>看懂 XOR 在做什麼（同一把鑰匙可正反還原）。</li>
+                <li>判斷這是不是「安全加密」還是「容易破解的混淆」。</li>
+                <li>找出描述「風險本質」最正確的選項。</li>
+            </ol>
+
+            <h3>原理與比喻：</h3>
+            <ul>
+                <li><strong>XOR 就像「簡易鎖」</strong>：同一把鑰匙左轉是鎖，右轉是開，沒有複雜的數學難題。</li>
+                <li><strong>反轉字串就像「倒著看報紙」</strong>：只是讓人第一眼看不懂，但完全沒有上鎖，不是防小偷的方法。</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="accordion" onclick="toggleAccordion(this)">
+        <div class="accordion-header">第四步：選項詳細分析</div>
+        <div class="accordion-content">
+            <div style="margin-bottom: 15px;">
+                <strong>(A) 程式碼使用一種簡單 XOR 加密，有容易被破解的風險 (正解)</strong><br>
+                <span style="color: var(--success-color);">為什麼對？</span> XOR 是可逆的，且金鑰 (0x42) 直接寫在程式裡，沒有任何安全強度，非常容易被還原破解。
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong>(B) 程式碼包含難以追蹤的邏輯漏洞...</strong><br>
+                <span style="color: var(--error-color);">為什麼錯？</span> 程式邏輯其實很單純（就是運算+反轉），並沒有「難以追蹤」的隱藏路徑或複雜後門。
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong>(C) 程式碼進行了無法逆向的加密方式...</strong><br>
+                <span style="color: var(--error-color);">為什麼錯？</span> XOR 與反轉都是絕對「可逆」的。只要將結果反轉回來，再 XOR 0x42，就能得到原始字串。
+            </div>
+            <div>
+                <strong>(D) 程式碼邏輯錯誤...</strong><br>
+                <span style="color: var(--error-color);">為什麼錯？</span> 程式邏輯本身是可以執行的，沒有語法錯誤。題目問的是「資安風險」，而不是「程式能不能跑」。
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion" onclick="toggleAccordion(this)">
+        <div class="accordion-header">觀念補充、口訣與陷阱</div>
+        <div class="accordion-content">
+            <h3>記憶口訣</h3>
+            <p>1. 「XOR 能還原，就不是安全加密」</p>
+            <p>2. 「反轉只是遮眼，不是上鎖」</p>
+            
+            <h3>常見陷阱 (避坑指南)</h3>
+            <ul>
+                <li><strong>容易搞混：</strong> 看到程式碼寫成一行行看不懂的樣子，就誤以為它很安全。</li>
+                <li><strong>心理盲點：</strong> 把「看不懂」誤當成「解不開」。</li>
+                <li><strong>判斷準則：</strong> 只要看到 <span class="highlight">XOR + 固定常數 + 簡單反轉</span>，直接判定為「弱混淆」。</li>
+            </ul>
+
+            <h3>核心觀念定位</h3>
+            <p>本題屬於「原始碼安全檢測 / 弱加密與混淆技術辨識」。需區分：</p>
+            <ul>
+                <li><strong>混淆 (Obfuscation)：</strong> 讓人不好讀，無安全性 (如 Base64, XOR)。</li>
+                <li><strong>真正加密 (Encryption)：</strong> 需有金鑰且計算複雜，難以逆向 (如 AES, RSA)。</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="accordion" onclick="toggleAccordion(this)">
+        <div class="accordion-header" style="color: var(--success-color);">正確答案總結</div>
+        <div class="accordion-content">
+            <p><strong>答案：(A)</strong></p>
+            <p><strong>一句話理由：</strong> 因為程式碼只使用可逆的 XOR 與字串反轉，且金鑰寫死，屬於容易被破解的弱混淆方式。</p>
+        </div>
+    </div>
+
+    <!-- Self Check Section -->
+    <h2 style="margin-top: 40px;">自我檢測</h2>
+    <div class="self-check-item">
+        <p><strong>Q1: 如果把 0x42 改成隨機產生但仍寫在程式碼變數中，安全性有本質提升嗎？為什麼？</strong></p>
+        <button class="toggle-ans-btn" onclick="toggleSelfCheck('ans1')">顯示參考答案</button>
+        <div id="ans1" class="answer-reveal">
+            沒有本質提升。因為只要「金鑰」是寫死在程式碼裡（Hard-coded），分析人員只要打開程式碼就能看到那把鑰匙，依然可以直接解密。
+        </div>
+    </div>
+
+    <div class="self-check-item">
+        <p><strong>Q2: 為什麼 Base64 編碼不能當成加密？</strong></p>
+        <button class="toggle-ans-btn" onclick="toggleSelfCheck('ans2')">顯示參考答案</button>
+        <div id="ans2" class="answer-reveal">
+            Base64 是一種「編碼」（Encoding），目的是為了資料傳輸格式統一，它有一套公開的轉換表。任何人都可以直接將 Base64 字串還原，完全不需要金鑰，所以沒有保密性。
+        </div>
+    </div>
+
+    <div class="self-check-item">
+        <p><strong>Q3: 若要真正保護敏感字串（如密碼），應選擇哪一類技術？</strong></p>
+        <button class="toggle-ans-btn" onclick="toggleSelfCheck('ans3')">顯示參考答案</button>
+        <div id="ans3" class="answer-reveal">
+            如果是儲存密碼，應使用雜湊（Hashing，如 SHA-256 + Salt）。如果是需要還原的資料，應使用強加密演算法（如 AES-256）並妥善管理金鑰（Key Management）。
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // State Management
+    let hasAnswered = false;
+    let hasExpandedAccordion = false;
+    let hasCheckedSelfTest = false;
+
+    // DOM Elements
+    const feedbackEl = document.getElementById('feedback');
+    const resetBtn = document.getElementById('resetBtn');
+    const showAnswerBtn = document.getElementById('showAnswerBtn');
+    const progressBar = document.getElementById('progressBar');
+    const radios = document.getElementsByName('q29');
+
+    // Function to calculate and update progress
+    function updateProgress() {
+        let score = 0;
+        if (hasAnswered) score += 40;
+        if (hasExpandedAccordion) score += 30;
+        if (hasCheckedSelfTest) score += 30;
+        
+        progressBar.style.width = score + '%';
+        progressBar.innerText = score + '% 完成';
+    }
+
+    // Submit Answer Logic
+    function submitAnswer() {
+        let selectedValue = null;
+        for (const radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        if (!selectedValue) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        hasAnswered = true;
+        updateProgress();
+
+        feedbackEl.style.display = 'block';
+        resetBtn.style.display = 'inline-block';
+        showAnswerBtn.style.display = 'inline-block';
+
+        if (selectedValue === 'A') {
+            feedbackEl.className = 'feedback-area feedback-correct';
+            feedbackEl.innerHTML = '<strong>正確！</strong> XOR 混淆 ≠ 安全加密，這只是簡單的可逆運算。';
+        } else {
+            feedbackEl.className = 'feedback-area feedback-incorrect';
+            feedbackEl.innerHTML = '<strong>答錯了。</strong> 提示：想想看，如果你有這段程式碼和那個數字 (0x42)，是不是很容易把字串算回來？';
+        }
+
+        // Disable radios after submit
+        for (const radio of radios) {
+            radio.disabled = true;
+        }
+    }
+
+    // Show Correct Answer Logic
+    function showCorrectAnswer() {
+        // Find option A and highlight parent
+        const optionA = document.querySelector('input[value="A"]');
+        if (optionA) {
+            optionA.parentElement.style.backgroundColor = '#d4edda';
+            optionA.parentElement.style.borderColor = '#28a745';
+        }
+        feedbackEl.style.display = 'block';
+        feedbackEl.className = 'feedback-area feedback-correct';
+        feedbackEl.innerHTML = '<strong>正解是 (A)</strong>。<br>這段程式碼沒有真正的金鑰保護，只靠 XOR 和反轉，屬於弱混淆。';
+    }
+
+    // Reset Quiz Logic
+    function resetQuiz() {
+        // Reset Logic
+        for (const radio of radios) {
+            radio.checked = false;
+            radio.disabled = false;
+            radio.parentElement.style.backgroundColor = '';
+            radio.parentElement.style.borderColor = '#e0e0e0';
+        }
+        feedbackEl.style.display = 'none';
+        resetBtn.style.display = 'none';
+        showAnswerBtn.style.display = 'none';
+        
+        // Note: We don't necessarily reset progress score to encourage completion, 
+        // but visual reset implies 'try again'.
+    }
+
+    // Accordion Logic
+    function toggleAccordion(element) {
+        element.classList.toggle('active');
+        if (element.classList.contains('active')) {
+            hasExpandedAccordion = true;
+            updateProgress();
+        }
+    }
+
+    // Self Check Logic
+    function toggleSelfCheck(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+            hasCheckedSelfTest = true;
+            updateProgress();
+        }
+    }
+</script>
+
+</body>
+</html>

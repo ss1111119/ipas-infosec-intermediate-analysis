@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_isp_dcn_out_of_band_management_q16.html - iPAS資安規劃實務衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --highlight-bg: #f1c40f;
+            --correct-color: #27ae60;
+            --light-bg: #ecf0f1;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f6f7;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+        }
+
+        /* Header */
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+
+        header .meta-info {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+            font-family: monospace;
+        }
+
+        /* Scenario Section */
+        .scenario-box {
+            background-color: #fff8e1;
+            border-left: 5px solid var(--highlight-bg);
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .scenario-img-container {
+            text-align: center;
+            margin-bottom: 15px;
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .scenario-img-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .img-caption {
+            font-size: 0.85rem;
+            color: #555;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .scenario-text {
+            font-size: 1.05rem;
+            text-align: justify;
+        }
+
+        /* Question Section */
+        .question-box {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+        }
+
+        .question-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .options-group label {
+            display: block;
+            padding: 12px;
+            margin: 8px 0;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .options-group label:hover {
+            background-color: #e9ecef;
+            border-color: #bbb;
+        }
+
+        .options-group input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: opacity 0.3s;
+        }
+
+        .btn-submit { background-color: var(--primary-color); color: white; }
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-toggle { background-color: var(--accent-color); color: white; display: none; }
+        
+        button:hover { opacity: 0.9; }
+
+        /* Result Area */
+        #result-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        .result-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-wrong { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Explanation Section (Accordion) */
+        #explanation-container {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+        }
+
+        .accordion {
+            background-color: #eee;
+            color: #444;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: 0.4s;
+            border-bottom: 1px solid #ddd;
+            position: relative;
+        }
+
+        .accordion:after {
+            content: '\002B';
+            color: #777;
+            font-weight: bold;
+            float: right;
+            margin-left: 5px;
+        }
+
+        .active:after {
+            content: "\2212";
+        }
+
+        .active, .accordion:hover {
+            background-color: #ddd; 
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .panel-content {
+            padding: 15px 0;
+        }
+
+        /* Highlighter Styles */
+        .highlight {
+            background: linear-gradient(120deg, #f1c40f 0%, #f1c40f 100%);
+            background-repeat: no-repeat;
+            background-size: 100% 40%;
+            background-position: 0 88%;
+            font-weight: bold;
+            padding: 0 2px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            color: white;
+            margin-right: 5px;
+        }
+        .tag-isp { background-color: #3498db; }
+        .tag-sec { background-color: #e74c3c; }
+
+        .key-point {
+            color: #e67e22;
+            font-weight: bold;
+        }
+
+        .trap-alert {
+            color: #c0392b;
+            font-weight: bold;
+            border-left: 3px solid #c0392b;
+            padding-left: 10px;
+            background: #fff5f5;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.8rem;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            header h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資訊安全規劃實務 - 短期衝刺班</h1>
+        <div class="meta-info">題組 2 | 題號：16 | 檔案：ipas_isp_dcn_out_of_band_management_q16.html</div>
+        <div style="margin-top:5px;">
+            <span class="tag tag-isp">網路架構</span>
+            <span class="tag tag-sec">關鍵基礎設施</span>
+            <span class="tag tag-sec">Out-of-Band</span>
+        </div>
+    </header>
+
+    <!-- 情境區塊 -->
+    <div class="scenario-box">
+        <h3>【情境描述】</h3>
+        
+        <div class="scenario-img-container">
+            <img src="https://i.meee.com.tw/PanAXHp.jpg" alt="ISP 網路架構圖：Data Service Backbone 與 Management DCN 分離">
+            <div class="img-caption">附圖：ISP 採用 Data Service Backbone 與 Management DCN 分離之 Out-of-Band 管理架構示意</div>
+        </div>
+
+        <div class="scenario-text">
+            <p>Anet 為一家 ISP 網際網路服務商，其參考關鍵基礎設施的網路管理要求，將公司的網路服務系統分割為兩個獨立部份：</p>
+            <ol>
+                <li><strong>Data Service Backbone（數據服務骨幹網路）</strong>：僅提供數據服務流，用以提供終端客戶上網與雲端服務。</li>
+                <li><strong>Management DCN（Data Control Network，管理數據網路）</strong>：用以建立網路設備的控制訊務流，並提供操作與管理網路設備與系統之功能。</li>
+            </ol>
+            <p>此外，骨幹網路設備關閉網路通道內（In-Band）的連線控制功能，僅保留通道外（Out-of-Band）的控制功能，以降低非必要設備連線風險。</p>
+        </div>
+    </div>
+
+    <!-- 題目互動區 -->
+    <div class="question-box">
+        <div class="question-title">
+            Q16. 因應上述維運安全需求，下列哪些規劃功能較適合應用於此系統架構之中？（複選題）
+        </div>
+        
+        <form id="quizForm">
+            <div class="options-group">
+                <label>
+                    <input type="checkbox" name="option" value="A">
+                    (A) 數據服務骨幹網路設備上，除了 Console 和 Management 埠之外，關閉所有的控制連線埠位
+                </label>
+                <label>
+                    <input type="checkbox" name="option" value="B">
+                    (B) 在 DCN 網路中建置流量清洗（DDoS Mitigation）系統，避免少數用戶遭受 DDoS 攻擊時，影響所有其他客戶的正常網路服務與連線品質
+                </label>
+                <label>
+                    <input type="checkbox" name="option" value="C">
+                    (C) 在 DCN 網路上建置 NAC（Network Access Control）網路存取控制系統，管理僅有授權的設備可進行連接通訊和設備操作功能
+                </label>
+                <label>
+                    <input type="checkbox" name="option" value="D">
+                    (D) 以網路防火牆將各網路區塊隔離開來，並僅限 DCN 的特定設備或網址可進入數據服務骨幹網路設備的控制網段與埠號
+                </label>
+            </div>
+        </form>
+
+        <div id="result-area"></div>
+
+        <div class="controls">
+            <button type="button" class="btn-submit" onclick="checkAnswer()">送出答案</button>
+            <button type="button" class="btn-reset" onclick="resetQuiz()">重作一次</button>
+            <button type="button" class="btn-toggle" id="btnToggle" onclick="toggleExplanation()">顯示／隱藏解析</button>
+        </div>
+    </div>
+
+    <!-- 解析學習區 -->
+    <div id="explanation-container">
+        <h2 style="text-align:center; color:var(--primary-color);">【名師解析區】</h2>
+
+        <!-- Accordion Items -->
+        <button class="accordion">【題目與情境回顧】</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>本題考驗考生對於<strong>「ISP 關鍵基礎設施」</strong>網路架構中，資料平面（Data Plane）與控制平面（Control/Management Plane）分離的實務規劃能力。</p>
+            </div>
+        </div>
+
+        <button class="accordion">【第一步：找關鍵字】</button>
+        <div class="panel">
+            <div class="panel-content">
+                <ul>
+                    <li><span class="highlight">ISP / 關鍵基礎設施</span>：代表這不是一般企業網路，要求極高的可用性與安全性，必須符合嚴格規範。</li>
+                    <li><span class="highlight">Data Service Backbone</span>（骨幹）：這條路是給<strong>客戶</strong>封包走的（Data Plane）。</li>
+                    <li><span class="highlight">Management DCN</span>（管理網）：這條路是給<strong>工程師/管理員</strong>控制設備走的（Control/Management Plane）。</li>
+                    <li><span class="highlight">Out-of-Band (OOB)</span>：帶外管理。意思是「管理流量」不走「數據流量」的線路，有專屬的物理或邏輯通道。</li>
+                    <li><span class="highlight">In-Band 關閉</span>：不能透過客戶上網的線路連進去設定路由器（避免客戶駭入設備）。</li>
+                </ul>
+                <p><strong>看圖重點：</strong>圖片清楚顯示「Service Traffic」走上面，「Management Traffic」走下面，兩者物理路徑分開。</p>
+            </div>
+        </div>
+
+        <button class="accordion">【第二步：白話翻譯】</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>這家公司把<strong>「給客戶用的網路（大馬路）」</strong>跟<strong>「工程師管設備的網路（維修便道）」</strong>完全分開。而且規定：設備只能走專門的維修便道進去修，大馬路那邊的維修入口全部封死。</p>
+                <p>請問在這種情況下，哪些安全規劃最合理？</p>
+            </div>
+        </div>
+
+        <button class="accordion">【第三步：解題思路】</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p class="key-point">核心觀念：關鍵基礎設施中的 Out-of-Band 管理與最小攻擊面原則。</p>
+                <p>既然已經要把管理功能獨立出來（OOB），所有關於管理的防護都應該集中在 DCN（管理網），並且切斷 Backbone（數據網）上的任何管理可能。</p>
+            </div>
+        </div>
+
+        <button class="accordion">【第四步：選項分析】</button>
+        <div class="panel">
+            <div class="panel-content">
+                <ul>
+                    <li>
+                        <strong>(A) 正確：</strong><br>
+                        既然要走 Out-of-Band（帶外），那麼 In-Band（帶內，即骨幹網路介面）上的 Telnet/SSH/HTTP 管理功能就應該全部關閉。僅保留 Console（實體埠）或專屬 Management 埠（接 DCN 用的）。<br>
+                        <em>目的：減少攻擊面（Attack Surface）。</em>
+                    </li>
+                    <br>
+                    <li>
+                        <strong>(B) 錯誤（陷阱題）：</strong><br>
+                        DDoS 攻擊通常發生在「客戶服務流量」上，目的是塞爆頻寬。DCN 是內部封閉的管理網路，流量極小且不對外開放。<br>
+                        <strong>流量清洗（Scrubbing Center）應該建置在 Data Service Backbone 或入口處</strong>，用來保護客戶服務。建在 DCN 裡面根本擋不到外面骨幹上的 DDoS 攻擊，就像把防彈背心穿在保險箱裡面，而不是穿在警衛身上。
+                    </li>
+                    <br>
+                    <li>
+                        <strong>(C) 正確：</strong><br>
+                        DCN 是最高權限的網路（上帝模式）。必須嚴格限制「誰的筆電」可以接上來。<br>
+                        建置 <strong>NAC（Network Access Control）</strong> 可以確保只有授權的維運電腦、跳板機可以接入 DCN，防止內部人員私接設備或惡意裝置入侵。
+                    </li>
+                    <br>
+                    <li>
+                        <strong>(D) 正確：</strong><br>
+                        即便分了區，還是要有防火牆（Firewall）做存取控制清單（ACL）。<br>
+                        限制只有 DCN 內的特定 IP（例如網管跳板機 Jump Host）可以連線到骨幹設備的 Management IP。這就是標準的<strong>網路微切分（Micro-segmentation）</strong>與最小權限原則。
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <button class="accordion">【觀念補充與延伸】</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>什麼是 Out-of-Band (OOB) 管理？</strong></p>
+                <p>就像飛機的駕駛艙門是鎖著的，乘客（Data Traffic）不能隨意進入駕駛艙（Management）。甚至更嚴格的 OOB 是指駕駛艙有專屬的登機梯，完全不經過客艙走道。</p>
+                <p><strong>優點：</strong></p>
+                <ul>
+                    <li>安全性高：駭客即便癱瘓了骨幹網路，管理網路仍活著，工程師可以進去修。</li>
+                    <li>可用性高：骨幹流量塞爆時，不會影響管理封包的傳送。</li>
+                </ul>
+            </div>
+        </div>
+
+        <button class="accordion">【記憶口訣】</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p style="font-size:1.2rem; color:var(--accent-color); font-weight:bold;">
+                    「管跟用要分線，能關就要關」<br>
+                    「Out-of-Band，只給對的人」
+                </p>
+                <ul>
+                    <li>管跟用要分線：Data 與 DCN 分離。</li>
+                    <li>能關就要關：骨幹上的控制埠全關 (A)。</li>
+                    <li>只給對的人：NAC 驗證設備 (C)、防火牆限制來源 (D)。</li>
+                </ul>
+            </div>
+        </div>
+
+        <button class="accordion">【常見陷阱】</button>
+        <div class="panel">
+            <div class="panel-content">
+                <div class="trap-alert">
+                    <p>看到「DDoS 防護」覺得好棒棒就選 (B)？</p>
+                    <p>錯！要看「放哪裡」。DDoS 清洗要放在被打的地方（骨幹），而不是放在沒人打得到的密室（DCN）。這題考的是「架構位置」的合理性。</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="accordion">【正確答案】</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p style="font-size: 1.5rem; text-align: center; color: var(--correct-color); font-weight: bold;">
+                    (A)、(C)、(D)
+                </p>
+            </div>
+        </div>
+
+        <button class="accordion">【自我檢測】</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>若是 In-Band 管理（例如一般中小企業），工程師通常如何管理防火牆？</p>
+                <p style="color:#666; font-size:0.9rem;">(答案：直接透過與員工/客戶相同的內網 IP，使用 SSH 或 HTTPS 連線到設備介面。風險較高，若內網中毒，設備管理介面容易被攻擊。)</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>Copyright &copy; 2024 iPAS 資訊安全規劃實務衝刺班 | Tutor AI 生成</p>
+    </footer>
+</div>
+
+<script>
+    function checkAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        let selected = [];
+        checkboxes.forEach((cb) => {
+            if (cb.checked) {
+                selected.push(cb.value);
+            }
+        });
+
+        const correctAnswers = ['A', 'C', 'D'];
+        const resultArea = document.getElementById('result-area');
+        const btnToggle = document.getElementById('btnToggle');
+
+        // 排序比較
+        selected.sort();
+        const isCorrect = JSON.stringify(selected) === JSON.stringify(correctAnswers);
+
+        if (isCorrect) {
+            resultArea.innerHTML = "🎉 恭喜答對！正確答案是 A、C、D。<br>觀念非常清晰！請查看下方解析以鞏固記憶。";
+            resultArea.className = "result-correct";
+        } else {
+            let msg = "❌ 答錯囉！<br>";
+            if (selected.length === 0) {
+                msg += "您沒有選擇任何選項。";
+            } else {
+                msg += "您選擇了：" + selected.join("、") + "。<br>";
+            }
+            msg += "正確答案是 A、C、D。<br>（提示：注意 DCN 的用途與 DDoS 清洗的位置）";
+            resultArea.innerHTML = msg;
+            resultArea.className = "result-wrong";
+        }
+
+        resultArea.style.display = "block";
+        btnToggle.style.display = "inline-block"; // 顯示解析按鈕
+        
+        // 自動展開解析區塊
+        document.getElementById('explanation-container').style.display = "block";
+    }
+
+    function resetQuiz() {
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        const resultArea = document.getElementById('result-area');
+        resultArea.style.display = "none";
+        resultArea.className = "";
+        
+        const explanation = document.getElementById('explanation-container');
+        explanation.style.display = "none";
+        
+        const btnToggle = document.getElementById('btnToggle');
+        btnToggle.style.display = "none";
+
+        // 重置所有手風琴
+        const panels = document.querySelectorAll('.panel');
+        panels.forEach(panel => panel.style.maxHeight = null);
+        const accordions = document.querySelectorAll('.accordion');
+        accordions.forEach(acc => acc.classList.remove("active"));
+        
+        window.scrollTo(0, 0);
+    }
+
+    function toggleExplanation() {
+        const explanation = document.getElementById('explanation-container');
+        if (explanation.style.display === "none" || explanation.style.display === "") {
+            explanation.style.display = "block";
+        } else {
+            explanation.style.display = "none";
+        }
+    }
+
+    // Accordion Logic
+    const accordions = document.getElementsByClassName("accordion");
+    for (let i = 0; i < accordions.length; i++) {
+        accordions[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            const panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

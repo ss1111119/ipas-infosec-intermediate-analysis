@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_nist_csf_govern_q15.html</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --highlight-bg: #fffcdb; /* 螢光筆底色 */
+            --border-radius: 8px;
+            --spacing-unit: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.6;
+            padding-bottom: 40px;
+        }
+
+        /* 版面配置 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 標題區 */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        header .meta-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header .filename {
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* 卡片通用樣式 */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+
+        /* 題目互動區 */
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: #f8f9fa;
+            border-color: var(--accent-color);
+        }
+
+        .option-item input[type="checkbox"] {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .option-label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-weight: 600;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-toggle {
+            background-color: white;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            margin-left: auto;
+        }
+
+        /* 回饋區 */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區手風琴效果 */
+        #explanation-section {
+            display: none; /* 預設隱藏 */
+        }
+
+        .accordion {
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .accordion-header {
+            background-color: #f1f3f5;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion.active .accordion-header {
+            background-color: #e3f2fd;
+            color: var(--accent-color);
+        }
+
+        .accordion-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            background-color: white;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+
+        .accordion.active .accordion-content {
+            padding: 20px;
+            max-height: 1000px; /* 足夠大的高度以容納內容 */
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* 內容樣式 */
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #d35400;
+            border-bottom: 2px solid #f1c40f;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #eee;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            border: 1px solid #ccc;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* 互動小工具 */
+        .tool-box {
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px dashed #bbb;
+            margin-top: 10px;
+        }
+
+        .tool-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #555;
+            display: block;
+        }
+
+        .interactive-check label {
+            display: block;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .result-hint {
+            margin-top: 8px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        /* RWD 調整 */
+        @media (max-width: 600px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn-toggle {
+                margin-left: 0;
+            }
+            header h1 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 1. 標頭區 -->
+    <header>
+        <h1>iPAS 資訊安全規劃實務 - 短期衝刺</h1>
+        <div class="meta-info">
+            <span>題號：15</span>
+            <span>科目：資安規劃實務 × 資安治理 × NIST CSF v2</span>
+            <span class="filename">ipas_nist_csf_govern_q15.html</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- 2. 題目互動區 -->
+        <section class="card" id="quiz-area">
+            <h2>題目互動區（複選題）</h2>
+            <div class="question-text">
+                15. 下列何項正確的描述了美國國家標準技術研究院（NIST）的網路安全框架（Cybersecurity Framework, CSF）新增的「治理（Govern）」功能重點？
+            </div>
+            
+            <form id="quiz-form">
+                <div class="options-group">
+                    <div class="option-item">
+                        <input type="checkbox" id="opt-a" name="answer" value="A">
+                        <label for="opt-a" class="option-label">(A) 明確高層管理在網路安全策略中的責任與決策角色</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="opt-b" name="answer" value="B">
+                        <label for="opt-b" class="option-label">(B) 提供技術層面的具體指導來實施威脅緩解機制</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="opt-c" name="answer" value="C">
+                        <label for="opt-c" class="option-label">(C) 強調將網路安全融入組織的整體風險管理框架中</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="opt-d" name="answer" value="D">
+                        <label for="opt-d" class="option-label">(D) 引入自動化工具以簡化網路安全事件的回應流程</label>
+                    </div>
+                </div>
+
+                <div class="feedback-area" id="feedback">
+                    <!-- JS 動態填入回饋 -->
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-submit" onclick="submitAnswer()">送出答案</button>
+                    <button type="button" class="btn-reset" onclick="resetQuiz()">重作一次</button>
+                    <button type="button" class="btn-toggle" onclick="toggleExplanation()">顯示／隱藏解析</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- 3. 解析學習區 (預設隱藏) -->
+        <section id="explanation-section">
+            
+            <!-- 區塊：題目重述 -->
+            <div class="accordion active">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【題目】</div>
+                <div class="accordion-content">
+                    <p>下列何項正確的描述了美國國家標準技術研究院（NIST）的網路安全框架（Cybersecurity Framework, CSF）新增的「治理（Govern）」功能重點？</p>
+                </div>
+            </div>
+
+            <!-- 區塊：第一步 找關鍵字 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【第一步：找關鍵字】</div>
+                <div class="accordion-content">
+                    <p>請用螢光筆將以下詞彙畫起來：</p>
+                    <ul style="list-style: none; padding: 0;">
+                        <li><span class="highlight">NIST CSF</span>：題目的核心標準。</li>
+                        <li><span class="highlight">v2、新增</span>：提示這是在考新版變更點。</li>
+                        <li><span class="highlight">Govern、治理</span>：本題主角。</li>
+                        <li><span class="highlight">高層管理、責任</span>：治理的核心對象與內涵。</li>
+                        <li><span class="highlight">整體風險管理</span>：治理的終極目標。</li>
+                    </ul>
+                    <hr style="margin: 15px 0; border:0; border-top:1px dashed #ccc;">
+                    <p><strong>關鍵提示：</strong><span class="highlight">Govern 是管理與決策層面的功能，不是技術控制。</span> 看到 Govern 就要想到「老闆」、「政策」、「整體風險」，而不是「防火牆」或「防毒軟體」。</p>
+                </div>
+            </div>
+
+            <!-- 區塊：第二步 白話翻譯 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【第二步：白話翻譯】</div>
+                <div class="accordion-content">
+                    <p><strong>翻譯給高中生聽：</strong></p>
+                    <p style="background:#f0f7ff; padding:10px; border-radius:5px; margin: 10px 0;">
+                        「NIST 的資安框架在新版多加了一個『治理』，這一塊到底是在管什麼？簡單說，它是在管<span style="color:var(--accent-color); font-weight:bold;">老闆怎麼負責</span>、資安怎麼被納入<span style="color:var(--accent-color); font-weight:bold;">公司整體風險</span>，而不是教你怎麼裝設備或設參數。」
+                    </p>
+                    <p><strong>名詞解釋：</strong></p>
+                    <ul>
+                        <li><strong>NIST CSF</strong>：一套幫組織規劃資安工作的整體架構（像是資安的SOP大綱）。</li>
+                        <li><strong>Govern（治理）</strong>：高層訂方向、分責任、做決策。決定誰該做什麼，以及如果不做會有什麼後果。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 區塊：第三步 解題思路 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【第三步：解題思路】</div>
+                <div class="accordion-content">
+                    <p><strong>這題在考什麼觀念？</strong></p>
+                    <p>→ NIST CSF v2 的 Govern 著重在「管理責任與風險整合」。</p>
+                    
+                    <p style="margin-top:15px;"><strong>解題步驟：</strong></p>
+                    <ol>
+                        <li>先確認「Govern」這個字，它不是在談技術操作（手動），而是在談管理（腦動）。</li>
+                        <li>再找選項中與「高層責任」、「風險管理」、「決策」有關的敘述。</li>
+                        <li>排除所有提到「工具」、「技術實作」、「自動化」或「事件回應」的選項（這些屬於 Protect, Detect, Respond）。</li>
+                    </ol>
+
+                    <p style="margin-top:15px;"><strong>原理與規則：</strong></p>
+                    <ul>
+                        <li>CSF v1 只有 5 大功能（IPDRR）。</li>
+                        <li>CSF v2 新增第 6 個功能 Govern (GV)，用來補強「誰負責、怎麼決策、如何與企業風險管理結合」這塊拼圖。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 區塊：第四步 選項分析 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【第四步：選項分析】</div>
+                <div class="accordion-content">
+                    <div style="margin-bottom: 10px;">
+                        <span class="tag" style="background:#d4edda; color:#155724;">(A) 正確</span>
+                        <strong>明確高層管理在網路安全策略中的責任與決策角色</strong>
+                        <p style="font-size:0.95rem; color:#555; margin-left:5px;">解析：Govern 的核心就是確立組織的資安戰略方向，以及高層管理者（如 CISO, Board）的角色與責任。</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 10px;">
+                        <span class="tag" style="background:#f8d7da; color:#721c24;">(B) 錯誤</span>
+                        <strong>提供技術層面的具體指導來實施威脅緩解機制</strong>
+                        <p style="font-size:0.95rem; color:#555; margin-left:5px;">解析：技術層面的威脅緩解（Mitigation）通常屬於 <strong>Protect (保護)</strong> 或 <strong>Detect (偵測)</strong> 的範疇，不是治理的層次。</p>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <span class="tag" style="background:#d4edda; color:#155724;">(C) 正確</span>
+                        <strong>強調將網路安全融入組織的整體風險管理框架中</strong>
+                        <p style="font-size:0.95rem; color:#555; margin-left:5px;">解析：這是 Govern 最重要的目的之一，資安風險不能獨立存在，必須與企業的財務、營運風險一起考量（ERM）。</p>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <span class="tag" style="background:#f8d7da; color:#721c24;">(D) 錯誤</span>
+                        <strong>引入自動化工具以簡化網路安全事件的回應流程</strong>
+                        <p style="font-size:0.95rem; color:#555; margin-left:5px;">解析：自動化工具與事件回應流程屬於 <strong>Respond (回應)</strong> 功能，專注於事件發生後的動作。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 區塊：觀念補充與延伸 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【觀念補充與延伸】</div>
+                <div class="accordion-content">
+                    <p><strong>核心觀念定位：</strong></p>
+                    <p>iPAS 規劃實務「NIST CSF v2 新增治理構面」必考觀念題。了解這題，等於掌握了 v2 改版的最大重點。</p>
+                    
+                    <p style="margin-top:10px;"><strong>定義補充（白話）：</strong></p>
+                    <ul>
+                        <li><strong>Governance (治理)</strong>：決定「誰負責」、「如何監督」、「如何與企業策略對齊」。就像國家的法律與政府架構。</li>
+                        <li><strong>Management (管理/實作)</strong>：按照架構去執行每一天的工作。</li>
+                    </ul>
+
+                    <p style="margin-top:10px;"><strong>觸類旁通：</strong></p>
+                    <ul>
+                        <li><strong>Govern vs Protect</strong>：治理是訂規則（如：所有員工必須用雙重驗證）；保護是裝工具（如：導入 Authenticator App）。</li>
+                        <li><strong>變化題型</strong>：「下列哪一項不是 Govern 的內容？」(找技術選項)；「CSF v2 為何要新增 Govern？」(因為舊版缺乏高層連結)。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 區塊：記憶口訣 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【記憶口訣】</div>
+                <div class="accordion-content">
+                    <div style="background:#fffcdb; padding:15px; border-left: 5px solid #f1c40f; font-size: 1.1rem; font-weight: bold;">
+                        <p>1. 「Govern 不動手，只動腦」</p>
+                        <p style="margin-top:8px;">2. 「老闆負責、風險整合，就是治理」</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 區塊：常見陷阱 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【常見陷阱】</div>
+                <div class="accordion-content">
+                    <ul>
+                        <li><strong>陷阱 1</strong>：看到 CSF 就以為每個選項都在講技術。</li>
+                        <li><strong>陷阱 2</strong>：把治理（Govern）誤認成事件回應（Respond）或工具導入。</li>
+                    </ul>
+                    <p style="margin-top:10px;"><strong>避坑指南：</strong></p>
+                    <p>→ 題目出現 <strong>Govern</strong>，先想三個關鍵詞：「<span style="color:#c0392b; font-weight:bold;">高層、責任、風險</span>」。只要選項提到具體操作（如：安裝、設定、分析封包），通常都不是治理。</p>
+                </div>
+            </div>
+
+            <!-- 區塊：正確答案 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【正確答案】</div>
+                <div class="accordion-content">
+                    <p style="font-size: 1.5rem; font-weight: bold; color: var(--success-color); text-align: center;">
+                        A、C
+                    </p>
+                </div>
+            </div>
+
+            <!-- 區塊：自我檢測 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【自我檢測】</div>
+                <div class="accordion-content">
+                    <p>試著回答以下問題（不看答案）：</p>
+                    <ol>
+                        <li>為什麼 CSF v1 需要在 v2 新增 Govern？它解決了什麼問題？</li>
+                        <li>Govern 和 ISO 27001 中的「管理責任 (Leadership)」有何相似之處？</li>
+                        <li>若題目強調「購買並安裝次世代防火牆」，這會是 Govern 嗎？如果不是，屬於哪一類？</li>
+                    </ol>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- 4. 學習輔助互動 -->
+        <section class="card" id="learning-tools">
+            <h2>學習輔助工具</h2>
+            
+            <div class="tool-box">
+                <span class="tool-title">CSF 六大功能速記卡</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                    <span class="tag" style="background:#2c3e50; color:white;">Govern (治理)</span>
+                    <span class="tag">Identify (識別)</span>
+                    <span class="tag">Protect (保護)</span>
+                    <span class="tag">Detect (偵測)</span>
+                    <span class="tag">Respond (回應)</span>
+                    <span class="tag">Recover (復原)</span>
+                </div>
+                <p style="font-size: 0.85rem; margin-top: 5px; color: #666;">記憶順序：G - I - P - D - R - R</p>
+            </div>
+
+            <div class="tool-box">
+                <span class="tool-title">互動判斷：這是「治理 (Govern)」嗎？</span>
+                <p id="mini-game-question" style="margin-bottom: 8px;">題目：CEO 簽署年度資安預算與政策。</p>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="checkMiniGame(true)" style="padding: 5px 15px; background: #27ae60; color: white;">是 Govern</button>
+                    <button onclick="checkMiniGame(false)" style="padding: 5px 15px; background: #c0392b; color: white;">不是 Govern</button>
+                </div>
+                <p id="mini-game-result" class="result-hint"></p>
+            </div>
+
+            <div class="tool-box">
+                <span class="tool-title">考題關鍵字檢核表</span>
+                <div class="interactive-check">
+                    <label><input type="checkbox" onchange="checkKeywords()"> 是否提到「高層」或「決策」？</label>
+                    <label><input type="checkbox" onchange="checkKeywords()"> 是否提到「整體風險」？</label>
+                    <label><input type="checkbox" onchange="checkKeywords()"> 是否「沒有」技術細節（如安裝、編碼）？</label>
+                </div>
+                <p id="keyword-result" class="result-hint" style="display:none;">👉 沒錯！如果以上皆是，這極高機率就是 Govern 的考題。</p>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script>
+    // -------------------
+    // 1. 題目判分邏輯
+    // -------------------
+    function submitAnswer() {
+        // 取得所有勾選的選項
+        const checkboxes = document.querySelectorAll('input[name="answer"]:checked');
+        const userAnswers = Array.from(checkboxes).map(cb => cb.value).sort();
+        
+        const correctAnswers = ['A', 'C'];
+        const feedbackEl = document.getElementById('feedback');
+        
+        // 判斷是否完全正確
+        const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctAnswers);
+        
+        feedbackEl.style.display = 'block';
+        
+        if (isCorrect) {
+            feedbackEl.className = 'feedback-area feedback-correct';
+            feedbackEl.innerHTML = `
+                <strong>恭喜答對！</strong><br>
+                你的答案：${userAnswers.join('、')} <br>
+                正確答案：A、C <br>
+                <span style="font-size:0.9rem;">(觀念正確！你已掌握 Govern 的核心精神。)</span>
+            `;
+            // 自動打開解析
+            document.getElementById('explanation-section').style.display = 'block';
+        } else {
+            feedbackEl.className = 'feedback-area feedback-wrong';
+            let msg = `<strong>可惜答錯囉！</strong><br>`;
+            
+            if (userAnswers.length === 0) {
+                msg += `你還沒選擇任何選項。<br>`;
+            } else {
+                msg += `你選了：${userAnswers.join('、')} <br>`;
+            }
+            
+            msg += `正確答案是：<strong>A、C</strong><br>`;
+            msg += `<span style="font-size:0.9rem;">(提示：Govern 不處理技術實作，只處理高層決策與風險整合。)</span>`;
+            
+            feedbackEl.innerHTML = msg;
+        }
+    }
+
+    function resetQuiz() {
+        // 清空選擇
+        const checkboxes = document.querySelectorAll('input[name="answer"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        // 隱藏回饋
+        document.getElementById('feedback').style.display = 'none';
+        
+        // 隱藏解析
+        document.getElementById('explanation-section').style.display = 'none';
+        
+        // 重置所有手風琴
+        const contents = document.querySelectorAll('.accordion-content');
+        const items = document.querySelectorAll('.accordion');
+        contents.forEach(c => c.style.maxHeight = null);
+        items.forEach(i => i.classList.remove('active'));
+        // 預設打開第一個題目區
+        items[0].classList.add('active');
+        // 但因為父層被藏起來，所以這一步只是為了顯示時好看
+    }
+
+    function toggleExplanation() {
+        const section = document.getElementById('explanation-section');
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
+            // 預設展開第一個
+            const firstAcc = section.querySelector('.accordion');
+            if (firstAcc) {
+                firstAcc.classList.add('active');
+                const content = firstAcc.querySelector('.accordion-content');
+                content.style.maxHeight = content.scrollHeight + "px";
+                content.style.padding = "20px";
+            }
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    // -------------------
+    // 2. 手風琴效果控制
+    // -------------------
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        const content = item.querySelector('.accordion-content');
+        
+        // 切換 active class
+        item.classList.toggle('active');
+        
+        if (item.classList.contains('active')) {
+            content.style.maxHeight = content.scrollHeight + "px";
+            content.style.padding = "20px";
+        } else {
+            content.style.maxHeight = null;
+            content.style.padding = "0 20px"; // 保持左右 padding 避免動畫抖動，上下歸零
+        }
+    }
+
+    // -------------------
+    // 3. 學習輔助工具邏輯
+    // -------------------
+    
+    // 關鍵字檢核
+    function checkKeywords() {
+        const checks = document.querySelectorAll('.interactive-check input[type="checkbox"]');
+        const allChecked = Array.from(checks).every(c => c.checked);
+        const result = document.getElementById('keyword-result');
+        
+        if (allChecked) {
+            result.style.display = 'block';
+        } else {
+            result.style.display = 'none';
+        }
+    }
+
+    // 迷你判斷題
+    const miniGameQuestions = [
+        { q: "CEO 簽署年度資安預算與政策。", isGovern: true },
+        { q: "工程師設定防火牆規則阻擋惡意 IP。", isGovern: false },
+        { q: "董事會審查資安風險對公司營收的影響。", isGovern: true },
+        { q: "防毒軟體自動隔離勒索病毒。", isGovern: false }
+    ];
+    let currentMiniQ = 0;
+
+    function checkMiniGame(userSaysYes) {
+        const q = miniGameQuestions[currentMiniQ];
+        const resultEl = document.getElementById('mini-game-result');
+        const questionEl = document.getElementById('mini-game-question');
+        
+        if (userSaysYes === q.isGovern) {
+            resultEl.style.color = '#27ae60';
+            resultEl.innerText = "⭕ 答對了！" + (q.isGovern ? " 這是管理層決策。" : " 這是技術實作(Protect/Respond)。");
+            
+            // 延遲換題
+            setTimeout(() => {
+                currentMiniQ = (currentMiniQ + 1) % miniGameQuestions.length;
+                questionEl.innerText = "題目：" + miniGameQuestions[currentMiniQ].q;
+                resultEl.innerText = "";
+            }, 1500);
+        } else {
+            resultEl.style.color = '#c0392b';
+            resultEl.innerText = "❌ 答錯囉，再想一下定義。";
+        }
+    }
+
+</script>
+
+</body>
+</html>

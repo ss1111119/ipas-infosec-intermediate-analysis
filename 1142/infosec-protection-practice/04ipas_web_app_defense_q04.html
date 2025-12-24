@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_web_app_defense_q04.html - iPAS資訊安全防護實務</title>
+    <style>
+        :root {
+            --primary-color: #005f73;
+            --secondary-color: #0a9396;
+            --accent-color: #ee9b00;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --light-text: #666;
+            --border-color: #dee2e6;
+            --success-color: #2a9d8f;
+            --error-color: #ae2012;
+            --highlight-bg: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        header .sub-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            padding: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: var(--secondary-color);
+            background-color: #f0fdff;
+        }
+
+        .option-label input[type="checkbox"] {
+            margin-top: 4px;
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #004c5c;
+        }
+
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-toggle {
+            background-color: var(--secondary-color);
+            color: white;
+            margin-left: auto;
+        }
+
+        .feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .feedback-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section */
+        .explanation-container {
+            display: none; /* Hidden by default */
+            padding: 0 25px 25px 25px;
+            background-color: #fff;
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f1f3f5;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            color: var(--primary-color);
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: normal;
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion-item.active .accordion-content {
+            display: block;
+        }
+
+        /* Specific Content Styles */
+        .highlight-word {
+            background-color: yellow;
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .step-title {
+            color: var(--secondary-color);
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        .card-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .info-card {
+            flex: 1;
+            min-width: 250px;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 4px;
+            background: #fdfdfd;
+        }
+
+        .info-card h4 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            border-bottom: 2px solid var(--accent-color);
+            display: inline-block;
+        }
+
+        .checklist-item {
+            margin-bottom: 8px;
+        }
+
+        .maturity-result {
+            font-weight: bold;
+            margin-top: 10px;
+            color: var(--secondary-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .btn-toggle {
+                margin-left: 0;
+                width: 100%;
+                margin-top: 10px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn-submit, .btn-reset {
+                width: 100%;
+            }
+
+            .info-card {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>題號：4｜iPAS 資訊安全防護實務</h1>
+        <div class="sub-info">檔名：ipas_web_app_defense_q04.html</div>
+    </header>
+
+    <!-- Quiz Interaction Area -->
+    <div class="quiz-section">
+        <div class="question-text">
+            為了防範常見的網站應用程式攻擊，如 SQL 注入（SQL Injection）與跨網站指令碼（XSS），開發團隊在設計安全架構時，應實施下列哪些防護與應變技術最為適切？（複選）
+        </div>
+
+        <div class="options-group" id="quizForm">
+            <label class="option-label">
+                <input type="checkbox" name="option" value="A">
+                <span>(A) 在伺服器端採用參數化查詢（Parameterized Queries）或預處理敘述（Prepared Statements）來處理所有資料庫操作</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="option" value="B">
+                <span>(B) 在網頁前端實作嚴格的內容安全策略（Content Security Policy, CSP）以限制外部腳本的載入與執行</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="option" value="C">
+                <span>(C) 對所有使用者輸入的資料，在輸出至網頁時進行適當的編碼（Output Encoding）</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="option" value="D">
+                <span>(D) 僅在 HTTP 協定上運行網站，避免 HTTPS 加密造成的效能損耗</span>
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">送出答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+            <button class="btn-toggle" onclick="toggleExplanation()">顯示／隱藏解析</button>
+        </div>
+
+        <div id="feedback" class="feedback-area"></div>
+    </div>
+
+    <!-- Explanation Learning Area -->
+    <div class="explanation-container" id="explanationArea">
+        
+        <!-- Block 1: Question -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【題目】</div>
+            <div class="accordion-content">
+                <p>為了防範常見的網站應用程式攻擊，如 SQL 注入（SQL Injection）與跨網站指令碼（XSS），開發團隊在設計安全架構時，應實施下列哪些防護與應變技術最為適切？（複選）</p>
+            </div>
+        </div>
+
+        <!-- Block 2: Keywords -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第一步：找關鍵字】</div>
+            <div class="accordion-content">
+                <p>請用螢光筆標示出考題重點：</p>
+                <p>
+                    <span class="highlight-word">SQL Injection</span>、
+                    <span class="highlight-word">XSS</span>、
+                    <span class="highlight-word">複選</span>、
+                    <span class="highlight-word">最為適切</span>、
+                    <span class="highlight-word">伺服器端</span>、
+                    <span class="highlight-word">防護</span>、
+                    <span class="highlight-word">參數化查詢</span>、
+                    <span class="highlight-word">CSP</span>、
+                    <span class="highlight-word">輸出編碼</span>、
+                    <span class="highlight-word">HTTP/HTTPS</span>
+                </p>
+                <br>
+                <p><strong>核心提示：</strong>本題考的是「多層防護（Defense in Depth）」觀念，針對不同的攻擊手法（SQLi, XSS）需要對應不同的防禦層（資料庫層、應用層、瀏覽器層）。</p>
+            </div>
+        </div>
+
+        <!-- Block 3: Translation -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第二步：白話翻譯】</div>
+            <div class="accordion-content">
+                <span class="step-title">高中生日常語言改寫：</span>
+                <p>「如果要防止網站被壞人塞惡意指令（弄壞資料庫）或偷資料（騙使用者），開發網站時有哪些安全措施是<strong>一定要做</strong>的？」</p>
+                <br>
+                <span class="step-title">名詞解釋：</span>
+                <ul>
+                    <li><strong>SQL 注入 (SQLi)：</strong> 壞人把惡意的資料庫指令塞進輸入框，如果你沒檢查，資料庫就會乖乖執行，導致資料被刪光或被看光。</li>
+                    <li><strong>XSS (跨網站指令碼)：</strong> 壞人把惡意 JavaScript 程式碼塞進網頁留言板，當別人瀏覽該頁面時，瀏覽器就會執行這段程式，導致帳號被盜。</li>
+                    <li><strong>CSP (內容安全策略)：</strong> 告訴瀏覽器一張「白名單」，規定只能載入哪些地方的程式碼，防止執行來路不明的惡意腳本。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Block 4: Thinking Process -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第三步：解題思路】</div>
+            <div class="accordion-content">
+                <p><strong>這題在考什麼？</strong> 常見網站攻擊需用「多層正確對策」防護，不可因效能或方便而犧牲安全。</p>
+                <br>
+                <span class="step-title">解題邏輯：</span>
+                <ol>
+                    <li><strong>對照攻擊類型：</strong> 題目提到 SQL Injection 和 XSS。</li>
+                    <li><strong>判斷選項有效性：</strong>
+                        <ul>
+                            <li>SQLi 的剋星是「參數化查詢」。</li>
+                            <li>XSS 的防護主力是「輸出編碼」，輔助防護是「CSP」。</li>
+                        </ul>
+                    </li>
+                    <li><strong>剔除毒藥選項：</strong> 任何建議「不使用加密（HTTPS）」的選項，在現代資安觀念中絕對是錯的。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Block 5: Option Analysis -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第四步：選項分析】</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>(A) 正確：</strong> 採用「參數化查詢」可以確保資料庫將使用者的輸入視為純文字，而非指令。這是防範 SQL Injection 最有效且標準的方法。</li>
+                    <li><strong>(B) 正確：</strong> CSP 是瀏覽器端的防線，能限制外部腳本來源，即使網站有漏洞，也能大幅降低 XSS 攻擊成功的機率。</li>
+                    <li><strong>(C) 正確：</strong> 「輸出編碼」將特殊字元（如 &lt;, &gt;, "）轉換為 HTML 實體（如 &amp;lt;），讓瀏覽器只顯示文字而不執行程式碼，是防範 XSS 的根本之道。</li>
+                    <li><strong>(D) 錯誤：</strong> HTTP 明文傳輸極度危險，容易遭中間人竊聽或竄改。現代硬體強大，HTTPS 的效能損耗幾乎可忽略不計，絕不能為了微小的效能而犧牲加密。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Block 6: Supplement -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【觀念補充與延伸】</div>
+            <div class="accordion-content">
+                <span class="step-title">核心觀念：多層防護 (Defense in Depth)</span>
+                <p>不要只依賴單一防線，必須在不同層級設置關卡。</p>
+                <br>
+                <div class="card-container">
+                    <div class="info-card">
+                        <h4>SQLi / XSS 對策對照卡</h4>
+                        <p><strong>SQL Injection：</strong></p>
+                        <ul>
+                            <li>主防：參數化查詢 (Prepared Statements)</li>
+                            <li>輔防：輸入驗證、最小權限原則</li>
+                        </ul>
+                        <p><strong>XSS：</strong></p>
+                        <ul>
+                            <li>主防：輸出編碼 (Output Encoding)</li>
+                            <li>輔防：CSP、HttpOnly Cookie</li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h4>防護層級分類</h4>
+                        <ul>
+                            <li><strong>資料庫層：</strong> 參數化查詢</li>
+                            <li><strong>應用層：</strong> 輸出編碼、輸入驗證</li>
+                            <li><strong>傳輸層：</strong> HTTPS (TLS)</li>
+                            <li><strong>瀏覽器層：</strong> CSP</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 7: Mnemonic -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【記憶口訣】</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.1em; color: var(--secondary-color); font-weight: bold;">
+                    「SQL 用參數，XSS 要編碼；<br>
+                    CSP 再補強，HTTP 別亂上。」
+                </p>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                <p>「三層一起來，網站才安全」：伺服器層(A)、瀏覽器層(B)、應用邏輯層(C)。</p>
+            </div>
+        </div>
+
+        <!-- Block 8: Common Traps -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【常見陷阱】</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>陷阱一：</strong> 以為只做「輸入驗證（過濾）」就夠了，忽略了駭客可能繞過過濾規則，必須搭配「輸出編碼」。</li>
+                    <li><strong>陷阱二：</strong> 誤信「HTTPS 會拖慢網站」的過時觀念，而在題目中選擇放棄 HTTPS。</li>
+                    <li><strong>陷阱三：</strong> 複選題只選了一個最熟悉的選項（例如只選 A），忘記資安強調全面防護。</li>
+                    <li><strong>避坑指南：</strong> 看到選項寫「僅在 HTTP」或「避免加密」，幾乎 100% 是錯誤選項。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Block 9: Correct Answer -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【正確答案】</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.5rem; color: var(--error-color); font-weight: bold;">
+                    A、B、C
+                </p>
+                <p>需同時選取三者才算完整得分。</p>
+            </div>
+        </div>
+
+        <!-- Block 10: Self Check -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【自我檢測】</div>
+            <div class="accordion-content">
+                <p>請嘗試回答以下問題（不提供標準答案，請反思）：</p>
+                <ol>
+                    <li>為什麼只做輸入驗證（Input Validation）仍可能發生 XSS？（提示：資料庫可能已經有髒資料）</li>
+                    <li>CSP 能「完全防止」XSS 嗎？為什麼？（提示：如果網站自己內嵌了不安全的 inline script 怎麼辦？）</li>
+                    <li>若網站未使用 HTTPS，除了資料被竊聽，還可能衍生哪些風險？（提示：中間人攻擊、Session Hijacking）</li>
+                </ol>
+                <br>
+                <hr>
+                <h4>網站安全成熟度檢核清單</h4>
+                <div style="margin-top: 10px;">
+                    <div class="checklist-item"><label><input type="checkbox" class="chk-maturity"> 是否全面使用參數化查詢？</label></div>
+                    <div class="checklist-item"><label><input type="checkbox" class="chk-maturity"> 是否實作 CSP？</label></div>
+                    <div class="checklist-item"><label><input type="checkbox" class="chk-maturity"> 是否正確做輸出編碼？</label></div>
+                    <div class="checklist-item"><label><input type="checkbox" class="chk-maturity"> 是否全面使用 HTTPS？</label></div>
+                </div>
+                <div id="maturityResult" class="maturity-result">請勾選上方項目檢測成熟度...</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Quiz Logic
+    function checkAnswer() {
+        const correctAnswers = ['A', 'B', 'C'];
+        const wrongAnswers = ['D'];
+        
+        // Get user selection
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        const userSelection = Array.from(checkboxes).map(cb => cb.value);
+        
+        const feedbackEl = document.getElementById('feedback');
+        
+        // Validation Logic
+        let isCorrect = true;
+        
+        // Check for missing correct answers
+        const missing = correctAnswers.filter(ans => !userSelection.includes(ans));
+        
+        // Check for extra wrong answers
+        const extra = userSelection.filter(ans => wrongAnswers.includes(ans));
+        
+        // Determine status
+        if (missing.length > 0 || extra.length > 0) {
+            isCorrect = false;
+        }
+
+        // Display Result
+        feedbackEl.style.display = 'block';
+        if (isCorrect && userSelection.length === correctAnswers.length) {
+            feedbackEl.className = 'feedback-area feedback-success';
+            feedbackEl.innerHTML = `<strong>恭喜答對！</strong><br>你的觀念非常正確。<br>正確答案正是 A、B、C。<br>請參考下方解析加深記憶。`;
+            // Auto open explanation on success
+            document.getElementById('explanationArea').style.display = 'block';
+        } else {
+            feedbackEl.className = 'feedback-area feedback-error';
+            let msg = `<strong>答案不完全正確。</strong><br>`;
+            msg += `你選擇了：${userSelection.length > 0 ? userSelection.join('、') : '（未作答）'}<br>`;
+            
+            if (extra.length > 0) {
+                msg += `注意：選項 ${extra.join('、')} 是錯誤的觀念。<br>`;
+            }
+            if (missing.length > 0) {
+                msg += `提示：你漏選了重要防護措施。<br>`;
+            }
+            
+            msg += `正確答案是：<strong>A、B、C</strong>。<br>請點擊「顯示／隱藏解析」查看詳細原因。`;
+            feedbackEl.innerHTML = msg;
+        }
+    }
+
+    function resetQuiz() {
+        // Clear checkboxes
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        // Hide feedback
+        document.getElementById('feedback').style.display = 'none';
+        
+        // Hide explanation
+        document.getElementById('explanationArea').style.display = 'none';
+        
+        // Reset accordion
+        const items = document.querySelectorAll('.accordion-item');
+        items.forEach(item => item.classList.remove('active'));
+    }
+
+    // Toggle entire explanation area
+    function toggleExplanation() {
+        const area = document.getElementById('explanationArea');
+        if (area.style.display === 'none' || area.style.display === '') {
+            area.style.display = 'block';
+        } else {
+            area.style.display = 'none';
+        }
+    }
+
+    // Accordion Logic
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        item.classList.toggle('active');
+    }
+
+    // Maturity Checklist Logic
+    const maturityChecks = document.querySelectorAll('.chk-maturity');
+    maturityChecks.forEach(chk => {
+        chk.addEventListener('change', updateMaturity);
+    });
+
+    function updateMaturity() {
+        const checkedCount = document.querySelectorAll('.chk-maturity:checked').length;
+        const total = maturityChecks.length;
+        const resultEl = document.getElementById('maturityResult');
+
+        if (checkedCount === 0) {
+            resultEl.textContent = "尚未實施任何安全措施，網站極度危險！";
+            resultEl.style.color = "#ae2012";
+        } else if (checkedCount < total) {
+            resultEl.textContent = `目前的防護等級：${checkedCount}/${total}。仍有改進空間，請補足缺漏項目。`;
+            resultEl.style.color = "#ee9b00";
+        } else {
+            resultEl.textContent = "太棒了！您的網站具備高水準的安全防護成熟度。";
+            resultEl.style.color = "#2a9d8f";
+        }
+    }
+</script>
+
+</body>
+</html>

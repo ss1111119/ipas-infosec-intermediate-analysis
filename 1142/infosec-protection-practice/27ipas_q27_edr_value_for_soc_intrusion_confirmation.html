@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安【題組 3】第 27 題解析：EDR 與 SOC</title>
+    <style>
+        :root {
+            --primary-color: #005f73;
+            --secondary-color: #0a9396;
+            --accent-color: #ee9b00;
+            --light-bg: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+            --success-color: #2a9d8f;
+            --error-color: #ae2012;
+            --highlight-bg: #e9c46a40;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* Header & Progress */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: rgba(255,255,255,0.3);
+            margin-top: 10px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Main Layout */
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            border-left: 5px solid var(--secondary-color);
+            padding-left: 10px;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            color: #444;
+        }
+
+        /* Scenario Section */
+        .scenario-box {
+            background-color: var(--light-bg);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .scenario-img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 15px auto;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        /* Question Section */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: var(--secondary-color);
+            background-color: #f0fbff;
+        }
+
+        .option-label input {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-weight: bold;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #004e5f;
+        }
+
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #5a6268;
+        }
+
+        /* Feedback Section */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none; /* Hidden by default */
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion Styles */
+        .accordion {
+            background-color: white;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: 0.4s;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .active, .accordion:hover {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+        }
+
+        .accordion:after {
+            content: '+';
+            font-size: 1.5rem;
+            color: #777;
+            float: right;
+            margin-left: 5px;
+        }
+
+        .active:after {
+            content: "-";
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            border-bottom: 1px solid transparent;
+        }
+
+        .panel-content {
+            padding: 20px 0;
+        }
+
+        /* Content Styling inside Panels */
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .step-list {
+            list-style: none;
+        }
+
+        .step-list li {
+            margin-bottom: 10px;
+            padding-left: 15px;
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        .analysis-box {
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .analysis-title-wrong { color: var(--error-color); font-weight: bold; }
+        .analysis-title-correct { color: var(--success-color); font-weight: bold; }
+
+        /* Self Check Section */
+        .self-check-item {
+            background: var(--light-bg);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+        
+        .toggle-answer-btn {
+            background: transparent;
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            margin-top: 10px;
+        }
+
+        .toggle-answer-btn:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .answer-reveal {
+            margin-top: 10px;
+            display: none;
+            color: var(--primary-color);
+            font-weight: bold;
+            padding-top: 5px;
+            border-top: 1px dashed #ccc;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .header-title { font-size: 1rem; }
+            .card { padding: 15px; }
+            button { width: 100%; margin-bottom: 10px; }
+            .btn-group { flex-direction: column; gap: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-content">
+        <div class="header-title">iPAS 資安實務 - 題組 3：第 27 題</div>
+        <div style="font-size: 0.9rem;">學習進度 <span id="progress-text">0%</span></div>
+    </div>
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+</header>
+
+<main>
+    <!-- 情境區塊 -->
+    <div class="card">
+        <h2>題組情境</h2>
+        <div class="scenario-box">
+            <p><strong>情境說明：</strong></p>
+            <p>隨著企業逐步採用雲端服務與遠端工作模式，端點偵測與回應（Endpoint Detection and Response, EDR）工具在資安監控中的作用日益凸顯，SOC（資安營運中心）需要利用 EDR 來偵測與確認入侵。</p>
+        </div>
+        <img src="https://i.meee.com.tw/fNga74B.jpg" alt="資安監控情境示意圖" class="scenario-img">
+    </div>
+
+    <!-- 題目區塊 -->
+    <div class="card" id="quiz-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="background: var(--secondary-color); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">單選題</span>
+            <span style="color: #666; font-size: 0.9rem;">題號：27</span>
+        </div>
+        
+        <p class="question-text">
+            題目：<br>
+            關於 EDR 能力對資安營運中心（SOC）在偵測與確認入侵方面的價值，下列描述何者最為正確？
+        </p>
+
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="q27" value="A">
+                <span>(A) EDR 主要用於監控網路流量，以發現已知惡意程式碼的特徵碼，與傳統 IDS 無異</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q27" value="B">
+                <span>(B) EDR 提供的資訊與傳統網路流量資料相比，在確認入侵方面較不具參考價值，因為它可能被攻擊者規避</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q27" value="C">
+                <span>(C) EDR 系統提供來自端點的強大偵測和豐富的監控數據，使其資料在確認入侵方面通常比網路流量資料更具資訊性</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q27" value="D">
+                <span>(D) EDR 僅是一種傳統防毒解決方案的升級版，不具備進階威脅偵測能力，無法應對 APT 級攻擊</span>
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">送出答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重設練習</button>
+        </div>
+
+        <!-- 回饋顯示區 -->
+        <div id="feedback-box" class="feedback-area">
+            <h3 id="feedback-title"></h3>
+            <p id="feedback-msg"></p>
+        </div>
+    </div>
+
+    <!-- 解析區塊：手風琴效果 -->
+    <div class="card" style="padding: 0; overflow: hidden;">
+        
+        <!-- 第一步 -->
+        <button class="accordion" onclick="toggleAccordion(this)">解析第一步：找關鍵字</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>請留意題目中的這些線索：</p>
+                <ul class="step-list" style="margin-top: 10px;">
+                    <li><span class="highlight">雲端服務</span>：系統在外部雲端，傳統邊界模糊。</li>
+                    <li><span class="highlight">遠端工作</span>：使用者不一定在公司網路內，只看公司防火牆流量可能看不到。</li>
+                    <li><span class="highlight">端點 (Endpoint)</span>：指使用者的電腦、筆電、伺服器等。</li>
+                    <li><span class="highlight">EDR (Endpoint Detection and Response)</span>：在端點裝代理程式，專門蒐集行為與事件並能回應的工具。</li>
+                    <li><span class="highlight">SOC (Security Operations Center)</span>：資安營運中心，負責監控、分析與事件回應的團隊。</li>
+                    <li><span class="highlight">偵測與確認入侵</span>：SOC 的核心任務。不只要「懷疑」，還要能證明「真的被打進來了」。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 第二步 -->
+        <button class="accordion" onclick="toggleAccordion(this)">解析第二步：白話翻譯</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>這題用高中生聽得懂的話來說就是：</p>
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin-top: 10px;">
+                    <strong>「SOC 要判斷『到底有沒有被駭客入侵』時，EDR 提供的端點內部資料，跟只看路過的網路流量比起來，哪個更有用？」</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第三步 -->
+        <button class="accordion" onclick="toggleAccordion(this)">解析第三步：解題思路</button>
+        <div class="panel">
+            <div class="panel-content">
+                <h3>這題在考什麼？</h3>
+                <p>端點可以看到詳細的『行為證據』，在確認是否被入侵時，比單純看網路流量更精準。</p>
+
+                <h3>原理與規則（生活比喻）：</h3>
+                <ul style="margin: 10px 0 10px 20px;">
+                    <li><strong>網路流量 (Flow/IDS)</strong>：就像大樓門口的「警衛」，只能看到誰進來、誰出去，但看不到那個人進房間後做了什麼。</li>
+                    <li><strong>EDR</strong>：就像每個房間裡裝了「攝影機」，能清楚看到那個人打開了保險箱（讀取檔案）、拿走了文件（外傳資料）或修改了門鎖（權限提升）。</li>
+                </ul>
+                <p><strong>結論：</strong>要「確認入侵」，有房間內的錄影畫面（EDR 資料）絕對比只看門口紀錄（流量）更清楚。</p>
+            </div>
+        </div>
+
+        <!-- 第四步 -->
+        <button class="accordion" onclick="toggleAccordion(this)">解析第四步：選項分析</button>
+        <div class="panel">
+            <div class="panel-content">
+                
+                <div class="analysis-box">
+                    <div class="analysis-title-wrong">(A) 錯誤</div>
+                    <p><strong>為什麼錯？</strong> 把 EDR 誤當成 IDS（入侵偵測系統）。IDS 才是主要看流量特徵的，EDR 看的是端點上的行為（Process, File, Registry）。</p>
+                </div>
+
+                <div class="analysis-box">
+                    <div class="analysis-title-wrong">(B) 錯誤</div>
+                    <p><strong>為什麼錯？</strong> 雖然 EDR 可能被高手規避，但不代表它「較不具參考價值」。事實上，端點資料通常最接近「案發現場」，是確認入侵最關鍵的證據來源。</p>
+                </div>
+
+                <div class="analysis-box">
+                    <div class="analysis-title-correct">(C) 正確</div>
+                    <p><strong>為什麼對？</strong> EDR 能提供程序樹（Process Tree）、執行的指令、檔案變更等詳細細節。對於 SOC 分析師來說，要判定這是不是誤報，這些「端點內的真相」比外部流量更有資訊性。</p>
+                </div>
+
+                <div class="analysis-box">
+                    <div class="analysis-title-wrong">(D) 錯誤</div>
+                    <p><strong>為什麼錯？</strong> EDR 不只是防毒軟體的升級。防毒主要擋已知病毒；EDR 能做行為分析、威脅狩獵（Threat Hunting）並應對 APT（進階持續性威脅）攻擊。</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 觀念補充 -->
+        <button class="accordion" onclick="toggleAccordion(this)">觀念補充與記憶口訣</button>
+        <div class="panel">
+            <div class="panel-content">
+                <h3>核心觀念定位</h3>
+                <p>本題屬於<strong>「SOC 監控能力 / 端點安全」</strong>領域的比較題。</p>
+                
+                <h3>名詞解釋</h3>
+                <ul>
+                    <li><strong>IDS (Intrusion Detection System)</strong>：偏向監控網路層的流量異常。</li>
+                    <li><strong>EDR</strong>：偏向監控端點（電腦）內部的行為與程序。</li>
+                    <li><strong>NDR (Network Detection and Response)</strong>：網路層的進階偵測與回應，補足流量看不懂加密內容的問題，但仍不如 EDR 能看到終端執行的指令。</li>
+                </ul>
+
+                <h3 style="color: var(--accent-color);">記憶口訣</h3>
+                <div style="border: 2px dashed var(--accent-color); padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; margin-top: 10px;">
+                    「要確認入侵，看端點行為最直觀」<br>
+                    「流量看門口，EDR 看房間」
+                </div>
+
+                <h3>常見陷阱</h3>
+                <p>不要看到選項寫「可能被規避」就覺得該工具沒用。資安講求縱深防禦（Defense in Depth），沒有單一工具是完美的。</p>
+            </div>
+        </div>
+
+        <!-- 正確答案 -->
+        <button class="accordion" onclick="toggleAccordion(this)">查看正確答案</button>
+        <div class="panel">
+            <div class="panel-content">
+                <h3 style="color: var(--success-color); text-align: center; font-size: 1.5rem;">答案：(C)</h3>
+                <p style="text-align: center;">因為 EDR 掌握端點行為與事件證據，通常比單看網路流量更能確認入侵。</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 自我檢測區塊 -->
+    <div class="card">
+        <h2>自我檢測</h2>
+        <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">試著回答以下問題，檢驗是否真正理解：</p>
+
+        <div class="self-check-item">
+            <strong>1) 若企業全面遠端工作（員工在家不連 VPN），僅靠公司出口防火牆的網路監控會漏掉什麼？</strong>
+            <br>
+            <button class="toggle-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+            <div class="answer-reveal">
+                答案：會完全看不到員工電腦的狀況。如果員工在家中電腦中了毒，因為流量不經過公司防火牆，公司完全無法偵測，這時必須靠安裝在電腦上的 EDR 才能發現。
+            </div>
+        </div>
+
+        <div class="self-check-item">
+            <strong>2) 若 EDR 偵測到可疑程序樹（例如 powershell 連續下載執行），這提供了什麼證據？</strong>
+            <br>
+            <button class="toggle-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+            <div class="answer-reveal">
+                答案：這提供了「行為證據」。證明攻擊者已經成功執行了指令，這比單純看到「有惡意流量」更能確認入侵已經發生。
+            </div>
+        </div>
+
+        <div class="self-check-item">
+            <strong>3) 題目若問「哪種工具最適合偵測網路層的封包攻擊特徵」，答案應該選什麼？</strong>
+            <br>
+            <button class="toggle-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+            <div class="answer-reveal">
+                答案：應該選 IDS（入侵偵測系統）或 IPS。因為那是網路層專門的工作，而不是 EDR 的強項。
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer>
+    <p>Design for iPAS Cybersecurity Exam Preparation</p>
+</footer>
+
+<script>
+    // 狀態變數
+    let isAnswered = false;
+    let openedAccordions = new Set();
+    let checkedSelfQuestions = new Set();
+
+    // 檢查答案邏輯
+    function checkAnswer() {
+        const radios = document.getElementsByName('q27');
+        let selectedValue = null;
+        
+        for (const radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        const feedbackBox = document.getElementById('feedback-box');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackMsg = document.getElementById('feedback-msg');
+
+        feedbackBox.style.display = 'block';
+        feedbackBox.className = 'feedback-area'; // 重置 class
+
+        if (selectedValue === 'C') {
+            feedbackBox.classList.add('feedback-correct');
+            feedbackTitle.textContent = '⭕ 答對了！';
+            feedbackMsg.innerHTML = '觀念正確！<br>EDR 就像房間裡的攝影機，能記錄端點內的詳細行為，對於「確認」是否被入侵，確實比單純看流量更有佐證能力。';
+        } else {
+            feedbackBox.classList.add('feedback-wrong');
+            feedbackTitle.textContent = '❌ 答錯了，請再想想';
+            
+            let hint = '';
+            if(selectedValue === 'A') hint = '提示：EDR 不是看流量特徵的喔，那是 IDS 的工作。';
+            if(selectedValue === 'B') hint = '提示：雖然可能被規避，但「端點內部的行為紀錄」是非常關鍵的證據，價值很高。';
+            if(selectedValue === 'D') hint = '提示：EDR 不只是防毒升級，它有進階的偵測與威脅獵捕能力。';
+            
+            feedbackMsg.innerHTML = `${hint}<br><strong>試著展開下方的「解析第四步：選項分析」來看看詳細原因。</strong>`;
+        }
+
+        isAnswered = true;
+        updateProgress();
+    }
+
+    // 重設邏輯
+    function resetQuiz() {
+        const radios = document.getElementsByName('q27');
+        for (const radio of radios) {
+            radio.checked = false;
+        }
+        document.getElementById('feedback-box').style.display = 'none';
+        isAnswered = false;
+        updateProgress();
+        window.scrollTo({ top: document.getElementById('quiz-section').offsetTop - 100, behavior: 'smooth' });
+    }
+
+    // 手風琴開關邏輯
+    function toggleAccordion(btn) {
+        btn.classList.toggle("active");
+        const panel = btn.nextElementSibling;
+        
+        if (panel.style.maxHeight) {
+            panel.style.maxHeight = null;
+        } else {
+            panel.style.maxHeight = panel.scrollHeight + "px";
+            // 紀錄進度
+            if (!openedAccordions.has(btn.innerText)) {
+                openedAccordions.add(btn.innerText);
+                updateProgress();
+            }
+        }
+    }
+
+    // 自我檢測顯示邏輯
+    function toggleSelfCheck(btn) {
+        const answerDiv = btn.nextElementSibling;
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+            btn.textContent = '顯示答案';
+        } else {
+            answerDiv.style.display = 'block';
+            btn.textContent = '隱藏答案';
+            
+            // 紀錄進度（只要點開任何一題就算完成這部分）
+            if (!checkedSelfQuestions.has(btn)) {
+                checkedSelfQuestions.add(btn);
+                updateProgress();
+            }
+        }
+    }
+
+    // 更新進度條
+    function updateProgress() {
+        // 總分權重：作答(40%) + 手風琴(40%) + 自我檢測(20%)
+        let score = 0;
+
+        if (isAnswered) score += 40;
+
+        // 手風琴共有 6 個
+        const accordionCount = 6; 
+        const accordionScore = (openedAccordions.size / accordionCount) * 40;
+        score += accordionScore;
+
+        // 自我檢測共有 3 題
+        const selfCheckScore = (checkedSelfQuestions.size > 0) ? 20 : 0; // 只要看過一題就算完成這部分體驗
+        score += selfCheckScore;
+
+        // Cap at 100
+        if (score > 100) score = 100;
+
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        
+        progressBar.style.width = score + '%';
+        progressText.textContent = Math.round(score) + '%';
+    }
+</script>
+
+</body>
+</html>

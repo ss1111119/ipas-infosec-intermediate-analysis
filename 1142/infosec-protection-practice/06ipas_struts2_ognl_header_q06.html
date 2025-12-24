@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_struts2_ognl_header_q06 - iPAS 資訊安全防護實務衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --warning-bg: #f9f9f9;
+            --text-color: #333;
+            --border-color: #ddd;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --highlight-bg: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Content Sections */
+        .section {
+            padding: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        /* Scenario */
+        .scenario-box {
+            background-color: var(--warning-bg);
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            font-size: 1rem;
+        }
+
+        /* Quiz Area */
+        .quiz-options {
+            margin: 20px 0;
+        }
+
+        .option-label {
+            display: block;
+            margin-bottom: 10px;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input {
+            margin-right: 10px;
+        }
+
+        .option-label.selected {
+            border-color: var(--accent-color);
+            background-color: #eaf6ff;
+        }
+
+        .quiz-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-retry {
+            background-color: var(--secondary-color);
+            color: white;
+            display: none;
+        }
+
+        .btn-toggle-explain {
+            background-color: transparent;
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-color);
+            margin-left: auto;
+        }
+
+        .btn-toggle-explain:hover {
+            background-color: #eee;
+        }
+
+        /* Feedback */
+        .feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .feedback-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Area (Accordion) */
+        #explanation-container {
+            display: none;
+            background-color: #fafafa;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-header {
+            padding: 15px 25px;
+            background-color: #fff;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .accordion-header:hover {
+            background-color: #f1f1f1;
+        }
+
+        .accordion-content {
+            padding: 0 25px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            background-color: white;
+        }
+
+        .accordion-content.active {
+            padding: 20px 25px;
+            max-height: 1000px; /* Arbitrary large height */
+            border-top: 1px solid #eee;
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s;
+        }
+
+        .accordion-header.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Highlights & Tags */
+        .highlight-keyword {
+            background-color: var(--highlight-bg);
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+            color: #d35400;
+            border-bottom: 2px solid #f39c12;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-right: 5px;
+            color: white;
+        }
+        .tag-blue { background-color: var(--accent-color); }
+        .tag-green { background-color: var(--success-color); }
+
+        /* Interactive Tools */
+        .interactive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .flashcard {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .flashcard:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .flashcard-front {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .flashcard-back {
+            display: none;
+            color: var(--accent-color);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .flashcard.flipped .flashcard-back {
+            display: block;
+        }
+        
+        .flashcard.flipped .flashcard-front {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Envelope Metaphor */
+        .envelope-container {
+            margin: 30px auto;
+            max-width: 300px;
+            position: relative;
+        }
+        
+        .envelope {
+            background: #fff;
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            position: relative;
+            border-radius: 5px;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0; 
+            height: 0; 
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 100px solid #eee;
+            z-index: 1;
+        }
+
+        .header-label {
+            display: block;
+            background: #f0f0f0;
+            margin: 5px 0;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            cursor: help;
+            border-left: 3px solid #ccc;
+        }
+
+        .header-label:hover {
+            background: #e0e0e0;
+        }
+
+        .header-label.key-header {
+            border-left: 3px solid var(--error-color);
+            background: #fff0f0;
+        }
+
+        .tooltip-text {
+            font-size: 0.9rem;
+            margin-top: 10px;
+            min-height: 40px;
+            color: var(--secondary-color);
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* Checkbox List */
+        .checklist-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .checklist-item input {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .checklist-hint {
+            margin-top: 15px;
+            font-weight: bold;
+            color: var(--accent-color);
+            min-height: 1.5em;
+        }
+
+        /* RWD */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.2rem; }
+            .section { padding: 15px; }
+            .quiz-controls { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>ipas_struts2_ognl_header_q06</h1>
+        <p>題組：題組 1｜題號：6｜科目：資訊安全【防護實務】</p>
+    </header>
+
+    <main>
+        <!-- 情境區 -->
+        <section class="section">
+            <div class="section-title">情境描述</div>
+            <div class="scenario-box">
+                某醫療資訊系統採用 Apache Struts 2 作為開發框架，且版本未及時更新。紅隊演練時，施測人員發現可透過特定 HTTP 請求，於 HTTP Header 中插入惡意 OGNL（Object Graph Navigation Language）語法，成功遠端執行任意指令（RCE），取得 Shell 權限。施測人員進一步利用此權限，在內網大量掃描並進行橫向移動（Lateral Movement），最終找到資料庫伺服器，並以預設帳號密碼登入，竊取大量病患醫療資料。若此漏洞被攻擊者利用，將造成嚴重的機密資料外洩事件。
+            </div>
+        </section>
+
+        <!-- 互動答題區 -->
+        <section class="section">
+            <div class="section-title">題目</div>
+            <p>以這個案例來說，施測人員用於執行 OGNL 語法的 HTTP Header 最有可能是下列何者？</p>
+            
+            <div class="quiz-options">
+                <label class="option-label" for="opt-a">
+                    <input type="radio" name="quiz" id="opt-a" value="A"> (A) Accept-Language
+                </label>
+                <label class="option-label" for="opt-b">
+                    <input type="radio" name="quiz" id="opt-b" value="B"> (B) Cache-Control
+                </label>
+                <label class="option-label" for="opt-c">
+                    <input type="radio" name="quiz" id="opt-c" value="C"> (C) Content-Type
+                </label>
+                <label class="option-label" for="opt-d">
+                    <input type="radio" name="quiz" id="opt-d" value="D"> (D) Origin
+                </label>
+            </div>
+
+            <div class="quiz-controls">
+                <button class="btn-submit" onclick="checkAnswer()">送出答案</button>
+                <button class="btn-retry" onclick="resetQuiz()">重作一次</button>
+                <button class="btn-toggle-explain" onclick="toggleExplanation()">顯示解析</button>
+            </div>
+
+            <div id="feedback" class="feedback-area"></div>
+        </section>
+
+        <!-- 解析學習區 -->
+        <div id="explanation-container">
+            
+            <!-- 題目複述 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【題目】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p>以這個案例來說，施測人員用於執行 OGNL 語法的 HTTP Header 最有可能是下列何者？</p>
+                    <ul style="list-style-type: none; margin-top: 10px;">
+                        <li>(A) Accept-Language</li>
+                        <li>(B) Cache-Control</li>
+                        <li>(C) Content-Type</li>
+                        <li>(D) Origin</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 第一步：找關鍵字 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第一步：找關鍵字】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p>請注意以下標示的關鍵字，這是解題的線索：</p>
+                    <p style="line-height: 2;">
+                        <span class="highlight-keyword">Apache Struts 2</span>、<span class="highlight-keyword">版本未更新</span>、<span class="highlight-keyword">HTTP Header</span>、<span class="highlight-keyword">OGNL 語法</span>、<span class="highlight-keyword">最有可能</span>、<span class="highlight-keyword">RCE</span>、<span class="highlight-keyword">Shell</span>
+                    </p>
+                    <br>
+                    <p><strong>關鍵解析：</strong> 題目在考「攻擊載體位置」。OGNL 注入通常必須放在「伺服器端會主動讀取、解析，且框架可能會拿來進行邏輯處理」的欄位。我們需要找出哪一個 Header 符合這個特徵。</p>
+                </div>
+            </div>
+
+            <!-- 第二步：白話翻譯 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第二步：白話翻譯】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p><strong>題目白話文：</strong><br>
+                    「駭客把一段惡意程式碼塞進 HTTP 請求的某個『信封標籤欄位』裡，讓舊版的 Struts2 網站一讀到就中招。請問駭客最常把惡意程式碼塞在哪個標籤欄位？」</p>
+                    <br>
+                    <p><strong>名詞解釋：</strong></p>
+                    <ul>
+                        <li><strong>HTTP Header：</strong> 瀏覽器或程式送出請求時，附帶在前面的「信封標籤資訊」，告訴伺服器怎麼處理這封信。</li>
+                        <li><strong>Content-Type：</strong> 告訴伺服器：「我這封信裡面的內容是什麼格式」（例如：是純文字、JSON 還是檔案上傳）。</li>
+                        <li><strong>OGNL：</strong> Struts2 用來方便操作資料的一種語法，如果沒過濾好，駭客可以寫語法來命令伺服器做壞事。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 第三步：解題思路 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第三步：解題思路】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p><strong>核心觀念：</strong> Struts2/OGNL 相關漏洞常見注入點與 HTTP Header 的用途辨識。</p>
+                    <br>
+                    <p><strong>解題邏輯步驟：</strong></p>
+                    <ol style="margin-left: 20px;">
+                        <li><strong>理解用途：</strong> 先看每個選項 Header 是做什麼用的。</li>
+                        <li><strong>找解析點：</strong> 哪個 Header 會直接影響後端框架「如何解析內容」？</li>
+                        <li><strong>排除法：</strong> 排除掉只是單純描述語言偏好、快取時間或跨站來源的 Header。</li>
+                    </ol>
+                    <br>
+                    <p><strong>推導結論：</strong><br>
+                    <span class="highlight-keyword">Content-Type</span> 用來宣告內容格式，Struts2 框架必須讀取它來決定用哪個解析器（Parser）處理資料。歷史上著名的 Struts2 漏洞（如 S2-045）就是因為在處理錯誤的 Content-Type 錯誤訊息時，不小心執行了裡面夾帶的 OGNL 語法。</p>
+                </div>
+            </div>
+
+            <!-- 第四步：選項分析 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第四步：選項分析】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <ul>
+                        <li><strong>(A) Accept-Language：</strong> <span style="color:var(--error-color)">錯</span>。<br>這是告訴伺服器使用者想看什麼語言（如 zh-TW, en-US）。雖然理論上任何欄位都能被程式讀取，但它通常只用來切換語系，不會觸發複雜的內容解析邏輯。</li>
+                        <li><strong>(B) Cache-Control：</strong> <span style="color:var(--error-color)">錯</span>。<br>這是在控制瀏覽器或中間設備的「快取策略」（如 no-cache），與伺服器端的應用程式邏輯與內容解析關聯較小。</li>
+                        <li><strong>(C) Content-Type：</strong> <span style="color:var(--success-color)">對</span>。<br>它告訴後端這次送來的資料格式（例如 multipart/form-data）。Struts2 框架會根據這個欄位呼叫對應的解析器。這是最常被利用來觸發解析漏洞的位置。</li>
+                        <li><strong>(D) Origin：</strong> <span style="color:var(--error-color)">錯</span>。<br>這是瀏覽器用來進行跨來源資源共享（CORS）檢查的標頭，用來標示請求來自哪個網站。這通常屬於瀏覽器安全機制的一環，較少成為 OGNL RCE 的主要注入點。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 觀念補充與延伸 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【觀念補充與延伸】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p><strong>iPAS 考點定位：</strong> Web 攻擊 × HTTP 基礎 × 漏洞利用位置。</p>
+                    <br>
+                    <p><strong>重要定義：</strong></p>
+                    <ul>
+                        <li><strong>Content-Type：</strong> 決定伺服器用哪種規則解析請求內容。</li>
+                        <li><strong>CORS (Cross-Origin Resource Sharing)：</strong> 瀏覽器的跨站保護機制，相關 Header 有 Origin、Access-Control-Allow-Origin 等。（白話：不同網站可不可以互相拿資料的通行證）。</li>
+                    </ul>
+                    <br>
+                    <p><strong>觸類旁通（考題變化）：</strong></p>
+                    <ul>
+                        <li>問：「哪個 Header 負責告訴伺服器用戶端希望接收的資料格式？」→ 答案是 <strong>Accept</strong>（注意與 Content-Type 區分）。</li>
+                        <li>問：「下列何者最可能與 CORS 跨站請求有關？」→ 答案通常找 <strong>Origin</strong> 或 <strong>Access-Control-*</strong> 系列。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 記憶口訣 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【記憶口訣】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div style="background: #e8f6f3; padding: 15px; border-radius: 5px; text-align: center;">
+                        <p style="font-size: 1.1rem; color: #16a085; font-weight: bold;">「內容怎麼解，看 Content-Type」</p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                        <p>「語言是偏好、快取是策略、來源是跨站；解析內容才是 Type」</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 常見陷阱 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【常見陷阱】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <ul>
+                        <li>看到 Header 名稱就靠直覺猜，沒有先思考該 Header 的「用途」。</li>
+                        <li>把 <strong>Origin</strong> 誤當成「來源 IP」或以為它是伺服器必須深度解析的欄位。</li>
+                        <li><strong>避坑指南：</strong> 看到題目問「執行語法」或「注入」，先問自己：哪個欄位會讓後端程式「讀取並解析內容」？答案通常是跟內容有關的 Content-Type。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 正確答案 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【正確答案】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p style="font-size: 1.2rem; font-weight: bold; color: var(--success-color); text-align: center;">(C) Content-Type</p>
+                </div>
+            </div>
+
+            <!-- 自我檢測 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【自我檢測】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p>試著回答以下問題（不提供答案，請自行思考）：</p>
+                    <ol>
+                        <li>Content-Type 與 Accept 這兩個 Header 有什麼主要差別？</li>
+                        <li>如果網站要限制跨站請求，通常會搭配哪些 Header？</li>
+                        <li>為什麼「影響解析流程」的欄位比「偏好設定」欄位更容易成為駭客的漏洞利用點？</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 學習輔助互動區 -->
+        <section class="section">
+            <div class="section-title">學習輔助工具</div>
+            
+            <h3>1. Header 用途速記卡 (點擊翻牌)</h3>
+            <div class="interactive-grid">
+                <div class="flashcard" onclick="flipCard(this)">
+                    <div class="flashcard-front">Accept-Language</div>
+                    <div class="flashcard-back">語言偏好<br>(我想看中文)</div>
+                </div>
+                <div class="flashcard" onclick="flipCard(this)">
+                    <div class="flashcard-front">Cache-Control</div>
+                    <div class="flashcard-back">快取策略<br>(這封信不要存)</div>
+                </div>
+                <div class="flashcard" onclick="flipCard(this)">
+                    <div class="flashcard-front">Content-Type</div>
+                    <div class="flashcard-back">內容格式<br>(這是什麼檔案？)</div>
+                </div>
+                <div class="flashcard" onclick="flipCard(this)">
+                    <div class="flashcard-front">Origin</div>
+                    <div class="flashcard-back">跨站來源<br>(我從哪裡寄來的)</div>
+                </div>
+            </div>
+
+            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+            <h3>2. HTTP 請求信封比喻</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">點擊下方的信封標籤，看看它們代表什麼意義：</p>
+            
+            <div class="envelope-container">
+                <div class="envelope">
+                    <div class="header-label" onclick="showMetaphor('lang')">Accept-Language: zh-TW</div>
+                    <div class="header-label" onclick="showMetaphor('cache')">Cache-Control: no-cache</div>
+                    <div class="header-label key-header" onclick="showMetaphor('type')">Content-Type: multipart/form-data</div>
+                    <div class="header-label" onclick="showMetaphor('origin')">Origin: http://evil.com</div>
+                    <div style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px; color: #aaa;">
+                        (信封內容：請求主體 Body)
+                    </div>
+                </div>
+            </div>
+            <div id="metaphor-tooltip" class="tooltip-text">請點擊上方的標籤...</div>
+
+            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+            <h3>3. 判斷檢核清單</h3>
+            <p>請勾選符合本題特徵的選項：</p>
+            <div style="background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 5px; margin-top: 10px;">
+                <div class="checklist-item">
+                    <input type="checkbox" id="check1" onchange="checkChecklist()">
+                    <label for="check1">這個 Header 會直接影響伺服器如何解析內容</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check2" onchange="checkChecklist()">
+                    <label for="check2">這個 Header 不是單純的偏好設定或快取策略</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check3" onchange="checkChecklist()">
+                    <label for="check3">駭客可利用此 Header 觸發框架的解析器漏洞</label>
+                </div>
+                <div id="checklist-result" class="checklist-hint"></div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer style="text-align: center; margin-top: 30px; padding: 20px; color: #999; font-size: 0.8rem;">
+        iPAS 資訊安全防護實務衝刺班教材 | Generated for Learning Purpose
+    </footer>
+</div>
+
+<script>
+    // Quiz Logic
+    function checkAnswer() {
+        const options = document.getElementsByName('quiz');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedback = document.getElementById('feedback');
+        const btnRetry = document.querySelector('.btn-retry');
+        const btnSubmit = document.querySelector('.btn-submit');
+        const labels = document.querySelectorAll('.option-label');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedback.style.display = 'block';
+        btnSubmit.style.display = 'none';
+        btnRetry.style.display = 'inline-block';
+
+        // Highlight styles
+        labels.forEach(label => {
+            const input = label.querySelector('input');
+            if(input.value === selectedValue) {
+                label.classList.add('selected');
+            }
+        });
+
+        if (selectedValue === 'C') {
+            feedback.className = 'feedback-area feedback-success';
+            feedback.innerHTML = '<strong>答對了！</strong><br>Content-Type 是 Struts2 漏洞中最常見的 OGNL 注入點，因為它直接控制伺服器解析內容的方式。請閱讀下方解析了解更多細節。';
+            // Auto open explanation if correct
+            const explanationContainer = document.getElementById('explanation-container');
+            const btnExplain = document.querySelector('.btn-toggle-explain');
+            if (explanationContainer.style.display !== 'block') {
+                explanationContainer.style.display = 'block';
+                btnExplain.innerText = '隱藏解析';
+            }
+        } else {
+            feedback.className = 'feedback-area feedback-error';
+            feedback.innerHTML = `<strong>答錯了。</strong><br>你選的是 (${selectedValue})，正確答案是 (C)。<br>提示：回想一下，哪個 Header 會告訴伺服器「這封信的內容是什麼格式」，進而觸發框架去解析它？`;
+        }
+    }
+
+    function resetQuiz() {
+        const options = document.getElementsByName('quiz');
+        for (const option of options) {
+            option.checked = false;
+        }
+        
+        const labels = document.querySelectorAll('.option-label');
+        labels.forEach(label => label.classList.remove('selected'));
+
+        document.getElementById('feedback').style.display = 'none';
+        document.querySelector('.btn-submit').style.display = 'inline-block';
+        document.querySelector('.btn-retry').style.display = 'none';
+    }
+
+    // Explanation Toggle
+    function toggleExplanation() {
+        const container = document.getElementById('explanation-container');
+        const btn = document.querySelector('.btn-toggle-explain');
+        
+        if (container.style.display === 'none' || container.style.display === '') {
+            container.style.display = 'block';
+            btn.innerText = '隱藏解析';
+        } else {
+            container.style.display = 'none';
+            btn.innerText = '顯示解析';
+        }
+    }
+
+    // Accordion Logic
+    function toggleAccordion(header) {
+        header.classList.toggle('active');
+        const content = header.nextElementSibling;
+        content.classList.toggle('active');
+    }
+
+    // Flashcard Logic
+    function flipCard(card) {
+        card.classList.toggle('flipped');
+    }
+
+    // Metaphor Tooltip Logic
+    function showMetaphor(type) {
+        const tooltip = document.getElementById('metaphor-tooltip');
+        switch(type) {
+            case 'lang':
+                tooltip.innerText = "Accept-Language: 「請用中文跟我溝通。」(純偏好)";
+                break;
+            case 'cache':
+                tooltip.innerText = "Cache-Control: 「這封信讀完不要存起來。」(純策略)";
+                break;
+            case 'type':
+                tooltip.innerText = "Content-Type: 「這封信裡面是特殊格式資料，請用專用解析器打開！」(★關鍵：解析器可能有漏洞)";
+                break;
+            case 'origin':
+                tooltip.innerText = "Origin: 「我是從 evil.com 寄來的。」(瀏覽器用來檢查跨站權限)";
+                break;
+        }
+    }
+
+    // Checklist Logic
+    function checkChecklist() {
+        const c1 = document.getElementById('check1').checked;
+        const c2 = document.getElementById('check2').checked;
+        const c3 = document.getElementById('check3').checked;
+        const result = document.getElementById('checklist-result');
+
+        if (c1 && c2 && c3) {
+            result.innerText = "全數符合！這就是 Content-Type 的特徵，也是最可能的答案。";
+            result.style.color = "#27ae60";
+        } else {
+            result.innerText = "請勾選所有選項來確認特徵...";
+            result.style.color = "#e67e22";
+        }
+    }
+</script>
+
+</body>
+</html>

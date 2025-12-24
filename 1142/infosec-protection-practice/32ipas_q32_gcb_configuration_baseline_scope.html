@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題庫解析 | 第 32 題：政府組態基準 GCB</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --error-color: #c0392b;
+            --bg-color: #ecf0f1;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            height: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--accent-color);
+            transition: width 0.5s ease-in-out;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        /* Question Section */
+        .question-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border-left: 5px solid var(--accent-color);
+            margin-bottom: 30px;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #e8f4f8;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* Buttons */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-submit { background-color: var(--accent-color); color: white; }
+        .btn-answer { background-color: var(--success-color); color: white; }
+        .btn-reset { background-color: var(--secondary-color); color: white; }
+        .btn-reveal { background-color: #95a5a6; color: white; font-size: 0.9rem; margin-top: 5px; }
+
+        /* Feedback Area */
+        #feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .feedback-partial { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .feedback-wrong { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Accordion Style */
+        .accordion {
+            background-color: #f1f1f1;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.05rem;
+            transition: 0.4s;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion:first-of-type {
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        .accordion:last-of-type {
+            border-bottom: none;
+        }
+
+        .active, .accordion:hover {
+            background-color: #e2e6ea;
+        }
+
+        .accordion:after {
+            content: '+';
+            font-size: 1.5rem;
+            color: #777;
+            float: right;
+            margin-left: 5px;
+        }
+
+        .active:after {
+            content: "-";
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+
+        .panel-content {
+            padding: 20px 0;
+        }
+
+        /* Content Highlights */
+        .highlight-term {
+            font-weight: bold;
+            color: var(--error-color);
+            background-color: #fce4ec;
+            padding: 0 4px;
+        }
+
+        .explanation-term {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安認證複習</h1>
+        <p>政府組態基準 (GCB) 適用範圍解析</p>
+    </header>
+
+    <div class="progress-container">
+        <div id="progressBar" class="progress-bar">學習進度：0%</div>
+    </div>
+
+    <!-- Question Section -->
+    <div class="question-section">
+        <span class="badge">第 32 題 | 複選題</span>
+        <div class="question-text">
+            常見資安健診服務需求中，下列哪些選項適合公部門所需的政府組態基準（Government Configuration Baseline, GCB）的類型？
+        </div>
+
+        <div class="options-group">
+            <label class="option-label">
+                <input type="checkbox" name="q32" value="A">
+                (A) 作業系統組態設定檢視
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q32" value="B">
+                (B) 瀏覽器組態設定檢視
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q32" value="C">
+                (C) 資料庫組態設定檢視
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q32" value="D">
+                (D) 惡意活動設定檢視
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">送出作答</button>
+            <button class="btn-answer" onclick="showCorrectAnswer()">顯示正解</button>
+            <button class="btn-reset" onclick="resetQuiz()">重設</button>
+        </div>
+
+        <div id="feedback-area"></div>
+    </div>
+
+    <!-- Explanation Accordions -->
+    <button class="accordion">第一步：找關鍵字</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p>請留意題目中的以下線索：</p>
+            <ul>
+                <li><span class="highlight-term">公部門</span>：指政府機關，公家單位需要遵循一致的資安規範。</li>
+                <li><span class="highlight-term">資安健診</span>：定期對系統進行的健康檢查，確認是否符合安全要求。</li>
+                <li><span class="highlight-term">政府組態基準 GCB</span>：<span class="explanation-term">Government Configuration Baseline</span>，這是政府規定的「安全設定標準做法」。</li>
+                <li><span class="highlight-term">組態設定</span>：指作業系統、瀏覽器或軟體的「開關」或「參數」設定狀態（例如：密碼長度是否設為 8 碼以上）。</li>
+            </ul>
+        </div>
+    </div>
+
+    <button class="accordion">第二步：白話翻譯</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p>這題用高中生能理解的話來說就是：</p>
+            <p style="margin-top: 10px; padding: 10px; background-color: #e8f4f8; border-left: 4px solid var(--accent-color);">
+                「政府規定的 GCB，就像是一張檢查表，用來檢查『你的電腦系統和軟體設定有沒有照規定來』。請問下面哪些東西，本來就有固定的設定選項可以讓我們拿著檢查表去檢查？」
+            </p>
+        </div>
+    </div>
+
+    <button class="accordion">第三步：解題思路</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p><strong>核心觀念：</strong>GCB 是用來檢查「設定是否符合標準」，不是用來抓當下的攻擊行為。</p>
+            <p><strong>判斷三步驟：</strong></p>
+            <ol>
+                <li>判斷選項是不是「可被事先規範的設定」？</li>
+                <li>能不能寫成一張「Yes/No 的檢核清單」？</li>
+                <li>排除那些偏向「即時監控」或「抓壞人」的項目。</li>
+            </ol>
+            <p style="margin-top: 15px;"><strong>比喻：</strong></p>
+            <ul>
+                <li>組態基準 (GCB) 就像<strong>「考場規則」</strong>：檢查桌子有沒有清空、准考證有沒有帶、手機有沒有關機。（這是檢查狀態）</li>
+                <li>惡意活動偵測就像<strong>「監考老師抓作弊」</strong>：看考試當下有沒有人偷看小抄。（這是監控行為）</li>
+            </ul>
+        </div>
+    </div>
+
+    <button class="accordion">第四步：選項分析</button>
+    <div class="panel">
+        <div class="panel-content">
+            <ul>
+                <li>
+                    <strong>(A) 作業系統組態設定檢視 <span style="color:var(--success-color)">[正確]</span></strong><br>
+                    原因：作業系統（如 Windows）有大量安全設定（例如：帳號密碼原則、關閉不必要的服務、權限控管），這是 GCB 最基本的核心。
+                </li>
+                <li>
+                    <strong>(B) 瀏覽器組態設定檢視 <span style="color:var(--success-color)">[正確]</span></strong><br>
+                    原因：瀏覽器（如 Chrome, Edge）是駭客入侵的常見入口。GCB 會規範例如：禁止自動下載、限制外掛程式安裝、強制使用安全連線等設定。
+                </li>
+                <li>
+                    <strong>(C) 資料庫組態設定檢視 <span style="color:var(--success-color)">[正確]</span></strong><br>
+                    原因：資料庫存放重要個資。GCB 會檢查例如：預設帳號是否停用、連線是否加密、稽核功能是否開啟等。
+                </li>
+                <li>
+                    <strong>(D) 惡意活動設定檢視 <span style="color:var(--error-color)">[錯誤]</span></strong><br>
+                    原因：惡意活動屬於「行為偵測」或「事件監控」。惡意程式的行為千變萬化，無法像設定值一樣寫成固定的「基準」來檢查。這比較接近 SOC（資安監控中心）的業務，而非 GCB。
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <button class="accordion">觀念補充與陷阱記憶</button>
+    <div class="panel">
+        <div class="panel-content">
+            <h3>核心觀念定位</h3>
+            <p>本題屬於「政府資安治理」的基本題。請區分以下三者：</p>
+            <ul>
+                <li><strong>GCB (組態基準)：</strong>設定有沒有照規定？（靜態比對）</li>
+                <li><strong>VANS (弱點管理)：</strong>軟體有沒有更新補丁？（版本比對）</li>
+                <li><strong>SOC (資安監控)：</strong>現在有沒有人在攻擊我？（動態監控）</li>
+            </ul>
+
+            <h3 style="margin-top: 15px;">記憶口訣</h3>
+            <p style="color: var(--accent-color); font-weight: bold;">「GCB 看設定，不看行為」</p>
+            <p style="color: var(--accent-color); font-weight: bold;">「系統、瀏覽器、資料庫，都是基準範圍」</p>
+
+            <h3 style="margin-top: 15px;">常見陷阱</h3>
+            <p>學生容易看到「資安」就把所有看起來很安全的名詞都選進去。請記得：只要看到「惡意活動」、「攻擊偵測」，通常就不屬於「組態基準 (Configuration)」的範疇。</p>
+        </div>
+    </div>
+
+    <button class="accordion">自我檢測</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p>試著回答以下問題，確認是否真正理解：</p>
+            
+            <div style="margin-top: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <p><strong>1. 為什麼「防毒軟體即時掃描」不適合作為 GCB 的項目？</strong></p>
+                <button class="btn-reveal" onclick="toggleAnswer('ans1')">看解答</button>
+                <div id="ans1" style="display:none; margin-top:5px; color: var(--primary-color);">
+                    因為即時掃描是一種「動態的行為監控」，而 GCB 關注的是「靜態的設定值」（例如：是否有勾選『開啟即時掃描』這個選項，才是 GCB 檢查的重點，而非掃描的動作本身）。
+                </div>
+            </div>
+
+            <div style="margin-top: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <p><strong>2. 如果題目改成適合「SOC 監控服務」，哪一個選項會變成正確？</strong></p>
+                <button class="btn-reveal" onclick="toggleAnswer('ans2')">看解答</button>
+                <div id="ans2" style="display:none; margin-top:5px; color: var(--primary-color);">
+                    選項 (D) 惡意活動設定檢視（或監控）。因為 SOC 的職責就是監控即時的惡意行為與異常流量。
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <p><strong>3. 為什麼公部門特別需要統一的 GCB？</strong></p>
+                <button class="btn-reveal" onclick="toggleAnswer('ans3')">看解答</button>
+                <div id="ans3" style="display:none; margin-top:5px; color: var(--primary-color);">
+                    為了降低管理成本與資安風險。如果每個機關的電腦設定都不一樣（例如有的密碼不用換，有的隨便設），駭客很容易找到弱點。統一基準可以確保所有機關都具備最低限度的防護能力。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>互動式教學網頁範例 - 適用於 iPAS 資訊安全工程師初級考試複習</p>
+    </footer>
+</div>
+
+<script>
+    // 正確答案定義
+    const correctAnswers = ['A', 'B', 'C'];
+    
+    // 進度追蹤變數
+    let state = {
+        quizSubmitted: false,
+        accordionOpened: false,
+        selfTestDone: false
+    };
+
+    // 檢查答案邏輯
+    function checkAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="q32"]:checked');
+        const userAnswers = Array.from(checkboxes).map(cb => cb.value);
+        const feedbackArea = document.getElementById('feedback-area');
+
+        // 更新進度
+        if (!state.quizSubmitted) {
+            state.quizSubmitted = true;
+            updateProgress();
+        }
+
+        if (userAnswers.length === 0) {
+            feedbackArea.textContent = "請至少選擇一個選項。";
+            feedbackArea.className = "";
+            feedbackArea.style.display = "block";
+            feedbackArea.style.backgroundColor = "#eee";
+            feedbackArea.style.color = "#333";
+            return;
+        }
+
+        // 判斷邏輯
+        const isAllCorrect = userAnswers.length === correctAnswers.length && 
+                             userAnswers.every(val => correctAnswers.includes(val));
+        
+        // 是否包含錯誤選項 (D)
+        const hasWrongOption = userAnswers.includes('D');
+        
+        // 是否漏選
+        const missingCorrect = correctAnswers.some(ans => !userAnswers.includes(ans));
+
+        feedbackArea.style.display = "block";
+
+        if (isAllCorrect) {
+            feedbackArea.textContent = "判斷正確！作業系統、瀏覽器與資料庫皆屬於可規範的組態設定範疇。";
+            feedbackArea.className = "feedback-correct";
+        } else if (hasWrongOption) {
+            feedbackArea.textContent = "全錯或包含錯誤觀念。提示：請重新思考什麼是「組態基準」（靜態設定），排除動態的惡意活動偵測。";
+            feedbackArea.className = "feedback-wrong";
+        } else if (missingCorrect) {
+            feedbackArea.textContent = "方向正確，但仍有漏選。GCB 的範圍不只涵蓋作業系統喔！";
+            feedbackArea.className = "feedback-partial";
+        }
+    }
+
+    // 顯示正解
+    function showCorrectAnswer() {
+        // 重設選擇
+        const checkboxes = document.querySelectorAll('input[name="q32"]');
+        checkboxes.forEach(cb => {
+            cb.checked = correctAnswers.includes(cb.value);
+        });
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.textContent = "正確答案：A、B、C。一句話理由：因為政府組態基準是用來檢核系統與軟體的安全設定，而非即時惡意行為偵測。";
+        feedbackArea.className = "feedback-correct";
+        feedbackArea.style.display = "block";
+
+        if (!state.quizSubmitted) {
+            state.quizSubmitted = true;
+            updateProgress();
+        }
+    }
+
+    // 重設
+    function resetQuiz() {
+        const checkboxes = document.querySelectorAll('input[name="q32"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = "none";
+        feedbackArea.className = "";
+    }
+
+    // 自我檢測顯示答案
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === "none") {
+            el.style.display = "block";
+            if (!state.selfTestDone) {
+                state.selfTestDone = true;
+                updateProgress();
+            }
+        } else {
+            el.style.display = "none";
+        }
+    }
+
+    // Accordion 互動
+    const acc = document.getElementsByClassName("accordion");
+    for (let i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            const panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+                // 更新進度
+                if (!state.accordionOpened) {
+                    state.accordionOpened = true;
+                    updateProgress();
+                }
+            }
+        });
+    }
+
+    // 更新進度條
+    function updateProgress() {
+        let completed = 0;
+        if (state.quizSubmitted) completed++;
+        if (state.accordionOpened) completed++;
+        if (state.selfTestDone) completed++;
+
+        const total = 3;
+        const percentage = Math.round((completed / total) * 100);
+        
+        const bar = document.getElementById("progressBar");
+        bar.style.width = percentage + "%";
+        bar.textContent = "學習進度：" + percentage + "%";
+        
+        if (percentage === 100) {
+            bar.style.backgroundColor = "#27ae60"; // Green when done
+            bar.textContent = "學習完成！";
+        }
+    }
+</script>
+
+</body>
+</html>

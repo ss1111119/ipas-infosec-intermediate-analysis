@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資訊安全防護實務 - 題號 13</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #ecf0f1;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --highlight-bg: #fff3cd;
+            --border-radius: 8px;
+            --spacing-unit: 16px;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        header .meta {
+            font-size: 0.9rem;
+            color: #bdc3c7;
+            margin-top: 5px;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        h2, h3 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+
+        /* Question Interaction */
+        .question-area {
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .options label {
+            display: block;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .options label:hover {
+            background-color: #e9ecef;
+        }
+
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion */
+        .accordion-item {
+            border-bottom: 1px solid #eee;
+        }
+
+        .accordion-header {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 15px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        .accordion-header.active::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            display: none;
+            padding-bottom: 15px;
+            color: #444;
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        /* Specific Content Styles */
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 0 4px;
+            border-radius: 2px;
+            border-bottom: 2px solid #ffd700;
+        }
+
+        .keyword-box {
+            background-color: #f1f8ff;
+            border-left: 4px solid var(--accent-color);
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        /* Interactive Learning Aids */
+        .interactive-box {
+            border: 1px dashed #aaa;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+
+        .defense-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .defense-btn {
+            padding: 8px;
+            border: 1px solid #ccc;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .defense-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .defense-desc {
+            margin-top: 10px;
+            font-style: italic;
+            color: #555;
+            min-height: 40px;
+        }
+
+        .checklist-item {
+            margin: 5px 0;
+        }
+
+        .result-msg {
+            font-weight: bold;
+            color: var(--correct-color);
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* Hide analysis initially */
+        #analysis-section {
+            display: none;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            header h1 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <header>
+        <h1>iPAS 資訊安全防護實務 - 題號 13</h1>
+        <div class="meta">科目：資訊安全【防護實務 × SOC × 網路防禦】 | 檔名：ipas_dns_onion_sinkhole_q13.html</div>
+    </header>
+
+    <!-- Question Interaction Area -->
+    <div class="card question-area">
+        <h2>題目互動區</h2>
+        <p><strong>題目：</strong>若安全營運中心（SOC）於內部 DNS 伺服器偵測到大量指向 *.onion 的查詢，但防火牆尚未攔阻，下列何項即時防禦措施最符合效率及不影響正常服務運作？</p>
+        
+        <div class="options" id="quiz-options">
+            <label><input type="radio" name="answer" value="A"> (A) 直接封鎖所有 53/TCP 與 53/UDP 流量</label>
+            <label><input type="radio" name="answer" value="B"> (B) 通知使用者可能違反政策，待其自我修正</label>
+            <label><input type="radio" name="answer" value="C"> (C) DNS 層將可疑頂級網域（Top-Level Domain, TLD）解析為內部黑洞（sinkhole）IP</label>
+            <label><input type="radio" name="answer" value="D"> (D) 調高 DNS 服務優先權，以降低查詢逾時</label>
+        </div>
+
+        <button class="btn" id="submit-btn" onclick="checkAnswer()">送出答案</button>
+        <button class="btn btn-outline" id="retry-btn" onclick="retryQuiz()" style="display:none;">重作一次</button>
+        <button class="btn btn-outline" id="toggle-analysis-btn" onclick="toggleAnalysis()">顯示／隱藏解析</button>
+
+        <div id="feedback-msg" class="feedback"></div>
+    </div>
+
+    <!-- Analysis Learning Area -->
+    <div id="analysis-section">
+        
+        <!-- Block: Question (Repeated for context) -->
+        <div class="card">
+            <button class="accordion-header active" onclick="toggleAccordion(this)">【題目】</button>
+            <div class="accordion-content active">
+                <p>若安全營運中心（SOC）於內部 DNS 伺服器偵測到大量指向 *.onion 的查詢，但防火牆尚未攔阻，下列何項即時防禦措施最符合效率及不影響正常服務運作？</p>
+            </div>
+        </div>
+
+        <!-- Block: Step 1 Keywords -->
+        <div class="card">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【第一步：找關鍵字】</button>
+            <div class="accordion-content">
+                <p>請注意以下影響決策的關鍵字：</p>
+                <ul>
+                    <li><span class="highlight">SOC</span>：負責監控與應變的單位。</li>
+                    <li><span class="highlight">內部 DNS</span>：問題發生在負責網域名稱解析的伺服器。</li>
+                    <li><span class="highlight">*.onion</span>：Tor 匿名網路的特徵網域，企業內部通常不應出現。</li>
+                    <li><span class="highlight">大量查詢</span>：異常流量，可能是惡意軟體試圖連線 C2。</li>
+                    <li><span class="highlight">即時防禦</span>：不能慢慢來，要馬上生效。</li>
+                    <li><span class="highlight">不影響正常服務</span>：這就是解題核心，不能「一刀切」把全公司網路斷掉。</li>
+                    <li><span class="highlight">sinkhole</span>：將惡意流量導向無效或受控 IP 的技術。</li>
+                </ul>
+                <div class="keyword-box">
+                    <strong>核心邏輯：</strong>要在不影響其他人上網（正常服務）的前提下，精準阻擋那些壞的查詢（*.onion）。
+                </div>
+            </div>
+        </div>
+
+        <!-- Block: Step 2 Translation -->
+        <div class="card">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【第二步：白話翻譯】</button>
+            <div class="accordion-content">
+                <p><strong>白話情境：</strong></p>
+                <p>「公司的資安團隊發現，有很多公司電腦一直在問『洋蔥網路（暗網）』的網址在哪裡，這看起來很像中毒或是在幹壞事。但是，現在不能把整個網路關掉，也不能讓全公司的同事無法上網。請問哪一個方法最快、最精準，又不會讓大家罵網路斷了？」</p>
+                <p><strong>名詞解釋：</strong></p>
+                <ul>
+                    <li><strong>DNS：</strong>網路的電話簿，負責把好記的網址（如 google.com）換成電腦看得懂的 IP 地址。</li>
+                    <li><strong>*.onion：</strong>這是一種特殊的網址，通常只能透過 Tor 瀏覽器訪問（暗網），一般企業網路不該有這種查詢。</li>
+                    <li><strong>Sinkhole（黑洞）：</strong>這是一種 DNS 欺騙技術。當壞人問「壞站台在哪？」時，DNS 騙他說「在 127.0.0.1（本機）」或公司監控伺服器，讓他連不出去，流量就像掉進黑洞一樣消失。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Block: Step 3 Logic -->
+        <div class="card">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【第三步：解題思路】</button>
+            <div class="accordion-content">
+                <p><strong>考點觀念：</strong>SOC 在 DNS 層進行「即時、低衝擊」的精準防禦。</p>
+                <p><strong>解題三步驟：</strong></p>
+                <ol>
+                    <li><strong>判斷風險來源：</strong>看到 `*.onion` 大量查詢，代表內部有感染或違規行為。</li>
+                    <li><strong>排除「影響過大」的作法：</strong>題目要求「不影響正常服務」，所以不能直接封鎖 DNS 服務（Port 53），那樣全公司都不能上網了。</li>
+                    <li><strong>選擇「精準打擊」手段：</strong>既然問題出在 DNS 查詢，就在 DNS 伺服器上設定規則，只針對 `*.onion` 回傳假 IP（Sinkhole），其他正常網址（如 .com, .tw）照常運作。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Block: Step 4 Option Analysis -->
+        <div class="card">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【第四步：選項分析】</button>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>(A) 直接封鎖所有 53/TCP 與 53/UDP 流量：</strong><br>
+                        <span style="color:var(--wrong-color)">錯誤。</span>這等於把全公司的 DNS 服務都切斷，沒人能查網址，所有網路服務都會癱瘓。雖然擋住了惡意連線，但也擋住了正常工作，嚴重違反「不影響正常服務」原則。</li>
+                    
+                    <li><strong>(B) 通知使用者可能違反政策，待其自我修正：</strong><br>
+                        <span style="color:var(--wrong-color)">錯誤。</span>這是「管理措施」，不是「即時防禦」。這速度太慢，等到使用者看到通知並修正，資料可能早就外洩了。</li>
+                    
+                    <li><strong>(C) DNS 層將可疑頂級網域（TLD）解析為內部黑洞（sinkhole）IP：</strong><br>
+                        <span style="color:var(--correct-color)">正確。</span>這是最標準的 DNS 安全防禦（DNS RPZ）。只針對 `*.onion` 這類壞網域回傳假 IP，使其無法連線；而一般的 Google、FB 查詢完全不受影響，兼顧安全與便利。</li>
+                    
+                    <li><strong>(D) 調高 DNS 服務優先權，以降低查詢逾時：</strong><br>
+                        <span style="color:var(--wrong-color)">錯誤。</span>這只是在優化效能，讓查詢跑得更快，完全沒有阻擋惡意行為，甚至可能讓惡意程式連線得更順暢。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Block: Concept Supplement -->
+        <div class="card">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【觀念補充與延伸】</button>
+            <div class="accordion-content">
+                <p><strong>核心觀念定位：</strong>這是 iPAS 防護實務中「DNS 防禦 × SOC 即時應變」的經典題型。</p>
+                <p><strong>深入 Sinkhole 原理：</strong></p>
+                <p>DNS Sinkhole 不僅能阻擋，還能「蒐證」。將惡意網域導向內部一台特定的 Web Server（Sinkhole Server），SOC 人員就可以分析這台 Server 的 Log，抓出到底是哪一台內部電腦（來源 IP）一直在發出惡意請求，進而進行清除。</p>
+                <div class="interactive-box">
+                    <strong>【學習輔助 1：DNS 防禦方式對照】</strong>
+                    <div style="margin-top:10px;">
+                        <table style="width:100%; border-collapse: collapse;">
+                            <tr style="background:#eee;">
+                                <th style="padding:8px; border:1px solid #ddd;">策略</th>
+                                <th style="padding:8px; border:1px solid #ddd;">衝擊程度</th>
+                                <th style="padding:8px; border:1px solid #ddd;">效果</th>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px; border:1px solid #ddd;">封鎖 Port 53</td>
+                                <td style="padding:8px; border:1px solid #ddd; color:red;">極高 (全斷)</td>
+                                <td style="padding:8px; border:1px solid #ddd;">防禦成功，業務中斷</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px; border:1px solid #ddd;">僅記錄 Log</td>
+                                <td style="padding:8px; border:1px solid #ddd; color:green;">無</td>
+                                <td style="padding:8px; border:1px solid #ddd;">無防禦效果</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px; border:1px solid #ddd; font-weight:bold;">DNS Sinkhole</td>
+                                <td style="padding:8px; border:1px solid #ddd; color:green;">極低 (僅擋惡意)</td>
+                                <td style="padding:8px; border:1px solid #ddd; font-weight:bold;">精準防禦，業務正常</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block: Mnemonics -->
+        <div class="card">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【記憶口訣】</button>
+            <div class="accordion-content">
+                <ul>
+                    <li>「DNS 出怪流，先丟黑洞裡。」</li>
+                    <li>「不封整網，只封壞名。」</li>
+                    <li>「Sinkhole 是假路標，讓病毒找不到家。」</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Block: Common Traps -->
+        <div class="card">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【常見陷阱】</button>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>陷阱一：</strong>一看到「阻擋」就想選防火牆封鎖 Port。要看清楚題目說「不影響正常服務」，DNS Port 53 是所有網路活動的基礎，絕不能全封。</li>
+                    <li><strong>陷阱二：</strong>誤以為「通知使用者」算防禦。SOC 重視的是「Technical Control（技術控制）」，尤其是即時阻斷，依賴人的行為修正太慢且不可靠。</li>
+                    <li><strong>避坑指南：</strong>只要題目出現「DNS 層防禦」且強調「不影響正常運作」，優先聯想 <strong>Sinkhole</strong> 或 <strong>RPZ (Response Policy Zone)</strong>。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Block: Correct Answer -->
+        <div class="card">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【正確答案】</button>
+            <div class="accordion-content">
+                <p style="font-size: 1.2rem; font-weight: bold; color: var(--correct-color);">
+                    (C) DNS 層將可疑頂級網域（Top-Level Domain, TLD）解析為內部黑洞（sinkhole）IP
+                </p>
+            </div>
+        </div>
+
+        <!-- Block: Self Check -->
+        <div class="card">
+            <button class="accordion-header" onclick="toggleAccordion(this)">【自我檢測】</button>
+            <div class="accordion-content">
+                <p>思考以下問題（不提供標準答案，請嘗試自己回答）：</p>
+                <ol>
+                    <li>DNS Sinkhole 和直接在防火牆封鎖惡意 IP 有什麼差別？優缺點各為何？</li>
+                    <li>如果惡意程式不查 DNS，直接用 IP 連線（Hardcoded IP），DNS Sinkhole 還有用嗎？</li>
+                    <li>除了 Sinkhole，還有哪些可以在 DNS 層做的安全措施？（提示：DNSSEC, DoH）</li>
+                </ol>
+
+                <div class="interactive-box">
+                    <strong>【學習輔助 2：防禦層級選擇互動】</strong>
+                    <p>若偵測到特定網域名稱 (Domain Name) 的惡意流量，哪一層最直接？</p>
+                    <div class="defense-grid">
+                        <div class="defense-btn" onclick="showDefenseInfo('dns', this)">DNS 層</div>
+                        <div class="defense-btn" onclick="showDefenseInfo('fw', this)">防火牆層</div>
+                        <div class="defense-btn" onclick="showDefenseInfo('ep', this)">端點層</div>
+                    </div>
+                    <div id="defense-info" class="defense-desc">請點選上方按鈕查看說明。</div>
+                </div>
+
+                <div class="interactive-box">
+                    <strong>【學習輔助 3：低衝擊判斷清單】</strong>
+                    <p>要符合「有效率且不影響正常服務」，必須滿足：</p>
+                    <div class="checklist-item"><label><input type="checkbox" id="chk1" onchange="checkEfficiency()"> 是否只影響可疑目標？</label></div>
+                    <div class="checklist-item"><label><input type="checkbox" id="chk2" onchange="checkEfficiency()"> 是否可立即生效？</label></div>
+                    <div class="checklist-item"><label><input type="checkbox" id="chk3" onchange="checkEfficiency()"> 是否不干擾正常使用者？</label></div>
+                    <div id="efficiency-msg" class="result-msg">恭喜！完全符合 Sinkhole 防禦原則！</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Interaction Logic
+    function checkAnswer() {
+        const options = document.getElementsByName('answer');
+        let selected = null;
+        for (let op of options) {
+            if (op.checked) {
+                selected = op.value;
+                break;
+            }
+        }
+
+        const feedback = document.getElementById('feedback-msg');
+        const analysisSection = document.getElementById('analysis-section');
+        const retryBtn = document.getElementById('retry-btn');
+        const submitBtn = document.getElementById('submit-btn');
+
+        if (!selected) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedback.style.display = 'block';
+        feedback.className = 'feedback'; // reset classes
+
+        if (selected === 'C') {
+            feedback.classList.add('correct');
+            feedback.innerHTML = '✅ 答對了！<br>正確答案正是 (C)。DNS Sinkhole 是最符合效率且不影響正常服務的防禦手段。';
+            // Auto show analysis on correct
+            analysisSection.style.display = 'block';
+            submitBtn.style.display = 'none';
+            retryBtn.style.display = 'inline-block';
+        } else {
+            feedback.classList.add('wrong');
+            feedback.innerHTML = `❌ 你選的是 (${selected})，正確答案是 (C)。<br>提示：請思考如何「精準阻擋」而不誤殺正常流量。關鍵觀念在於「DNS 層精準阻擋」。<br>請點擊下方「顯示／隱藏解析」按鈕來學習詳細觀念。`;
+            submitBtn.style.display = 'none';
+            retryBtn.style.display = 'inline-block';
+        }
+    }
+
+    function retryQuiz() {
+        const options = document.getElementsByName('answer');
+        for (let op of options) {
+            op.checked = false;
+        }
+        document.getElementById('feedback-msg').style.display = 'none';
+        document.getElementById('submit-btn').style.display = 'inline-block';
+        document.getElementById('retry-btn').style.display = 'none';
+        document.getElementById('analysis-section').style.display = 'none';
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleAnalysis() {
+        const section = document.getElementById('analysis-section');
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    // Accordion Logic
+    function toggleAccordion(element) {
+        element.classList.toggle('active');
+        const content = element.nextElementSibling;
+        content.classList.toggle('active');
+    }
+
+    // Learning Aid 2 Logic
+    function showDefenseInfo(type, btn) {
+        // Reset buttons
+        document.querySelectorAll('.defense-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const info = document.getElementById('defense-info');
+        if (type === 'dns') {
+            info.innerHTML = "✅ <strong>最佳選擇：</strong>針對 Domain Name 進行過濾（如 Sinkhole），精準且效能好。";
+            info.style.color = 'var(--correct-color)';
+        } else if (type === 'fw') {
+            info.innerHTML = "⚠️ <strong>次要選擇：</strong>防火牆主要看 IP。若惡意程式 IP 一直變，防火牆會擋得很辛苦。";
+            info.style.color = '#e67e22';
+        } else if (type === 'ep') {
+            info.innerHTML = "ℹ️ <strong>最後防線：</strong>端點防毒也能擋，但在網路上源頭（DNS）先擋掉效率更高，可保護未安裝防毒的設備（如 IoT）。";
+            info.style.color = '#333';
+        }
+    }
+
+    // Learning Aid 3 Logic
+    function checkEfficiency() {
+        const c1 = document.getElementById('chk1').checked;
+        const c2 = document.getElementById('chk2').checked;
+        const c3 = document.getElementById('chk3').checked;
+        const msg = document.getElementById('efficiency-msg');
+
+        if (c1 && c2 && c3) {
+            msg.style.display = 'block';
+        } else {
+            msg.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

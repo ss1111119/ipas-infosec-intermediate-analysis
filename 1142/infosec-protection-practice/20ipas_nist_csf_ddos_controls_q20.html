@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_nist_csf_ddos_controls_q20.html - iPAS 資安衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-light: #f8f9fa;
+            --text-main: #333;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            background-color: #e9ecef;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        header .sub-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        /* Sections */
+        .section {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        /* Scenario Image */
+        .scenario-img-container {
+            text-align: center;
+            margin-bottom: 15px;
+            background-color: #000;
+            padding: 5px;
+        }
+
+        .scenario-img-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .img-caption {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .scenario-text {
+            background-color: var(--bg-light);
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        /* Quiz Area */
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f1f3f5;
+        }
+
+        .option-label input {
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-retry {
+            background-color: #7f8c8d;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        .btn-toggle-explain {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Result Area */
+        #result-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .result-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section (Accordion) */
+        .explanation-container {
+            display: none; /* Hidden by default */
+            margin-top: 20px;
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            margin-bottom: 5px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            width: 100%;
+            text-align: left;
+            padding: 15px;
+            background-color: #fff;
+            border: none;
+            border-bottom: 1px solid transparent;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header:after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: normal;
+        }
+
+        .accordion-header.active {
+            background-color: #eef2f5;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-header.active:after {
+            content: '-';
+        }
+
+        .accordion-content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            background-color: #fff;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .accordion-content .content-inner {
+            padding: 15px 0;
+        }
+
+        /* Content Styling inside Accordion */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            margin-right: 5px;
+            color: white;
+        }
+        .tag-de { background-color: #e67e22; }
+        .tag-rs { background-color: #c0392b; }
+        .tag-id { background-color: #2980b9; }
+
+        ul.analysis-list {
+            list-style: none;
+            padding: 0;
+        }
+        ul.analysis-list li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        ul.analysis-list li.correct::before {
+            content: "✓";
+            color: var(--success-color);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        ul.analysis-list li.wrong::before {
+            content: "✗";
+            color: var(--error-color);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* Interactive Tools */
+        .tool-box {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        /* CSF Cards */
+        .csf-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .csf-card {
+            background: var(--bg-light);
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .csf-card:active {
+            transform: scale(0.98);
+        }
+        .csf-card-title {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .csf-card-desc {
+            font-size: 0.8rem;
+            display: none;
+            color: #555;
+        }
+
+        /* Cost Slider Buttons */
+        .cost-controls {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        .cost-btn {
+            flex: 1;
+            font-size: 0.9rem;
+            background: #fff;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        .cost-btn.active {
+            background: var(--primary-color);
+            color: #fff;
+        }
+        .cost-display {
+            font-size: 0.9rem;
+            padding: 10px;
+            background: #f1f1f1;
+            border-left: 4px solid #888;
+        }
+
+        /* Checklist */
+        .checklist-item {
+            display: block;
+            margin-bottom: 8px;
+        }
+        .progress-bar-container {
+            height: 10px;
+            background: #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--success-color);
+            transition: width 0.3s;
+        }
+        .progress-text {
+            font-size: 0.85rem;
+            text-align: right;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .action-area {
+                flex-direction: column;
+            }
+            .csf-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資訊安全防護實務／規劃實務</h1>
+        <div class="sub-info">題組 2 | 題號 20 | NIST CSF 與 DDoS 防護規劃 | ipas_nist_csf_ddos_controls_q20.html</div>
+    </header>
+
+    <div class="section">
+        <div class="section-title">情境描述</div>
+        <div class="scenario-img-container">
+            <img src="https://i.meee.com.tw/F5HlAqh.jpg" alt="DDoS情境示意圖">
+            <div class="img-caption">附圖：展示服務遭大量連線/請求，造成外部連線失敗之 DDoS 情境示意</div>
+        </div>
+        <div class="scenario-text">
+            某新創公司對外提供展示用的 Web 服務，近期在外部展示期間出現無法連線的狀況，但公司內部連外上網正常。經檢視主機連線紀錄與網路側錄資料，研判遭受 DDoS 類型攻擊（包含可能的 HTTP Flood / TCP 連線耗盡），導致對外服務品質下降。公司<strong>資源有限</strong>，希望以「<strong>最低成本、最高效益</strong>」方式建立基本 DDoS 防護與應變。
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">題目 (複選)</div>
+        <div class="question-text">
+            題號 20：承上題，參考美國國家標準技術研究院（NIST）創建的網路安全框架（Cyber Security Framework, CSF），請問 ABC 新創公司在資源有限的情況下，應該導入哪些 DDoS 防護機制最為合適？（請選擇正確的三項）
+        </div>
+        
+        <form id="quiz-form">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="A">
+                    <span>(A) RS.CO-02：當發生 DDoS 事件時，即時與內外部利害關係人溝通</span>
+                </label>
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="B">
+                    <span>(B) ID.IM-01：擴增網路頻寬與設備效能以提高 DDoS 攻擊的門檻</span>
+                </label>
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="C">
+                    <span>(C) DE.CM-01：增設新世代防火牆限制惡意流量與偵測異常威脅</span>
+                </label>
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="D">
+                    <span>(D) RS.MA-01：一旦發生 DDoS 攻擊時可以啟動網路上游業者的流量清洗服務</span>
+                </label>
+            </div>
+
+            <div class="action-area">
+                <button type="button" class="btn-submit" onclick="checkAnswer()">送出答案</button>
+                <button type="button" class="btn-retry" onclick="resetQuiz()">重作一次</button>
+                <button type="button" class="btn-toggle-explain" onclick="toggleExplanation()">顯示／隱藏解析</button>
+            </div>
+        </form>
+
+        <div id="result-area"></div>
+    </div>
+
+    <div class="section explanation-container" id="explanation-area">
+        <div class="section-title">名師解析學習區</div>
+
+        <!-- 區塊 1: 題目 -->
+        <div class="accordion-item">
+            <button class="accordion-header">題目回顧</button>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <p>情境：新創公司、資源有限、DDoS 攻擊。</p>
+                    <p>目標：參考 NIST CSF，導入低成本高效益的防護。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 區塊 2: 找關鍵字 -->
+        <div class="accordion-item">
+            <button class="accordion-header">第一步：找關鍵字</button>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <p>請用螢光筆將以下重點劃記：</p>
+                    <ul>
+                        <li><span class="highlight">資源有限</span>：解題最關鍵線索，代表不能選昂貴的基礎建設擴充（如無止盡擴頻寬）。</li>
+                        <li><span class="highlight">DDoS</span>：分散式阻斷服務，主要攻擊可用性。</li>
+                        <li><span class="highlight">NIST CSF</span>：思考架構需涵蓋 IPDRR（識別、保護、偵測、回應、復原）。</li>
+                        <li><span class="highlight">RS (Respond)</span>：事件發生時的應變措施（溝通、緩解）。</li>
+                        <li><span class="highlight">DE (Detect)</span>：如何看見攻擊（監控、異常偵測）。</li>
+                        <li><span class="highlight">流量清洗</span>：借助上游 ISP 資源過濾髒流量，適合資源有限者。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 區塊 3: 白話翻譯 -->
+        <div class="accordion-item">
+            <button class="accordion-header">第二步：白話翻譯</button>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <p><strong>高中生也聽得懂的翻譯：</strong></p>
+                    <p>「這家公司錢不多（資源有限），但網站常常被網路攻擊打到不能用（DDoS）。如果照資安框架（NIST CSF）的想法，哪些做法是最應該優先做的？」</p>
+                    <p>其實就是在問：</p>
+                    <ul>
+                        <li>有人打來時，要怎麼通知老闆和客戶？（溝通）</li>
+                        <li>怎麼知道現在正在被打？要怎麼先稍微擋一下？（偵測與防火牆）</li>
+                        <li>自己擋不住時，怎麼叫網路供應商幫忙過濾流量？（流量清洗）</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 區塊 4: 解題思路 -->
+        <div class="accordion-item">
+            <button class="accordion-header">第三步：解題思路</button>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <p><strong>核心觀念：</strong>資源有限時，用 CSF 思維優先導入「可立即降低衝擊」的偵測與回應措施。</p>
+                    <p><strong>解題三步驟：</strong></p>
+                    <ol>
+                        <li><strong>刪去高成本：</strong>看到「資源有限」，先排除依靠「硬碰硬」的做法。擴充頻寬（Option B）成本極高且對抗大規模 DDoS 效果有限，不是首選。</li>
+                        <li><strong>優先挑見效快：</strong>偵測（DE）是防護的眼睛，回應（RS）是防護的手腳。新世代防火牆（Option C）兼具偵測與基礎阻擋，CP 值高。</li>
+                        <li><strong>善用外部資源：</strong>既然自己資源少，就找上游幫忙。流量清洗（Option D）是標準的借力使力。同時，別忘了「溝通」（Option A）是完全不用花大錢但能降低客訴壓力的重要流程。</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 區塊 5: 選項分析 -->
+        <div class="accordion-item">
+            <button class="accordion-header">第四步：選項分析</button>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <ul class="analysis-list">
+                        <li class="correct"><strong>(A) RS.CO-02 即時溝通：正確。</strong>
+                            <br>這是回應（Respond）階段的關鍵。建立通報流程成本最低，且能確保利害關係人（客戶、管理層）知情，避免恐慌與信任危機。</li>
+                        
+                        <li class="wrong"><strong>(B) ID.IM-01 擴增頻寬：錯誤。</strong>
+                            <br>雖然頻寬大能提高攻擊門檻，但頻寬費用昂貴。對於「資源有限」的新創，無止盡擴充頻寬不切實際，且 1G 的頻寬遇到 10G 的攻擊一樣掛掉，不符「最高效益」原則。</li>
+                        
+                        <li class="correct"><strong>(C) DE.CM-01 增設 NGFW：正確。</strong>
+                            <br>屬於偵測（Detect）與持續監控。新世代防火牆 (NGFW) 可以識別應用層攻擊（如 HTTP Flood）並阻擋，比起單純擴頻寬，更能精準處理惡意流量。</li>
+                        
+                        <li class="correct"><strong>(D) RS.MA-01 啟動流量清洗：正確。</strong>
+                            <br>屬於回應（Respond）中的減緩措施。當攻擊流量大過自身負荷，請求上游 ISP 進行清洗是標準 SOP，這通常是「訂閱制」或「依需啟用」，比自建抗 DDoS 機房便宜太多。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 區塊 6: 觀念補充與延伸 -->
+        <div class="accordion-item">
+            <button class="accordion-header">觀念補充與延伸</button>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <p><strong>NIST CSF 核心五大功能：</strong></p>
+                    <p>Identify (識別)、Protect (保護)、Detect (偵測)、Respond (回應)、Recover (復原)。本題重點在於遭受攻擊當下的 <strong>DE</strong> 與 <strong>RS</strong>。</p>
+                    <p><strong>觸類旁通：</strong></p>
+                    <ul>
+                        <li><strong>擴頻寬 vs 流量清洗：</strong>擴頻寬像是「把家門口馬路拓寬」，但壞人還是會塞滿路；流量清洗像是「在路口設檢查站」，壞人進不來，好人才放行。</li>
+                        <li><strong>思考題：</strong>若題目改成「資源充足且追求極致可用性」，(B) 選項才可能被考慮納入，作為多層次防禦的一環。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 區塊 7: 記憶口訣 -->
+        <div class="accordion-item">
+            <button class="accordion-header">記憶口訣</button>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <div style="background:#e8f8f5; padding:15px; border-radius:8px; text-align:center; font-size:1.1rem; font-weight:bold; color:#16a085;">
+                        「小公司抗 DDoS：<br>先偵測 (NGFW)、會溝通 (CO)、找上游 (清洗)」
+                    </div>
+                    <p style="text-align:center; margin-top:10px;">遇到資源有限，千萬別選「砸錢擴頻寬」。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 區塊 8: 常見陷阱 -->
+        <div class="accordion-item">
+            <button class="accordion-header">常見陷阱</button>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <ul>
+                        <li><strong>陷阱一：頻寬迷思。</strong> 學生常以為網路越快越安全，其實 DDoS 攻擊流量通常是指數級成長，單靠擴充頻寬是無底洞。</li>
+                        <li><strong>陷阱二：忽略軟實力。</strong> 選項 (A) 的「溝通」常被理工科考生忽略，認為這不是「技術」。但在 NIST CSF 中，回應階段的溝通協調（Communications）是極為重要的管控措施。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 區塊 9: 正確答案 -->
+        <div class="accordion-item">
+            <button class="accordion-header">正確答案</button>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <h3 style="color:var(--success-color);">A、C、D</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- 區塊 10: 自我檢測 -->
+        <div class="accordion-item">
+            <button class="accordion-header">自我檢測</button>
+            <div class="accordion-content">
+                <div class="content-inner">
+                    <p>試著回答以下問題（不提供標準答案，請自我思考）：</p>
+                    <ol>
+                        <li>若公司預算連新世代防火牆都買不起，還有什麼開源軟體或主機設定可以提升偵測能力？</li>
+                        <li>在啟動上游流量清洗服務前，通常需要提供給 ISP 哪些網路資訊（例如 IP 網段、攻擊特徵）？</li>
+                        <li>若攻擊類型變更為 DNS Flood，除了防火牆，還需要檢查哪種伺服器的設定？</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 學習輔助互動區 -->
+        <div class="section-title" style="margin-top:30px;">學習輔助互動工具</div>
+        
+        <!-- Tool 1: CSF Cards -->
+        <div class="tool-box">
+            <h4>1. CSF 功能快速卡 (點擊翻牌)</h4>
+            <div class="csf-cards">
+                <div class="csf-card" onclick="toggleCard(this)">
+                    <span class="csf-card-title tag tag-de">Detect (偵測)</span>
+                    <span class="csf-card-desc">看見異常！例如：NGFW 發現連線數飆高。</span>
+                </div>
+                <div class="csf-card" onclick="toggleCard(this)">
+                    <span class="csf-card-title tag tag-rs">Respond (回應)</span>
+                    <span class="csf-card-desc">採取行動！例如：切換清洗服務、發送通告。</span>
+                </div>
+                <div class="csf-card" onclick="toggleCard(this)">
+                    <span class="csf-card-title tag tag-id">Identify (識別)</span>
+                    <span class="csf-card-desc">盤點資產！例如：知道哪些 IP 是對外服務。</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tool 2: Cost Slider -->
+        <div class="tool-box">
+            <h4>2. 資源有限取捨 (成本分析)</h4>
+            <div class="cost-controls">
+                <button class="cost-btn" onclick="showCost('low')">成本低 (首選)</button>
+                <button class="cost-btn" onclick="showCost('mid')">成本中 (必要)</button>
+                <button class="cost-btn" onclick="showCost('high')">成本高 (慎選)</button>
+            </div>
+            <div id="cost-display-area" class="cost-display">
+                請點擊上方按鈕，查看不同策略的成本效益落點。
+            </div>
+        </div>
+
+        <!-- Tool 3: Checklist -->
+        <div class="tool-box">
+            <h4>3. DDoS 應變檢核清單</h4>
+            <label class="checklist-item"><input type="checkbox" onchange="updateProgress()"> 建立緊急聯絡人清單與溝通模板 (RS.CO)</label>
+            <label class="checklist-item"><input type="checkbox" onchange="updateProgress()"> 設定防火牆阻擋規則與流量監控 (DE.CM)</label>
+            <label class="checklist-item"><input type="checkbox" onchange="updateProgress()"> 與 ISP 簽訂或確認流量清洗啟動流程 (RS.MA)</label>
+            <label class="checklist-item"><input type="checkbox" onchange="updateProgress()"> 確認預算未浪費在無效擴充上 (Cost Efficiency)</label>
+            
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="checklist-bar"></div>
+            </div>
+            <div class="progress-text" id="checklist-text">整體成熟度：尚未開始</div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2025 iPAS 資訊安全防護實務 考前衝刺教材</p>
+    </footer>
+</div>
+
+<script>
+    // Quiz Logic
+    function checkAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        const userAnswers = Array.from(checkboxes).map(cb => cb.value).sort();
+        const correctAnswers = ['A', 'C', 'D'];
+        const resultArea = document.getElementById('result-area');
+        const btnRetry = document.querySelector('.btn-retry');
+        const btnSubmit = document.querySelector('.btn-submit');
+
+        // Check equality
+        const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctAnswers);
+
+        let html = '';
+        if (isCorrect) {
+            html = `<div class="result-correct">
+                <strong>完全正確！</strong><br>
+                恭喜你掌握了資源有限下的最佳防護策略。<br>
+                正確答案就是 <strong>A、C、D</strong>。
+            </div>`;
+        } else {
+            const userStr = userAnswers.length > 0 ? userAnswers.join('、') : '未作答';
+            html = `<div class="result-wrong">
+                <strong>答錯囉！</strong><br>
+                你選擇了：${userStr}<br>
+                正確答案應該是：<strong>A、C、D</strong><br>
+                <small>提示：(B) 擴增頻寬通常成本過高且效果有限。</small>
+            </div>`;
+        }
+
+        resultArea.innerHTML = html;
+        resultArea.style.display = 'block';
+        btnSubmit.style.display = 'none';
+        btnRetry.style.display = 'inline-block';
+        
+        // Auto show explanation if wrong? Maybe better to let user toggle.
+        // Let's highlight the explanation button a bit
+        document.querySelector('.btn-toggle-explain').style.fontWeight = 'bold';
+    }
+
+    function resetQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('result-area').style.display = 'none';
+        document.querySelector('.btn-submit').style.display = 'inline-block';
+        document.querySelector('.btn-retry').style.display = 'none';
+    }
+
+    function toggleExplanation() {
+        const area = document.getElementById('explanation-area');
+        if (area.style.display === 'none' || area.style.display === '') {
+            area.style.display = 'block';
+            // Scroll to explanation
+            area.scrollIntoView({behavior: "smooth"});
+        } else {
+            area.style.display = 'none';
+        }
+    }
+
+    // Accordion Logic
+    const accHeaders = document.querySelectorAll('.accordion-header');
+    accHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            this.classList.toggle('active');
+            const content = this.nextElementSibling;
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+            }
+        });
+    });
+
+    // Learning Tool 1: CSF Card Toggle
+    function toggleCard(card) {
+        const title = card.querySelector('.csf-card-title');
+        const desc = card.querySelector('.csf-card-desc');
+        
+        if (desc.style.display === 'block') {
+            desc.style.display = 'none';
+            title.style.display = 'block';
+        } else {
+            desc.style.display = 'block';
+            title.style.display = 'none';
+        }
+    }
+
+    // Learning Tool 2: Cost Display
+    function showCost(level) {
+        const display = document.getElementById('cost-display-area');
+        const btns = document.querySelectorAll('.cost-btn');
+        btns.forEach(b => b.classList.remove('active'));
+        
+        // Highlight active button
+        event.target.classList.add('active');
+
+        if (level === 'low') {
+            display.innerHTML = '<strong>低成本 (推薦)</strong>：<br>選項 (A) 溝通流程。建立SOP幾乎只需人力成本，是資源有限時必備的「軟防護」。';
+            display.style.borderLeftColor = '#27ae60';
+        } else if (level === 'mid') {
+            display.innerHTML = '<strong>中成本 (高CP值)</strong>：<br>選項 (C) 新世代防火牆 & (D) 流量清洗(依需付費)。雖然要花錢，但針對攻擊特徵阻擋，效益遠高於單純買頻寬。';
+            display.style.borderLeftColor = '#f39c12';
+        } else if (level === 'high') {
+            display.innerHTML = '<strong>高成本 (不推薦)</strong>：<br>選項 (B) 擴增頻寬。線路費用昂貴，對於大規模 DDoS 往往杯水車薪，不符合「最低成本」原則。';
+            display.style.borderLeftColor = '#c0392b';
+        }
+    }
+
+    // Learning Tool 3: Checklist Progress
+    function updateProgress() {
+        const checks = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+        const checkedCount = Array.from(checks).filter(c => c.checked).length;
+        const total = checks.length;
+        const percentage = (checkedCount / total) * 100;
+        
+        const bar = document.getElementById('checklist-bar');
+        const text = document.getElementById('checklist-text');
+        
+        bar.style.width = percentage + '%';
+        
+        let status = '尚未開始';
+        if (percentage === 100) status = '完善 (Ready for Exam)';
+        else if (percentage >= 75) status = '進階';
+        else if (percentage >= 50) status = '基礎';
+        else if (percentage > 0) status = '起步中';
+        
+        text.innerText = `整體成熟度：${status} (${Math.round(percentage)}%)`;
+    }
+</script>
+
+</body>
+</html>

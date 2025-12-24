@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資訊安全防護實務 - nmap 掃描與資料庫版本偵測</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header Area */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin: 0 0 10px 0;
+        }
+
+        header .meta-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Card Style */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Scenario & Question */
+        .scenario-box {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid var(--accent-color);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        /* Options */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .option-item input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        /* Buttons */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        /* Feedback Area */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion Style for Explanation */
+        .accordion {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .accordion-header {
+            background-color: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            transition: background-color 0.2s;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion-header.active::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: white;
+            padding: 0 15px;
+        }
+
+        .accordion-content.show {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Content Styling */
+        .highlight {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .code-snippet {
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            background-color: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: #c7254e;
+        }
+
+        /* Interactive Tools Styling */
+        .tool-box {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        
+        .tool-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+        }
+
+        .flashcard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .flashcard {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 20px 10px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .flashcard.flipped {
+            background-color: white;
+            color: var(--text-color);
+            border: 2px solid var(--accent-color);
+        }
+
+        .result-display {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            font-family: monospace;
+            min-height: 2em;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+
+        /* Utility */
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>iPAS 資訊安全防護實務</h1>
+            <div class="meta-info">題組 1 - 第 8 題（複選題）</div>
+            <div class="meta-info">檔案：ipas_nmap_mysql_version_scan_q08.html</div>
+        </header>
+
+        <main>
+            <!-- 題目互動區 -->
+            <section class="card" id="quiz-section">
+                <div class="section-title">題目互動區</div>
+                
+                <div class="scenario-box">
+                    <strong>情境描述：</strong><br>
+                    某醫療資訊系統採用 Apache Struts 2 作為開發框架，且版本未及時更新。攻擊者透過惡意 OGNL 語法成功取得遠端程式碼執行（RCE）與 Shell 權限後，開始在內網進行掃描與橫向移動，試圖尋找資料庫伺服器，並蒐集其所使用的服務類型與版本資訊，以利後續入侵與資料竊取。
+                </div>
+
+                <div class="question-text">
+                    8. 攻擊者取得 RCE 後，使用下列哪些 nmap 指令（指令中的 target 請視為要掃描的系統）可以用來掃描 3306 埠，並且可以顯示資料庫服務的版本？（複選）
+                </div>
+
+                <div class="options-group">
+                    <label class="option-item">
+                        <input type="checkbox" name="option" value="A">
+                        (A) nmap -sV -p 3306 target
+                    </label>
+                    <label class="option-item">
+                        <input type="checkbox" name="option" value="B">
+                        (B) nmap -O -p 1-65535 target
+                    </label>
+                    <label class="option-item">
+                        <input type="checkbox" name="option" value="C">
+                        (C) nmap -sS -T5 target
+                    </label>
+                    <label class="option-item">
+                        <input type="checkbox" name="option" value="D">
+                        (D) nmap -sV -p 3306 --script mysql-info target
+                    </label>
+                </div>
+
+                <div id="feedback-area"></div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="checkAnswer()">送出答案</button>
+                    <button class="btn btn-secondary" onclick="resetQuiz()">重作一次</button>
+                    <button class="btn btn-outline" onclick="toggleExplanationArea()">顯示／隱藏解析</button>
+                </div>
+            </section>
+
+            <!-- 解析學習區 -->
+            <section class="card hidden" id="explanation-area">
+                <div class="section-title">解析學習區</div>
+
+                <!-- 1. 題目 -->
+                <div class="accordion">
+                    <div class="accordion-header">【題目重溫】</div>
+                    <div class="accordion-content">
+                        <p>攻擊者取得 RCE 後，使用下列哪些 nmap 指令可以用來掃描 3306 埠，並且可以顯示資料庫服務的版本？</p>
+                    </div>
+                </div>
+
+                <!-- 2. 關鍵字 -->
+                <div class="accordion">
+                    <div class="accordion-header">【第一步：找關鍵字】</div>
+                    <div class="accordion-content">
+                        <p>請留意以下用螢光筆標示的重點：</p>
+                        <ul>
+                            <li><span class="highlight">RCE</span>：遠端程式碼執行，代表攻擊者已控制主機。</li>
+                            <li><span class="highlight">內網掃描</span>：攻擊者正在探索內部網路環境。</li>
+                            <li><span class="highlight">3306 埠</span>：這是 MySQL 資料庫預設的通訊埠。</li>
+                            <li><span class="highlight">顯示服務版本</span>：這是本題最關鍵的限制條件！不僅要知道埠開啟，還要知道版本。</li>
+                            <li><span class="highlight">nmap</span>：使用的掃描工具。</li>
+                            <li><span class="highlight">-sV</span>：Nmap 用來偵測服務版本（Service Version）的參數。</li>
+                            <li><span class="highlight">script</span>：Nmap 的腳本引擎（NSE），可獲取更詳細資訊。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 3. 白話翻譯 -->
+                <div class="accordion">
+                    <div class="accordion-header">【第二步：白話翻譯】</div>
+                    <div class="accordion-content">
+                        <p>用高中生日常口語來說，這題是在問：</p>
+                        <blockquote style="border-left: 3px solid #ccc; padding-left: 10px; font-style: italic;">
+                            「駭客已經進到內網了，他想確認目標主機的資料庫是不是 MySQL，而且非常想知道它的『版本號』是多少。請問下面哪幾個 nmap 指令真的能掃出這些詳細資料？」
+                        </blockquote>
+                        <p><strong>專有名詞解釋：</strong></p>
+                        <ul>
+                            <li><strong>RCE (Remote Code Execution)</strong>：就像駭客拿到了你電腦的遙控器，可以在遠端直接對你的電腦下指令。</li>
+                            <li><strong>3306 埠</strong>：就像是 MySQL 資料庫專用的大門，看到這個門開著，通常裡面就是 MySQL。</li>
+                            <li><strong>-sV</strong>：Nmap 的一個功能開關，專門用來「敲門問對方是誰、幾歲（版本）」。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 4. 解題思路 -->
+                <div class="accordion">
+                    <div class="accordion-header">【第三步：解題思路】</div>
+                    <div class="accordion-content">
+                        <p><strong>這題在考什麼觀念？</strong><br>
+                        nmap 各種參數的用途辨識，特別是「服務版本偵測」的功能。</p>
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li>先找出題目要求的兩個硬性條件：<strong>「掃 3306 埠」</strong> ＋ <strong>「顯示服務版本」</strong>。</li>
+                            <li>檢查選項中的參數，找找看誰有 <span class="code-snippet">-sV</span> (Service Version)。沒有 -sV 的通常只能知道埠是開還是關，無法知道版本。</li>
+                            <li>再看看有沒有額外的 script 可以幫忙撈出資料庫的詳細資訊。</li>
+                        </ol>
+                        <p><strong>原理與規則：</strong></p>
+                        <ul>
+                            <li><span class="code-snippet">nmap -sV</span>：代表進行服務版本偵測，這是獲取版本資訊的標準動作。</li>
+                            <li><span class="code-snippet">mysql-info</span>：這是一個 NSE script，專門用來對 MySQL 進行更深入的探測（如版本、協議等）。</li>
+                            <li>沒有 <span class="code-snippet">-sV</span> 的指令（如 -sS），僅能進行端口掃描，無法解析應用層的版本資訊。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 5. 選項分析 -->
+                <div class="accordion">
+                    <div class="accordion-header">【第四步：選項分析】</div>
+                    <div class="accordion-content">
+                        <ul>
+                            <li><strong>(A) 正確：</strong> <span class="code-snippet">nmap -sV -p 3306 target</span><br>
+                            使用了 <span class="code-snippet">-sV</span> 參數，這是「服務版本偵測」的標準參數，搭配 <span class="code-snippet">-p 3306</span> 指定掃描 MySQL 埠，能成功回傳資料庫版本。</li>
+                            
+                            <li><strong>(B) 錯誤：</strong> <span class="code-snippet">nmap -O -p 1-65535 target</span><br>
+                            <span class="code-snippet">-O</span> 是用來偵測「作業系統（Operating System）」指紋（如 Windows, Linux），與應用程式的「服務版本」無關。即使掃描了所有埠，也看不到 MySQL 的版本號。</li>
+                            
+                            <li><strong>(C) 錯誤：</strong> <span class="code-snippet">nmap -sS -T5 target</span><br>
+                            <span class="code-snippet">-sS</span> 是半開放式（SYN）掃描，只能快速確認埠是否有開啟（Open/Closed），無法與服務進行足夠的互動來取得版本資訊。<span class="code-snippet">-T5</span> 只是代表掃描速度極快。</li>
+                            
+                            <li><strong>(D) 正確：</strong> <span class="code-snippet">nmap -sV -p 3306 --script mysql-info target</span><br>
+                            使用了 <span class="code-snippet">-sV</span> 進行版本偵測，還額外加掛了 <span class="code-snippet">mysql-info</span> 腳本，這能比單純的 -sV 取得更完整、更詳細的 MySQL 服務與版本狀態資訊。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 6. 觀念補充 -->
+                <div class="accordion">
+                    <div class="accordion-header">【觀念補充與延伸】</div>
+                    <div class="accordion-content">
+                        <p><strong>核心觀念定位：</strong><br>
+                        這是 iPAS 防護實務中關於「nmap 參數用途」與「內網橫向移動」的高頻複選題。</p>
+                        <p><strong>定義補充：</strong></p>
+                        <ul>
+                            <li><strong>-sV (Service Version Detection)</strong>：Nmap 會嘗試與目標埠建立連線，讀取對方的 Banner 或回應特徵，來判斷後端實際執行的軟體與版本。</li>
+                            <li><strong>NSE Script</strong>：Nmap Scripting Engine，Nmap 強大的擴充功能，使用 Lua 語言編寫，可以執行漏洞掃描、暴力破解或進階資訊蒐集。</li>
+                        </ul>
+                        <p><strong>觸類旁通（舉一反三）：</strong></p>
+                        <ul>
+                            <li><strong>對比概念</strong>：知道「門是開的（Port Open）」跟知道「門後面是誰（Service Version）」是兩回事。前者用 -sS，後者要用 -sV。</li>
+                            <li><strong>變化題型</strong>：
+                                <ul>
+                                    <li>問：「哪個 nmap 參數可以用來判斷作業系統？」→ 答：<span class="code-snippet">-O</span></li>
+                                    <li>問：「若只想快速確認 3306 是否開啟，不被發現，最簡單的指令？」→ 答：<span class="code-snippet">-sS</span>（SYN Scan）</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 7. 記憶口訣 -->
+                <div class="accordion">
+                    <div class="accordion-header">【記憶口訣】</div>
+                    <div class="accordion-content">
+                        <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold; background: #eee; padding: 10px; border-radius: 5px;">
+                            「看版本，記得 sV；要更細，加 script」
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 8. 常見陷阱 -->
+                <div class="accordion">
+                    <div class="accordion-header">【常見陷阱】</div>
+                    <div class="accordion-content">
+                        <ul>
+                            <li><strong>陷阱一：</strong> 看到選項 (B) 掃描範圍很大（1-65535），就誤以為資料會比較詳細。其實沒有 <span class="code-snippet">-sV</span>，掃再多埠也看不出版本。</li>
+                            <li><strong>陷阱二：</strong> 把 <span class="code-snippet">-T5</span>（掃描速度）誤認成某種掃描技術。它只影響速度，不影響掃描內容的深度。</li>
+                            <li><strong>避坑指南：</strong> 題目只要提到「版本（Version）」，眼睛就先去選項裡找 <span class="code-snippet">-sV</span>，沒有它的選項通常可以直接刪除。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 9. 正確答案 -->
+                <div class="accordion">
+                    <div class="accordion-header">【正確答案】</div>
+                    <div class="accordion-content">
+                        <p style="font-size: 1.5rem; color: var(--success-color); font-weight: bold; text-align: center;">
+                            A、D
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 10. 自我檢測 -->
+                <div class="accordion">
+                    <div class="accordion-header">【自我檢測】</div>
+                    <div class="accordion-content">
+                        <p>試著回答以下問題（不提供標準答案，請自行思考）：</p>
+                        <ol>
+                            <li>如果只用 <span class="code-snippet">nmap -p 3306 target</span>，執行結果會顯示什麼資訊？能看到 MySQL 5.7.33 這種字樣嗎？</li>
+                            <li><span class="code-snippet">--script mysql-info</span> 和單純的 <span class="code-snippet">-sV</span> 在顯示結果上有什麼細微的差別？</li>
+                            <li>假設今天要偵測的是 SSH 服務的版本，nmap 指令應該怎麼下？需要哪些參數？</li>
+                        </ol>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- 學習輔助互動區 -->
+            <section class="card" id="learning-tools">
+                <div class="section-title">學習輔助互動</div>
+
+                <!-- 工具 1: 參數速記卡 -->
+                <div class="tool-box">
+                    <div class="tool-title">1. nmap 參數速記卡（點擊翻牌）</div>
+                    <div class="flashcard-grid">
+                        <div class="flashcard" onclick="toggleCard(this)" data-answer="指定通訊埠">
+                            -p
+                        </div>
+                        <div class="flashcard" onclick="toggleCard(this)" data-answer="服務版本偵測 (Service Version)">
+                            -sV
+                        </div>
+                        <div class="flashcard" onclick="toggleCard(this)" data-answer="TCP SYN 掃描 (半開放)">
+                            -sS
+                        </div>
+                        <div class="flashcard" onclick="toggleCard(this)" data-answer="作業系統偵測 (OS Detection)">
+                            -O
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 工具 2: 指令效果對照器 -->
+                <div class="tool-box">
+                    <div class="tool-title">2. 指令效果對照器</div>
+                    <p style="font-size: 0.9rem;">請勾選參數，看看能取得什麼資訊：</p>
+                    <div style="margin-bottom: 10px;">
+                        <label><input type="checkbox" class="cmd-check" value="port"> <span class="code-snippet">-p</span> (指定埠)</label>
+                        <label><input type="checkbox" class="cmd-check" value="syn"> <span class="code-snippet">-sS</span> (SYN掃描)</label>
+                        <label><input type="checkbox" class="cmd-check" value="version"> <span class="code-snippet">-sV</span> (版本偵測)</label>
+                        <label><input type="checkbox" class="cmd-check" value="os"> <span class="code-snippet">-O</span> (OS偵測)</label>
+                    </div>
+                    <div class="result-display" id="cmd-result">
+                        目前資訊：無
+                    </div>
+                </div>
+
+                <!-- 工具 3: 掃描目的檢核 -->
+                <div class="tool-box">
+                    <div class="tool-title">3. 掃描目的檢核清單</div>
+                    <p style="font-size: 0.9rem;">你的目的是什麼？勾選後推薦你指令：</p>
+                    <div>
+                        <label style="display:block;"><input type="checkbox" class="goal-check" value="open"> 只是要知道埠有沒有開？</label>
+                        <label style="display:block;"><input type="checkbox" class="goal-check" value="service"> 還要知道是什麼服務（HTTP/MySQL）？</label>
+                        <label style="display:block;"><input type="checkbox" class="goal-check" value="version"> 需要精確的版本資訊（如 v5.7.1）？</label>
+                    </div>
+                    <div class="result-display" id="goal-result" style="margin-top:10px; color: var(--accent-color); font-weight:bold;">
+                        推薦指令：請勾選上方目的
+                    </div>
+                </div>
+
+            </section>
+        </main>
+
+        <footer>
+            <p>iPAS 資訊安全防護實務教學專用 | Designed for Offline Use</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- 1. Quiz Logic ---
+        function checkAnswer() {
+            const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+            const userAnswers = Array.from(checkboxes).map(cb => cb.value).sort();
+            const correctAnswers = ['A', 'D'];
+            const feedbackArea = document.getElementById('feedback-area');
+            const explanationArea = document.getElementById('explanation-area');
+
+            // Compare arrays
+            const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctAnswers);
+            
+            feedbackArea.style.display = 'block';
+            
+            if (isCorrect) {
+                feedbackArea.className = 'feedback-correct';
+                feedbackArea.innerHTML = `<strong>完全正確！</strong><br>你的選擇：${userAnswers.join('、')}。<br>恭喜你掌握了 nmap 版本偵測的關鍵參數！請往下滑動查看詳細解析。`;
+                explanationArea.classList.remove('hidden');
+            } else {
+                feedbackArea.className = 'feedback-incorrect';
+                let msg = `<strong>答錯囉！</strong><br>`;
+                if (userAnswers.length === 0) {
+                    msg += "你沒有勾選任何選項。";
+                } else {
+                    msg += `你選了：${userAnswers.join('、')}。<br>`;
+                }
+                msg += `正確答案是 <strong>A、D</strong>。<br>提示：題目重點是「顯示版本」，請找找看哪個參數有 Version 的意思。`;
+                feedbackArea.innerHTML = msg;
+            }
+        }
+
+        function resetQuiz() {
+            const checkboxes = document.querySelectorAll('input[name="option"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            const feedbackArea = document.getElementById('feedback-area');
+            feedbackArea.style.display = 'none';
+            feedbackArea.innerHTML = '';
+            document.getElementById('explanation-area').classList.add('hidden');
+            
+            // Close all accordions
+            const contents = document.querySelectorAll('.accordion-content');
+            const headers = document.querySelectorAll('.accordion-header');
+            contents.forEach(c => {
+                c.style.maxHeight = null;
+                c.classList.remove('show');
+            });
+            headers.forEach(h => h.classList.remove('active'));
+        }
+
+        function toggleExplanationArea() {
+            const area = document.getElementById('explanation-area');
+            area.classList.toggle('hidden');
+        }
+
+        // --- 2. Accordion Logic ---
+        document.querySelectorAll('.accordion-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                
+                // Toggle active state
+                header.classList.toggle('active');
+                content.classList.toggle('show');
+
+                // Smooth height transition
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        });
+
+        // --- 3. Interactive Tools Logic ---
+
+        // Flashcards
+        function toggleCard(card) {
+            card.classList.toggle('flipped');
+            if (card.classList.contains('flipped')) {
+                card.textContent = card.getAttribute('data-answer');
+                card.style.backgroundColor = 'white';
+                card.style.color = '#333';
+                card.style.border = '2px solid #3498db';
+            } else {
+                // Reset to original text based on card position or hardcoded logic
+                // For simplicity, we can't easily retrieve original text without storing it.
+                // Let's store original text in a data attribute on init or infer.
+                // Simpler way: Check the data-answer and reverse logic hardcoded for this demo
+                const answer = card.getAttribute('data-answer');
+                let question = "";
+                if(answer.includes("指定")) question = "-p";
+                if(answer.includes("服務版本")) question = "-sV";
+                if(answer.includes("SYN")) question = "-sS";
+                if(answer.includes("作業系統")) question = "-O";
+                
+                card.textContent = question;
+                card.style.backgroundColor = '#3498db';
+                card.style.color = 'white';
+                card.style.border = 'none';
+            }
+        }
+
+        // Command Matcher
+        const cmdChecks = document.querySelectorAll('.cmd-check');
+        const cmdResult = document.getElementById('cmd-result');
+
+        cmdChecks.forEach(chk => {
+            chk.addEventListener('change', updateCmdResult);
+        });
+
+        function updateCmdResult() {
+            let info = [];
+            const checkedVals = Array.from(cmdChecks).filter(c => c.checked).map(c => c.value);
+            
+            if (checkedVals.length === 0) {
+                cmdResult.innerText = "目前資訊：無";
+                return;
+            }
+
+            if (checkedVals.includes('port')) info.push("目標埠號是否開放");
+            if (checkedVals.includes('syn')) info.push("目標埠號狀態 (Open/Closed)");
+            if (checkedVals.includes('version')) info.push("服務名稱 (e.g., Apache, MySQL) 與 詳細版本號");
+            if (checkedVals.includes('os')) info.push("推測的作業系統類型 (e.g., Linux, Windows)");
+
+            cmdResult.innerHTML = "<strong>可獲得資訊：</strong><br>" + info.join("、");
+        }
+
+        // Checklist
+        const goalChecks = document.querySelectorAll('.goal-check');
+        const goalResult = document.getElementById('goal-result');
+
+        goalChecks.forEach(chk => {
+            chk.addEventListener('change', updateGoalResult);
+        });
+
+        function updateGoalResult() {
+            const vals = Array.from(goalChecks).filter(c => c.checked).map(c => c.value);
+            let cmd = "nmap ";
+            
+            if (vals.length === 0) {
+                goalResult.innerText = "推薦指令：請勾選上方目的";
+                return;
+            }
+
+            // Logic builder
+            if (vals.includes('version')) {
+                cmd += "-sV ";
+            } else if (vals.includes('service')) {
+                cmd += "-sV "; // Service detection usually implies version or at least -sV is best practice
+            } else {
+                // Just open port check
+                cmd += "-sS "; // Default stealth scan
+            }
+
+            cmd += "target";
+            
+            let explanation = "";
+            if (vals.includes('version')) {
+                explanation = " (需要 -sV 來抓取版本)";
+            } else if (vals.includes('service') && !vals.includes('version')) {
+                explanation = " (建議用 -sV 來確認服務類型)";
+            }
+
+            goalResult.innerHTML = `推薦指令：<span class="code-snippet">${cmd}</span>${explanation}`;
+        }
+
+    </script>
+</body>
+</html>

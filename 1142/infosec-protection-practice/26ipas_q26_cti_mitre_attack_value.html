@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安【題組 3】第 26 題：MITRE ATT&CK 解析</title>
+    <style>
+        :root {
+            --primary-color: #003366; /* 專業深藍 */
+            --secondary-color: #f4f7f6; /* 淺灰背景 */
+            --accent-color: #0056b3; /* 亮藍按鈕 */
+            --correct-color: #2e7d32; /* 正確綠 */
+            --error-color: #c62828; /* 錯誤紅 */
+            --text-color: #333333;
+            --border-color: #ddd;
+            --highlight-bg: #e3f2fd;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-height: 100vh;
+        }
+
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+            margin-top: 30px;
+        }
+
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: #e0e0e0;
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--correct-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* 情境區塊 */
+        .scenario-box {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .scenario-img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            border: 1px solid #ccc;
+        }
+
+        /* 題目區塊 */
+        .question-box {
+            background-color: var(--highlight-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f0f0;
+        }
+
+        .option-label input {
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+
+        /* 按鈕區 */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .btn-submit:hover {
+            background-color: #002244;
+        }
+
+        .btn-reset {
+            background-color: #757575;
+            color: #fff;
+        }
+
+        .btn-reset:hover {
+            background-color: #555;
+        }
+
+        .feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-correct {
+            background-color: #e8f5e9;
+            color: var(--correct-color);
+            border: 1px solid var(--correct-color);
+        }
+
+        .feedback-error {
+            background-color: #ffebee;
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        /* 解析折疊區塊 */
+        .accordion {
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f9f9f9;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header:hover {
+            background-color: #eef;
+        }
+
+        .accordion-content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            background-color: #fff;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+
+        .accordion-content.active {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion-icon {
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+
+        .accordion-header.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 重點標示 */
+        .highlight-term {
+            color: var(--error-color);
+            font-weight: bold;
+            background-color: #fff3e0;
+            padding: 0 4px;
+        }
+
+        .explanation-text {
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        /* 自我檢測 */
+        .self-check-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .answer-reveal {
+            margin-top: 10px;
+            color: var(--primary-color);
+            font-weight: bold;
+            display: none;
+            padding: 5px;
+            background-color: #e3f2fd;
+        }
+
+        .btn-reveal {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        
+        .btn-reveal:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* 標籤 */
+        .tag {
+            display: inline-block;
+            background-color: #666;
+            color: white;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            border-radius: 12px;
+            margin-bottom: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 學習進度條 -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>iPAS 資安題組 3：第 26 題解析</h1>
+            <p style="color: #666; font-size: 0.9rem;">主題：CTI 威脅情資與 MITRE ATT&CK 框架</p>
+        </header>
+
+        <!-- 情境區 -->
+        <section class="scenario-box">
+            <span class="tag">題組情境</span>
+            <p><strong>情境說明：</strong></p>
+            <p>鑑於近期持續不斷的 APT 攻擊，資安營運中心（Security Operations Center, SOC）在利用網路威脅情資（Cyber Threat Intelligence, CTI）時，需評估不同情資與分析框架的價值與用途。</p>
+            <img src="https://i.meee.com.tw/fNga74B.jpg" alt="CTI 與 SOC 情境示意圖" class="scenario-img">
+        </section>
+
+        <!-- 題目區 -->
+        <section class="question-box">
+            <span class="tag">單選題</span>
+            <div class="question-text">
+                26. 鑑於近期持續不斷的 APT 攻擊，資安營運中心（SOC）在利用網路威脅情資（CTI）時，對於採用 MITRE ATT&CK 這類框架的主要價值，下列描述何者最為正確？
+            </div>
+
+            <div class="options-group" id="quizForm">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A">
+                    <span>(A) MITRE ATT&CK 提供詳盡的特定攻擊者 IP 位址和網域名稱列表，便於 SOC 立即封鎖，是唯一實用的情資來源</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B">
+                    <span>(B) MITRE ATT&CK 能夠自動且絕對地將攻擊歸因於特定國家級行為者，簡化歸因過程，減少分析師工作量</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C">
+                    <span>(C) MITRE ATT&CK 的主要目的是為 SOC 提供自動化的威脅偵測工具，取代人工分析師的判斷，達到全面自動化</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D">
+                    <span>(D) MITRE ATT&CK 提供一套基於真實世界觀察的威脅者戰術、技術與程序（TTPs）知識庫，有助於 SOC 理解威脅者行為模式</span>
+                </label>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-submit" onclick="checkAnswer()">送出答案</button>
+                <button class="btn-reset" onclick="resetQuiz()">重設</button>
+            </div>
+
+            <!-- 回饋區 -->
+            <div id="feedback" class="feedback-area"></div>
+        </section>
+
+        <!-- 解析區 (Accordion) -->
+        <h2>完整解析（點擊展開）</h2>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                第一步：找關鍵字
+                <span class="accordion-icon">▼</span>
+            </div>
+            <div class="accordion-content">
+                <p>請先圈出題目中的資安專有名詞：</p>
+                <ul>
+                    <li><strong>APT 攻擊</strong>：<span class="highlight-term">進階持續性威脅</span>（長期潛伏、目標明確、手法複雜的駭客攻擊）。</li>
+                    <li><strong>SOC</strong>：<span class="highlight-term">資安營運中心</span>（負責全天候監控、分析告警、處理資安事件的專責單位）。</li>
+                    <li><strong>CTI</strong>：<span class="highlight-term">網路威脅情資</span>（收集並整理攻擊者的相關資訊，用來輔助防禦決策）。</li>
+                    <li><strong>MITRE ATT&CK</strong>：一個全球通用的<span class="highlight-term">攻擊行為知識庫</span>（整理攻擊者「怎麼打」的戰術與技術）。</li>
+                    <li><strong>主要價值</strong>：題目問的是這個框架「原本設計的用途」，而不是它能不能順便做其他事。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                第二步：白話翻譯
+                <span class="accordion-icon">▼</span>
+            </div>
+            <div class="accordion-content">
+                <p>用最簡單的話來說，這題是在問：</p>
+                <p class="highlight-term">「SOC 為什麼要用 MITRE ATT&CK？這個框架真正幫我們解決了什麼問題？」</p>
+                <p>是幫我們「自動抓人」？還是幫我們「看懂對手的招式」？</p>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                第三步：解題思路
+                <span class="accordion-icon">▼</span>
+            </div>
+            <div class="accordion-content">
+                <p><strong>核心觀念：</strong>CTI 框架的定位在於「理解行為模式」，而非提供即時黑名單。</p>
+                <ol>
+                    <li><strong>分辨差異：</strong>情資有分「指紋特徵」（如 IP、Hash，容易改變）與「行為模式」（如 TTPs，難以改變）。MITRE ATT&CK 屬於後者。</li>
+                    <li><strong>判斷屬性：</strong>MITRE ATT&CK 是一個「知識庫（Knowledge Base）」與「矩陣圖」，它本身不是軟體工具，也不會自動幫你封鎖 IP。</li>
+                    <li><strong>選擇邏輯：</strong>任何聲稱能「完全自動化」、「絕對歸因」、「取代人工」的選項，通常在資安管理題目中都是錯誤的。</li>
+                </ol>
+                <p><strong>比喻：</strong>MITRE ATT&CK 就像是警察局的<strong>「犯罪手法百科全書」</strong>（教你小偷通常怎麼撬開門鎖），而不是列出所有罪犯電話號碼的「黑名單」。</p>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                第四步：選項詳細分析
+                <span class="accordion-icon">▼</span>
+            </div>
+            <div class="accordion-content">
+                <div style="margin-bottom: 15px;">
+                    <strong style="color:var(--error-color)">× (A) 提供 IP 與網域名稱列表，便於封鎖...</strong>
+                    <br>
+                    <span class="explanation-text">錯在把 ATT&CK 當成黑名單。IP 和網域屬於「IOC（入侵指標）」，這些資訊變化很快，不是 ATT&CK 框架的主要內容。ATT&CK 關注的是「TTPs（戰術、技術、程序）」。</span>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong style="color:var(--error-color)">× (B) 自動且絕對地歸因於特定國家...</strong>
+                    <br>
+                    <span class="explanation-text">錯在「自動且絕對」。網路攻擊的歸因（Attribution）非常困難，通常需要人工專家分析多方證據，且容易被偽造。ATT&CK 只是提供參考，無法自動定罪。</span>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong style="color:var(--error-color)">× (C) 提供自動化工具，取代人工分析師...</strong>
+                    <br>
+                    <span class="explanation-text">錯在「取代人工」與「工具」。ATT&CK 是知識架構，不是軟體。SOC 仍需依賴分析師利用此架構來設計防禦策略，無法完全被自動化取代。</span>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong style="color:var(--correct-color)">✓ (D) 提供基於真實觀察的 TTPs 知識庫，理解行為模式</strong>
+                    <br>
+                    <span class="explanation-text">正確。這正是 MITRE ATT&CK 的定義：它是基於真實世界攻擊數據，整理出的 TTPs（Tactics, Techniques, and Procedures），幫助防禦者理解攻擊者的思考與行動方式。</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                觀念補充、記憶口訣與常見陷阱
+                <span class="accordion-icon">▼</span>
+            </div>
+            <div class="accordion-content">
+                <h4>核心名詞解釋</h4>
+                <ul>
+                    <li><strong>TTPs</strong>：
+                        <ul>
+                            <li><strong>Tactics (戰術)</strong>：攻擊者的「目的」（例如：想取得初始存取權）。</li>
+                            <li><strong>Techniques (技術)</strong>：攻擊者「如何」達成目的（例如：發送釣魚郵件）。</li>
+                            <li><strong>Procedures (程序)</strong>：具體的執行細節。</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4>記憶口訣</h4>
+                <div style="background-color: #f0f4c3; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <p style="margin:0;"><strong>「ATT&CK 看行為，不給黑名單。」</strong></p>
+                    <p style="margin:5px 0 0 0;"><strong>「不是抓兇手，是懂怎麼打。」</strong></p>
+                </div>
+
+                <h4>常見陷阱</h4>
+                <ul>
+                    <li>看到「情資」就以為一定是 IP 或病毒雜湊值 (Hash)。</li>
+                    <li>誤以為「框架 (Framework)」等於「自動化防毒軟體」。</li>
+                    <li>看到「國家級駭客」就選歸因，忽略了歸因的困難性。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 自我檢測區 -->
+        <h2>自我檢測（點擊按鈕查看解答）</h2>
+        <div class="scenario-box">
+            <div class="self-check-item">
+                <p><strong>問題 1：</strong>如果 SOC 的目標是「快速且自動化地封鎖」已知的惡意連線，應該優先使用哪一類情資（IOC 還是 TTPs）？</p>
+                <button class="btn-reveal" onclick="toggleReveal('ans1')">顯示答案</button>
+                <div id="ans1" class="answer-reveal">
+                    答案：IOC（如 IP 黑名單、惡意網域）。因為它們格式固定，防火牆能直接讀取並阻擋。
+                </div>
+            </div>
+
+            <div class="self-check-item">
+                <p><strong>問題 2：</strong>MITRE ATT&CK 是否能「單獨」用來判定攻擊者是誰（例如判定是中國或俄羅斯的駭客）？</p>
+                <button class="btn-reveal" onclick="toggleReveal('ans2')">顯示答案</button>
+                <div id="ans2" class="answer-reveal">
+                    答案：不能。不同駭客組織可能使用相同的工具或技術（Living off the Land），必須搭配其他情資佐證。
+                </div>
+            </div>
+
+            <div class="self-check-item" style="border-bottom: none;">
+                <p><strong>問題 3：</strong>在金字塔痛苦指數（Pyramid of Pain）中，TTPs 位於最頂端，代表改變它對攻擊者來說最困難，還是最簡單？</p>
+                <button class="btn-reveal" onclick="toggleReveal('ans3')">顯示答案</button>
+                <div id="ans3" class="answer-reveal">
+                    答案：最困難。一旦防禦者掌握了行為模式（TTPs）並進行攔截，攻擊者必須重新學習或發明新打法，成本極高。
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 進度追蹤變數
+        let hasAnswered = false;
+        let hasOpenedAccordion = false;
+        let hasCheckedSelf = false;
+
+        function updateProgress() {
+            let progress = 0;
+            if (hasAnswered) progress += 40;
+            if (hasOpenedAccordion) progress += 30;
+            if (hasCheckedSelf) progress += 30;
+            
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // 檢查答案邏輯
+        function checkAnswer() {
+            const options = document.getElementsByName('answer');
+            let selectedValue = null;
+            
+            for (const option of options) {
+                if (option.checked) {
+                    selectedValue = option.value;
+                    break;
+                }
+            }
+
+            const feedbackDiv = document.getElementById('feedback');
+            feedbackDiv.style.display = 'block';
+
+            if (!selectedValue) {
+                feedbackDiv.className = 'feedback-area feedback-error';
+                feedbackDiv.innerHTML = '<strong>請先選擇一個選項！</strong>';
+                return;
+            }
+
+            hasAnswered = true;
+            updateProgress();
+
+            if (selectedValue === 'D') {
+                feedbackDiv.className = 'feedback-area feedback-correct';
+                feedbackDiv.innerHTML = `
+                    <strong>答對了！(D) 是正確答案。</strong><br>
+                    <p>觀念正確：MITRE ATT&CK 的核心價值正是提供 TTPs 知識庫，協助理解攻擊行為。</p>
+                    <p>請務必閱讀下方解析，加深對其他錯誤選項的理解。</p>
+                `;
+            } else {
+                feedbackDiv.className = 'feedback-area feedback-error';
+                let hint = '';
+                if (selectedValue === 'A') hint = '提示：ATT&CK 不是黑名單列表，它更關注「行為」。';
+                if (selectedValue === 'B') hint = '提示：歸因（找兇手）很難自動化，也不是此框架主要目的。';
+                if (selectedValue === 'C') hint = '提示：ATT&CK 是知識架構，不是自動化軟體工具。';
+                
+                feedbackDiv.innerHTML = `
+                    <strong>答錯了。</strong><br>
+                    <p>${hint}</p>
+                    <p>建議展開下方的「第四步：選項詳細分析」查看原因。</p>
+                `;
+            }
+        }
+
+        // 重設測驗
+        function resetQuiz() {
+            const options = document.getElementsByName('answer');
+            for (const option of options) {
+                option.checked = false;
+            }
+            const feedbackDiv = document.getElementById('feedback');
+            feedbackDiv.style.display = 'none';
+            feedbackDiv.innerHTML = '';
+            
+            // 重設進度條邏輯可選，這裡選擇不重設已獲得的知識進度
+            // window.scrollTo(0, 0); // 選擇性回到頂部
+        }
+
+        // 折疊區塊控制
+        function toggleAccordion(header) {
+            header.classList.toggle('active');
+            const content = header.nextElementSibling;
+            
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                content.classList.remove('active');
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                content.classList.add('active');
+                
+                // 記錄進度
+                hasOpenedAccordion = true;
+                updateProgress();
+            }
+        }
+
+        // 自我檢測顯示答案
+        function toggleReveal(id) {
+            const answerDiv = document.getElementById(id);
+            const btn = answerDiv.previousElementSibling;
+            
+            if (answerDiv.style.display === 'block') {
+                answerDiv.style.display = 'none';
+                btn.textContent = '顯示答案';
+            } else {
+                answerDiv.style.display = 'block';
+                btn.textContent = '隱藏答案';
+                
+                // 記錄進度
+                hasCheckedSelf = true;
+                updateProgress();
+            }
+        }
+    </script>
+</body>
+</html>

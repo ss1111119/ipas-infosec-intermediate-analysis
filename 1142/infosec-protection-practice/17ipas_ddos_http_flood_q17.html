@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS資安防護實務 - HTTP Flood 攻擊解析 (ipas_ddos_http_flood_q17.html)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --highlight-color: #f1c40f;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --correct-color: #27ae60;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Header Style */
+        header {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        header .filename {
+            font-family: monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        /* Main Container */
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* Card Style */
+        .card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--primary-color);
+        }
+
+        /* Scenario Section */
+        .scenario-box h2 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .scenario-image-container {
+            text-align: center;
+            margin: 20px 0;
+            background: #eee;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .scenario-image-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .image-caption {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        /* Quiz Section */
+        .quiz-box h3 {
+            color: var(--primary-color);
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f0f0;
+            border-color: var(--primary-color);
+        }
+
+        .option-label input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        .btn-toggle-exp {
+            background-color: #34495e;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        /* Result Area */
+        #result-message {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .result-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section (Accordion) */
+        .explanation-box {
+            display: none; /* Hidden initially */
+        }
+
+        .accordion-item {
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #e9ecef;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #dee2e6;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: #fff;
+        }
+
+        .accordion-content .inner {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        /* Highlight styles */
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>iPAS 資訊安全防護實務</h1>
+    <p>衝刺班精選題庫 | 題組題解析</p>
+    <div class="filename">ipas_ddos_http_flood_q17.html</div>
+</header>
+
+<main>
+    <!-- Scenario Section -->
+    <div class="card scenario-box">
+        <h2>題組 2：情境描述</h2>
+        <p>某公司對外提供展示用的 Web 伺服器，供業務人員在公司外部進行產品 Demo。某日業務反應在外部無法連回展示伺服器，但 MIS 檢查後發現公司對外上網電路正常、內部連外上網亦正常。進一步檢視主機連線記錄與網路側錄資料（如附圖所示），發現短時間內出現大量 HTTP 連線與請求，導致展示伺服器服務異常。</p>
+        
+        <div class="scenario-image-container">
+            <!-- 題目指定圖片 -->
+            <img src="https://i.meee.com.tw/F5HlAqh.jpg" alt="主機連線異常記錄圖表" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22200%22%20height%3D%22200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_1%20text%20%7B%20fill%3A%23AAAAAA%3Bfont-weight%3Abold%3Bfont-family%3AArial%2C%20Helvetica%2C%20Open%20Sans%2C%20sans-serif%2C%20monospace%3Bfont-size%3A10pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_1%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23EEEEEE%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%2250%22%20y%3D%22104%22%3EImage%20Load%20Error%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E'">
+            <div class="image-caption">附圖：展示伺服器連線異常與 HTTP 連線暴增示意</div>
+        </div>
+    </div>
+
+    <!-- Quiz Section -->
+    <div class="card quiz-box">
+        <span class="tag">題號 17</span> <span class="tag" style="background-color: #e67e22;">網路攻擊判斷</span>
+        <h3>請問業務無法在外部展示期間，公司最可能遭受下列什麼類型的攻擊？</h3>
+        
+        <form id="quiz-form">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A">
+                    (A) 跨站腳本攻擊（Cross Site Scripting）
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B">
+                    (B) DNS 洪水攻擊（DNS Flood）
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C">
+                    (C) HTTP 洪水攻擊（HTTP Flood）
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D">
+                    (D) ICMP 洪水攻擊（ICMP Flood）
+                </label>
+            </div>
+
+            <div id="result-message"></div>
+
+            <div class="btn-group">
+                <button type="button" class="btn-submit" onclick="checkAnswer()">送出答案</button>
+                <button type="button" class="btn-retry" onclick="resetQuiz()">重作一次</button>
+                <button type="button" class="btn-toggle-exp" onclick="toggleTotalExplanation()">顯示／隱藏解析</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Explanation Section (Accordion) -->
+    <div class="card explanation-box" id="explanation-area">
+        <h2 style="text-align: center; color: var(--accent-color);">名師詳解區</h2>
+        
+        <!-- Block 1: Question -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【題目】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    請問業務無法在外部展示期間，公司最可能遭受下列什麼類型的攻擊？
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 2: Keywords -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第一步：找關鍵字】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p>老師幫大家把題目跟圖片的重點畫出來，這是解題的線索：</p>
+                    <ul>
+                        <li><span class="highlight">外部無法連線</span>：代表是對外服務阻斷 (DoS/DDoS)。</li>
+                        <li><span class="highlight">公司內部上網正常</span>：代表公司的網路頻寬沒有被塞滿，防火牆跟路口路由器還活著。</li>
+                        <li><span class="highlight">短時間暴增</span>、<span class="highlight">大量連線</span>：典型的洪水攻擊特徵。</li>
+                        <li><span class="highlight">HTTP</span>、<span class="highlight">展示伺服器</span>：攻擊目標鎖定在 Web 服務層 (Layer 7)。</li>
+                    </ul>
+                    <p><strong>圖片觀察重點：</strong>你可以看到圖表中，連線數（Sessions）在某個時間點呈現垂直上升，且標示多為 HTTP 協定，這就是證據。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 3: Vernacular Translation -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第二步：白話翻譯】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p>如果把這題翻譯成高中生日常對話，就是：</p>
+                    <blockquote>
+                        「公司網路沒斷，我們自己上網都很順，但外面的人一直連不上公司的網站。檢查發現，是因為有人用<span class="highlight">大量的 HTTP 請求</span>（像是一秒鐘按幾萬次 F5 重新整理）把網站伺服器塞爆了，導致它忙不過來。」
+                    </blockquote>
+                    <p><strong>名詞解釋：</strong></p>
+                    <ul>
+                        <li><strong>HTTP 洪水攻擊 (HTTP Flood)：</strong> 駭客控制很多台電腦（殭屍網路），假裝成正常用戶，瘋狂向你的網站要網頁，把網站伺服器的 CPU 或記憶體耗光，讓它沒辦法服務真正的客人。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 4: Solving Logic -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第三步：解題思路】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p><strong>核心觀念：</strong>從「服務層異常、網路層正常」判斷這是應用層 DDoS。</p>
+                    <ol>
+                        <li><strong>看現象：</strong>圖片顯示 <span class="highlight">HTTP 連線數</span>短時間內暴增。</li>
+                        <li><strong>刪去法（頻寬 vs 服務）：</strong>題目說「內部連外上網正常」，表示公司的網路管線（頻寬）沒有被塞爆。如果頻寬被塞爆（如 ICMP Flood），內部員工上網也會卡。</li>
+                        <li><strong>鎖定目標：</strong>既然頻寬沒事，但 Web Server 掛了，且充滿 HTTP 請求，這就是針對第 7 層（應用層）的攻擊。</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 5: Options Analysis -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第四步：選項分析】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <ul>
+                        <li><strong>(A) 跨站腳本攻擊 (XSS)：</strong><br>這是讓使用者瀏覽器執行惡意腳本（偷 Cookie 用），通常不會導致伺服器服務中斷。<strong>(X)</strong></li>
+                        <li><strong>(B) DNS 洪水攻擊 (DNS Flood)：</strong><br>這是攻擊 DNS 解析伺服器。雖然會導致連不上（因為找不到 IP），但題目截圖明確顯示是「Web 主機」收到大量「HTTP 請求」，而非 DNS 請求。<strong>(X)</strong></li>
+                        <li><strong>(C) HTTP 洪水攻擊 (HTTP Flood)：</strong><br>完全符合情境。大量 HTTP GET/POST 請求耗盡 Web 伺服器資源，導致服務中斷 (Denial of Service)。<strong>(O)</strong></li>
+                        <li><strong>(D) ICMP 洪水攻擊 (ICMP Flood)：</strong><br>這是俗稱的 Ping 攻擊，屬於網路層 (Layer 3)。這種攻擊通常會塞滿網路頻寬，導致公司「內部連外」也會變慢或斷線，與題目描述不符。<strong>(X)</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 6: Concept Supplement -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【觀念補充與延伸】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p><strong>DDoS 攻擊的層次差異：</strong></p>
+                    <ul>
+                        <li><strong>網路層 (L3/L4) 攻擊：</strong>像 ICMP Flood、SYN Flood。目的是塞滿頻寬或防火牆連線表。症狀是「網路完全癱瘓，內外都不通」。</li>
+                        <li><strong>應用層 (L7) 攻擊：</strong>像 HTTP Flood。目的是耗盡伺服器算力（CPU/RAM）。症狀是「網路看起來是通的（Ping 得到），但網頁開不起來」。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 7: Mnemonics -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【記憶口訣】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold;">
+                        「網站卡、網路好 → 想 HTTP」
+                    </p>
+                    <p style="text-align: center;">(網站掛了但網路乖乖的，就是針對網站應用層的 HTTP 攻擊)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 8: Common Traps -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【常見陷阱】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p>同學最容易選錯的是 <strong>(D) ICMP Flood</strong>。</p>
+                    <p><strong>陷阱邏輯：</strong>看到「無法連線」就直覺想到 DDoS，然後就選了最常聽到的 Ping 攻擊。請務必注意題目說的「內部上網正常」，這句話就是用來排除頻寬型攻擊（ICMP/UDP Flood）的關鍵！</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 9: Correct Answer -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【正確答案】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p style="font-size: 1.5rem; color: var(--correct-color); font-weight: bold; text-align: center;">
+                        (C) HTTP 洪水攻擊（HTTP Flood）
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 10: Self Check -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【自我檢測】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p>考考自己：</p>
+                    <ul>
+                        <li>如果是 DNS Flood，會有什麼現象？(答：網址解不出 IP，但直接用 IP 可能連得上)</li>
+                        <li>如果是 SYN Flood，是針對 TCP 的哪個階段？(答：三向交握的第一步)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer>
+    <p>&copy; iPAS 資安防護實務衝刺班 | 講師專用教材</p>
+</footer>
+
+<script>
+    const correctOption = "C";
+
+    function checkAnswer() {
+        // Get selected value
+        const form = document.getElementById('quiz-form');
+        const selectedValue = form.answer.value;
+        const resultMsg = document.getElementById('result-message');
+        const btnSubmit = document.querySelector('.btn-submit');
+        const btnRetry = document.querySelector('.btn-retry');
+        const btnToggle = document.querySelector('.btn-toggle-exp');
+        const explanationArea = document.getElementById('explanation-area');
+
+        if (!selectedValue) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        // Disable inputs
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach(input => input.disabled = true);
+        btnSubmit.style.display = 'none';
+        btnRetry.style.display = 'inline-block';
+        btnToggle.style.display = 'inline-block';
+
+        // Show Result
+        resultMsg.style.display = 'block';
+        if (selectedValue === correctOption) {
+            resultMsg.className = "result-correct";
+            resultMsg.innerHTML = "🎉 答對了！太棒了！<br>正確答案正是 (C)。趕快往下看解析，把觀念更釐清！";
+            // Auto open explanation if correct
+            explanationArea.style.display = 'block';
+        } else {
+            resultMsg.className = "result-wrong";
+            resultMsg.innerHTML = `⚠️ 哎呀！你選的是 ${selectedValue}，但正確答案是 C。<br>別氣餒，快點開解析看看為什麼選 C！`;
+            // Do not auto open explanation to force user interaction, or optional
+             explanationArea.style.display = 'block';
+        }
+        
+        // Open the first accordion item by default
+        const firstAcc = document.querySelector('.accordion-item');
+        if(firstAcc) {
+            firstAcc.classList.add('active');
+            const content = firstAcc.querySelector('.accordion-content');
+            content.style.maxHeight = content.scrollHeight + "px";
+        }
+    }
+
+    function resetQuiz() {
+        const form = document.getElementById('quiz-form');
+        const resultMsg = document.getElementById('result-message');
+        const btnSubmit = document.querySelector('.btn-submit');
+        const btnRetry = document.querySelector('.btn-retry');
+        const btnToggle = document.querySelector('.btn-toggle-exp');
+        const explanationArea = document.getElementById('explanation-area');
+
+        // Reset inputs
+        form.reset();
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach(input => input.disabled = false);
+
+        // Reset UI
+        resultMsg.style.display = 'none';
+        btnSubmit.style.display = 'inline-block';
+        btnRetry.style.display = 'none';
+        btnToggle.style.display = 'none';
+        explanationArea.style.display = 'none';
+
+        // Close all accordions
+        const accordionItems = document.querySelectorAll('.accordion-item');
+        accordionItems.forEach(item => {
+            item.classList.remove('active');
+            item.querySelector('.accordion-content').style.maxHeight = null;
+        });
+
+        // Scroll to top of quiz
+        document.querySelector('.quiz-box').scrollIntoView({behavior: 'smooth'});
+    }
+
+    function toggleTotalExplanation() {
+        const explanationArea = document.getElementById('explanation-area');
+        if (explanationArea.style.display === 'none' || explanationArea.style.display === '') {
+            explanationArea.style.display = 'block';
+            explanationArea.scrollIntoView({behavior: 'smooth'});
+        } else {
+            explanationArea.style.display = 'none';
+        }
+    }
+
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        const content = item.querySelector('.accordion-content');
+
+        // Toggle active class
+        item.classList.toggle('active');
+
+        // Handle max-height for transition
+        if (item.classList.contains('active')) {
+            content.style.maxHeight = content.scrollHeight + "px";
+        } else {
+            content.style.maxHeight = null;
+        }
+    }
+</script>
+
+</body>
+</html>

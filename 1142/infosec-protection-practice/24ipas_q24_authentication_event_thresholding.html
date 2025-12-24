@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安認證解析 | 題號 24：身份驗證事件閾值</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 深藍專業感 */
+            --accent-color: #3498db; /* 亮藍強調 */
+            --highlight-bg: #fff3cd; /* 重點螢光底色 */
+            --correct-color: #27ae60;
+            --warning-color: #f39c12;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --text-color: #333;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header & Progress */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .progress-container {
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            width: 100%;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background-color: var(--accent-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Cards & Sections */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .tag {
+            display: inline-block;
+            background: var(--primary-color);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            vertical-align: middle;
+        }
+
+        /* Quiz Interaction */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent-color);
+            background-color: #f0f8ff;
+        }
+
+        .option-label input[type="checkbox"] {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-submit { background-color: var(--primary-color); color: white; }
+        .btn-submit:hover { background-color: #1a252f; }
+        
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-answer { background-color: transparent; border: 2px solid var(--accent-color); color: var(--accent-color); }
+        .btn-answer:hover { background-color: var(--accent-color); color: white; }
+
+        .btn-toggle { background-color: #ecf0f1; color: var(--primary-color); font-size: 0.9rem; margin-bottom: 15px; width: 100%; text-align: left;}
+
+        /* Feedback Styles */
+        #feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+        }
+        .feedback-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .feedback-partial { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .feedback-wrong { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Accordion Styles */
+        details {
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background: #fff;
+        }
+
+        summary {
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            background-color: #fcfcfc;
+            list-style: none; /* Hide default triangle */
+            position: relative;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            position: absolute;
+            right: 20px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #eef2f5;
+        }
+
+        .details-content {
+            padding: 20px;
+            background: #fff;
+        }
+
+        /* Content Styling */
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 0 4px;
+            border-radius: 3px;
+        }
+
+        .term {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .badge-step {
+            display: inline-block;
+            background: #333;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+        }
+
+        .list-item {
+            margin-bottom: 12px;
+            padding-left: 10px;
+            border-left: 3px solid #ddd;
+        }
+
+        .trap-box {
+            background-color: #fff0f0;
+            border: 1px solid #ffdcdc;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .mnemonic-box {
+            background-color: #e8f6f3;
+            border: 1px solid #d1f2eb;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        /* Self Check Section */
+        .self-check-item {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 15px;
+        }
+        .reveal-btn {
+            font-size: 0.85rem;
+            padding: 4px 10px;
+            margin-top: 5px;
+            background: #666;
+            color: white;
+        }
+        .answer-text {
+            display: none;
+            margin-top: 8px;
+            color: var(--correct-color);
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .card { padding: 15px; }
+            h1 { font-size: 1.5rem; }
+            .btn-group { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安認證教學解析</h1>
+        <div class="subtitle">單元：資安監控與日誌分析</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <p style="font-size: 0.9rem; text-align: right; color: #666; margin-top: 5px;">學習進度：<span id="progressText">0%</span></p>
+    </header>
+
+    <!-- 題目區塊 -->
+    <div class="card">
+        <span class="tag">複選題</span> <span class="tag" style="background-color: #7f8c8d;">題號 24</span>
+        <h2>題目練習</h2>
+        <div class="question-text">
+            在網路安全的資安監控機制中，其一方式為使用<strong>身份驗證事件閾值 (Authentication Event Thresholding)</strong> 來識別異常使用者行為，透過收集身份驗證事件，來建立使用者活動基準，並分析身份驗證事件是否一致來而達成偵測。<br><br>
+            關於可作為身份驗證事件閾值的資料來源敘述，下列何者最為適切？（請選擇多項）
+        </div>
+
+        <div class="options-group">
+            <label class="option-label">
+                <input type="checkbox" name="quiz" value="A">
+                <span>(A) 虛擬私人網路 (VPN) 伺服器日誌檔</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="quiz" value="B">
+                <span>(B) 網路流量 (Network flow) 日誌檔</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="quiz" value="C">
+                <span>(C) 身份與存取管理 (IDAM) 日誌檔</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="quiz" value="D">
+                <span>(D) 輕量型目錄存取通訊協定 (LDAP) 網路傳輸量</span>
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">提交作答</button>
+            <button class="btn-reset" onclick="resetQuiz()">重設作答</button>
+            <button class="btn-answer" onclick="showAnswer()">顯示正解</button>
+        </div>
+
+        <div id="feedback-area"></div>
+    </div>
+
+    <!-- 控制區 -->
+    <button class="btn-toggle" onclick="toggleAllDetails()">[ 切換 ] 展開 / 收合所有解析內容</button>
+
+    <!-- 解析區塊 -->
+    <div id="explanation-container">
+        
+        <!-- 第一步 -->
+        <details onclick="updateProgress()">
+            <summary><span class="badge-step">STEP 1</span> 找關鍵字</summary>
+            <div class="details-content">
+                <p>解題時請先圈出以下線索，這些決定了你要選什麼樣的答案：</p>
+                <div class="list-item">
+                    <span class="term">身份驗證事件閾值</span>：
+                    <br>白話文：用來判斷「登入行為是否異常」的門檻線。例如「1分鐘內輸入錯誤3次」就是一個閾值。
+                </div>
+                <div class="list-item">
+                    <span class="term">收集身份驗證事件</span>：
+                    <br>這代表資料來源必須包含「登入」、「驗證」、「帳號核對」這些動作。
+                </div>
+                <div class="list-item">
+                    <span class="term">使用者活動基準</span>：
+                    <br>這代表我們要知道「這個人平常怎麼登入的」（例如：平常都用台灣 IP，突然變成俄羅斯 IP）。
+                </div>
+            </div>
+        </details>
+
+        <!-- 第二步 -->
+        <details onclick="updateProgress()">
+            <summary><span class="badge-step">STEP 2</span> 白話翻譯</summary>
+            <div class="details-content">
+                <p style="font-size: 1.1rem; border-left: 4px solid var(--accent-color); padding-left: 10px;">
+                    這題其實是在問：<br>
+                    <strong>「下列哪些資料裡面，真的有記錄『誰在登入』或『正在驗證身份』的動作？」</strong>
+                </p>
+                <p>只要能找出「帳號被驗證」的痕跡，就可以用來判斷這個人是不是怪怪的。</p>
+            </div>
+        </details>
+
+        <!-- 第三步 -->
+        <details onclick="updateProgress()">
+            <summary><span class="badge-step">STEP 3</span> 解題思路</summary>
+            <div class="details-content">
+                <h3>觀念核心：身份驗證監控 ≠ 一般流量監控</h3>
+                <p>要建立「使用者活動基準」，我們必須通過三個過濾網：</p>
+                <ol>
+                    <li><strong>關聯性：</strong>這份資料跟「證明我是誰」有關嗎？</li>
+                    <li><strong>累積性：</strong>這份資料能統計出「某個人的習慣」嗎？</li>
+                    <li><strong>異常指標：</strong>能從中看出登入失敗次數、異常時間或異常來源嗎？</li>
+                </ol>
+                <div class="highlight" style="padding: 10px; margin-top: 10px;">
+                    <strong>原理與規則：</strong><br>
+                    就像大樓警衛看監視器：
+                    <ul>
+                        <li>看「門禁刷卡紀錄」→ 這是身份驗證（知道是誰刷的）。</li>
+                        <li>看「門口馬路車流量」→ 這是一般流量（不知道車裡是誰）。</li>
+                    </ul>
+                    題目要找的是「門禁刷卡紀錄」。
+                </div>
+            </div>
+        </details>
+
+        <!-- 第四步 -->
+        <details onclick="updateProgress()">
+            <summary><span class="badge-step">STEP 4</span> 選項深度分析</summary>
+            <div class="details-content">
+                
+                <div class="list-item">
+                    <strong style="color: var(--correct-color);">(A) VPN 伺服器日誌檔 - [正確]</strong>
+                    <p><strong>白話解釋：</strong>VPN (虛擬私人網路) 是員工從家裡連進公司內網的通道。</p>
+                    <p><strong>為什麼選：</strong>VPN 日誌會詳細記錄「帳號 UserA 在 03:00 從 IP 1.2.3.4 嘗試登入，結果失敗」。這完全符合身份驗證事件的定義。</p>
+                </div>
+
+                <div class="list-item">
+                    <strong style="color: var(--error-color);">(B) 網路流量 (Network flow) 日誌檔 - [錯誤]</strong>
+                    <p><strong>白話解釋：</strong>NetFlow 就像是紀錄水管裡流過多少水、流向哪裡。</p>
+                    <p><strong>錯在哪：</strong>它只紀錄 IP 對 IP 的連線封包大小與時間，<strong>通常不會紀錄「使用者帳號」</strong>，也看不出是在傳檔案還是在登入。它屬於「網路層」監控，而非「身份層」。</p>
+                </div>
+
+                <div class="list-item">
+                    <strong style="color: var(--correct-color);">(C) IDAM 日誌檔 - [正確]</strong>
+                    <p><strong>白話解釋：</strong>IDAM (身份與存取管理系統) 就是專門管帳號、權限的大總管。</p>
+                    <p><strong>為什麼選：</strong>這就是它的本業！所有的授權、登入、改密碼紀錄都在這裡，是建立使用者行為基準最核心的資料。</p>
+                </div>
+
+                <div class="list-item">
+                    <strong style="color: var(--correct-color);">(D) LDAP 網路傳輸量 - [正確]</strong>
+                    <p><strong>白話解釋：</strong>LDAP (輕量型目錄存取通訊協定) 是一種標準，電腦常用它去問伺服器：「這個帳號密碼對不對？」。</p>
+                    <p><strong>為什麼選：</strong>雖然是看「傳輸量」，但如果是針對 LDAP 協定的傳輸量暴增，通常代表有<strong>大量的身份驗證請求</strong>（例如有人在暴力破解猜密碼），這可以直接反映驗證事件的異常。</p>
+                </div>
+
+            </div>
+        </details>
+
+        <!-- 觀念補充 -->
+        <details onclick="updateProgress()">
+            <summary><span class="badge-step">BONUS</span> 記憶口訣與陷阱</summary>
+            <div class="details-content">
+                
+                <h3>記憶口訣</h3>
+                <div class="mnemonic-box">
+                    「驗證看身分，不是看流量」<br>
+                    「有帳號、有登入，才叫驗證事件」
+                </div>
+
+                <h3>常見陷阱</h3>
+                <div class="trap-box">
+                    <p><strong>陷阱：</strong>看到選項 (B) 有「Network」和「Log」覺得很專業就選了。</p>
+                    <p><strong>避坑指南：</strong>題目關鍵字是 <strong>Authentication (驗證)</strong>。Network flow (流量) 主要是看頻寬跟連線路徑，就像看到一輛車經過，但不知道駕駛是誰，無法判斷該「駕駛」的行為是否異常。</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- 自我檢測 -->
+        <details onclick="updateProgress()">
+            <summary><span class="badge-step">TEST</span> 自我檢測</summary>
+            <div class="details-content">
+                <p>試試看，你真的懂了嗎？</p>
+
+                <div class="self-check-item">
+                    <div>1. 哪一種資料最適合用來偵測「暴力破解 (Brute Force)」的帳號登入嘗試？</div>
+                    <button class="reveal-btn" onclick="toggleAnswer('ans1')">看答案</button>
+                    <div id="ans1" class="answer-text">IDAM 日誌或 VPN 日誌（任何有紀錄「登入失敗」次數的紀錄）。</div>
+                </div>
+
+                <div class="self-check-item">
+                    <div>2. 若只看到大量封包從 A 傳到 B，但不知道內容與帳號，這屬於哪種監控？</div>
+                    <button class="reveal-btn" onclick="toggleAnswer('ans2')">看答案</button>
+                    <div id="ans2" class="answer-text">網路流量監控 (Network Flow Monitoring)。</div>
+                </div>
+
+                <div class="self-check-item">
+                    <div>3. 若題目改成「帳號被盜用後的異常登入」，我們通常會檢查哪兩個維度？</div>
+                    <button class="reveal-btn" onclick="toggleAnswer('ans3')">看答案</button>
+                    <div id="ans3" class="answer-text">時間（如：凌晨登入）與 地點（如：IP 來自國外）。</div>
+                </div>
+
+            </div>
+        </details>
+    </div>
+
+    <footer style="text-align: center; margin-top: 40px; color: #999; font-size: 0.8rem; border-top: 1px solid #ddd; padding-top: 20px;">
+        iPAS 資安認證互動教材 | 此網頁僅供教學練習使用
+    </footer>
+
+</div>
+
+<script>
+    // 正確答案設定
+    const CORRECT_ANSWERS = ['A', 'C', 'D'];
+    
+    // 進度條相關變數
+    let quizAttempted = false;
+    
+    function checkAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="quiz"]:checked');
+        const feedbackArea = document.getElementById('feedback-area');
+        const selectedValues = Array.from(checkboxes).map(cb => cb.value);
+
+        if (selectedValues.length === 0) {
+            feedbackArea.style.display = 'block';
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.innerHTML = "⚠️ 請至少選擇一個選項。";
+            return;
+        }
+
+        // 判斷邏輯
+        // 1. 是否包含錯誤選項 (B) -> 全錯
+        // 2. 是否完全等於 ['A', 'C', 'D'] -> 全對
+        // 3. 否則 -> 部分正確
+
+        const hasWrongOption = selectedValues.includes('B');
+        const isExactMatch = selectedValues.length === CORRECT_ANSWERS.length && 
+                             selectedValues.every(val => CORRECT_ANSWERS.includes(val));
+
+        feedbackArea.style.display = 'block';
+
+        if (hasWrongOption) {
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.innerHTML = "❌ 回答錯誤。<br>提示：其中有一個選項屬於「網路層」流量，不包含使用者帳號資訊，無法做為身份驗證基準。";
+        } else if (isExactMatch) {
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = "✅ 完全正確！<br>A, C, D 皆包含身份驗證的關鍵資訊（帳號、登入行為、請求量）。";
+        } else {
+            feedbackArea.className = 'feedback-partial';
+            feedbackArea.innerHTML = "⚠️ 部分正確。<br>你選的選項是對的，但還有漏網之魚喔！請再找找看還有哪些也跟「驗證」有關？";
+        }
+
+        quizAttempted = true;
+        updateProgress();
+    }
+
+    function resetQuiz() {
+        const checkboxes = document.querySelectorAll('input[name="quiz"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'none';
+        
+        quizAttempted = false;
+        updateProgress();
+    }
+
+    function showAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="quiz"]');
+        checkboxes.forEach(cb => {
+            cb.checked = CORRECT_ANSWERS.includes(cb.value);
+        });
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'block';
+        feedbackArea.className = 'feedback-correct';
+        feedbackArea.innerHTML = "💡 正解：A、C、D<br>請參考下方解析了解原因。";
+
+        quizAttempted = true;
+        updateProgress();
+    }
+
+    // 展開/收合所有細節
+    let allExpanded = false;
+    function toggleAllDetails() {
+        const details = document.querySelectorAll('details');
+        allExpanded = !allExpanded;
+        details.forEach(detail => {
+            detail.open = allExpanded;
+        });
+        updateProgress();
+    }
+
+    // 自我檢測答案開關
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    }
+
+    // 更新進度條
+    function updateProgress() {
+        const totalItems = 7; // 1 Quiz + 6 Accordion Sections
+        let currentProgress = 0;
+
+        // Check quiz status
+        if (quizAttempted) currentProgress += 1;
+
+        // Check open details
+        const details = document.querySelectorAll('details');
+        details.forEach(det => {
+            if (det.open) currentProgress += 1;
+        });
+
+        // Calculate percentage
+        const percentage = Math.min(100, Math.round((currentProgress / totalItems) * 100));
+        
+        document.getElementById('progressBar').style.width = percentage + "%";
+        document.getElementById('progressText').innerText = percentage + "%";
+    }
+</script>
+
+</body>
+</html>

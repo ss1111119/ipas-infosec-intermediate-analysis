@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題目解析：Android TEE</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e67e22;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f5f7fa;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-radius: 8px;
+            --shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            height: 10px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background-color: var(--success-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            text-align: right;
+            margin-top: 2px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 10px;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Question Section */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-btn {
+            padding: 15px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            border-color: var(--secondary-color);
+            background-color: #f0f8ff;
+        }
+
+        .option-btn.correct {
+            background-color: #d4edda;
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .option-btn.wrong {
+            background-color: #f8d7da;
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        .feedback-area {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .feedback-area.show {
+            display: block;
+        }
+
+        /* Accordion / Content Sections */
+        .accordion-header {
+            width: 100%;
+            text-align: left;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+        }
+
+        .accordion-header:hover {
+            background-color: #f9f9f9;
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-top: none;
+            background: white;
+            margin-top: -10px;
+            margin-bottom: 15px;
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        /* Content Styling */
+        .keyword {
+            background-color: #fff3cd; /* Yellow highlight */
+            padding: 0 4px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .highlight-box {
+            background-color: #e8f4fd;
+            border-left: 4px solid var(--secondary-color);
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .term-def {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .step-list {
+            list-style-type: none;
+        }
+
+        .step-list li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .step-list li::before {
+            content: "•";
+            color: var(--secondary-color);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        /* Self Check */
+        .self-check-item {
+            border: 1px solid #eee;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+            background-color: #fff;
+        }
+
+        .reveal-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .reveal-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .answer-reveal {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        /* Footer Controls */
+        .footer-controls {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .reset-btn {
+            background-color: var(--text-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .reset-btn:hover {
+            background-color: black;
+        }
+
+        /* Helpers */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container" style="padding: 0;">
+        <h1>iPAS 資安題庫解析 #23</h1>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text">學習進度：<span id="progressText">0%</span></div>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- Question Section -->
+    <div class="card" id="questionCard">
+        <div class="section-title">題目練習</div>
+        <p class="question-text">
+            Android 作業系統為提昇安全性，在專用硬體元件中提供下列何項生成/保護加密金鑰的機制？
+        </p>
+        <div class="options-grid">
+            <button class="option-btn" onclick="checkAnswer('A', this)">(A) 共用偏好設定(Shared Preferences)</button>
+            <button class="option-btn" onclick="checkAnswer('B', this)">(B) 內部儲存(Internal Storage)</button>
+            <button class="option-btn" onclick="checkAnswer('C', this)">(C) 可信執行環境(Trusted Execution Environment, TEE)</button>
+            <button class="option-btn" onclick="checkAnswer('D', this)">(D) 外部儲存(External Storage)</button>
+        </div>
+        <div id="feedback" class="feedback-area"></div>
+    </div>
+
+    <!-- Solution Section (Collapsed initially) -->
+    <div id="solutionSection" class="hidden">
+        <div class="section-title" style="margin-top: 20px; margin-bottom: 10px;">完整解析</div>
+        
+        <!-- Step 1 & 2: Keywords & Translation -->
+        <button class="accordion-header" onclick="toggleAccordion('acc1')">
+            <span>第一步與第二步：關鍵字與白話翻譯</span>
+            <span>▼</span>
+        </button>
+        <div id="acc1" class="accordion-content">
+            <h3>【第一步：找關鍵字】</h3>
+            <p style="margin-bottom: 15px;">
+                <span class="keyword">Android</span>、<span class="keyword">提昇安全性</span>、<span class="keyword">專用硬體元件</span>、<span class="keyword">生成/保護加密金鑰</span>、<span class="keyword">TEE</span>
+            </p>
+            <div class="highlight-box">
+                <strong>為什麼是線索？</strong><br>
+                題目特別強調「專用硬體元件」，這代表答案不能只是手機裡的一個「資料夾」或「軟體設定」，而必須是硬體層級的保護機制。
+            </div>
+
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+
+            <h3>【第二步：白話翻譯】</h3>
+            <p>
+                這題用日常口語來說就是：<br>
+                <strong>「請問在 Android 手機裡面，哪一個地方像是『獨立的實體保險箱』，可以用硬體把加密金鑰鎖起來，讓壞人或惡意程式偷不走？」</strong>
+            </p>
+        </div>
+
+        <!-- Step 3: Logic -->
+        <button class="accordion-header" onclick="toggleAccordion('acc2')">
+            <span>第三步：解題思路與核心觀念</span>
+            <span>▼</span>
+        </button>
+        <div id="acc2" class="accordion-content">
+            <p><strong>核心考點：</strong>行動裝置的硬體信任根與金鑰儲存機制。</p>
+            <br>
+            <h4>解題步驟：</h4>
+            <ul class="step-list">
+                <li>看到「硬體元件」先刪除純軟體選項（如 A 和 D）。</li>
+                <li>比較剩下的內部儲存與 TEE，誰才是「專用」且「隔離」的環境？</li>
+                <li>確認 TEE 的定義符合「生成與保護金鑰」。</li>
+            </ul>
+            <br>
+            <h4>原理與規則（生活比喻）：</h4>
+            <p>
+                一般的儲存空間（Internal Storage）就像是你的<strong>書桌抽屜</strong>。雖然有鎖（權限管理），但如果有小偷（Root 權限/惡意軟體）闖進房間，抽屜還是會被撬開。
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>TEE（可信執行環境）</strong>就像是鑲嵌在牆壁裡的<strong>合金保險箱</strong>。就算小偷進了房間（手機中毒），因為他沒有保險箱的密碼且打不開厚重的鋼門（硬體隔離），所以放在裡面的珠寶（金鑰）依然安全。
+            </p>
+        </div>
+
+        <!-- Step 4: Options Analysis -->
+        <button class="accordion-header" onclick="toggleAccordion('acc3')">
+            <span>第四步：選項詳細分析</span>
+            <span>▼</span>
+        </button>
+        <div id="acc3" class="accordion-content">
+            <div style="margin-bottom: 15px;">
+                <strong>(A) 共用偏好設定 (Shared Preferences)</strong>
+                <p class="term-def">錯誤。這是一種用來存「設定值」（如：音量大小、是否開啟通知）的輕量級機制，本質上是一個 XML 文字檔。它完全沒有加密保護，就像把秘密寫在便條紙上。</p>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong>(B) 內部儲存 (Internal Storage)</strong>
+                <p class="term-def">錯誤。這是 App 的私有資料夾。雖然 Android 有「沙箱機制」（App Sandbox，讓 A 程式不能隨便看 B 程式的資料），但它仍是存在一般的記憶體晶片中。如果手機被 Root（取得最高權限），這些檔案就無所遁形。</p>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong>(C) 可信執行環境 (Trusted Execution Environment, TEE)</strong>
+                <p class="term-def" style="color: var(--success-color); font-weight: bold;">正確。</p>
+                <p>TEE 是處理器內部的一個獨立區域，被稱為「安全世界」(Secure World)。
+                <br>它與一般的作業系統（普通世界）是<strong>硬體隔離</strong>的。金鑰可以在這裡生成，且永遠不離開這個硬體區域，僅輸出運算結果。這符合題目要求的「專用硬體元件」與「保護金鑰」。</p>
+            </div>
+            <div>
+                <strong>(D) 外部儲存 (External Storage)</strong>
+                <p class="term-def">錯誤。這通常指 SD 卡或公共儲存區（如相簿）。這裡的權限最寬鬆，任何取得讀取權限的 App 都可以存取，把金鑰放這裡是資安大忌。</p>
+            </div>
+        </div>
+
+        <!-- Concept Extensions -->
+        <button class="accordion-header" onclick="toggleAccordion('acc4')">
+            <span>觀念補充、記憶口訣與陷阱</span>
+            <span>▼</span>
+        </button>
+        <div id="acc4" class="accordion-content">
+            <h3>【觀念補充】</h3>
+            <p><strong>TEE 一般性定義：</strong>在主處理器中提供一個安全的執行區域，保證載入的程式碼與資料受到保護，能維持機密性與完整性。</p>
+            <p style="margin-top: 10px;"><strong>觸類旁通：</strong></p>
+            <ul class="step-list">
+                <li><strong>TEE vs Secure Element (SE)：</strong>SE（安全元件，如 SIM 卡或專用防篡改晶片）比 TEE 更獨立、更安全，但運算能力較弱。TEE 則是 CPU 切出來的安全區，效能較好。兩者都算硬體保護。</li>
+                <li><strong>變化題：</strong>如果題目選單沒有 TEE，但有 <strong>Hardware-backed Keystore</strong>（硬體支援的金鑰庫），那個也是正確答案。</li>
+            </ul>
+
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+
+            <h3>【記憶口訣】</h3>
+            <div class="highlight-box" style="text-align: center; font-size: 1.2rem; color: var(--primary-color);">
+                「金鑰要進 TEE，別放外部地」
+            </div>
+
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+
+            <h3>【常見陷阱】</h3>
+            <ul class="step-list">
+                <li><strong>心理盲點：</strong>看到「內部儲存」就覺得很安全。其實「內部」只是相對「外部（SD卡）」而言，對於作業系統核心來說，它只是普通檔案。</li>
+                <li><strong>避坑指南：</strong>只要題目出現「專用硬體」、「硬體隔離」、「TrustZone」等字眼，請直接往 <strong>TEE</strong> 或 <strong>SE (Secure Element)</strong> 思考。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Self Check Section -->
+    <div class="card">
+        <div class="section-title">自我檢測 (不計分)</div>
+        <p style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">試著回答下列問題，確認觀念是否釐清。點擊按鈕查看解答。</p>
+
+        <div class="self-check-item">
+            <p><strong>1. 在 Android 中，若開發者將機敏資料直接存放在 SD 卡的公開目錄下，最容易受到哪種威脅？</strong></p>
+            <button class="reveal-btn" onclick="toggleSelfCheck('sc1')">顯示解答</button>
+            <div id="sc1" class="answer-reveal">
+                解答：資料外洩給其他 App 或使用者。<br>
+                解析：SD 卡對應到「外部儲存 (External Storage)」，權限控管最寬鬆，不具備沙箱保護。
+            </div>
+        </div>
+
+        <div class="self-check-item">
+            <p><strong>2. Android Keystore 系統若具備 "Hardware-backed" 特性，通常是指背後使用了哪兩種技術之一？</strong></p>
+            <button class="reveal-btn" onclick="toggleSelfCheck('sc2')">顯示解答</button>
+            <div id="sc2" class="answer-reveal">
+                解答：TEE (可信執行環境) 或 SE (安全元件)。<br>
+                解析：這代表金鑰的運算不是由軟體模擬，而是由硬體晶片執行，即使 OS 被攻破也難以取出金鑰。
+            </div>
+        </div>
+
+        <div class="self-check-item">
+            <p><strong>3. 若某金融 App 要求金鑰「絕對不能被 Root 後的作業系統讀取」，應優先採用 Shared Preferences 還是 TEE？</strong></p>
+            <button class="reveal-btn" onclick="toggleSelfCheck('sc3')">顯示解答</button>
+            <div id="sc3" class="answer-reveal">
+                解答：TEE。<br>
+                解析：Shared Preferences 是純檔案，Root 後可被任意讀取；TEE 透過硬體隔離，Root 權限也無法直接讀取安全世界的記憶體。
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-controls">
+        <button class="reset-btn" onclick="resetPage()">重設練習</button>
+    </div>
+
+</div>
+
+<script>
+    // State Tracking
+    let state = {
+        mainAnswered: false,
+        explanationExpanded: false,
+        selfCheckCount: 0,
+        totalChecks: 3
+    };
+
+    const correctAnswer = 'C';
+    
+    // Update Progress Bar
+    function updateProgress() {
+        let progress = 0;
+        
+        // Logic: Main Question (40%) + Explanation (30%) + Self Checks (10% each = 30%)
+        if (state.mainAnswered) progress += 40;
+        if (state.explanationExpanded) progress += 30;
+        progress += (state.selfCheckCount * 10);
+
+        const bar = document.getElementById('progressBar');
+        const text = document.getElementById('progressText');
+        
+        bar.style.width = progress + '%';
+        text.innerText = progress + '%';
+    }
+
+    // Check Main Answer
+    function checkAnswer(option, btnElement) {
+        if (state.mainAnswered) return; // Prevent clicking again
+
+        const feedback = document.getElementById('feedback');
+        const btns = document.querySelectorAll('.option-btn');
+        
+        // Disable all buttons visual state
+        btns.forEach(b => b.style.cursor = 'default');
+
+        if (option === correctAnswer) {
+            btnElement.classList.add('correct');
+            feedback.innerHTML = `<strong style="color:var(--success-color)">答對了！(C) 是正確答案。</strong><br>TEE 是專用的硬體隔離環境。請展開下方解析查看詳細說明。`;
+            feedback.style.backgroundColor = '#d4edda';
+            feedback.style.border = '1px solid #c3e6cb';
+        } else {
+            btnElement.classList.add('wrong');
+            // Highlight correct one
+            btns.forEach(b => {
+                if (b.innerText.includes('(C)')) b.classList.add('correct');
+            });
+            feedback.innerHTML = `<strong style="color:var(--error-color)">答錯了。正確答案是 (C)。</strong><br>(A)、(B)、(D) 都是一般儲存空間，並非「專用硬體元件」。請看下方解析。`;
+            feedback.style.backgroundColor = '#f8d7da';
+            feedback.style.border = '1px solid #f5c6cb';
+        }
+
+        feedback.classList.add('show');
+        document.getElementById('solutionSection').classList.remove('hidden');
+        
+        state.mainAnswered = true;
+        updateProgress();
+    }
+
+    // Toggle Accordion
+    function toggleAccordion(id) {
+        const content = document.getElementById(id);
+        const header = content.previousElementSibling;
+        const arrow = header.querySelector('span:last-child');
+
+        if (content.classList.contains('active')) {
+            content.classList.remove('active');
+            arrow.innerText = '▼';
+        } else {
+            content.classList.add('active');
+            arrow.innerText = '▲';
+            
+            // Track progress only for the first expansion
+            if (!state.explanationExpanded) {
+                state.explanationExpanded = true;
+                updateProgress();
+            }
+        }
+    }
+
+    // Toggle Self Check Answers
+    const checkedItems = new Set();
+    function toggleSelfCheck(id) {
+        const answerDiv = document.getElementById(id);
+        const btn = answerDiv.previousElementSibling;
+        
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+            btn.innerText = '顯示解答';
+        } else {
+            answerDiv.style.display = 'block';
+            btn.innerText = '隱藏解答';
+            
+            if (!checkedItems.has(id)) {
+                checkedItems.add(id);
+                state.selfCheckCount++;
+                updateProgress();
+            }
+        }
+    }
+
+    // Reset Page
+    function resetPage() {
+        window.scrollTo(0, 0);
+        setTimeout(() => {
+            window.location.reload();
+        }, 100);
+    }
+</script>
+
+</body>
+</html>

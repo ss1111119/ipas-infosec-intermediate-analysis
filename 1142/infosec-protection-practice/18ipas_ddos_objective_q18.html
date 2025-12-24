@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_ddos_objective_q18.html - iPAS 資訊安全防護實務衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --highlight-color: #f1c40f;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin: 0 0 10px 0;
+        }
+
+        .meta-info {
+            font-size: 0.9rem;
+            color: #666;
+            background-color: #eee;
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        /* Scenario Section */
+        .scenario-box {
+            background-color: #fff8e1;
+            border-left: 5px solid var(--highlight-color);
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .scenario-img-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .scenario-img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .img-caption {
+            font-size: 0.85rem;
+            color: #555;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Question Section */
+        .question-box {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover {
+            background-color: #f9f9f9;
+            border-color: #bbb;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #34495e;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+            display: none;
+        }
+
+        .btn-retry:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-explain {
+            background-color: var(--accent-color);
+            color: white;
+            display: none;
+        }
+
+        .btn-explain:hover {
+            background-color: #c0392b;
+        }
+
+        /* Feedback */
+        #feedback-area {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Area */
+        #explanation-area {
+            display: none;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        details {
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        summary {
+            background-color: #f1f2f6;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            list-style: none; /* Hide default triangle */
+            position: relative;
+        }
+
+        summary::after {
+            content: '+';
+            position: absolute;
+            right: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        details[open] summary {
+            background-color: #e9ecef;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .details-content {
+            padding: 15px;
+            color: #444;
+        }
+
+        /* Highlighting styles */
+        .highlight {
+            background-color: yellow;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .highlight-not {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .teacher-note {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+            margin: 10px 0;
+            color: #555;
+            font-style: italic;
+        }
+
+        .concept-tag {
+            display: inline-block;
+            background: #e8f4f8;
+            color: #2980b9;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-right: 5px;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .btn {
+                width: 100%;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資訊安全防護實務衝刺班</h1>
+        <div class="meta-info">
+            檔案名稱：ipas_ddos_objective_q18.html | 題組：2 | 題號：18
+        </div>
+    </header>
+
+    <!-- 圖片與情境區 -->
+    <div class="scenario-box">
+        <div class="scenario-img-container">
+            <img src="https://i.meee.com.tw/F5HlAqh.jpg" alt="展示伺服器異常情境圖" class="scenario-img">
+            <div class="img-caption">附圖：外部無法連線但內部上網正常之展示伺服器異常情境</div>
+        </div>
+        
+        <span class="scenario-title">【情境描述】</span>
+        某公司對外提供展示用的 Web 伺服器，供業務人員在公司外部進行產品展示。某日發現外部使用者無法正常連線，但公司內部對外上網功能正常。檢視主機連線紀錄與網路側錄資料後，發現短時間內出現大量異常連線與請求流量，研判為阻斷服務相關攻擊行為。
+    </div>
+
+    <!-- 題目區 -->
+    <div class="quiz-section">
+        <div class="question-box">
+            <span class="concept-tag">攻擊目的判斷</span>
+            題目：承上題，請問下列何項 <span class="highlight-not">不是</span> 分散式阻斷服務（Distributed Denial of Service, DDoS）攻擊的破壞目的？
+        </div>
+
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="option" value="A">
+                (A) 癱瘓系統服務主機
+            </label>
+            <label class="option-label">
+                <input type="radio" name="option" value="B">
+                (B) 破壞系統服務程式
+            </label>
+            <label class="option-label">
+                <input type="radio" name="option" value="C">
+                (C) 影響網頁服務正常運作
+            </label>
+            <label class="option-label">
+                <input type="radio" name="option" value="D">
+                (D) 塞爆服務網路的頻寬
+            </label>
+        </div>
+
+        <!-- 互動按鈕 -->
+        <div class="btn-group">
+            <button class="btn btn-submit" onclick="checkAnswer()">送出答案</button>
+            <button class="btn btn-retry" onclick="resetQuiz()">重作一次</button>
+            <button class="btn btn-explain" onclick="toggleExplanation()">顯示／隱藏解析</button>
+        </div>
+
+        <!-- 結果回饋 -->
+        <div id="feedback-area"></div>
+    </div>
+
+    <!-- 解析學習區 -->
+    <div id="explanation-area">
+        <h3 style="border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-top: 0;">👨‍🏫 名師詳解專區</h3>
+
+        <details open>
+            <summary>【題目】回顧</summary>
+            <div class="details-content">
+                請問下列何項<strong>不是</strong>分散式阻斷服務（DDoS）攻擊的破壞目的？<br>
+                (A) 癱瘓系統服務主機<br>
+                (B) 破壞系統服務程式<br>
+                (C) 影響網頁服務正常運作<br>
+                (D) 塞爆服務網路的頻寬
+            </div>
+        </details>
+
+        <details>
+            <summary>【第一步：找關鍵字】</summary>
+            <div class="details-content">
+                <ul>
+                    <li><span class="highlight">DDoS</span>：分散式阻斷服務，考試重點在於「服務可用性」。</li>
+                    <li><span class="highlight-not">不是</span>：這是<strong>反向題</strong>，要選出一個「錯誤」的敘述。</li>
+                    <li><span class="highlight">破壞目的</span>：攻擊者到底想達成什麼效果？</li>
+                    <li><span class="highlight">服務癱瘓、頻寬耗盡、正常運作</span>：這些都是與「連線」或「使用」相關的詞。</li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>【第二步：白話翻譯】</summary>
+            <div class="details-content">
+                <div class="teacher-note">
+                    各位同學，這題其實是在問你：「DDoS 到底是來幹嘛的？」
+                </div>
+                <p>簡單來說：<strong>「DDoS 是用很多流量把服務擠爆，讓人不能用，但它不是拿來直接把程式弄壞。」</strong></p>
+                <p>專有名詞解釋：</p>
+                <ul>
+                    <li><strong>DDoS</strong>：想像成幾萬個人同時打電話進公司總機，雖然電話線沒被剪斷，但真正要談生意的人根本打不進來（線路佔滿）。</li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>【第三步：解題思路】</summary>
+            <div class="details-content">
+                <p><strong>一句話核心：</strong>DDoS 的目的是「讓人不能用（可用性喪失）」，不是「把系統程式破壞掉（完整性喪失）」。</p>
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>想清楚 DDoS 攻擊本質是<strong>「流量型攻擊」</strong>或<strong>「資源耗盡型攻擊」</strong>。</li>
+                    <li>看到選項中有提到「修改程式」、「刪除檔案」、「破壞程式碼」這類行為，通常屬於<strong>惡意程式（Virus/Worm）</strong>或<strong>入侵（Intrusion）</strong>，而不是 DDoS。</li>
+                    <li>題目問「不是」，所以我們要找那個「破壞程式」的選項。</li>
+                </ol>
+            </div>
+        </details>
+
+        <details>
+            <summary>【第四步：選項分析】</summary>
+            <div class="details-content">
+                <ul>
+                    <li><strong>(A) 癱瘓系統服務主機</strong>：<span style="color:red;">這是 DDoS 的目的。</span>讓 CPU 滿載或記憶體耗盡，主機就癱瘓了。</li>
+                    <li><strong>(B) 破壞系統服務程式</strong>：<span style="color:green; font-weight:bold;">這【不是】DDoS 的目的（正確答案）。</span>破壞程式通常需要取得權限進入系統刪改檔案，這是駭客入侵或中毒的行為，DDoS 只是在外面一直敲門塞爆你而已，不會進去拆房子。</li>
+                    <li><strong>(C) 影響網頁服務正常運作</strong>：<span style="color:red;">這是 DDoS 的目的。</span>讓使用者看到 "Service Unavailable"。</li>
+                    <li><strong>(D) 塞爆服務網路的頻寬</strong>：<span style="color:red;">這是 DDoS 的目的。</span>就像塞車一樣，路只有那麼寬，車多了就動不了。</li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>【觀念補充與延伸】</summary>
+            <div class="details-content">
+                <p><strong>核心觀念定位：</strong>這是 iPAS 防護實務「DDoS 攻擊目的」的基礎必考題。</p>
+                <p><strong>資安三要素 (CIA) 對照：</strong></p>
+                <ul>
+                    <li><strong>DDoS</strong> 攻擊的是 <strong>可用性 (Availability)</strong>：讓服務變慢或中斷。</li>
+                    <li><strong>勒索軟體/病毒</strong> 攻擊的是 <strong>可用性 + 完整性 (Integrity)</strong>：加密或破壞檔案。</li>
+                    <li><strong>竊取個資</strong> 攻擊的是 <strong>機密性 (Confidentiality)</strong>。</li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>【記憶口訣】</summary>
+            <div class="details-content">
+                <div style="font-size: 1.2rem; text-align: center; border: 2px solid var(--highlight-color); padding: 10px; background: #fffff0;">
+                    🛡️ <strong>「DDoS 只塞不拆」</strong><br>
+                    🛡️ <strong>「不能用 ≠ 程式壞」</strong>
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>【常見陷阱】</summary>
+            <div class="details-content">
+                <ul>
+                    <li>⚠️ <strong>誤區：</strong>看到「服務掛掉」就以為系統內部被「破壞」了。其實就像百貨公司門口被抗議群眾擋住，裡面的專櫃（程式）其實是完好無缺的。</li>
+                    <li>⚠️ <strong>粗心：</strong>沒注意題目問的是「<span class="highlight-not">不是</span>」。這類反向題最容易因為讀題太快而選錯。</li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>【正確答案】</summary>
+            <div class="details-content">
+                <p style="font-size: 1.5rem; color: var(--success-color); font-weight: bold; text-align: center;">
+                    本題正確答案為 (B)
+                </p>
+            </div>
+        </details>
+
+        <details>
+            <summary>【自我檢測】</summary>
+            <div class="details-content">
+                <p>試著回答以下問題（不看答案）：</p>
+                <ol>
+                    <li>DDoS 與勒索軟體在破壞目的上有何不同？</li>
+                    <li>若系統程式真的被刪除，還會是單純的 DDoS 嗎？</li>
+                    <li>防禦 DDoS 與防禦惡意程式的重點是否相同？（提示：一個擋流量，一個擋檔案執行）</li>
+                </ol>
+            </div>
+        </details>
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        // 取得使用者選擇
+        const options = document.getElementsByName('option');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const btnSubmit = document.querySelector('.btn-submit');
+        const btnRetry = document.querySelector('.btn-retry');
+        const btnExplain = document.querySelector('.btn-explain');
+        const explanationArea = document.getElementById('explanation-area');
+
+        // 未作答檢核
+        if (!selectedValue) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        // 顯示回饋區
+        feedbackArea.style.display = 'block';
+        
+        // 鎖定選項，避免重複修改
+        options.forEach(opt => opt.disabled = true);
+        btnSubmit.style.display = 'none'; // 隱藏送出按鈕
+        btnRetry.style.display = 'inline-block'; // 顯示重作按鈕
+        btnExplain.style.display = 'inline-block'; // 顯示解析按鈕
+
+        if (selectedValue === 'B') {
+            // 答對
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = '🎉 恭喜答對！正確答案就是 (B)。<br>DDoS 只會塞爆網路，不會破壞程式碼。';
+            // 自動展開解析
+            explanationArea.style.display = 'block';
+        } else {
+            // 答錯
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.innerHTML = `⚠️ 哎呀！你選的是 (${selectedValue})，正確答案是 (B)。<br>點擊下方「顯示／隱藏解析」來看看為什麼吧！`;
+        }
+    }
+
+    function resetQuiz() {
+        // 重置選項
+        const options = document.getElementsByName('option');
+        options.forEach(opt => {
+            opt.checked = false;
+            opt.disabled = false;
+        });
+
+        // 重置按鈕與區域
+        document.querySelector('.btn-submit').style.display = 'inline-block';
+        document.querySelector('.btn-retry').style.display = 'none';
+        document.querySelector('.btn-explain').style.display = 'none';
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'none';
+        feedbackArea.className = '';
+        feedbackArea.innerHTML = '';
+
+        document.getElementById('explanation-area').style.display = 'none';
+        
+        // 滾動回頂部
+        document.querySelector('.quiz-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleExplanation() {
+        const explanationArea = document.getElementById('explanation-area');
+        if (explanationArea.style.display === 'none' || explanationArea.style.display === '') {
+            explanationArea.style.display = 'block';
+            explanationArea.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            explanationArea.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

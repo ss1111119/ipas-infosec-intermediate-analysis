@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_security_defense_q01.html - iPAS 資訊安全防護實務衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #34495e;
+            --highlight-color: #f1c40f;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #f5f6fa;
+            --card-bg: #ffffff;
+            --border-color: #dcdde1;
+            --text-color: #2f3640;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header .meta-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* Card Style */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Question Area */
+        .question-content {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 1rem;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 1rem;
+            margin-top: 0.3rem;
+            transform: scale(1.2);
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 1.5rem;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-color);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Feedback Area */
+        #feedback-area {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: rgba(39, 174, 96, 0.1);
+            border: 1px solid var(--correct-color);
+            color: var(--correct-color);
+            font-weight: bold;
+        }
+
+        .feedback-wrong {
+            background-color: rgba(192, 57, 43, 0.1);
+            border: 1px solid var(--wrong-color);
+            color: var(--wrong-color);
+            font-weight: bold;
+        }
+
+        .action-bar {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            display: none; /* Initially hidden */
+        }
+
+        /* Accordion Analysis */
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            margin-bottom: 0.8rem;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f1f2f6;
+            padding: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header:hover {
+            background-color: #e6e7eb;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: white;
+        }
+
+        .accordion-item.active .accordion-content {
+            padding: 1.5rem;
+            max-height: 1000px; /* Arbitrary large height for expansion */
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Content Styling */
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .keyword-list li {
+            margin-bottom: 0.8rem;
+            list-style-type: none;
+            padding-left: 1rem;
+            border-left: 3px solid var(--highlight-color);
+        }
+
+        .step-title {
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Interactive Tools */
+        .tool-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .tool-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.3rem;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table th, .comparison-table td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .checklist-item {
+            display: block;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .checklist-item input {
+            margin-right: 0.5rem;
+        }
+
+        #checklist-feedback {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            font-weight: bold;
+            min-height: 1.5em;
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.2rem; }
+            .card { padding: 1.5rem; }
+            .btn { width: 100%; text-align: center; }
+            .action-bar { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資訊安全防護實務 - 短期衝刺班</h1>
+        <div class="meta-info">
+            <span>題號：1</span>
+            <span>科目：資訊安全【防護實務】</span>
+            <span>檔案：ipas_security_defense_q01.html</span>
+        </div>
+    </header>
+
+    <!-- 題目互動區 -->
+    <main class="card" id="quiz-section">
+        <div class="question-content">
+            題目：下列的弱點應對修補方式，何者最為適當？
+        </div>
+        
+        <form id="quiz-form">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A">
+                    <span>(A) 緩衝區溢位（Buffer Overflow）使用記憶體執行阻擋（Data Execution Prevention, DEP）</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B">
+                    <span>(B) 遠端程式碼執行（Remote Code Execution, RCE）僅以防火牆封鎖流量</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C">
+                    <span>(C) 指令注入（Command Injection）只做字串過濾</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D">
+                    <span>(D) 資源注入（Resource Injection）採黑名單過濾資源名稱</span>
+                </label>
+            </div>
+
+            <button type="button" class="btn" id="submit-btn" onclick="checkAnswer()">送出答案</button>
+        </form>
+
+        <div id="feedback-area"></div>
+
+        <div class="action-bar" id="action-bar">
+            <button class="btn btn-outline" onclick="resetQuiz()">重作一次</button>
+            <button class="btn btn-outline" id="toggle-analysis-btn" onclick="toggleAnalysis()">顯示解析</button>
+        </div>
+    </main>
+
+    <!-- 解析與觀念學習區 (預設隱藏) -->
+    <section id="analysis-section" style="display: none;">
+        
+        <!-- 學習輔助互動區 -->
+        <div class="card">
+            <h3 style="margin-bottom: 1rem;">學習輔助工具箱</h3>
+            
+            <div class="tool-card">
+                <div class="tool-title">弱點 × 防護對照卡</div>
+                <table class="comparison-table">
+                    <tr>
+                        <th>弱點類型</th>
+                        <th>建議防護手段</th>
+                    </tr>
+                    <tr>
+                        <td>Buffer Overflow</td>
+                        <td><span style="color:var(--correct-color); font-weight:bold;">DEP / ASLR</span> (系統層級)</td>
+                    </tr>
+                    <tr>
+                        <td>Injection</td>
+                        <td><span style="color:var(--correct-color); font-weight:bold;">參數化查詢 / 白名單</span> (應用層級)</td>
+                    </tr>
+                    <tr>
+                        <td>RCE</td>
+                        <td><span style="color:var(--correct-color); font-weight:bold;">修補程式碼 / 權限最小化</span> (根本解)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-title">防護層級提示卡</div>
+                <p><strong>OS 層：</strong>DEP、ASLR (防止記憶體被亂搞)</p>
+                <p><strong>應用層：</strong>輸入驗證、參數化查詢 (防止程式邏輯錯誤)</p>
+                <p><strong>網路層：</strong>防火牆、WAF (過濾惡意流量，屬邊界防護)</p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-title">防護有效性檢核清單 (請勾選)</div>
+                <div id="checklist">
+                    <label class="checklist-item"><input type="checkbox" onchange="checkChecklist()"> 是否直接處理弱點根因？</label>
+                    <label class="checklist-item"><input type="checkbox" onchange="checkChecklist()"> 是否難以被繞過？(非黑名單)</label>
+                    <label class="checklist-item"><input type="checkbox" onchange="checkChecklist()"> 是否深入核心而非僅在邊界阻擋？</label>
+                </div>
+                <div id="checklist-feedback">勾選上方項目以檢視防護成熟度...</div>
+            </div>
+        </div>
+
+        <!-- 詳細解析 Accordion -->
+        <div class="card">
+            <h2 style="margin-bottom: 1rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">詳解與觀念剖析</h2>
+
+            <!-- 1. 題目 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【題目】</div>
+                <div class="accordion-content">
+                    <p>下列的弱點應對修補方式，何者最為適當？</p>
+                </div>
+            </div>
+
+            <!-- 2. 第一步：找關鍵字 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【第一步：找關鍵字】</div>
+                <div class="accordion-content">
+                    <ul class="keyword-list">
+                        <li><span class="highlight">弱點、修補方式、最為適當</span>：這是在考配對題，必須找出「手段」能否精準解決「問題」。</li>
+                        <li><span class="highlight">Buffer Overflow (緩衝區溢位)</span>：記憶體管理的漏洞。</li>
+                        <li><span class="highlight">DEP (記憶體執行阻擋)</span>：直接針對記憶體執行的防護機制。</li>
+                        <li><span class="highlight">RCE (遠端程式碼執行)</span>：極高風險漏洞，通常源於程式邏輯缺陷。</li>
+                        <li><span class="highlight">Command Injection (指令注入)</span>：輸入字串未處理導致執行系統指令。</li>
+                        <li><span class="highlight">黑名單</span>：一種負面表列的過濾方式，通常是不夠周全的。</li>
+                    </ul>
+                    <p style="margin-top:1rem;"><strong>關鍵判斷點：</strong>題目問「最為適當」，意味著選項中的防護必須是「直接針對弱點原理」的根本解法，而非僅僅是外部圍堵或容易被繞過的過濾。</p>
+                </div>
+            </div>
+
+            <!-- 3. 第二步：白話翻譯 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【第二步：白話翻譯】</div>
+                <div class="accordion-content">
+                    <p>這題用高中生的語言來說就是：<br><strong>「現在是在問：哪一種安全問題，用這個防護方法是真的有對症下藥？」</strong></p>
+                    <hr style="margin: 1rem 0; border: 0; border-top: 1px dashed #ccc;">
+                    <p><strong>名詞解釋：</strong></p>
+                    <ul>
+                        <li><strong>緩衝區溢位 (Buffer Overflow)：</strong> 程式像個杯子，你倒進去的水 (資料) 超過杯子容量，溢出來的水弄濕了桌布 (覆蓋了相鄰記憶體)，導致駭客可以趁機塞惡意程式進去跑。</li>
+                        <li><strong>DEP (Data Execution Prevention)：</strong> 電腦的一種保護鎖，強制規定「放資料的區域」絕對不能被當成「程式」來執行。就算水溢出來了，駭客塞的程式也跑不動。</li>
+                        <li><strong>遠端程式碼執行 (RCE)：</strong> 駭客不用登入帳號，坐在自己家就能遠端讓你的電腦執行他要的指令。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 4. 第三步：解題思路 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【第三步：解題思路】</div>
+                <div class="accordion-content">
+                    <p><strong class="step-title">這題在考什麼觀念？</strong></p>
+                    <p>常見弱點要搭配「正確層級」的防護機制，而不是表面阻擋。</p>
+                    <p><strong class="step-title">解題步驟：</strong></p>
+                    <ol style="margin-left: 1.5rem;">
+                        <li>先看弱點屬於哪一類（記憶體層、輸入驗證層、系統設計層）。</li>
+                        <li>再看防護方式是不是直接針對該弱點的運作機制進行破壞。</li>
+                        <li>若防護方式只是「擋表面」（如防火牆）、「單一手段」（如只做字串過濾）、「黑名單」（容易漏掉），通常都不夠適當。</li>
+                    </ol>
+                    <p><strong class="step-title">原理與規則：</strong></p>
+                    <ul>
+                        <li>Buffer Overflow 是記憶體層級的問題。</li>
+                        <li>DEP 是在 CPU / OS 層級阻止記憶體區段被執行。</li>
+                        <li>因此 (A) 是直接「對原理下手」的防護，最為適當。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 5. 第四步：選項分析 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【第四步：選項分析】</div>
+                <div class="accordion-content">
+                    <div style="margin-bottom: 1rem;">
+                        <strong>(A) 正確：</strong><br>
+                        DEP (Data Execution Prevention) 能標記記憶體區段為「不可執行」。即使發生 Buffer Overflow 導致惡意代碼注入到堆疊或堆積中，CPU 也會拒絕執行該代碼。這是典型的、有效的防護型控制。
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <strong>(B) 錯誤：</strong><br>
+                        RCE 是應用程式本身的邏輯漏洞。僅用防火牆封鎖流量只是「網路層」的阻擋，駭客可能透過合法的 Port (如 Port 80/443) 傳送惡意 Payload，防火牆通常擋不住內容層的攻擊。必須修補漏洞本身才行。
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <strong>(C) 錯誤：</strong><br>
+                        指令注入 (Command Injection) 若「只做」字串過濾 (例如過濾 `&` 或 `|`)，極易被變形繞過 (例如改用 `&&` 或其他編碼)。最適當的做法是使用「參數化 API」或嚴格限制執行權限，避免直接呼叫 shell。
+                    </div>
+                    <div>
+                        <strong>(D) 錯誤：</strong><br>
+                        黑名單 (Blacklist) 是「列出壞人名單」，但壞人的名字千變萬化，永遠列不完。資源注入 (Resource Injection，如 Path Traversal) 應採「白名單」機制 (只允許存取特定的檔案名稱) 並配合權限驗證。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. 觀念補充與延伸 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【觀念補充與延伸】</div>
+                <div class="accordion-content">
+                    <p><strong>核心觀念定位：</strong>這是 iPAS 資訊安全防護實務中「弱點 × 防護手段對應」的經典題型。</p>
+                    <p><strong>定義補充：</strong></p>
+                    <ul>
+                        <li><strong>防護型控制 (Preventive Control)：</strong> 就是在攻擊成功造成損害前，就把它擋下來。DEP 就是讓攻擊代碼「無法執行」，屬於預防。</li>
+                    </ul>
+                    <p><strong>觸類旁通：</strong></p>
+                    <ul>
+                        <li><strong>黑名單 vs 白名單：</strong> 資安界有一句名言「白名單永遠優於黑名單 (Whitelist over Blacklist)」。</li>
+                        <li><strong>邊界防護 vs 應用層修補：</strong> 防火牆是邊界防護 (保全)，程式碼修補是應用層修補 (鎖好保險箱)。只有保全是不夠的。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 7. 記憶口訣 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【記憶口訣】</div>
+                <div class="accordion-content">
+                    <p style="font-size: 1.2rem; text-align: center; color: var(--primary-color); font-weight: bold; background: #ecf0f1; padding: 1rem; border-radius: 8px;">
+                        「溢位靠 DEP，其它都不夠」<br>
+                        「記憶體問題，要 OS 來救」
+                    </p>
+                </div>
+            </div>
+
+            <!-- 8. 常見陷阱 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【常見陷阱】</div>
+                <div class="accordion-content">
+                    <ul>
+                        <li>看到「防火牆」就覺得它萬能，覺得什麼都能擋 (其實擋不住應用層攻擊)。</li>
+                        <li>以為「有過濾就安全」，忽略了過濾列表可能不完整 (黑名單失效)。</li>
+                        <li><strong>避坑指南：</strong> 作答時問自己一句話：「這個防護，有沒有直接處理弱點的根本原因？」如果只是擋外面，通常不是最佳解。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 9. 正確答案 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【正確答案】</div>
+                <div class="accordion-content">
+                    <p style="font-size: 2rem; color: var(--correct-color); font-weight: bold; text-align: center;">
+                        (A)
+                    </p>
+                </div>
+            </div>
+
+            <!-- 10. 自我檢測 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">【自我檢測】</div>
+                <div class="accordion-content">
+                    <p><em>試著回答以下問題 (不提供標準答案，請思考)：</em></p>
+                    <ol>
+                        <li>如果沒有 DEP，還有哪些編譯器技術 (如 Canary) 或 OS 機制 (如 ASLR) 可以降低 Buffer Overflow 風險？</li>
+                        <li>為什麼黑名單在資安防護中常被視為不可靠？駭客可以用什麼方式繞過？</li>
+                        <li>面對 RCE 類型漏洞，除了修補程式碼，最小權限原則 (Least Privilege) 能如何降低損害？</li>
+                    </ol>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</div>
+
+<script>
+    // 互動邏輯
+    function checkAnswer() {
+        const selected = document.querySelector('input[name="answer"]:checked');
+        const feedbackArea = document.getElementById('feedback-area');
+        const actionBar = document.getElementById('action-bar');
+        const submitBtn = document.getElementById('submit-btn');
+
+        if (!selected) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+        actionBar.style.display = 'flex';
+        submitBtn.style.display = 'none';
+
+        // 鎖定選項
+        const radios = document.querySelectorAll('input[name="answer"]');
+        radios.forEach(r => r.disabled = true);
+
+        if (selected.value === 'A') {
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.textContent = '正確，這是防護型控制的典型做法，DEP 直接阻擋了溢位後的執行動作。';
+        } else {
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.textContent = `你選的是 ${selected.value}，正確答案是 A。這類題型請回到「弱點類型 × 防護手段對應」重新思考根本解法。`;
+        }
+    }
+
+    function resetQuiz() {
+        const form = document.getElementById('quiz-form');
+        const feedbackArea = document.getElementById('feedback-area');
+        const actionBar = document.getElementById('action-bar');
+        const submitBtn = document.getElementById('submit-btn');
+        const radios = document.querySelectorAll('input[name="answer"]');
+        
+        form.reset();
+        radios.forEach(r => r.disabled = false);
+        
+        feedbackArea.style.display = 'none';
+        feedbackArea.className = '';
+        feedbackArea.textContent = '';
+        
+        actionBar.style.display = 'none';
+        submitBtn.style.display = 'inline-block';
+        
+        // 隱藏解析並收合所有 accordion
+        document.getElementById('analysis-section').style.display = 'none';
+        document.getElementById('toggle-analysis-btn').textContent = '顯示解析';
+        
+        const contents = document.querySelectorAll('.accordion-content');
+        const items = document.querySelectorAll('.accordion-item');
+        contents.forEach(c => c.style.maxHeight = null);
+        items.forEach(i => i.classList.remove('active'));
+    }
+
+    function toggleAnalysis() {
+        const section = document.getElementById('analysis-section');
+        const btn = document.getElementById('toggle-analysis-btn');
+        
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            btn.textContent = '隱藏解析';
+            // Scroll to analysis
+            section.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            section.style.display = 'none';
+            btn.textContent = '顯示解析';
+        }
+    }
+
+    // Accordion Logic
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        const content = item.querySelector('.accordion-content');
+        
+        item.classList.toggle('active');
+        
+        if (item.classList.contains('active')) {
+            content.style.maxHeight = content.scrollHeight + "px";
+        } else {
+            content.style.maxHeight = null;
+        }
+    }
+
+    // Checklist Logic
+    function checkChecklist() {
+        const checks = document.querySelectorAll('#checklist input[type="checkbox"]');
+        const checkedCount = Array.from(checks).filter(c => c.checked).length;
+        const feedback = document.getElementById('checklist-feedback');
+        
+        if (checkedCount === 0) {
+            feedback.textContent = '勾選上方項目以檢視防護成熟度...';
+            feedback.style.color = '#7f8c8d';
+        } else if (checkedCount < 3) {
+            feedback.textContent = '尚有缺漏，完美的防護應同時具備這三點特性！';
+            feedback.style.color = '#e67e22';
+        } else {
+            feedback.textContent = '太棒了！這就是一個高成熟度、具縱深防禦思維的資安防護。';
+            feedback.style.color = '#27ae60';
+        }
+    }
+</script>
+
+</body>
+</html>

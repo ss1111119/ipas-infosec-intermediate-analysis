@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安【題組 4】第 34 題：whoami 指令解析</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 專業深藍 */
+            --secondary-color: #34495e;
+            --accent-color: #3498db; /* 亮藍 */
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --text-color: #333;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft JhengHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        /* Header & Progress */
+        header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 15px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--success-color);
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        /* Scenario Section */
+        .scenario-box {
+            background-color: #eaf2f8;
+            border-left: 5px solid var(--accent-color);
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .scenario-img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Question Section */
+        .question-box {
+            margin-bottom: 30px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+            border-color: var(--accent-color);
+        }
+
+        .option-input {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        /* Feedback Section */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .feedback-area.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .feedback-area.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Accordion / Collapsible */
+        .accordion {
+            background-color: #fff;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.1rem;
+            transition: 0.4s;
+            border-bottom: 1px solid #eee;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion:hover {
+            background-color: #f9f9f9;
+        }
+
+        .accordion:after {
+            content: '+';
+            font-size: 1.5rem;
+            color: #777;
+        }
+
+        .accordion.active:after {
+            content: '-';
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            border-bottom: 1px solid transparent;
+        }
+
+        .panel.open {
+            padding: 20px 18px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Content Styling inside panels */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .keyword-list dt {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 10px;
+        }
+
+        .keyword-list dd {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .quote-box {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 15px;
+            font-style: italic;
+            color: #555;
+            margin: 15px 0;
+        }
+
+        /* Self Assessment */
+        .self-check-item {
+            margin-bottom: 20px;
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .btn-reveal {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            margin-top: 10px;
+        }
+
+        .answer-reveal {
+            display: none;
+            margin-top: 10px;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安題組 4：第 34 題</h1>
+        <div class="subtitle">主題：網頁攻擊行為分析與指令評估</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text">學習進度：<span id="progressText">0%</span></div>
+    </header>
+
+    <!-- 題目情境區 -->
+    <section class="scenario-box">
+        <span class="scenario-title">【題組情境】</span>
+        <p>你是企業藍隊防禦人員（負責防守的資安團隊），SOC（資安監控中心）告警顯示某伺服器的 ping 功能疑似遭利用，應用程式日誌出現可疑輸入：</p>
+        <div class="quote-box">「127.0.0.1; whoami」</div>
+        <p>攻擊者可能透過指令注入（Command Injection）執行系統指令，並蒐集系統資訊以決定下一步行動。</p>
+        
+        <img src="https://i.meee.com.tw/zmoyb9O.jpg" alt="應用程式日誌截圖：顯示 GET 請求參數中包含 127.0.0.1; whoami" class="scenario-img">
+    </section>
+
+    <!-- 題目作答區 -->
+    <section class="question-box">
+        <div class="question-text">
+            <span style="background:#2c3e50; color:white; padding:2px 8px; font-size:0.9rem; border-radius:4px; margin-right:5px;">單選題</span>
+            請問「127.0.0.1; whoami」可能是攻擊者想要用來評估下列何項資訊？
+        </div>
+
+        <form id="quizForm">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A" class="option-input">
+                    (A) 評估此作業系統版本是否有現成的漏洞可以利用
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B" class="option-input">
+                    (B) 評估該使用者是否有足夠的權限可以存取機敏資料
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C" class="option-input">
+                    (C) 評估該使用者的群組是否有足夠的權限可以存取機敏資料
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D" class="option-input">
+                    (D) 評估當下的系統路徑位於哪個目錄中
+                </label>
+            </div>
+            
+            <div class="btn-group">
+                <button type="button" class="btn-submit" onclick="checkAnswer()">提交答案</button>
+                <button type="button" class="btn-reset" id="resetBtn" onclick="resetQuiz()">重設作答</button>
+            </div>
+        </form>
+
+        <div id="feedback" class="feedback-area"></div>
+    </section>
+
+    <hr style="border:0; border-top:1px solid #eee; margin:30px 0;">
+
+    <!-- 解析區塊 (Accordion) -->
+    
+    <button class="accordion">第一步：找關鍵字</button>
+    <div class="panel">
+        <p>請觀察日誌中的特殊符號與英文單字，這是解題的線索：</p>
+        <dl class="keyword-list">
+            <dt>127.0.0.1</dt>
+            <dd>本機 IP 位址。這裡看似是正常的 ping 功能輸入參數，但實際上只是用來欺騙系統的「障眼法」。</dd>
+            
+            <dt>分號「;」</dt>
+            <dd>在 Linux 系統中，分號用來<strong>串接指令</strong>。意思是「做完前面的事（ping），接著做後面的事」。</dd>
+            
+            <dt>whoami</dt>
+            <dd>這是 Linux/Windows 的標準指令，意思是<strong>「我是誰」</strong>。它會顯示目前執行這個指令的「使用者帳號名稱」。</dd>
+            
+            <dt>權限</dt>
+            <dd>在電腦系統中，能不能讀取或修改機敏資料，完全取決於你的「身分（帳號）」與該帳號擁有的「權限」。</dd>
+        </dl>
+    </div>
+
+    <button class="accordion">第二步：白話翻譯</button>
+    <div class="panel">
+        <p>如果用我們平常講話的方式，攻擊者的行為可以這樣翻譯：</p>
+        <div class="quote-box">
+            「攻擊者在 ping 後面偷偷加上 whoami，其實就是想問系統：<br>
+            <strong>『現在幫我執行這個指令的，到底是哪個帳號？』</strong><br>
+            如果是高權限帳號（如 root 或 Administrator），我就能做更多壞事；如果是低權限，我就只能做有限的事。」
+        </div>
+    </div>
+
+    <button class="accordion">第三步：解題思路</button>
+    <div class="panel">
+        <p><strong>這題在考什麼觀念？</strong><br>
+        考你是否知道 <code>whoami</code> 這個指令的標準用途，以及攻擊者「為什麼」要執行它。</p>
+        
+        <p><strong>解題邏輯：</strong></p>
+        <ol>
+            <li>先知道 <code>whoami</code> 的輸出結果是<strong>「使用者名稱」</strong>（例如：root, www-data, admin）。</li>
+            <li>使用者名稱直接對應到<strong>「權限大小」</strong>（管理員 vs 一般使用者 vs 服務帳號）。</li>
+            <li>因此，選出最貼近「確認身分 → 推估權限」的選項。</li>
+        </ol>
+
+        <p><strong>原理比喻：</strong><br>
+        <code>whoami</code> 就像是闖入者在問：「我現在穿的是員工制服、經理西裝，還是保全制服？」<br>
+        身分不同，能打開的門（存取資料/系統功能）就不同。</p>
+    </div>
+
+    <button class="accordion">第四步：選項分析</button>
+    <div class="panel">
+        <div style="margin-bottom: 15px;">
+            <strong>(A) 評估此作業系統版本...</strong><br>
+            <span style="color:var(--error-color)">不合適。</span><br>
+            若要查作業系統版本，通常會用 <code>uname -a</code> 或 <code>cat /etc/os-release</code>。<code>whoami</code> 不會告訴你 OS 是什麼版本。
+        </div>
+        <div style="margin-bottom: 15px;">
+            <strong>(B) 評估該使用者是否有足夠的權限...</strong><br>
+            <span style="color:var(--success-color); font-weight:bold;">正確！</span><br>
+            <code>whoami</code> 直接確認目前執行的身分。攻擊者確認身分後，就能知道自己是否有權限讀取密碼檔、資料庫設定檔等機敏資料。
+        </div>
+        <div style="margin-bottom: 15px;">
+            <strong>(C) 評估該使用者的「群組」...</strong><br>
+            <span style="color:var(--error-color)">不合適。</span><br>
+            雖然群組也影響權限，但若要查「群組」，通常會用 <code>id</code> 或 <code>groups</code> 指令。<code>whoami</code> 預設只顯示「名稱」，不會列出詳細的群組清單。
+        </div>
+        <div>
+            <strong>(D) 評估當下的系統路徑...</strong><br>
+            <span style="color:var(--error-color)">不合適。</span><br>
+            若要查目前在哪個目錄（路徑），會使用 <code>pwd</code> (Print Working Directory)。這與 <code>whoami</code> 無關。
+        </div>
+    </div>
+
+    <button class="accordion">觀念補充與記憶口訣</button>
+    <div class="panel">
+        <p><strong>核心觀念：</strong></p>
+        <p>本題屬於「指令注入後的偵察（Reconnaissance）」。攻擊者在入侵初期，必須先搞清楚環境（Situational Awareness）。</p>
+        
+        <p><strong>常見指令對照表：</strong></p>
+        <ul>
+            <li><code>whoami</code>：我是誰（確認帳號名稱）</li>
+            <li><code>id</code>：我是誰 + 我有哪些標籤（確認帳號與<strong>群組</strong> ID）</li>
+            <li><code>pwd</code>：我在哪裡（確認當前目錄路徑）</li>
+            <li><code>uname -a</code>：這是什麼系統（確認核心版本）</li>
+        </ul>
+
+        <hr>
+        
+        <p><strong>記憶口訣：</strong></p>
+        <div class="highlight" style="display:inline-block; font-size:1.1rem; color:var(--primary-color);">
+            「whoami 問身分，推權限」
+        </div>
+        <div class="highlight" style="display:inline-block; font-size:1.1rem; color:var(--primary-color); margin-top:5px;">
+            「要看群組用 id，要看路徑用 pwd」
+        </div>
+
+        <p style="margin-top:20px;"><strong>常見陷阱：</strong></p>
+        <p>容易把「使用者」跟「群組」混為一談。請記得：<code>whoami</code> 很單純，只給名字；<code>id</code> 比較詳細，會給群組資訊。</p>
+    </div>
+
+    <!-- 自我檢測區 -->
+    <section style="margin-top: 40px;">
+        <h3 style="color: var(--primary-color);">自我檢測</h3>
+        <p>試試看，如果你遇到變形題，能不能反應過來？</p>
+
+        <div class="self-check-item">
+            <div>1) 若日誌改成「127.0.0.1; id」，題目最可能在問什麼資訊？</div>
+            <button class="btn-reveal" onclick="toggleAnswer(this)">顯示答案</button>
+            <div class="answer-reveal">答案：評估使用者的「群組」歸屬與詳細權限 ID。</div>
+        </div>
+
+        <div class="self-check-item">
+            <div>2) 若日誌改成「127.0.0.1; pwd」，最可能在評估什麼資訊？</div>
+            <button class="btn-reveal" onclick="toggleAnswer(this)">顯示答案</button>
+            <div class="answer-reveal">答案：評估當下的「系統路徑」位於哪個目錄中。</div>
+        </div>
+
+        <div class="self-check-item">
+            <div>3) 攻擊者若發現 whoami 回傳的是高權限帳號（如 root），下一步常見行為可能有哪些？</div>
+            <button class="btn-reveal" onclick="toggleAnswer(this)">顯示答案</button>
+            <div class="answer-reveal">答案：竊取敏感資料（如 /etc/shadow）、植入後門程式、清除日誌紀錄。</div>
+        </div>
+    </section>
+
+    <footer>
+        <p>教學內容僅供學習參考，請勿用於非法用途。<br>
+        Design for iPAS Cybersecurity Exam Preparation.</p>
+    </footer>
+</div>
+
+<script>
+    // 進度條狀態管理
+    const progressState = {
+        quizCompleted: false,
+        accordionOpened: false,
+        selfCheckUsed: false
+    };
+
+    function updateProgress() {
+        let completed = 0;
+        if (progressState.quizCompleted) completed++;
+        if (progressState.accordionOpened) completed++;
+        if (progressState.selfCheckUsed) completed++;
+
+        const total = 3;
+        const percentage = Math.round((completed / total) * 100);
+        
+        document.getElementById('progressBar').style.width = percentage + '%';
+        document.getElementById('progressText').innerText = percentage + '%';
+    }
+
+    // 作答檢查邏輯
+    function checkAnswer() {
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedback = document.getElementById('feedback');
+        const resetBtn = document.getElementById('resetBtn');
+
+        if (!selectedValue) {
+            alert('請先選擇一個選項！');
+            return;
+        }
+
+        feedback.className = 'feedback-area'; // 重置 class
+        feedback.innerHTML = '';
+
+        if (selectedValue === 'B') {
+            feedback.classList.add('correct');
+            feedback.innerHTML = '<strong>答對了！</strong> (B) 是正確答案。<br>提示：whoami 用來確認目前指令以哪個帳號身分在跑，進而判斷權限。';
+        } else {
+            feedback.classList.add('incorrect');
+            let hint = '';
+            if (selectedValue === 'A') hint = '查版本通常是用 uname 或 ver 指令。';
+            if (selectedValue === 'C') hint = '查群組通常是用 id 指令。';
+            if (selectedValue === 'D') hint = '查路徑通常是用 pwd 指令。';
+            
+            feedback.innerHTML = '<strong>答錯了。</strong><br>提示：' + hint + '<br>請試著展開下方解析尋找答案。';
+        }
+
+        // 顯示重設按鈕
+        resetBtn.style.display = 'inline-block';
+
+        // 更新進度
+        if (!progressState.quizCompleted) {
+            progressState.quizCompleted = true;
+            updateProgress();
+        }
+    }
+
+    // 重設作答
+    function resetQuiz() {
+        const form = document.getElementById('quizForm');
+        form.reset();
+        
+        const feedback = document.getElementById('feedback');
+        feedback.className = 'feedback-area';
+        feedback.style.display = 'none';
+        
+        document.getElementById('resetBtn').style.display = 'none';
+    }
+
+    // Accordion 邏輯
+    const acc = document.getElementsByClassName("accordion");
+    for (let i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            const panel = this.nextElementSibling;
+            
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+                panel.classList.remove("open");
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+                panel.classList.add("open");
+                
+                // 更新進度 (只要展開過一次就算達成)
+                if (!progressState.accordionOpened) {
+                    progressState.accordionOpened = true;
+                    updateProgress();
+                }
+            } 
+        });
+    }
+
+    // 自我檢測顯示答案
+    function toggleAnswer(btn) {
+        const answerDiv = btn.nextElementSibling;
+        if (answerDiv.style.display === "block") {
+            answerDiv.style.display = "none";
+            btn.innerText = "顯示答案";
+        } else {
+            answerDiv.style.display = "block";
+            btn.innerText = "隱藏答案";
+            
+            // 更新進度
+            if (!progressState.selfCheckUsed) {
+                progressState.selfCheckUsed = true;
+                updateProgress();
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

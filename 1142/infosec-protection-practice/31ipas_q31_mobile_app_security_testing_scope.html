@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安檢測解析 - 第 31 題：行動銀行 App 資安檢測</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --error-color: #c0392b;
+            --light-bg: #ecf0f1;
+            --white: #ffffff;
+            --border-color: #bdc3c7;
+            --text-color: #2c3e50;
+            --highlight-bg: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f5f7fa;
+            padding-bottom: 50px;
+        }
+
+        /* 佈局容器 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 標題區 */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--secondary-color);
+        }
+
+        /* 進度條 */
+        .progress-container {
+            position: sticky;
+            top: 0;
+            background: var(--white);
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 100;
+            margin: -20px -20px 20px -20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .progress-label {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background-color: var(--light-bg);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--success-color);
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* 卡片樣式 */
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* 題目區 */
+        .question-badge {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: var(--white);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: var(--light-bg);
+        }
+
+        .option-item input[type="checkbox"] {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .option-text {
+            font-size: 1rem;
+        }
+
+        /* 按鈕區 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--light-bg);
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: var(--white);
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* 回饋訊息 */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-partial {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion (可展開/收合區塊) */
+        .accordion {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            background: var(--white);
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-header {
+            width: 100%;
+            text-align: left;
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border: none;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion-header.active::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: var(--white);
+        }
+
+        .accordion-body {
+            padding: 20px;
+        }
+
+        /* 重點標示 */
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 0 4px;
+            font-weight: bold;
+            border-bottom: 2px solid var(--warning-color);
+        }
+
+        .term {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .term-def {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* 列表樣式 */
+        ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* 自我檢測區 */
+        .self-check-item {
+            margin-bottom: 20px;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .self-check-item:last-child {
+            border-bottom: none;
+        }
+
+        .self-check-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .self-check-answer {
+            background-color: var(--light-bg);
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>iPAS 資安能力鑑定解析</h1>
+            <div class="subtitle">單元：行動應用程式安全 (Mobile App Security)</div>
+        </header>
+
+        <!-- 進度條 -->
+        <div class="progress-container">
+            <div class="progress-label">
+                <span>學習進度</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- 題目卡片 -->
+        <section class="card" id="question-card">
+            <span class="question-badge">第 31 題 (複選)</span>
+            <div class="question-text">
+                <p>一家金融科技公司委託資安廠商對其新上線的行動銀行 App 進行一次完整的資安檢測。</p>
+                <p>為了徹底評估其防護能力，下列何項作業較<strong>「不」屬於</strong>安全檢測項目？</p>
+            </div>
+
+            <form id="quiz-form">
+                <div class="options-group">
+                    <label class="option-item">
+                        <input type="checkbox" name="option" value="A">
+                        <span class="option-text">(A) 執行滲透測試 (Penetration Testing)，模擬駭客從外部嘗試入侵 App 與後端伺服器</span>
+                    </label>
+                    <label class="option-item">
+                        <input type="checkbox" name="option" value="B">
+                        <span class="option-text">(B) 進行原始碼檢測 (Source Code Review)，找出應用程式邏輯與編碼層面的安全漏洞</span>
+                    </label>
+                    <label class="option-item">
+                        <input type="checkbox" name="option" value="C">
+                        <span class="option-text">(C) 對其使用的雲端平台環境進行雲端安全配置檢視 (Cloud Security Posture Management, CSPM)</span>
+                    </label>
+                    <label class="option-item">
+                        <input type="checkbox" name="option" value="D">
+                        <span class="option-text">(D) 針對 App 安裝檔 (.apk / .ipa) 進行逆向工程</span>
+                    </label>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary" onclick="checkAnswer()">送出作答</button>
+                    <button type="button" class="btn btn-outline" onclick="showAnswer()">顯示正解</button>
+                    <button type="button" class="btn btn-reset" onclick="resetQuiz()">重設</button>
+                </div>
+
+                <div id="feedback" class="feedback-box"></div>
+            </form>
+        </section>
+
+        <!-- 解析區域 Accordion -->
+        <section class="accordion">
+            <!-- 題目 -->
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">題目關鍵字解析</button>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <h3>第一步：找關鍵字</h3>
+                        <p>請留意以下線索，它們決定了這題的邏輯方向：</p>
+                        <ul>
+                            <li><span class="highlight">行動銀行 App</span>：這是本次的主角，屬於高敏感金融應用程式。</li>
+                            <li><span class="highlight">完整的資安檢測</span>：題目限定範圍在「針對該 App 本身」及其直接相關的後端系統。</li>
+                            <li><span class="highlight">App 與後端伺服器</span>：這是 App 運作的必要元件。</li>
+                            <li><span class="highlight">原始碼</span>：程式的核心組成。</li>
+                            <li><span class="highlight">App 安裝檔 (apk / ipa)</span>：這是使用者下載到手機上的檔案。</li>
+                            <li><span class="highlight">雲端平台環境</span>：這是基礎設施 (Infrastructure)，範圍大於單一 App。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 翻譯與思路 -->
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">翻譯與解題思路</button>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <h3>第二步：白話翻譯</h3>
+                        <p>這題用白話文來說是在問：</p>
+                        <p style="background: #f0f0f0; padding: 10px; border-left: 4px solid var(--accent-color); margin: 10px 0;">
+                            「如果要檢查『一個行動銀行 App 本身』安不安全，哪些工作是標準必做的？而哪些其實已經<strong>超出範圍</strong>（例如在檢查整個環境），或者<strong>不是正規檢測手段</strong>？」
+                        </p>
+                        
+                        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
+
+                        <h3>第三步：解題思路</h3>
+                        <p><strong>核心觀念：</strong>App 資安檢測的重點在於「App 與其程式行為」，而不是整個雲端環境治理或過度偏向逆向破解分析。</p>
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li>先界定檢測對象是「App 本身」。</li>
+                            <li>判斷選項是否直接針對 App 的程式碼、商業邏輯或連線行為。</li>
+                            <li>排除「偏向基礎設施治理 (Infrastructure)」或「非必要且具爭議性的手段」。</li>
+                        </ol>
+                        <p><strong>比喻說明：</strong></p>
+                        <ul>
+                            <li><strong>App 安全檢測</strong>：就像檢查這輛「車」本身的煞車靈不靈、門鎖有沒有壞。</li>
+                            <li><strong>CSPM</strong>：就像檢查整個「停車場」的管理規定和柵欄位置（這是環境治理）。</li>
+                            <li><strong>逆向工程</strong>：就像把車子拆解開來研究它的引擎設計圖（這通常是用來破解或深入研究惡意程式，不一定是常規的安全性檢查步驟）。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 選項分析 -->
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">選項逐一分析</button>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <h3>第四步：選項分析</h3>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <strong style="color: var(--success-color);">(A) 滲透測試 (Penetration Testing)</strong> - <span style="font-weight: bold;">屬於檢測項目</span>
+                            <p style="font-size: 0.95em; color: #555;">這是標準的 App 與後端安全測試方式。透過模擬駭客攻擊（例如攔截封包、測試 API 漏洞），可以找出真實運作下的弱點。</p>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <strong style="color: var(--success-color);">(B) 原始碼檢測 (Source Code Review)</strong> - <span style="font-weight: bold;">屬於檢測項目</span>
+                            <p style="font-size: 0.95em; color: #555;">直接檢查程式碼怎麼寫，能找出邏輯錯誤或不安全的編碼習慣（例如將密碼寫死在程式裡）。對金融 App 來說這是高價值的檢測。</p>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <strong style="color: var(--error-color);">(C) 雲端安全配置檢視 (CSPM)</strong> - <span style="font-weight: bold;">較不屬於</span>
+                            <p style="font-size: 0.95em; color: #555;"><span class="term">CSPM (Cloud Security Posture Management)</span> 著重在雲端平台整體的設定（如 AWS/Azure 的權限設定、儲存體公開權限等）。這屬於「基礎設施與治理」層級，範圍太廣，並非針對單一 App 的程式安全檢測。</p>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <strong style="color: var(--error-color);">(D) 逆向工程 (Reverse Engineering)</strong> - <span style="font-weight: bold;">較不屬於</span>
+                            <p style="font-size: 0.95em; color: #555;">雖然駭客會做這件事，但在委託廠商進行的正規「資安檢測」中，逆向工程通常是為了分析惡意程式，或驗證有無「抗逆向機制」。把它當作主要的檢測手段並非常態，因為這比較偏向研究與破解分析。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 觀念補充 -->
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">重點觀念與記憶口訣</button>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <h3>觀念補充</h3>
+                        <p><strong>核心觀念定位：</strong>本題屬於「資安測試範圍界定 / 行動應用程式安全」，考試常考「哪些算、哪些不算」的邊界判斷。</p>
+                        <ul>
+                            <li><span class="term">滲透測試</span>：動態測試 (DAST)，實際打打看。</li>
+                            <li><span class="term">原始碼檢測</span>：靜態測試 (SAST)，檢查程式碼。</li>
+                            <li><span class="term">CSPM</span>：雲端環境治理，檢查設定檔。</li>
+                        </ul>
+
+                        <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+
+                        <h3>記憶口訣</h3>
+                        <p style="font-size: 1.2rem; font-weight: bold; color: var(--primary-color); text-align: center; background: #e8f4f8; padding: 10px; border-radius: 6px;">
+                            「App 檢測看程式，不看整朵雲」
+                        </p>
+                        <p style="text-align: center;">滲透、原碼是標準；CSPM、逆向要想清。</p>
+
+                        <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+
+                        <h3>常見陷阱</h3>
+                        <ul>
+                            <li><strong>學生最容易搞混：</strong>看到「資安」兩個字，就以為所有跟安全有關的選項都應該選。</li>
+                            <li><strong>避坑指南：</strong>題目既然指定了「App 資安檢測」，就要優先選與 App 程式邏輯直接相關的項目。範圍過大（雲端環境）或手段特殊（逆向）的通常是干擾選項。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 正確答案 -->
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">最終答案與總結</button>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <h3>正確答案：C、D</h3>
+                        <p><strong>一句話理由：</strong></p>
+                        <p>因為 CSPM 屬於雲端治理層級，而逆向工程通常並非一般正式 App 安全檢測的標準項目。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 自我檢測卡片 -->
+        <section class="card" id="self-check-card">
+            <h2 style="font-size: 1.2rem; margin-bottom: 15px; border-bottom: 2px solid var(--accent-color); display: inline-block;">自我檢測</h2>
+            <p style="margin-bottom: 20px; color: #666;">試著回答以下問題，強化記憶（點擊按鈕查看答案）：</p>
+
+            <div class="self-check-item">
+                <div class="self-check-question">1. 若題目改成「整體雲端資安治理」，哪一個選項就會變成正確的檢測項目？</div>
+                <button class="btn btn-outline" style="font-size: 0.8rem; padding: 5px 10px;" onclick="toggleSelfCheck('ans1')">顯示/隱藏答案</button>
+                <div id="ans1" class="self-check-answer">
+                    <strong>答案：(C) CSPM。</strong><br>
+                    因為 CSPM 專門用來掃描雲端平台（如 AWS, Azure, GCP）的設定是否有漏洞，例如 S3 Bucket 是否誤開為公開。
+                </div>
+            </div>
+
+            <div class="self-check-item">
+                <div class="self-check-question">2. 為什麼金融 App 特別重視原始碼檢測 (Source Code Review)？</div>
+                <button class="btn btn-outline" style="font-size: 0.8rem; padding: 5px 10px;" onclick="toggleSelfCheck('ans2')">顯示/隱藏答案</button>
+                <div id="ans2" class="self-check-answer">
+                    <strong>答案：找出邏輯漏洞。</strong><br>
+                    金融 App 涉及金流，任何邏輯錯誤（如轉帳金額為負數）都可能造成鉅額損失，原始碼檢測能從根本找出這些問題。
+                </div>
+            </div>
+
+            <div class="self-check-item">
+                <div class="self-check-question">3. 在合法資安檢測中，為什麼「逆向工程」常被謹慎使用？</div>
+                <button class="btn btn-outline" style="font-size: 0.8rem; padding: 5px 10px;" onclick="toggleSelfCheck('ans3')">顯示/隱藏答案</button>
+                <div id="ans3" class="self-check-answer">
+                    <strong>答案：法律與智慧財產權爭議。</strong><br>
+                    逆向工程涉及將軟體還原，可能觸犯授權條款。除非目的是為了驗證「防護機制」（如混淆是否有效），否則一般不作為找漏洞的首選方式。
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; iPAS 資安能力鑑定教學練習 | 版面設計：Clean & Professional</p>
+        </footer>
+    </div>
+
+    <script>
+        // 進度追蹤變數
+        let progress = {
+            answered: false,
+            expanded: new Set(),
+            selfChecked: false
+        };
+
+        const totalItems = 7; // 1 (Answer) + 5 (Accordions) + 1 (Self Check)
+        // Note: Accordions count: Keywords, Translation, Analysis, Concepts, Answer = 5 items
+
+        // 檢查答案邏輯
+        function checkAnswer() {
+            const correctAnswers = ['C', 'D'];
+            const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+            const userAnswers = Array.from(checkboxes).map(cb => cb.value);
+            const feedbackEl = document.getElementById('feedback');
+            
+            feedbackEl.style.display = 'block';
+            feedbackEl.className = 'feedback-box'; // reset classes
+
+            if (userAnswers.length === 0) {
+                feedbackEl.textContent = "請至少選擇一個選項。";
+                feedbackEl.classList.add('feedback-wrong');
+                return;
+            }
+
+            // 判斷邏輯
+            const isCorrectLength = userAnswers.length === correctAnswers.length;
+            const hasCorrectItems = userAnswers.every(ans => correctAnswers.includes(ans));
+            const hasWrongItems = userAnswers.some(ans => !correctAnswers.includes(ans));
+            
+            // 計算是否有選對部分
+            const correctPicks = userAnswers.filter(ans => correctAnswers.includes(ans)).length;
+
+            if (isCorrectLength && hasCorrectItems) {
+                // 全對
+                feedbackEl.textContent = "判斷正確！CSPM 與逆向工程確實較不屬於標準 App 安全檢測範圍。";
+                feedbackEl.classList.add('feedback-correct');
+                progress.answered = true;
+            } else if (hasWrongItems || (correctPicks > 0 && correctPicks < 2)) {
+                // 部分對或有錯
+                if (correctPicks > 0) {
+                    feedbackEl.textContent = "方向正確，但仍有誤選或漏選。請再確認哪些才是「不屬於」的項目。";
+                    feedbackEl.classList.add('feedback-partial');
+                } else {
+                    feedbackEl.textContent = "選擇錯誤。請重新檢視什麼才算 App 安全檢測範圍。";
+                    feedbackEl.classList.add('feedback-wrong');
+                }
+            } else {
+                 feedbackEl.textContent = "請重新思考。";
+                 feedbackEl.classList.add('feedback-wrong');
+            }
+
+            updateProgress();
+        }
+
+        // 顯示正解
+        function showAnswer() {
+            const checkboxes = document.querySelectorAll('input[name="option"]');
+            checkboxes.forEach(cb => {
+                if (cb.value === 'C' || cb.value === 'D') {
+                    cb.checked = true;
+                    cb.parentElement.style.backgroundColor = '#d4edda';
+                } else {
+                    cb.checked = false;
+                    cb.parentElement.style.backgroundColor = '';
+                }
+            });
+            const feedbackEl = document.getElementById('feedback');
+            feedbackEl.style.display = 'block';
+            feedbackEl.textContent = "已顯示正確答案：C 與 D。";
+            feedbackEl.className = 'feedback-box feedback-partial';
+            
+            progress.answered = true;
+            updateProgress();
+        }
+
+        // 重設
+        function resetQuiz() {
+            const checkboxes = document.querySelectorAll('input[name="option"]');
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+                cb.parentElement.style.backgroundColor = '';
+            });
+            const feedbackEl = document.getElementById('feedback');
+            feedbackEl.style.display = 'none';
+        }
+
+        // Accordion 開關
+        function toggleAccordion(header) {
+            header.classList.toggle('active');
+            const content = header.nextElementSibling;
+            
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                // 記錄進度
+                const title = header.innerText;
+                progress.expanded.add(title);
+                updateProgress();
+            }
+        }
+
+        // 自我檢測開關
+        function toggleSelfCheck(id) {
+            const el = document.getElementById(id);
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+            } else {
+                el.style.display = 'block';
+                progress.selfChecked = true;
+                updateProgress();
+            }
+        }
+
+        // 更新進度條
+        function updateProgress() {
+            // 計算分數
+            // 1. 作答完成 (佔 20%)
+            // 2. 展開解析 (共5個區塊，每個 10%，共 50%)
+            // 3. 自我檢測 (佔 30%)
+            // 簡化計算：總共 7 個檢查點 (1 answer + 5 accordions + 1 self-check)
+            
+            let score = 0;
+            if (progress.answered) score++;
+            score += progress.expanded.size;
+            if (progress.selfChecked) score++;
+
+            // 確保不超過總數 (若使用者多次操作)
+            const maxScore = 7; 
+            const percentage = Math.min(Math.round((score / maxScore) * 100), 100);
+
+            document.getElementById('progress-bar').style.width = percentage + '%';
+            document.getElementById('progress-text').textContent = percentage + '%';
+        }
+    </script>
+</body>
+</html>

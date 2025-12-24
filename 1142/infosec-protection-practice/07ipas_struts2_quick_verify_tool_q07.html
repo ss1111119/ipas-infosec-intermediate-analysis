@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_struts2_quick_verify_tool_q07.html - iPAS資安防護實務衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --accent-hover: #2980b9;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f5f6fa;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-color: #dcdde1;
+            --highlight-color: #fff700;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Header Section */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-bottom: 4px solid var(--accent-color);
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .meta-info {
+            font-size: 0.9rem;
+            color: #bdc3c7;
+        }
+
+        /* Scenario & Question Section */
+        .content-area {
+            padding: 25px;
+        }
+
+        .scenario-box {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-left: 5px solid var(--secondary-color);
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        /* Interaction Area */
+        .options-group {
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: block;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover {
+            background-color: #f7f9fc;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input {
+            margin-right: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: white;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            margin-left: 10px;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Result & Feedback */
+        #result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .result-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section */
+        .explanation-wrapper {
+            margin-top: 30px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 20px;
+            display: none; /* Hidden by default */
+        }
+
+        .toggle-switch {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-switch input {
+            margin-right: 10px;
+        }
+
+        .accordion {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .accordion-header {
+            background-color: #f1f2f6;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #e2e6ea;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion-header.active::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Content Styling */
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .code-snippet {
+            background-color: #2d3436;
+            color: #dfe6e9;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        /* Learning Tools Section */
+        .learning-tools {
+            margin-top: 40px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tool-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .tool-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tool-desc {
+            display: none;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            border-top: 1px solid #eee;
+            padding-top: 5px;
+        }
+
+        .interactive-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            margin-right: 10px;
+        }
+
+        .checklist-item {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+            }
+            body {
+                padding: 0;
+            }
+            .tool-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資訊安全防護實務 - 短期衝刺班</h1>
+        <div class="meta-info">題組 1 | 題號 7 | 檔案：ipas_struts2_quick_verify_tool_q07.html</div>
+    </header>
+
+    <div class="content-area">
+        <!-- 題目情境區 -->
+        <div class="scenario-box">
+            <span class="scenario-title">【情境描述】</span>
+            <p>某醫療資訊系統採用 Apache Struts 2 作為開發框架，且版本未及時更新。紅隊演練時，施測人員發現可透過特定 HTTP 請求，於 HTTP Header 中插入惡意 OGNL（Object Graph Navigation Language）語法，成功遠端執行任意指令（RCE），取得 Shell 權限。施測人員進一步利用此權限，在內網大量掃描並進行橫向移動（Lateral Movement），最終找到資料庫伺服器，並以預設帳號密碼登入，竊取大量病患醫療資料。若此漏洞被攻擊者利用，將造成嚴重的機密資料外洩事件。</p>
+        </div>
+
+        <div class="question-text">
+            題目：醫院若想針對內網環境進行上述 Struts 2 漏洞的快速偵測並驗證，使用下列何種工具或指令最為適切？
+        </div>
+
+        <!-- 作答區 -->
+        <div class="options-group" id="quiz-form">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                (A) nmap -sV --script=http-shellshock
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                (B) sqlmap -u "https://struts2.com"
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                (C) nikto -host struts2.com -C all
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                (D) msf ＞ use exploit/multi/http/struts2_content_type_ognl
+            </label>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn" onclick="checkAnswer()">送出答案</button>
+            <button class="btn btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <!-- 結果與回饋 -->
+        <div id="result-area"></div>
+
+        <!-- 解析區 (Accordion) -->
+        <div class="explanation-wrapper" id="explanation-wrapper">
+            <div class="toggle-switch">
+                <label>
+                    <input type="checkbox" id="toggle-exp" onchange="toggleAllExplanations()"> 
+                    <strong>顯示／隱藏詳細解析</strong>
+                </label>
+            </div>
+
+            <div id="accordion-container" style="display: none;">
+                <!-- 1. 題目 -->
+                <div class="accordion">
+                    <div class="accordion-header" onclick="togglePanel(this)">【題目】</div>
+                    <div class="accordion-content">
+                        <p>醫院若想針對內網環境進行上述 Struts 2 漏洞的快速偵測並驗證，使用下列何種工具或指令最為適切？</p>
+                    </div>
+                </div>
+
+                <!-- 2. 第一步：找關鍵字 -->
+                <div class="accordion">
+                    <div class="accordion-header" onclick="togglePanel(this)">【第一步：找關鍵字】</div>
+                    <div class="accordion-content">
+                        <p>請注意以下紅字與螢光筆部分：</p>
+                        <ul>
+                            <li><span class="highlight">內網環境</span>：代表施測範圍在防火牆內。</li>
+                            <li><span class="highlight">快速偵測、驗證</span>：重點！不只要掃描，還要能「驗證」（Verify/Exploit）漏洞是否存在。</li>
+                            <li><span class="highlight">Struts 2 漏洞</span>、<span class="highlight">Content-Type</span>、<span class="highlight">OGNL</span>、<span class="highlight">RCE</span>：這是題幹明確指定的漏洞特徵。</li>
+                            <li><span class="highlight">工具/指令</span>、<span class="highlight">最為適切</span>：要選最能對症下藥的工具。</li>
+                        </ul>
+                        <p><strong>關鍵提示：</strong>「偵測並驗證」意味著該工具最好具備 Exploit（漏洞利用）模組，能實際觸發漏洞以證明危害。</p>
+                    </div>
+                </div>
+
+                <!-- 3. 第二步：白話翻譯 -->
+                <div class="accordion">
+                    <div class="accordion-header" onclick="togglePanel(this)">【第二步：白話翻譯】</div>
+                    <div class="accordion-content">
+                        <p><strong>白話解釋：</strong></p>
+                        <p>「醫院想在內網快速找出：哪些主機有 Struts2 的 OGNL 漏洞，而且要能『試一下就知道真的會中』，應該用哪個工具？」</p>
+                        <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                        <p><strong>名詞解釋：</strong></p>
+                        <ul>
+                            <li><strong>偵測：</strong>找出可能有問題的系統。</li>
+                            <li><strong>驗證：</strong>真的打一下，確認漏洞存在（Proof of Concept）。</li>
+                            <li><strong>Metasploit (msf)：</strong>一個把各種漏洞利用模組整理好的滲透測試工具，像是一把萬能鑰匙包。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 4. 第三步：解題思路 -->
+                <div class="accordion">
+                    <div class="accordion-header" onclick="togglePanel(this)">【第三步：解題思路】</div>
+                    <div class="accordion-content">
+                        <p><strong>本題核心觀念：</strong>漏洞類型要配對正確的掃描/驗證工具（對症下藥）。</p>
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li><strong>確認題幹漏洞：</strong>題目說的是 Struts2 框架，透過 Content-Type 標頭進行 OGNL 注入，導致 RCE。</li>
+                            <li><strong>找對應工具：</strong>看選項中哪個工具的指令或模組名稱，明確包含「Struts2」、「Content-Type」、「OGNL」這些關鍵字。</li>
+                            <li><strong>排除干擾項：</strong>
+                                <ul>
+                                    <li>(A) 是測 Shellshock（Bash漏洞）。</li>
+                                    <li>(B) 是測 SQL Injection。</li>
+                                    <li>(C) 是網頁通用弱掃，不一定能「驗證」RCE。</li>
+                                </ul>
+                            </li>
+                        </ol>
+                        <p><strong>結論：</strong>msf 的模組名稱 <code>struts2_content_type_ognl</code> 完全命中題目的漏洞特徵，且 Metasploit 本身就是強大的漏洞驗證工具。</p>
+                    </div>
+                </div>
+
+                <!-- 5. 第四步：選項分析 -->
+                <div class="accordion">
+                    <div class="accordion-header" onclick="togglePanel(this)">【第四步：選項分析】</div>
+                    <div class="accordion-content">
+                        <ul>
+                            <li><strong>(A) nmap -sV --script=http-shellshock</strong><br>
+                                <span style="color:var(--error-color)">[錯誤]</span> Shellshock 是 Bash 的環境變數注入漏洞，與 Struts2 OGNL 無關。Nmap 雖可用腳本掃描，但這裡選錯腳本了。
+                            </li>
+                            <li><strong>(B) sqlmap -u "https://struts2.com"</strong><br>
+                                <span style="color:var(--error-color)">[錯誤]</span> sqlmap 是專門用來檢測 SQL 注入 (SQL Injection) 的工具。題目是 OGNL 程式碼注入 RCE，兩者原理不同。
+                            </li>
+                            <li><strong>(C) nikto -host struts2.com -C all</strong><br>
+                                <span style="color:var(--error-color)">[不適切]</span> Nikto 是 Web 伺服器弱點掃描器，擅長找設定錯誤、敏感檔案或已知版本問題。雖然可能掃出 Struts2 版本過舊，但對於「驗證 RCE 漏洞」的能力不如 Metasploit 直接且有效。
+                            </li>
+                            <li><strong>(D) msf ＞ use exploit/multi/http/struts2_content_type_ognl</strong><br>
+                                <span style="color:var(--success-color)">[正確]</span> Metasploit (msf) 是漏洞利用框架。選項中的模組路徑直接指明了針對 Struts2 的 Content-Type OGNL 漏洞，能發送特定 payload 進行快速驗證與利用。
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 6. 觀念補充與延伸 -->
+                <div class="accordion">
+                    <div class="accordion-header" onclick="togglePanel(this)">【觀念補充與延伸】</div>
+                    <div class="accordion-content">
+                        <p><strong>核心觀念定位：</strong>iPAS 防護實務常考「工具用途辨識」。請熟記以下定義：</p>
+                        <ul>
+                            <li><strong>nmap：</strong>掃描主機存活、開放埠口 (Port)、服務版本偵測。</li>
+                            <li><strong>nikto：</strong>Web 伺服器弱點掃描、找常見錯誤設定、預設檔案。</li>
+                            <li><strong>sqlmap：</strong>SQL 注入 (SQLi) 自動化測試與資料庫接管。</li>
+                            <li><strong>Metasploit (msf)：</strong>漏洞利用框架，用特定模組快速驗證 (Exploit) 特定漏洞。</li>
+                        </ul>
+                        <br>
+                        <p><strong>觸類旁通（舉一反三）：</strong></p>
+                        <ul>
+                            <li><strong>變化題 1：</strong>若題幹改成「網站懷疑有 SQL Injection」，最適合用哪個工具？<br>→ 答案選 <strong>sqlmap</strong>。</li>
+                            <li><strong>變化題 2：</strong>若題幹改成「只要盤點內網有哪些主機、開了什麼 Port」，最適合用哪個工具？<br>→ 答案選 <strong>nmap</strong>。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 7. 記憶口訣 -->
+                <div class="accordion">
+                    <div class="accordion-header" onclick="togglePanel(this)">【記憶口訣】</div>
+                    <div class="accordion-content">
+                        <p style="font-size: 1.1rem; font-weight: bold; color: var(--accent-color); text-align: center; border: 2px solid var(--accent-color); padding: 10px; border-radius: 8px;">
+                            「掃主機用 nmap，<br>
+                            掃網頁用 nikto；<br>
+                            SQLi 找 sqlmap，<br>
+                            驗證漏洞靠 msf。」
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 8. 常見陷阱 -->
+                <div class="accordion">
+                    <div class="accordion-header" onclick="togglePanel(this)">【常見陷阱】</div>
+                    <div class="accordion-content">
+                        <ul>
+                            <li>看到題目有 "Web" 或 "HTTP" 就亂選 nikto。但題目要求的是「驗證 Struts2 OGNL RCE」，nikto 力有未逮。</li>
+                            <li>把所有漏洞都當成 SQL 注入，看到駭客入侵就選 sqlmap。必須區分是資料庫注入還是系統指令執行 (RCE)。</li>
+                            <li><strong>避坑指南：</strong>先把題目的「漏洞名字」寫下來（如 Struts2 OGNL），再看哪個選項的指令字串裡「名字有對上」。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 9. 正確答案 -->
+                <div class="accordion">
+                    <div class="accordion-header" onclick="togglePanel(this)">【正確答案】</div>
+                    <div class="accordion-content">
+                        <p style="font-size: 2rem; text-align: center; color: var(--success-color); font-weight: bold;">(D)</p>
+                    </div>
+                </div>
+
+                <!-- 10. 自我檢測 -->
+                <div class="accordion">
+                    <div class="accordion-header" onclick="togglePanel(this)">【自我檢測】</div>
+                    <div class="accordion-content">
+                        <p>試著回答以下問題（不提供答案，請自行思考）：</p>
+                        <ol>
+                            <li>若內網要快速盤點所有主機開了哪些埠與服務版本，你會選哪個工具？為什麼？</li>
+                            <li>nikto 與 sqlmap 的差異是什麼？各自最適用的情境是什麼？</li>
+                            <li>「偵測 (Detection)」與「驗證 (Verification)」在弱點管理流程中各代表什麼？為什麼有時候掃描完還需要驗證？</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 學習輔助互動區 -->
+        <div class="learning-tools" id="learning-tools" style="display:none;">
+            <h3>🛠️ 學習輔助工具箱</h3>
+            
+            <!-- 12. 工具對照速記卡 -->
+            <div class="interactive-section">
+                <h4>1. 工具對照速記卡 (點擊卡片查看比喻)</h4>
+                <div class="tool-cards">
+                    <div class="tool-card" onclick="toggleCard(this)">
+                        <strong>Nmap</strong>
+                        <div class="tool-desc">像「全校點名」<br>確認誰在教室、門窗是否開著。</div>
+                    </div>
+                    <div class="tool-card" onclick="toggleCard(this)">
+                        <strong>Nikto</strong>
+                        <div class="tool-desc">像「健康檢查」<br>找網頁伺服器的常見老毛病。</div>
+                    </div>
+                    <div class="tool-card" onclick="toggleCard(this)">
+                        <strong>Sqlmap</strong>
+                        <div class="tool-desc">像「資料庫鑽頭」<br>專門鑽資料庫的漏洞。</div>
+                    </div>
+                    <div class="tool-card" onclick="toggleCard(this)">
+                        <strong>Metasploit (msf)</strong>
+                        <div class="tool-desc">像「萬能鑰匙包」<br>拿出特定鑰匙，試試能不能開門(驗證)。</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 13. 題目關鍵字選擇器 -->
+            <div class="interactive-section">
+                <h4>2. 漏洞關鍵字 → 工具選擇器</h4>
+                <p>如果你遇到...</p>
+                <div style="margin-top: 10px;">
+                    <select id="vuln-selector" onchange="recommendTool()">
+                        <option value="">-- 請選擇漏洞情境 --</option>
+                        <option value="sqli">資料庫 SQL Injection</option>
+                        <option value="ognl">Struts2 OGNL RCE (本題)</option>
+                        <option value="shellshock">Bash Shellshock 漏洞</option>
+                        <option value="scan">一般主機與 Port 盤點</option>
+                    </select>
+                    <span id="tool-recommendation" style="font-weight: bold; color: var(--accent-color);"></span>
+                </div>
+            </div>
+
+            <!-- 14. 作答檢核清單 -->
+            <div class="interactive-section">
+                <h4>3. 作答邏輯檢核 (Checklist)</h4>
+                <div style="background: white; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <label class="checklist-item">
+                        <input type="checkbox" id="check1" onchange="verifyChecklist()"> 選項工具是否對應到「Struts 2」與「OGNL」？
+                    </label>
+                    <label class="checklist-item">
+                        <input type="checkbox" id="check2" onchange="verifyChecklist()"> 該工具是否能做「驗證 (Exploit)」而不只是掃描？
+                    </label>
+                    <label class="checklist-item">
+                        <input type="checkbox" id="check3" onchange="verifyChecklist()"> 模組名稱是否包含 <code>content_type_ognl</code> 線索？
+                    </label>
+                    <div id="checklist-feedback" style="margin-top: 5px; font-size: 0.9rem; color: var(--secondary-color);"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 檢查答案邏輯
+    function checkAnswer() {
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const resultArea = document.getElementById('result-area');
+        const explanationWrapper = document.getElementById('explanation-wrapper');
+        const learningTools = document.getElementById('learning-tools');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        resultArea.style.display = 'block';
+        
+        // 顯示解析區塊與工具區塊
+        explanationWrapper.style.display = 'block';
+        learningTools.style.display = 'block';
+
+        if (selectedValue === 'D') {
+            resultArea.className = 'result-correct';
+            resultArea.innerHTML = '<strong>✅ 答對了！</strong><br>Metasploit 提供了針對 Struts 2 OGNL 漏洞的專用利用模組，是驗證此漏洞的最佳工具。';
+        } else {
+            resultArea.className = 'result-incorrect';
+            resultArea.innerHTML = `<strong>❌ 答錯了！</strong><br>你選的是 (${selectedValue})，正確答案是 (D)。<br>提示：工具必須「對準」漏洞類型。題目是 OGNL 漏洞，且需要「驗證」。請查看下方解析。`;
+        }
+    }
+
+    // 重置測驗
+    function resetQuiz() {
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+        document.getElementById('result-area').style.display = 'none';
+        document.getElementById('explanation-wrapper').style.display = 'none';
+        document.getElementById('learning-tools').style.display = 'none';
+        document.getElementById('toggle-exp').checked = false;
+        document.getElementById('accordion-container').style.display = 'none';
+        
+        // 重置 checklist
+        document.getElementById('check1').checked = false;
+        document.getElementById('check2').checked = false;
+        document.getElementById('check3').checked = false;
+        document.getElementById('checklist-feedback').innerText = '';
+        
+        // 重置 selector
+        document.getElementById('vuln-selector').value = '';
+        document.getElementById('tool-recommendation').innerText = '';
+
+        // 關閉所有卡片
+        const descs = document.querySelectorAll('.tool-desc');
+        descs.forEach(d => d.style.display = 'none');
+    }
+
+    // 切換所有解析顯示
+    function toggleAllExplanations() {
+        const isChecked = document.getElementById('toggle-exp').checked;
+        const container = document.getElementById('accordion-container');
+        container.style.display = isChecked ? 'block' : 'none';
+    }
+
+    // 手風琴面板切換
+    function togglePanel(header) {
+        header.classList.toggle('active');
+        const content = header.nextElementSibling;
+        if (content.style.display === 'block') {
+            content.style.display = 'none';
+        } else {
+            content.style.display = 'block';
+        }
+    }
+
+    // 翻轉工具卡片
+    function toggleCard(card) {
+        const desc = card.querySelector('.tool-desc');
+        if (desc.style.display === 'block') {
+            desc.style.display = 'none';
+        } else {
+            desc.style.display = 'block';
+        }
+    }
+
+    // 推薦工具互動
+    function recommendTool() {
+        const val = document.getElementById('vuln-selector').value;
+        const output = document.getElementById('tool-recommendation');
+        
+        switch(val) {
+            case 'sqli':
+                output.innerText = '👉 推薦使用 sqlmap';
+                break;
+            case 'ognl':
+                output.innerText = '👉 推薦使用 Metasploit (msf) [正解]';
+                break;
+            case 'shellshock':
+                output.innerText = '👉 推薦使用 nmap script 或專用 exploit';
+                break;
+            case 'scan':
+                output.innerText = '👉 推薦使用 nmap';
+                break;
+            default:
+                output.innerText = '';
+        }
+    }
+
+    // 檢核清單驗證
+    function verifyChecklist() {
+        const c1 = document.getElementById('check1').checked;
+        const c2 = document.getElementById('check2').checked;
+        const c3 = document.getElementById('check3').checked;
+        const feedback = document.getElementById('checklist-feedback');
+
+        if (c1 && c2 && c3) {
+            feedback.innerText = '👍 觀念正確！這三個條件都指向 Metasploit 的特定模組。';
+            feedback.style.color = 'var(--success-color)';
+        } else if (c1 || c2 || c3) {
+            feedback.innerText = '...請繼續確認其他條件，以確保選出「最為適切」的答案。';
+            feedback.style.color = 'var(--secondary-color)';
+        } else {
+            feedback.innerText = '';
+        }
+    }
+</script>
+
+</body>
+</html>

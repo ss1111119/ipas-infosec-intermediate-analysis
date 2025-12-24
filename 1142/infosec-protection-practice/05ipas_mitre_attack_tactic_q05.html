@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資訊安全防護實務 - 題組1 題號5 (ipas_mitre_attack_tactic_q05.html)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-radius: 8px;
+            --spacing-unit: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header Area */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        header .meta-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        /* Scenario Box */
+        .scenario-box {
+            background-color: #e8f4fc;
+            border-left: 5px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Question Area */
+        .question-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent-color);
+            background-color: #f0f8ff;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* Action Buttons */
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        .btn-toggle-expl {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Feedback Area */
+        .feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section (Accordion) */
+        .explanation-container {
+            display: none; /* Hidden by default */
+            margin-top: 30px;
+        }
+
+        .accordion-item {
+            background-color: var(--card-bg);
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .accordion-header {
+            background-color: #fff;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .accordion-header:hover {
+            background-color: #f9f9f9;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: #fff;
+        }
+
+        .accordion-content .inner {
+            padding: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        /* Specific Styling for Content */
+        .highlight-marker {
+            background-color: #fff3cd; /* Yellow highlight */
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .keyword-box {
+            display: inline-block;
+            background-color: #e2e6ea;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 0.9em;
+        }
+
+        /* Interactive Learning Aids */
+        .learning-aid-section {
+            border: 1px dashed #bbb;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: var(--border-radius);
+            background-color: #fafafa;
+        }
+
+        .learning-aid-title {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 10px;
+            font-weight: bold;
+            display: block;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        /* Flashcards */
+        .flashcards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .flashcard {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: transform 0.2s;
+            position: relative;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .flashcard:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .flashcard-content {
+            display: none;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            color: #666;
+        }
+
+        .flashcard.active .flashcard-content {
+            display: block;
+        }
+
+        .flashcard-title {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Segment Marker */
+        .segment-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .segment-btn {
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .segment-btn:hover {
+            background-color: #e9ecef;
+        }
+
+        .segment-result {
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--accent-color);
+            min-height: 1.5em;
+        }
+
+        /* Checklist */
+        .checklist-item {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .checklist-result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f4fc;
+            border-radius: 4px;
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.2rem; }
+            .action-area { flex-direction: column; }
+            .flashcards-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>資訊安全防護實務 - 短期衝刺班</h1>
+        <div class="meta-info">
+            <span>題組：1</span>
+            <span>題號：5</span>
+            <span>檔案：ipas_mitre_attack_tactic_q05.html</span>
+        </div>
+    </header>
+
+    <div class="scenario-box">
+        <span class="scenario-title">【情境描述】</span>
+        某醫療資訊系統採用 Apache Struts 2 作為開發框架，且版本未及時更新。該醫院在紅隊演練時，施測人員發現可透過特定 HTTP 請求，於 HTTP Header 中對醫療資訊系統插入惡意 OGNL（Object Graph Navigation Language）語法，成功在系統上遠端執行任意指令（RCE），取得 Shell 權限。施測人員進一步利用此權限，在內網大量掃描，並進行橫向移動（Lateral Movement），最終找到資料庫伺服器，並以預設帳號密碼登入，竊取大量病患醫療資料。若此漏洞被攻擊者利用，將造成嚴重的機密資料外洩事件。
+    </div>
+
+    <div class="question-card">
+        <div class="question-text">
+            5. 「在系統插入惡意 OGNL 語法，成功遠端執行任意指令並取得 Shell 權限」這一攻擊行為，根據 MITRE ATT&CK，最適合歸類於下列哪一個戰術？
+        </div>
+
+        <div class="options-group" id="optionsForm">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                (A) Reconnaissance（偵察）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                (B) Initial Access（初始存取）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                (C) Privilege Escalation（權限提升）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                (D) Defense Evasion（防禦規避）
+            </label>
+        </div>
+
+        <div class="feedback-area" id="feedbackArea"></div>
+
+        <div class="action-area">
+            <button class="btn-submit" onclick="submitAnswer()">送出答案</button>
+            <button class="btn-retry" onclick="retryQuiz()">重作一次</button>
+            <button class="btn-toggle-expl" onclick="toggleExplanationMain()">顯示／隱藏解析</button>
+        </div>
+    </div>
+
+    <!-- 解析區 -->
+    <div class="explanation-container" id="explanationContainer">
+        
+        <!-- 0. 題目重述 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【題目】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p>請問「插入惡意 OGNL 語法，成功遠端執行任意指令並取得 Shell 權限」屬於哪個 MITRE ATT&CK 戰術？</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. 找關鍵字 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第一步：找關鍵字】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p>請用螢光筆標記出以下重點：</p>
+                    <p>
+                        <span class="highlight-marker">Apache Struts 2</span>、
+                        <span class="highlight-marker">版本未更新</span>、
+                        <span class="highlight-marker">HTTP Header</span>、
+                        <span class="highlight-marker">插入惡意 OGNL</span>、
+                        <span class="highlight-marker">RCE</span>、
+                        <span class="highlight-marker">取得 Shell</span>、
+                        <span class="highlight-marker">根據 MITRE ATT&CK</span>、
+                        <span class="highlight-marker">戰術（Tactic）</span>、
+                        <span class="highlight-marker">最適合歸類</span>
+                    </p>
+                    <br>
+                    <p><strong>注意範圍：</strong>題目只問「插入 OGNL &rarr; RCE &rarr; 拿到 Shell」這一段。雖然情境後面有提到內網掃描、橫向移動、登入資料庫，但那不是本題詢問的焦點。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 白話翻譯 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第二步：白話翻譯】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p><strong>這題在問什麼？</strong></p>
+                    <p>「駭客利用 Struts 2 這個軟體的漏洞，從外面丟一個特製的請求過去，就能成功鑽進系統裡，並且開始下達指令。請問這個動作，算是在 ATT&CK 的哪一個『階段/目的』？」</p>
+                    <hr style="margin: 15px 0; border:0; border-top:1px dashed #ccc;">
+                    <p><strong>名詞解釋：</strong></p>
+                    <ul style="list-style-type: circle; margin-left: 20px;">
+                        <li><strong>MITRE ATT&CK：</strong>把駭客常用的各種壞招數，整理成一套很有系統的「戰術（目的）/技術（手段）」分類表。</li>
+                        <li><strong>戰術 (Tactic)：</strong>駭客在攻擊鏈的某個階段，「當下想要達到的目的」（例如：想進去、想偷看、想變管理員）。</li>
+                        <li><strong>OGNL：</strong>Struts 2 框架用來操作資料物件的一種語法，如果沒寫好，駭客可以寫惡意語法叫系統執行。</li>
+                        <li><strong>RCE (遠端程式碼執行)：</strong>人明明在外面，卻能叫伺服器執行我寫的程式碼。</li>
+                        <li><strong>Shell 權限：</strong>就像拿到了一個可以打指令的控制視窗（CMD 或 Terminal），代表已經控制了那台機器。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 解題思路 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第三步：解題思路】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p><strong>核心觀念：</strong>用 MITRE ATT&CK 的「戰術」定義來判斷行為目的。</p>
+                    <p><strong>解題三步驟：</strong></p>
+                    <ol style="margin-left: 20px;">
+                        <li><strong>判斷狀態：</strong>攻擊者是還在門外看？還是已經進到門內？<br>&rarr; 已經 RCE 取得 Shell，代表「進去了」。</li>
+                        <li><strong>判斷目的：</strong>是進去後想從普通員工變老闆（提權）？還是在躲監視器（規避）？<br>&rarr; 這是他「第一次」打穿防護網進來。</li>
+                        <li><strong>對應戰術：</strong>利用漏洞從外部成功進入系統 = <strong>Initial Access（初始存取）</strong>。</li>
+                    </ol>
+                    <br>
+                    <p><strong>原理規則：</strong></p>
+                    <ul>
+                        <li><span class="keyword-box">Initial Access</span>：指攻擊者「第一次成功進入目標環境」的方式。常見手段包含釣魚郵件、利用公開應用程式漏洞（如本題 Struts 2）、利用外部遠端服務等。</li>
+                        <li><span class="keyword-box">Privilege Escalation</span>：指「已進入後」，想辦法從低權限帳號變成高權限（root/SYSTEM/Admin）。題目僅描述「利用漏洞取得 Shell」，重點在於「獲得入口」，而非強調從 User 變 Root。</li>
+                        <li><span class="keyword-box">Defense Evasion</span>：指「躲避偵測」，例如停用防毒、刪除日誌。題目完全沒提到這些。</li>
+                    </ul>
+                    
+                    <!-- 互動輔助：事件分段標記器 -->
+                    <div class="learning-aid-section">
+                        <span class="learning-aid-title">互動：點選下方事件階段，看看對應什麼戰術？</span>
+                        <div class="segment-container">
+                            <button class="segment-btn" onclick="showSegmentHint('exploit')">1. 利用漏洞取得 Shell</button>
+                            <button class="segment-btn" onclick="showSegmentHint('scan')">2. 內網掃描</button>
+                            <button class="segment-btn" onclick="showSegmentHint('lateral')">3. 橫向移動</button>
+                            <button class="segment-btn" onclick="showSegmentHint('theft')">4. 登入資料庫竊取資料</button>
+                        </div>
+                        <div id="segmentResult" class="segment-result"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 選項分析 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第四步：選項分析】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <ul style="list-style: none;">
+                        <li style="margin-bottom: 10px;">
+                            <strong>(A) Reconnaissance（偵察）：</strong><span style="color:var(--error-color)">錯</span>。<br>
+                            偵察是攻擊「前」的準備動作，例如用 Google 搜尋目標網域、掃描有哪些 IP 開放、收集員工 Email。本題攻擊者已經執行指令並拿到 Shell，不是在做功課階段了。
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            <strong>(B) Initial Access（初始存取）：</strong><span style="color:var(--success-color); font-weight:bold;">對</span>。<br>
+                            攻擊者利用 Struts 2 的漏洞注入 OGNL，從網際網路成功「打進」目標主機並建立立足點（Shell），這正是初始進入的定義。
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            <strong>(C) Privilege Escalation（權限提升）：</strong><span style="color:var(--error-color)">錯</span>。<br>
+                            權限提升通常是指「已經在系統內」的低權限使用者，試圖變成管理員。雖然拿到 Shell 很厲害，但題目的描述重點在於「如何進入系統」，而非強調權限的升級過程。
+                        </li>
+                        <li>
+                            <strong>(D) Defense Evasion（防禦規避）：</strong><span style="color:var(--error-color)">錯</span>。<br>
+                            題幹沒有描述任何「隱匿蹤跡」、「混淆程式碼」、「關閉防毒軟體」或「刪除登入紀錄」的行為。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 觀念補充與延伸 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【觀念補充與延伸】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p><strong>核心觀念定位：</strong> iPAS 防護實務常考「情境題抓行為」，給你一段攻擊故事，要你切出某一段並配對到正確的 MITRE ATT&CK 戰術。</p>
+                    <br>
+                    <p><strong>通用定義與舉一反三：</strong></p>
+                    
+                    <!-- 互動輔助：速記卡 -->
+                    <div class="learning-aid-section">
+                        <span class="learning-aid-title">ATT&CK 戰術四選一速記卡 (點擊翻牌)</span>
+                        <div class="flashcards-grid">
+                            <div class="flashcard" onclick="toggleFlashcard(this)">
+                                <div class="flashcard-title">Reconnaissance<br>(偵察)</div>
+                                <div class="flashcard-content">像小偷先去踩點<br>查地址、看作息</div>
+                            </div>
+                            <div class="flashcard" onclick="toggleFlashcard(this)">
+                                <div class="flashcard-title">Initial Access<br>(初始存取)</div>
+                                <div class="flashcard-content">像撬開門鎖<br>第一次闖進屋內</div>
+                            </div>
+                            <div class="flashcard" onclick="toggleFlashcard(this)">
+                                <div class="flashcard-title">Privilege Escalation<br>(權限提升)</div>
+                                <div class="flashcard-content">像拿到主控鑰匙<br>從訪客變屋主</div>
+                            </div>
+                            <div class="flashcard" onclick="toggleFlashcard(this)">
+                                <div class="flashcard-title">Defense Evasion<br>(防禦規避)</div>
+                                <div class="flashcard-content">像遮住監視器<br>或穿隱形斗篷</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+                    <p><strong>觸類旁通：</strong></p>
+                    <ul>
+                        <li><strong>Initial Access vs Execution：</strong> 在真實 ATT&CK 矩陣中，「遠端執行代碼」也常涉及 Execution（執行）戰術。但考試是單選題，若選項沒有 Execution，且強調「從外而內」的突破，選 Initial Access 最為恰當（因為這是他進入的第一步）。</li>
+                        <li><strong>變化題型 1：</strong>如果題幹改成「進入後利用作業系統漏洞拿到 Root 權限」，戰術選什麼？ &rarr; <strong>Privilege Escalation</strong>。</li>
+                        <li><strong>變化題型 2：</strong>如果題幹改成「攻擊者修改檔案時間戳記以隱藏修改時間」，戰術選什麼？ &rarr; <strong>Defense Evasion</strong>。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 記憶口訣 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【記憶口訣】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p>請選擇你喜歡的版本：</p>
+                    <div style="background:#f9f9f9; padding:10px; border-left:4px solid #aaa; margin-bottom:10px;">
+                        <strong>長版：</strong><br>
+                        「破門進屋＝初始存取；升到老闆＝權限提升；躲警報＝防禦規避；先踩點＝偵察」
+                    </div>
+                    <div style="background:#f9f9f9; padding:10px; border-left:4px solid #aaa;">
+                        <strong>短版：</strong><br>
+                        「進門 Initial，升官 Privilege，躲藏 Defense，偷看 Recon」
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 常見陷阱 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【常見陷阱】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <ul>
+                        <li><strong>陷阱 1：</strong>看到「取得 Shell」就直覺以為是「權限提升」。<br>&rarr; 其實題幹是在描述「怎麼打進去」的過程，除非他強調「從一般 User Shell 變成 Root Shell」，否則第一步通常歸類在 Initial Access。</li>
+                        <li><strong>陷阱 2：</strong>忽略題目的「最適合」。<br>&rarr; 有時候一個行為橫跨兩個戰術，但要選「主要目的」。這裡的主要目的是「建立進入點」。</li>
+                    </ul>
+                    <br>
+                    <p><strong>避坑指南：</strong>先問自己：「這一段是在『進去』、『升權』，還是『躲偵測』？」再選戰術。</p>
+                    
+                    <!-- 互動輔助：判斷檢核清單 -->
+                    <div class="learning-aid-section">
+                        <span class="learning-aid-title">判斷檢核清單 (勾選看看你覺得現在像什麼？)</span>
+                        <label class="checklist-item"><input type="checkbox" onchange="checkListLogic()" id="chk1"> 是否只是在外部搜尋資訊，還沒碰到系統？</label>
+                        <label class="checklist-item"><input type="checkbox" onchange="checkListLogic()" id="chk2"> 是否從外部成功「第一次」闖入目標環境？</label>
+                        <label class="checklist-item"><input type="checkbox" onchange="checkListLogic()" id="chk3"> 是否已經在裡面，正在從低權限變高權限？</label>
+                        <label class="checklist-item"><input type="checkbox" onchange="checkListLogic()" id="chk4"> 是否在刪日誌、停防毒來躲避偵測？</label>
+                        <div id="checklistFeedback" class="checklist-result"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 正確答案 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【正確答案】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p style="font-size: 1.2rem; font-weight: bold; color: var(--success-color);">
+                        正確答案：(B) Initial Access（初始存取）
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 自我檢測 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【自我檢測】</div>
+            <div class="accordion-content">
+                <div class="inner">
+                    <p>試著回答以下問題（不提供標準答案，請用剛學到的觀念思考）：</p>
+                    <ol>
+                        <li>如果攻擊者是透過寄送「釣魚郵件」騙員工輸入密碼登入系統，這最可能是哪個戰術？</li>
+                        <li>若攻擊者進入後，使用 Nmap 掃描內網尋找其他存活主機（Discovery），這比較像哪一類行為？</li>
+                        <li>如果攻擊者在主機上執行命令刪除 Windows Event Logs 避免被發現，對應哪個戰術？</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // 主要答題邏輯
+    function submitAnswer() {
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedbackArea');
+        const retryBtn = document.querySelector('.btn-retry');
+        const submitBtn = document.querySelector('.btn-submit');
+        const explanationContainer = document.getElementById('explanationContainer');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+        submitBtn.style.display = 'none';
+        retryBtn.style.display = 'inline-block';
+        
+        // 顯示解析區塊（如果尚未顯示）
+        explanationContainer.style.display = 'block';
+
+        if (selectedValue === 'B') {
+            feedbackArea.className = 'feedback-area feedback-correct';
+            feedbackArea.innerHTML = '<strong>恭喜答對！</strong><br>沒錯，利用漏洞從外部成功進入系統，正是 Initial Access 的特徵。請閱讀下方詳細解析以鞏固觀念。';
+        } else {
+            feedbackArea.className = 'feedback-area feedback-wrong';
+            let wrongMsg = `<strong>可惜，答錯了。</strong><br>你選的是 (${selectedValue})，但正確答案是 (B)。<br>`;
+            wrongMsg += '<strong>提示：</strong>回想一下，攻擊者利用 Struts 2 漏洞是為了「進去」還是「升級」？這是他進入系統的第一步喔。請參考下方解析。';
+            feedbackArea.innerHTML = wrongMsg;
+        }
+    }
+
+    function retryQuiz() {
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+        document.getElementById('feedbackArea').style.display = 'none';
+        document.querySelector('.btn-submit').style.display = 'inline-block';
+        document.querySelector('.btn-retry').style.display = 'none';
+        document.getElementById('explanationContainer').style.display = 'none';
+        
+        // 收合所有 Accordion
+        const contents = document.querySelectorAll('.accordion-content');
+        const items = document.querySelectorAll('.accordion-item');
+        contents.forEach(c => c.style.maxHeight = null);
+        items.forEach(i => i.classList.remove('active'));
+
+        // 重置 Checkboxes
+        document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+        document.getElementById('checklistFeedback').style.display = 'none';
+        document.getElementById('segmentResult').innerText = '';
+    }
+
+    function toggleExplanationMain() {
+        const container = document.getElementById('explanationContainer');
+        if (container.style.display === 'none' || container.style.display === '') {
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    // Accordion 切換邏輯
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        const content = header.nextElementSibling;
+        
+        item.classList.toggle('active');
+        
+        if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        }
+    }
+
+    // 速記卡互動
+    function toggleFlashcard(card) {
+        card.classList.toggle('active');
+    }
+
+    // 事件分段標記互動
+    function showSegmentHint(type) {
+        const resultBox = document.getElementById('segmentResult');
+        let text = '';
+        if (type === 'exploit') {
+            text = '【本題重點】利用漏洞從外部取得 Shell &rarr; 這是「初始存取 (Initial Access)」！因為這是進入的第一步。';
+            resultBox.style.color = 'var(--accent-color)';
+        } else if (type === 'scan') {
+            text = '內網掃描 &rarr; 這是「發現 (Discovery)」戰術，為了尋找其他目標。';
+            resultBox.style.color = '#666';
+        } else if (type === 'lateral') {
+            text = '橫向移動 &rarr; 這是「橫向移動 (Lateral Movement)」戰術，在內部網路跳板。';
+            resultBox.style.color = '#666';
+        } else if (type === 'theft') {
+            text = '竊取資料 &rarr; 這是「資料外洩 (Exfiltration)」戰術。';
+            resultBox.style.color = '#666';
+        }
+        resultBox.innerText = text;
+    }
+
+    // 檢核清單互動
+    function checkListLogic() {
+        const chk1 = document.getElementById('chk1').checked;
+        const chk2 = document.getElementById('chk2').checked;
+        const chk3 = document.getElementById('chk3').checked;
+        const chk4 = document.getElementById('chk4').checked;
+        const feedback = document.getElementById('checklistFeedback');
+
+        feedback.style.display = 'block';
+        
+        if (chk2) {
+            feedback.innerHTML = '<strong>提示：</strong>你勾選了「從外部第一次闖入」，這完全符合 <strong>Initial Access (初始存取)</strong> 的定義！這正是本題的情境。';
+            feedback.style.color = 'var(--success-color)';
+        } else if (chk1) {
+            feedback.innerHTML = '<strong>提示：</strong>只在外部看？那是 Reconnaissance (偵察)。但本題攻擊者已經拿到 Shell 囉。';
+            feedback.style.color = '#555';
+        } else if (chk3) {
+            feedback.innerHTML = '<strong>提示：</strong>這叫做 Privilege Escalation (權限提升)。雖然拿到 Shell 很棒，但這題強調的是「闖入」的動作。';
+            feedback.style.color = '#555';
+        } else if (chk4) {
+            feedback.innerHTML = '<strong>提示：</strong>這叫做 Defense Evasion (防禦規避)。題目裡有說他在躲誰嗎？沒有喔。';
+            feedback.style.color = '#555';
+        } else {
+            feedback.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
