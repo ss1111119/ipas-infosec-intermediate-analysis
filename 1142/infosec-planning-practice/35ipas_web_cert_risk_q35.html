@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_web_cert_risk_q35.html - iPAS資安規劃實務衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --warning-bg: #f39c12;
+            --light-bg: #ecf0f1;
+            --text-color: #333;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #34495e);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        header .meta-info {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-family: monospace;
+        }
+
+        /* Main Container */
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* Card Style */
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        /* Quiz Area */
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+            border-color: var(--accent-color);
+        }
+
+        .option-label.selected {
+            border-color: var(--accent-color);
+            background-color: #eaf6ff;
+        }
+
+        .option-input {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Buttons */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            flex: 1;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Hidden initially */
+        }
+
+        .btn-toggle {
+            background-color: var(--primary-color);
+            color: white;
+            display: none; /* Hidden initially */
+        }
+
+        /* Feedback Area */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis Section (Accordion) */
+        #analysis-section {
+            display: none; /* Hidden by default */
+            margin-top: 30px;
+        }
+
+        .accordion-item {
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background: white;
+        }
+
+        .accordion-header {
+            background-color: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid transparent;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        /* Color coding for specific sections */
+        .acc-key .accordion-header { border-left-color: #f1c40f; }
+        .acc-logic .accordion-header { border-left-color: #3498db; }
+        .acc-ans .accordion-header { border-left-color: #27ae60; }
+        .acc-trap .accordion-header { border-left-color: #e74c3c; }
+
+        .accordion-content {
+            display: none;
+            padding: 20px;
+            background-color: white;
+            border-top: 1px solid #ddd;
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s;
+        }
+        
+        .accordion-header.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Formatting Helpers */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #856404;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 0.85rem;
+            border-radius: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .tag-red { background: #ffebee; color: #c62828; }
+        .tag-green { background: #e8f5e9; color: #2e7d32; }
+        .tag-blue { background: #e3f2fd; color: #1565c0; }
+
+        /* Interactive Elements Styles */
+        .scenario-container {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .scenario-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px dashed #bdc3c7;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            color: #7f8c8d;
+            min-width: 140px;
+        }
+        .scenario-btn.active {
+            border-style: solid;
+            color: white;
+        }
+        .scenario-btn[data-type="external"].active {
+            background-color: #e67e22;
+            border-color: #d35400;
+        }
+        .scenario-btn[data-type="internal"].active {
+            background-color: #2980b9;
+            border-color: #2c3e50;
+        }
+        #scenario-result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f1f2f6;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            min-height: 60px;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .slider-track {
+            width: 100%;
+            margin: 10px 0;
+        }
+        #slider-feedback {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            background: white;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+        }
+        .checklist-item input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        #checklist-progress {
+            font-weight: bold;
+            color: var(--success-color);
+            margin-top: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .btn { width: 100%; margin-bottom: 10px; flex: none; }
+            .btn-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>iPAS 資安規劃實務 - 衝刺班精選題</h1>
+        <div class="meta-info">檔名: ipas_web_cert_risk_q35.html | 題號: 35</div>
+    </header>
+
+    <main>
+        <!-- 題目互動區 -->
+        <section id="quiz-section" class="card">
+            <div class="question-text">
+                <span style="background:#3498db; color:white; padding:2px 8px; border-radius:4px; font-size:0.9rem; vertical-align:middle;">Q35</span>
+                在網站憑證使用風險對策上，下列何者最「不」適切？
+            </div>
+
+            <div class="options-group">
+                <label class="option-label" onclick="selectOption('A')">
+                    <input type="radio" name="quiz" value="A" class="option-input">
+                    <span>(A) 外部網站憑證必須要納入資訊資產，確保其可用性</span>
+                </label>
+                <label class="option-label" onclick="selectOption('B')">
+                    <input type="radio" name="quiz" value="B" class="option-input">
+                    <span>(B) 內部系統網站，也必須要採用外部簽發的憑證</span>
+                </label>
+                <label class="option-label" onclick="selectOption('C')">
+                    <input type="radio" name="quiz" value="C" class="option-input">
+                    <span>(C) 網站憑證的簽發單位也必須納入風險評估的一環</span>
+                </label>
+                <label class="option-label" onclick="selectOption('D')">
+                    <input type="radio" name="quiz" value="D" class="option-input">
+                    <span>(D) 網站憑證必須要設定到期前提醒之巡查流程</span>
+                </label>
+            </div>
+
+            <div id="feedback-area"></div>
+
+            <div class="btn-group">
+                <button class="btn btn-submit" id="submit-btn" onclick="submitAnswer()">送出答案</button>
+                <button class="btn btn-retry" id="retry-btn" onclick="resetQuiz()">重作一次</button>
+                <button class="btn btn-toggle" id="toggle-btn" onclick="toggleAnalysis()">顯示/隱藏解析</button>
+            </div>
+        </section>
+
+        <!-- 解析學習區 -->
+        <section id="analysis-section">
+            
+            <!-- 1. 題目 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【題目】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p>在網站憑證使用風險對策上，下列何者最「不」適切？</p>
+                </div>
+            </div>
+
+            <!-- 2. 找關鍵字 -->
+            <div class="accordion-item acc-key">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第一步：找關鍵字】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p>請留意以下黃色標記的關鍵字，這是解題的線索：</p>
+                    <p style="margin-top:10px; line-height:1.8;">
+                        <span class="highlight">網站憑證</span>、<span class="highlight">風險對策</span>、<span class="highlight">最「不」適切</span>、<span class="highlight">外部網站</span>、<span class="highlight">內部系統</span>、<span class="highlight">外部簽發</span>、<span class="highlight">簽發單位</span>、<span class="highlight">風險評估</span>、<span class="highlight">到期前提醒</span>、<span class="highlight">巡查流程</span>、<span class="highlight">可用性</span>
+                    </p>
+                    <hr style="margin:15px 0; border:0; border-top:1px dashed #ccc;">
+                    <p><strong>💡 題眼分析：</strong></p>
+                    <p>這題的重點在於「最不適切」，這通常代表要找出一個<strong>「不合理、過於絕對或不符合成本效益」</strong>的強制要求。特別注意「內部系統」與「外部簽發」之間的邏輯關係。</p>
+                </div>
+            </div>
+
+            <!-- 3. 白話翻譯 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第二步：白話翻譯】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <ul style="list-style-type: none; padding-left: 0;">
+                        <li style="margin-bottom:10px;">
+                            <span class="tag tag-blue">網站憑證</span>
+                            讓瀏覽器確認網站身分、並用 HTTPS 加密的「數位身分證＋加密鎖」。
+                        </li>
+                        <li style="margin-bottom:10px;">
+                            <span class="tag tag-blue">簽發單位 / CA</span>
+                            Certificate Authority，憑證機構；就是幫網站發身分證的權威單位。
+                        </li>
+                        <li style="margin-bottom:10px;">
+                            <span class="tag tag-blue">外部簽發</span>
+                            由公認受信任的 CA（如 DigiCert, Let's Encrypt）發證，瀏覽器天生就信任，通常要錢或需網域驗證。
+                        </li>
+                        <li style="margin-bottom:10px;">
+                            <span class="tag tag-blue">內部憑證 / 內部 CA</span>
+                            公司自己架設伺服器發證，通常給內網系統用，省錢且方便管理，但需要在員工電腦安裝信任根憑證。
+                        </li>
+                        <li style="margin-bottom:10px;">
+                            <span class="tag tag-blue">可用性</span>
+                            Availability，確保系統在需要的時候能正常運作，不會因為憑證過期跳出警告而無法連線。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 4. 解題思路 -->
+            <div class="accordion-item acc-logic">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第三步：解題思路】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p><strong>這題在考什麼？</strong></p>
+                    <p>網站憑證的風險控管要點，以及「外部公開環境」與「內部封閉環境」憑證策略的差異。</p>
+                    
+                    <p style="margin-top:15px;"><strong>解題步驟：</strong></p>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>區分環境：</strong>先看系統是給誰用的？(A)是外部網站，(B)是內部系統。</li>
+                        <li><strong>判斷必要性：</strong>外部網站為了讓大眾信任，必須用外部 CA。但內部系統呢？</li>
+                        <li><strong>找出邏輯漏洞：</strong>內部系統的使用者是員工，裝置受公司管控。若強制「必須」用外部 CA，不僅貴，而且因為內部 IP/Hostname 通常無法申請公開憑證，實務上根本做不到或很困難。</li>
+                    </ol>
+
+                    <p style="margin-top:15px;"><strong>為何 B 最不適切？</strong></p>
+                    <p>重點在於<strong>「信任鏈與使用情境」</strong>。內網系統可以使用企業自建的 PKI（內部 CA）發證，只要透過 AD (Active Directory) 或 MDM 將「內部根憑證」派送到員工電腦，瀏覽器一樣會顯示安全鎖頭。強制要求內部系統「必須」採用外部簽發，既浪費成本，技術上也可能因為內網域名無法通過公開驗證而受阻。</p>
+                </div>
+            </div>
+
+            <!-- 5. 選項分析 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第四步：選項分析】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div style="margin-bottom: 15px;">
+                        <span class="tag tag-green">A 適切</span>
+                        <strong>外部網站憑證必須要納入資訊資產，確保其可用性：</strong>
+                        <br>憑證過期會導致瀏覽器跳出「不安全」警告，導致使用者無法訪問（服務中斷），這直接影響「可用性」。納入資產盤點是管理的基礎，完全正確。
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <span class="tag tag-red">B 不適切</span>
+                        <strong>內部系統網站，也必須要採用外部簽發的憑證：</strong>
+                        <br>這就是本題答案。內部系統可控性高，可使用「內部 CA / 自簽憑證」，配合企業內部信任派送機制即可達到加密與身分驗證效果。強制外部簽發增加了不必要的成本與驗證難度（例如 Intranet 域名無法申請公有憑證）。
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <span class="tag tag-green">C 適切</span>
+                        <strong>網站憑證的簽發單位也必須納入風險評估的一環：</strong>
+                        <br>若 CA 本身資安做得爛（曾發生 CA 被駭客入侵亂發假憑證的案例，如 DigiNotar 事件），瀏覽器廠商會將其「撤銷信任」。所以選擇信譽良好的 CA 是必要的供應鏈風險評估。
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <span class="tag tag-green">D 適切</span>
+                        <strong>網站憑證必須要設定到期前提醒之巡查流程：</strong>
+                        <br>憑證是有「有效期限」的（目前主流公有憑證為 398 天或更短）。若沒有監控與提醒機制，過期當下服務會立即異常。這是最基本的維運與風險對策。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. 觀念補充與延伸 (含互動) -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【觀念補充與延伸】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>1. 核心觀念定位</h4>
+                    <p>這題是 iPAS「風險管理」與「PKI/資產保護」的交叉考點。考試常問「內外部情境差異」。</p>
+                    
+                    <hr style="margin:15px 0; border-top:1px dashed #ddd;">
+                    
+                    <h4>2. 互動圖解：憑證策略情境快選</h4>
+                    <p>點選下方按鈕，看看不同環境建議的憑證策略：</p>
+                    <div class="scenario-container">
+                        <div class="scenario-btn" data-type="external" onclick="showScenario('external', this)">外網公開網站<br>(Public Web)</div>
+                        <div class="scenario-btn" data-type="internal" onclick="showScenario('internal', this)">內網受控系統<br>(Internal System)</div>
+                    </div>
+                    <div id="scenario-result">請點選上方情境按鈕查看建議策略...</div>
+
+                    <hr style="margin:15px 0; border-top:1px dashed #ddd;">
+
+                    <h4>3. 互動圖解：憑證到期風險時間軸</h4>
+                    <p>拖動滑桿，模擬距離憑證到期的天數與風險建議：</p>
+                    <div class="slider-container">
+                        <label for="expiry-slider">距離到期天數：<span id="days-display" style="color:#e74c3c; font-size:1.2rem;">90</span> 天</label>
+                        <input type="range" id="expiry-slider" class="slider-track" min="0" max="90" value="90" oninput="updateSlider(this.value)">
+                        <div id="slider-feedback">安全期：定期監控即可。</div>
+                    </div>
+
+                    <hr style="margin:15px 0; border-top:1px dashed #ddd;">
+
+                    <h4>4. 專有名詞補充</h4>
+                    <ul>
+                        <li><strong>憑證生命週期管理 (CLM)：</strong>申請 -> 簽發 -> 部署 -> 監控 -> 更新 -> 撤銷 -> 稽核。</li>
+                        <li><strong>信任鏈 (Trust Chain)：</strong>瀏覽器只信任「根憑證 (Root CA)」。它會沿著「中繼憑證」一路驗證到你的「伺服器憑證」，這串鍊條必須完整且未過期。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 7. 記憶口訣 -->
+            <div class="accordion-item acc-trap">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【記憶口訣】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div style="background:#fef9e7; padding:15px; border-left:4px solid #f1c40f; font-size:1.1rem;">
+                        <strong>「內網不必外CA，重點信任可控；<br>到期要提醒，CA也要評估。」</strong>
+                    </div>
+                    <p style="margin-top:10px; color:#666;">
+                        解釋：內網可以用內部 CA (不必外 CA)，重點是能不能讓員工電腦信任 (信任可控)。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 8. 常見陷阱 -->
+            <div class="accordion-item acc-trap">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【常見陷阱】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <ul>
+                        <li>❌ <strong>陷阱一：</strong>以為「外部簽發＝一定更安全」。<br>→ 其實內部 CA 若私鑰保護得當，在內網環境反而更有彈性且安全。</li>
+                        <li>❌ <strong>陷阱二：</strong>誤把「HTTPS 必須要被信任」解讀成「一定要花錢買公有 CA」。<br>→ 信任是可以「設定」的 (例如 AD 派送)。</li>
+                        <li>❌ <strong>陷阱三：</strong>忽略「簽發單位」本身的風險。<br>→ CA 也可能被駭，所以 CA 的信譽也是風險評估一環。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 9. 正確答案 -->
+            <div class="accordion-item acc-ans">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【正確答案】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p style="font-size:1.2rem; font-weight:bold; color:var(--success-color);">本題正確答案為 (B)</p>
+                    <p>因為內部系統不具強制使用外部憑證的必要性，且實務上可能因網域限制而不可行。</p>
+                </div>
+            </div>
+
+            <!-- 10. 自我檢測 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【自我檢測】
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p>試著回答以下問題，檢視觀念是否通透：</p>
+                    <ol style="margin-left:20px; margin-bottom:20px;">
+                        <li>如果公司內部有 MDM (行動裝置管理)，內網系統用內部 CA 要做哪個關鍵動作才能讓手機瀏覽器信任？</li>
+                        <li>若憑證到期沒有提醒，導致過期，對使用者與業務會造成哪些影響？這屬於 CIA 的哪一面？</li>
+                        <li>如果簽發單位 (CA) 爆出被入侵或誤簽事件，你的風險處理可能有哪些選項？</li>
+                    </ol>
+
+                    <hr style="margin:15px 0; border-top:1px dashed #ddd;">
+
+                    <h4>憑證管理檢核清單 (Checklist)</h4>
+                    <p>實務上你會這樣做嗎？勾選看看：</p>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="chk1" onchange="updateChecklist()">
+                        <label for="chk1">已盤點所有網域與憑證資產 (Inventory)</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="chk2" onchange="updateChecklist()">
+                        <label for="chk2">已設定到期前自動提醒 (Monitoring)</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="chk3" onchange="updateChecklist()">
+                        <label for="chk3">私鑰已妥善保護 (HSM 或嚴格權限控管)</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" id="chk4" onchange="updateChecklist()">
+                        <label for="chk4">CA 供應商已納入風險評估</label>
+                    </div>
+                    <div id="checklist-progress">完成度：0/4</div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        // 狀態管理
+        let currentSelection = null;
+        let isSubmitted = false;
+        const correctAnswer = 'B';
+
+        // DOM 元素
+        const feedbackArea = document.getElementById('feedback-area');
+        const submitBtn = document.getElementById('submit-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const analysisSection = document.getElementById('analysis-section');
+        const optionLabels = document.querySelectorAll('.option-label');
+
+        // 選擇選項
+        function selectOption(value) {
+            if (isSubmitted) return; // 送出後不能改
+
+            currentSelection = value;
+            
+            // UI 更新
+            optionLabels.forEach(label => {
+                label.classList.remove('selected');
+                const input = label.querySelector('input');
+                if (input.value === value) {
+                    label.classList.add('selected');
+                    input.checked = true;
+                }
+            });
+        }
+
+        // 送出答案
+        function submitAnswer() {
+            if (!currentSelection) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            isSubmitted = true;
+            submitBtn.style.display = 'none'; // 隱藏送出按鈕
+            retryBtn.style.display = 'block'; // 顯示重作
+            toggleBtn.style.display = 'block'; // 顯示解析開關
+
+            // 判斷對錯
+            if (currentSelection === correctAnswer) {
+                feedbackArea.innerHTML = '🎉 答對了！觀念很清楚喔！<br>趕快打開下方解析，看看還有沒有遺漏的細節。';
+                feedbackArea.className = 'feedback-correct';
+                // 自動打開解析
+                analysisSection.style.display = 'block';
+            } else {
+                feedbackArea.innerHTML = `⚠️ 你選的是 ${currentSelection}，但正確答案是 B。<br>提示：想想看「內部系統」真的需要花錢買公有憑證嗎？回到關鍵字找線索！`;
+                feedbackArea.className = 'feedback-wrong';
+            }
+            feedbackArea.style.display = 'block';
+        }
+
+        // 重作一次
+        function resetQuiz() {
+            currentSelection = null;
+            isSubmitted = false;
+
+            // UI 重置
+            optionLabels.forEach(label => {
+                label.classList.remove('selected');
+                label.querySelector('input').checked = false;
+            });
+
+            feedbackArea.style.display = 'none';
+            feedbackArea.className = '';
+            
+            submitBtn.style.display = 'block';
+            retryBtn.style.display = 'none';
+            toggleBtn.style.display = 'none';
+            
+            // 隱藏解析並收合所有手風琴
+            analysisSection.style.display = 'none';
+            document.querySelectorAll('.accordion-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.classList.remove('active');
+            });
+
+            // 滾動回頂部
+            document.getElementById('quiz-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 顯示/隱藏解析
+        function toggleAnalysis() {
+            if (analysisSection.style.display === 'none') {
+                analysisSection.style.display = 'block';
+                // 滾動到解析區
+                analysisSection.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                analysisSection.style.display = 'none';
+            }
+        }
+
+        // 手風琴功能
+        function toggleAccordion(header) {
+            header.classList.toggle('active');
+            const content = header.nextElementSibling;
+            
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+            }
+        }
+
+        // --- 互動學習功能 ---
+
+        // 1. 情境快選
+        function showScenario(type, btn) {
+            const resultBox = document.getElementById('scenario-result');
+            const allBtns = document.querySelectorAll('.scenario-btn');
+            
+            allBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (type === 'external') {
+                resultBox.innerHTML = '<strong>建議策略：使用外部受信任 CA (Public CA)</strong><br>原因：訪客是一般大眾，無法要求他們安裝你的憑證。必須使用瀏覽器預設信任的 CA (如 DigiCert, Let\'s Encrypt) 才能避免跳出警告。';
+                resultBox.style.borderLeft = '4px solid #e67e22';
+            } else {
+                resultBox.innerHTML = '<strong>建議策略：可使用內部 CA (Internal CA / Private PKI)</strong><br>原因：使用者是員工，裝置受控。可透過 AD/MDM 統一派送公司根憑證。這樣做成本低、發證快，且支援內部私有網域。';
+                resultBox.style.borderLeft = '4px solid #2980b9';
+            }
+        }
+
+        // 2. 風險滑桿
+        function updateSlider(val) {
+            const display = document.getElementById('days-display');
+            const feedback = document.getElementById('slider-feedback');
+            
+            display.innerText = val;
+
+            if (val > 60) {
+                feedback.innerHTML = "🟢 安全期：憑證運作正常，只需定期監控。";
+                feedback.style.color = "#27ae60";
+            } else if (val > 30) {
+                feedback.innerHTML = "🔵 準備期：應開始規劃續約流程，確認聯絡人與 CA 狀況。";
+                feedback.style.color = "#2980b9";
+            } else if (val > 14) {
+                feedback.innerHTML = "🟡 警告期：尚未更新！應立即啟動續約與簽核流程。";
+                feedback.style.color = "#f39c12";
+            } else if (val > 0) {
+                feedback.innerHTML = "🔴 危險期 (Red Alert)：隨時可能過期導致服務中斷！應每日追蹤直到更新完成。";
+                feedback.style.color = "#c0392b";
+            } else {
+                feedback.innerHTML = "💀 過期 (Expired)：服務已中斷或瀏覽器顯示不安全。需進行緊急事故處理！";
+                feedback.style.color = "black";
+                display.innerText = "0 (已過期)";
+            }
+        }
+
+        // 3. 檢核清單
+        function updateChecklist() {
+            const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+            let checkedCount = 0;
+            checkboxes.forEach(chk => {
+                if (chk.checked) checkedCount++;
+            });
+
+            const progress = document.getElementById('checklist-progress');
+            progress.innerText = `完成度：${checkedCount} / 4`;
+
+            if (checkedCount === 4) {
+                progress.innerHTML += " <br>🎉 太棒了！你的憑證管理制度相當完善！";
+            } else if (checkedCount === 0) {
+                progress.innerHTML += " <br>⚠️ 請盡快開始盤點與規劃！";
+            }
+        }
+    </script>
+</body>
+</html>

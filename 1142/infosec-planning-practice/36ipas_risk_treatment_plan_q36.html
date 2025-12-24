@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_risk_treatment_plan_q36.html - iPAS資訊安全規劃實務</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 深藍專業 */
+            --accent-color: #3498db;  /* 亮藍按鈕 */
+            --success-color: #27ae60; /* 綠色正確 */
+            --error-color: #c0392b;   /* 紅色錯誤 */
+            --bg-color: #f4f6f7;      /* 淺灰背景 */
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --highlight-bg: #fff3cd;  /* 螢光筆效果 */
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: transparent;
+        }
+
+        /* Header Area */
+        header {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            margin: 0 0 10px 0;
+            color: var(--primary-color);
+        }
+
+        header .meta-info {
+            font-size: 0.9rem;
+            color: #666;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .file-name {
+            font-family: monospace;
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Quiz Section */
+        .card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9f9f9;
+        }
+
+        .option-label input[type="checkbox"] {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-toggle {
+            background-color: var(--accent-color);
+            color: white;
+            margin-left: auto; /* Push to right */
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Feedback Area */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section (Accordion) */
+        #explanation-container {
+            display: none; /* Default hidden */
+        }
+
+        .accordion {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .accordion-header {
+            background-color: #e9ecef;
+            color: var(--primary-color);
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid transparent;
+        }
+
+        .accordion-header:hover {
+            background-color: #dfe4ea;
+        }
+
+        .accordion-header.active {
+            border-left-color: var(--accent-color);
+            background-color: #dde1e6;
+        }
+
+        .accordion-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: white;
+        }
+
+        .accordion-content p, .accordion-content ul, .accordion-content div {
+            margin: 15px 0;
+        }
+
+        /* Specific Content Styles */
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .step-title {
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .keyword-box {
+            border: 1px dashed #aaa;
+            padding: 10px;
+            background-color: #fafafa;
+            border-radius: 4px;
+        }
+
+        .concept-card {
+            background-color: #e8f4fd;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .mnemonic-box {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+
+        .trap-box {
+            background-color: #fff5f5;
+            border-left: 4px solid var(--error-color);
+            padding: 15px;
+        }
+
+        /* Interactive Checklist */
+        .checklist-container {
+            background: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        
+        .checklist-item {
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .checklist-result {
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .btn-toggle {
+                margin-left: 0;
+                width: 100%;
+                margin-top: 10px;
+            }
+            header h1 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資訊安全規劃實務 - 短期衝刺班</h1>
+        <div class="meta-info">
+            <span>題號：36</span>
+            <span>題型：複選題</span>
+            <span>檔案：<span class="file-name">ipas_risk_treatment_plan_q36.html</span></span>
+        </div>
+    </header>
+
+    <main>
+        <!-- 題目互動區 -->
+        <section id="quiz-section" class="card">
+            <div class="question-text">
+                36. 有關風險處理計畫之敘述，下列哪些項目最為適切？（複選）
+            </div>
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="A">
+                    <span>(A) 風險處理計畫之目的為規範如何實施選定之風險處理選項</span>
+                </label>
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="B">
+                    <span>(B) 風險處理計畫應明確鑑別風險處理實施之順序</span>
+                </label>
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="C">
+                    <span>(C) 風險處理計畫之內容必須包含所有外部關注方之回饋</span>
+                </label>
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="D">
+                    <span>(D) 風險處理計畫之內容應包含風險當責者及核准與實施風險處理計畫之人員</span>
+                </label>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-submit" onclick="checkAnswer()">送出答案</button>
+                <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+                <button class="btn-toggle" onclick="toggleAllExplanations()">顯示/隱藏解析</button>
+            </div>
+
+            <div id="feedback-area"></div>
+        </section>
+
+        <!-- 解析學習區 -->
+        <section id="explanation-container">
+            
+            <!-- 題目備份 (雖然上面有，但根據要求結構保留) -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【題目】
+                </div>
+                <div class="accordion-content">
+                    <p>有關風險處理計畫之敘述，下列哪些項目最為適切？（複選）<br>
+                    (A) 風險處理計畫之目的為規範如何實施選定之風險處理選項<br>
+                    (B) 風險處理計畫應明確鑑別風險處理實施之順序<br>
+                    (C) 風險處理計畫之內容必須包含所有外部關注方之回饋<br>
+                    (D) 風險處理計畫之內容應包含風險當責者及核准與實施風險處理計畫之人員</p>
+                </div>
+            </div>
+
+            <!-- 第一步：找關鍵字 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第一步：找關鍵字】
+                </div>
+                <div class="accordion-content">
+                    <div class="keyword-box">
+                        <p>請用螢光筆將以下關鍵字標註起來：</p>
+                        <ul>
+                            <li><span class="highlight">風險處理計畫</span>：本題的主角，也就是這份文件到底在寫什麼。</li>
+                            <li><span class="highlight">最為適切</span>：選出正確且符合邏輯的敘述。</li>
+                            <li><span class="highlight">複選</span>：這是最重要的提示！代表要找出所有構成計畫的「必要骨架」，而不是只挑一個最重要的。</li>
+                            <li>選項關鍵字：<span class="highlight">目的</span>、<span class="highlight">實施</span>、<span class="highlight">順序</span>、<span class="highlight">內容</span>、<span class="highlight">外部關注方</span>、<span class="highlight">風險當責者</span>、<span class="highlight">核准人員</span>。</li>
+                        </ul>
+                        <p><strong>老師提點：</strong>複選題的解題心法是「找合理必備項目」。只要這項要素缺失會導致計畫無法執行，通常就是正確答案。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第二步：白話翻譯 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第二步：白話翻譯】
+                </div>
+                <div class="accordion-content">
+                    <p>將生硬的規範術語翻譯成職場白話文：</p>
+                    <ul>
+                        <li><strong>風險處理計畫</strong>（就是把「要怎麼處理這個風險」寫成一份真正可以去做的行動計畫書）。</li>
+                        <li><strong>風險處理選項</strong>（面對風險的策略，例如：我不做了避免掉、我加裝防火牆降低它、我買保險移轉它、還是兩手一攤接受它）。</li>
+                        <li><strong>風險當責者</strong>（Risk Owner，對該風險負最終成敗責任的人，通常是部門主管，他要負責點頭拍板）。</li>
+                        <li><strong>外部關注方</strong>（Interested Parties，例如客戶、股東、主管機關等，會盯著你看或被你影響的人）。</li>
+                        <li><strong>實施之順序</strong>（資源有限，哪個風險要先救？哪個後做？要有輕重緩急）。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 第三步：解題思路 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第三步：解題思路】
+                </div>
+                <div class="accordion-content">
+                    <span class="step-title">這題在考什麼？</span>
+                    <p>一句話：<strong>風險處理計畫的「內容架構」與「必備要素」。</strong></p>
+                    
+                    <span class="step-title">解題邏輯三步驟：</span>
+                    <ol>
+                        <li><strong>定位文件性質：</strong>風險處理計畫是一份「執行藍圖」，就像專案計畫書。</li>
+                        <li><strong>檢查必要性：</strong>一份計畫書如果沒有「步驟」、沒有「順序」、沒有「負責人」，能執行嗎？不能，所以這些都是對的。</li>
+                        <li><strong>排除絕對化選項：</strong>看到「必須包含所有...」這種太過絕對的字眼要警覺。計畫是內部執行的依據，外部意見雖然重要，但不可能「每一份計畫」都「必須」包含「所有」外部人的回饋，這樣計畫永遠寫不完。</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- 第四步：選項分析 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第四步：選項分析】
+                </div>
+                <div class="accordion-content">
+                    <ul>
+                        <li><strong>(A) 風險處理計畫之目的為規範如何實施選定之風險處理選項 <span style="color:var(--success-color)">[正確]</span></strong>
+                            <br>解析：沒錯，我們在風險評鑑階段決定了要「降低風險」，計畫書就是要寫清楚「如何降低」、「用什麼控制措施」。它是連接「決策」與「行動」的橋樑。</li>
+                        
+                        <li><strong>(B) 風險處理計畫應明確鑑別風險處理實施之順序 <span style="color:var(--success-color)">[正確]</span></strong>
+                            <br>解析：對。公司的預算和人力是有限的，不可能所有風險同時處理。必須根據風險等級高低，排列優先順序（Priority）。</li>
+                        
+                        <li><strong>(C) 風險處理計畫之內容必須包含所有外部關注方之回饋 <span style="color:var(--error-color)">[錯誤]</span></strong>
+                            <br>解析：這個選項錯在<strong>「必須」</strong>與<strong>「所有」</strong>。
+                            <ul>
+                                <li>雖然 ISO 標準提到應考量關注方觀點，但並非強制要求每一項計畫內容都要詳列外部回饋。</li>
+                                <li>若某個內部風險與外部無關，就不需包含。</li>
+                                <li>若要包含「所有」回饋，實務上根本不可行，會導致計畫發散。</li>
+                            </ul>
+                        </li>
+                        
+                        <li><strong>(D) 風險處理計畫之內容應包含風險當責者及核准與實施風險處理計畫之人員 <span style="color:var(--success-color)">[正確]</span></strong>
+                            <br>解析：對。這就是「R&R（Role and Responsibility，角色與權責）」。
+                            <ul>
+                                <li>誰負責成敗？（當責者）</li>
+                                <li>誰簽字同意資源？（核准者）</li>
+                                <li>誰去動手做？（實施人員）</li>
+                            </ul>
+                            沒有這些人名，計畫就是廢紙。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 觀念補充與延伸 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【觀念補充與延伸】
+                </div>
+                <div class="accordion-content">
+                    <div class="concept-card">
+                        <h4>核心觀念定位</h4>
+                        <p>這是 iPAS 資安規劃實務中「風險管理（Risk Management）」章節的必考題。流程是：風險評鑑 → 選擇處理選項 → <strong>撰寫風險處理計畫</strong> → 殘餘風險確認。</p>
+                    </div>
+                    
+                    <h4>學習輔助：風險處理計畫骨架卡</h4>
+                    <p>一份合格的風險處理計畫，至少要有這 5 大骨架：</p>
+                    <ol>
+                        <li><strong>要做什麼？</strong>（選定的處理選項與控制措施）</li>
+                        <li><strong>誰負責？</strong>（風險當責者、核准者）</li>
+                        <li><strong>誰執行？</strong>（實施人員）</li>
+                        <li><strong>資源需求</strong>（需要多少預算、人力）</li>
+                        <li><strong>時間與順序</strong>（預計何時完成、優先順序）</li>
+                    </ol>
+                    <p><em>註：對比概念「風險評鑑報告」重點在於發現風險與計算等級；「處理計畫」重點在於解決問題。</em></p>
+                </div>
+            </div>
+
+            <!-- 記憶口訣 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【記憶口訣】
+                </div>
+                <div class="accordion-content">
+                    <div class="mnemonic-box">
+                        「怎麼做、誰負責、先後排；<br>意見參考不全包」
+                    </div>
+                    <p>口訣解析：</p>
+                    <ul>
+                        <li><strong>怎麼做</strong>：規範如何實施 (A)</li>
+                        <li><strong>誰負責</strong>：當責者與實施人員 (D)</li>
+                        <li><strong>先後排</strong>：鑑別實施順序 (B)</li>
+                        <li><strong>意見參考不全包</strong>：外部回饋參考即可，不用硬性包含所有 (C錯)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 常見陷阱 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【常見陷阱】
+                </div>
+                <div class="accordion-content">
+                    <div class="trap-box">
+                        <h4>避坑指南</h4>
+                        <ul>
+                            <li><strong>陷阱一：看到「計畫」就以為要大滿貫。</strong>
+                                <br>很多考生看到 C 選項覺得「多聽意見很好啊」，就選下去了。要記得資安講求成本效益，不必要的資訊不用全塞進計畫。</li>
+                            <li><strong>陷阱二：忽略「複選題」特性。</strong>
+                                <br>有時候考生覺得 A 最重要，就只選 A。請記得檢查每一個選項，只要是「構成計畫的必要零件」都要選。</li>
+                            <li><strong>陷阱三：混淆角色。</strong>
+                                <br>誤以為「風險當責者」就是「實施人員」。通常當責者是高層（負責扛責），實施者是工程師（負責做）。計畫中兩者都要有。</li>
+                        </ul>
+                        
+                        <div style="margin-top:15px; background:white; padding:10px; border:1px solid #ddd; border-radius:4px;">
+                            <strong>複選題檢查提示卡：</strong>
+                            <br>作答時請自問：「如果這份計畫少了這一項（例如少了順序），還能運作嗎？」
+                            <br>如果不能，這一項就是必選。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 正確答案 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【正確答案】
+                </div>
+                <div class="accordion-content">
+                    <p style="font-size: 1.5rem; color: var(--success-color); font-weight: bold; text-align: center;">
+                        正確答案：A、B、D
+                    </p>
+                </div>
+            </div>
+
+            <!-- 自我檢測 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【自我檢測】
+                </div>
+                <div class="accordion-content">
+                    <p>試著回答以下 3 個延伸問題，確認觀念是否釐清（不提供標準答案，請思考）：</p>
+                    <ol>
+                        <li>如果風險處理計畫沒有寫清楚「順序」(B)，實務上 IT 部門可能會發生什麼混亂？</li>
+                        <li>風險當責者 (Owner) 與實施人員 (Implementer) 如果是不同人，計畫中若只寫了實施人員，當發生資源不足時會由誰解決？</li>
+                        <li>什麼樣的「外部關注方」回饋，是我們在撰寫計畫時「必須」優先考量的？（提示：與法律或合約有關的）</li>
+                    </ol>
+
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
+
+                    <h4>計畫完整度檢核清單（互動練習）</h4>
+                    <p>假設你正在審核一份風險處理計畫，請勾選確認以下項目：</p>
+                    <div class="checklist-container">
+                        <label class="checklist-item"><input type="checkbox" onchange="checkChecklist()" class="chk-item"> 計畫已說明具體如何實施控制措施？</label>
+                        <label class="checklist-item"><input type="checkbox" onchange="checkChecklist()" class="chk-item"> 計畫已排定執行的先後順序？</label>
+                        <label class="checklist-item"><input type="checkbox" onchange="checkChecklist()" class="chk-item"> 計畫已明確指定「風險當責者」？</label>
+                        <label class="checklist-item"><input type="checkbox" onchange="checkChecklist()" class="chk-item"> 計畫已列出核准人與執行人？</label>
+                        <label class="checklist-item"><input type="checkbox" onchange="checkChecklist()" class="chk-item"> 確認沒有盲目收錄無關的外部回饋？</label>
+                        
+                        <div id="checklist-feedback" class="checklist-result">完整度：0/5</div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+</div>
+
+<script>
+    // ----------------------------------------------------
+    // 1. 答題判斷邏輯
+    // ----------------------------------------------------
+    function checkAnswer() {
+        // 取得所有被勾選的選項
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        let userAnswers = [];
+        checkboxes.forEach((checkbox) => {
+            userAnswers.push(checkbox.value);
+        });
+
+        // 正確答案設定
+        const correctAnswers = ['A', 'B', 'D'];
+        
+        // 排序後比對 (將陣列轉字串比對)
+        const userStr = userAnswers.sort().join(',');
+        const correctStr = correctAnswers.sort().join(',');
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        const explanationContainer = document.getElementById('explanation-container');
+
+        feedbackArea.style.display = 'block';
+
+        if (userStr === correctStr) {
+            // 完全正確
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = `
+                <strong>恭喜答對！🎉</strong><br>
+                你的選擇：${userAnswers.join('、')}<br>
+                觀念非常清楚，風險處理計畫的要素你都掌握了！<br>
+                <small>（請點擊下方「顯示/隱藏解析」複習詳細觀念）</small>
+            `;
+            // 自動展開解析區 (Optional)
+            explanationContainer.style.display = 'block';
+        } else {
+            // 錯誤
+            let msg = `<strong>答錯囉！請再想一想 🤔</strong><br>`;
+            if (userAnswers.length === 0) {
+                msg += `你沒有選擇任何選項。<br>`;
+            } else {
+                msg += `你選了：${userAnswers.join('、')}<br>`;
+            }
+            msg += `正確答案是：<strong>A、B、D</strong><br>`;
+            
+            // 簡單提示錯誤原因
+            if (userAnswers.includes('C')) {
+                msg += `提示：選項 (C) 的「所有」太過絕對，通常不是必要條件。<br>`;
+            }
+            if (!userAnswers.includes('A') || !userAnswers.includes('B') || !userAnswers.includes('D')) {
+                msg += `提示：這是一份「執行計畫」，想一想執行需要哪些基本要素（人、事、順序）？`;
+            }
+
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.innerHTML = msg;
+            
+            // 答錯也自動展開解析，讓學生學習
+            explanationContainer.style.display = 'block';
+        }
+    }
+
+    // ----------------------------------------------------
+    // 2. 重置功能
+    // ----------------------------------------------------
+    function resetQuiz() {
+        // 清除勾選
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => cb.checked = false);
+
+        // 隱藏回饋區
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'none';
+        feedbackArea.innerHTML = '';
+
+        // 隱藏解析區
+        const explanationContainer = document.getElementById('explanation-container');
+        explanationContainer.style.display = 'none';
+
+        // 重置所有手風琴狀態
+        const headers = document.querySelectorAll('.accordion-header');
+        const contents = document.querySelectorAll('.accordion-content');
+        headers.forEach(h => h.classList.remove('active'));
+        contents.forEach(c => c.style.maxHeight = null);
+
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ----------------------------------------------------
+    // 3. 手風琴 (Accordion) 切換邏輯
+    // ----------------------------------------------------
+    function toggleAccordion(header) {
+        header.classList.toggle('active');
+        const content = header.nextElementSibling;
+        
+        if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+        }
+    }
+
+    // ----------------------------------------------------
+    // 4. 全局顯示/隱藏解析開關
+    // ----------------------------------------------------
+    function toggleAllExplanations() {
+        const container = document.getElementById('explanation-container');
+        if (container.style.display === 'none' || container.style.display === '') {
+            container.style.display = 'block';
+            // 自動展開第一個區塊
+            const firstHeader = container.querySelector('.accordion-header');
+            if(firstHeader && !firstHeader.classList.contains('active')) {
+                toggleAccordion(firstHeader);
+            }
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    // ----------------------------------------------------
+    // 5. 互動式檢查清單邏輯
+    // ----------------------------------------------------
+    function checkChecklist() {
+        const items = document.querySelectorAll('.chk-item');
+        let checkedCount = 0;
+        items.forEach(item => {
+            if (item.checked) checkedCount++;
+        });
+
+        const feedback = document.getElementById('checklist-feedback');
+        feedback.textContent = `完整度：${checkedCount}/5`;
+
+        if (checkedCount === 5) {
+            feedback.innerHTML += " <span style='color:green'>—— 完美！這就是一份專業的計畫架構。</span>";
+        } else if (checkedCount >= 3) {
+            feedback.innerHTML += " <span style='color:orange'>—— 還不錯，但還有缺漏喔。</span>";
+        }
+    }
+</script>
+
+</body>
+</html>

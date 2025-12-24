@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安風險評鑑：範疇與邊界定義教學</title>
+    <style>
+        :root {
+            --primary: #1e3a8a; /* 深藍 */
+            --primary-light: #eff6ff;
+            --accent: #f59e0b; /* 金黃 */
+            --text: #1e293b;
+            --text-light: #64748b;
+            --success: #22c55e;
+            --success-bg: #f0fdf4;
+            --error: #ef4444;
+            --error-bg: #fef2f2;
+            --border: #e2e8f0;
+            --white: #ffffff;
+            --bg: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Icons */
+        .icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
+            color: var(--white);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            background-color: var(--accent);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f8fafc;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Question Section */
+        .question-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+
+        .context-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 16px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        .factors-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .factors-list li {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            gap: 10px;
+        }
+
+        .factor-id {
+            background: #cbd5e1;
+            color: #475569;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 640px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-label:hover {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+        }
+
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .option-input:checked + .option-content {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .option-label:has(.option-input:checked) {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .option-key {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-right: 12px;
+            color: var(--text-light);
+        }
+
+        /* Buttons */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 24px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #1e40af;
+        }
+
+        .btn:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* Feedback Section */
+        .feedback {
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: 12px;
+            display: none; /* Hidden by default */
+        }
+
+        .feedback.correct {
+            display: block;
+            background-color: var(--success-bg);
+            border: 1px solid var(--success);
+            color: #14532d;
+        }
+
+        .feedback.wrong {
+            display: block;
+            background-color: var(--error-bg);
+            border: 1px solid var(--error);
+            color: #7f1d1d;
+        }
+
+        /* Analysis Accordion */
+        details.analysis-item {
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        details.analysis-item summary {
+            padding: 12px 16px;
+            background: #f8fafc;
+            cursor: pointer;
+            font-weight: 600;
+            list-style: none; /* Hide default triangle */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        details.analysis-item summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details.analysis-item[open] summary {
+            border-bottom: 1px solid var(--border);
+        }
+
+        details.analysis-item .content {
+            padding: 16px;
+            font-size: 0.95rem;
+            background: white;
+            color: var(--text);
+        }
+
+        /* Core Concepts */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        
+        @media (min-width: 768px) {
+            .concept-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .concept-box {
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .concept-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* Traps */
+        .trap-list li {
+            margin-bottom: 12px;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .trap-list li::before {
+            content: "⚠️";
+            position: absolute;
+            left: 0;
+            top: 2px;
+        }
+
+        /* Memory Aid */
+        .mnemonic-box {
+            background: linear-gradient(to right, #fffbeb, #fef3c7);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px dashed var(--accent);
+            text-align: center;
+        }
+
+        .mnemonic-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #92400e;
+            margin: 10px 0;
+        }
+
+        /* Self Check */
+        .self-check-item {
+            background: var(--bg);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .toggle-hint-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        .hint-content {
+            display: none;
+            margin-top: 8px;
+            padding: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        /* Utilities */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .mt-4 { margin-top: 1rem; }
+        .font-bold { font-weight: bold; }
+        
+        /* Highlight styles for result */
+        .highlight-correct { border-color: var(--success); background-color: var(--success-bg); }
+        .highlight-wrong { border-color: var(--error); background-color: var(--error-bg); }
+        
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- Header -->
+    <header>
+        <span class="badge">iPAS 資安名師教室</span>
+        <h1>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.75l-2.5 1.25L12 11zm0 2.25l-5-2.5-5 2.5 10 5 10-5-5-2.5-5 2.5z"></path></svg>
+            主題：資安風險管理範疇與邊界
+        </h1>
+        <p>難易度：★★☆☆☆ | 題型：單選題</p>
+    </header>
+
+    <!-- Question Card -->
+    <main class="card" id="quiz-card">
+        <div class="card-header">
+            <svg class="icon" viewBox="0 0 24 24" style="color:var(--primary);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            模擬試題
+        </div>
+        <div class="card-body">
+            
+            <details class="context-box" open>
+                <summary style="cursor: pointer; font-weight:bold; margin-bottom:8px;">【題組共用說明】(點擊收合)</summary>
+                <p>某組織之系統開發單位，在進行資安風險評鑑前，需先釐清所有資通系統與組織業務之關聯性，以界定資安風險管理的範疇與邊界。</p>
+            </details>
+
+            <p style="margin-bottom: 12px;"><strong>附圖列出以下事項（考量因素）：</strong></p>
+            <ul class="factors-list" id="factors">
+                <li data-id="1"><span class="factor-id">1</span> 組織架構、營運目標、策略及政策</li>
+                <li data-id="2"><span class="factor-id">2</span> 適用之法令、法規及契約要求</li>
+                <li data-id="3"><span class="factor-id">3</span> 組織整體風險管理作法</li>
+                <li data-id="4"><span class="factor-id">4</span> 系統管理者的期望</li>
+                <li data-id="5"><span class="factor-id">5</span> 組織內資訊及資通系統資產及相對應之控制措施</li>
+            </ul>
+
+            <p class="question-text">在定義資安風險管理範疇與邊界時，應考量之因素包含附圖中的哪些事項較為適切？</p>
+
+            <div class="options-grid">
+                <label class="option-label" id="label-A">
+                    <input type="radio" name="answer" value="A" class="option-input">
+                    <span class="option-key">(A)</span>
+                    <span class="option-content">2、3</span>
+                </label>
+                <label class="option-label" id="label-B">
+                    <input type="radio" name="answer" value="B" class="option-input">
+                    <span class="option-key">(B)</span>
+                    <span class="option-content">2、4、5</span>
+                </label>
+                <label class="option-label" id="label-C">
+                    <input type="radio" name="answer" value="C" class="option-input">
+                    <span class="option-key">(C)</span>
+                    <span class="option-content">1、2、3、5</span>
+                </label>
+                <label class="option-label" id="label-D">
+                    <input type="radio" name="answer" value="D" class="option-input">
+                    <span class="option-key">(D)</span>
+                    <span class="option-content">1、3、4、5</span>
+                </label>
+            </div>
+
+            <button class="btn" id="submit-btn" onclick="checkAnswer()">提交答案</button>
+
+            <!-- Feedback Area -->
+            <div id="result-area" class="feedback">
+                <!-- Content injected by JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Post-Quiz Learning Content (Hidden initially) -->
+    <div id="learning-content" class="hidden">
+        
+        <!-- Detailed Analysis -->
+        <section class="card">
+            <div class="card-header">
+                <svg class="icon" viewBox="0 0 24 24" style="color:var(--primary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                選項逐一解析
+            </div>
+            <div class="card-body">
+                <details class="analysis-item" open>
+                    <summary>為什麼 (C) 是正確答案？ <span style="color:var(--success);">✓ 正確</span></summary>
+                    <div class="content">
+                        <p>定義範疇與邊界必須依據「客觀」且「具強制力」的標準：</p>
+                        <ul style="margin-left:20px; margin-top:8px;">
+                            <li><strong>因素 1 (組織架構/目標)：</strong> 確保資安策略與業務目標一致 (Context)。</li>
+                            <li><strong>因素 2 (法規/契約)：</strong> 法律與合約是不可逾越的硬性邊界 (Compliance)。</li>
+                            <li><strong>因素 3 (風險作法)：</strong> 組織定義的風險胃納與評估準則 (Criteria)。</li>
+                            <li><strong>因素 5 (資產/控制)：</strong> 實際存在的硬體、軟體與資料是保護的對象 (Assets)。</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="analysis-item">
+                    <summary>為什麼排除「因素 4」？ <span style="color:var(--error);">✕ 錯誤觀念</span></summary>
+                    <div class="content">
+                        <p><strong>「系統管理者的期望」</strong> 屬於主觀意願。在資安風險評鑑中：</p>
+                        <p>1. <strong>主觀 vs 客觀：</strong> 邊界定義需基於組織政策(1)與法律(2)，而非個人的喜好或期望。</p>
+                        <p>2. <strong>變動性：</strong> 人員期望會隨時間改變，不適合作為穩定的邊界基礎。</p>
+                        <p>3. <strong>位階：</strong> 組織目標 > 個人期望。</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Core Concepts -->
+        <section class="card">
+            <div class="card-header">
+                <svg class="icon" viewBox="0 0 24 24" style="color:var(--accent);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                核心觀念白話文
+            </div>
+            <div class="card-body">
+                <div class="concept-grid">
+                    <div class="concept-box">
+                        <div class="concept-title">範疇 (Scope)</div>
+                        <p>簡單說就是<strong>「我們這次要檢查哪些東西」</strong>。是總部？還是分公司？是全公司系統？還是只有會計系統？必須明確定義資產、流程與組織單位的範圍。</p>
+                    </div>
+                    <div class="concept-box">
+                        <div class="concept-title">邊界 (Boundary)</div>
+                        <p>就是<strong>「楚河漢界」</strong>。界線以內歸我們管，界線以外（如 ISP 業者、外部與客戶的網路）是外部環境。要釐清責任歸屬。</p>
+                    </div>
+                </div>
+                <div class="mt-4" style="background:#f1f5f9; padding:12px; border-radius:8px;">
+                    <strong>為什麼必須連結業務與法規？</strong><br>
+                    資安是為了讓「生意（業務）」做下去，而且「不被罰錢（法規）」。如果不看這兩點，畫出來的邊界就沒有實質意義。
+                </div>
+            </div>
+        </section>
+
+        <!-- Traps & Mnemonics -->
+        <section class="card">
+            <div class="card-header">
+                <svg class="icon" viewBox="0 0 24 24" style="color:#dc2626;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                常見考試陷阱與口訣
+            </div>
+            <div class="card-body">
+                <h3 style="margin-bottom:12px;">🚫 考生常犯錯誤：</h3>
+                <ul class="trap-list">
+                    <li><strong>把「期望」當「需求」：</strong> 業務需求(Business Requirement)要納入，但個人的「期望(Expectation)」不是依據。</li>
+                    <li><strong>只重技術不重法規：</strong> 忘記法律契約也是邊界的一部分（例如個資法規定要保護的範圍）。</li>
+                    <li><strong>忽略資產現況：</strong> 空有政策卻沒有盤點實際資產，邊界會變成「紙上談兵」。</li>
+                </ul>
+
+                <hr style="margin:20px 0; border:0; border-top:1px solid #e2e8f0;">
+
+                <div class="mnemonic-box">
+                    <p>💡 記憶口訣</p>
+                    <div class="mnemonic-text">「法、組、風、資」是邊界</div>
+                    <p style="font-size:0.9rem; color:#b45309;">
+                        (<strong>法</strong>規、<strong>組</strong>織、<strong>風</strong>險作法、<strong>資</strong>產)<br>
+                        <span style="color:#ef4444;">個人的期望，通通丟一邊！</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Self Check -->
+        <section class="card">
+            <div class="card-header">
+                <svg class="icon" viewBox="0 0 24 24" style="color:var(--success);"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                自我檢測 (點擊顯示提示)
+            </div>
+            <div class="card-body">
+                
+                <div class="self-check-item">
+                    <p><strong>Q1. 某銀行要導入 ISO 27001，客服人員希望系統登入時間可以延長到 24 小時不登出方便作業，這應該作為界定資安風險邊界的依據嗎？</strong></p>
+                    <button class="toggle-hint-btn" onclick="toggleHint('hint1')">顯示/隱藏 解析</button>
+                    <div id="hint1" class="hint-content">
+                        <strong>不應該。</strong><br>
+                        這屬於「使用者期望/便利性」，反而可能違反「組織資安政策」或「法規要求」。不能因為使用者想方便就隨意更改風險邊界與控制措施。
+                    </div>
+                </div>
+
+                <div class="self-check-item">
+                    <p><strong>Q2. 組織在定義風險範疇時，是否需要考量「委外廠商」的合約要求？</strong></p>
+                    <button class="toggle-hint-btn" onclick="toggleHint('hint2')">顯示/隱藏 解析</button>
+                    <div id="hint2" class="hint-content">
+                        <strong>絕對需要。</strong><br>
+                        對應選項中的「2. 適用之法令、法規及契約要求」。委外合約界定了責任的邊界，是必須考量的重點。
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <footer class="text-center" style="margin-top:40px; color:var(--text-light); font-size:0.85rem;">
+        <p>&copy; 2024 iPAS 資安補教名師團隊 | 僅供教學練習使用</p>
+    </footer>
+
+</div>
+
+<script>
+    const CORRECT_ANSWER = 'C';
+    let hasSubmitted = false;
+
+    function checkAnswer() {
+        if (hasSubmitted) return;
+
+        // Get selected option
+        const selected = document.querySelector('input[name="answer"]:checked');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultArea = document.getElementById('result-area');
+        const learningContent = document.getElementById('learning-content');
+        const factorsList = document.getElementById('factors');
+
+        // Validation
+        if (!selected) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        hasSubmitted = true;
+        const userAnswer = selected.value;
+
+        // Disable inputs
+        document.querySelectorAll('input[name="answer"]').forEach(el => el.disabled = true);
+        submitBtn.disabled = true;
+        submitBtn.textContent = "作答完成";
+
+        // Show Learning Content
+        learningContent.classList.remove('hidden');
+        learningContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Highlight Logic
+        const labelSelected = document.getElementById(`label-${userAnswer}`);
+        const labelCorrect = document.getElementById(`label-${CORRECT_ANSWER}`);
+
+        // Mark factors visually
+        // Correct factors: 1, 2, 3, 5
+        // Wrong factor: 4
+        const factorItems = factorsList.querySelectorAll('li');
+        factorItems.forEach(li => {
+            const id = li.getAttribute('data-id');
+            if(id === '4') {
+                li.style.textDecoration = "line-through";
+                li.style.color = "#94a3b8";
+                li.innerHTML += ' <span style="color:var(--error); font-weight:bold; margin-left:auto;">✕ (排除)</span>';
+            } else {
+                li.style.background = "#f0fdf4";
+                li.innerHTML += ' <span style="color:var(--success); font-weight:bold; margin-left:auto;">✓</span>';
+            }
+        });
+
+        // Result Logic
+        if (userAnswer === CORRECT_ANSWER) {
+            // Correct
+            labelSelected.classList.add('highlight-correct');
+            resultArea.className = 'feedback correct';
+            resultArea.innerHTML = `
+                <h3>🎉 恭喜答對！</h3>
+                <p>觀念非常清晰！您正確排除了「系統管理者期望」這個主觀因素。</p>
+            `;
+        } else {
+            // Wrong
+            labelSelected.classList.add('highlight-wrong');
+            labelCorrect.classList.add('highlight-correct'); // Show correct answer
+            resultArea.className = 'feedback wrong';
+            resultArea.innerHTML = `
+                <h3>⚠️ 答錯了，別氣餒！</h3>
+                <p>正確答案是 <strong>(C)</strong>。</p>
+                <p>請記得：「期望」是主觀的，不能當作客觀的風險邊界依據。</p>
+            `;
+        }
+    }
+
+    function toggleHint(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

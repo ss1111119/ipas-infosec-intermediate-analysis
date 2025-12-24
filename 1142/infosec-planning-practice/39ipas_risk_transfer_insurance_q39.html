@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_risk_transfer_insurance_q39.html - iPAS資訊安全規劃實務衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 專業深藍 */
+            --accent-color: #3498db;   /* 亮藍 */
+            --success-color: #27ae60;  /* 綠色 */
+            --error-color: #c0392b;    /* 紅色 */
+            --bg-color: #f4f6f7;       /* 淺灰底 */
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --highlight-bg: #fff3cd;   /* 螢光筆黃 */
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        header .sub-info {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Card Style */
+        .card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+            font-size: 1.3rem;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            margin-top: 20px;
+            font-size: 1.1rem;
+        }
+
+        /* Scenario Box */
+        .scenario-box {
+            background-color: #eef2f5;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #dcdcdc;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        /* Question Options */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent-color);
+            background-color: #f0f8ff;
+        }
+
+        .option-label input {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.2s;
+            text-align: center;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .btn-toggle {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Feedback Area */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis Section (Accordion) */
+        #analysis-section {
+            display: none; /* Hidden by default */
+        }
+
+        details {
+            background-color: #fff;
+            margin-bottom: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: #f9f9f9;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Hide default triangle */
+            position: relative;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            position: absolute;
+            right: 20px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* Highlight Logic */
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        /* Interactive Aids Style */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .mini-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .mini-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: var(--accent-color);
+        }
+
+        .mini-card strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .checklist-item {
+            margin-bottom: 8px;
+            padding: 8px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .checklist-item label {
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .action-area {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <header>
+        <h1>iPAS 資訊安全規劃實務 - 短期衝刺班</h1>
+        <div class="sub-info">題目代號：ipas_risk_transfer_insurance_q39.html | 題號：39（題組 5）</div>
+    </header>
+
+    <!-- Question Area -->
+    <main class="card">
+        <h2>題目練習</h2>
+        
+        <div class="scenario-box">
+            <strong>【情境說明 - 題組 5】</strong><br>
+            A 公司為知名製造業，近期遭受勒索病毒攻擊。駭客刪除了所有備份資料，並竊取了 1TB 的研發與客戶機密資料，加密了主要伺服器。駭客在勒索信中威脅：若不支付高額贖金，將在 48 小時內公開資料。此次事件導致 ERP 與 CRM 系統癱瘓，生產線與供應鏈全面停擺。
+        </div>
+
+        <p style="font-size: 1.1rem; font-weight: bold;">
+            題目：若 A 公司未來決定購買「資安保險」以應對類似事件，這屬於下列何種風險處理策略？
+        </p>
+
+        <div class="options-group" id="options-form">
+            <label class="option-label">
+                <input type="radio" name="opt" value="A">
+                (A) 風險降低（Risk Reduction）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="opt" value="B">
+                (B) 風險避免（Risk Avoidance）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="opt" value="C">
+                (C) 風險接受（Risk Acceptance）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="opt" value="D">
+                (D) 風險轉移（Risk Transfer）
+            </label>
+        </div>
+
+        <button class="btn btn-submit" onclick="checkAnswer()">送出答案</button>
+
+        <!-- Feedback Area -->
+        <div id="feedback-area"></div>
+
+        <!-- Action Buttons (Hidden initially) -->
+        <div class="action-area" id="post-answer-actions" style="display: none;">
+            <button class="btn btn-retry" onclick="resetQuiz()">重作一次</button>
+            <button class="btn btn-toggle" onclick="toggleAnalysis()">顯示/隱藏解析</button>
+        </div>
+    </main>
+
+    <!-- Analysis Area -->
+    <section id="analysis-section">
+        
+        <!-- 1. 題目再現 (已在上方，此處為結構完整性保留，或可簡略) -->
+        <div class="card">
+            <h2>解析學習區</h2>
+
+            <!-- Step 1: Keywords -->
+            <details open>
+                <summary>【第一步：找關鍵字】</summary>
+                <div class="details-content">
+                    <p>請注意題目中的紅字線索：</p>
+                    <ul>
+                        <li><span class="highlight">購買資安保險</span>：核心動作，涉及合約與理賠。</li>
+                        <li><span class="highlight">未來</span>：雖是未來的規劃，但重點在於手段的本質。</li>
+                        <li><span class="highlight">風險處理</span>：考點在於四大處理（4T）的分類。</li>
+                    </ul>
+                    <p><strong>關鍵邏輯：</strong>保險的本質並無法阻止駭客攻擊（無法降低機率），但可以在發生事情時，由<span class="highlight">保險公司（第三方）</span>來賠付損失（降低財務衝擊）。</p>
+                </div>
+            </details>
+
+            <!-- Step 2: Plain Translation -->
+            <details>
+                <summary>【第二步：白話翻譯】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>資安保險</strong>（遇到資安事件時，由保險公司依條款賠付部分損失的金融商品）。</li>
+                        <li><strong>風險轉移</strong>（把「萬一出事要付的錢/賠償責任」的一部分丟給別人去承擔）。</li>
+                        <li><strong>風險降低</strong>（加裝防火牆、防毒、備份，讓被駭的機率變小，或損害變小）。</li>
+                        <li><strong>風險避免</strong>（因為太危險，乾脆不使用該系統或停止該項業務）。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- Step 3: Logic -->
+            <details>
+                <summary>【第三步：解題思路】</summary>
+                <div class="details-content">
+                    <p><strong>這題在考什麼？</strong> 四大風險處理選項中，「保險」歸類於哪一類。</p>
+                    <p><strong>解題步驟：</strong></p>
+                    <ol>
+                        <li><strong>翻譯動作：</strong>「購買保險」意味著當勒索發生時，贖金、復原費用或法律賠償由保險公司支付。</li>
+                        <li><strong>判斷方向：</strong>
+                            <ul>
+                                <li>攻擊機率變低了嗎？沒有。（那是風險降低）</li>
+                                <li>系統關閉不以使用了嗎？沒有。（那是風險避免）</li>
+                                <li>完全自己認賠嗎？沒有。（那是風險接受）</li>
+                                <li>找人分擔損失嗎？是的。</li>
+                            </ul>
+                        </li>
+                        <li><strong>對照定義：</strong>將財務損失的責任交給第三方（保險公司）＝ <strong>風險轉移</strong>。</li>
+                    </ol>
+                    <p><strong>核心原理：</strong>保險處理的是「財務衝擊」，而非技術風險本身。</p>
+                </div>
+            </details>
+
+            <!-- Step 4: Options Analysis -->
+            <details>
+                <summary>【第四步：選項分析】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>(A) 風險降低：錯。</strong>降低是透過控制措施（如：異地備份、EDR、防火牆）來減少發生可能性或衝擊。買保險並不會讓駭客打不進來。</li>
+                        <li><strong>(B) 風險避免：錯。</strong>避免是指「停止」導致風險的活動。例如：怕勒索就不連接網際網路，或關閉該伺服器。買保險並不等於停止運作。</li>
+                        <li><strong>(C) 風險接受：錯。</strong>接受是指「不採取額外行動」，準備好自己承擔所有損失。買保險是積極找人分攤，並非單純接受。</li>
+                        <li><strong>(D) 風險轉移：對。</strong>透過合約或保險，將風險帶來的潛在財務損失轉嫁給第三方（保險公司）承擔。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- Extension -->
+            <details>
+                <summary>【觀念補充與延伸】</summary>
+                <div class="details-content">
+                    <p><strong>核心觀念定位：</strong>這是 iPAS 資安規劃實務的超高頻考點。「保險」與「委外合約賠償」幾乎必選「轉移」。</p>
+                    <p><strong>觸類旁通 - 常見變化題：</strong></p>
+                    <ul>
+                        <li><strong>問：</strong>「與雲端廠商簽訂 SLA，若中斷服務需支付違約金」算哪種？<br>
+                            <strong>答：</strong>風險轉移（將中斷的損失責任轉給廠商）。</li>
+                        <li><strong>問：</strong>「導入 SOC 監控服務」算哪種？<br>
+                            <strong>答：</strong>通常屬於「風險降低」（透過監控提早發現），雖有委外成分，但主要目的是降低衝擊。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- Mnemonic -->
+            <details>
+                <summary>【記憶口訣】</summary>
+                <div class="details-content">
+                    <div style="background: #e8f6f3; padding: 15px; border-radius: 5px; text-align: center; font-size: 1.1rem; color: #16a085; font-weight: bold;">
+                        「保險買下去，損失移出去」<br>
+                        「合約保險第三方，轉移最典型」
+                    </div>
+                </div>
+            </details>
+
+            <!-- Traps -->
+            <details>
+                <summary>【常見陷阱】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>陷阱一：</strong>誤以為買了保險，資安就會變好（誤選風險降低）。其實保險只是事後賠錢，資安防護沒變強。</li>
+                        <li><strong>陷阱二：</strong>把「接受風險但買保險」混淆。接受通常是指「殘餘風險」在可接受範圍內，不花大錢處理；而保險通常針對無法接受的大額損失進行轉嫁。</li>
+                        <li><strong>避坑指南：</strong>看到關鍵字「保險」、「第三方賠償」、「合約轉嫁」，直覺反應找「轉移」。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- Correct Answer -->
+            <details>
+                <summary>【正確答案】</summary>
+                <div class="details-content">
+                    <p style="font-size: 1.2rem; font-weight: bold; color: var(--success-color);">本題正確答案為：(D) 風險轉移（Risk Transfer）</p>
+                </div>
+            </details>
+
+            <!-- Self Check -->
+            <details>
+                <summary>【自我檢測】</summary>
+                <div class="details-content">
+                    <p>試著回答以下問題（不提供答案，請自行思考）：</p>
+                    <ol>
+                        <li>如果公司實施「離線備份」並定期演練還原，這比較像哪種風險處理？為什麼？</li>
+                        <li>若合約要求雲端服務商發生中斷超過 4小時要賠償 10 倍費用，屬於哪種風險處理？</li>
+                        <li>買了資安保險，還需要做控制措施（如防火牆）嗎？為什麼？</li>
+                    </ol>
+                </div>
+            </details>
+        </div>
+
+        <!-- Interactive Learning Aids -->
+        <div class="card">
+            <h2>互動學習工具箱</h2>
+            
+            <h3>1. 四大風險處理速記卡（點擊翻牌）</h3>
+            <div class="grid-cards">
+                <div class="mini-card" onclick="alert('例子：因為怕颱風天出門危險，所以今天「不出門了」。\n（停止活動＝避免）')">
+                    <strong>Risk Avoidance<br>風險避免</strong>
+                    <small>點我看生活例子</small>
+                </div>
+                <div class="mini-card" onclick="alert('例子：怕淋濕，所以「帶雨傘」出門。\n（採取措施＝降低機率或衝擊）')">
+                    <strong>Risk Reduction<br>風險降低</strong>
+                    <small>點我看生活例子</small>
+                </div>
+                <div class="mini-card" onclick="alert('例子：怕生病花大錢，所以「買醫療險」。\n（保險公司幫你付＝轉移）')">
+                    <strong>Risk Transfer<br>風險轉移</strong>
+                    <small>點我看生活例子</small>
+                </div>
+                <div class="mini-card" onclick="alert('例子：毛毛雨而已，懶得撐傘，「淋濕也沒關係」。\n（自己扛＝接受）')">
+                    <strong>Risk Acceptance<br>風險接受</strong>
+                    <small>點我看生活例子</small>
+                </div>
+            </div>
+
+            <h3>2. 保險能轉移什麼？</h3>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="btn" style="background:#e0e0e0; color:#333;" onclick="showInsuranceScope()">顯示轉移範圍</button>
+                <div id="insurance-scope-display" style="margin-top:10px; display:none; padding:10px; background:#fff; border:1px dashed #999;">
+                    <ul style="text-align: left; display: inline-block;">
+                        <li>✅ <strong>財務損失：</strong> 營運中斷損失、贖金（視法規與條款）。</li>
+                        <li>✅ <strong>法律賠償：</strong> 對客戶個資外洩的民事賠償。</li>
+                        <li>✅ <strong>應變費用：</strong> 聘請鑑識專家、律師、公關的費用。</li>
+                    </ul>
+                    <p style="font-size:0.8rem; color:red;">*注意：商譽損失通常難以完全轉移，且保單有除外條款（如戰爭）。</p>
+                </div>
+            </div>
+
+            <h3>3. 決策檢核清單 (Checklist)</h3>
+            <div class="checklist-item">
+                <label><input type="checkbox" onchange="checkListUpdate()"> 事件主要痛點是鉅額財務衝擊嗎？</label>
+            </div>
+            <div class="checklist-item">
+                <label><input type="checkbox" onchange="checkListUpdate()"> 是否可透過保險/合約讓第三方分攤？</label>
+            </div>
+            <div class="checklist-item">
+                <label><input type="checkbox" onchange="checkListUpdate()"> 是否了解控制措施仍需執行（保險不擋駭客）？</label>
+            </div>
+            <div class="checklist-item">
+                <label><input type="checkbox" onchange="checkListUpdate()"> 是否已確認保單除外條款？</label>
+            </div>
+            <div id="checklist-result" style="margin-top: 10px; font-weight: bold; color: var(--accent-color);"></div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="text-align: center; margin-top: 40px; font-size: 0.8rem; color: #777;">
+        iPAS 資訊安全規劃實務衝刺班 | 教材版本 v1.0 | 僅供教學使用
+    </footer>
+
+</div>
+
+<script>
+    // 檢查答案邏輯
+    function checkAnswer() {
+        const selectedOption = document.querySelector('input[name="opt"]:checked');
+        const feedbackArea = document.getElementById('feedback-area');
+        const actionArea = document.getElementById('post-answer-actions');
+        
+        if (!selectedOption) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        const answer = selectedOption.value;
+        feedbackArea.style.display = 'block';
+        actionArea.style.display = 'flex';
+
+        if (answer === 'D') {
+            // Correct
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = `
+                <h3>🎉 答對了！</h3>
+                <p>正確答案是 <strong>(D) 風險轉移</strong>。</p>
+                <p>觀念正確：購買保險就是將財務損失的責任「移出去」給保險公司承擔。</p>
+            `;
+            // 自動打開解析區
+            document.getElementById('analysis-section').style.display = 'block';
+        } else {
+            // Wrong
+            let concept = '';
+            if(answer === 'A') concept = '風險降低是指「加裝防護措施」（如防火牆）。';
+            if(answer === 'B') concept = '風險避免是指「停止做這件事」（如不用電腦）。';
+            if(answer === 'C') concept = '風險接受是指「自己吞下去」（如不處理）。';
+
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.innerHTML = `
+                <h3>⚠️ 答錯了</h3>
+                <p>你選的是 <strong>(${answer})</strong>，正確答案是 <strong>(D)</strong>。</p>
+                <p>提示：${concept}</p>
+                <p><strong>關鍵思考：</strong>保險並沒有讓系統變安全，而是讓「財務損失」由別人（保險公司）來付，這叫做什麼？</p>
+            `;
+        }
+    }
+
+    // 重作一次
+    function resetQuiz() {
+        // 清除選擇
+        const radios = document.querySelectorAll('input[name="opt"]');
+        radios.forEach(r => r.checked = false);
+
+        // 隱藏區域
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('post-answer-actions').style.display = 'none';
+        
+        // 捲動回頂部
+        document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 顯示/隱藏解析
+    function toggleAnalysis() {
+        const section = document.getElementById('analysis-section');
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
+            section.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    // 顯示保險範圍
+    function showInsuranceScope() {
+        const display = document.getElementById('insurance-scope-display');
+        if (display.style.display === 'none') {
+            display.style.display = 'block';
+        } else {
+            display.style.display = 'none';
+        }
+    }
+
+    // 檢查清單邏輯
+    function checkListUpdate() {
+        const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+        const checkedCount = Array.from(checkboxes).filter(c => c.checked).length;
+        const resultDiv = document.getElementById('checklist-result');
+
+        if (checkedCount === 4) {
+            resultDiv.innerText = "🌟 完美！這就是一個成熟的「風險轉移」決策過程。";
+        } else if (checkedCount > 0) {
+            resultDiv.innerText = "💡 思考中... 請繼續確認每個環節。";
+        } else {
+            resultDiv.innerText = "";
+        }
+    }
+</script>
+
+</body>
+</html>

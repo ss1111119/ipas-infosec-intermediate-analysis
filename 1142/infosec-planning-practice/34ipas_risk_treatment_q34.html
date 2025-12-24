@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_risk_treatment_q34.html - iPAS資安規劃實務衝刺班</title>
+    <style>
+        /* 基礎設定 */
+        :root {
+            --primary-color: #2c3e50; /* 專業深藍 */
+            --accent-color: #3498db; /* 亮藍 */
+            --highlight-color: #f1c40f; /* 重點黃 */
+            --correct-color: #27ae60; /* 正確綠 */
+            --wrong-color: #c0392b; /* 錯誤紅 */
+            --bg-color: #fdfdfd;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --spacing-unit: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f8;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* 版面容器 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--spacing-unit);
+        }
+
+        /* 標題區 */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* 卡片共用樣式 */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* 題目互動區 */
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            background: white;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent-color);
+            background-color: #f0f8ff;
+        }
+
+        .option-btn.selected {
+            border-color: var(--primary-color);
+            background-color: #e8f4fd;
+            font-weight: bold;
+        }
+
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button.primary-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        button.secondary-btn {
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* 反饋訊息 */
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區塊 (Accordion) */
+        .accordion-item {
+            border: 1px solid #e0e0e0;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: white;
+        }
+
+        .accordion-header {
+            background-color: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .accordion-item.active .accordion-content {
+            display: block;
+        }
+
+        /* 內容樣式特化 */
+        mark {
+            background-color: var(--highlight-color);
+            padding: 0 4px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .highlight-box {
+            background-color: #f1f8ff;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .trap-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        /* 學習輔助卡片區 */
+        .learning-tools {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        @media (min-width: 600px) {
+            .learning-tools {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .tool-card {
+            background: #fff;
+            border: 1px dashed #aaa;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .tool-card h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        /* 檢核清單 */
+        .checklist-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .checklist-item input {
+            margin-right: 10px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .checklist-status {
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        /* 解析開關控制 */
+        #explanation-section {
+            display: none; /* 預設完全隱藏 */
+            margin-top: 30px;
+        }
+        
+        .section-title {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        /* 自我檢測題 */
+        .self-test-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .self-test-item:last-child {
+            border-bottom: none;
+        }
+        .self-test-q {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #444;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 1. 頁首 -->
+    <header>
+        <h1>iPAS 資訊安全規劃實務 - 短期衝刺班</h1>
+        <p>單元：風險處理 | 題號：34 | 檔案：ipas_risk_treatment_q34.html</p>
+    </header>
+
+    <!-- 2. 題目互動區 -->
+    <main class="card" id="quiz-section">
+        <div class="question-text">
+            題目 34：有關風險處理的描述，下列何者最為適切？
+        </div>
+
+        <div class="options-group">
+            <button class="option-btn" onclick="selectOption('A')" id="btn-A">(A) 該資產的使用者，即為需決定風險處理方式的角色</button>
+            <button class="option-btn" onclick="selectOption('B')" id="btn-B">(B) 資產擁有者不需要參與識別其資產相關聯之風險</button>
+            <button class="option-btn" onclick="selectOption('C')" id="btn-C">(C) 風險評鑑進行完成後，再決定建立風險接受準則以進行後續風險處理</button>
+            <button class="option-btn" onclick="selectOption('D')" id="btn-D">(D) 需考量風險評鑑的結果，由風險擁有者於風險處理的選項中，選擇適切之方式</button>
+        </div>
+
+        <div class="action-area">
+            <button class="primary-btn" onclick="submitAnswer()">送出答案</button>
+            <button class="secondary-btn" onclick="retryQuiz()">重作一次</button>
+            <button class="secondary-btn" id="toggle-explanation-btn" onclick="toggleAllExplanations()" style="display:none;">顯示解析</button>
+        </div>
+
+        <div id="feedback-msg" class="feedback"></div>
+    </main>
+
+    <!-- 3. 解析學習區 (固定順序) -->
+    <div id="explanation-section">
+        
+        <!-- 【題目】 -->
+        <div class="accordion-item active">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【題目】</div>
+            <div class="accordion-content">
+                <p>有關風險處理的描述，下列何者最為適切？</p>
+            </div>
+        </div>
+
+        <!-- 【第一步：找關鍵字】 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第一步：找關鍵字】</div>
+            <div class="accordion-content">
+                <p>請留意以下用詞，它們決定了誰負責做什麼，以及先後順序：</p>
+                <div class="highlight-box">
+                    <ul>
+                        <li><mark>風險處理</mark>：這是本題的主題，即決定如何應對風險的階段。</li>
+                        <li><mark>最為適切</mark>：代表要找符合 ISO 27005 或一般資安風險管理最佳實務的流程。</li>
+                        <li><mark>資產擁有者</mark> vs <mark>資產使用者</mark> vs <mark>風險擁有者</mark>：考這三種角色的權責劃分。</li>
+                        <li><mark>風險評鑑</mark> vs <mark>風險接受準則</mark>：考這兩個步驟的先後邏輯。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 【第二步：白話翻譯】 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第二步：白話翻譯】</div>
+            <div class="accordion-content">
+                <p>很多同學會被名詞混淆，這裡直接翻譯給你聽：</p>
+                <ul style="list-style-type: disc; margin-left: 20px; line-height: 1.8;">
+                    <li><strong>風險處理</strong> (Risk Treatment)<br>就是面對風險時決定要怎麼做：是要避開它、降低它、轉嫁給保險公司、還是乾脆接受它。</li>
+                    <li><strong>風險評鑑</strong> (Risk Assessment)<br>就是把風險的「嚴重度」與「發生可能性」算出來，確認風險等級高低的過程。</li>
+                    <li><strong>風險接受準則</strong> (Risk Acceptance Criteria)<br>就是公司老闆或管理層事先訂好的「門檻」，規定什麼程度以下的風險我們可以容忍，不用花大錢去修補。</li>
+                    <li><strong>風險擁有者</strong> (Risk Owner)<br>就是對該風險「成敗負責」的人，通常是高階主管，他有權力決定要不要花預算去處理風險，或者簽字同意接受風險。</li>
+                    <li><strong>資產擁有者</strong> (Asset Owner)<br>就是對該資產（如伺服器、資料庫）負保管責任的人，他最了解資產價值，所以必須參與風險識別。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 【第三步：解題思路】 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第三步：解題思路】</div>
+            <div class="accordion-content">
+                <p><strong>這題考什麼？</strong> 風險管理的角色分工與流程順序。</p>
+                
+                <h4 style="margin-top:10px;">解題邏輯三步驟：</h4>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>先訂規則：</strong>公司必須先有「風險接受準則」（這是一把尺），才能去衡量風險。</li>
+                    <li><strong>再做評估：</strong>進行「風險評鑑」，算出風險值，並拿那把尺（準則）來比對。</li>
+                    <li><strong>最後決策：</strong>由「風險擁有者」根據評鑑結果，決定要採取哪種處理方式（因為這牽涉到預算與責任）。</li>
+                </ol>
+
+                <div class="highlight-box" style="margin-top: 15px;">
+                    <h4>流程檢核清單 (互動檢查)</h4>
+                    <p style="font-size:0.9rem; color:#666;">請依序勾選，體驗正確的風險管理邏輯：</p>
+                    <div id="checklist-container">
+                        <div class="checklist-item">
+                            <input type="checkbox" id="chk1" onchange="updateChecklist()">
+                            <label for="chk1">1. 已建立「風險接受準則」(有了門檻標準)</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="chk2" onchange="updateChecklist()">
+                            <label for="chk2">2. 已完成「風險識別與分析」(確認資產價值與威脅)</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="chk3" onchange="updateChecklist()">
+                            <label for="chk3">3. 已完成「風險評鑑」(產出評估結果)</label>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" id="chk4" onchange="updateChecklist()">
+                            <label for="chk4">4. 風險擁有者依結果選擇「風險處理」方式</label>
+                        </div>
+                        <p id="checklist-feedback" class="checklist-status">流程完整度：0/4 - 請從第一步開始！</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 【第四步：選項分析】 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【第四步：選項分析】</div>
+            <div class="accordion-content">
+                <ul>
+                    <li style="margin-bottom: 10px;">
+                        <strong>(A) 該資產的使用者，即為需決定風險處理方式的角色</strong><br>
+                        <span style="color: var(--wrong-color); font-weight:bold;">❌ 錯誤</span>。使用者雖然使用資產，但通常沒有權限決定是否投入資源修補漏洞或接受風險。決策權在「風險擁有者」或管理層手中。
+                    </li>
+                    <li style="margin-bottom: 10px;">
+                        <strong>(B) 資產擁有者不需要參與識別其資產相關聯之風險</strong><br>
+                        <span style="color: var(--wrong-color); font-weight:bold;">❌ 錯誤</span>。資產擁有者最了解資產的用途、價值與弱點，若不參與識別，風險評估將會失真。
+                    </li>
+                    <li style="margin-bottom: 10px;">
+                        <strong>(C) 風險評鑑進行完成後，再決定建立風險接受準則以進行後續風險處理</strong><br>
+                        <span style="color: var(--wrong-color); font-weight:bold;">❌ 錯誤</span>。順序錯了！「風險接受準則」應該在評鑑之前（或規劃階段）就定義好。如果評完分數才訂及格標準，那就是「射箭再畫靶」，失去客觀性。
+                    </li>
+                    <li style="margin-bottom: 10px;">
+                        <strong>(D) 需考量風險評鑑的結果，由風險擁有者於風險處理的選項中，選擇適切之方式</strong><br>
+                        <span style="color: var(--correct-color); font-weight:bold;">✅ 正確</span>。這完全符合標準流程：依據評鑑結果（Report），由有權責的人（Risk Owner）從四種處理選項（規避/降低/轉移/接受）中做決定。
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 【觀念補充與延伸】 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【觀念補充與延伸】</div>
+            <div class="accordion-content">
+                <p><strong>核心定位：</strong>這是 iPAS 資安規劃實務中關於「風險管理流程 (ISO 27005)」的經典題型。</p>
+                <br>
+                
+                <div class="learning-tools">
+                    <!-- 互動學習卡 1 -->
+                    <div class="tool-card">
+                        <h4>風險處理選項速記卡</h4>
+                        <ul style="font-size: 0.9rem; list-style: none;">
+                            <li>🛡️ <strong>降低 (Reduce/Mitigate)</strong>：<br>裝防火牆、修補漏洞（最常見）。</li>
+                            <li>🚫 <strong>避免 (Avoid)</strong>：<br>風險太高了，乾脆關閉該服務或不使用該技術。</li>
+                            <li>🤝 <strong>移轉 (Transfer/Share)</strong>：<br>買保險、外包給廠商（出事別人賠）。</li>
+                            <li>🆗 <strong>接受 (Accept)</strong>：<br>風險在門檻內，或者處理成本高於損失，老闆簽字說「好，我們承擔」。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 互動學習卡 2 -->
+                    <div class="tool-card">
+                        <h4>角色對照小卡</h4>
+                        <ul style="font-size: 0.9rem; list-style: none;">
+                            <li>👤 <strong>資產使用者</strong>：<br>「我只負責用，有問題我回報。」</li>
+                            <li>🔑 <strong>資產擁有者</strong>：<br>「這東西歸我管，我知道它多重要。」（參與識別）</li>
+                            <li>👑 <strong>風險擁有者</strong>：<br>「這風險我負責，錢我來批，決定怎麼做。」（決策權）</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <strong>觸類旁通：變化題型</strong>
+                    <ul>
+                        <li>問「殘餘風險」：經過風險處理後，剩下來的風險，需由管理層確認是否可接受。</li>
+                        <li>問「誰核准殘餘風險」：答案依然是「風險擁有者」或高階管理層。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 【記憶口訣】 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【記憶口訣】</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.1rem; font-weight: bold; color: var(--primary-color); text-align: center; padding: 10px; background-color: #eef;">
+                    「門檻先訂、評鑑再定；<br>
+                    風險擁有者，最後拍板。」
+                </p>
+                <p style="margin-top: 10px; font-size: 0.9rem; color: #555;">
+                    解釋：門檻（接受準則）要在評鑑前訂好；最後的決策（拍板）是風險擁有者的責任。
+                </p>
+            </div>
+        </div>
+
+        <!-- 【常見陷阱】 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【常見陷阱】</div>
+            <div class="accordion-content">
+                <div class="trap-box">
+                    <strong>⚠️ 避坑指南：</strong>
+                    <ol>
+                        <li><strong>誤把「使用者」當老大：</strong> 使用者只是操作者，通常沒有權力決定資安政策。</li>
+                        <li><strong>以為「資產擁有者」不用做事：</strong> 很多人以為資安是資安官的事，其實資產擁有者必須參與「風險識別」，因為沒有人比他更懂那個資產。</li>
+                        <li><strong>順序顛倒：</strong> 看到選項寫「評鑑完再訂準則」，絕對是錯的！這就像考完試再決定及格分數是 10 分還是 90 分，不合邏輯。</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 【正確答案】 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【正確答案】</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.5rem; text-align: center; color: var(--correct-color); font-weight: bold;">
+                    本題正確答案為 (D)
+                </p>
+            </div>
+        </div>
+
+        <!-- 【自我檢測】 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">【自我檢測】</div>
+            <div class="accordion-content">
+                <p>試著回答以下問題（不提供標準答案，請回顧上方觀念）：</p>
+                
+                <div class="self-test-item">
+                    <div class="self-test-q">Q1. 如果題目把選項 (D) 的「風險擁有者」改成「資產使用者」，為什麼就不對？</div>
+                    <div style="font-size: 0.9rem; color: #666;">提示：想想看「權責」與「預算」掌握在誰手上。</div>
+                </div>
+
+                <div class="self-test-item">
+                    <div class="self-test-q">Q2. 若組織沒有先訂定「風險接受準則」，直接做風險評鑑，最後會發生什麼管理上的問題？</div>
+                    <div style="font-size: 0.9rem; color: #666;">提示：評估出來的風險等級「高」或「低」，有客觀標準嗎？</div>
+                </div>
+
+                <div class="self-test-item">
+                    <div class="self-test-q">Q3. 在你的學校或公司情境中，誰最像「資產擁有者」？誰最像「風險擁有者」？</div>
+                    <div style="font-size: 0.9rem; color: #666;">提示：保管電腦的人 vs 簽名核准買防火牆的老闆。</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // 變數設定
+    let selectedOption = null;
+    const correctOption = 'D';
+    const explanationSection = document.getElementById('explanation-section');
+    const feedbackMsg = document.getElementById('feedback-msg');
+    const toggleBtn = document.getElementById('toggle-explanation-btn');
+
+    // 選擇選項
+    function selectOption(option) {
+        selectedOption = option;
+        
+        // 清除所有按鈕樣式
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+
+        // 加上被選取樣式
+        document.getElementById('btn-' + option).classList.add('selected');
+        
+        // 隱藏反饋（如果重新選擇）
+        feedbackMsg.style.display = 'none';
+    }
+
+    // 送出答案
+    function submitAnswer() {
+        if (!selectedOption) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedbackMsg.style.display = 'block';
+        toggleBtn.style.display = 'inline-block'; // 顯示解析按鈕
+
+        if (selectedOption === correctOption) {
+            feedbackMsg.className = 'feedback correct';
+            feedbackMsg.innerHTML = '🎉 答對了！觀念非常正確。<br>請點擊下方「顯示解析」複習詳細觀念。';
+            // 自動展開解析區
+            explanationSection.style.display = 'block';
+            toggleBtn.textContent = '隱藏解析';
+        } else {
+            feedbackMsg.className = 'feedback wrong';
+            feedbackMsg.innerHTML = `⚠️ 答錯了！你選的是 ${selectedOption}，正確答案是 ${correctOption}。<br>請點擊「顯示解析」，特別留意「第四步：選項分析」與「常見陷阱」。`;
+        }
+    }
+
+    // 重作一次
+    function retryQuiz() {
+        selectedOption = null;
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        feedbackMsg.style.display = 'none';
+        explanationSection.style.display = 'none';
+        toggleBtn.style.display = 'none';
+        toggleBtn.textContent = '顯示解析';
+        
+        // 重置所有 accordion
+        document.querySelectorAll('.accordion-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        // 預設打開第一個
+        document.querySelector('.accordion-item').classList.add('active');
+        
+        // 重置檢核清單
+        document.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+            chk.checked = false;
+        });
+        updateChecklist();
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 切換單個 Accordion
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        item.classList.toggle('active');
+    }
+
+    // 顯示/隱藏全部解析
+    function toggleAllExplanations() {
+        if (explanationSection.style.display === 'none' || explanationSection.style.display === '') {
+            explanationSection.style.display = 'block';
+            toggleBtn.textContent = '隱藏解析';
+            // 滾動到解析區
+            explanationSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            explanationSection.style.display = 'none';
+            toggleBtn.textContent = '顯示解析';
+        }
+    }
+
+    // 流程檢核清單邏輯
+    function updateChecklist() {
+        const checks = [
+            document.getElementById('chk1').checked,
+            document.getElementById('chk2').checked,
+            document.getElementById('chk3').checked,
+            document.getElementById('chk4').checked
+        ];
+        
+        const count = checks.filter(Boolean).length;
+        const feedback = document.getElementById('checklist-feedback');
+        
+        // 確保順序邏輯 (雖非強制，但為了教學效果)
+        if (count === 0) {
+            feedback.textContent = "流程完整度：0/4 - 請從第一步開始！";
+            feedback.style.color = "#666";
+        } else if (count < 4) {
+            if (!checks[0]) {
+                feedback.textContent = "提示：還沒建立準則，怎麼評估呢？請勾選第 1 項。";
+            } else if (!checks[2]) {
+                feedback.textContent = "提示：還沒做評鑑，無法決策喔。";
+            } else {
+                feedback.textContent = `流程完整度：${count}/4 - 加油，快完成了！`;
+            }
+            feedback.style.color = "var(--accent-color)";
+        } else {
+            feedback.textContent = "流程完整度：4/4 - 完美！這就是標準的風險處理決策流程。";
+            feedback.style.color = "var(--correct-color)";
+        }
+    }
+</script>
+
+</body>
+</html>

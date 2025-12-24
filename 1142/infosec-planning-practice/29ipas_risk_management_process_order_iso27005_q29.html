@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安風險管理流程特訓 | ISO 27005 & 31000</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .step-card {
+            transition: all 0.3s ease;
+        }
+        .step-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Custom Radio Button Styling */
+        input[type="radio"] {
+            display: none;
+        }
+        
+        input[type="radio"] + label {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        input[type="radio"]:checked + label {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+            color: #1e40af;
+            font-weight: bold;
+        }
+
+        input[type="radio"]:checked + label .radio-circle {
+            border-color: #2563eb;
+            background-color: #2563eb;
+            box-shadow: inset 0 0 0 3px #eff6ff;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .flow-arrow::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .flow-arrow::after {
+                content: '↓';
+                right: 50%;
+                top: auto;
+                bottom: -25px;
+                transform: translateX(50%);
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header Section -->
+    <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white shadow-lg">
+        <div class="max-w-4xl mx-auto px-4 py-6">
+            <div class="flex items-center space-x-4">
+                <div class="bg-white p-2 rounded-full shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight">iPAS 資安風險管理特訓班</h1>
+                    <p class="text-blue-200 text-sm mt-1">ISO 27005 & ISO 31000 流程攻略</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8 space-y-8">
+        
+        <!-- Introduction / Persona -->
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-blue-100 flex items-start gap-4">
+            <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-2xl">👨‍🏫</div>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold text-gray-900">同學們好！</h2>
+                <p class="text-gray-600 mt-1">
+                    我是你們的資安講師。風險管理不是死背步驟，而是要理解「為什麼要這樣做」。
+                    今天我們用一個晶片公司的情境，來釐清 ISO 標準的正確邏輯。準備好挑戰了嗎？
+                </p>
+            </div>
+        </div>
+
+        <!-- Scenario & Question Card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="bg-slate-50 border-b border-slate-200 p-6">
+                <h3 class="font-bold text-slate-800 text-lg mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    情境題：XYZ 晶片設計公司
+                </h3>
+                <p class="text-slate-600 leading-relaxed">
+                    XYZ 公司計畫導入資訊安全管理系統（ISMS），並依循 ISO 27005 與 ISO 31000 進行風險管理。
+                    已知「監視與審查」與「溝通及諮詢」是持續貫穿的作業。請將下列主要的風險管理作業進行正確排序：
+                </p>
+                
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-2 bg-white p-4 rounded-lg border border-slate-200">
+                    <div class="flex items-center gap-2"><span class="font-bold text-blue-600 w-6">1.</span> 風險回應</div>
+                    <div class="flex items-center gap-2"><span class="font-bold text-blue-600 w-6">2.</span> 建立全景 (Context Establishment)</div>
+                    <div class="flex items-center gap-2"><span class="font-bold text-blue-600 w-6">3.</span> 風險分析及評估</div>
+                    <div class="flex items-center gap-2"><span class="font-bold text-blue-600 w-6">4.</span> 風險識別</div>
+                    <div class="flex items-center gap-2"><span class="font-bold text-blue-600 w-6">5.</span> 風險評鑑</div>
+                    <div class="flex items-center gap-2"><span class="font-bold text-blue-600 w-6">6.</span> 風險處理</div>
+                    <div class="flex items-center gap-2"><span class="font-bold text-blue-600 w-6">7.</span> 記錄及報告</div>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <p class="font-bold text-gray-800 mb-4 text-lg">請問下列何者為正確的風險管理流程順序？</p>
+                
+                <div class="space-y-3" id="options-container">
+                    <!-- Option A -->
+                    <div>
+                        <input type="radio" name="quiz" id="optA" value="A">
+                        <label for="optA" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                            <div class="radio-circle w-5 h-5 rounded-full border border-gray-300 mr-4 flex-shrink-0"></div>
+                            <span class="text-gray-700 font-medium">(A) 1 → 3 → 4 → 5 → 6</span>
+                        </label>
+                    </div>
+                    <!-- Option B -->
+                    <div>
+                        <input type="radio" name="quiz" id="optB" value="B">
+                        <label for="optB" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                            <div class="radio-circle w-5 h-5 rounded-full border border-gray-300 mr-4 flex-shrink-0"></div>
+                            <span class="text-gray-700 font-medium">(B) 5 → 4 → 3 → 1 → 7</span>
+                        </label>
+                    </div>
+                    <!-- Option C -->
+                    <div>
+                        <input type="radio" name="quiz" id="optC" value="C">
+                        <label for="optC" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                            <div class="radio-circle w-5 h-5 rounded-full border border-gray-300 mr-4 flex-shrink-0"></div>
+                            <span class="text-gray-700 font-medium">(C) 2 → 4 → 3 → 6 → 7</span>
+                        </label>
+                    </div>
+                    <!-- Option D -->
+                    <div>
+                        <input type="radio" name="quiz" id="optD" value="D">
+                        <label for="optD" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                            <div class="radio-circle w-5 h-5 rounded-full border border-gray-300 mr-4 flex-shrink-0"></div>
+                            <span class="text-gray-700 font-medium">(D) 2 → 5 → 4 → 3 → 1</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="error-msg" class="hidden mt-4 p-3 bg-red-100 text-red-700 rounded-md text-sm font-medium flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    請選擇一個答案後再提交！
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-8 flex justify-end">
+                    <button id="submit-btn" onclick="checkAnswer()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors flex items-center">
+                        提交答案
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </button>
+                    <button id="reset-btn" onclick="resetQuiz()" class="hidden bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        重新作答
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result & Explanation Section (Hidden initially) -->
+        <div id="result-section" class="hidden space-y-8 fade-in">
+            
+            <!-- Result Banner -->
+            <div id="result-banner" class="rounded-lg p-6 flex flex-col items-center justify-center text-center">
+                <!-- Content injected via JS -->
+            </div>
+
+            <!-- Visual Flowchart -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h4 class="font-bold text-gray-800 mb-4 text-lg border-l-4 border-green-500 pl-3">圖像化記憶：正確的風險管理流程</h4>
+                <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0 md:space-x-2 py-4">
+                    
+                    <div class="flex flex-col items-center relative w-full md:w-1/5 flow-arrow">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl mb-2">1</div>
+                        <div class="text-center font-bold text-sm text-gray-800">建立全景</div>
+                        <div class="text-center text-xs text-gray-500 mt-1">Context</div>
+                    </div>
+
+                    <div class="flex flex-col items-center relative w-full md:w-1/5 flow-arrow">
+                        <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xl mb-2">2</div>
+                        <div class="text-center font-bold text-sm text-gray-800">風險識別</div>
+                        <div class="text-center text-xs text-gray-500 mt-1">Identify</div>
+                    </div>
+
+                    <div class="flex flex-col items-center relative w-full md:w-1/5 flow-arrow">
+                        <div class="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xl mb-2">3</div>
+                        <div class="text-center font-bold text-sm text-gray-800">分析與評估</div>
+                        <div class="text-center text-xs text-gray-500 mt-1">Analyze</div>
+                    </div>
+
+                    <div class="flex flex-col items-center relative w-full md:w-1/5 flow-arrow">
+                        <div class="w-12 h-12 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold text-xl mb-2">4</div>
+                        <div class="text-center font-bold text-sm text-gray-800">風險處理</div>
+                        <div class="text-center text-xs text-gray-500 mt-1">Treat</div>
+                    </div>
+
+                    <div class="flex flex-col items-center w-full md:w-1/5">
+                        <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xl mb-2">5</div>
+                        <div class="text-center font-bold text-sm text-gray-800">記錄及報告</div>
+                        <div class="text-center text-xs text-gray-500 mt-1">Report</div>
+                    </div>
+
+                </div>
+                <div class="mt-4 text-sm text-gray-500 text-center italic border-t border-dashed pt-2">
+                    ※ 「監視與審查」和「溝通及諮詢」則是貫穿以上所有步驟
+                </div>
+            </div>
+
+            <!-- Deep Dive Analysis -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Why Correct -->
+                <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                    <h4 class="font-bold text-green-800 mb-3 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        正解解析 (C)
+                    </h4>
+                    <ul class="space-y-2 text-sm text-green-800">
+                        <li><strong>1. 建立全景 (2)：</strong>就像蓋房子要先看地形，不先了解公司目標與環境，無法談風險。</li>
+                        <li><strong>2. 風險識別 (4)：</strong>開始找問題（有哪些威脅？）。</li>
+                        <li><strong>3. 分析及評估 (3)：</strong>算出問題有多大（機率x衝擊），並決定優先順序。</li>
+                        <li><strong>4. 風險處理 (6)：</strong>決定怎麼做（避免、降低、移轉、接受）。</li>
+                        <li><strong>5. 記錄及報告 (7)：</strong>凡走過必留下痕跡，為了稽核與管理。</li>
+                    </ul>
+                </div>
+
+                <!-- Why Wrong -->
+                <div class="bg-red-50 p-6 rounded-lg border border-red-200">
+                    <h4 class="font-bold text-red-800 mb-3 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        錯誤選項陷阱
+                    </h4>
+                    <ul class="space-y-2 text-sm text-red-800">
+                        <li><strong>(A) 順序顛倒：</strong>還沒識別風險就先分析？邏輯不通。</li>
+                        <li><strong>(B) 缺少全景：</strong>一開始就找風險，沒有設定範圍（Scope），容易做白工。</li>
+                        <li><strong>(D) 評鑑過早：</strong>評鑑是對比標準做判斷，必須在識別之後、處理之前。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Exam Tips & Memory Aids -->
+            <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200 shadow-sm">
+                <h4 class="font-bold text-yellow-800 text-lg mb-3">🔥 老師的破題口訣</h4>
+                <div class="bg-white p-4 rounded border border-yellow-100 text-center text-lg font-medium text-gray-700">
+                    「先看<span class="text-red-500">全景</span>、再找<span class="text-red-500">風險</span>、算完<span class="text-red-500">大小</span>才<span class="text-blue-600">處理</span>，最後一定要<span class="text-blue-600">留紀錄</span>」
+                </div>
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-yellow-900">
+                    <div>
+                        <p class="font-bold mb-1">對比概念：</p>
+                        <p>🔹 <strong>識別 vs 分析：</strong>識別是「有沒有」，分析是「有多嚴重」。</p>
+                    </div>
+                    <div>
+                        <p class="font-bold mb-1">常見關鍵字：</p>
+                        <p>🔹 看到「Context/全景」→ 選第1步。</p>
+                        <p>🔹 看到「避免/降低/移轉」→ 這是「風險處理」。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Self Reflection -->
+            <div class="bg-indigo-50 p-6 rounded-lg">
+                <h4 class="font-bold text-indigo-900 mb-2">🧠 舉一反三：自我檢測</h4>
+                <p class="text-indigo-800 text-sm mb-2">如果沒有先「建立全景」，直接做「風險識別」會怎樣？</p>
+                <p class="text-gray-600 text-sm bg-white p-3 rounded italic">
+                    答：你會像無頭蒼蠅。例如：明明公司只做軟體，你卻花時間去識別工廠淹水的風險。全景定義了「範圍」與「業務目標」，讓風險管理有邊界。
+                </p>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="text-center py-8 text-gray-500 text-sm">
+        <p>&copy; 2025 iPAS 資安教學團隊 | 專為學習者設計的 Gemini Canvas 互動教材</p>
+    </footer>
+
+    <script>
+        const correctValue = 'C';
+        
+        function checkAnswer() {
+            // Get selected option
+            const options = document.getElementsByName('quiz');
+            let selectedValue = null;
+            
+            for (const option of options) {
+                if (option.checked) {
+                    selectedValue = option.value;
+                    break;
+                }
+            }
+
+            // Validation
+            const errorMsg = document.getElementById('error-msg');
+            if (!selectedValue) {
+                errorMsg.classList.remove('hidden');
+                return;
+            } else {
+                errorMsg.classList.add('hidden');
+            }
+
+            // Disable inputs
+            options.forEach(opt => opt.disabled = true);
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('reset-btn').classList.remove('hidden');
+
+            // Show Result Section
+            const resultSection = document.getElementById('result-section');
+            const resultBanner = document.getElementById('result-banner');
+            
+            resultSection.classList.remove('hidden');
+
+            if (selectedValue === correctValue) {
+                // Correct UI
+                resultBanner.className = "bg-green-100 border-2 border-green-400 text-green-800 p-6 rounded-lg text-center mb-6";
+                resultBanner.innerHTML = `
+                    <div class="text-5xl mb-2">🎉</div>
+                    <h3 class="text-2xl font-bold">答對了！</h3>
+                    <p class="mt-2">觀念非常正確，你已經掌握了 ISO 風險管理的邏輯骨幹！</p>
+                    <p class="text-sm mt-1 text-green-700">正確順序：建立全景 → 識別 → 分析評估 → 處理 → 報告</p>
+                `;
+            } else {
+                // Incorrect UI
+                resultBanner.className = "bg-red-100 border-2 border-red-400 text-red-800 p-6 rounded-lg text-center mb-6";
+                let feedback = "";
+                if(selectedValue === 'A') feedback = "注意：順序反了！還沒識別風險，怎麼能先回應呢？";
+                if(selectedValue === 'B') feedback = "注意：你漏了第一步！「全景」是地基，沒有地基房子蓋不起來。";
+                if(selectedValue === 'D') feedback = "注意：評鑑順序不對。必須先識別出風險，才能進行評鑑喔。";
+
+                resultBanner.innerHTML = `
+                    <div class="text-5xl mb-2">💪</div>
+                    <h3 class="text-2xl font-bold">再接再厲！</h3>
+                    <p class="mt-2 font-bold">你選擇了 (${selectedValue})，正確答案是 (C)</p>
+                    <p class="mt-2 bg-white inline-block px-4 py-1 rounded-full shadow-sm text-red-600">${feedback}</p>
+                    <p class="text-sm mt-3 text-red-700">往下看老師的圖解，把邏輯理順！</p>
+                `;
+            }
+
+            // Scroll to result
+            setTimeout(() => {
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function resetQuiz() {
+            // Reset inputs
+            const options = document.getElementsByName('quiz');
+            options.forEach(opt => {
+                opt.checked = false;
+                opt.disabled = false;
+            });
+
+            // Hide sections
+            document.getElementById('result-section').classList.add('hidden');
+            document.getElementById('error-msg').classList.add('hidden');
+            
+            // Toggle buttons
+            document.getElementById('submit-btn').classList.remove('hidden');
+            document.getElementById('reset-btn').classList.add('hidden');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

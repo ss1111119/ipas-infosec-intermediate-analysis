@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_ransomware_q37.html - iPAS 資安規劃實務衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --light-bg: #f8f9fa;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ecf0f1;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #2980b9, #2c3e50);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        header .sub-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 5px;
+            font-family: monospace;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* Question Section */
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .scenario-box {
+            background-color: #fff9e6;
+            border-left: 5px solid var(--warning-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        .option-btn:hover {
+            border-color: #3498db;
+            background-color: #f0f8ff;
+        }
+
+        .option-btn.selected {
+            border-color: var(--primary-color);
+            background-color: #e8f4fc;
+            font-weight: bold;
+        }
+
+        .option-btn.correct-mark {
+            border-color: var(--success-color);
+            background-color: #d5f5e3;
+        }
+
+        .option-btn.wrong-mark {
+            border-color: var(--accent-color);
+            background-color: #fadbd8;
+        }
+
+        /* Action Buttons */
+        .action-area {
+            margin-top: 20px;
+            text-align: center;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        .btn-toggle-analysis {
+            background-color: var(--warning-color);
+            color: #2c3e50;
+            display: none; /* Hidden by default */
+        }
+
+        /* Feedback Area */
+        #feedback-msg {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis Section */
+        #analysis-section {
+            display: none; /* Default hidden */
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        details {
+            background: white;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+            border: 1px solid #eee;
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 15px;
+            cursor: pointer;
+            background-color: #fff;
+            font-weight: bold;
+            color: var(--primary-color);
+            list-style: none; /* Remove default triangle */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: #999;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        details[open] summary {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-content {
+            padding: 20px;
+            font-size: 0.95rem;
+            color: #555;
+            background-color: white;
+        }
+
+        /* Highlighter & Badges */
+        .highlight {
+            background-color: #fff200;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .step-badge {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+        }
+
+        .concept-box {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 15px;
+            margin: 10px 0;
+        }
+
+        /* Self Test Interaction */
+        .self-test-label {
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>iPAS 資訊安全規劃實務 - 衝刺班</h1>
+        <div class="sub-info">題號：37 (題組) | 檔名：ipas_ransomware_q37.html</div>
+    </header>
+
+    <div class="container">
+        <!-- 題目互動區 -->
+        <section class="card" id="quiz-area">
+            <div class="scenario-box">
+                <strong>【情境描述】</strong><br>
+                2025 年 2 月時，A 公司及其關係企業遭受駭客組織發動的勒索攻擊。該攻擊發生於週末夜間，駭客成功潛入企業核心系統，刪除了所有備份，並聲稱竊取了 1TB 的機密資料。隔天清晨，企業官網首頁被竄改，發布了駭客的勒索訊息，要求在 24 小時內支付未公開的贖金，否則將外洩資料並摧毀企業聲譽。此次攻擊事件對 A 公司造成重大損失，公司核心系統 ERP、CRM 等業務系統全面癱瘓，生產與供應鏈亦因而停擺。
+            </div>
+
+            <div class="question-text">
+                題目：駭客刪除備份後發佈勒索訊息，請問下列何項行為的描述最為適切？
+            </div>
+
+            <div class="options-grid">
+                <div class="option-btn" onclick="selectOption('A')" id="opt-A">(A) 偽裝攻擊</div>
+                <div class="option-btn" onclick="selectOption('B')" id="opt-B">(B) 服務阻斷</div>
+                <div class="option-btn" onclick="selectOption('C')" id="opt-C">(C) 勒索攻擊</div>
+                <div class="option-btn" onclick="selectOption('D')" id="opt-D">(D) 社交工程</div>
+            </div>
+
+            <div id="feedback-msg"></div>
+
+            <div class="action-area">
+                <button class="btn btn-submit" id="submitBtn" onclick="submitAnswer()">送出答案</button>
+                <button class="btn btn-retry" id="retryBtn" onclick="retryQuiz()">重作一次</button>
+                <button class="btn btn-toggle-analysis" id="toggleBtn" onclick="toggleAnalysis()">顯示解析</button>
+            </div>
+        </section>
+
+        <!-- 解析學習區 -->
+        <section id="analysis-section">
+            <h2 style="text-align: center; color: var(--primary-color);">名師詳解區</h2>
+            
+            <!-- 1. 題目 -->
+            <details>
+                <summary><span class="step-badge">題目</span>回顧原題</summary>
+                <div class="detail-content">
+                    <p>駭客刪除備份後發佈勒索訊息，請問下列何項行為的描述最為適切？</p>
+                    <p><strong>正確答案：(C) 勒索攻擊</strong></p>
+                </div>
+            </details>
+
+            <!-- 2. 第一步：找關鍵字 -->
+            <details open>
+                <summary><span class="step-badge">第一步</span>找關鍵字</summary>
+                <div class="detail-content">
+                    <p>老師幫你把這題的「靈魂」抓出來，考試時看到這些字眼就要警鈴大作：</p>
+                    <p>
+                        ...駭客成功潛入企業核心系統，<span class="highlight">刪除所有備份</span>，並聲稱<span class="highlight">竊取了 1TB 的機密資料</span>...發布了駭客的<span class="highlight">勒索訊息</span>，<span class="highlight">要求在 24 小時內支付...贖金</span>，否則將<span class="highlight">外洩資料</span>...系統全面<span class="highlight">癱瘓</span>。
+                    </p>
+                    <div class="concept-box">
+                        <strong>名師點評：</strong><br>
+                        為什麼這些是重點？因為「要求贖金」+「威脅外洩資料/破壞系統」就是勒索軟體最直接的簽名檔。
+                    </div>
+                </div>
+            </details>
+
+            <!-- 3. 第二步：白話翻譯 -->
+            <details>
+                <summary><span class="step-badge">第二步</span>白話翻譯</summary>
+                <div class="detail-content">
+                    <p>把生硬的科技名詞翻譯成高中生聽得懂的話：</p>
+                    <ul>
+                        <li><strong>勒索攻擊：</strong>就像綁架案。駭客綁架了你的電腦或資料（加密鎖起來或偷走），然後威脅你「不給錢就撕票（刪資料或公開機密）」。</li>
+                        <li><strong>刪除備份：</strong>等於把你車子的備胎刺破。讓你出事時完全沒辦法自救，只能乖乖付錢。</li>
+                        <li><strong>ERP / CRM：</strong>公司的「大腦」跟「帳本」。ERP 管生產庫存，CRM 管客戶名單。這兩個壞掉，公司就等於腦死，沒辦法做生意了。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- 4. 第三步：解題思路 -->
+            <details>
+                <summary><span class="step-badge">第三步</span>解題思路</summary>
+                <div class="detail-content">
+                    <p><strong>核心考點：</strong>常見資安攻擊類型的辨識。</p>
+                    <p><strong>解題三步驟：</strong></p>
+                    <ol>
+                        <li><strong>看行為 (Action)：</strong>駭客刪了備份、偷了資料、癱瘓了系統。</li>
+                        <li><strong>看目的 (Intent)：</strong>駭客留了訊息，明確說「給我贖金，不然就外洩資料」。</li>
+                        <li><strong>下判斷 (Decision)：</strong>
+                            <ul>
+                                <li>是為了騙密碼嗎？不是（排除社交工程）。</li>
+                                <li>單純為了讓你不爽不能上網嗎？不全是（排除純 DoS）。</li>
+                                <li>是為了要錢嗎？<strong>是！</strong>只要涉及「贖金 (Ransom)」，99% 都是勒索攻擊。</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            </details>
+
+            <!-- 5. 第四步：選項分析 -->
+            <details>
+                <summary><span class="step-badge">第四步</span>選項分析</summary>
+                <div class="detail-content">
+                    <ul>
+                        <li><strong>(A) 偽裝攻擊 (Spoofing)：</strong><span style="color:red">錯</span>。偽裝是指冒充合法的 IP、網址或 Email 身份（例如：假裝是老闆寄信給你）。題目中沒有強調身分冒用，重點在勒索。</li>
+                        <li><strong>(B) 服務阻斷 (DoS/DDoS)：</strong><span style="color:red">錯</span>。雖然結果造成了「系統癱瘓」（服務被阻斷），但 DoS 的目的通常是「讓你不能用」，而這裡的癱瘓是為了「逼你付錢」的手段。且 DoS 通常不會竊取資料。</li>
+                        <li><strong>(C) 勒索攻擊 (Ransomware)：</strong><span style="color:green">對</span>。完全符合特徵：刪除還原手段（備份）、竊取資料（雙重勒索）、要求限時支付贖金。</li>
+                        <li><strong>(D) 社交工程 (Social Engineering)：</strong><span style="color:red">錯</span>。社交工程是利用人性的弱點（恐懼、貪婪、好奇）來騙取資訊（如釣魚郵件）。雖然駭客潛入初期可能用了這招，但題目問的是「刪除備份後發布勒索訊息」這個階段的行為描述。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- 6. 觀念補充與延伸 -->
+            <details>
+                <summary><span class="step-badge">觀念</span>補充與延伸</summary>
+                <div class="detail-content">
+                    <p><strong>雙重勒索 (Double Extortion)：</strong><br>
+                    傳統勒索軟體只會「加密」你的檔案（不給錢就解不開）。但現在流行「雙重勒索」：</p>
+                    <ol>
+                        <li>先<strong>偷</strong>走你的機密資料。</li>
+                        <li>再<strong>加密</strong>你的系統。</li>
+                        <li>如果你有備份不想付解密費，駭客就威脅<strong>「公開外洩」</strong>你偷來的資料（逼你付封口費）。</li>
+                    </ol>
+                    <p>本題情境正是典型的雙重勒索手法。</p>
+                </div>
+            </details>
+
+            <!-- 7. 記憶口訣 -->
+            <details>
+                <summary><span class="step-badge">記憶</span>口訣</summary>
+                <div class="detail-content">
+                    <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent-color); text-align: center;">
+                        「要錢、加密、刪備份，就是勒索壞名聲」
+                    </p>
+                    <p>只要看到題目提到<strong>「贖金」、「比特幣付款」、「解密金鑰」</strong>，請直覺反應選勒索攻擊。</p>
+                </div>
+            </details>
+
+            <!-- 8. 常見陷阱 -->
+            <details>
+                <summary><span class="step-badge">陷阱</span>常見陷阱</summary>
+                <div class="detail-content">
+                    <p><strong>陷阱題型：</strong>題目若說「網站無法連線，流量暴增」，這才是 (B) 服務阻斷。</p>
+                    <p>同學常混淆：看到「系統癱瘓」就想選 DoS。<strong>請記得看「原因」</strong>：如果是因為資料被鎖住、備份被刪除而癱瘓，且涉及金錢利益，主因是勒索。</p>
+                </div>
+            </details>
+
+            <!-- 9. 正確答案 -->
+            <details>
+                <summary><span class="step-badge">解答</span>正確答案</summary>
+                <div class="detail-content">
+                    <p style="font-size: 2rem; text-align: center; color: var(--success-color); font-weight: bold;">(C)</p>
+                </div>
+            </details>
+
+            <!-- 10. 自我檢測 -->
+            <details>
+                <summary><span class="step-badge">檢測</span>自我檢測</summary>
+                <div class="detail-content">
+                    <p>想一想，如果駭客只是傳送一封 Email 說「您的帳號密碼已過期，請點此連結更改」，這是哪一種攻擊？</p>
+                    <label class="self-test-label">
+                        <input type="checkbox" onclick="if(this.checked) alert('沒錯！這就是社交工程（釣魚郵件）！')"> 社交工程
+                    </label>
+                    <label class="self-test-label">
+                        <input type="checkbox" onclick="if(this.checked) alert('不對喔，這沒有直接癱瘓系統或勒索金錢。')"> 勒索攻擊
+                    </label>
+                </div>
+            </details>
+        </section>
+    </div>
+
+    <footer>
+        &copy; 2025 iPAS 資安規劃實務短期衝刺班 | By AI Lecturer<br>
+        本頁面為離線教材，僅供教學使用
+    </footer>
+
+    <script>
+        // 狀態變數
+        let selectedValue = null;
+        const correctAnswer = 'C';
+
+        // 選擇選項功能
+        function selectOption(val) {
+            // 清除之前的選擇樣式
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            // 設定當前選擇
+            selectedValue = val;
+            document.getElementById('opt-' + val).classList.add('selected');
+            
+            // 隱藏之前的回饋（如果有）
+            document.getElementById('feedback-msg').style.display = 'none';
+        }
+
+        // 送出答案功能
+        function submitAnswer() {
+            const feedbackEl = document.getElementById('feedback-msg');
+            const submitBtn = document.getElementById('submitBtn');
+            const retryBtn = document.getElementById('retryBtn');
+            const toggleBtn = document.getElementById('toggleBtn');
+            const analysisSection = document.getElementById('analysis-section');
+
+            if (!selectedValue) {
+                feedbackEl.textContent = "請先點選一個選項再送出！";
+                feedbackEl.className = ""; // 清除樣式
+                feedbackEl.style.backgroundColor = "#fff3cd";
+                feedbackEl.style.color = "#856404";
+                feedbackEl.style.display = 'block';
+                return;
+            }
+
+            // 鎖定選項，不可再選
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.onclick = null;
+                btn.style.cursor = 'default';
+            });
+
+            // 判斷對錯
+            if (selectedValue === correctAnswer) {
+                feedbackEl.innerHTML = "🎉 <strong>答對了！</strong><br>觀念非常正確，你已經掌握勒索攻擊的核心特徵。";
+                feedbackEl.className = "feedback-correct";
+                document.getElementById('opt-' + correctAnswer).classList.add('correct-mark');
+            } else {
+                feedbackEl.innerHTML = `⚠️ <strong>答錯了！</strong><br>你選的是 (${selectedValue})，正確答案是 (${correctAnswer})。<br>提示：注意題目中的「要求贖金」與「刪除備份」。`;
+                feedbackEl.className = "feedback-wrong";
+                document.getElementById('opt-' + selectedValue).classList.add('wrong-mark');
+                // 標示正確答案
+                document.getElementById('opt-' + correctAnswer).classList.add('correct-mark'); // 讓同學知道哪個是對的
+            }
+
+            feedbackEl.style.display = 'block';
+
+            // 切換按鈕狀態
+            submitBtn.style.display = 'none';
+            retryBtn.style.display = 'inline-block';
+            toggleBtn.style.display = 'inline-block';
+            
+            // 自動顯示解析區塊（但不展開內容，或者可以選擇展開第一項）
+            // analysisSection.style.display = 'block'; // 若想自動顯示可打開這行
+        }
+
+        // 重作一次功能
+        function retryQuiz() {
+            // 重置變數
+            selectedValue = null;
+
+            // 重置選項樣式與事件
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected', 'correct-mark', 'wrong-mark');
+                btn.style.cursor = 'pointer';
+                // 重新綁定事件 (因為是純字串 id 綁定，這裡簡單用閉包或重新賦值)
+                const id = btn.id.split('-')[1];
+                btn.onclick = function() { selectOption(id); };
+            });
+
+            // 重置介面
+            document.getElementById('feedback-msg').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            document.getElementById('retryBtn').style.display = 'none';
+            document.getElementById('toggleBtn').style.display = 'none';
+            document.getElementById('toggleBtn').textContent = '顯示解析';
+            
+            // 隱藏解析區
+            const analysisSection = document.getElementById('analysis-section');
+            analysisSection.style.display = 'none';
+
+            // 滾動回頂部
+            document.getElementById('quiz-area').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 顯示/隱藏解析開關
+        function toggleAnalysis() {
+            const section = document.getElementById('analysis-section');
+            const btn = document.getElementById('toggleBtn');
+            
+            if (section.style.display === 'none' || section.style.display === '') {
+                section.style.display = 'block';
+                btn.textContent = '隱藏解析';
+                // 順便滾動到解析區
+                section.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                section.style.display = 'none';
+                btn.textContent = '顯示解析';
+            }
+        }
+    </script>
+</body>
+</html>

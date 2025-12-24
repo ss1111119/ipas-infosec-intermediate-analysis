@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安重點題型：遠端辦公與 VDI (Q23)</title>
+    <style>
+        :root {
+            --primary: #4338ca; /* Indigo 700 */
+            --primary-light: #e0e7ff; /* Indigo 100 */
+            --success: #16a34a; /* Green 600 */
+            --success-bg: #dcfce7; /* Green 50 */
+            --error: #dc2626; /* Red 600 */
+            --error-bg: #fee2e2; /* Red 50 */
+            --warning: #ca8a04; /* Yellow 600 */
+            --warning-bg: #fef9c3; /* Yellow 50 */
+            --text-main: #1f2937; /* Gray 800 */
+            --text-sub: #4b5563; /* Gray 600 */
+            --bg-body: #f3f4f6; /* Gray 100 */
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: transparent;
+        }
+
+        /* Utility Classes */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #3730a3;
+        }
+
+        .btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .tag-blue { background-color: #dbeafe; color: #1e40af; }
+        
+        /* Icons (Inline SVG styling) */
+        .icon {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #1e40af, #4338ca);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        /* Scenario Section (Collapsible) */
+        .scenario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .scenario-content {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            transition: max-height 0.3s ease-out;
+            overflow: hidden;
+        }
+        
+        .scenario-card {
+            border-left: 5px solid var(--warning);
+        }
+
+        /* Question Options */
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9fafb;
+            border-color: #bfdbfe;
+        }
+
+        .option-label.selected {
+            border-color: var(--primary);
+            background-color: #eff6ff;
+        }
+
+        .option-label.correct {
+            border-color: var(--success);
+            background-color: var(--success-bg);
+        }
+
+        .option-label.wrong {
+            border-color: var(--error);
+            background-color: var(--error-bg);
+            opacity: 0.7;
+        }
+
+        input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            accent-color: var(--primary);
+        }
+
+        /* Feedback Area */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .feedback-correct {
+            background-color: var(--success-bg);
+            color: #14532d;
+            border: 1px solid #86efac;
+        }
+
+        .feedback-wrong {
+            background-color: var(--error-bg);
+            color: #7f1d1d;
+            border: 1px solid #fca5a5;
+        }
+
+        /* Accordion for Analysis */
+        .accordion-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f9fafb;
+            padding: 12px 16px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .accordion-content {
+            padding: 16px;
+            background-color: white;
+            border-top: 1px solid #e5e7eb;
+            display: none;
+        }
+        
+        .accordion-content.active {
+            display: block;
+        }
+
+        /* Core Concepts */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        
+        @media (min-width: 768px) {
+            .concept-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .concept-box {
+            background-color: #eff6ff;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .concept-box h4 {
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Traps Section */
+        .trap-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .trap-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Mnemonic */
+        .mnemonic-box {
+            background-color: #ecfdf5;
+            border: 2px dashed #059669;
+            padding: 20px;
+            text-align: center;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .mnemonic-text {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #065f46;
+            margin-bottom: 8px;
+        }
+
+        /* Self Assessment */
+        .quiz-item {
+            margin-bottom: 16px;
+            padding: 12px;
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .hint-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        .hint-text {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            padding: 8px;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <header>
+        <div style="background-color: rgba(255,255,255,0.2); padding: 10px; border-radius: 50%; margin-right: 16px;">
+            <svg class="icon" style="width: 32px; height: 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+        </div>
+        <div>
+            <h1>iPAS 資安工程師 - 考前衝刺</h1>
+            <p>主題：遠端辦公與集中控管 (Q23)</p>
+        </div>
+    </header>
+
+    <!-- Scenario Block -->
+    <div class="card scenario-card">
+        <div class="scenario-header" onclick="toggleScenario()">
+            <div style="display: flex; align-items: center;">
+                <svg class="icon" style="color: #ca8a04;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                <h2 style="font-size: 1.125rem;">【題組共用情境】</h2>
+            </div>
+            <svg id="scenarioToggleIcon" class="icon toggle-icon" style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </div>
+        <div id="scenarioContent" class="scenario-content">
+            <p style="color: #4b5563;">
+                公司因關稅考量，決定於美國增設生產基地以提高商品競爭力，原營業據點將遷移至生產基地。
+                相關業務人員改採 <span style="color: #2563eb; font-weight: bold;">遠端辦公</span> 模式，
+                公司希望在維持 <span style="color: #dc2626; font-weight: bold;">集中控管資訊系統</span> 的前提下，
+                同時滿足遠端辦公的實際需求。
+            </p>
+        </div>
+    </div>
+
+    <!-- Question Block -->
+    <div class="card">
+        <span class="tag tag-blue">單選題</span>
+        <h3 style="margin-bottom: 20px; font-size: 1.2rem;">下列何者措施有助於公司集中控管資訊系統，同時可以符合遠端辦公的需求？</h3>
+
+        <form id="quizForm">
+            <label class="option-label" id="label-A">
+                <input type="radio" name="option" value="A">
+                <span>(A) 導入精簡用戶端配合虛擬桌面基礎架構（VDI）</span>
+            </label>
+
+            <label class="option-label" id="label-B">
+                <input type="radio" name="option" value="B">
+                <span>(B) 導入零信任架構（Zero Trust Architecture, ZTA）</span>
+            </label>
+
+            <label class="option-label" id="label-C">
+                <input type="radio" name="option" value="C">
+                <span>(C) 在所有筆電啟用 BitLocker 全磁碟加密</span>
+            </label>
+
+            <label class="option-label" id="label-D">
+                <input type="radio" name="option" value="D">
+                <span>(D) 宣導員工使用私人電腦進行遠端連線</span>
+            </label>
+        </form>
+
+        <button id="submitBtn" class="btn" onclick="submitAnswer()" disabled>提交答案</button>
+
+        <!-- Feedback Area -->
+        <div id="feedbackArea" class="feedback-box hidden">
+            <!-- JS will populate this -->
+        </div>
+    </div>
+
+    <!-- Analysis Section (Hidden initially) -->
+    <div id="analysisSection" class="hidden">
+        
+        <!-- Correct Answer Explanation -->
+        <div class="card" style="border-left: 5px solid var(--primary);">
+            <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                <svg class="icon" style="color: var(--primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                <h3 style="color: var(--primary); font-size: 1.25rem;">名師解析：選項逐一擊破</h3>
+            </div>
+
+            <!-- Accordion -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('acc-A')">
+                    <span style="color: var(--success); font-weight: bold;">(A) 精簡用戶端 + VDI (正解)</span>
+                    <span>▼</span>
+                </div>
+                <div id="acc-A" class="accordion-content">
+                    <p><strong>完全符合：</strong> 資料與運算都在公司的伺服器上（集中控管），員工端只負責顯示畫面與輸入操作（遠端存取）。即便員工端設備遺失，資料也不會外洩。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('acc-B')">
+                    <span>(B) 零信任架構 (ZTA)</span>
+                    <span>▼</span>
+                </div>
+                <div id="acc-B" class="accordion-content">
+                    <p><strong>觀念混淆：</strong> ZTA 是一種「永不信任，始終驗證」的安全驗證<span style="color:var(--error);">理念/模型</span>，並非一種「桌面基礎架構」。雖然遠端辦公需要導入 ZTA 觀念，但它本身無法解決「系統集中派送與管理」的需求。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('acc-C')">
+                    <span>(C) BitLocker 全磁碟加密</span>
+                    <span>▼</span>
+                </div>
+                <div id="acc-C" class="accordion-content">
+                    <p><strong>功能不同：</strong> 這是<span style="color:var(--error);">端點保護</span>技術，防止設備遺失後資料被讀取。但資料仍儲存在員工電腦上，且無法做到系統面的「集中控管」（如統一更新軟體）。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('acc-D')">
+                    <span>(D) 使用私人電腦 (BYOD)</span>
+                    <span>▼</span>
+                </div>
+                <div id="acc-D" class="accordion-content">
+                    <p><strong>資安大忌：</strong> 若無配套措施（如 MAM/MDM），私人電腦是資安最大的破口，極難被公司集中控管。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Core Concepts (Plain Language) -->
+        <div class="card">
+            <h3 style="margin-bottom: 16px;">核心觀念說明（白話文版）</h3>
+            <div class="concept-grid">
+                <div class="concept-box">
+                    <h4>
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        什麼是 VDI？
+                    </h4>
+                    <p style="font-size: 0.95rem;">
+                        <strong>Virtual Desktop Infrastructure</strong>。把員工的 Windows 桌面變成一個「虛擬檔案」放在公司的超級電腦裡執行。員工的螢幕看到的只是「畫面串流」（像看 Netflix），操作指令回傳給公司主機運算。
+                    </p>
+                </div>
+                <div class="concept-box">
+                    <h4>
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                        什麼是精簡用戶端 (Thin Client)？
+                    </h4>
+                    <p style="font-size: 0.95rem;">
+                        一台功能很陽春、幾乎沒有硬碟的小電腦。它唯一的任務就是連線到 VDI。因為沒有硬碟，所以不會中毒、不會存機密資料，非常安全。
+                    </p>
+                </div>
+                <div class="concept-box">
+                    <h4>
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        為什麼叫「集中控管」？
+                    </h4>
+                    <p style="font-size: 0.95rem;">
+                        IT 人員只要在機房更新一個「母檔映像」，幾百個員工下次登入時，用到的就是最新的系統。不需要逐一台筆電去安裝軟體或修補漏洞。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Traps & Mnemonic -->
+        <div class="card" style="background-color: #fffbeb; border: 1px solid #fcd34d;">
+            <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+                
+                <!-- Traps -->
+                <div style="flex: 1; min-width: 300px;">
+                    <h3 style="color: #92400e; display: flex; align-items: center; margin-bottom: 12px;">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        常見考試陷阱
+                    </h3>
+                    <div class="trap-item">
+                        <span style="font-weight: bold; color: #b45309; margin-right: 8px;">1.</span>
+                        <p><strong>誤選 ZTA：</strong> 零信任 (Zero Trust) 雖然熱門，但它是「驗證原則」，題目若問「架構/措施/系統」且強調「集中管理」，選 VDI 才是正解。</p>
+                    </div>
+                    <div class="trap-item">
+                        <span style="font-weight: bold; color: #b45309; margin-right: 8px;">2.</span>
+                        <p><strong>誤選 BitLocker：</strong> 加密只是保護硬碟掉了不被偷看，無法解決「遠端辦公的系統維護」問題。</p>
+                    </div>
+                    <div class="trap-item">
+                        <span style="font-weight: bold; color: #b45309; margin-right: 8px;">3.</span>
+                        <p><strong>低估 BYOD 風險：</strong> 私人電腦常被當作遠端辦公的低成本解法，但在正規資安考試中，這通常是錯誤選項（除非有完整配套）。</p>
+                    </div>
+                </div>
+
+                <!-- Mnemonic -->
+                <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; justify-content: center;">
+                    <div class="mnemonic-box">
+                        <p style="margin-bottom: 4px; color: #047857; font-size: 0.9rem;">資安名師口訣</p>
+                        <p class="mnemonic-text">"VDI 虛擬桌，主機在守，畫面在手"</p>
+                        <p style="font-size: 0.9rem; color: #064e3b; margin-top: 8px;">主機在機房守著資料<br>你手上只拿著畫面</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Self Assessment -->
+        <div class="card">
+            <h3>自我檢測</h3>
+            <p style="margin-bottom: 16px; color: #6b7280; font-size: 0.9rem;">確認是否真的理解核心觀念</p>
+
+            <div class="quiz-item">
+                <p><strong>Q1: 員工的筆記型電腦如果不見了，使用 VDI 架構的公司資料會外洩嗎？</strong></p>
+                <button class="hint-btn" onclick="toggleHint('hint1')">顯示/隱藏解析</button>
+                <div id="hint1" class="hint-text hidden">
+                    不會。因為 VDI 架構下，資料都存在公司的伺服器中，員工端的電腦（精簡用戶端）不儲存任何業務資料。
+                </div>
+            </div>
+
+            <div class="quiz-item">
+                <p><strong>Q2: VDI 對於 IT 管理員最大的好處是什麼？</strong></p>
+                <button class="hint-btn" onclick="toggleHint('hint2')">顯示/隱藏解析</button>
+                <div id="hint2" class="hint-text hidden">
+                    集中管理與維護。只需更新伺服器上的「黃金映像檔 (Golden Image)」，所有使用者的桌面環境就會同步更新，無需逐台維護。
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    // State management simple vars
+    const correctAnswer = 'A';
+    let hasSubmitted = false;
+
+    // Toggle Scenario
+    function toggleScenario() {
+        const content = document.getElementById('scenarioContent');
+        const icon = document.getElementById('scenarioToggleIcon');
+        
+        if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+            icon.style.transform = 'rotate(0deg)';
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+            icon.style.transform = 'rotate(180deg)';
+        }
+    }
+
+    // Initialize Scenario open
+    window.onload = function() {
+        toggleScenario(); // Open by default
+    };
+
+    // Enable submit button on selection
+    const radioButtons = document.querySelectorAll('input[name="option"]');
+    const submitBtn = document.getElementById('submitBtn');
+
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (!hasSubmitted) {
+                // Update styling for selected state
+                document.querySelectorAll('.option-label').forEach(lbl => lbl.classList.remove('selected'));
+                radio.parentElement.classList.add('selected');
+                submitBtn.disabled = false;
+            }
+        });
+    });
+
+    // Submit Logic
+    function submitAnswer() {
+        if (hasSubmitted) return;
+        
+        const selectedOption = document.querySelector('input[name="option"]:checked');
+        if (!selectedOption) return;
+
+        hasSubmitted = true;
+        const userValue = selectedOption.value;
+        const feedbackArea = document.getElementById('feedbackArea');
+        const analysisSection = document.getElementById('analysisSection');
+
+        // Disable inputs
+        radioButtons.forEach(r => r.disabled = true);
+        submitBtn.disabled = true;
+        submitBtn.innerText = "已提交";
+
+        // Style labels (Show Right/Wrong)
+        document.getElementById(`label-${correctAnswer}`).classList.add('correct');
+        if (userValue !== correctAnswer) {
+            document.getElementById(`label-${userValue}`).classList.add('wrong');
+        }
+
+        // Show Feedback Message
+        feedbackArea.classList.remove('hidden');
+        if (userValue === correctAnswer) {
+            feedbackArea.className = "feedback-box feedback-correct";
+            feedbackArea.innerHTML = `
+                <div>
+                    <strong>答對了！</strong> 正確答案是 (A)。
+                    <div style="font-size:0.9rem;">觀念非常正確，VDI 是集中控管的神器。</div>
+                </div>
+            `;
+        } else {
+            feedbackArea.className = "feedback-box feedback-wrong";
+            feedbackArea.innerHTML = `
+                <div>
+                    <strong>答錯了。</strong> 正確答案是 (A)。
+                    <div style="font-size:0.9rem;">別氣餒，請看下方的名師解析，這是常見的陷阱題喔！</div>
+                </div>
+            `;
+        }
+
+        // Reveal Analysis
+        analysisSection.classList.remove('hidden');
+        // Smooth scroll to analysis
+        setTimeout(() => {
+            analysisSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+    }
+
+    // Accordion Logic
+    function toggleAccordion(id) {
+        const content = document.getElementById(id);
+        const wasActive = content.classList.contains('active');
+        
+        // Close all first (optional, standard accordion behavior)
+        document.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('active'));
+
+        if (!wasActive) {
+            content.classList.add('active');
+        }
+    }
+
+    // Hint Toggle
+    function toggleHint(id) {
+        const hint = document.getElementById(id);
+        hint.classList.toggle('hidden');
+    }
+</script>
+
+</body>
+</html>

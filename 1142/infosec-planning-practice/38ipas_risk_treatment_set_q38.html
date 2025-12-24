@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_risk_treatment_set_q38.html - iPAS 資安規劃實務衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --spacing-unit: 16px;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        header .sub-info {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* Main Container */
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* Card Style */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        /* Question Section */
+        .scenario-box {
+            background-color: #fff8e1;
+            padding: 15px;
+            border-left: 4px solid #f1c40f;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .option-label {
+            display: block;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input {
+            margin-right: 10px;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+            flex: 2;
+        }
+
+        .btn-submit:hover { background-color: #2980b9; }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-toggle-analysis {
+            background-color: var(--primary-color);
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+            display: none; /* Hidden by default until answered or toggled manually */
+        }
+
+        /* Feedback */
+        #feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis Section (Accordion) */
+        #analysis-area {
+            display: none;
+        }
+
+        details {
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background: #fff;
+        }
+
+        summary {
+            padding: 15px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            list-style: none; /* Remove default triangle */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: #777;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid #ddd;
+            background-color: #eef2f5;
+        }
+
+        .details-content {
+            padding: 15px;
+            font-size: 0.95rem;
+        }
+
+        /* Highlighting */
+        .highlight {
+            background-color: #fff176;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .term {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* Learning Tools Styles */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .tool-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .tool-card strong {
+            display: block;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        /* Severity Tool */
+        .severity-btn-group {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .severity-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.9rem;
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .severity-btn.active {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        #severity-feedback {
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            min-height: 40px;
+        }
+
+        /* Checklist */
+        .checklist-item {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .checklist-item input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        #checklist-result {
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: #777;
+            border-top: 1px solid #ddd;
+            margin-top: 30px;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.2rem; }
+            .btn-group { flex-direction: column; }
+            .btn-submit, .btn-reset { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>iPAS 資安規劃實務 - 短期衝刺班</h1>
+    <div class="sub-info">題號：38（題組 5）| 檔名：ipas_risk_treatment_set_q38.html</div>
+</header>
+
+<main>
+    <!-- 題目互動區 -->
+    <section class="card" id="question-area">
+        <h2>題目：風險處理決策</h2>
+        
+        <div class="scenario-box">
+            <strong>【情境描述 - 題組 5】</strong><br>
+            一家知名跨國企業遭受勒索軟體攻擊。攻擊者利用釣魚郵件滲透，取得管理者權限後執行了以下動作：
+            <ul>
+                <li>刪除了所有的離線備份與線上快照。</li>
+                <li>竊取了約 1TB 的客戶機密資料與研發專利。</li>
+                <li>加密了核心資料庫，導致公司 ERP 與 CRM 系統全面癱瘓。</li>
+                <li>在官網首頁植入勒索訊息，限時 24 小時內支付高額贖金，否則公開資料。</li>
+                <li>目前公司供應鏈已因系統中斷而停擺，每小時損失估計達數百萬。</li>
+            </ul>
+            <strong>題目：關於此事件之風險處理，下列何者最「不」合適？</strong>
+        </div>
+
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                (A) 風險降低（Risk Reduction）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                (B) 風險避免（Risk Avoidance）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                (C) 風險接受（Risk Acceptance）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                (D) 風險轉移（Risk Transfer）
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">送出答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+        
+        <button class="btn-toggle-analysis" id="toggle-analysis-btn" onclick="toggleAnalysis()">顯示/隱藏詳細解析</button>
+
+        <div id="feedback-area"></div>
+    </section>
+
+    <!-- 解析學習區 -->
+    <section id="analysis-area">
+        
+        <!-- 區塊 1: 題目 -->
+        <details>
+            <summary>【題目回顧】</summary>
+            <div class="details-content">
+                <p>請參考上方情境區。本題重點在於判斷在「高衝擊、高急迫性」的勒索情境下，哪一種風險處置策略是管理層<strong>最不應該</strong>採取的。</p>
+            </div>
+        </details>
+
+        <!-- 區塊 2: 找關鍵字 -->
+        <details>
+            <summary>【第一步：找關鍵字】</summary>
+            <div class="details-content">
+                <p>請注意情境中的嚴重程度指標：</p>
+                <ul>
+                    <li><span class="highlight">刪除備份</span>：復原難度極高。</li>
+                    <li><span class="highlight">竊取 1TB 機密</span>：涉及資料外洩（Data Breach）與法律責任。</li>
+                    <li><span class="highlight">ERP/CRM 癱瘓</span>、<span class="highlight">供應鏈停擺</span>：核心營運中斷（Business Interruption），衝擊極高。</li>
+                    <li><span class="highlight">限時 24 小時</span>：極度急迫。</li>
+                    <li><span class="highlight">最不合適</span>：這是負向題，要選出「絕對不能選」的策略。</li>
+                </ul>
+                <p><strong>結論：</strong>這是一個「高衝擊（High Impact）」且「高風險（High Risk）」的災難事件。</p>
+            </div>
+        </details>
+
+        <!-- 區塊 3: 白話翻譯 -->
+        <details>
+            <summary>【第二步：白話翻譯】</summary>
+            <div class="details-content">
+                <p>將資安專有名詞翻譯成白話文，幫助理解：</p>
+                <ul>
+                    <li><span class="term">風險處理 (Risk Treatment)</span>：就是面對風險時，決定要怎麼做的四個方向（做點事、不做了、給別人扛、吞下去）。</li>
+                    <li><span class="term">風險接受 (Risk Acceptance)</span>：就是「我知道有風險，但我決定不採取額外行動，願意承擔後果」。通常是因為風險很小，或者處理成本比損失還貴。</li>
+                    <li><span class="term">風險降低 (Risk Reduction/Mitigation)</span>：就是「加裝防護措施」，比如裝防毒、設防火牆、做備份，把發生機率或衝擊變小。</li>
+                    <li><span class="term">風險避免 (Risk Avoidance)</span>：就是「我不玩了」，透過停止某項業務或改變流程，讓風險根本沒機會發生。</li>
+                    <li><span class="term">風險轉移 (Risk Transfer)</span>：就是「找人分攤賠償」，例如買保險或外包給專業廠商。注意：責任通常還是在自己身上，只是錢有人幫忙出。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- 區塊 4: 解題思路 -->
+        <details>
+            <summary>【第三步：解題思路】</summary>
+            <div class="details-content">
+                <p><strong>這題在考什麼？</strong><br>考你四大風險處理選項如何依「風險嚴重度」來選擇。</p>
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li><strong>判斷衝擊：</strong>本題情境是「核心系統癱瘓 + 供應鏈停擺 + 機密外洩」。這是公司存亡等級的危機，衝擊度 = <strong>極高</strong>。</li>
+                    <li><strong>檢視選項：</strong>
+                        <ul>
+                            <li>面對這種毀滅性打擊，我們能「降低」它嗎？可以（啟動應變、止血）。</li>
+                            <li>我們能「轉移」它嗎？可以（找保險理賠、找外部專家救援）。</li>
+                            <li>我們能「避免」嗎？事發後較難，但策略上可以停止某些高風險連線。</li>
+                            <li>我們能「接受」嗎？<strong>絕對不行</strong>。</li>
+                        </ul>
+                    </li>
+                    <li><strong>對照原理：</strong>「風險接受」的適用前提是「剩餘風險（Residual Risk）」且在「可接受風險水準（Acceptable Risk Level）」之內。供應鏈停擺和機密外洩顯然<strong>超出</strong>了任何公司的可接受水準。</li>
+                </ol>
+            </div>
+        </details>
+
+        <!-- 區塊 5: 選項分析 -->
+        <details>
+            <summary>【第四步：選項分析】</summary>
+            <div class="details-content">
+                <ul>
+                    <li><strong>(A) 風險降低（Risk Reduction） - 合適</strong><br>
+                        即使已經發生，仍需進行緊急應變（Incident Response），例如隔離網路、清除惡意程式、修補漏洞，這都是在「降低」災害擴大和未來發生的機率。日常例子：生病了趕快吃藥看醫生。</li>
+                    <li><strong>(B) 風險避免（Risk Avoidance） - 可能合適</strong><br>
+                        為了防止勒索軟體擴散，IT 部門可能會直接「切斷對外網路」或「關閉受駭伺服器」，這屬於停止某項活動以避免風險繼續發生。日常例子：颱風天直接取消登山行程。</li>
+                    <li><strong>(C) 風險接受（Risk Acceptance） - 最不合適（正確答案）</strong><br>
+                        在此情境下，接受意味著「不付贖金、不復原系統、不通知客戶、任由資料外洩且不採取任何補救措施」，直接讓公司倒閉。這違反了企業經營的永續性原則（Business Continuity）。除非修復成本大於公司價值（通常不可能），否則不能直接雙手一攤說「我接受」。</li>
+                    <li><strong>(D) 風險轉移（Risk Transfer） - 合適</strong><br>
+                        企業若有投保「資安險」，此時可申請理賠來支付鑑識費用或營運損失；或委由外部資安公司（MDR）進行調查。日常例子：車禍撞壞了，叫保險公司來賠。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- 區塊 6: 觀念補充與延伸 -->
+        <details>
+            <summary>【觀念補充與延伸】</summary>
+            <div class="details-content">
+                <p><strong>核心觀念定位：</strong>這是 iPAS 資安規劃實務常考題，測驗考生是否理解風險管理的邏輯。</p>
+                <p><strong>關鍵定義：</strong></p>
+                <ul>
+                    <li><strong>剩餘風險 (Residual Risk)</strong>：原始風險經過控制措施（降低、轉移等）處理後，還剩下的那一點點風險。通常只有剩餘風險才適用「接受」。</li>
+                </ul>
+                <p><strong>觸類旁通：</strong></p>
+                <ul>
+                    <li><strong>風險接受 vs 風險降低</strong>：差別在於有沒有「做事」。接受 = 不做事；降低 = 做事（加控制項）。</li>
+                    <li><strong>風險轉移 vs 風險避免</strong>：轉移 = 活動繼續做，但損失找人分擔；避免 = 風險太高，乾脆不做這活動了。</li>
+                </ul>
+                <p><strong>變化題型：</strong></p>
+                <ul>
+                    <li>問「何者屬於風險轉移？」答案通常找：購買保險、外包合約、簽訂 SLA。</li>
+                    <li>問「何者最合適？」如果是低風險、低衝擊事件，答案可能是「風險接受」。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- 區塊 7: 記憶口訣 -->
+        <details>
+            <summary>【記憶口訣】</summary>
+            <div class="details-content">
+                <div style="background: #e8f6f3; padding: 15px; border-radius: 8px; text-align: center;">
+                    <h3 style="margin: 0 0 10px 0; color: #16a085;">風險處理四字訣</h3>
+                    <p style="font-size: 1.1rem; margin: 0;"><strong>避、降、轉、收</strong></p>
+                    <p style="margin-top: 10px;"><strong>大事不能收，轉移要花錢，降低最常見，避免是不做。</strong></p>
+                </div>
+            </div>
+        </details>
+
+        <!-- 區塊 8: 常見陷阱 -->
+        <details>
+            <summary>【常見陷阱】</summary>
+            <div class="details-content">
+                <ul>
+                    <li><strong>陷阱一：</strong>看到「接受」覺得很佛系就選。
+                        <br>👉 修正：要看情境！只有「低風險」或「處理成本 > 損失」才選接受。</li>
+                    <li><strong>陷阱二：</strong>把「風險轉移」誤會成「完全不用管」。
+                        <br>👉 修正：責任（Accountability）通常無法轉移，只能轉移財務損失或執行工作。若外包商出包，業主還是要對客戶負責。</li>
+                    <li><strong>避坑指南：</strong>做題時先問自己：「如果今天老闆決定什麼都不做（接受），公司會不會倒？」如果會，那就絕對不能選接受。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- 區塊 9: 正確答案 -->
+        <details>
+            <summary>【正確答案】</summary>
+            <div class="details-content">
+                <p style="font-size: 1.2rem; text-align: center;"><strong>本題正確答案為 (C)</strong></p>
+                <p>面對勒索病毒導致的全面癱瘓與鉅額損失，「風險接受」是管理上的失職，最不合適。</p>
+            </div>
+        </details>
+
+        <!-- 區塊 10: 自我檢測 -->
+        <details>
+            <summary>【自我檢測】</summary>
+            <div class="details-content">
+                <p>試著回答以下問題（不提供答案，請自行思考）：</p>
+                <ol>
+                    <li>什麼情況下「風險接受」是合理的？你需要先滿足哪些條件？</li>
+                    <li>如果公司已做離線備份與演練，仍有 0.01% 機率被勒索成功，這 0.01% 叫什麼風險？</li>
+                    <li>資安保險算不算風險轉移？它能轉移哪些東西、不能轉移哪些？</li>
+                </ol>
+            </div>
+        </details>
+
+        <!-- 學習輔助互動區 (必做) -->
+        <div style="margin-top: 30px; border-top: 2px dashed #ccc; padding-top: 20px;">
+            <h3 style="color: var(--primary-color); text-align: center;">🎓 互動學習工具箱</h3>
+            
+            <!-- 工具 1: 速記卡 -->
+            <div class="card">
+                <h4>1. 四大風險處理選項速記卡 (生活版)</h4>
+                <p>情境：下雨天要出門</p>
+                <div class="tool-grid">
+                    <div class="tool-card">
+                        <strong>Avoid (避免)</strong>
+                        改天再出門<br>(直接不遇到雨)
+                    </div>
+                    <div class="tool-card">
+                        <strong>Reduce (降低)</strong>
+                        穿雨衣、撐傘<br>(還是出門但減少濕身)
+                    </div>
+                    <div class="tool-card">
+                        <strong>Transfer (轉移)</strong>
+                        叫 Uber/計程車<br>(付錢讓別人扛淋雨風險)
+                    </div>
+                    <div class="tool-card">
+                        <strong>Accept (接受)</strong>
+                        直接淋雨跑過去<br>(濕了就算了)
+                    </div>
+                </div>
+            </div>
+
+            <!-- 工具 2: 嚴重度判斷器 -->
+            <div class="card">
+                <h4>2. 情境嚴重度判斷器</h4>
+                <p>請點選本題情境的衝擊程度：</p>
+                <div class="severity-btn-group">
+                    <button class="severity-btn" onclick="checkSeverity('low', this)">低衝擊 (如: 文具遺失)</button>
+                    <button class="severity-btn" onclick="checkSeverity('mid', this)">中衝擊 (如: 單機故障)</button>
+                    <button class="severity-btn" onclick="checkSeverity('high', this)">高衝擊 (如: 核心癱瘓)</button>
+                </div>
+                <div id="severity-feedback">點擊上方按鈕查看建議...</div>
+            </div>
+
+            <!-- 工具 3: 決策檢核清單 -->
+            <div class="card">
+                <h4>3. 風險接受決策檢核清單</h4>
+                <p>我想選「風險接受」，請幫我檢查是否合理：</p>
+                <div class="checklist-item">
+                    <input type="checkbox" id="chk1" onchange="checkRiskAcceptance()">
+                    <label for="chk1">是否符合公司定義的「可接受風險準則」？</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="chk2" onchange="checkRiskAcceptance()">
+                    <label for="chk2">處理成本是否遠大於潛在損失？</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="chk3" onchange="checkRiskAcceptance()">
+                    <label for="chk3">該系統是否非核心、無個資？</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="chk4" onchange="checkRiskAcceptance()">
+                    <label for="chk4">是否已無其他有效的控制措施？</label>
+                </div>
+                <div id="checklist-result">請勾選符合的項目...</div>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<footer>
+    <p>iPAS 資訊安全規劃實務 - 短期衝刺班教材 | 檔案：ipas_risk_treatment_set_q38.html</p>
+</footer>
+
+<script>
+    // 答題邏輯
+    function checkAnswer() {
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const analysisBtn = document.getElementById('toggle-analysis-btn');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+        
+        if (selectedValue === 'C') {
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = '✅ 答對了！<br>面對高衝擊、高損失的勒索事件，直接「接受」風險是最不負責任且不合適的做法。';
+            // 自動顯示解析按鈕
+            analysisBtn.style.display = 'block';
+            // 自動展開解析區 (Optional, 但讓使用者自己點開比較好控制版面)
+            document.getElementById('analysis-area').style.display = 'block';
+            analysisBtn.innerText = "隱藏詳細解析";
+        } else {
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.innerHTML = `❌ 你選的是 (${selectedValue})，正確答案是 (C)。<br>提示：請回到「情境嚴重度」判斷，公司核心系統癱瘓且供應鏈停擺，能直接雙手一攤「接受」嗎？`;
+            analysisBtn.style.display = 'block'; // 答錯也給看解析
+        }
+    }
+
+    function resetQuiz() {
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'none';
+        feedbackArea.className = '';
+        feedbackArea.innerHTML = '';
+        
+        // 隱藏解析區
+        document.getElementById('analysis-area').style.display = 'none';
+        document.getElementById('toggle-analysis-btn').style.display = 'none';
+        document.getElementById('toggle-analysis-btn').innerText = "顯示/隱藏詳細解析";
+
+        // 重置所有 details
+        const details = document.querySelectorAll('details');
+        details.forEach(d => d.removeAttribute('open'));
+
+        // 重置互動工具
+        document.getElementById('severity-feedback').innerHTML = "點擊上方按鈕查看建議...";
+        document.querySelectorAll('.severity-btn').forEach(btn => btn.classList.remove('active'));
+        
+        document.querySelectorAll('.checklist-item input').forEach(chk => chk.checked = false);
+        document.getElementById('checklist-result').innerText = "請勾選符合的項目...";
+    }
+
+    function toggleAnalysis() {
+        const area = document.getElementById('analysis-area');
+        const btn = document.getElementById('toggle-analysis-btn');
+        if (area.style.display === 'none' || area.style.display === '') {
+            area.style.display = 'block';
+            btn.innerText = "隱藏詳細解析";
+        } else {
+            area.style.display = 'none';
+            btn.innerText = "顯示詳細解析";
+        }
+    }
+
+    // 嚴重度判斷器互動
+    function checkSeverity(level, btn) {
+        // 清除 active
+        document.querySelectorAll('.severity-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const feedback = document.getElementById('severity-feedback');
+        if (level === 'low') {
+            feedback.innerHTML = "💡 <strong>低衝擊：</strong>可以考慮「風險接受」。(例如：弄丟一支鉛筆，再買就有了)";
+            feedback.style.color = "#27ae60";
+        } else if (level === 'mid') {
+            feedback.innerHTML = "💡 <strong>中衝擊：</strong>優先考慮「風險降低」或「轉移」。接受需謹慎評估。";
+            feedback.style.color = "#d35400";
+        } else if (level === 'high') {
+            feedback.innerHTML = "🚨 <strong>高衝擊 (本題情境)：</strong>必須採取「降低」或「轉移」，甚至「避免」。<strong>絕不建議直接「接受」</strong>，因為後果無法承擔！";
+            feedback.style.color = "#c0392b";
+        }
+    }
+
+    // 檢核清單互動
+    function checkRiskAcceptance() {
+        const chk1 = document.getElementById('chk1').checked;
+        const chk2 = document.getElementById('chk2').checked;
+        const chk3 = document.getElementById('chk3').checked;
+        const chk4 = document.getElementById('chk4').checked;
+        
+        const count = [chk1, chk2, chk3, chk4].filter(Boolean).length;
+        const result = document.getElementById('checklist-result');
+
+        if (count === 4) {
+            result.innerHTML = "✅ 條件全數符合，可以考慮「風險接受」。(通常是剩餘風險)";
+            result.style.color = "#27ae60";
+        } else if (count > 0) {
+            result.innerHTML = "⚠️ 條件尚未完全符合，建議再評估是否能先「降低」風險。";
+            result.style.color = "#f39c12";
+        } else {
+            result.innerHTML = "❌ 完全不符合！請勿選擇風險接受。";
+            result.style.color = "#c0392b";
+        }
+    }
+</script>
+
+</body>
+</html>

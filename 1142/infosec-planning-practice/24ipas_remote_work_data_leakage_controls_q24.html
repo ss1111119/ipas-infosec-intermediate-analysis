@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安教學：遠距辦公資料防護 (Q24)</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #f59e0b;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-light: #6b7280;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        header h1 { margin: 0; font-size: 1.5rem; }
+        header p { margin: 5px 0 0; opacity: 0.9; }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 10px;
+        }
+
+        /* Scenario Toggle */
+        .scenario-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+        }
+        
+        details.scenario-details summary {
+            cursor: pointer;
+            color: var(--primary-color);
+            font-weight: bold;
+            outline: none;
+        }
+
+        /* Question Section */
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f9ff;
+        }
+
+        .option-label input[type="checkbox"] {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Result Area */
+        #result-area {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .result-correct { background-color: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+        .result-wrong { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+
+        /* Feedback Tags */
+        .feedback-tag {
+            display: inline-block;
+            font-size: 0.85rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        .tag-correct { background-color: #d1fae5; color: #047857; }
+        .tag-missed { background-color: #fef3c7; color: #b45309; }
+        .tag-wrong { background-color: #fee2e2; color: #b91c1c; }
+
+        /* Accordion Explanations */
+        details.explanation {
+            margin-top: 5px;
+            padding: 10px;
+            background-color: #f9fafb;
+            border-radius: 6px;
+        }
+        details.explanation summary {
+            font-size: 0.9rem;
+            color: #6b7280;
+            cursor: pointer;
+        }
+        .exp-content {
+            margin-top: 8px;
+            font-size: 0.95rem;
+            color: #374151;
+            padding-left: 10px;
+            border-left: 2px solid #ccc;
+        }
+
+        /* Teaching Sections */
+        .highlight-box {
+            background-color: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .concept-item {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .trap-list li, .mnemonic-list li { margin-bottom: 8px; }
+
+        /* Self Test */
+        .self-test-item {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 10px;
+        }
+        .hint-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .hint-text { display: none; color: #4b5563; background: #e5e7eb; padding: 5px; border-radius: 4px; margin-top: 5px;}
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>iPAS 資安名師教室</h1>
+            <p>主題：遠距辦公資料外洩防護策略 (Q24)</p>
+        </header>
+
+        <!-- Scenario Section -->
+        <div class="card">
+            <details class="scenario-details" open>
+                <summary>📝 題組共用情境（點擊收合/展開）</summary>
+                <div class="scenario-box" style="margin-top: 10px;">
+                    <p><strong>情境描述：</strong></p>
+                    <p>歐洲地區的業務人員多採<strong>遠距辦公</strong>模式，由公司配發筆記型電腦（主要採用 Windows 10 作業系統）供員工使用。</p>
+                    <p>公司希望能採取最有效的技術控制措施，以降低<strong>機密資料外流</strong>的風險。</p>
+                </div>
+            </details>
+        </div>
+
+        <!-- Question Section -->
+        <div class="card">
+            <div class="card-title">❓ 題目：請選擇正確的防護措施（複選）</div>
+            <p style="margin-bottom: 15px; color: #666;">請勾選所有能有效降低機密外流風險的選項：</p>
+            
+            <form id="quiz-form">
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="A">
+                    <span>(A) 為員工提供虛擬私人網路（VPN），以加密存取內部資源</span>
+                    <span id="feedback-A" class="feedback-tag" style="display:none;"></span>
+                </label>
+                <details class="explanation" id="exp-A" style="display:none;">
+                    <summary>查看解析</summary>
+                    <div class="exp-content">✅ <strong>正確。</strong>VPN 能建立加密通道，防止員工在外使用不安全的公共 Wi-Fi 時，資料被中間人竊聽或側錄。</div>
+                </details>
+
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="B">
+                    <span>(B) 啟用 BitLocker 磁碟加密功能</span>
+                    <span id="feedback-B" class="feedback-tag" style="display:none;"></span>
+                </label>
+                <details class="explanation" id="exp-B" style="display:none;">
+                    <summary>查看解析</summary>
+                    <div class="exp-content">✅ <strong>正確。</strong>這是針對「裝置遺失/被竊」的防護。若筆電掉了，沒有金鑰，小偷無法讀取硬碟內的資料（Data at Rest）。</div>
+                </details>
+
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="C">
+                    <span>(C) 作業系統禁止使用無線區域網路</span>
+                    <span id="feedback-C" class="feedback-tag" style="display:none;"></span>
+                </label>
+                <details class="explanation" id="exp-C" style="display:none;">
+                    <summary>查看解析</summary>
+                    <div class="exp-content">❌ <strong>錯誤。</strong>雖然這樣很安全，但在「遠距業務」情境下，禁止 Wi-Fi 會導致員工無法工作，違反資安三要素的「可用性」。這不是合理的風險控制措施。</div>
+                </details>
+
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="D">
+                    <span>(D) 導入精簡用戶端配合雲端桌面（VDI）</span>
+                    <span id="feedback-D" class="feedback-tag" style="display:none;"></span>
+                </label>
+                <details class="explanation" id="exp-D" style="display:none;">
+                    <summary>查看解析</summary>
+                    <div class="exp-content">✅ <strong>正確。</strong>這是最徹底的解法。資料實際儲存與運算都在公司伺服器，員工筆電只接收畫面。即便筆電被駭或遺失，裡面完全沒有機密檔案。</div>
+                </details>
+
+                <div id="status-hint" style="text-align: right; font-size: 0.9rem; color: #888; margin-top: 10px;">狀態：尚未作答</div>
+                <button type="button" class="btn-submit" onclick="submitAnswer()">提交答案</button>
+            </form>
+
+            <div id="result-area"></div>
+        </div>
+
+        <!-- Core Concepts -->
+        <div class="card">
+            <div class="card-title">📚 核心觀念：遠距辦公三大外洩風險</div>
+            <p>要防止資料外洩，必須從資料存在的「三種狀態」來思考防護：</p>
+            <div class="concept-grid">
+                <div class="concept-item">
+                    <strong style="color: var(--primary-color);">1. 傳輸中 (Data in Transit)</strong>
+                    <hr style="border:0; border-top:1px solid #ddd; margin:5px 0;">
+                    <p><strong>風險：</strong>公共 Wi-Fi 監聽。<br><strong>解法：</strong>VPN。<br>VPN 就像一條加密的安全隧道，讓資料在公網上跑也不會被看光。</p>
+                </div>
+                <div class="concept-item">
+                    <strong style="color: var(--primary-color);">2. 儲存中 (Data at Rest)</strong>
+                    <hr style="border:0; border-top:1px solid #ddd; margin:5px 0;">
+                    <p><strong>風險：</strong>筆電遺失或被竊。<br><strong>解法：</strong>BitLocker。<br>整顆硬碟加密，就算小偷把硬碟拆下來裝到別台電腦也讀不到資料。</p>
+                </div>
+                <div class="concept-item">
+                    <strong style="color: var(--primary-color);">3. 端點殘留 (Data on Endpoint)</strong>
+                    <hr style="border:0; border-top:1px solid #ddd; margin:5px 0;">
+                    <p><strong>風險：</strong>員工電腦中毒或下載資料。<br><strong>解法：</strong>VDI / 雲端桌面。<br>資料根本不下載到員工電腦，只傳送畫面，資料「不落地」。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Traps & Mnemonics -->
+        <div class="card">
+            <div class="card-title">⚠️ 常見考試陷阱與記憶口訣</div>
+            
+            <div class="highlight-box">
+                <strong>🚫 常見陷阱：</strong>
+                <ul class="trap-list">
+                    <li><strong>誤選 (C) 禁止使用網路：</strong> 很多同學以為「越嚴格越安全」。但在資安考試中，任何讓業務「無法運作」的措施（破壞可用性）通常都是錯誤選項。</li>
+                    <li><strong>以為「開機密碼」就夠了：</strong> Windows 登入密碼很容易被繞過，若沒有做硬碟加密 (BitLocker)，硬碟被拔走資料就光了。</li>
+                    <li><strong>忽略端點儲存：</strong> 只用了 VPN (保護傳輸)，但員工把機密檔案下載到桌面，筆電一掉資料照樣外洩。必須搭配 BitLocker 或 VDI。</li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 20px; background-color: #eff6ff; padding: 15px; border-radius: 8px; border: 1px solid #bfdbfe;">
+                <strong style="color: var(--secondary-color); font-size: 1.1rem;">💡 名師記憶口訣：</strong>
+                <ul class="mnemonic-list" style="margin-top: 10px; list-style-type: none; padding-left: 0;">
+                    <li>🛡️ <strong>傳輸</strong>安全靠 <strong>VPN</strong> (打洞)</li>
+                    <li>🔐 <strong>硬體</strong>遺失靠 <strong>BitLocker</strong> (上鎖)</li>
+                    <li>☁️ <strong>資料</strong>不落地靠 <strong>VDI</strong> (雲端)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Self Assessment -->
+        <div class="card">
+            <div class="card-title">✅ 自我檢測（觀念驗證）</div>
+            
+            <div class="self-test-item">
+                <p><strong>Q1：</strong> 如果業務小明的筆電在咖啡廳被偷了，哪一項技術能確保硬碟裡的報價單不會被打開？</p>
+                <button class="hint-btn" onclick="toggleHint('hint1')">顯示提示/答案</button>
+                <div id="hint1" class="hint-text">
+                    <strong>答案：BitLocker (磁碟加密)。</strong><br>
+                    解析：筆電被偷屬於實體遺失，需要靠靜態資料加密來保護。VPN 救不了被偷的電腦。
+                </div>
+            </div>
+
+            <div class="self-test-item">
+                <p><strong>Q2：</strong> 為什麼不能直接「禁止業務使用 Wi-Fi」來解決資料外洩問題？</p>
+                <button class="hint-btn" onclick="toggleHint('hint2')">顯示提示/答案</button>
+                <div id="hint2" class="hint-text">
+                    <strong>答案：違反資安三要素的「可用性 (Availability)」。</strong><br>
+                    解析：安全措施不能導致業務停擺。應該尋求「安全使用 Wi-Fi 的方法」(如 VPN)，而不是禁用。
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // 正確答案設定
+        const correctAnswers = ['A', 'B', 'D'];
+
+        function submitAnswer() {
+            // 1. 取得使用者選取的選項
+            const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+            const userSelection = Array.from(checkboxes).map(cb => cb.value).sort();
+            
+            // 2. 鎖定表單，避免重複作答
+            const allCheckboxes = document.querySelectorAll('input[name="option"]');
+            allCheckboxes.forEach(cb => cb.disabled = true);
+            document.querySelector('.btn-submit').style.display = 'none'; // 隱藏按鈕
+
+            // 3. 判斷是否完全正確
+            // 兩個陣列內容必須完全一樣 (長度相同 且 內容相同)
+            const isCorrect = userSelection.length === correctAnswers.length && 
+                              userSelection.every((val, index) => val === correctAnswers[index]);
+
+            // 4. 顯示結果區塊
+            const resultArea = document.getElementById('result-area');
+            resultArea.style.display = 'block';
+            
+            if (isCorrect) {
+                resultArea.className = 'result-correct';
+                resultArea.innerHTML = '🎉 恭喜答對！觀念非常清晰！<br>正確答案是：A、B、D';
+            } else {
+                resultArea.className = 'result-wrong';
+                resultArea.innerHTML = `⚠️ 作答錯誤！<br>正確答案應該是：A、B、D`;
+            }
+
+            // 更新狀態提示
+            document.getElementById('status-hint').innerText = '狀態：已完成作答';
+
+            // 5. 逐項顯示解析與標籤
+            const allOptions = ['A', 'B', 'C', 'D'];
+            
+            allOptions.forEach(opt => {
+                // 顯示該選項的解析 (Accordion)
+                document.getElementById(`exp-${opt}`).style.display = 'block';
+                document.getElementById(`exp-${opt}`).open = true; // 自動展開
+
+                // 處理標籤顯示邏輯
+                const feedbackSpan = document.getElementById(`feedback-${opt}`);
+                feedbackSpan.style.display = 'inline-block';
+                
+                const isUserSelected = userSelection.includes(opt);
+                const isActuallyCorrect = correctAnswers.includes(opt);
+
+                if (isUserSelected && isActuallyCorrect) {
+                    // 選了且是對的
+                    feedbackSpan.className = 'feedback-tag tag-correct';
+                    feedbackSpan.innerText = '⭕ 您選對了';
+                } else if (isUserSelected && !isActuallyCorrect) {
+                    // 選了但是錯的 (多選)
+                    feedbackSpan.className = 'feedback-tag tag-wrong';
+                    feedbackSpan.innerText = '❌ 不該選此項';
+                } else if (!isUserSelected && isActuallyCorrect) {
+                    // 沒選但應該選 (漏選)
+                    feedbackSpan.className = 'feedback-tag tag-missed';
+                    feedbackSpan.innerText = '⚠️ 您漏選了';
+                } else {
+                    // 沒選且確實不該選 (正確排除)
+                    feedbackSpan.style.display = 'none'; // 不需要特別顯示
+                }
+            });
+        }
+
+        // 自我檢測提示開關
+        function toggleHint(id) {
+            const hint = document.getElementById(id);
+            if (hint.style.display === 'block') {
+                hint.style.display = 'none';
+            } else {
+                hint.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

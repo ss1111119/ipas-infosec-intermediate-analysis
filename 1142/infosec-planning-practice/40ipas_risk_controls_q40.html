@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_risk_controls_q40.html - iPAS 資安規劃實務衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --accent-hover: #2980b9;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 40px;
+        }
+
+        /* 版面結構 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 標題區 */
+        header {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* 通用卡片樣式 */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+
+        /* 題目區 */
+        .scenario-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--error-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+        }
+
+        .option-label input[type="checkbox"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕區 */
+        .action-area {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin: 0 5px;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: #fff;
+        }
+
+        .btn-toggle {
+            background-color: var(--secondary-color);
+            color: #fff;
+            margin-top: 15px;
+        }
+
+        /* 回饋區 */
+        #feedback-message {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區 - Accordion */
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f1f1f1;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9e9e9;
+        }
+
+        .accordion-content {
+            padding: 15px;
+            display: none;
+            background-color: #fff;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        .keyword-highlight {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        /* 互動小工具 */
+        .interactive-tool-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .info-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: var(--accent-color);
+        }
+
+        .info-card h4 {
+            color: var(--accent-color);
+            margin-bottom: 8px;
+        }
+
+        .info-card p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .checklist-container {
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .checklist-item {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .checklist-item input {
+            margin-right: 10px;
+        }
+
+        #checklist-result {
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        /* 隱藏/顯示控制 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* RWD 調整 */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.3rem;
+            }
+            .interactive-tool-section {
+                grid-template-columns: 1fr;
+            }
+            .btn {
+                display: block;
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>ipas_risk_controls_q40.html</h1>
+        <p>iPAS《資訊安全規劃實務》衝刺班 | 題組 5 - 題號 40</p>
+    </header>
+
+    <!-- 題目互動區 -->
+    <main>
+        <section class="card" id="question-area">
+            <h2 class="card-title">題目練習</h2>
+            
+            <div class="scenario-box">
+                <strong>【事件情境】</strong><br>
+                A 公司近日發生資安勒索事件。攻擊者入侵後，先刪除所有線上備份檔案，接著對伺服器進行加密，並竊取約 1TB 機密資料。駭客要求在 48 小時內支付贖金，否則將公開資料。目前公司內部的 ERP 與 CRM 系統完全癱瘓，導致生產線與出貨作業停擺，供應鏈嚴重受影響。
+            </div>
+
+            <div class="question-text">
+                題目：40. 針對此事件，A 公司實施下列哪些的安全控制措施，可以協助有效降低風險？（複選）
+            </div>
+
+            <form id="quiz-form">
+                <div class="options-group">
+                    <label class="option-label">
+                        <input type="checkbox" name="answer" value="A">
+                        (A) 實施多層備份策略
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="answer" value="B">
+                        (B) 使用零信任網路架構
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="answer" value="C">
+                        (C) 將備份系統與主網分離
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="answer" value="D">
+                        (D) 定期刪除備份檔案
+                    </label>
+                </div>
+
+                <div class="action-area">
+                    <button type="button" class="btn btn-submit" onclick="checkAnswer()">送出答案</button>
+                    <button type="button" class="btn btn-reset" onclick="resetQuiz()">重作一次</button>
+                </div>
+            </form>
+
+            <div id="feedback-message"></div>
+
+            <div class="action-area">
+                <button type="button" class="btn btn-toggle hidden" id="toggle-analysis-btn" onclick="toggleAnalysis()">顯示/隱藏解析</button>
+            </div>
+        </section>
+
+        <!-- 解析學習區 -->
+        <section class="card hidden" id="analysis-area">
+            <h2 class="card-title">詳細解析</h2>
+
+            <!-- 1. 題目 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【題目】
+                    <span>+</span>
+                </div>
+                <div class="accordion-content">
+                    <p>針對勒索事件，A 公司實施下列哪些的安全控制措施，可以協助有效降低風險？</p>
+                </div>
+            </div>
+
+            <!-- 2. 關鍵字 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第一步：找關鍵字】
+                    <span>+</span>
+                </div>
+                <div class="accordion-content">
+                    <p>請注意以下標記重點：</p>
+                    <ul>
+                        <li><span class="keyword-highlight">勒索攻擊</span>：目的是加密資料勒索贖金，常伴隨竊取資料。</li>
+                        <li><span class="keyword-highlight">刪除備份</span>：駭客常見手法，目的是斷絕你「不付錢就自行復原」的後路。</li>
+                        <li><span class="keyword-highlight">有效降低風險</span>：指能「降低攻擊成功機率」或「降低損害衝擊」的措施。</li>
+                        <li><span class="keyword-highlight">複選</span>：這題不只一個正確答案。</li>
+                        <li>選項關鍵字：<span class="keyword-highlight">多層備份</span>、<span class="keyword-highlight">零信任</span>、<span class="keyword-highlight">備份分離</span>、<span class="keyword-highlight">定期刪除</span>。</li>
+                    </ul>
+                    <p style="margin-top:10px; color: #666;">※ 核心判斷：「風險降低」意味著讓駭客更難得手，或者就算發生了，我們也能救回來。</p>
+                </div>
+            </div>
+
+            <!-- 3. 白話翻譯 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第二步：白話翻譯】
+                    <span>+</span>
+                </div>
+                <div class="accordion-content">
+                    <p>題目其實在問：「公司被勒索軟體打得很慘，備份都被刪光光。為了避免下次這麼慘，哪些方法真的有用？」</p>
+                    <hr style="margin: 10px 0; border:0; border-top:1px dashed #ddd;">
+                    <p><strong>專有名詞解釋：</strong></p>
+                    <ul style="list-style-type: circle; margin-left: 20px;">
+                        <li><strong>多層備份 (Multi-layer Backup)：</strong> 不要只備份一份，要有好幾份，而且放在不同地方（例如：本地一份、雲端一份、離線硬碟一份）。</li>
+                        <li><strong>零信任網路 (Zero Trust)：</strong> 「不要相信任何人」。以前只要進了公司內網就暢行無阻；零信任是不管內外部，要做任何存取前都要先驗證身分，且只給最小權限。</li>
+                        <li><strong>備份與主網分離 (Air Gap / Segmentation)：</strong> 備份系統不要跟平常工作的電腦放在同一個網路環境。這樣駭客攻破辦公室電腦時，才不會順便摸到備份主機把備份刪掉。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 4. 解題思路 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第三步：解題思路】
+                    <span>+</span>
+                </div>
+                <div class="accordion-content">
+                    <p><strong>考點：</strong> 哪些控制措施能有效降低勒索事件風險。</p>
+                    <p><strong>思考邏輯：</strong></p>
+                    <ol style="margin-left: 20px;">
+                        <li><strong>分析痛點：</strong> 題目說駭客「刪除所有線上備份」且「橫向移動」癱瘓了 ERP/CRM。</li>
+                        <li><strong>評估選項：</strong>
+                            <ul>
+                                <li>要防止備份被刪 -> 需要備份分離、離線備份。</li>
+                                <li>要防止災情擴大 -> 需要零信任架構限制權限。</li>
+                                <li>要確保能復原 -> 需要多層次備份。</li>
+                            </ul>
+                        </li>
+                        <li><strong>剔除法：</strong> 找出会「害死自己」的選項 -> 定期刪除備份會讓資料更難救回來。</li>
+                    </ol>
+                    <p style="margin-top:10px;"><strong>原則：</strong> 能保住資料、限制駭客亂跑的，就是好措施。</p>
+                </div>
+            </div>
+
+            <!-- 5. 選項分析 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第四步：選項分析】
+                    <span>+</span>
+                </div>
+                <div class="accordion-content">
+                    <ul>
+                        <li><span style="color:var(--success-color)">✔ (A) 實施多層備份策略</span>：正確。3-2-1 備份原則（3份備份、2種媒體、1地異地），即使第一層被刪，還有第二、三層可救，大幅降低營運中斷風險。</li>
+                        <li><span style="color:var(--success-color)">✔ (B) 使用零信任網路架構</span>：正確。零信任強調「持續驗證」與「最小權限」。即使駭客入侵了一台電腦，零信任架構可以阻止他輕易跳到備份主機或核心 ERP 系統（限制橫向移動），降低擴散風險。</li>
+                        <li><span style="color:var(--success-color)">✔ (C) 將備份系統與主網分離</span>：正確。這就是針對「駭客刪除線上備份」的解藥。透過實體或邏輯隔離，駭客無法透過網路直接存取備份檔，確保最後一道防線。</li>
+                        <li><span style="color:var(--error-color)">✖ (D) 定期刪除備份檔案</span>：錯誤。這是自殺行為。備份的目的是保留歷史資料以供復原。雖然我們會刪除「過期」備份以節省空間，但單純強調「定期刪除」會減少可復原的還原點（RPO），反而增加資料遺失的風險。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 6. 觀念補充 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【觀念補充與延伸】
+                    <span>+</span>
+                </div>
+                <div class="accordion-content">
+                    <p><strong>核心觀念：</strong> iPAS 資安規劃實務常考「控制措施」與「風險」的關係。</p>
+                    <p><strong>風險降低 (Risk Reduction)：</strong></p>
+                    <p>是指透過技術或管理手段，降低事件發生的「可能性」或發生後的「衝擊」。</p>
+                    <br>
+                    <p><strong>觸類旁通：</strong></p>
+                    <ul>
+                        <li><strong>備份保留策略 (Retention Policy)：</strong> 規定備份要留多久（例如留 1 年），而非隨意刪除。</li>
+                        <li><strong>變化題型：</strong> 若題目問「何者最能降低勒索軟體『成功入侵』的機率？」答案偏向 (B) 零信任與防毒；若問「何者能降低『資料遺失』的衝擊？」答案偏向 (A) 與 (C)。本題問「降低風險」（包含發生率與衝擊），故 A、B、C 皆選。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 7. 記憶口訣 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【記憶口訣】
+                    <span>+</span>
+                </div>
+                <div class="accordion-content">
+                    <div style="background:#e8f8f5; padding:15px; border-radius:6px; text-align:center;">
+                        <p style="font-size:1.2rem; font-weight:bold; color:var(--primary-color);">「備份多層又分離，零信任防擴散」</p>
+                        <p style="margin-top:8px;">「能保命的選，會自刪的別選」</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. 常見陷阱 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【常見陷阱】
+                    <span>+</span>
+                </div>
+                <div class="accordion-content">
+                    <ul>
+                        <li>陷阱 1：看到「定期刪除」覺得是清理垃圾的好習慣？錯！在資安備份情境，除非是為了法規隱私（如 GDPR）刪除個資，否則針對營運備份，刪除越多，風險越高。</li>
+                        <li>陷阱 2：複選題只敢選一個最順眼的。iPAS 考試複選題通常有多個正確控制措施並行。</li>
+                        <li>避坑指南：遇到勒索情境，先問自己「如果明天中勒索病毒，哪個選項能救我一命？」</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 9. 正確答案 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【正確答案】
+                    <span>+</span>
+                </div>
+                <div class="accordion-content">
+                    <p style="font-size: 1.5rem; font-weight: bold; color: var(--success-color); text-align: center;">
+                        A、B、C
+                    </p>
+                </div>
+            </div>
+
+            <!-- 10. 自我檢測 -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【自我檢測】
+                    <span>+</span>
+                </div>
+                <div class="accordion-content">
+                    <p>試著回答以下問題（不提供標準答案，請反思）：</p>
+                    <ol>
+                        <li>如果備份有做，但和主系統在同一網段，風險在哪？</li>
+                        <li>零信任主要是降低哪一種風險？是「入侵發生率」還是「災害擴散範圍」？</li>
+                        <li>多層備份一定要放在雲端嗎？離線磁帶算不算多層備份的一環？</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- 學習輔助互動區 -->
+        <section class="card" id="interactive-tools">
+            <h2 class="card-title">學習輔助工具</h2>
+            
+            <h3>1. 勒索防護三支柱（點擊卡片查看重點）</h3>
+            <div class="interactive-tool-section">
+                <div class="info-card" onclick="alert('備份策略：\n確保資料有複本，即使正本被鎖也能還原。\n重點：3-2-1 原則、多層備份。')">
+                    <h4>備份策略</h4>
+                    <p>最後一道防線</p>
+                </div>
+                <div class="info-card" onclick="alert('網路隔離：\n將重要資產（如備份系統）與一般辦公區隔開。\n重點：實體隔離、VLAN、防火牆。')">
+                    <h4>網路隔離</h4>
+                    <p>阻斷攻擊路徑</p>
+                </div>
+                <div class="info-card" onclick="alert('存取控管：\n驗證每個請求，不預設信任。\n重點：零信任架構、MFA、最小權限。')">
+                    <h4>存取控管</h4>
+                    <p>限制橫向移動</p>
+                </div>
+            </div>
+
+            <h3 style="margin-top:20px;">2. 控制效果分類（點擊測試）</h3>
+            <p style="font-size:0.9rem; margin-bottom:10px;">點選下方措施，判斷是降低「發生率」還是「影響程度」。</p>
+            <div class="interactive-tool-section">
+                <button class="btn" style="background-color:#fff; color:#333; border:1px solid #ccc;" onclick="alert('【防火牆/零信任】\n主要功能：降低發生率 (Likelihood)\n阻擋駭客進入或擴散。')">防火牆/零信任</button>
+                <button class="btn" style="background-color:#fff; color:#333; border:1px solid #ccc;" onclick="alert('【備份/還原演練】\n主要功能：降低影響程度 (Impact)\n無法阻止駭客打進來，但能讓你活下來。')">備份/還原</button>
+            </div>
+
+            <h3 style="margin-top:20px;">3. 復原能力檢核清單</h3>
+            <div class="checklist-container">
+                <label class="checklist-item"><input type="checkbox" onchange="checkLevel()"> 是否有多層備份？</label>
+                <label class="checklist-item"><input type="checkbox" onchange="checkLevel()"> 是否有離線或異地備份？</label>
+                <label class="checklist-item"><input type="checkbox" onchange="checkLevel()"> 備份系統是否與主網分離？</label>
+                <label class="checklist-item"><input type="checkbox" onchange="checkLevel()"> 是否有限制橫向移動（零信任）？</label>
+                <div id="checklist-result">目前防護等級：危險 😱</div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© iPAS 資訊安全規劃實務衝刺班 | 僅供教學練習使用</p>
+    </footer>
+</div>
+
+<script>
+    /**
+     * iPAS 互動教學頁面邏輯
+     */
+
+    // 顯示/隱藏解析區塊
+    function toggleAnalysis() {
+        const analysisArea = document.getElementById('analysis-area');
+        const btn = document.getElementById('toggle-analysis-btn');
+        
+        if (analysisArea.classList.contains('hidden')) {
+            analysisArea.classList.remove('hidden');
+            // 自動捲動到解析區
+            analysisArea.scrollIntoView({ behavior: 'smooth' });
+            btn.textContent = "隱藏解析";
+        } else {
+            analysisArea.classList.add('hidden');
+            btn.textContent = "顯示解析";
+        }
+    }
+
+    // Accordion 開關邏輯
+    function toggleAccordion(header) {
+        const content = header.nextElementSibling;
+        const symbol = header.querySelector('span');
+        
+        // 切換 active 樣式
+        if (content.classList.contains('active')) {
+            content.classList.remove('active');
+            symbol.textContent = "+";
+        } else {
+            content.classList.add('active');
+            symbol.textContent = "-";
+        }
+    }
+
+    // 檢查答案邏輯
+    function checkAnswer() {
+        const correctAnswers = ['A', 'B', 'C'];
+        // 取得所有被勾選的選項
+        const checkboxes = document.querySelectorAll('input[name="answer"]:checked');
+        let userAnswers = [];
+        checkboxes.forEach((cb) => {
+            userAnswers.push(cb.value);
+        });
+
+        // 排序以便比對
+        userAnswers.sort();
+        
+        const feedbackEl = document.getElementById('feedback-message');
+        const analysisBtn = document.getElementById('toggle-analysis-btn');
+
+        // 判分邏輯：必須完全吻合
+        // 1. 數量必須相同
+        // 2. 內容必須相同
+        const isCorrect = userAnswers.length === correctAnswers.length && 
+                          userAnswers.every((val, index) => val === correctAnswers[index]);
+
+        if (isCorrect) {
+            feedbackEl.innerHTML = `恭喜答對！🎉<br>正確答案正是 A、B、C。<br>這些措施組合起來能構成縱深防禦。`;
+            feedbackEl.className = "feedback-correct";
+            feedbackEl.style.display = "block";
+        } else {
+            let msg = "答錯囉！😅<br>";
+            if (userAnswers.length === 0) {
+                msg += "您還沒有選擇任何選項。";
+            } else {
+                msg += `您選了：${userAnswers.join('、')}<br>`;
+                msg += `正確答案應該是：A、B、C<br>`;
+                
+                // 具體錯誤提示
+                if (userAnswers.includes('D')) {
+                    msg += "<br>⚠️ 提示：定期刪除備份會讓你沒資料可救，千萬別選 D！";
+                } else if (!userAnswers.includes('A') || !userAnswers.includes('B') || !userAnswers.includes('C')) {
+                    msg += "<br>⚠️ 提示：這是一題複選題，還有其他有效措施喔！";
+                }
+            }
+            feedbackEl.innerHTML = msg;
+            feedbackEl.className = "feedback-error";
+            feedbackEl.style.display = "block";
+        }
+
+        // 送出後顯示解析按鈕
+        analysisBtn.classList.remove('hidden');
+    }
+
+    // 重置測驗
+    function resetQuiz() {
+        // 清空選擇
+        const checkboxes = document.querySelectorAll('input[name="answer"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        // 隱藏回饋
+        const feedbackEl = document.getElementById('feedback-message');
+        feedbackEl.style.display = "none";
+        
+        // 隱藏解析區與按鈕
+        document.getElementById('analysis-area').classList.add('hidden');
+        document.getElementById('toggle-analysis-btn').classList.add('hidden');
+        document.getElementById('toggle-analysis-btn').textContent = "顯示/隱藏解析";
+        
+        // 捲動回頂端
+        document.getElementById('question-area').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 復原能力檢核清單邏輯
+    function checkLevel() {
+        const checks = document.querySelectorAll('.checklist-container input[type="checkbox"]:checked');
+        const count = checks.length;
+        const resultText = document.getElementById('checklist-result');
+        
+        switch(count) {
+            case 0:
+                resultText.textContent = "目前防護等級：危險 😱 (門戶大開)";
+                resultText.style.color = "#c0392b";
+                break;
+            case 1:
+                resultText.textContent = "目前防護等級：脆弱 😟 (很容易被打穿)";
+                resultText.style.color = "#e67e22";
+                break;
+            case 2:
+                resultText.textContent = "目前防護等級：普通 😐 (尚可，但有風險)";
+                resultText.style.color = "#f39c12";
+                break;
+            case 3:
+                resultText.textContent = "目前防護等級：良好 🙂 (已有基礎防禦)";
+                resultText.style.color = "#27ae60";
+                break;
+            case 4:
+                resultText.textContent = "目前防護等級：優秀 😎 (資安模範生！)";
+                resultText.style.color = "#2980b9";
+                break;
+        }
+    }
+</script>
+
+</body>
+</html>

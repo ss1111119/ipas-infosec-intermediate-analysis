@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安教室：可用性風險評估</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0fdf4; /* 淡淡的綠色背景，象徵 pass */
+        }
+        .option-card {
+            transition: all 0.2s ease;
+        }
+        .option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .option-card.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .marker-highlight {
+            background: linear-gradient(120deg, #fde68a 0%, #fde68a 100%);
+            background-repeat: no-repeat;
+            background-size: 100% 40%;
+            background-position: 0 88%;
+        }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen pb-10">
+
+    <!-- Navbar / Header -->
+    <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
+        <div class="max-w-3xl mx-auto flex items-center gap-3">
+            <div class="bg-white text-indigo-600 w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg md:text-xl">iPAS 資安補教名師 - 雲端教室</h1>
+                <p class="text-xs text-indigo-200">單元：風險評估與 CIA 三要素</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto p-4 space-y-6">
+
+        <!-- Intro Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex gap-4 items-start">
+            <div class="shrink-0">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Teacher&backgroundColor=c0aede" alt="Teacher" class="w-16 h-16 rounded-full shadow-sm">
+            </div>
+            <div class="space-y-2">
+                <h2 class="font-bold text-lg text-indigo-800">各位同學好！</h2>
+                <p class="text-gray-600 text-sm leading-relaxed">
+                    今天要帶大家破解 <span class="font-bold text-indigo-600">CIA 三要素</span> 中的「可用性（Availability）」。
+                    很多同學會把「安全」跟「可用」混在一起，但其實它們關注的點不一樣喔！
+                    試著回答下面這題 iPAS 經典題，看看你能不能抓到重點。
+                </p>
+            </div>
+        </div>
+
+        <!-- Question Section -->
+        <div id="quiz-container" class="bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-indigo-500">
+            <div class="p-6 bg-indigo-50 border-b border-indigo-100">
+                <span class="inline-block px-2 py-1 bg-indigo-600 text-white text-xs rounded mb-2">複選題</span>
+                <h3 class="font-bold text-lg text-gray-800 leading-snug">
+                    進行電子郵件系統風險評估時，下列哪些選項為「<span class="text-indigo-600">可用性（Availability）</span>」評估的考量因素？
+                </h3>
+            </div>
+
+            <div class="p-6 space-y-3">
+                <!-- Options -->
+                <div class="option-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer flex items-center gap-3" onclick="toggleOption('A')">
+                    <div id="check-A" class="w-6 h-6 border-2 border-gray-300 rounded flex items-center justify-center text-white transition-colors">
+                        <i class="fa-solid fa-check text-sm opacity-0"></i>
+                    </div>
+                    <span class="font-medium text-gray-700">(A) 電子郵件系統的備援方式</span>
+                </div>
+
+                <div class="option-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer flex items-center gap-3" onclick="toggleOption('B')">
+                    <div id="check-B" class="w-6 h-6 border-2 border-gray-300 rounded flex items-center justify-center text-white transition-colors">
+                        <i class="fa-solid fa-check text-sm opacity-0"></i>
+                    </div>
+                    <span class="font-medium text-gray-700">(B) 最適可用人數的評估</span>
+                </div>
+
+                <div class="option-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer flex items-center gap-3" onclick="toggleOption('C')">
+                    <div id="check-C" class="w-6 h-6 border-2 border-gray-300 rounded flex items-center justify-center text-white transition-colors">
+                        <i class="fa-solid fa-check text-sm opacity-0"></i>
+                    </div>
+                    <span class="font-medium text-gray-700">(C) 電子郵件系統管理者登入密碼之管制方式</span>
+                </div>
+
+                <div class="option-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer flex items-center gap-3" onclick="toggleOption('D')">
+                    <div id="check-D" class="w-6 h-6 border-2 border-gray-300 rounded flex items-center justify-center text-white transition-colors">
+                        <i class="fa-solid fa-check text-sm opacity-0"></i>
+                    </div>
+                    <span class="font-medium text-gray-700">(D) 電子郵件系統負載平衡運作方式</span>
+                </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="p-6 pt-0 flex flex-col gap-3">
+                <div id="error-msg" class="hidden bg-red-100 text-red-700 px-4 py-2 rounded text-sm text-center">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> 請至少選擇一個選項再送出喔！
+                </div>
+                <button id="submit-btn" onclick="submitAnswer()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow transition-colors flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> 提交答案
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Section (Hidden by default) -->
+        <div id="result-section" class="hidden space-y-6">
+            
+            <!-- Score Card -->
+            <div id="score-card" class="bg-white rounded-xl shadow-lg p-6 text-center border-l-8 fade-in">
+                <div id="score-icon-container" class="mb-3 text-5xl"></div>
+                <h3 id="score-title" class="text-2xl font-bold mb-1"></h3>
+                <p id="score-desc" class="text-gray-600 mb-4"></p>
+                
+                <div class="flex justify-center gap-4 text-sm bg-gray-50 p-3 rounded-lg inline-flex">
+                    <div class="text-gray-500">你的選擇：<span id="user-selection" class="font-bold text-gray-800"></span></div>
+                    <div class="w-px bg-gray-300"></div>
+                    <div class="text-green-600">正確答案：<span class="font-bold">A、B、D</span></div>
+                </div>
+
+                <div class="mt-6">
+                    <button onclick="resetQuiz()" class="text-indigo-600 hover:text-indigo-800 font-medium underline text-sm">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> 再試一次
+                    </button>
+                </div>
+            </div>
+
+            <!-- Explanation Section -->
+            <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden fade-in">
+                <div class="bg-emerald-600 text-white p-4 flex items-center gap-2">
+                    <i class="fa-solid fa-chalkboard-user text-xl"></i>
+                    <h3 class="font-bold text-lg">名師解析時間</h3>
+                </div>
+                
+                <div class="p-6 space-y-8">
+                    
+                    <!-- Option Analysis -->
+                    <section>
+                        <h4 class="font-bold text-gray-800 mb-3 border-l-4 border-emerald-500 pl-3">選項逐一破解</h4>
+                        <div class="space-y-3">
+                            <div class="flex gap-3 items-start">
+                                <span class="bg-green-100 text-green-700 font-bold px-2 py-1 rounded text-sm shrink-0">A 正確</span>
+                                <div>
+                                    <span class="font-bold block text-gray-700">備援方式 (Redundancy)</span>
+                                    <p class="text-sm text-gray-600">這是可用性的核心！就像汽車有備胎一樣，當主系統壞掉時，備援系統能馬上接手，確保服務不斷線。</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 items-start">
+                                <span class="bg-green-100 text-green-700 font-bold px-2 py-1 rounded text-sm shrink-0">B 正確</span>
+                                <div>
+                                    <span class="font-bold block text-gray-700">最適可用人數評估 (Capacity)</span>
+                                    <p class="text-sm text-gray-600">這是在評估系統「撐不撐得住」。如果不先算好能容納多少人，人一多系統就當機，那就是不可用了。</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 items-start">
+                                <span class="bg-red-100 text-red-700 font-bold px-2 py-1 rounded text-sm shrink-0">C 錯誤</span>
+                                <div>
+                                    <span class="font-bold block text-gray-700">管理者登入密碼管制</span>
+                                    <p class="text-sm text-gray-600">注意！這是<span class="text-red-500 font-bold">機密性 (Confidentiality)</span> 跟存取控制的問題。密碼設得再複雜，跟系統會不會當機沒有直接關係。</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 items-start">
+                                <span class="bg-green-100 text-green-700 font-bold px-2 py-1 rounded text-sm shrink-0">D 正確</span>
+                                <div>
+                                    <span class="font-bold block text-gray-700">負載平衡 (Load Balancing)</span>
+                                    <p class="text-sm text-gray-600">把流量分散給很多台伺服器，避免累死其中一台。這是確保系統穩定、高可用性的常見技術。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <hr class="border-gray-200">
+
+                    <!-- Core Concepts -->
+                    <section class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-brain text-yellow-500"></i>
+                                核心觀念：可用性
+                            </h4>
+                            <ul class="text-sm text-gray-600 space-y-2 list-disc pl-5">
+                                <li>定義：確保授權使用者在需要時，能「<span class="font-bold text-gray-800">用得到、不當機、不延誤</span>」地存取資源。</li>
+                                <li>關鍵技術：備援、備份、負載平衡、災難復原 (DR)、容量規劃。</li>
+                                <li><strong>記憶口訣：</strong><br><span class="block mt-1 p-2 bg-yellow-50 text-yellow-800 rounded font-bold text-center">「可用性三件事：<br>撐得住、分得開、用得下」</span></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-scale-balanced text-indigo-500"></i>
+                                對比：可用性 vs 機密性
+                            </h4>
+                            <div class="text-sm space-y-2">
+                                <div class="bg-gray-50 p-3 rounded">
+                                    <p class="font-bold text-indigo-700">可用性 (Availability)</p>
+                                    <p class="text-gray-600">關鍵字：備援、效能、當機、中斷、SLA。</p>
+                                    <p class="text-xs text-gray-500 mt-1">→ 關心「能不能用」。</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded">
+                                    <p class="font-bold text-red-700">機密性 (Confidentiality)</p>
+                                    <p class="text-gray-600">關鍵字：密碼、加密、權限、外洩。</p>
+                                    <p class="text-xs text-gray-500 mt-1">→ 關心「誰能看」。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Self Check -->
+                    <section class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <h4 class="font-bold text-blue-800 mb-2">
+                            <i class="fa-solid fa-clipboard-question mr-1"></i>
+                            老師的課後思考題
+                        </h4>
+                        <p class="text-sm text-blue-700 mb-2">如果不看答案，這三題你想得出來嗎？</p>
+                        <ol class="list-decimal pl-5 text-sm text-gray-700 space-y-1">
+                            <li>如果系統有備援，但切換要花 8 小時，這算「高可用性」嗎？（提示：RTO 時間）</li>
+                            <li>系統每週一早上準時當機，這比較像是機密性還是可用性問題？</li>
+                            <li>在 CIA 三角形中，最容易因為硬體效能不足而被打擊的是哪一個？</li>
+                        </ol>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center text-gray-400 text-xs py-6">
+        Designed for iPAS Security Learning | Gemini Canvas Demo
+    </footer>
+
+    <script>
+        // State
+        let selectedOptions = new Set();
+        const correctAnswers = ['A', 'B', 'D'];
+
+        // Function to toggle selection
+        function toggleOption(option) {
+            const card = document.querySelector(`.option-card[onclick="toggleOption('${option}')"]`);
+            const checkbox = document.getElementById(`check-${option}`);
+            const checkIcon = checkbox.querySelector('i');
+
+            if (selectedOptions.has(option)) {
+                // Deselect
+                selectedOptions.delete(option);
+                card.classList.remove('selected');
+                checkbox.classList.remove('bg-indigo-600', 'border-indigo-600');
+                checkbox.classList.add('border-gray-300');
+                checkIcon.classList.add('opacity-0');
+            } else {
+                // Select
+                selectedOptions.add(option);
+                card.classList.add('selected');
+                checkbox.classList.remove('border-gray-300');
+                checkbox.classList.add('bg-indigo-600', 'border-indigo-600');
+                checkIcon.classList.remove('opacity-0');
+            }
+            
+            // Hide error message if user selects something
+            document.getElementById('error-msg').classList.add('hidden');
+        }
+
+        // Function to submit answer
+        function submitAnswer() {
+            if (selectedOptions.size === 0) {
+                document.getElementById('error-msg').classList.remove('hidden');
+                // Shake animation for the card
+                const container = document.getElementById('quiz-container');
+                container.classList.add('animate-pulse');
+                setTimeout(() => container.classList.remove('animate-pulse'), 500);
+                return;
+            }
+
+            // Lock inputs
+            document.querySelectorAll('.option-card').forEach(el => {
+                el.style.pointerEvents = 'none';
+                el.classList.add('opacity-80');
+            });
+            document.getElementById('submit-btn').style.display = 'none';
+
+            // Calculate Result
+            const userArray = Array.from(selectedOptions).sort();
+            const isCorrect = JSON.stringify(userArray) === JSON.stringify(correctAnswers);
+
+            // Render Result Card
+            const scoreCard = document.getElementById('score-card');
+            const scoreIcon = document.getElementById('score-icon-container');
+            const scoreTitle = document.getElementById('score-title');
+            const scoreDesc = document.getElementById('score-desc');
+            const userSelectionSpan = document.getElementById('user-selection');
+
+            userSelectionSpan.textContent = userArray.join('、');
+
+            if (isCorrect) {
+                scoreCard.classList.add('border-green-500');
+                scoreIcon.innerHTML = '<i class="fa-solid fa-circle-check text-green-500"></i>';
+                scoreTitle.textContent = "太強了！完全正確！";
+                scoreTitle.className = "text-2xl font-bold mb-1 text-green-700";
+                scoreDesc.textContent = "你已經精準掌握了可用性（Availability）的精髓，看來這題難不倒你！";
+                triggerConfetti();
+            } else {
+                scoreCard.classList.add('border-red-500');
+                scoreIcon.innerHTML = '<i class="fa-solid fa-circle-xmark text-red-500"></i>';
+                scoreTitle.textContent = "哎呀，差一點點！";
+                scoreTitle.className = "text-2xl font-bold mb-1 text-red-700";
+                
+                // Logic for feedback text
+                if (selectedOptions.has('C')) {
+                    scoreDesc.textContent = "陷阱題！選項 (C) 的密碼管理屬於「機密性」，而不是可用性喔。";
+                } else if (userArray.length < 3) {
+                    scoreDesc.textContent = "還有漏掉的選項喔！備援、負載平衡跟容量評估都是為了讓系統「撐得住」。";
+                } else {
+                    scoreDesc.textContent = "再仔細看看解析，釐清一下觀念吧！";
+                }
+            }
+
+            // Show Results
+            const resultSection = document.getElementById('result-section');
+            resultSection.classList.remove('hidden');
+
+            // Scroll to results smoothly
+            setTimeout(() => {
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        // Reset Quiz
+        function resetQuiz() {
+            selectedOptions.clear();
+            
+            // Reset UI
+            document.querySelectorAll('.option-card').forEach(el => {
+                el.classList.remove('selected');
+                el.style.pointerEvents = 'auto';
+                el.classList.remove('opacity-80');
+            });
+            
+            document.querySelectorAll('[id^="check-"]').forEach(el => {
+                el.classList.remove('bg-indigo-600', 'border-indigo-600');
+                el.classList.add('border-gray-300');
+                el.querySelector('i').classList.add('opacity-0');
+            });
+
+            document.getElementById('submit-btn').style.display = 'flex';
+            document.getElementById('result-section').classList.add('hidden');
+            document.getElementById('score-card').className = "bg-white rounded-xl shadow-lg p-6 text-center border-l-8 fade-in"; // Remove color borders
+            
+            // Scroll back to top
+            document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Simple Confetti Effect (Visual delight for correct answer)
+        function triggerConfetti() {
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = Math.random() * 5 + 5 + 'px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.opacity = Math.random();
+                confetti.style.zIndex = '100';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                document.body.appendChild(confetti);
+
+                const animationDuration = Math.random() * 2 + 2;
+                
+                confetti.animate([
+                    { transform: `translateY(0) rotate(0)`, opacity: 1 },
+                    { transform: `translateY(100vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                ], {
+                    duration: animationDuration * 1000,
+                    easing: 'linear',
+                    fill: 'forwards'
+                });
+
+                setTimeout(() => confetti.remove(), animationDuration * 1000);
+            }
+        }
+    </script>
+</body>
+</html>

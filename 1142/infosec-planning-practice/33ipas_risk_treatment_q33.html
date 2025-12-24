@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_risk_treatment_q33.html - iPAS 資安規劃實務衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --warning-bg: #f9f9e0;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-color: #333;
+            --highlight-color: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Heiti TC", "Microsoft JhengHei", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f4f6f8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            padding: 30px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .question-box {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            padding-left: 15px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 15px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover {
+            background-color: var(--light-bg);
+            border-color: var(--accent-color);
+        }
+
+        .option-btn.selected {
+            border-color: var(--accent-color);
+            background-color: #eaf6fd;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .option-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+            flex-grow: 1;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-reset {
+            background-color: var(--light-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-toggle {
+            background-color: transparent;
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+
+        /* Feedback */
+        .feedback-msg {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .feedback-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        /* Analysis Section */
+        .analysis-section {
+            padding: 0 20px 20px;
+            background-color: #fff;
+            display: none; /* Hidden by default */
+        }
+
+        .analysis-section.visible {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Accordion Style */
+        details {
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: var(--light-bg);
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Hide default marker */
+            position: relative;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            position: absolute;
+            right: 20px;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .content-block {
+            padding: 20px;
+            background-color: white;
+        }
+
+        /* Highlights & Styling inside analysis */
+        mark {
+            background-color: var(--highlight-color);
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            display: inline-block;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .mnemonic-box {
+            background-color: var(--warning-bg);
+            border-left: 5px solid #f1c40f;
+            padding: 15px;
+            font-style: italic;
+            font-size: 1.1rem;
+            margin: 10px 0;
+        }
+
+        /* Interactive Tools Area */
+        .tools-section {
+            padding: 20px;
+            background-color: #fafafa;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .tool-card {
+            background: white;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .cheat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .cheat-item {
+            border: 1px solid #eee;
+            padding: 10px;
+            text-align: center;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .cheat-item strong {
+            display: block;
+            color: var(--accent-color);
+            margin-bottom: 4px;
+        }
+
+        /* Checklist */
+        .checklist-item {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        
+        .checklist-msg {
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--success-color);
+            min-height: 1.5em;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #777;
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .cheat-grid {
+                grid-template-columns: 1fr;
+            }
+            .action-bar {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資訊安全規劃實務 - 衝刺班</h1>
+        <p>題號：33 | 檔案：ipas_risk_treatment_q33.html</p>
+    </header>
+
+    <main>
+        <!-- 題目互動區 -->
+        <section class="quiz-section">
+            <div class="question-box">
+                33. 有關在選擇風險處理選項時可參考之因素，下列何項敘述「有誤」？
+            </div>
+
+            <div class="options-grid" id="options-container">
+                <button class="option-btn" data-value="A">(A) 應考量組織的目標來選擇風險處理選項</button>
+                <button class="option-btn" data-value="B">(B) 應考量組織的業務壓力來選擇風險處理選項</button>
+                <button class="option-btn" data-value="C">(C) 應考量組織所訂之風險準則來選擇風險處理選項</button>
+                <button class="option-btn" data-value="D">(D) 應考量組織可用資源來選擇風險處理選項</button>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn btn-submit" id="submit-btn" onclick="submitAnswer()">送出答案</button>
+                <button class="btn btn-reset" onclick="resetQuiz()">重作一次</button>
+                <button class="btn btn-toggle" id="toggle-analysis-btn" onclick="toggleAnalysis()">顯示/隱藏解析</button>
+            </div>
+
+            <div id="feedback-area" class="feedback-msg"></div>
+        </section>
+
+        <!-- 解析學習區 -->
+        <section id="analysis-section" class="analysis-section">
+            
+            <details open>
+                <summary>【題目】</summary>
+                <div class="content-block">
+                    <p>有關在選擇風險處理選項時可參考之因素，下列何項敘述「有誤」？</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>【第一步：找關鍵字】</summary>
+                <div class="content-block">
+                    <p>請注意以下考點詞彙：</p>
+                    <ul>
+                        <li><mark>風險處理選項</mark> (題目的核心主題)</li>
+                        <li><mark>參考因素</mark> (決策依據)</li>
+                        <li><mark>有誤</mark> (這是反向題，要找錯的)</li>
+                        <li><mark>組織目標</mark></li>
+                        <li><mark>業務壓力</mark> (陷阱詞)</li>
+                        <li><mark>風險準則</mark></li>
+                        <li><mark>可用資源</mark></li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>【第二步：白話翻譯】</summary>
+                <div class="content-block">
+                    <ul>
+                        <li><strong>風險處理選項：</strong> 面對風險要採取的處置方式，通常指「避免、降低、移轉、接受」這四種手段。</li>
+                        <li><strong>風險準則：</strong> 就是公司內部訂好的「那把尺」，規定風險高到什麼程度必須處理，低到什麼程度可以接受。</li>
+                        <li><strong>組織目標：</strong> 就是公司想達成的方向、KPI 或願景。資安不能擋路，要幫助公司達成目標。</li>
+                        <li><strong>業務壓力：</strong> 指的是像是「趕上線」、「客戶在催」、「業績要達標」這種情境壓力。</li>
+                        <li><strong>可用資源：</strong> 公司有多少錢（預算）、多少人（人力）、多少技術工具。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>【第三步：解題思路】</summary>
+                <div class="content-block">
+                    <h4>這題在考什麼觀念？</h4>
+                    <p>考的是「理性的資安風險管理決策模型」。</p>
+                    
+                    <h4>解題步驟：</h4>
+                    <ol>
+                        <li><strong>確認決策基礎：</strong> 風險管理的目的是為了讓組織在「可控制」的範圍內達成目標。</li>
+                        <li><strong>篩選合理依據：</strong> 決策應該基於「規則」(風險準則)、「方向」(組織目標) 與「能力」(可用資源)。</li>
+                        <li><strong>排除情緒或短期壓力：</strong> 「業務壓力」通常是導致便宜行事、跳過安控措施的主因。雖然實務上常遇到，但在規範與學理上，它<strong>不應該</strong>成為選擇風險處理選項的「正當參考因素」。</li>
+                    </ol>
+                    
+                    <h4>原理與規則：</h4>
+                    <p>如果因為業務壓力大就選擇「接受風險」(不做資安)，這叫「賭博」，不叫「風險管理」。正確做法是依據風險準則評估，若風險過高，即便有業務壓力，也應尋求替代方案(如補償性控制)或投入更多資源，而非單純因壓力而妥協。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>【第四步：選項分析】</summary>
+                <div class="content-block">
+                    <ul>
+                        <li><strong>(A) 應考量組織的目標：</strong> <span style="color:var(--success-color)">正確</span>。資安是為了支援業務，處理選項若導致組織目標無法達成，就不是好選項。</li>
+                        <li><strong>(B) 應考量組織的業務壓力：</strong> <span style="color:var(--error-color)">有誤 (本題答案)</span>。業務壓力屬於「情境限制」，不應作為選擇處理方式的依據。若將壓力納入參考，容易造成決策偏差（例如為了趕上線而故意忽略高風險）。</li>
+                        <li><strong>(C) 應考量組織所訂之風險準則：</strong> <span style="color:var(--success-color)">正確</span>。這是最重要的依據。準則定義了什麼是「可接受風險」，決定了我們需要處理到什麼程度。</li>
+                        <li><strong>(D) 應考量組織可用資源：</strong> <span style="color:var(--success-color)">正確</span>。這是「可行性」分析。例如想買昂貴防火牆(降低風險)但沒預算，就得改用開源方案或加強監控，資源直接影響選項的選擇。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>【觀念補充與延伸】</summary>
+                <div class="content-block">
+                    <h4>核心觀念定位</h4>
+                    <p>本題屬於 iPAS 資安規劃實務的「風險管理」章節，特別是 ISO 27005 或 NIST SP 800-30 風險處理 (Risk Treatment) 階段。</p>
+                    
+                    <h4>通用定義</h4>
+                    <p>在選擇風險處理選項時，通常需平衡以下幾點：</p>
+                    <ul>
+                        <li><strong>成本效益分析：</strong> 處理風險的成本不應高於風險發生時的損失 (除非涉及法規或人身安全)。</li>
+                        <li><strong>法規與合約要求：</strong> 這是硬性規定，優於內部準則。</li>
+                        <li><strong>利益相關者的觀點：</strong> 客戶、股東、員工的看法。</li>
+                    </ul>
+
+                    <h4>觸類旁通</h4>
+                    <p><strong>風險評鑑 vs 風險處理：</strong> 前者是「診斷病情」，後者是「開藥方」。本題問的是開藥方時要考慮什麼。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>【記憶口訣】</summary>
+                <div class="content-block">
+                    <div class="mnemonic-box">
+                        「目、準、資」先看，<br>
+                        「壓力」別來亂！
+                    </div>
+                    <p>解釋：</p>
+                    <ul>
+                        <li><strong>目：</strong> 組織目標 (A)</li>
+                        <li><strong>準：</strong> 風險準則 (C)</li>
+                        <li><strong>資：</strong> 可用資源 (D)</li>
+                        <li><strong>壓力：</strong> 業務壓力 (B) -> 這是干擾項，別讓它牽著鼻子走。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>【常見陷阱】</summary>
+                <div class="content-block">
+                    <ul>
+                        <li><strong>陷阱 1：現實與理想的混淆。</strong> 考生常想「可是老闆都在催啊」，但在考試與標準規範中，不能把這種不當壓力合理化。</li>
+                        <li><strong>陷阱 2：誤把「業務需求」當「業務壓力」。</strong> 「業務需求」(如功能要好用) 是要考量的，但「業務壓力」(如不想做資安測試因為沒時間) 是要排除的。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>【正確答案】</summary>
+                <div class="content-block">
+                    <p>本題正確答案為 <strong>(B)</strong>。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>【自我檢測】</summary>
+                <div class="content-block">
+                    <p>試試看回答以下延伸問題 (不提供標準答案，請自行思考)：</p>
+                    <ol>
+                        <li>如果在考題中，選項 B 改成「應考量法律與法規的要求」，這個敘述是正確還是錯誤？</li>
+                        <li>如果組織資源不足以執行某項高成本的風險降低措施，且風險高於準則，此時管理者暫時簽核通過，這屬於哪一種風險處理手段？</li>
+                        <li>風險準則通常是在風險管理的哪一個階段制定的？(建立全景? 風險評鑑? 風險處理?)</li>
+                    </ol>
+                </div>
+            </details>
+
+            <!-- 學習輔助工具區 -->
+            <div class="tools-section">
+                <h4>學習小工具：風險處理選項速記卡</h4>
+                <div class="cheat-grid">
+                    <div class="cheat-item">
+                        <strong>避免 (Avoid)</strong>
+                        不做高風險的活動<br>(例：關閉不必要的服務)
+                    </div>
+                    <div class="cheat-item">
+                        <strong>降低 (Reduce/Mitigate)</strong>
+                        加裝控制措施<br>(例：安裝防火牆、備份)
+                    </div>
+                    <div class="cheat-item">
+                        <strong>移轉 (Transfer/Share)</strong>
+                        找人分擔損失<br>(例：買保險、委外合約)
+                    </div>
+                    <div class="cheat-item">
+                        <strong>接受 (Accept/Retain)</strong>
+                        風險在可容忍內<br>(例：編列預算承擔損失)
+                    </div>
+                </div>
+
+                <h4 style="margin-top:20px;">決策檢核清單 (Checklist)</h4>
+                <p style="font-size:0.9rem; margin-bottom:10px;">在決定資安措施前，請問自己：</p>
+                <div>
+                    <label class="checklist-item">
+                        <input type="checkbox" onchange="checkListStatus()"> 是否符合組織目標？
+                    </label>
+                    <label class="checklist-item">
+                        <input type="checkbox" onchange="checkListStatus()"> 是否參照風險準則？
+                    </label>
+                    <label class="checklist-item">
+                        <input type="checkbox" onchange="checkListStatus()"> 資源是否足夠 (人力/預算)？
+                    </label>
+                    <label class="checklist-item">
+                        <input type="checkbox" onchange="checkListStatus()"> 成本效益是否合理？
+                    </label>
+                </div>
+                <div id="checklist-result" class="checklist-msg"></div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer>
+        <p>此頁面為 iPAS 衝刺班教學專用範例 | 檔名: ipas_risk_treatment_q33.html</p>
+        <p>Copyright © 2024 補教名師團隊. All rights reserved.</p>
+    </footer>
+</div>
+
+<script>
+    // 題目資料與邏輯
+    const correctAnswer = 'B';
+    let selectedOption = null;
+    let isSubmitted = false;
+
+    // 取得 DOM 元素
+    const optionBtns = document.querySelectorAll('.option-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    const feedbackArea = document.getElementById('feedback-area');
+    const analysisSection = document.getElementById('analysis-section');
+    const toggleBtn = document.getElementById('toggle-analysis-btn');
+
+    // 選項點擊事件
+    optionBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (isSubmitted) return; // 已送出後不可更改
+            
+            // 清除其他選取狀態
+            optionBtns.forEach(b => b.classList.remove('selected'));
+            
+            // 設定當前選取
+            this.classList.add('selected');
+            selectedOption = this.getAttribute('data-value');
+        });
+    });
+
+    // 送出答案邏輯
+    function submitAnswer() {
+        if (!selectedOption) {
+            alert('請先選擇一個選項 (A/B/C/D)');
+            return;
+        }
+
+        isSubmitted = true;
+        
+        // 鎖定按鈕
+        optionBtns.forEach(btn => btn.classList.add('disabled'));
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.6';
+
+        // 判斷對錯
+        feedbackArea.className = 'feedback-msg'; // 重置 class
+        feedbackArea.style.display = 'block';
+
+        if (selectedOption === correctAnswer) {
+            // 答對
+            feedbackArea.classList.add('feedback-success');
+            feedbackArea.innerHTML = '🎉 恭喜答對！正確答案就是 (B)。<br>請往下閱讀詳細解析以鞏固觀念。';
+            // 自動展開解析
+            analysisSection.classList.add('visible');
+            toggleBtn.innerText = '隱藏解析';
+        } else {
+            // 答錯
+            feedbackArea.classList.add('feedback-error');
+            feedbackArea.innerHTML = `❌ 很可惜，你選的是 (${selectedOption})，正確答案是 (B)。<br>提示：請回到「關鍵字」尋找「業務壓力」為何不適合作為正規參考因素。`;
+        }
+    }
+
+    // 重作一次邏輯
+    function resetQuiz() {
+        selectedOption = null;
+        isSubmitted = false;
+
+        // 重置選項樣式
+        optionBtns.forEach(btn => {
+            btn.classList.remove('selected', 'disabled');
+        });
+
+        // 重置按鈕狀態
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+
+        // 隱藏回饋與解析
+        feedbackArea.style.display = 'none';
+        feedbackArea.innerHTML = '';
+        analysisSection.classList.remove('visible');
+        toggleBtn.innerText = '顯示/隱藏解析';
+
+        // 收合所有 accordion (選用，若想保留閱讀進度可註解掉下面這行)
+        // document.querySelectorAll('details').forEach(d => d.removeAttribute('open'));
+        // 預設打開第一個
+        // document.querySelector('details').setAttribute('open', '');
+        
+        // 重置 checklist
+        document.querySelectorAll('.checklist-item input').forEach(input => input.checked = false);
+        document.getElementById('checklist-result').innerText = '';
+    }
+
+    // 切換解析顯示
+    function toggleAnalysis() {
+        if (analysisSection.classList.contains('visible')) {
+            analysisSection.classList.remove('visible');
+            toggleBtn.innerText = '顯示解析';
+        } else {
+            analysisSection.classList.add('visible');
+            toggleBtn.innerText = '隱藏解析';
+        }
+    }
+
+    // 檢核清單互動
+    function checkListStatus() {
+        const checkboxes = document.querySelectorAll('.checklist-item input');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        const resultDiv = document.getElementById('checklist-result');
+
+        if (allChecked) {
+            resultDiv.innerText = "👍 很好！這就是一個理性的風險決策模型基礎。";
+        } else {
+            resultDiv.innerText = "";
+        }
+    }
+</script>
+
+</body>
+</html>

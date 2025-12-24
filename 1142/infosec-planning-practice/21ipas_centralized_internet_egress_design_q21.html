@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安實戰教室 - 集中式對外連線設計 (Q21)</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5; /* Indigo */
+            --primary-hover: #4338ca;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft JhengHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        /* Common Sections */
+        .section {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 1em;
+            background-color: var(--primary-color);
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        /* Scenario Toggle */
+        .scenario-box {
+            background-color: #eef2ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: underline;
+            padding: 0;
+        }
+
+        /* Quiz Styles */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .highlight-not {
+            color: var(--error-color);
+            text-decoration: underline;
+            font-weight: 900;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .option-label input[type="radio"] {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        /* Interaction States */
+        .option-label.checked {
+            border-color: var(--primary-color);
+            background-color: #eef2ff;
+        }
+
+        .option-label.correct {
+            border-color: var(--success-color);
+            background-color: #ecfdf5;
+        }
+
+        .option-label.wrong {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .status-pending { background-color: #f3f4f6; color: #6b7280; }
+        .status-answered { background-color: #dbeafe; color: #1e40af; }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-submit:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Feedback Section */
+        .feedback-area {
+            display: none; /* Hidden by default */
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-banner {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .result-banner.success { background-color: #d1fae5; color: #065f46; }
+        .result-banner.error { background-color: #fee2e2; color: #991b1b; }
+
+        /* Accordion for Explanations */
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            margin-bottom: 8px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f9fafb;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .accordion-header:hover {
+            background-color: #f3f4f6;
+        }
+
+        .accordion-content {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+            display: none; /* Hidden by default */
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .accordion-content.open { display: block; }
+        
+        .opt-tag {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.8rem;
+            margin-right: 8px;
+        }
+        .bg-gray { background-color: #9ca3af; }
+        .bg-red { background-color: var(--error-color); }
+        .bg-green { background-color: var(--success-color); }
+
+        /* Core Concepts */
+        .concept-card {
+            background-color: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .concept-title { color: #92400e; font-weight: bold; margin-bottom: 8px; }
+
+        /* Traps */
+        .trap-list {
+            list-style: none;
+        }
+        .trap-list li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+        .trap-list li::before {
+            content: '⚠️';
+            position: absolute;
+            left: 0;
+            top: 2px;
+        }
+
+        /* Mnemonic */
+        .mnemonic-box {
+            background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        /* Self Test */
+        .self-test-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        .hint-btn {
+            background: none;
+            border: 1px solid var(--text-muted);
+            color: var(--text-muted);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        .hint-content {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        /* Utility */
+        .hidden { display: none !important; }
+        .show { display: block !important; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .section { padding: 15px; }
+            header h1 { font-size: 1.2rem; }
+            .question-text { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安實戰教室</h1>
+        <p>主題：多據點架構之網際網路流量監控設計</p>
+    </header>
+
+    <!-- Q21 Main Question -->
+    <div class="section">
+        <span id="quiz-status" class="status-badge status-pending">狀態：尚未作答</span>
+
+        <!-- Collapsible Scenario -->
+        <div class="scenario-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="color: var(--primary-color); font-size: 1rem;">【題組共用情境】</h3>
+                <button class="toggle-btn" onclick="toggleScenario()">收合/展開</button>
+            </div>
+            <div id="scenario-content">
+                <p>某上市公司因國內市場趨於飽和，為降低生產成本並提升競爭力，於國內設有公司總部，並於附近與東南亞設有生產基地，同時於美國與歐洲設有營業據點。公司希望在國內能<strong style="color: #b91c1c;">「統一控管對外連線」</strong>，確保所有網際網路流量皆可被集中監控與稽核。</p>
+            </div>
+        </div>
+
+        <div class="question-block">
+            <p class="question-text">
+                Q. 公司於國內希望統一控管對外連線，所有的網際網路流量可以被監控，下列何項方案最<span class="highlight-not">「不」</span>適切？
+            </p>
+            
+            <form id="quiz-form">
+                <div class="options-group">
+                    <label class="option-label" onclick="selectOption(this)">
+                        <input type="radio" name="answer" value="A">
+                        <span>(A) 於總部及生產基地各自佈署防火牆，並集中管理規則與日誌</span>
+                    </label>
+
+                    <label class="option-label" onclick="selectOption(this)">
+                        <input type="radio" name="answer" value="B">
+                        <span>(B) 總部及生產基地各自租賃網際網路服務，直接對外連線</span>
+                    </label>
+
+                    <label class="option-label" onclick="selectOption(this)">
+                        <input type="radio" name="answer" value="C">
+                        <span>(C) 租用專線（Leased Line）連接總部與生產基地，對外連線統一從總部出口</span>
+                    </label>
+
+                    <label class="option-label" onclick="selectOption(this)">
+                        <input type="radio" name="answer" value="D">
+                        <span>(D) 生產基地透過站台對站台虛擬私人網路（Site-to-Site VPN），將流量全部導向公司總部</span>
+                    </label>
+                </div>
+                <button type="button" id="submitBtn" class="btn-submit" onclick="submitAnswer()">提交答案</button>
+            </form>
+        </div>
+
+        <!-- Feedback Area -->
+        <div id="feedback-area" class="feedback-area">
+            <div id="result-banner" class="result-banner"></div>
+            
+            <div style="margin-bottom: 20px;">
+                <h3 class="section-title">💡 選項詳細解析 (點擊展開)</h3>
+                
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><span class="opt-tag bg-gray">A</span> 各自佈署防火牆，集中管理日誌</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p><strong>尚可接受，但非最佳。</strong><br>這屬於分散式架構。雖然透過集中管理平台可以統一派送規則並收集日誌，具備一定的管理能力，但流量本身沒有經過統一出口，監控的即時性與完整性不如將流量拉回總部。</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><span class="opt-tag bg-red">B</span> 各自租網際網路，直接對外 (正確答案)</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p><strong>完全不適切 (最危險)。</strong><br>這就是所謂的「各自為政」或 Local Breakout。每個據點直接上網，總部完全看不見分公司的流量內容，無法進行統一的 DLP (資料外洩防護) 或網頁過濾，嚴重違反「集中監控」的原則。</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><span class="opt-tag bg-green">C</span> 租用專線 (Leased Line) 回總部</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p><strong>最穩健方案。</strong><br>透過 MPLS 或實體專線將分公司與總部連接成封閉內網，所有上網流量強制繞回總部出口。優點是品質穩定、安全；缺點是費用昂貴。</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><span class="opt-tag bg-green">D</span> Site-to-Site VPN 回總部</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p><strong>高 CP 值方案。</strong><br>利用網際網路建立加密隧道，將流量「回傳 (Backhaul)」至總部。這是現代企業取代昂貴專線，達成集中控管最常見的做法。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Concepts -->
+    <div class="section">
+        <h3 class="section-title">📚 核心觀念：集中式對外連線</h3>
+        
+        <div class="concept-card">
+            <div class="concept-title">什麼是「集中式對外連線」？</div>
+            <p>想像一個社區有 10 個側門，如果每個側門都可以自由進出，警衛很難管理。集中式連線就是把側門全部鎖起來，規定所有人要出社區，必須先走到「正門」，經過警衛檢查後才能出去。雖然稍微繞路，但最安全。</p>
+        </div>
+
+        <div class="concept-card">
+            <div class="concept-title">為什麼要這麼做？ (Why?)</div>
+            <ul>
+                <li><strong>資安治理 (Governance)：</strong> 確保全公司 (含海外據點) 套用一致的防火牆規則 (例如：上班時間禁止連線博弈網站)。</li>
+                <li><strong>稽核與鑑識 (Audit)：</strong> 所有 Log 都在總部，發生資安事件時，不需要去追討海外分公司的設備紀錄。</li>
+                <li><strong>成本考量：</strong> 只需在總部購買高階昂貴的資安設備 (如 APT 防護、DLP)，分公司只需基本連線設備。</li>
+            </ul>
+        </div>
+
+        <div class="concept-card">
+            <div class="concept-title">專線 vs. VPN 怎麼選？</div>
+            <p>兩者都能達成「將流量帶回總部」的目的：</p>
+            <ul>
+                <li><strong>專線 (Leased Line)：</strong> 像「私家車道」。穩定、快、超貴。適合關鍵營運據點。</li>
+                <li><strong>VPN (Site-to-Site)：</strong> 像「在公路上開警車護送」。便宜、品質受公網影響。適合一般辦事處。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Traps & Mnemonic -->
+    <div class="section">
+        <h3 class="section-title">⚠️ 考試常見陷阱 & 記憶口訣</h3>
+        
+        <ul class="trap-list">
+            <li><strong>陷阱 1：</strong> 以為「每個點都有裝防火牆」就叫做集中控管。
+                <br><span style="font-size: 0.9em; color: #666;">(錯！那叫分散式防禦，總部依然看不見流量內容。)</span>
+            </li>
+            <li><strong>陷阱 2：</strong> 混淆「管理」與「流量」。
+                <br><span style="font-size: 0.9em; color: #666;">(錯！集中管理日誌 (Log) 不等於集中流量 (Traffic)。只有流量經過總部，才能即時阻擋。)</span>
+            </li>
+            <li><strong>陷阱 3：</strong> 考題若出現「降低延遲」、「分流」，則 (B) 可能是對的。
+                <br><span style="font-size: 0.9em; color: #666;">(注意！本題關鍵字是「監控與稽核」，所以必須犧牲一點效能走回頭路。)</span>
+            </li>
+        </ul>
+
+        <div class="mnemonic-box">
+            <div style="font-size: 0.9rem; margin-bottom: 5px; opacity: 0.8;">🔥 名師口訣 🔥</div>
+            <div style="font-size: 1.5rem; font-weight: bold;">「集中出口，安穩無憂；<br>各自上網，漏洞難救。」</div>
+        </div>
+    </div>
+
+    <!-- Self Assessment -->
+    <div class="section" style="border-bottom: none;">
+        <h3 class="section-title">📝 自我檢測 (Self-Check)</h3>
+        
+        <div class="self-test-item">
+            <p><strong>Q1: 如果分公司使用 VPN 連回總部，但員工上網查資料時，流量沒有經過總部 VPN，而是直接從分公司當地出去，這叫做什麼技術？是否符合本題需求？</strong></p>
+            <button class="hint-btn" onclick="toggleHint('hint1')">顯示/隱藏解答</button>
+            <div id="hint1" class="hint-content">
+                <strong>解答：</strong>這叫做「Split Tunneling (分割通道)」。<br>這<strong>不符合</strong>本題「所有流量集中監控」的需求，因為上網流量繞過了總部檢查。但在實務上，為了優化 Office 365 或視訊會議效能，有時會刻意開啟此功能。
+            </div>
+        </div>
+
+        <div class="self-test-item">
+            <p><strong>Q2: 相比於佈署多台防火牆，採用「集中式出口」架構，對「軟體授權費」有什麼潛在優勢？</strong></p>
+            <button class="hint-btn" onclick="toggleHint('hint2')">顯示/隱藏解答</button>
+            <div id="hint2" class="hint-content">
+                <strong>解答：</strong>可以節省授權費。<br>因為只需要在總部購買一套高階資安授權 (如 IPS, Anti-Virus, URL Filtering)，分公司設備只需基本的連線功能，不需重複購買多份昂貴的資安訂閱。
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Scenario Toggle
+    function toggleScenario() {
+        const content = document.getElementById('scenario-content');
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+        } else {
+            content.style.display = 'none';
+        }
+    }
+
+    // Option Selection UI Styling
+    function selectOption(label) {
+        // Prevent selection if already submitted
+        if(document.getElementById('submitBtn').disabled) return;
+
+        // Reset all backgrounds
+        document.querySelectorAll('.option-label').forEach(l => {
+            l.classList.remove('checked');
+            l.querySelector('input').checked = false;
+        });
+
+        // Set checked state
+        label.classList.add('checked');
+        label.querySelector('input').checked = true;
+    }
+
+    // Accordion Toggle
+    function toggleAccordion(header) {
+        const content = header.nextElementSibling;
+        content.classList.toggle('open');
+        
+        // Simple arrow rotation text
+        const arrow = header.querySelector('span:last-child');
+        arrow.textContent = content.classList.contains('open') ? '▲' : '▼';
+    }
+
+    // Hint Toggle
+    function toggleHint(id) {
+        const hint = document.getElementById(id);
+        if (hint.style.display === 'block') {
+            hint.style.display = 'none';
+        } else {
+            hint.style.display = 'block';
+        }
+    }
+
+    // Submit Logic
+    function submitAnswer() {
+        const form = document.getElementById('quiz-form');
+        const selected = form.querySelector('input[name="answer"]:checked');
+        const statusBadge = document.getElementById('quiz-status');
+        const feedbackArea = document.getElementById('feedback-area');
+        const banner = document.getElementById('result-banner');
+
+        if (!selected) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        const answer = selected.value;
+        const correctAnswer = 'B';
+
+        // Disable interaction
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').innerText = "作答完畢";
+        document.querySelectorAll('input[type="radio"]').forEach(i => i.disabled = true);
+        
+        // Update Status
+        statusBadge.textContent = "狀態：已作答";
+        statusBadge.classList.remove('status-pending');
+        statusBadge.classList.add('status-answered');
+
+        // Show Feedback Section
+        feedbackArea.style.display = 'block';
+
+        // Check Answer
+        const labels = document.querySelectorAll('.option-label');
+        
+        if (answer === correctAnswer) {
+            banner.textContent = "恭喜答對！觀念非常正確！(正確答案：B)";
+            banner.classList.add('success');
+            
+            // Style the selected correct answer
+            labels.forEach(l => {
+                if(l.querySelector('input').value === 'B') l.classList.add('correct');
+            });
+        } else {
+            banner.textContent = "答錯囉！請參考下方解析。(正確答案：B)";
+            banner.classList.add('error');
+
+            // Style wrong and correct
+            labels.forEach(l => {
+                const val = l.querySelector('input').value;
+                if(val === answer) l.classList.add('wrong');
+                if(val === correctAnswer) l.classList.add('correct');
+            });
+        }
+
+        // Scroll to feedback
+        feedbackArea.scrollIntoView({ behavior: 'smooth' });
+        
+        // Auto open the correct answer accordion
+        const accordions = document.querySelectorAll('.accordion-header');
+        accordions.forEach(acc => {
+             // Find the one with B tag
+             if(acc.innerHTML.includes('>B</span>')) {
+                 toggleAccordion(acc);
+             }
+        });
+    }
+</script>
+
+</body>
+</html>

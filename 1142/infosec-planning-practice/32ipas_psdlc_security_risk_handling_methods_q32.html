@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安名師特訓 - PSDLC 風險處理實務</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .teacher-avatar {
+            width: 60px;
+            height: 60px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .chat-bubble {
+            position: relative;
+            background: #ffffff;
+            border-radius: .4em;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .chat-bubble:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 0;
+            height: 0;
+            border: 10px solid transparent;
+            border-right-color: #ffffff;
+            border-left: 0;
+            margin-top: -10px;
+            margin-left: -10px;
+        }
+        .option-card {
+            transition: all 0.2s ease;
+        }
+        .option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .option-checkbox:checked + label {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .correct-bg { background-color: #dcfce7 !important; border-color: #22c55e !important; }
+        .wrong-bg { background-color: #fee2e2 !important; border-color: #ef4444 !important; }
+        .missing-bg { border-color: #f59e0b !important; background-color: #fef3c7 !important; }
+    </style>
+</head>
+<body class="text-slate-800 pb-12">
+
+    <!-- Header / Instructor Intro -->
+    <header class="bg-slate-800 text-white p-4 shadow-lg sticky top-0 z-10">
+        <div class="max-w-3xl mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-bold"><i class="fas fa-shield-halved mr-2"></i>iPAS 資安實戰教室</h1>
+                <p class="text-xs text-slate-300">單元：PSDLC 產品安全開發生命週期</p>
+            </div>
+            <div class="bg-blue-600 px-3 py-1 rounded text-xs font-bold">Q32 - 風險處理</div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto p-4 space-y-6">
+
+        <!-- Teacher Intro -->
+        <div class="flex items-start gap-4 mb-6">
+            <div class="teacher-avatar flex-shrink-0">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <div class="chat-bubble flex-1 border border-slate-200">
+                <p class="font-bold text-blue-600 mb-1">資安教練：</p>
+                <p>各位同學注意！很多人以為資安是「產品做完再掃描一下」就好，這是大錯特錯的觀念！我們今天要看 XYZ 公司如何「正確」處理產品資安風險。記住，這是一題<strong>複選題</strong>，別掉進陷阱囉！</p>
+            </div>
+        </div>
+
+        <!-- Scenario & Question -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-blue-50 p-4 border-b border-blue-100">
+                <h2 class="font-bold text-blue-900"><i class="fas fa-file-alt mr-2"></i>題組情境</h2>
+                <p class="mt-2 text-sm text-slate-700 leading-relaxed">
+                    XYZ 公司已導入產品安全開發生命週期 (PSDLC)，在開發新產品時，需系統性地處理產品相關的資安風險，以降低產品上市後的安全事件與營運衝擊。
+                </p>
+            </div>
+            
+            <div class="p-6">
+                <h3 class="text-lg font-bold mb-4">【題目】XYZ 公司在開發新產品時所面臨的資安風險，下列哪些方式可以導入處理？（複選）</h3>
+                
+                <form id="quizForm" class="space-y-3">
+                    <!-- Option A -->
+                    <div class="option-card relative">
+                        <input type="checkbox" id="optA" name="options" value="A" class="option-checkbox hidden peer">
+                        <label for="optA" class="flex items-start p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 peer-checked:border-blue-500 transition-colors h-full select-none">
+                            <div class="flex-shrink-0 w-6 h-6 border-2 border-slate-300 rounded mr-3 flex items-center justify-center peer-checked:bg-blue-500 peer-checked:border-blue-500 text-white transition-all">
+                                <i class="fas fa-check text-xs opacity-0 peer-checked:opacity-100"></i>
+                            </div>
+                            <span class="text-base font-medium">(A) 當產品開發測試階段完成後，再處理所有安全問題</span>
+                        </label>
+                    </div>
+
+                    <!-- Option B -->
+                    <div class="option-card relative">
+                        <input type="checkbox" id="optB" name="options" value="B" class="option-checkbox hidden peer">
+                        <label for="optB" class="flex items-start p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 peer-checked:border-blue-500 transition-colors h-full select-none">
+                            <div class="flex-shrink-0 w-6 h-6 border-2 border-slate-300 rounded mr-3 flex items-center justify-center peer-checked:bg-blue-500 peer-checked:border-blue-500 text-white transition-all">
+                                <i class="fas fa-check text-xs opacity-0 peer-checked:opacity-100"></i>
+                            </div>
+                            <span class="text-base font-medium">(B) 產品安全事件管理上，需通知客戶相關風險並提供產品安全修補，並納入新產品的設計考量之中</span>
+                        </label>
+                    </div>
+
+                    <!-- Option C -->
+                    <div class="option-card relative">
+                        <input type="checkbox" id="optC" name="options" value="C" class="option-checkbox hidden peer">
+                        <label for="optC" class="flex items-start p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 peer-checked:border-blue-500 transition-colors h-full select-none">
+                            <div class="flex-shrink-0 w-6 h-6 border-2 border-slate-300 rounded mr-3 flex items-center justify-center peer-checked:bg-blue-500 peer-checked:border-blue-500 text-white transition-all">
+                                <i class="fas fa-check text-xs opacity-0 peer-checked:opacity-100"></i>
+                            </div>
+                            <span class="text-base font-medium">(C) 產品設計階段進行威脅建模，以分析潛在漏洞</span>
+                        </label>
+                    </div>
+
+                    <!-- Option D -->
+                    <div class="option-card relative">
+                        <input type="checkbox" id="optD" name="options" value="D" class="option-checkbox hidden peer">
+                        <label for="optD" class="flex items-start p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 peer-checked:border-blue-500 transition-colors h-full select-none">
+                            <div class="flex-shrink-0 w-6 h-6 border-2 border-slate-300 rounded mr-3 flex items-center justify-center peer-checked:bg-blue-500 peer-checked:border-blue-500 text-white transition-all">
+                                <i class="fas fa-check text-xs opacity-0 peer-checked:opacity-100"></i>
+                            </div>
+                            <span class="text-base font-medium">(D) 使用靜態程式碼分析工具，檢查程式碼安全</span>
+                        </label>
+                    </div>
+
+                    <div id="errorMsg" class="hidden text-red-500 text-sm font-bold text-center mt-2">
+                        <i class="fas fa-exclamation-circle"></i> 請至少選擇一個選項再提交！
+                    </div>
+
+                    <button type="button" onclick="submitQuiz()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg mt-6 shadow transition-transform active:scale-95 flex items-center justify-center text-lg">
+                        送出答案 <i class="fas fa-paper-plane ml-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Result Section (Hidden by default) -->
+        <div id="resultSection" class="hidden space-y-6 fade-in">
+            
+            <!-- Outcome Banner -->
+            <div id="outcomeBanner" class="p-6 rounded-xl text-center shadow-md">
+                <!-- Content injected by JS -->
+            </div>
+
+            <!-- Detailed Explanation -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2"><i class="fas fa-search"></i> 名師詳解</h3>
+                
+                <div class="space-y-4">
+                    <div class="p-4 rounded-lg bg-red-50 border-l-4 border-red-500">
+                        <div class="flex items-center mb-2">
+                            <span class="font-bold text-red-700 mr-2">(A) 錯誤</span>
+                            <span class="text-xs bg-red-200 text-red-800 px-2 py-0.5 rounded">地雷陷阱</span>
+                        </div>
+                        <p class="text-sm text-slate-700">將資安問題留到「測試完成後」才處理，修補成本會大幅提高，且可能導致產品延期。這違反了 <strong>Security by Design</strong> 的原則，資安應該是「前移 (Shift Left)」，而不是最後補救。</p>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-green-50 border-l-4 border-green-500">
+                        <div class="flex items-center mb-2">
+                            <span class="font-bold text-green-700 mr-2">(B) 正確</span>
+                            <span class="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded">持續改善</span>
+                        </div>
+                        <p class="text-sm text-slate-700">這叫「回饋循環 (Feedback Loop)」。舊產品的安全事件經驗，必須納入新產品的設計考量，這是 PSDLC 持續改善的重要精神。</p>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-green-50 border-l-4 border-green-500">
+                        <div class="flex items-center mb-2">
+                            <span class="font-bold text-green-700 mr-2">(C) 正確</span>
+                            <span class="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded">關鍵步驟</span>
+                        </div>
+                        <p class="text-sm text-slate-700"><strong>威脅建模 (Threat Modeling)</strong> 是在「設計階段」最重要的資安活動，可以及早發現架構上的風險，是預防性最強的作法。</p>
+                    </div>
+
+                    <div class="p-4 rounded-lg bg-green-50 border-l-4 border-green-500">
+                        <div class="flex items-center mb-2">
+                            <span class="font-bold text-green-700 mr-2">(D) 正確</span>
+                            <span class="text-xs bg-green-200 text-green-800 px-2 py-0.5 rounded">開發工具</span>
+                        </div>
+                        <p class="text-sm text-slate-700"><strong>靜態程式碼分析 (SAST)</strong> 可以在寫程式的「開發階段」就找出語法或邏輯上的潛在弱點，避免漏洞進入正式版。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extended Learning -->
+            <div class="bg-indigo-50 rounded-xl shadow-sm border border-indigo-100 p-6">
+                <h3 class="text-lg font-bold text-indigo-900 mb-4"><i class="fas fa-brain mr-2"></i>教練的私房筆記（必考觀念）</h3>
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <h4 class="font-bold text-indigo-700 mb-2">PSDLC 核心精神</h4>
+                        <ul class="list-disc list-inside text-sm text-slate-600 space-y-1">
+                            <li>資安不是最後才補，而是<strong>從設計開始</strong></li>
+                            <li>越早處理風險，成本越低 (1:10:100 法則)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <h4 class="font-bold text-indigo-700 mb-2">記憶口訣</h4>
+                        <p class="text-sm text-slate-600 font-medium text-center bg-indigo-50 p-2 rounded">
+                            「安全要前移，設計先想清，<br>寫碼要檢查，事件要回饋」
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-4 bg-white p-4 rounded-lg shadow-sm">
+                    <h4 class="font-bold text-indigo-700 mb-2">各階段對應重點</h4>
+                    <div class="flex justify-between text-xs text-center">
+                        <div class="flex-1">
+                            <div class="font-bold text-slate-800">設計階段</div>
+                            <div class="text-blue-600 mt-1">威脅建模</div>
+                        </div>
+                        <div class="text-slate-300">➜</div>
+                        <div class="flex-1">
+                            <div class="font-bold text-slate-800">開發階段</div>
+                            <div class="text-blue-600 mt-1">程式碼檢測 (SAST)</div>
+                        </div>
+                        <div class="text-slate-300">➜</div>
+                        <div class="flex-1">
+                            <div class="font-bold text-slate-800">測試階段</div>
+                            <div class="text-blue-600 mt-1">滲透測試 / DAST</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-indigo-200">
+                    <h4 class="font-bold text-indigo-800 mb-2"><i class="fas fa-question-circle"></i> 自我檢測（想一想）</h4>
+                    <ul class="text-sm text-slate-700 space-y-2">
+                        <li>1. 為什麼在設計階段修正漏洞成本最低？(提示：還沒寫成程式碼)</li>
+                        <li>2. 題目若出現「前移安全」，你要優先選哪個階段的活動？(提示：設計階段)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button onclick="resetQuiz()" class="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-6 rounded-lg shadow transition-colors flex items-center justify-center">
+                <i class="fas fa-redo mr-2"></i> 重新作答
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        const correctAnswers = ['B', 'C', 'D'];
+
+        function submitQuiz() {
+            const form = document.getElementById('quizForm');
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+            const userSelection = [];
+            
+            // Get checked values
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    userSelection.push(cb.value);
+                }
+            });
+
+            // Validation: Cannot be empty
+            const errorMsg = document.getElementById('errorMsg');
+            if (userSelection.length === 0) {
+                errorMsg.classList.remove('hidden');
+                return;
+            } else {
+                errorMsg.classList.add('hidden');
+            }
+
+            // Lock inputs
+            checkboxes.forEach(cb => cb.disabled = true);
+            document.querySelector('button[onclick="submitQuiz()"]').classList.add('hidden');
+
+            // Compare answers logic
+            // Sort both to ensure order doesn't matter (though A,B,C,D usually sorted)
+            userSelection.sort();
+            const correctSorted = [...correctAnswers].sort();
+            
+            const isPerfect = JSON.stringify(userSelection) === JSON.stringify(correctSorted);
+
+            // UI Logic for Answers
+            checkboxes.forEach(cb => {
+                const label = cb.nextElementSibling;
+                const iconContainer = label.querySelector('div');
+                const icon = iconContainer.querySelector('i');
+                const val = cb.value;
+
+                // Reset base classes to ensure clean slate if needed (mostly useful on retry)
+                label.classList.remove('border-2', 'border-slate-200', 'hover:bg-slate-50', 'bg-eff6ff');
+
+                if (correctAnswers.includes(val)) {
+                    // It is a CORRECT option
+                    if (cb.checked) {
+                        // User selected it CORRECTLY
+                        label.classList.add('correct-bg', 'border-2');
+                        iconContainer.classList.remove('peer-checked:bg-blue-500', 'peer-checked:border-blue-500', 'border-slate-300');
+                        iconContainer.classList.add('bg-green-500', 'border-green-500');
+                        icon.className = "fas fa-check text-white";
+                        icon.classList.remove('opacity-0');
+                    } else {
+                        // User MISSED a correct option
+                        label.classList.add('missing-bg', 'border-2', 'border-dashed');
+                        // Add a "Should have picked" indicator text inside label? 
+                        // Let's just style the box to show it was missing
+                        const span = label.querySelector('span');
+                        span.innerHTML += ` <span class="text-xs text-amber-700 font-bold ml-2">(漏選了這項！)</span>`;
+                    }
+                } else {
+                    // It is a WRONG option
+                    if (cb.checked) {
+                        // User WRONGLY selected it
+                        label.classList.add('wrong-bg', 'border-2');
+                        iconContainer.classList.remove('peer-checked:bg-blue-500', 'peer-checked:border-blue-500', 'border-slate-300');
+                        iconContainer.classList.add('bg-red-500', 'border-red-500');
+                        icon.className = "fas fa-times text-white";
+                        icon.classList.remove('opacity-0');
+                    } else {
+                        // User CORRECTLY avoided it
+                        label.classList.add('opacity-50', 'bg-slate-100'); // Dim it out
+                    }
+                }
+            });
+
+            // Show Result Section
+            const resultSection = document.getElementById('resultSection');
+            const outcomeBanner = document.getElementById('outcomeBanner');
+            
+            resultSection.classList.remove('hidden');
+
+            if (isPerfect) {
+                outcomeBanner.className = "p-6 rounded-xl text-center shadow-md bg-green-600 text-white";
+                outcomeBanner.innerHTML = `
+                    <h2 class="text-2xl font-bold mb-2"><i class="fas fa-trophy text-yellow-300"></i> 完全正確！</h2>
+                    <p>太棒了！你的觀念非常正確，已經掌握了 PSDLC「資安前移」的精髓！</p>
+                    <p class="mt-2 text-sm bg-green-700 inline-block px-3 py-1 rounded">正確答案：B、C、D</p>
+                `;
+            } else {
+                outcomeBanner.className = "p-6 rounded-xl text-center shadow-md bg-amber-500 text-white";
+                outcomeBanner.innerHTML = `
+                    <h2 class="text-2xl font-bold mb-2"><i class="fas fa-exclamation-triangle"></i> 再接再厲！</h2>
+                    <p>有點可惜喔！請查看下方的解析，找出你的觀念盲點。</p>
+                    <p class="mt-2 text-sm bg-amber-600 inline-block px-3 py-1 rounded">正確答案：B、C、D</p>
+                `;
+            }
+
+            // Scroll to results
+            setTimeout(() => {
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function resetQuiz() {
+            // Reset form
+            const form = document.getElementById('quizForm');
+            form.reset();
+            
+            // Re-enable inputs and clean up styles
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.disabled = false;
+                const label = cb.nextElementSibling;
+                // Restore original label classes
+                label.className = "flex items-start p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 peer-checked:border-blue-500 transition-colors h-full select-none";
+                
+                // Restore icon container
+                const iconContainer = label.querySelector('div');
+                iconContainer.className = "flex-shrink-0 w-6 h-6 border-2 border-slate-300 rounded mr-3 flex items-center justify-center peer-checked:bg-blue-500 peer-checked:border-blue-500 text-white transition-all";
+                
+                // Restore icon
+                const icon = iconContainer.querySelector('i');
+                icon.className = "fas fa-check text-xs opacity-0 peer-checked:opacity-100";
+                
+                // Remove appended text span if any
+                const span = label.querySelector('span');
+                // A bit hacky but simple way to reset text without complex DOM manipulation
+                if (cb.value === 'A') span.innerText = "(A) 當產品開發測試階段完成後，再處理所有安全問題";
+                if (cb.value === 'B') span.innerText = "(B) 產品安全事件管理上，需通知客戶相關風險並提供產品安全修補，並納入新產品的設計考量之中";
+                if (cb.value === 'C') span.innerText = "(C) 產品設計階段進行威脅建模，以分析潛在漏洞";
+                if (cb.value === 'D') span.innerText = "(D) 使用靜態程式碼分析工具，檢查程式碼安全";
+            });
+
+            // Show submit button
+            document.querySelector('button[onclick="submitQuiz()"]').classList.remove('hidden');
+
+            // Hide results
+            document.getElementById('resultSection').classList.add('hidden');
+            
+            // Scroll top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

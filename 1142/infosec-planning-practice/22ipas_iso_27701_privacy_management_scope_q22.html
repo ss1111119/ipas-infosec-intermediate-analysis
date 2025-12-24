@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安教學 - ISO 27701 導入邏輯 (Q22)</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #16a34a;
+            --error-color: #dc2626;
+            --warning-bg: #fffbeb;
+            --warning-text: #92400e;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-secondary: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .role-badge {
+            background-color: #fbbf24;
+            color: #78350f;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Scenario Section */
+        details.scenario-box {
+            background-color: #f0f9ff;
+            border-left: 5px solid var(--primary-color);
+            padding: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        details.scenario-box summary {
+            font-weight: bold;
+            color: var(--secondary-color);
+            outline: none;
+            list-style: none; /* Remove default triangle */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        details.scenario-box summary::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        details.scenario-box[open] summary::after {
+            content: '-';
+        }
+
+        .scenario-content {
+            margin-top: 12px;
+            color: #334155;
+            font-size: 1.05rem;
+        }
+
+        /* Quiz Section */
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .highlight-not {
+            color: var(--error-color);
+            font-size: 1.4rem;
+            font-weight: 900;
+            text-decoration: underline;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-label:hover {
+            background-color: #f1f5f9;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 16px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-color);
+        }
+
+        /* Interactive States */
+        .option-label.selected {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        .option-label.correct {
+            border-color: var(--success-color);
+            background-color: #dcfce7;
+            color: #14532d;
+        }
+
+        .option-label.wrong {
+            border-color: var(--error-color);
+            background-color: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 24px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-submit:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* Feedback Section */
+        #feedback-section {
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .result-banner {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .result-success { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .result-fail { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+        /* Accordion for Analysis */
+        .accordion {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-header {
+            background-color: #f8fafc;
+            padding: 12px 16px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-content {
+            padding: 16px;
+            background-color: white;
+            display: none;
+            border-top: 1px solid #e2e8f0;
+            color: #475569;
+        }
+
+        .accordion-content.show {
+            display: block;
+        }
+
+        /* Core Concepts & Traps */
+        .concept-box {
+            background-color: #e0e7ff;
+            border-left: 5px solid #4338ca;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .trap-box {
+            background-color: var(--warning-bg);
+            border: 2px solid #fcd34d;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .mnemonic-card {
+            background: linear-gradient(to right, #4f46e5, #ec4899);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Self Assessment */
+        .self-check-item {
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .toggle-answer-btn {
+            background: none;
+            border: 1px solid #94a3b8;
+            color: #64748b;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .check-answer {
+            margin-top: 8px;
+            padding: 10px;
+            background: white;
+            border-left: 3px solid var(--success-color);
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Utility */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+        .badge-correct { background: #dcfce7; color: #166534; }
+        .badge-wrong { background: #fee2e2; color: #991b1b; }
+        
+        ul.concept-list {
+            padding-left: 20px;
+        }
+        ul.concept-list li {
+            margin-bottom: 8px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- Header -->
+    <header>
+        <span class="role-badge">iPAS 資安補教名師</span>
+        <h1>ISO/IEC 27701 隱私資訊管理導入實務</h1>
+        <p>題組單元：Q22 - 標準關聯性與適用範圍</p>
+    </header>
+
+    <!-- Scenario -->
+    <details class="scenario-box" open>
+        <summary>【題組共用情境】 (點擊可收合)</summary>
+        <div class="scenario-content">
+            <p>國內總公司因應海外客戶的要求，特別重視個人資料保護，因此要求公司需通過 <strong>ISO/IEC 27701 隱私資訊管理系統（PIMS）</strong> 驗證，以確保隱私治理符合國際規範並提升客戶信任。</p>
+        </div>
+    </details>
+
+    <br>
+
+    <!-- Question Card -->
+    <div class="card" id="quiz-card">
+        <h3 class="question-title">請問下列何項措施最<span class="highlight-not">「不」</span>適切？</h3>
+        
+        <div class="options-group" id="options-container">
+            <!-- Options will be handled by JS for selection styling, but structure is here -->
+            <label class="option-label" data-id="A">
+                <input type="radio" name="q22" value="A">
+                <span>(A) 審視 ISO/IEC 27001 資訊安全管理驗證的範圍是否符合需求</span>
+            </label>
+
+            <label class="option-label" data-id="B">
+                <input type="radio" name="q22" value="B">
+                <span>(B) 積極尋求通過 BS 10012 個人資訊管理驗證</span>
+            </label>
+
+            <label class="option-label" data-id="C">
+                <input type="radio" name="q22" value="C">
+                <span>(C) 選擇業務部門優先導入 ISO/IEC 27701 資訊安全管理驗證</span>
+            </label>
+
+            <label class="option-label" data-id="D">
+                <input type="radio" name="q22" value="D">
+                <span>(D) 選擇生產基地優先導入 ISO/IEC 27701 資訊安全管理驗證</span>
+            </label>
+        </div>
+
+        <button class="btn-submit" id="submit-btn" disabled>提交答案</button>
+    </div>
+
+    <!-- Feedback & Analysis Section -->
+    <div id="feedback-section">
+        
+        <!-- Result Banner -->
+        <div id="result-banner" class="result-banner"></div>
+
+        <!-- Option Analysis -->
+        <div class="card">
+            <h3 class="section-title">🎓 名師逐項解析</h3>
+            <p style="margin-bottom: 12px; color: #64748b; font-size: 0.9rem;">點擊下方選項查看詳細說明：</p>
+            
+            <div class="accordion">
+                <!-- Option A -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>(A) 審視 ISO 27001 驗證範圍</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <span class="badge badge-correct">適切</span>
+                        <p><strong>這是絕對必要的步驟！</strong><br>ISO 27701 是 ISO 27001 的「擴充標準 (Extension)」。要拿 27701，前提是必須先有（或同時申請）27001。27701 的驗證範圍通常不能大於 27001 的範圍，因此必須先審視母標準的範圍設定。</p>
+                    </div>
+                </div>
+
+                <!-- Option B -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>(B) 積極尋求通過 BS 10012 驗證</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content" style="display: block; background-color: #fffbeb;">
+                        <span class="badge badge-wrong">不適切 (正確答案)</span>
+                        <p><strong>這就是多此一舉！</strong><br>雖然 BS 10012 也是很好的個資標準（英國標準），但題目情境的目標是「ISO 27701」。去申請另一個獨立的 BS 標準並非 ISO 27701 的前置作業，既耗費資源也非必要路徑。應該專注於整合 ISO 27001 + 27701。</p>
+                    </div>
+                </div>
+
+                <!-- Option C -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>(C) 選擇業務部門優先導入</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <span class="badge badge-correct">適切</span>
+                        <p>ISO 標準允許設定「驗證範圍 (Scope)」。企業可以基於風險考量、預算或急迫性，只選擇接觸客戶個資最多的「業務部門」作為優先導入範圍，這是合乎邏輯的策略。</p>
+                    </div>
+                </div>
+
+                <!-- Option D -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>(D) 選擇生產基地優先導入</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <span class="badge badge-correct">適切</span>
+                        <p>同理，若生產基地涉及員工個資或客戶機密數據處理，將其設為驗證範圍也是符合規範的操作。ISO 並未強迫第一次驗證就必須包含全公司。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Core Concepts -->
+        <div class="card concept-box">
+            <h3 class="section-title">💡 核心觀念：白話文講清楚</h3>
+            <ul class="concept-list">
+                <li><strong>ISO/IEC 27701 是什麼？</strong><br>它是「隱私資訊管理系統 (PIMS)」。你可以把它想像成 ISO 27001 (資安) 的「DLC 擴充包」或「外掛模組」。</li>
+                <li><strong>主從關係是關鍵：</strong><br>ISO 27001 是主機，ISO 27701 是擴充包。你不能單獨買擴充包來玩，一定要依附在 ISO 27001 之下。</li>
+                <li><strong>為何不是 BS 10012？</strong><br>BS 10012 是英國標準協會制定的，它是一個「獨立」的遊戲。雖然玩法（保護個資）很像，但它是獨立運作的，不需要依附 ISO 27001。既然公司指名要 ISO 27701，跑去買 BS 10012 就是買錯遊戲了。</li>
+            </ul>
+        </div>
+
+        <!-- Traps & Mnemonics -->
+        <div class="card">
+            <h3 class="section-title">⚠️ 考試常見陷阱</h3>
+            <div class="trap-box">
+                <ol style="padding-left: 20px;">
+                    <li><strong>陷阱一：</strong>誤以為「任何個資標準」都可以拿來抵用。事實上，ISO 標準有嚴格的家族關係。</li>
+                    <li><strong>陷阱二：</strong>忽略「Extension (擴充)」這個關鍵字。題目若出現 ISO 27701 能否「獨立驗證」，答案永遠是 NO。</li>
+                    <li><strong>陷阱三：</strong>誤以為導入範圍必須一次到位（全公司）。其實實務上常採分階段導入（如先做機房或業務部）。</li>
+                </ol>
+            </div>
+
+            <div class="mnemonic-card">
+                🧠 記憶口訣：<br>
+                「27001 是地基，27701 蓋樓梯；<br>
+                BS 10012 是隔壁棟，不要跑錯去按鈴！」
+            </div>
+        </div>
+
+        <!-- Self Assessment -->
+        <div class="card">
+            <h3 class="section-title">📝 自我檢測 (不記分)</h3>
+            
+            <div class="self-check-item">
+                <p><strong>Q1：</strong> 若公司目前完全沒有任何 ISO 認證，老闆想要「只」申請 ISO 27701 證書，顧問該如何建議？</p>
+                <button class="toggle-answer-btn" onclick="toggleSelfCheck(this)">顯示參考答案</button>
+                <div class="check-answer">
+                    <strong>答：</strong> 不可行。必須告知老闆 ISO 27701 需依附於 ISO 27001。建議需同時導入 ISO 27001 與 ISO 27701，或先通過 27001。
+                </div>
+            </div>
+
+            <div class="self-check-item">
+                <p><strong>Q2：</strong> BS 10012 和 ISO 27701 最大的架構差異是什麼？</p>
+                <button class="toggle-answer-btn" onclick="toggleSelfCheck(this)">顯示參考答案</button>
+                <div class="check-answer">
+                    <strong>答：</strong> BS 10012 可獨立驗證（High Level Structure）；ISO 27701 則是 ISO 27001 的擴充標準，不可獨立驗證。
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 40px;">
+            iPAS 資訊安全工程師考照衝刺教材 | 生成日期：2025
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // --- Logic for Interactivity ---
+    
+    const correctId = 'B';
+    const submitBtn = document.getElementById('submit-btn');
+    const options = document.querySelectorAll('.option-label');
+    const radios = document.querySelectorAll('input[name="q22"]');
+    const feedbackSection = document.getElementById('feedback-section');
+    const resultBanner = document.getElementById('result-banner');
+
+    let selectedValue = null;
+    let isSubmitted = false;
+
+    // 1. Listen for Selection
+    options.forEach(option => {
+        option.addEventListener('click', function() {
+            if (isSubmitted) return; // Prevent change after submit
+
+            // Visual update for selection
+            options.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+
+            // Update state
+            const radio = this.querySelector('input');
+            radio.checked = true;
+            selectedValue = radio.value;
+            
+            // Enable submit button
+            submitBtn.disabled = false;
+        });
+    });
+
+    // 2. Handle Submit
+    submitBtn.addEventListener('click', function() {
+        if (!selectedValue || isSubmitted) return;
+        
+        isSubmitted = true;
+        this.style.display = 'none'; // Hide submit button
+        
+        // Check Answer
+        const isCorrect = selectedValue === correctId;
+        
+        // Show Banner
+        resultBanner.className = 'result-banner ' + (isCorrect ? 'result-success' : 'result-fail');
+        resultBanner.innerHTML = isCorrect 
+            ? '🎉 答對了！觀念正確！<br>目標是 27701，確實不需要多繞路去拿 BS 10012。' 
+            : '❌ 答錯了！<br>正確答案是 (B)。請看下方解析釐清觀念。';
+
+        // Styling Options (Show Correct/Wrong)
+        options.forEach(option => {
+            const id = option.getAttribute('data-id');
+            option.style.cursor = 'default';
+            
+            if (id === correctId) {
+                option.classList.add('correct');
+                // Ensure the correct one is marked visually even if not selected
+            } else if (id === selectedValue && !isCorrect) {
+                option.classList.add('wrong');
+            } else {
+                option.style.opacity = '0.5';
+            }
+        });
+
+        // Show Feedback Section
+        feedbackSection.style.display = 'block';
+
+        // Auto scroll to feedback
+        feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    // 3. Accordion Logic
+    function toggleAccordion(header) {
+        const content = header.nextElementSibling;
+        const isVisible = content.classList.contains('show');
+        
+        // Optional: Close others? Let's keep multiple open for study ease
+        // content.classList.toggle('show');
+        
+        if (isVisible) {
+            content.classList.remove('show');
+            header.querySelector('span:last-child').textContent = '▼';
+        } else {
+            content.classList.add('show');
+            header.querySelector('span:last-child').textContent = '▲';
+        }
+    }
+
+    // 4. Self Check Toggle
+    function toggleSelfCheck(btn) {
+        const answerDiv = btn.nextElementSibling;
+        const isVisible = answerDiv.style.display === 'block';
+        
+        if (isVisible) {
+            answerDiv.style.display = 'none';
+            btn.textContent = '顯示參考答案';
+        } else {
+            answerDiv.style.display = 'block';
+            btn.textContent = '隱藏參考答案';
+        }
+    }
+
+</script>
+
+</body>
+</html>
