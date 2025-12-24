@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iPAS 資安重點衝刺 - Deepfake 綜合防禦 (Q12)</title>
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --success: #16a34a;
+        --danger: #dc2626;
+        --warning: #d97706;
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; }
+    
+    body {
+        font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        line-height: 1.6;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* Header Styles */
+    header {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        color: white;
+        padding: 24px;
+        border-radius: 12px 12px 0 0;
+        border-bottom: 4px solid var(--primary);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 { margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
+    .subtitle { color: #94a3b8; font-size: 0.9rem; margin-top: 5px; }
+    .badge {
+        background-color: var(--primary);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        vertical-align: middle;
+    }
+
+    /* Card Styles */
+    .card {
+        background: var(--card-bg);
+        border-radius: 0 0 12px 12px;
+        padding: 30px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        border: 1px solid var(--border);
+        border-top: none;
+    }
+
+    .question-box {
+        font-size: 1.15rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        padding-left: 15px;
+        border-left: 4px solid var(--primary);
+    }
+
+    /* Option Styles */
+    .options-group { display: flex; flex-direction: column; gap: 12px; }
+    
+    .option-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 12px 16px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .option-item:hover { background-color: #f1f5f9; }
+    
+    /* Hide default checkbox but keep functionality */
+    input[type="checkbox"] {
+        accent-color: var(--primary);
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+        margin-top: 4px;
+        cursor: pointer;
+    }
+
+    /* State Classes for Feedback */
+    .correct-highlight { border-color: var(--success); background-color: #f0fdf4; }
+    .wrong-highlight { border-color: var(--danger); background-color: #fef2f2; }
+    .missed-highlight { border-color: var(--warning); background-color: #fffbeb; border-style: dashed; }
+
+    /* Buttons */
+    .btn-group { margin-top: 25px; display: flex; gap: 15px; }
+    
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.2s;
+    }
+
+    .btn-primary { background-color: var(--primary); color: white; }
+    .btn-primary:hover { background-color: var(--primary-dark); }
+    
+    .btn-reset { background-color: #cbd5e1; color: #334155; }
+    .btn-reset:hover { background-color: #94a3b8; }
+
+    /* Result Area */
+    .result-area {
+        margin-top: 25px;
+        padding: 15px;
+        border-radius: 8px;
+        display: none; /* Hidden by default */
+    }
+    
+    .result-success { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .result-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    /* Analysis Sections */
+    .analysis-section { display: none; margin-top: 30px; animation: fadeIn 0.5s; }
+    
+    .section-title {
+        font-size: 1.2rem;
+        color: var(--text-main);
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 8px;
+        margin-bottom: 15px;
+        margin-top: 30px;
+        font-weight: bold;
+    }
+
+    .accordion-item {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        margin-bottom: 10px;
+        overflow: hidden;
+    }
+
+    .accordion-header {
+        background-color: #f8fafc;
+        padding: 12px 15px;
+        cursor: pointer;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .accordion-header:hover { background-color: #f1f5f9; }
+
+    .accordion-content {
+        padding: 15px;
+        background-color: white;
+        border-top: 1px solid var(--border);
+        display: none; /* JS toggles this */
+        font-size: 0.95rem;
+    }
+
+    .tag { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin-right: 8px; font-weight: bold; }
+    .tag-tech { background-color: #dbeafe; color: #1e40af; }
+    .tag-proc { background-color: #fce7f3; color: #9d174d; }
+    .tag-trap { background-color: #fee2e2; color: #991b1b; }
+
+    /* Educational Blocks */
+    .concept-box {
+        background-color: #eff6ff;
+        border-left: 4px solid var(--primary);
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 0 4px 4px 0;
+    }
+
+    .trap-box {
+        background-color: #fff7ed;
+        border-left: 4px solid var(--warning);
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .mnemonic-box {
+        background-color: #f0fdf4;
+        border: 2px dashed var(--success);
+        padding: 20px;
+        text-align: center;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+
+    .mnemonic-text { font-size: 1.5rem; font-weight: bold; color: var(--success); letter-spacing: 2px; }
+
+    /* Self Check */
+    .self-check-card {
+        background: white;
+        border: 1px solid var(--border);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+    
+    .hint-btn {
+        font-size: 0.8rem;
+        color: var(--primary);
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-decoration: underline;
+        padding: 0;
+    }
+    
+    .answer-reveal { display: none; margin-top: 8px; color: var(--success); font-weight: bold; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Print Optimization */
+    @media print {
+        .btn-group, .hint-btn { display: none; }
+        .accordion-content { display: block !important; }
+        .analysis-section { display: block !important; }
+        body { background-color: white; }
+        .container { max-width: 100%; box-shadow: none; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1><span class="badge">iPAS 資安管理師</span> 考題模擬教室</h1>
+        <div class="subtitle">單元：新興科技風險與防禦 (Q12)</div>
+    </header>
+
+    <div class="card">
+        <!-- Question Section -->
+        <div class="question-box">
+            <span style="color:var(--primary);">[複選題]</span> 
+            為了防禦日益逼真的深度偽造（Deepfake）攻擊，組織應採取結合技術與程序的綜合性防禦策略。下列哪些措施屬於此類策略？
+        </div>
+
+        <div class="options-group" id="quizForm">
+            <label class="option-item" id="label-A">
+                <input type="checkbox" name="option" value="A">
+                <span>(A) 採用具備活體偵測（Liveness Detection）功能的生物辨識系統</span>
+            </label>
+            
+            <label class="option-item" id="label-B">
+                <input type="checkbox" name="option" value="B">
+                <span>(B) 建立一個獨立的、高可信度的通訊管道（如緊急簡訊群組），用於驗證高風險指令</span>
+            </label>
+            
+            <label class="option-item" id="label-C">
+                <input type="checkbox" name="option" value="C">
+                <span>(C) 禁止所有員工使用社交媒體</span>
+            </label>
+            
+            <label class="option-item" id="label-D">
+                <input type="checkbox" name="option" value="D">
+                <span>(D) 針對財務、人事等敏感操作，實施職務區隔（Segregation of Duties, SoD）與多重審批流程</span>
+            </label>
+        </div>
+
+        <!-- Feedback Area -->
+        <div id="resultArea" class="result-area"></div>
+
+        <!-- Buttons -->
+        <div class="btn-group">
+            <button class="btn btn-primary" id="submitBtn" onclick="checkAnswer()">提交答案</button>
+            <button class="btn btn-reset" id="resetBtn" onclick="resetQuiz()" style="display:none;">重練一次</button>
+        </div>
+    </div>
+
+    <!-- Analysis Content (Hidden initially) -->
+    <div id="analysisSection" class="analysis-section card" style="margin-top: 0; padding-top: 0;">
+        
+        <!-- Accordion Analysis -->
+        <div class="section-title">💡 名師逐項解析 (點擊展開)</div>
+        
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>(A) 具備活體偵測功能的生物辨識</span>
+                <span class="badge" style="background:var(--success)">正確</span>
+            </div>
+            <div class="accordion-content">
+                <span class="tag tag-tech">技術控制</span>
+                <p><strong>為什麼要選：</strong>Deepfake 主要是生成 2D 影像。活體偵測（Liveness Detection）透過偵測眨眼、微表情、或是要求使用者做特定動作（點頭、轉頭）來確認鏡頭前是「真人」而非螢幕播放的影片或 AI 合成圖像。這是目前技術端最有效的反制手段之一。</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>(B) 建立獨立的通訊管道 (Out-of-Band)</span>
+                <span class="badge" style="background:var(--success)">正確</span>
+            </div>
+            <div class="accordion-content">
+                <span class="tag tag-proc">程序控制</span>
+                <p><strong>為什麼要選：</strong>這叫做「頻帶外驗證」（Out-of-Band Verification）。如果老闆在視訊會議（頻帶內）叫你匯款，你覺得怪怪的，應該用完全不同的管道（如：打手機、加密簡訊群組）去確認。攻擊者可以偽造視訊，但很難同時駭入並控制老闆的手機通訊。</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>(C) 禁止所有員工使用社交媒體</span>
+                <span class="badge" style="background:var(--danger)">錯誤</span>
+            </div>
+            <div class="accordion-content">
+                <span class="tag tag-trap">常見陷阱</span>
+                <p><strong>為什麼不選：</strong>
+                1. <strong>不可行：</strong>行銷、業務部門需要社群媒體工作。資安不能導致業務停擺（可用性原則）。<br>
+                2. <strong>無效：</strong>攻擊者可以從新聞採訪、公開演講影片獲取高層的臉部素材，不一定要從員工私人社群抓。<br>
+                應採取「適度開放 + 教育訓練」，而非「全面禁止」。</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>(D) 實施職務區隔 (SoD) 與多重審批</span>
+                <span class="badge" style="background:var(--success)">正確</span>
+            </div>
+            <div class="accordion-content">
+                <span class="tag tag-proc">程序控制</span>
+                <p><strong>為什麼要選：</strong>這就是「不把雞蛋放在同一個籃子裡」。即使駭客用 Deepfake 騙過了財務經理（權限A），如果轉帳還需要總經理（權限B）的硬體憑證審核，攻擊就無法完成。透過流程設計來彌補人眼辨識的不足。</p>
+            </div>
+        </div>
+
+        <!-- Core Concepts -->
+        <div class="section-title">📚 核心觀念：技術+程序</div>
+        <div class="concept-box">
+            <h4>1. 什麼是 Deepfake？</h4>
+            <p>利用 AI（GAN 對抗網路）將一個人的臉部或聲音，無縫替換到另一個影片或音訊中。現在技術已能做到「即時視訊偽造」。</p>
+            
+            <h4>2. 為什麼單靠技術不夠？</h4>
+            <p>防禦技術永遠落後於攻擊技術。AI 偵測模型可能會有誤判，或者被更新的生成算法繞過。因此，不能只依賴「軟體判斷」。</p>
+
+            <h4>3. 縱深防禦 (Defense in Depth)</h4>
+            <p>必須結合<strong>技術（活體偵測）</strong>與<strong>程序（SOP、驗證流程）</strong>。當技術失效（看不出來是假的）時，程序（SOP 要求必須打電話確認）能擋下攻擊。</p>
+        </div>
+
+        <!-- Traps -->
+        <div class="section-title">⚠️ 考試常見陷阱</div>
+        <div class="trap-box">
+            <ul>
+                <li><strong>陷阱一：看到「全面禁止」就覺得安全。</strong><br>iPAS 考題中，極端的「禁止所有...」通常是錯的，因為違反了商業運作需求。</li>
+                <li><strong>陷阱二：忽略「程序」的重要性。</strong><br>很多考生以為資安就是買防火牆、防毒軟體。但在對抗詐騙（社交工程）時，SOP（如：要求回撥電話）往往比軟體更有用。</li>
+                <li><strong>陷阱三：把管理手段當作行政庶務。</strong><br>職務區隔（SoD）不只是防內鬼，更是防駭客奪權的重要防線。</li>
+            </ul>
+        </div>
+
+        <!-- Mnemonic -->
+        <div class="section-title">🧠 記憶口訣</div>
+        <div class="mnemonic-box">
+            <div class="mnemonic-text">「活、多、驗、分」</div>
+            <div style="margin-top:10px; color:#555;">
+                <strong>活</strong>體偵測 (技術)<br>
+                <strong>多</strong>重審批 (程序)<br>
+                <strong>驗</strong>證管道 (程序)<br>
+                <strong>分</strong>權制衡 (程序)
+            </div>
+        </div>
+
+        <!-- Self Check -->
+        <div class="section-title">📝 自我檢測 (點擊顯示答案)</div>
+        
+        <div class="self-check-card">
+            <p><strong>Q1：</strong>當總經理透過視訊會議要求財務緊急匯款，財務人員依據公司規定，掛斷視訊並撥打總經理內線確認。這是屬於哪種控制措施？</p>
+            <button class="hint-btn" onclick="toggleAnswer('ans1')">看答案</button>
+            <div id="ans1" class="answer-reveal">頻帶外驗證 (Out-of-Band Verification) / 程序控制</div>
+        </div>
+
+        <div class="self-check-card">
+            <p><strong>Q2：</strong>Deepfake 攻擊主要破壞了資訊安全 CIA 三要素中的哪一項？</p>
+            <button class="hint-btn" onclick="toggleAnswer('ans2')">看答案</button>
+            <div id="ans2" class="answer-reveal">完整性 (Integrity) 與 真實性 (Authenticity)</div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Correct Answer Logic
+    const CORRECT_ANSWERS = ['A', 'B', 'D'];
+
+    function checkAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        let userAnswers = [];
+        
+        // 1. Collect User Answers
+        checkboxes.forEach(cb => {
+            if (cb.checked) userAnswers.push(cb.value);
+            cb.disabled = true; // Disable inputs
+        });
+
+        // 2. Determine Result
+        // Sort arrays to ensure correct comparison
+        userAnswers.sort();
+        const correctSorted = [...CORRECT_ANSWERS].sort();
+        
+        const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctSorted);
+
+        // 3. Render Feedback
+        const resultArea = document.getElementById('resultArea');
+        resultArea.style.display = 'block';
+
+        if (isCorrect) {
+            resultArea.className = 'result-area result-success';
+            resultArea.innerHTML = `<strong>🎉 完全正確！</strong><br>你的觀念非常清晰！Deepfake 防禦需要「技術」與「程序」並重。<br>正確答案正是：A、B、D。`;
+        } else {
+            resultArea.className = 'result-area result-error';
+            resultArea.innerHTML = `<strong>❌ 答案有誤</strong><br>正確答案應該是：<strong>A、B、D</strong>。<br>請參考下方解析，看看哪裡漏選或多選了。`;
+        }
+
+        // 4. Highlight Options
+        checkboxes.forEach(cb => {
+            const label = document.getElementById('label-' + cb.value);
+            const val = cb.value;
+            const isTarget = CORRECT_ANSWERS.includes(val);
+            const isChecked = cb.checked;
+
+            // Remove old classes just in case
+            label.classList.remove('correct-highlight', 'wrong-highlight', 'missed-highlight');
+
+            if (isChecked && isTarget) {
+                // Correctly checked
+                label.classList.add('correct-highlight');
+                label.innerHTML += ` <span style="color:var(--success); font-weight:bold; float:right;">(⭕ 答對)</span>`;
+            } else if (isChecked && !isTarget) {
+                // Wrongly checked
+                label.classList.add('wrong-highlight');
+                label.innerHTML += ` <span style="color:var(--danger); font-weight:bold; float:right;">(❌ 多選)</span>`;
+            } else if (!isChecked && isTarget) {
+                // Missed
+                label.classList.add('missed-highlight');
+                label.innerHTML += ` <span style="color:var(--warning); font-weight:bold; float:right;">(⚠️ 漏選)</span>`;
+            }
+        });
+
+        // 5. Show Buttons and Analysis
+        document.getElementById('submitBtn').style.display = 'none';
+        document.getElementById('resetBtn').style.display = 'inline-block';
+        document.getElementById('analysisSection').style.display = 'block';
+
+        // Scroll to analysis
+        setTimeout(() => {
+            document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    }
+
+    function resetQuiz() {
+        // Reset UI
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => {
+            cb.checked = false;
+            cb.disabled = false;
+            // Restore original text (remove status spans)
+            const label = document.getElementById('label-' + cb.value);
+            label.className = 'option-item';
+            // Simple way to restore text: grab the span inside label
+            const textSpan = label.querySelector('span');
+            // Remove the status text appended at the end
+            // Actually, simplest is to reload page or just clean up status text. 
+            // Let's just remove the <span> added by JS logic.
+            const statusMsg = label.querySelector('span[style]');
+            if(statusMsg) statusMsg.remove();
+        });
+
+        document.getElementById('resultArea').style.display = 'none';
+        document.getElementById('analysisSection').style.display = 'none';
+        document.getElementById('submitBtn').style.display = 'inline-block';
+        document.getElementById('resetBtn').style.display = 'none';
+        
+        // Hide self-check answers
+        document.querySelectorAll('.answer-reveal').forEach(el => el.style.display = 'none');
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleAccordion(header) {
+        const content = header.nextElementSibling;
+        if (content.style.display === 'block') {
+            content.style.display = 'none';
+        } else {
+            content.style.display = 'block';
+        }
+    }
+
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

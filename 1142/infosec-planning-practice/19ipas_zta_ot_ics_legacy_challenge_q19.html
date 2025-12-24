@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安考題解析：OT 環境與零信任架構 (Q19)</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary-color: #475569;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --success-color: #16a34a;
+            --success-bg: #dcfce7;
+            --error-color: #dc2626;
+            --error-bg: #fee2e2;
+            --warning-color: #d97706;
+            --warning-bg: #fef3c7;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1e293b;
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 1.25rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            background-color: #334155;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            padding-bottom: 4rem;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .intro-card {
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #111827;
+        }
+
+        /* Question Styles */
+        .question-header {
+            background-color: #f1f5f9;
+            padding: 1rem 1.5rem;
+            margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .tag {
+            background-color: #dbeafe;
+            color: #1e40af;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.25rem;
+            border: 1px solid #93c5fd;
+        }
+
+        .question-text {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Options */
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .option-label {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .option-card {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .option-card:hover {
+            border-color: #93c5fd;
+            background-color: #eff6ff;
+        }
+
+        .option-input:checked + .option-card {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        .option-input:disabled + .option-card {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-letter {
+            width: 2rem;
+            height: 2rem;
+            background-color: #f3f4f6;
+            color: #6b7280;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .option-input:checked + .option-card .option-letter {
+            background-color: #dbeafe;
+            color: var(--primary-color);
+        }
+
+        /* Button */
+        .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 1.5rem;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Feedback & Explanation */
+        .hidden {
+            display: none;
+        }
+
+        .feedback-box {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid transparent;
+        }
+
+        .feedback-success {
+            background-color: var(--success-bg);
+            border-color: #86efac;
+            color: #14532d;
+        }
+
+        .feedback-error {
+            background-color: var(--error-bg);
+            border-color: #fca5a5;
+            color: #7f1d1d;
+        }
+
+        .explanation-section {
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Accordion / Analysis List */
+        .analysis-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .analysis-item:last-child {
+            border-bottom: none;
+        }
+
+        .analysis-tag {
+            font-weight: bold;
+            min-width: 2.5rem;
+        }
+
+        .tag-correct { color: var(--success-color); }
+        .tag-wrong { color: var(--error-color); }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .compare-box {
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            border: 1px solid;
+        }
+
+        .compare-it {
+            background-color: #eff6ff;
+            border-color: #dbeafe;
+        }
+
+        .compare-ot {
+            background-color: #fff7ed;
+            border-color: #ffedd5;
+        }
+
+        .compare-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .compare-list {
+            list-style-type: disc;
+            padding-left: 1.25rem;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+        
+        .compare-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Whiteboard */
+        .whiteboard {
+            background-color: #334155;
+            color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .highlight-text {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+            border-left: 3px solid #facc15;
+        }
+
+        /* Traps & Self Check */
+        .trap-box {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .memory-box {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .self-check-item {
+            margin-bottom: 1rem;
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        details summary {
+            cursor: pointer;
+            color: var(--primary-color);
+            font-weight: 500;
+            user-select: none;
+        }
+        
+        details summary:hover {
+            text-decoration: underline;
+        }
+
+        details p {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #fff;
+            border-left: 3px solid var(--success-color);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        .status-pending { background: #e5e7eb; color: #374151; }
+        .status-done { background: #dbeafe; color: #1e40af; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="brand">
+                <span>🛡️</span> iPAS 資安名師講堂
+            </div>
+            <div class="badge">主題：ZTA in OT</div>
+        </div>
+    </nav>
+
+    <div class="container">
+        
+        <!-- Intro -->
+        <div class="card intro-card">
+            <h2 class="section-title">👨‍🏫 講師引言</h2>
+            <p>各位同學好，OT (營運技術) 環境的資安是 iPAS 考試的深水區。這題考的是「落地實務」，為什麼在辦公室 (IT) 很簡單的零信任，搬到工廠 (OT) 就會撞牆？請特別注意選項中的技術名詞。</p>
+        </div>
+
+        <!-- Question Section -->
+        <div class="card">
+            <div class="question-header">
+                <span class="tag">單選題</span>
+                <span id="statusBadge" class="status-badge status-pending">尚未作答</span>
+                <span style="margin-left: auto; font-size: 0.875rem; color: #64748b;">難度：⭐⭐⭐</span>
+            </div>
+            
+            <p class="question-text">
+                某智慧製造工廠計畫導入零信任安全架構（ZTA），以保護其營運技術（OT）網路。相較於傳統的資訊技術（IT）環境，在 OT 場域中實施 ZTA 時，面臨的最大挑戰通常是什麼？
+            </p>
+
+            <form id="quizForm">
+                <div class="options-grid">
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="A" class="option-input">
+                        <div class="option-card">
+                            <span class="option-letter">A</span>
+                            <span>使用者身分多元，難以統一管理</span>
+                        </div>
+                    </label>
+
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="B" class="option-input">
+                        <div class="option-card">
+                            <span class="option-letter">B</span>
+                            <span>缺乏足夠的網路頻寬來處理持續的驗證請求</span>
+                        </div>
+                    </label>
+
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="C" class="option-input">
+                        <div class="option-card">
+                            <span class="option-letter">C</span>
+                            <span>大量老舊的工業控制系統（ICS）與設備不支援現代化的身分驗證協定</span>
+                        </div>
+                    </label>
+
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="D" class="option-input">
+                        <div class="option-card">
+                            <span class="option-letter">D</span>
+                            <span>OT 環境中的資料流量過於龐大，難以進行深度封包檢測（DPI）</span>
+                        </div>
+                    </label>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn">提交答案 🚀</button>
+            </form>
+
+            <div id="feedback" class="feedback-box hidden"></div>
+        </div>
+
+        <!-- Explanation Section -->
+        <div id="explanation" class="explanation-section hidden">
+            
+            <!-- Option Analysis -->
+            <div class="card">
+                <h3 class="section-title">🎯 選項逐一解析</h3>
+                
+                <div class="analysis-item">
+                    <span class="analysis-tag tag-wrong">(A)</span>
+                    <div>
+                        <strong>IT 思維陷阱：</strong>雖然 OT 環境中確實有員工、廠商等多元身分，但這屬於「管理流程」問題，並非技術上的死胡同。現有的 IAM (身分識別管理) 系統已能很好地解決此問題，不是 ZTA 落地的最大障礙。
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <span class="analysis-tag tag-wrong">(B)</span>
+                    <div>
+                        <strong>頻寬不是重點：</strong>身分驗證的封包非常小 (幾 KB)，即使持續驗證也不會塞爆工業網路。OT 比較擔心的是「延遲 (Latency)」，但頻寬本身充足。
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <span class="analysis-tag tag-correct">(C)</span>
+                    <div>
+                        <strong>正確答案 (技術硬傷)：</strong>零信任的核心是「持續驗證」。但工廠內充斥著 20 年前的 PLC、HMI 設備，這些「老古董」只懂簡單的開/關指令 (如 Modbus)，根本沒有設計帳號密碼欄位，更別說支援 MFA 或數位憑證。<strong>設備本身無法回應驗證請求</strong>，是 ZTA 無法推行的最大痛點。
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <span class="analysis-tag tag-wrong">(D)</span>
+                    <div>
+                        <strong>手段誤認為障礙：</strong>DPI (深度封包檢測) 是 OT 防禦的重要技術，並非阻礙。且流量大可以透過分流解決，這不是架構層面的最大挑戰。
+                    </div>
+                </div>
+            </div>
+
+            <!-- Core Concepts & Whiteboard -->
+            <div class="whiteboard">
+                <h3 style="color: #facc15; margin-bottom: 1rem;">💡 名師白話文：為什麼 OT 這麼難搞？</h3>
+                <p style="margin-bottom: 1rem;">
+                    想像零信任 (ZTA) 是一個嚴格的<strong>機場安檢口</strong>，每個人經過都要出示護照 (驗證身分)。
+                </p>
+                <ul style="padding-left: 1.5rem; margin-bottom: 1rem;">
+                    <li><strong>IT 環境 (辦公室)：</strong> 電腦就像現代旅客，人手一本護照，隨時可以配合檢查。</li>
+                    <li><strong>OT 環境 (工廠)：</strong> 老舊設備就像是<strong>「穿越來的原始人」</strong>。</li>
+                </ul>
+                <div class="highlight-text">
+                    你問原始人：「請出示護照 (Token)。」<br>
+                    原始人：「(一臉茫然) 我只知道 1 是開燈，0 是關燈...」
+                </div>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: #cbd5e1;">
+                    因為設備聽不懂驗證語言，所以我們通常得在它前面加裝一個「翻譯官」(工控資安閘道器) 來幫它做檢查。
+                </p>
+            </div>
+
+            <!-- Comparison IT vs OT -->
+            <div class="card">
+                <h3 class="section-title">📊 IT 與 OT 導入 ZTA 難度比一比</h3>
+                <div class="comparison-grid">
+                    <div class="compare-box compare-it">
+                        <div class="compare-title">💻 IT 環境 (簡單模式)</div>
+                        <ul class="compare-list">
+                            <li><strong>保護對象：</strong>資料 (Data)</li>
+                            <li><strong>設備壽命：</strong>3-5 年 (常更新)</li>
+                            <li><strong>作業系統：</strong>Win 10/11, Linux (支援現代協定)</li>
+                            <li><strong>ZTA 做法：</strong>裝 Agent、強制多因子驗證 (MFA)</li>
+                        </ul>
+                    </div>
+                    <div class="compare-box compare-ot">
+                        <div class="compare-title">🏭 OT 環境 (地獄模式)</div>
+                        <ul class="compare-list">
+                            <li><strong>保護對象：</strong>產線可用性 (Availability)</li>
+                            <li><strong>設備壽命：</strong>15-20 年 (死不更新)</li>
+                            <li><strong>作業系統：</strong>Win XP, 嵌入式 (不支援 Agent)</li>
+                            <li><strong>ZTA 做法：</strong>無法裝 Agent，只能靠網段隔離 (Segmentation)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Traps & Memory Key -->
+            <div class="comparison-grid" style="margin-bottom: 1.5rem;">
+                <div class="trap-box">
+                    <h4 style="color: #991b1b; margin-bottom: 0.5rem;">⚠️ 常見考試陷阱</h4>
+                    <ul style="padding-left: 1.25rem; font-size: 0.9rem; color: #7f1d1d;">
+                        <li><strong>陷阱 1：</strong>看到「管理困難」就選 (A)。記住，管理問題通常有解，技術上「不支援」才是無解。</li>
+                        <li><strong>陷阱 2：</strong>誤以為 OT 網路很慢 (B)。其實工控網路頻寬通常足夠，問題是即時性要求極高。</li>
+                        <li><strong>陷阱 3：</strong>把 DPI 當成萬靈丹 (D)。DPI 只是檢測工具，不是 ZTA 的架構核心困難。</li>
+                    </ul>
+                </div>
+                <div class="memory-box">
+                    <h4 style="color: #166534; margin-bottom: 0.5rem;">🔑 記憶口訣</h4>
+                    <p style="font-size: 1.1rem; font-weight: bold; color: #15803d; margin-bottom: 0.5rem;">
+                        「工控老舊啞巴機，<br>有口難言驗證難。」
+                    </p>
+                    <p style="font-size: 0.8rem; color: #166534;">
+                        解釋：工控設備太老 (Legacy)，像啞巴一樣無法回應身分驗證 (AuthN) 的請求。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Self Check -->
+            <div class="card">
+                <h3 class="section-title">📝 自我檢測 (點擊查看答案)</h3>
+                
+                <div class="self-check-item">
+                    <p><strong>Q1：</strong>為了讓不支援驗證的舊設備納入零信任架構，通常會在設備前方加裝什麼硬體？</p>
+                    <details>
+                        <summary>顯示答案與提示</summary>
+                        <p><strong>答案：工控資安閘道器 (Industrial Security Gateway)</strong><br>提示：就像是在啞巴前面請一位翻譯官，由閘道器代為驗證身分，通過後才放行指令給設備。</p>
+                    </details>
+                </div>
+
+                <div class="self-check-item">
+                    <p><strong>Q2：</strong>在 OT 環境中，下列哪一項屬性優先級最高，導致我們不敢隨意重啟設備更新 Patch？</p>
+                    <details>
+                        <summary>顯示答案與提示</summary>
+                        <p><strong>答案：可用性 (Availability)</strong><br>提示：CIA 三角形在 OT 中通常變成 AIC，產線不能停是最高指導原則。</p>
+                    </details>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 2rem;">
+            Designed for iPAS Security Engineer Exam Prep
+        </div>
+
+    </div>
+
+    <script>
+        const form = document.getElementById('quizForm');
+        const feedback = document.getElementById('feedback');
+        const explanation = document.getElementById('explanation');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusBadge = document.getElementById('statusBadge');
+        const optionInputs = document.querySelectorAll('.option-input');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // 取得選中的答案
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+
+            if (!selectedOption) {
+                alert('同學，請先選擇一個答案再提交喔！');
+                return;
+            }
+
+            const answer = selectedOption.value;
+            const correctAnswer = 'C';
+
+            // 鎖定表單
+            optionInputs.forEach(input => input.disabled = true);
+            submitBtn.disabled = true;
+            submitBtn.innerText = '作答完畢';
+            
+            // 更新狀態
+            statusBadge.textContent = '已作答';
+            statusBadge.classList.remove('status-pending');
+            statusBadge.classList.add('status-done');
+
+            // 顯示回饋
+            feedback.classList.remove('hidden');
+            if (answer === correctAnswer) {
+                feedback.className = 'feedback-box feedback-success';
+                feedback.innerHTML = `
+                    <h3 style="font-weight: bold; font-size: 1.1rem; margin-bottom: 0.5rem;">🎉 答對了！</h3>
+                    <p>非常棒！你精準抓住了 OT 資安實務上最棘手的硬體痛點。</p>
+                `;
+            } else {
+                feedback.className = 'feedback-box feedback-error';
+                feedback.innerHTML = `
+                    <h3 style="font-weight: bold; font-size: 1.1rem; margin-bottom: 0.5rem;">❌ 答錯囉！</h3>
+                    <p>正確答案是 <strong>(C)</strong>。別擔心，這個陷阱很多人會踩，快看下方的解析！</p>
+                `;
+            }
+
+            // 視覺化選項對錯
+            document.querySelectorAll('.option-card').forEach(card => {
+                const input = card.previousElementSibling;
+                if (input.value === correctAnswer) {
+                    card.style.borderColor = 'var(--success-color)';
+                    card.style.backgroundColor = '#f0fdf4';
+                    card.innerHTML += ' <span style="margin-left:auto; color:var(--success-color);">✔</span>';
+                } else if (input.checked && input.value !== correctAnswer) {
+                    card.style.borderColor = 'var(--error-color)';
+                    card.style.backgroundColor = '#fef2f2';
+                    card.innerHTML += ' <span style="margin-left:auto; color:var(--error-color);">✘</span>';
+                }
+            });
+
+            // 顯示解析區塊並滑動
+            explanation.classList.remove('hidden');
+            setTimeout(() => {
+                explanation.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        });
+    </script>
+</body>
+</html>

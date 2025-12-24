@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安重點試題解析：ISO 27001 溝通與傳達</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* Professional Navy */
+            --accent-color: #3498db;  /* Clean Blue */
+            --highlight-bg: #f8f9fa;  /* Light Gray */
+            --correct-color: #27ae60; /* Green */
+            --error-color: #c0392b;   /* Red */
+            --border-color: #bdc3c7;
+            --text-main: #333333;
+            --text-secondary: #666666;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: #eef2f3;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--primary-color);
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-top: 30px;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+            background-color: var(--highlight-bg);
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        p, li {
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        /* Keyword Card */
+        .keyword-card {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            border: 1px solid var(--border-color);
+        }
+        .keyword-card strong {
+            color: var(--primary-color);
+        }
+
+        /* Question Section */
+        .question-box {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: var(--highlight-bg);
+        }
+
+        input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* Interactive Elements */
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.3s;
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #1a252f;
+        }
+
+        .btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        /* Feedback Area */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            display: none; /* Hidden by default */
+            border-radius: 4px;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section (Hidden initially) */
+        #explanation-content {
+            display: none;
+        }
+
+        /* Accordion */
+        .accordion {
+            background-color: var(--highlight-bg);
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: 0.4s;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion:after {
+            content: '+'; 
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .accordion.active:after {
+            content: "-";
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+
+        /* Specific Sections */
+        .concept-box {
+            border: 1px solid var(--accent-color);
+            padding: 15px;
+            margin-top: 15px;
+            background: #f0f8ff;
+        }
+
+        .mnemonic-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .trap-list li {
+            margin-bottom: 8px;
+            color: #d35400;
+        }
+
+        /* Self Assessment */
+        .self-check-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .hint-btn {
+            background: none;
+            border: 1px solid var(--text-secondary);
+            color: var(--text-secondary);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .hint-text {
+            display: none;
+            margin-top: 10px;
+            color: var(--accent-color);
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        .footer-summary {
+            margin-top: 50px;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            font-size: 0.9rem;
+            border-radius: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資安重點試題解析：ISO 27001</h1>
+    
+    <!-- Keyword Card -->
+    <div class="keyword-card">
+        <strong>關鍵字快掃：</strong>
+        <span>ISO 27001</span>、<span>溝通</span>、<span>傳達</span>、<span>事項</span>、<span>對象</span>、<span>方式</span>、<span>不包括</span>
+    </div>
+
+    <!-- Interactive Question -->
+    <div class="question-box">
+        <div class="question-text">
+            依據 ISO/IEC 27001:2022（資訊安全管理系統的國際標準）之中，關於「溝通與傳達」的內容，組織應決定相關於資訊安全管理系統之內部及外部溝通或傳達的需要，<strong>「不」</strong>包括下列何項？
+        </div>
+        <form id="quiz-form">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A">
+                    (A) 溝通或傳達事項
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B">
+                    (B) 溝通或傳達對象
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C">
+                    (C) 溝通或傳達地點
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D">
+                    (D) 溝通或傳達方式
+                </label>
+            </div>
+            <button type="button" id="submit-btn" class="btn">提交答案</button>
+        </form>
+
+        <div id="feedback-area"></div>
+    </div>
+
+    <!-- Explanation Content (Revealed after submission) -->
+    <div id="explanation-content">
+        
+        <h2>選項逐一解析</h2>
+        <button class="accordion">解析內容（點擊展開）</button>
+        <div class="panel">
+            <p><strong>(A) 溝通或傳達事項 (What)：</strong><br>這是必要的。組織必須決定「要講什麼」，例如資安政策更新、資安事件通報內容。</p>
+            <p><strong>(B) 溝通或傳達對象 (Who)：</strong><br>這是必要的。組織必須決定「要跟誰講」，例如跟員工（內部）或跟主管機關、客戶（外部）。</p>
+            <p><strong>(C) 溝通或傳達地點 (Where)：<span style="color:var(--correct-color)">【正確答案】</span></strong><br>標準條文中並未要求定義「地點」。現代資安溝通重視的是流程與傳遞，而非物理位置。</p>
+            <p><strong>(D) 溝通或傳達方式 (How)：</strong><br>這是必要的。組織必須決定「怎麼講」，例如透過 Email、會議、公告欄或專屬通訊軟體。</p>
+        </div>
+
+        <h2>觀念補充與延伸</h2>
+        <div class="concept-box">
+            <h3>1. 核心觀念定位</h3>
+            <p>本題出自 <strong>ISO/IEC 27001:2022 第 7.4 條款「溝通 (Communication)」</strong>。這是 ISMS（資訊安全管理系統）中「支援 (Support)」章節的重要環節。此題為基礎觀念題，主要考條文細節的記憶。</p>
+            
+            <h3>2. 條文精神白話文</h3>
+            <p>ISO 的邏輯很簡單：為了讓資安管得好，你要先講好規則。所謂「講好規則」，就是你要明確定義下列五件事（5W1H 中的選錄）：</p>
+            <ul>
+                <li><strong>What：</strong> 溝通什麼內容？</li>
+                <li><strong>When：</strong> 什麼時候溝通？</li>
+                <li><strong>With whom：</strong> 跟誰溝通？</li>
+                <li><strong>How：</strong> 如何溝通？</li>
+                <li><strong>Who：</strong> 誰負責發起溝通？（註：2022 年版條文有明確列出這項）</li>
+            </ul>
+            <p><strong>對比概念：</strong> 條文關注的是「程序」與「資訊流」，而不是「物理空間（地點）」。</p>
+
+            <h3>3. 變化題型預測</h3>
+            <p><strong>變形題：</strong> 下列何者為 ISO 27001:2022 第 7.4 節新增的要求？<br>
+            <em>答案參考：</em> 雖然本次題目未涉及，但舊版主要強調前四項，新版更明確分出「由誰溝通 (Who shall communicate)」。若題目將選項改為 (C) 由誰負責溝通，則 (C) 會變成正確的（需要決定的）項目。</p>
+        </div>
+
+        <div class="mnemonic-box">
+            <h3>記憶口訣</h3>
+            <p style="font-size: 1.2rem; font-weight: bold;">「人、事、時、法、主」</p>
+            <p>解釋：</p>
+            <ul style="margin: 0;">
+                <li><strong>人：</strong> 對象 (With whom)</li>
+                <li><strong>事：</strong> 事項 (What)</li>
+                <li><strong>時：</strong> 時機 (When)</li>
+                <li><strong>法：</strong> 方法/方式 (How)</li>
+                <li><strong>主：</strong> 主講人/負責人 (Who shall communicate)</li>
+                <li><em>口訣運用：把這五點記熟，考試問「不包括什麼」，只要不是這五點（如地點、天氣、心情）就是答案。</em></li>
+            </ul>
+        </div>
+
+        <h2>常見陷阱與避坑指南</h2>
+        <ul class="trap-list">
+            <li><strong>陷阱 1：誤把「地點」當成「方式」。</strong><br>有些同學會覺得「在會議室講」就是地點，所以地點也要決定。但在 ISO 定義中，「開會」屬於「方式 (Process/Method)」，會議室只是附屬的物理屬性，不是條文要求的管控重點。</li>
+            <li><strong>陷阱 2：直覺認為「人事時地物」都要管。</strong><br>傳統管理學常講 5W1H，但在 ISO 27001 的這個特定條款中，刻意排除了地點 (Where)，請務必打破慣性思維。</li>
+            <li><strong>陷阱 3：混淆「內部」與「外部」溝通。</strong><br>條文規定組織要決定內部「及」外部溝通。如果題目問「僅需決定內部溝通」，那是錯的。</li>
+        </ul>
+
+        <h2>自我檢測（思考題）</h2>
+        
+        <div class="self-check-item">
+            <p><strong>Q1：如果公司發生重大資安事故，依據 7.4 條款，我們需要事先定義好「誰」負責對新聞媒體發言嗎？</strong></p>
+            <button class="hint-btn" onclick="toggleHint('hint1')">顯示/隱藏提示</button>
+            <div id="hint1" class="hint-text">提示：回想口訣中的「主（主講人）」，以及溝通對象包含「外部」。</div>
+        </div>
+
+        <div class="self-check-item">
+            <p><strong>Q2：組織是否需要為每一次的溝通（例如每天的早會）都寫一份詳細的文件化資訊？</strong></p>
+            <button class="hint-btn" onclick="toggleHint('hint2')">顯示/隱藏提示</button>
+            <div id="hint2" class="hint-text">提示：ISO 重視的是「決定」與「流程」，而不是無意義的文書作業。通常是針對「需要」溝通的事項建立機制，而非流水帳。</div>
+        </div>
+
+        <div class="self-check-item">
+            <p><strong>Q3：溝通方式 (How) 只能是書面通知嗎？</strong></p>
+            <button class="hint-btn" onclick="toggleHint('hint3')">顯示/隱藏提示</button>
+            <div id="hint3" class="hint-text">提示：條文沒有限制形式。口頭、Email、會議、內網公告皆可，重點是「有效性」。</div>
+        </div>
+    </div>
+
+    <!-- Footer Summary -->
+    <div class="footer-summary">
+        <strong>30 秒考前速記：</strong><br>
+        ISO 27001 溝通條款 (7.4) 必背五要素：何事、何時、對象、方式、負責人。<br>
+        <strong>不需要</strong>定義「地點」。
+    </div>
+
+</div>
+
+<script>
+    // Interaction Logic
+    document.addEventListener('DOMContentLoaded', function() {
+        const submitBtn = document.getElementById('submit-btn');
+        const feedbackArea = document.getElementById('feedback-area');
+        const explanationContent = document.getElementById('explanation-content');
+        const form = document.getElementById('quiz-form');
+        const correctValue = 'C'; // Correct Answer
+
+        // Accordion Logic
+        const acc = document.getElementsByClassName("accordion");
+        for (let i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                const panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                    panel.style.maxHeight = null;
+                } else {
+                    panel.style.maxHeight = panel.scrollHeight + "px";
+                }
+            });
+        }
+
+        // Submit Logic
+        submitBtn.addEventListener('click', function() {
+            // Get selected value
+            const formData = new FormData(form);
+            const selectedValue = formData.get('answer');
+
+            // Validation: Check if answered
+            if (!selectedValue) {
+                alert('請先選擇一個答案再提交！');
+                return;
+            }
+
+            // Disable inputs after submission
+            const inputs = form.querySelectorAll('input');
+            inputs.forEach(input => input.disabled = true);
+            submitBtn.disabled = true;
+            submitBtn.textContent = '已作答';
+
+            // Show Feedback
+            feedbackArea.style.display = 'block';
+            
+            if (selectedValue === correctValue) {
+                feedbackArea.className = 'feedback-correct';
+                feedbackArea.innerHTML = `
+                    <strong>恭喜答對！</strong><br>
+                    正確答案是 <strong>(C)</strong>。<br>
+                    ISO 27001 條文中確實未包含「地點」。
+                `;
+            } else {
+                feedbackArea.className = 'feedback-incorrect';
+                feedbackArea.innerHTML = `
+                    <strong>答錯了。</strong><br>
+                    您選擇了 (${selectedValue})，但正確答案是 <strong>(C)</strong>。<br>
+                    請參考下方解析了解原因。
+                `;
+            }
+
+            // Reveal Explanation
+            explanationContent.style.display = 'block';
+            
+            // Auto-scroll to feedback
+            feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Auto-open the first accordion for better UX
+            setTimeout(() => {
+                if(acc[0]) acc[0].click();
+            }, 500);
+        });
+    });
+
+    // Hint Toggle Function
+    function toggleHint(id) {
+        const hint = document.getElementById(id);
+        if (hint.style.display === 'block') {
+            hint.style.display = 'none';
+        } else {
+            hint.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

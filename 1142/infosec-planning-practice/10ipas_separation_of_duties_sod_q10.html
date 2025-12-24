@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安補教名師 - 職務區隔 (SOD) 專題解析</title>
+    <style>
+        :root {
+            --primary-color: #2563eb; /* Blue 600 */
+            --primary-dark: #1e40af; /* Blue 800 */
+            --secondary-color: #f8fafc; /* Slate 50 */
+            --text-main: #1e293b; /* Slate 800 */
+            --text-light: #64748b; /* Slate 500 */
+            --success-color: #16a34a; /* Green 600 */
+            --success-bg: #dcfce7; /* Green 100 */
+            --error-color: #dc2626; /* Red 600 */
+            --error-bg: #fee2e2; /* Red 100 */
+            --border-radius: 12px;
+            --box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        /* Content Sections */
+        .section {
+            padding: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Quiz Styles */
+        .question-box {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .highlight {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .option-input {
+            margin-right: 15px;
+            margin-top: 5px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-color);
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* Result Area */
+        #result-area {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .correct {
+            background-color: var(--success-bg);
+            border: 1px solid var(--success-color);
+            color: #14532d;
+        }
+
+        .incorrect {
+            background-color: var(--error-bg);
+            border: 1px solid var(--error-color);
+            color: #7f1d1d;
+        }
+
+        /* Explanations (Accordion-like) */
+        .explanation-card {
+            background-color: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .exp-header {
+            background-color: #f1f5f9;
+            padding: 12px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .exp-content {
+            padding: 15px 20px;
+            display: none; /* Hidden by default */
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+        }
+
+        .exp-content.show {
+            display: block;
+        }
+
+        .tag-correct {
+            color: var(--success-color);
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .tag-wrong {
+            color: var(--error-color);
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        /* Core Concepts & Traps */
+        .concept-box {
+            background-color: #eff6ff;
+            border-left: 5px solid var(--primary-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .trap-list {
+            list-style: none;
+        }
+
+        .trap-list li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 12px;
+        }
+
+        .trap-list li::before {
+            content: "⚠️";
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* Mnemonic */
+        .mnemonic {
+            background-color: #312e81;
+            color: #fef08a;
+            padding: 20px;
+            text-align: center;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Self Check */
+        .self-check-item {
+            background-color: #fff;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .answer-reveal {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8fafc;
+            border-radius: 6px;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header { padding: 1.5rem; }
+            .section { padding: 1.5rem; }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安重點教室</h1>
+        <p>單元：職務區隔 (Separation of Duties, SOD)</p>
+    </header>
+
+    <!-- Quiz Section -->
+    <div class="section">
+        <div class="section-title">📝 隨堂測驗 (Q10)</div>
+        <div class="question-box">
+            某企業為防止內部人員濫用權限，設計了資訊系統的權限分工制度。
+            下列何項作法<span class="highlight">「最符合」</span>職務區隔（SOD）之原則？
+        </div>
+
+        <form id="quizForm">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A" class="option-input">
+                    <span>(A) 系統管理員擁有新增、查詢、刪除與審核所有交易紀錄的權限</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B" class="option-input">
+                    <span>(B) 員工可依需求申請額外權限，經由直屬主管自動核准後立即生效</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C" class="option-input">
+                    <span>(C) 部門主管在系統中直接新增自己以及下屬之出勤與加班紀錄，並同時進行審核</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D" class="option-input">
+                    <span>(D) 資料輸入作業由 A 員工負責，資料審核與最終送出作業由 B 員工執行</span>
+                </label>
+            </div>
+            <button type="button" id="submitBtn" class="btn" onclick="submitAnswer()">提交答案</button>
+        </form>
+
+        <div id="result-area"></div>
+    </div>
+
+    <!-- Explanation Section (Hidden initially) -->
+    <div id="explanation-section" class="section" style="display: none;">
+        <div class="section-title">🔍 名師詳解 (點擊展開)</div>
+        
+        <div class="explanation-card">
+            <div class="exp-header" onclick="toggleExp('expA')">
+                (A) 系統管理員權限全包 <span id="iconA">▼</span>
+            </div>
+            <div id="expA" class="exp-content">
+                <span class="tag-wrong">錯誤。</span>
+                這是最嚴重的「權限過大」問題。系統管理員若能同時「執行交易」又「審核交易」，等於是球員兼裁判，極易發生舞弊或掩蓋錯誤。SOD 要求管理員通常只負責維護系統，不應介入業務資料內容的修改。
+            </div>
+        </div>
+
+        <div class="explanation-card">
+            <div class="exp-header" onclick="toggleExp('expB')">
+                (B) 自動核准機制 <span id="iconB">▼</span>
+            </div>
+            <div id="expB" class="exp-content">
+                <span class="tag-wrong">錯誤。</span>
+                雖然這有提到申請流程，但「自動核准」意味著缺乏實質的人為檢查。這比較像是「授權流程」的設計缺失，雖然有分工的形式，但沒有達到「制衡」的效果。
+            </div>
+        </div>
+
+        <div class="explanation-card">
+            <div class="exp-header" onclick="toggleExp('expC')">
+                (C) 主管自己新增自己審核 <span id="iconC">▼</span>
+            </div>
+            <div id="expC" class="exp-content">
+                <span class="tag-wrong">錯誤。</span>
+                這是典型的違反 SOD 案例。「申請者」與「審核者」必須是不同人。主管審核自己的加班紀錄存在極大的「利益衝突 (Conflict of Interest)」。
+            </div>
+        </div>
+
+        <div class="explanation-card">
+            <div class="exp-header" onclick="toggleExp('expD')">
+                (D) 執行與審核分人負責 <span id="iconD">▼</span>
+            </div>
+            <div id="expD" class="exp-content">
+                <span class="tag-correct">正確！</span>
+                這就是 SOD 的教科書定義。將一項作業流程切分為「輸入/申請」與「審核/放行」，並強迫由不同人執行。除非 A 與 B 兩人串通（共謀），否則無法單獨完成舞弊。
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Concepts -->
+    <div class="section">
+        <div class="section-title">💡 SOD 核心觀念 (白話版)</div>
+        <div class="concept-box">
+            <h3>為什麼要拆開「執行、審核、核准」？</h3>
+            <p>想像銀行金庫，如果鑰匙和密碼都在同一個人手上，他隨時可以把錢搬走沒人知道。SOD 的核心就是<b>「不讓任何一個人擁有完成一項高風險任務所需的全部權限」</b>。</p>
+            <br>
+            <h3>如何降低風險？</h3>
+            <p>透過強制分工，若要舞弊必須找另一個人幫忙（這叫做<b>共謀 Collusion</b>）。人性上，要找人一起做壞事比自己偷偷做壞事難度高得多，且容易走漏風聲，藉此大幅降低風險。</p>
+        </div>
+    </div>
+
+    <!-- Traps -->
+    <div class="section">
+        <div class="section-title">⚠️ 考試常見陷阱</div>
+        <ul class="trap-list">
+            <li>
+                <strong>權限過度集中 (選項 A)：</strong><br>
+                題目常出現「超級使用者」或「資深員工」，誤導你以為資歷深就可以擁有一條龍的權限。記住：無論資歷多深，都不能違反 SOD。
+            </li>
+            <li>
+                <strong>只看流程快、不看制衡 (選項 B)：</strong><br>
+                為了效率（如自動核准）而犧牲制衡機制，這在資安管理中是不允許的。SOD 常常會犧牲一點效率來換取安全。
+            </li>
+            <li>
+                <strong>自己做、自己審 (選項 C)：</strong><br>
+                這是最直觀的陷阱。看到「自己申請、自己核准」絕對是錯的。
+            </li>
+        </ul>
+
+        <div class="mnemonic">
+            口訣：「球員兼裁判，絕對是大患！」
+        </div>
+    </div>
+
+    <!-- Self Check -->
+    <div class="section" style="border-bottom: none;">
+        <div class="section-title">🛡️ 自我檢測 (想一下再看答案)</div>
+        
+        <div class="self-check-item">
+            <p><strong>Q1. 程式開發人員 (Developer) 可以擁有正式環境 (Production) 的修改權限嗎？</strong></p>
+            <button class="toggle-btn" onclick="toggleAnswer('ans1')">顯示/隱藏答案</button>
+            <div id="ans1" class="answer-reveal">
+                不行！開發與維運必須分離。若開發人員可直接修改正式環境，可能會未經測試就植入後門或修改數據。
+            </div>
+        </div>
+
+        <div class="self-check-item">
+            <p><strong>Q2. 資料庫管理員 (DBA) 查看機敏資料的 Log 紀錄，應該由誰來審核？</strong></p>
+            <button class="toggle-btn" onclick="toggleAnswer('ans2')">顯示/隱藏答案</button>
+            <div id="ans2" class="answer-reveal">
+                不能是 DBA 自己！必須由資安人員或稽核人員來審查 DBA 的存取紀錄 (Log)，這叫做「監控特權帳號」。
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p style="text-align: center; color: var(--text-light); font-size: 0.8rem; padding: 20px;">
+            Designed for iPAS Security Review | 無外部引用單一檔案版
+        </p>
+    </footer>
+</div>
+
+<script>
+    // 正確答案設定
+    const CORRECT_ANSWER = 'D';
+    let hasSubmitted = false;
+
+    function submitAnswer() {
+        const radios = document.getElementsByName('answer');
+        let selectedValue = null;
+
+        for (const radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案喔！');
+            return;
+        }
+
+        hasSubmitted = true;
+        const resultArea = document.getElementById('result-area');
+        const explanationSection = document.getElementById('explanation-section');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // 顯示結果
+        resultArea.style.display = 'block';
+        if (selectedValue === CORRECT_ANSWER) {
+            resultArea.className = 'correct';
+            resultArea.innerHTML = `<strong>🎉 答對了！</strong><br>選得好！這正是職務區隔的標準做法。`;
+        } else {
+            resultArea.className = 'incorrect';
+            resultArea.innerHTML = `<strong>❌ 答錯了...</strong><br>正確答案是 <strong>(${CORRECT_ANSWER})</strong>。<br>別氣餒，快看看下方的名師詳解！`;
+        }
+
+        // 鎖定按鈕與選項
+        submitBtn.textContent = '已完成作答';
+        submitBtn.disabled = true;
+        for (const radio of radios) {
+            radio.disabled = true;
+        }
+
+        // 顯示詳解區塊
+        explanationSection.style.display = 'block';
+        
+        // 自動滾動到結果處
+        resultArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function toggleExp(id) {
+        const content = document.getElementById(id);
+        const icon = document.getElementById('icon' + id.replace('exp', ''));
+        
+        if (content.classList.contains('show')) {
+            content.classList.remove('show');
+            icon.textContent = '▼';
+        } else {
+            content.classList.add('show');
+            icon.textContent = '▲';
+        }
+    }
+
+    function toggleAnswer(id) {
+        const answerDiv = document.getElementById(id);
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+        } else {
+            answerDiv.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

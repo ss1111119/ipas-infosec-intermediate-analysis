@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安教學 - 混合雲架構與微切分</title>
+    <style>
+        :root {
+            --primary-color: #003366; /* 補習班專業藍 */
+            --accent-color: #d9534f; /* 重點紅 */
+            --success-color: #2e7d32; /* 正確綠 */
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --border-color: #ccc;
+            --highlight-bg: #e8f0fe;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: #eee;
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--primary-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 10px;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            color: #444;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        /* 重點關鍵字小卡 */
+        .keyword-card {
+            background-color: var(--highlight-bg);
+            border: 1px dashed var(--primary-color);
+            padding: 10px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        .keyword-card strong {
+            color: #000;
+            background-color: #fff176; /* 螢光筆效果 */
+            padding: 0 4px;
+        }
+
+        /* 收合情境區 */
+        .scenario-box {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .scenario-header {
+            background-color: #f0f0f0;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .scenario-header:hover {
+            background-color: #e0e0e0;
+        }
+        .scenario-content {
+            padding: 15px;
+            display: block; /* 預設展開 */
+            background-color: #fff;
+        }
+        .scenario-content.collapsed {
+            display: none;
+        }
+        .highlight {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* 題目區 */
+        .question-section {
+            background-color: #fff;
+            padding: 15px 0;
+        }
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+        .option-item {
+            margin-bottom: 12px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: flex-start;
+        }
+        .option-item:hover {
+            background-color: #f5f5f5;
+        }
+        .option-item input {
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .btn:hover {
+            background-color: #002244;
+        }
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 提示框 */
+        .alert {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 15px;
+            display: none;
+            font-weight: bold;
+        }
+        .alert-error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+        .alert-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        /* 解析區 - 預設隱藏 */
+        .analysis-section {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+        }
+        
+        /* 核心機制圖解 (ASCII style with CSS) */
+        .diagram-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .diagram-box {
+            border: 1px solid #333;
+            padding: 15px;
+            background-color: #fafafa;
+            flex: 1;
+            min-width: 280px;
+        }
+        .diagram-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-decoration: underline;
+        }
+        .flow-diagram {
+            font-family: "Consolas", monospace;
+            white-space: pre;
+            text-align: center;
+            line-height: 1.4;
+            font-size: 0.9rem;
+        }
+
+        /* 手風琴效果 */
+        .accordion {
+            background-color: #f1f1f1;
+            color: #444;
+            cursor: pointer;
+            padding: 12px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: 0.4s;
+            margin-top: 5px;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+        .active, .accordion:hover {
+            background-color: #ddd;
+        }
+        .accordion:after {
+            content: '+'; 
+            float: right;
+            font-weight: bold;
+        }
+        .active:after {
+            content: "-";
+        }
+        .panel {
+            padding: 0 15px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            border-left: 3px solid #ddd;
+        }
+
+        /* 30秒速記 & 記憶口訣 */
+        .summary-box {
+            background-color: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .mnemonic-box {
+            background-color: #fff3e0;
+            border: 1px solid #ffb74d;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #e65100;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        /* 自我檢測區 */
+        .quiz-card {
+            background-color: #fafafa;
+            border: 1px solid #eee;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .hint-btn {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            background-color: #607d8b;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .hint-text {
+            display: none;
+            margin-top: 8px;
+            color: #555;
+            font-size: 0.9rem;
+            font-style: italic;
+            border-top: 1px dotted #ccc;
+            padding-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+            .diagram-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資安實務：混合雲安全架構題組 (6)</h1>
+
+    <!-- 關鍵字小卡 -->
+    <div class="keyword-card">
+        <strong>混合雲</strong> (部分系統在自己機房、部分在雲端一起運作) &nbsp;|&nbsp; 
+        <strong>內部網路</strong> &nbsp;|&nbsp; 
+        <strong>橫向移動</strong> (駭客先入侵一台，再在內部網路一路跳到更多機器) &nbsp;|&nbsp; 
+        <strong>控制損害</strong> &nbsp;|&nbsp; 
+        <strong>零信任 ZTA</strong> (不預設信任，內外都要驗證與授權) &nbsp;|&nbsp; 
+        <strong>微切分</strong> (把內網切成很多小區域，彼此存取要再驗證)
+    </div>
+
+    <!-- 題目與情境 -->
+    <div class="scenario-box">
+        <div class="scenario-header" onclick="toggleScenario()">
+            <span>[情境題] 區域醫療中心資安事件 (點擊收合/展開)</span>
+            <span id="scenario-icon">▲</span>
+        </div>
+        <div class="scenario-content" id="scenario-text">
+            <p>一家被政府核定為「關鍵基礎設施提供者」的區域醫療中心，資訊環境為<span class="highlight">混合雲架構</span>。院內核心的「電子病歷系統（EHR）」部署於本地資料中心，新推出的「遠距醫療諮詢平台」採用雲端原生技術並整合第三方預約排程模組。開發團隊在公務筆電上使用生成式 AI 輔助開發。SOC 偵測到 EHR 主機疑似勒索軟體活動，攻擊源頭來自<span class="highlight">遭入侵的開發人員筆電</span>。</p>
+        </div>
+    </div>
+
+    <div class="question-section">
+        <h3>【題目】</h3>
+        <p>身為該醫療中心的資安長（CISO），為有效控制損害並避免攻擊者在混合雲環境<span class="highlight">內部橫向移動</span>，下列何種安全架構規劃原則在此情境下最能發揮作用？</p>
+        
+        <ul class="options-list">
+            <li class="option-item">
+                <label style="cursor: pointer; width: 100%; display: block;">
+                    <input type="radio" name="answer" value="A"> 
+                    (A) 強化<strong>邊界防火牆</strong> (像大門口警衛，只管進出大門的流量) 規則，嚴格過濾所有進出醫院網路的流量
+                </label>
+            </li>
+            <li class="option-item">
+                <label style="cursor: pointer; width: 100%; display: block;">
+                    <input type="radio" name="answer" value="B"> 
+                    (B) 導入<strong>零信任安全架構</strong> (Zero Trust Architecture, ZTA)，在內網實施<strong>微切分</strong> (Micro-segmentation)
+                </label>
+            </li>
+            <li class="option-item">
+                <label style="cursor: pointer; width: 100%; display: block;">
+                    <input type="radio" name="answer" value="C"> 
+                    (C) 要求所有員工每三十天更換一次高強度密碼，並進行資安教育訓練
+                </label>
+            </li>
+            <li class="option-item">
+                <label style="cursor: pointer; width: 100%; display: block;">
+                    <input type="radio" name="answer" value="D"> 
+                    (D) 集中所有伺服器日誌至本地的<strong>資安訊息與事件管理系統</strong> (SIEM，集中收集與分析日誌的系統) 進行分析
+                </label>
+            </li>
+        </ul>
+
+        <div id="feedback-area" class="alert"></div>
+        <button id="submit-btn" class="btn" onclick="checkAnswer()">提交答案</button>
+    </div>
+
+    <!-- 解析與教學區 (作答後顯示) -->
+    <div id="analysis-section" class="analysis-section">
+        
+        <h2>詳細解析</h2>
+
+        <!-- 30秒考前速記 -->
+        <div class="summary-box">
+            <strong>【30 秒考前速記】</strong><br>
+            遇到「內網入侵」、「橫向移動」、「混合雲」關鍵字，解法首選 <strong>零信任 (ZTA)</strong> 與 <strong>微切分 (Micro-segmentation)</strong>。<br>
+            傳統防火牆擋不住內部擴散，SIEM 只能看不能擋，改密碼緩不濟急。
+        </div>
+
+        <!-- 記憶口訣 -->
+        <div class="mnemonic-box">
+            記憶口訣：不只守大門，內部也分區；駭客進得來，讓他走不動！
+        </div>
+
+        <!-- 核心機制圖解 -->
+        <h3>核心機制圖解：為什麼微切分有效？</h3>
+        <div class="diagram-container">
+            <div class="diagram-box">
+                <div class="diagram-title">傳統邊界防護 (選項 A)</div>
+                <div class="flow-diagram">
+[網際網路]
+    │
+    ▼
+[ 邊界防火牆 ] (大門警衛)
+    │
+    ▼
+┌───────────────────┐
+│ [內部網路 - 信任區]  │
+│                   │
+│ (駭客) -> (筆電) -> (EHR) │
+│   ▲      暢行無阻     ▲   │
+└───────────────────┘
+※ 一旦進門，全家任我行
+                </div>
+            </div>
+            <div class="diagram-box">
+                <div class="diagram-title">零信任與微切分 (選項 B)</div>
+                <div class="flow-diagram">
+[網際網路]
+    │
+    ▼
+[ 邊界防火牆 ]
+    │
+    ▼
+┌───────────────────┐
+│ [內部網路 - 零信任]  │
+│ ┌──────┐  ╍╍  ┌──────┐ │
+│ │ 筆電 │ -X-> │ EHR  │ │
+│ └──────┘ (驗證) └──────┘ │
+│    ▲       擋下      ▲    │
+└───────────────────┘
+※ 房間都有鎖，移動要授權
+                </div>
+            </div>
+        </div>
+
+        <!-- 選項逐一解析 -->
+        <h3>選項逐一解析</h3>
+        
+        <button class="accordion active">正確選項 (B) 解析</button>
+        <div class="panel" style="max-height: 200px;">
+            <p><span style="color:var(--success-color); font-weight:bold;">(B) 導入零信任安全架構 (ZTA)，在內網實施微切分</span></p>
+            <p><strong>為什麼選 B：</strong><br>
+            題目要求「控制損害」與「避免內部橫向移動」。開發人員筆電已被入侵，代表駭客已經在「牆內」。<br>
+            <strong>微切分 (Micro-segmentation)</strong> 的核心概念就是將網路切分成極小的邏輯區域（例如每台主機或應用程式都是獨立區域）。即使筆電中毒，因為與 EHR 系統之間有「微切分」隔離，且 ZTA 要求「永不信任，始終驗證」，駭客無法直接連線到 EHR，有效限制了攻擊的<strong>爆炸半徑 (Blast Radius)</strong>。</p>
+        </div>
+
+        <button class="accordion">錯誤選項 (A) 解析</button>
+        <div class="panel">
+            <p><span style="color:var(--accent-color); font-weight:bold;">(A) 強化邊界防火牆規則</span></p>
+            <p><strong>盲點：</strong><br>
+            防火牆主要防禦「南北向流量」（進出內網）。本題情境駭客已經透過合法的開發人員筆電進入內網，之後的攻擊屬於「東西向流量」（內網互連）。傳統邊界防火牆通常不會檢查內網對內網的連線，因此無法阻止。</p>
+        </div>
+
+        <button class="accordion">錯誤選項 (C) 解析</button>
+        <div class="panel">
+            <p><span style="color:var(--accent-color); font-weight:bold;">(C) 定期更換密碼與教育訓練</span></p>
+            <p><strong>盲點：</strong><br>
+            這是良好的基礎衛生習慣（Administrative Control），但對於「正在發生的勒索軟體擴散」缺乏立即的「技術性阻斷能力」。勒索軟體傳播往往利用系統漏洞或既有的連線權限，改密碼緩不濟急。</p>
+        </div>
+
+        <button class="accordion">錯誤選項 (D) 解析</button>
+        <div class="panel">
+            <p><span style="color:var(--accent-color); font-weight:bold;">(D) 集中日誌至 SIEM 分析</span></p>
+            <p><strong>盲點：</strong><br>
+            SIEM 是「偵測與分析」工具，就像監視器。它能告訴你「家裡進小偷了」，但它本身不能自動鎖門或把小偷抓起來（除非搭配 SOAR 自動化回應，但選項僅提及 SIEM 分析）。題目問的是「架構規劃原則」來「控制損害」，主動防禦的架構（微切分）比被動監控更直接有效。</p>
+        </div>
+
+        <!-- 觀念補充與常見陷阱 -->
+        <div style="display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 300px; background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px;">
+                <h3 style="margin-top:0; color:var(--primary-color);">觀念補充與延伸</h3>
+                <ul style="padding-left: 20px;">
+                    <li><strong>核心觀念：</strong>iPAS 考試極愛考「橫向移動」的剋星，答案幾乎都是 ZTA 或網段隔離 (Segmentation)。</li>
+                    <li><strong>原理：</strong>微切分將傳統「扁平」的內網變成無數個小保險箱。</li>
+                    <li><strong>變化題型：</strong>若題目問「雲端虛擬機之間 (VM-to-VM) 的防護」，答案也是微切分（或是東西向防火牆）。</li>
+                </ul>
+            </div>
+            <div style="flex: 1; min-width: 300px; background-color: #fff3e0; border: 1px solid #ffe0b2; padding: 15px; border-radius: 4px;">
+                <h3 style="margin-top:0; color:#e65100;">常見陷阱與避坑</h3>
+                <ul style="padding-left: 20px;">
+                    <li>看到「阻擋」直覺選防火牆 (A) → <strong>錯！</strong>要看是擋外面還是擋裡面。</li>
+                    <li>把 SIEM (D) 當成防護盾 → <strong>錯！</strong>它是監視器。</li>
+                    <li><strong>避坑指南：</strong>題目只要出現「已入侵」、「內部擴散」、「內網互連」，請把視線從「邊界」移開，尋找「內部隔離」相關選項。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 自我檢測 -->
+        <h3>自我檢測 (不提供標準答案，請思考)</h3>
+        
+        <div class="quiz-card">
+            <strong>Q1. 如果駭客是透過 VPN 取得合法帳號連入內網，邊界防火牆擋得住嗎？</strong>
+            <br>
+            <button class="hint-btn" onclick="toggleHint('hint1')">顯示提示</button>
+            <div id="hint1" class="hint-text">提示：VPN 通道建立後，流量通常被視為「已信任」或「內部流量」。防火牆主要管通道建立，管不到通道內的內容。</div>
+        </div>
+
+        <div class="quiz-card">
+            <strong>Q2. 「網路分段 (Segmentation)」與「微切分 (Micro-segmentation)」有何不同？</strong>
+            <br>
+            <button class="hint-btn" onclick="toggleHint('hint2')">顯示提示</button>
+            <div id="hint2" class="hint-text">提示：分段通常是用 VLAN 切出大區塊（如人資區、研發區）；微切分則是精細到「每一台機器」或「每一個服務」都隔離。</div>
+        </div>
+
+        <div class="quiz-card">
+            <strong>Q3. 實施零信任架構的三大核心精神是什麼？ (NIST SP 800-207)</strong>
+            <br>
+            <button class="hint-btn" onclick="toggleHint('hint3')">顯示提示</button>
+            <div id="hint3" class="hint-text">提示：1. 所有的溝通都要驗證；2. 最小權限原則；3. 預設不信任 (Never Trust, Always Verify)。</div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // 簡單的收合功能
+    function toggleScenario() {
+        var content = document.getElementById("scenario-text");
+        var icon = document.getElementById("scenario-icon");
+        if (content.style.display === "none" || content.classList.contains("collapsed")) {
+            content.style.display = "block";
+            content.classList.remove("collapsed");
+            icon.textContent = "▲";
+        } else {
+            content.style.display = "none";
+            content.classList.add("collapsed");
+            icon.textContent = "▼";
+        }
+    }
+
+    // 檢查答案邏輯
+    function checkAnswer() {
+        var radios = document.getElementsByName('answer');
+        var selectedValue = null;
+        for (var i = 0; i < radios.length; i++) {
+            if (radios[i].checked) {
+                selectedValue = radios[i].value;
+                break;
+            }
+        }
+
+        var feedbackArea = document.getElementById('feedback-area');
+        var submitBtn = document.getElementById('submit-btn');
+        var analysisSection = document.getElementById('analysis-section');
+
+        if (!selectedValue) {
+            alert("請先選擇一個答案再提交！");
+            return;
+        }
+
+        // 鎖定按鈕避免重複提交
+        submitBtn.disabled = true;
+        submitBtn.textContent = "已作答";
+        feedbackArea.style.display = "block";
+
+        if (selectedValue === 'B') {
+            feedbackArea.className = "alert alert-success";
+            feedbackArea.innerHTML = "<strong>✅ 答對了！</strong><br>選項 (B) 是防止橫向移動最有效的架構手段。";
+        } else {
+            feedbackArea.className = "alert alert-error";
+            feedbackArea.innerHTML = "<strong>❎ 答錯了！</strong><br>你選擇了 (" + selectedValue + ")。正確答案應為 <strong>(B)</strong>。<br>請參考下方解析了解原因。";
+        }
+
+        // 顯示解析區
+        analysisSection.style.display = "block";
+        
+        // 自動滾動到解析區
+        setTimeout(function() {
+            analysisSection.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+    }
+
+    // 手風琴功能
+    var acc = document.getElementsByClassName("accordion");
+    for (var i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            } 
+        });
+    }
+
+    // 提示開關
+    function toggleHint(id) {
+        var hint = document.getElementById(id);
+        if (hint.style.display === "block") {
+            hint.style.display = "none";
+        } else {
+            hint.style.display = "block";
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安考題解析：金管會零信任架構導入指引</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 專業深藍 */
+            --secondary-color: #34495e; /* 次要深灰 */
+            --accent-color: #2980b9; /* 亮藍連結色 */
+            --correct-color: #27ae60; /* 正確綠 */
+            --wrong-color: #c0392b; /* 錯誤紅 */
+            --bg-color: #f5f6fa; /* 淺灰背景，保護眼睛 */
+            --card-bg: #ffffff;
+            --border-radius: 6px;
+            --font-main: "Helvetica Neue", Helvetica, Arial, "Microsoft JhengHei", sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header Style */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 15px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            background: #eef4f9;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .sub-text {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Card Style */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Question Section */
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .term-def {
+            background-color: #f0f0f0;
+            padding: 0 4px;
+            border-radius: 3px;
+            font-size: 0.9em;
+            color: #555;
+            font-weight: normal;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: block;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9f9f9;
+            border-color: var(--accent-color);
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* Buttons */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #1a252f;
+        }
+
+        .btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .btn-toggle {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            width: auto;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .btn-toggle:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Feedback Section */
+        #feedback-area {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #d5f5e3;
+            color: #1e8449;
+            border: 1px solid #abebc6;
+        }
+
+        .feedback-wrong {
+            background-color: #fadbd8;
+            color: #922b21;
+            border: 1px solid #f5b7b1;
+        }
+
+        /* Accordion */
+        .accordion-content {
+            display: none;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            margin-top: 15px;
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        /* Teaching Content Styling */
+        .highlight-box {
+            background-color: #fff8dc;
+            border-left: 4px solid #f1c40f;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .comparison-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .tag-yellow { background-color: #fff3cd; color: #856404; }
+        .tag-green { background-color: #d4edda; color: #155724; }
+
+        .keyword-card {
+            border: 2px dashed var(--accent-color);
+            padding: 15px;
+            background-color: #fbfbfb;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .keyword-card strong {
+            color: var(--wrong-color);
+            font-size: 1.1rem;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ccc;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .hint-text {
+            display: none;
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            h1 { font-size: 1.2rem; }
+            .card { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>資安實務解析：零信任架構等級判定</h1>
+        <div class="sub-text">適用範圍：iPAS 資訊安全工程師 / 金融業資安從業人員</div>
+    </header>
+
+    <!-- 關鍵字速記卡 -->
+    <div class="keyword-card">
+        <div>【一眼辨識關鍵字】</div>
+        <strong>零信任、動態屬性、即時指標、撤銷存取、即時告警、Level III</strong>
+    </div>
+
+    <!-- 題目區 -->
+    <div class="card" id="quiz-section">
+        <div class="question-text">
+            <p>金管會<span class="term-def">（我國金融監理機關）</span>於 2024 年 7 月發布《金融業導入零信任架構參考指引》，將導入措施分為四級（Level I – IV）。</p>
+            <p>若在資源存取時，將「時間、地點、設備合規狀態」等動態屬性<span class="term-def">（會隨時間改變的條件，例如登入時間、地點、設備狀態）</span>納入授權審核條件，並可對異常樣態進行<strong>動態撤銷、限縮存取或即時告警</strong>，請問該作法屬於下列哪一級的資安管控措施？</p>
+        </div>
+
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A"> (A) 第一級：靜態指標
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B"> (B) 第二級：融入動態指標
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C"> (C) 第三級：以即時指標為主
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D"> (D) 第四級：最佳化整合指標
+            </label>
+        </div>
+
+        <button class="btn" id="submit-btn" onclick="checkAnswer()">提交答案</button>
+
+        <!-- 回饋區 -->
+        <div id="feedback-area"></div>
+    </div>
+
+    <!-- 解析區（預設隱藏，作答後建議展開） -->
+    <div class="card" id="analysis-section" style="display:none;">
+        <h2 style="margin-top:0;">試題解析</h2>
+        
+        <div class="highlight-box">
+            <strong>正確答案：(C) 第三級：以即時指標為主</strong>
+        </div>
+
+        <button class="btn btn-toggle" onclick="toggleAccordion('detail-analysis')">▼ 點擊查看選項逐一解析</button>
+        <div id="detail-analysis" class="accordion-content">
+            <ul>
+                <li><strong>(A) 第一級：</strong>重點在「靜態」，僅驗證帳號、角色、權限等固定資料，尚未納入環境變數。</li>
+                <li><strong>(B) 第二級：</strong>開始蒐集動態資料（如設備健康度），但反應機制通常是「定期掃描」或「下次登入時生效」，尚未達到題目要求的「即時撤銷」。</li>
+                <li><strong>(C) 第三級：</strong>正確。關鍵在於<strong>「即時指標」<span class="term-def">（系統當下即時取得並判斷的安全資訊）</span></strong>。系統能持續監控連線中的狀態，一旦發現異常（如地點突然跳轉、設備中毒），能<strong>立即（Real-time）</strong>中斷連線或告警。</li>
+                <li><strong>(D) 第四級：</strong>重點在於「自動化」與「跨系統聯防」，屬於最佳化階段，通常指 AI 輔助判斷或跨資安設備的連動。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 觀念補充 -->
+    <div class="card">
+        <h2>觀念補充與延伸</h2>
+        <p><strong>核心觀念：</strong>零信任架構 Zero Trust<span class="term-def">（不預設信任，所有存取都要重新驗證）</span>並非買一套軟體就完成，而是一個成熟度演進的過程。金管會指引主要參考美國 CISA 與 NIST 標準，將導入過程分級。</p>
+
+        <h3>1. 四個等級白話對照</h3>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th width="15%">等級</th>
+                    <th width="25%">關鍵字</th>
+                    <th>白話說明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Level I</td>
+                    <td>靜態、身份</td>
+                    <td>有帳號密碼就能進，頂多加個 MFA（多因子驗證）。門禁卡刷過就開門。</td>
+                </tr>
+                <tr>
+                    <td>Level II</td>
+                    <td>動態屬性</td>
+                    <td>除了看卡片，還會看「你拿什麼手機」、「現在幾點」。但如果進門後手機中毒，系統可能不知道。</td>
+                </tr>
+                <tr>
+                    <td>Level III</td>
+                    <td><strong>即時指標</strong>、連續驗證</td>
+                    <td>進門後，監視器一直盯著你。如果你突然做出怪動作（異常行為），警衛<strong>立刻</strong>把你趕出去（即時撤銷）。</td>
+                </tr>
+                <tr>
+                    <td>Level IV</td>
+                    <td>最佳化、自動化</td>
+                    <td>全自動 AI 保全，連結警察局與消防隊，自動判斷並處理複雜攻擊。</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>2. 常見陷阱：為什麼不選 Level II？</h3>
+        <div class="highlight-box">
+            <p><strong>陷阱解析：</strong>題目雖然提到「納入動態屬性」，這聽起來像 Level II。但題目的後半段<strong>「對異常樣態進行動態撤銷...即時告警」</strong>才是決定性關鍵。</p>
+            <p>Level II 只是「蒐集」了動態資料作為門檻；Level III 則是能「即時運用」這些資料來切斷連線。</p>
+        </div>
+
+        <h3>3. 記憶口訣</h3>
+        <p style="font-size: 1.2rem; color: var(--primary-color); font-weight: bold; text-align: center; border: 2px solid #ddd; padding: 10px;">
+            「一靜、二動、三即時、四最佳」
+        </p>
+        <p style="text-align: center; font-size: 0.9rem; color: #666;">（一級看靜態，二級看動態屬性，三級看即時反應，四級做最佳化）</p>
+    </div>
+
+    <!-- 自我檢測 -->
+    <div class="card">
+        <h2>自我檢測（不提供標準答案，請思考）</h2>
+        
+        <div style="margin-bottom: 15px;">
+            <p><strong>Q1. 某銀行系統僅在使用者「登入當下」檢查設備是否有安裝防毒軟體，登入後若關閉防毒軟體，系統無法察覺。這屬於哪一級？</strong></p>
+            <button class="btn btn-toggle" onclick="toggleHint('hint1')">顯示提示</button>
+            <div id="hint1" class="hint-text">提示：只在「門口」檢查一次，進門後就不管了，缺乏「持續/即時」監控能力。這通常是 Level II 的特徵。</div>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <p><strong>Q2. 下列哪一項不是「動態屬性」？ (A) 登入 IP 地理位置 (B) 員工編號與職級 (C) 當下連線時間 (D) 設備作業系統版本</strong></p>
+            <button class="btn btn-toggle" onclick="toggleHint('hint2')">顯示提示</button>
+            <div id="hint2" class="hint-text">提示：哪一個資料是幾年都不太會變，寫死在人事資料庫裡的？</div>
+        </div>
+
+        <div>
+            <p><strong>Q3. 實作 Level III 需要依賴什麼樣的核心組件來達成「即時撤銷」？</strong></p>
+            <button class="btn btn-toggle" onclick="toggleHint('hint3')">顯示提示</button>
+            <div id="hint3" class="hint-text">提示：通常稱為 PDP (Policy Decision Point) 或 PEP (Policy Enforcement Point) 的即時連動機制。</div>
+        </div>
+    </div>
+
+    <footer>
+        <div style="border: 1px solid #999; padding: 10px; display: inline-block; background: #fff;">
+            <strong>【30 秒考前速記】</strong><br>
+            看到「即時反應、連續驗證、立即撤銷」選 Level 3。<br>
+            看到「蒐集屬性、裝置健康度」選 Level 2。<br>
+            看到「只有帳號密碼 MFA」選 Level 1。
+        </div>
+        <p>&copy; 2025 iPAS 資安互動教學網 | 講師版權所有</p>
+    </footer>
+</div>
+
+<script>
+    function checkAnswer() {
+        const radios = document.getElementsByName('answer');
+        let selectedValue = null;
+        const feedbackArea = document.getElementById('feedback-area');
+        const analysisSection = document.getElementById('analysis-section');
+
+        for (const radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        if (!selectedValue) {
+            alert("請先選擇一個答案再提交！\n（考試時空白可是沒分數的喔！）");
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+        analysisSection.style.display = 'block'; // 作答後顯示解析區
+
+        if (selectedValue === 'C') {
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = '✅ 答對了！<br>正是「Level III」的即時指標與撤銷能力。觀念非常正確！';
+        } else {
+            feedbackArea.className = 'feedback-wrong';
+            let wrongMsg = '❌ 答錯囉！<br>';
+            if (selectedValue === 'B') {
+                wrongMsg += '這題很多人選 (B)。請注意 Level II 雖有動態屬性，但「即時撤銷/告警」是 Level III 的特徵。';
+            } else if (selectedValue === 'A') {
+                wrongMsg += 'Level I 僅依賴靜態資料，不會隨環境變動，請重新複習定義。';
+            } else {
+                wrongMsg += 'Level IV 強調自動化與最佳化，題目敘述的是即時監控機制，屬於 Level III。';
+            }
+            wrongMsg += '<br><strong>正確答案是 (C)</strong>';
+            feedbackArea.innerHTML = wrongMsg;
+        }
+        
+        // 滾動到解析區
+        analysisSection.scrollIntoView({behavior: "smooth"});
+    }
+
+    function toggleAccordion(id) {
+        const content = document.getElementById(id);
+        const btn = event.target;
+        
+        if (content.style.display === "block") {
+            content.style.display = "none";
+            btn.innerHTML = "▼ 點擊查看選項逐一解析";
+        } else {
+            content.style.display = "block";
+            btn.innerHTML = "▲ 收合解析";
+        }
+    }
+
+    function toggleHint(id) {
+        const hint = document.getElementById(id);
+        if (hint.style.display === "block") {
+            hint.style.display = "none";
+        } else {
+            hint.style.display = "block";
+        }
+    }
+</script>
+
+</body>
+</html>

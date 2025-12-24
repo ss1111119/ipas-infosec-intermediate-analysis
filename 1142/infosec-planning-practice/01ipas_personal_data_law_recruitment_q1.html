@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS 個資法考題解析 - 招募篇</title>
+    <style>
+        /* 基礎設定：模擬補習班講義風格，簡潔、高對比、易讀 */
+        :root {
+            --primary-color: #2c3e50; /* 深藍灰，專業感 */
+            --accent-color: #2980b9; /* 亮藍，用於按鈕與強調 */
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --border-color: #ccc;
+            --correct-color: #27ae60;
+            --error-color: #c0392b;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Heiti TC", "LiHei Pro", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-radius: 5px;
+        }
+
+        /* 標題設定：不比內文大太多 */
+        h1 {
+            font-size: 1.2rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 4px solid var(--accent-color);
+            background-color: #f0f4f8;
+            padding: 5px 10px;
+        }
+
+        h3 {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 15px;
+        }
+
+        /* 專有名詞解釋樣式 */
+        .term-def {
+            color: #555;
+            font-size: 0.9em;
+            background-color: #eee;
+            padding: 0 4px;
+            border-radius: 3px;
+        }
+
+        /* 狀態列 */
+        .status-bar {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: right;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 5px;
+        }
+
+        /* 題目區塊 */
+        .question-box {
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start; /* 對齊頂部，避免多行文字跑版 */
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f5f5f5;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 回饋區塊 */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid;
+            border-radius: 4px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-correct {
+            border-color: var(--correct-color);
+            background-color: #eafaf1;
+            color: var(--correct-color);
+        }
+
+        .feedback-incorrect {
+            border-color: var(--error-color);
+            background-color: #fdedec;
+            color: var(--error-color);
+        }
+
+        .result-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        /* 解析折疊區塊 (Accordion) */
+        .accordion-btn {
+            background-color: #eef2f5;
+            color: #333;
+            cursor: pointer;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1rem;
+            transition: 0.4s;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .accordion-btn:after {
+            content: '+';
+            font-weight: bold;
+        }
+
+        .accordion-btn.active:after {
+            content: '-';
+        }
+
+        .panel {
+            padding: 0 15px;
+            background-color: white;
+            display: none; /* 預設收合 */
+            overflow: hidden;
+            border: 1px solid #ddd;
+            border-top: none;
+            margin-bottom: 10px;
+        }
+
+        .panel p {
+            margin: 15px 0;
+        }
+
+        /* 觀念補充與陷阱 */
+        .concept-box, .trap-box, .mnemonic-box, .keyword-card {
+            background-color: #fff;
+            border: 1px solid #eee;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid #666;
+        }
+        
+        .keyword-card {
+            border-left: 3px solid #e67e22; /* 橘色 */
+            background-color: #fff8e1;
+        }
+
+        .mnemonic-box {
+            border-left-color: var(--accent-color);
+            background-color: #e8f4fd;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .trap-box {
+             border-left-color: var(--error-color);
+        }
+
+        /* 自我檢測提示按鈕 */
+        .hint-toggle {
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            text-decoration: underline;
+            cursor: pointer;
+            margin-left: 10px;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .hint-text {
+            display: none;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            padding-left: 10px;
+            border-left: 2px solid #ddd;
+        }
+
+        /* 頁尾 */
+        footer {
+            margin-top: 40px;
+            border-top: 2px solid var(--primary-color);
+            padding-top: 15px;
+            font-size: 0.9rem;
+            background-color: #f0f0f0;
+            padding: 15px;
+            text-align: center;
+        }
+
+        /* 手機響應式調整 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.1rem;
+            }
+            .btn {
+                padding: 12px;
+            }
+        }
+        
+        /* 隱藏內容 (直到送出後顯示) */
+        .post-submit-content {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="status-bar" id="statusBar">狀態：尚未作答</div>
+
+    <h1>IPAS 個資法｜招募面試篇｜模擬試題 Q1</h1>
+
+    <!-- 題目區 -->
+    <div class="question-box">
+        <p>題目：公司取得應徵人員的<span class="term-def">個人資料（可以用來識別你身分的資訊，例如姓名、電話、身分證字號）</span>時，下列何項行為違反個人資料保護法？</p>
+    </div>
+
+    <form id="quizForm">
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                <span>(A) 說明取得資料之使用期限</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                <span>(B) 請其放棄申請其個人資料複製本之權利</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                <span>(C) 說明個人資料的使用對象</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                <span>(D) 告知個人資料使用之方式</span>
+            </label>
+        </div>
+        <button type="button" class="btn" id="submitBtn" onclick="checkAnswer()">提交答案</button>
+    </form>
+
+    <!-- 回饋區 (送出後顯示) -->
+    <div id="feedback" class="feedback-area">
+        <div class="result-title" id="resultTitle"></div>
+        <div id="resultMessage"></div>
+    </div>
+
+    <!-- 解析與教學區 (送出後顯示) -->
+    <div class="post-submit-content" id="teachingContent">
+        
+        <!-- 加分項：關鍵字小卡 -->
+        <div class="keyword-card">
+            <strong>👁️ 一眼辨識關鍵字：</strong>
+            本題請圈選：<b>公司取得</b>、<b>應徵人員</b>、<b>個人資料</b>、<b>違反個資法</b>、<b>放棄權利</b>。
+        </div>
+
+        <h2>📖 逐項解析（點擊展開）</h2>
+        
+        <button class="accordion-btn">為什麼 (B) 是違反個資法的？（正確答案）</button>
+        <div class="panel">
+            <p><strong>這題選 (B) 是因為：權利不能「預先」拋棄。</strong></p>
+            <p>這涉及到個資法第 3 條規定的<span class="term-def">當事人權利（你對自己的個資可查詢、閱覽、複製、補充更正、停止使用、刪除）</span>。</p>
+            <p>法律規定這些權利是你的「天賦人權」（在個資法領域內），公司不能在面試時，利用權勢（你想被錄取的心態）強迫你簽署文件說：「我自願放棄以後跟公司要我的個資複製本」。這種「預先拋棄」在法律上是<strong>無效</strong>且<strong>違法</strong>的。</p>
+        </div>
+
+        <button class="accordion-btn">為什麼 (A) 說明使用期限 是合法的？</button>
+        <div class="panel">
+            <p>這是合法的，且是必須做的。</p>
+            <p>根據個資法第 8 條的<span class="term-def">告知義務（公司在收集資料時必須先說清楚用途、對象、方式、期間）</span>，公司必須清楚告訴你，這份履歷他們會保存多久（例如：若未錄取，保存一年後銷毀）。</p>
+        </div>
+
+        <button class="accordion-btn">為什麼 (C) 說明使用對象 是合法的？</button>
+        <div class="panel">
+            <p>這是合法的。</p>
+            <p>這也是第 8 條「告知義務」的一環。公司要告訴你，這份資料除了人資看，還會給誰看？（例如：會不會傳給總公司、或者外包的薪資結算公司）。</p>
+        </div>
+
+        <button class="accordion-btn">為什麼 (D) 告知使用方式 是合法的？</button>
+        <div class="panel">
+            <p>這是合法的。</p>
+            <p>同樣是第 8 條「告知義務」。公司要說明會怎麼用你的資料（例如：僅用於面試聯繫、建檔存查，還是會拿去做行銷分析？招募通常只能用於招募相關用途）。</p>
+        </div>
+
+        <h2>💡 觀念補充與延伸</h2>
+        <div class="concept-box">
+            <h3>核心觀念：告知義務 vs. 當事人權利</h3>
+            <p>這題其實是在考兩個概念的區別：</p>
+            <ol>
+                <li><strong>公司「必須」做的事（告知義務）：</strong>蒐集前要說清楚目的、類別、期間、對象等（選項 A, C, D 都是在做這件事，所以合法）。</li>
+                <li><strong>公司「不能」做的事（限制權利）：</strong>不能限制或要求當事人預先放棄法定的權利（選項 B 試圖限制你的權利，所以違法）。</li>
+            </ol>
+            <p><strong>法條白話文：</strong>個資法規定，當事人權利「不得預先拋棄」或「以特約限制」。意思是，就算你簽了放棄同意書，那張紙也是廢紙一張。</p>
+        </div>
+
+        <div class="mnemonic-box">
+            📣 記憶口訣：<br>
+            「蒐集前要 <strong>告知</strong>，法定權利 <strong>不可棄</strong>。」
+        </div>
+
+        <h2>⚠️ 常見陷阱（避坑指南）</h2>
+        <div class="trap-box">
+            <ul>
+                <li><strong>陷阱 1：以為「我自願簽名」就有效。</strong><br>錯！法律為了保護弱勢（應徵者），規定這些基本權利不能因為你簽名就失效。</li>
+                <li><strong>陷阱 2：混淆「使用權限」與「當事人權利」。</strong><br>公司有權使用你的資料（因為你有給），但不代表公司可以剝奪你「查詢」或「複製」自己資料的權利。</li>
+                <li><strong>陷阱 3：只看到「說明」就覺得是好事。</strong><br>選項 (B) 雖然也是「請其...」，但內容是「放棄權利」，這就是違法的核心。讀題要讀完。</li>
+            </ul>
+        </div>
+
+        <h2>📝 自我檢測（不提供答案，試著回答看看）</h2>
+        <div class="concept-box">
+            <div style="margin-bottom: 15px;">
+                <strong>Q1. 如果公司說「履歷一經投遞，概不退還且不得查詢」，這句話有效嗎？</strong>
+                <button class="hint-toggle" onclick="toggleHint('hint1')">顯示提示</button>
+                <div id="hint1" class="hint-text">提示：回想一下「當事人權利」能不能被預先限制？</div>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <strong>Q2. 應徵時，公司一定要告知我資料會被用在什麼「地區」嗎？</strong>
+                <button class="hint-toggle" onclick="toggleHint('hint2')">顯示提示</button>
+                <div id="hint2" class="hint-text">提示：回去看「告知義務」的內容，包含期間、地區、對象、方式。</div>
+            </div>
+
+            <div>
+                <strong>Q3. 我請求公司給我一份我當初填寫的履歷影本，公司可以跟我收錢嗎？</strong>
+                <button class="hint-toggle" onclick="toggleHint('hint3')">顯示提示</button>
+                <div id="hint3" class="hint-text">提示：個資法第 14 條，查詢或製給複製本，得酌收必要成本費用。</div>
+            </div>
+        </div>
+
+        <footer>
+            <strong>⏱️ 30 秒複習：</strong><br>
+            1. 蒐集個資前，公司有「告知義務」（講清楚怎麼用）。<br>
+            2. 當事人有 5 大權利（查、閱、製、補、刪），這是法律給的。<br>
+            3. 重點考點：權利「不得預先拋棄」，叫你放棄就是違法！
+        </footer>
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        // 1. 取得使用者選擇的答案
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        // 2. 驗證是否已作答
+        if (!selectedValue) {
+            alert('同學，請先選一個答案再提交喔！');
+            return;
+        }
+
+        // 3. 判斷對錯與定義正確答案
+        const correctAnswer = 'B';
+        const isCorrect = (selectedValue === correctAnswer);
+        const feedbackDiv = document.getElementById('feedback');
+        const titleDiv = document.getElementById('resultTitle');
+        const msgDiv = document.getElementById('resultMessage');
+        const statusBar = document.getElementById('statusBar');
+
+        // 4. 設定回饋內容
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.className = 'feedback-area ' + (isCorrect ? 'feedback-correct' : 'feedback-incorrect');
+
+        if (isCorrect) {
+            titleDiv.textContent = '🎉 答對了！';
+            msgDiv.textContent = `太棒了！選項 (${selectedValue}) 確實是違反個資法的行為。`;
+        } else {
+            titleDiv.textContent = '❌ 答錯了，沒關係，這題有陷阱。';
+            msgDiv.textContent = `你選擇了 (${selectedValue})，但正確答案是 (B)。我們來看看為什麼。`;
+        }
+
+        // 5. 更新狀態與介面
+        statusBar.textContent = '狀態：已作答';
+        document.getElementById('submitBtn').disabled = true; // 禁止重複提交
+        document.getElementById('submitBtn').textContent = '已提交';
+        
+        // 6. 顯示解析內容
+        document.getElementById('teachingContent').style.display = 'block';
+
+        // 7. 自動捲動到回饋區
+        feedbackDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // 提示開關功能
+    function toggleHint(id) {
+        const hint = document.getElementById(id);
+        const btn = hint.previousElementSibling;
+        if (hint.style.display === 'block') {
+            hint.style.display = 'none';
+            btn.textContent = '顯示提示';
+        } else {
+            hint.style.display = 'block';
+            btn.textContent = '隱藏提示';
+        }
+    }
+
+    // 手風琴 (Accordion) 功能設定
+    const acc = document.getElementsByClassName("accordion-btn");
+    for (let i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            const panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

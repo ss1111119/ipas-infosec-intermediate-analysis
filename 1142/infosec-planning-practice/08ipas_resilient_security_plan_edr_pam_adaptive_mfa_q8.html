@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安師 - 韌性防護實戰教學 (Q8)</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #475569;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+            --error: #dc2626;
+            --error-bg: #fee2e2;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 5px solid var(--primary);
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .tag {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .card-header {
+            background: #f8fafc;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Question Form */
+        .scenario-text {
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: #93c5fd;
+            background: #f0f9ff;
+        }
+
+        .option-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            accent-color: var(--primary);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            background-color: #0f172a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #334155;
+        }
+
+        .btn-reset {
+            background-color: white;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            margin-top: 10px;
+        }
+
+        .btn-reset:hover {
+            background-color: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        /* Result Area */
+        #result-area {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 8px;
+            display: none; /* Hidden by default */
+        }
+
+        .result-success {
+            background-color: var(--success-bg);
+            color: #14532d;
+            border: 1px solid #86efac;
+        }
+
+        .result-error {
+            background-color: var(--error-bg);
+            color: #7f1d1d;
+            border: 1px solid #fca5a5;
+        }
+
+        /* Accordion */
+        .accordion-item {
+            border-bottom: 1px solid var(--border);
+        }
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-header {
+            width: 100%;
+            text-align: left;
+            padding: 16px;
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-main);
+        }
+        
+        .accordion-header:hover {
+            background-color: #f8fafc;
+        }
+
+        .accordion-content {
+            padding: 0 16px 16px 16px;
+            display: none;
+            color: var(--secondary);
+            font-size: 0.95rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 12px;
+            margin-right: 8px;
+            color: white;
+        }
+        .bg-green { background-color: var(--success); }
+        .bg-red { background-color: var(--error); }
+
+        /* Sidebar Styles */
+        .info-box {
+            padding: 16px;
+            margin-bottom: 16px;
+            background: #fff;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+        }
+        .info-box h4 { margin-bottom: 8px; color: #92400e; }
+        .info-box p, .info-box ul { font-size: 0.9rem; color: #78350f; }
+
+        .concept-box {
+            background: #1e1b4b;
+            color: #e0e7ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+        .concept-box h3 { border-bottom: 1px solid #4338ca; padding-bottom: 10px; margin-bottom: 15px; }
+        .concept-item { margin-bottom: 12px; }
+        .concept-title { color: #818cf8; font-size: 0.75rem; text-transform: uppercase; font-weight: bold; display: block;}
+
+        .mnemonic-box {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .mnemonic-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #92400e;
+            margin: 10px 0;
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .pitfall-list {
+            list-style: none;
+            margin-top: 10px;
+        }
+        .pitfall-list li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+        .pitfall-list li::before {
+            content: "⚠️";
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 12px;
+        }
+
+        /* Self Check */
+        .self-check {
+            background: #ecfdf5;
+            border: 1px solid #6ee7b7;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .hint-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        #hint-content { display: none; margin-top: 10px; font-size: 0.9rem; color: #047857; font-style: italic;}
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-title">
+                <h1>iPAS 資安補教名師：韌性防護實戰 Q8</h1>
+                <p>考點：韌性防護架構 & 縱深防禦策略</p>
+            </div>
+            <span class="tag">情境複選題</span>
+        </header>
+
+        <div class="grid">
+            <!-- Left Column: Question & Interaction -->
+            <main>
+                <div class="card">
+                    <div class="card-header">
+                        📝 題目卷：醫療中心資安長 (CISO) 的決策
+                    </div>
+                    <div class="card-body">
+                        <p class="scenario-text">
+                            身為醫療中心的資安長，為了建構一個兼具<span class="highlight">彈性與韌性</span>的安全防護體系，防止結合供應鏈與內部人員的攻擊再次發生，下列哪些措施應納入改善計畫？（請勾選所有正確選項）
+                        </p>
+
+                        <form id="quiz-form">
+                            <div class="checkbox-group">
+                                <label class="option-label">
+                                    <input type="checkbox" name="ans" value="A">
+                                    <span>(A) 在所有端點（含開發者筆電）部署 EDR</span>
+                                </label>
+                                <label class="option-label">
+                                    <input type="checkbox" name="ans" value="B">
+                                    <span>(B) 制定並落實 PAM，採最小權限原則</span>
+                                </label>
+                                <label class="option-label">
+                                    <input type="checkbox" name="ans" value="C">
+                                    <span>(C) 為關鍵系統啟用基於風險的 Adaptive MFA</span>
+                                </label>
+                                <label class="option-label">
+                                    <input type="checkbox" name="ans" value="D">
+                                    <span>(D) 要求所有遠端工作均配置單向閘道傳輸器</span>
+                                </label>
+                            </div>
+
+                            <button type="button" class="btn" onclick="checkAnswer()">提交答案</button>
+                            
+                            <!-- Result Box -->
+                            <div id="result-area">
+                                <h3 id="result-title" style="margin-bottom: 5px;"></h3>
+                                <p id="result-msg"></p>
+                            </div>
+
+                            <button type="button" id="redo-btn" class="btn btn-reset hidden" onclick="resetQuiz()">🔄 再做一次</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Accordion Analysis (Hidden until submitted) -->
+                <div id="analysis-card" class="card hidden">
+                    <div class="card-header">
+                        💡 名師詳解 (點擊展開)
+                    </div>
+                    <div class="accordion">
+                        <!-- Item A -->
+                        <div class="accordion-item">
+                            <button class="accordion-header" onclick="toggleAccordion('acc-a')">
+                                <span><span class="badge bg-green">A</span> EDR (Endpoint Detection and Response)</span>
+                                <span>▼</span>
+                            </button>
+                            <div id="acc-a" class="accordion-content">
+                                <p><strong>為什麼選 A？</strong><br>開發者筆電常是供應鏈攻擊的入口。傳統防毒軟體無法偵測「合法軟體被濫用」的行為。EDR 能監控異常行為（如不正常的編譯程序注入、PowerShell 呼叫），是防範內部與供應鏈攻擊的最後一道防線。</p>
+                            </div>
+                        </div>
+
+                        <!-- Item B -->
+                        <div class="accordion-item">
+                            <button class="accordion-header" onclick="toggleAccordion('acc-b')">
+                                <span><span class="badge bg-green">B</span> PAM (Privileged Access Management)</span>
+                                <span>▼</span>
+                            </button>
+                            <div id="acc-b" class="accordion-content">
+                                <p><strong>為什麼選 B？</strong><br>這是針對「內部人員威脅」最有效的手段。透過 PAM 實施「最小權限」與「監控特權帳號操作」，即使供應鏈軟體被植入後門，攻擊者也無法輕易提權進行橫向移動。</p>
+                            </div>
+                        </div>
+
+                        <!-- Item C -->
+                        <div class="accordion-item">
+                            <button class="accordion-header" onclick="toggleAccordion('acc-c')">
+                                <span><span class="badge bg-green">C</span> Adaptive MFA (適應性多因子驗證)</span>
+                                <span>▼</span>
+                            </button>
+                            <div id="acc-c" class="accordion-content">
+                                <p><strong>為什麼選 C？</strong><br>一般的 MFA 可能會被繞過（MFA Fatigue）。基於風險（Risk-based）的驗證能依據登入環境（如非常規時間、地點、設備指紋）動態調整強度，提供符合題目要求之「彈性」且強大的身分確認。</p>
+                            </div>
+                        </div>
+
+                        <!-- Item D -->
+                        <div class="accordion-item">
+                            <button class="accordion-header" onclick="toggleAccordion('acc-d')">
+                                <span><span class="badge bg-red">D</span> 常見陷阱：單向閘道 (One-way Gateway)</span>
+                                <span>▼</span>
+                            </button>
+                            <div id="acc-d" class="accordion-content">
+                                <p><strong>為什麼不選 D？</strong><br>雖然單向閘道安全性極高（通常用於軍方或 OT 網閘），但嚴重影響「可用性」。遠端開發與維運通常需要雙向互動（Pull/Push Code, 查詢 DB）。強制單向會導致業務中斷，<span style="text-decoration: underline; color: #b91c1c;">違反題目要求的「彈性」原則</span>。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Column: Sidebar Knowledge -->
+            <aside>
+                <!-- 3 Layers Concept -->
+                <div class="concept-box">
+                    <h3>🛡️ 防護層級概念</h3>
+                    <div class="concept-item">
+                        <span class="concept-title">端點 (Endpoint)</span>
+                        <p>EDR/XDR：不只防毒，重點在「行為分析」。</p>
+                    </div>
+                    <div class="concept-item">
+                        <span class="concept-title">身分 (Identity)</span>
+                        <p>PAM：控制「特權帳號」能做什麼。</p>
+                    </div>
+                    <div class="concept-item">
+                        <span class="concept-title">存取 (Access)</span>
+                        <p>Adaptive MFA：依照風險動態驗證。</p>
+                    </div>
+                </div>
+
+                <!-- Mnemonic -->
+                <div class="mnemonic-box">
+                    <h4 style="color: #b45309; margin-bottom: 8px;">🧠 記憶口訣</h4>
+                    <div class="mnemonic-text">
+                        端點看行為<br>特權要限縮
+                    </div>
+                    <div class="mnemonic-text">
+                        驗證動態變<br>單向不通風
+                    </div>
+                    <p style="font-size: 0.8rem; color: #b45309; margin-top: 5px;">(單向不通風 = 太死板，刪除)</p>
+                </div>
+
+                <!-- Pitfalls -->
+                <div class="card">
+                    <div class="card-header" style="background: #fff1f2; color: #9f1239;">
+                        ⚠️ 常見陷阱 (必讀)
+                    </div>
+                    <div class="card-body" style="padding: 16px;">
+                        <ul class="pitfall-list">
+                            <li><strong>誤區 1：防毒軟體 = EDR？</strong><br>錯！防毒看特徵碼（已知病毒），EDR 看行為（未知攻擊）。</li>
+                            <li><strong>誤區 2：所有 MFA 都一樣？</strong><br>錯！SMS 簡訊驗證不安全，Adaptive MFA 才能依風險動態防禦。</li>
+                            <li><strong>誤區 3：越嚴格越好？</strong><br>錯！資安講求 CIA 平衡。過度限制（如全單向）犧牲可用性，反而不是「韌性」。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Self Check -->
+                <div class="self-check">
+                    <h4 style="color: #065f46; margin-bottom: 8px;">🤔 自我檢測</h4>
+                    <p style="font-size: 0.9rem; color: #064e3b;">
+                        如果駭客成功竊取了高級主管的帳號密碼，上述哪一個機制最有機會在登入階段攔截他？
+                    </p>
+                    <button class="hint-btn" onclick="toggleHint()">查看提示</button>
+                    <div id="hint-content">
+                        <strong>答案：(C) Adaptive MFA</strong><br>
+                        因為駭客的登入設備、IP 或時間通常與主管平時習慣不同，系統偵測到高風險會強制要求多因子驗證。
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        function checkAnswer() {
+            // Get all checkboxes
+            const checkboxes = document.querySelectorAll('input[name="ans"]');
+            let selected = [];
+            
+            checkboxes.forEach(cb => {
+                if (cb.checked) selected.push(cb.value);
+            });
+
+            // Logic
+            const correctSet = ['A', 'B', 'C'];
+            const wrongSet = ['D'];
+
+            // Validate
+            // 1. Must include ALL correct answers
+            const hasAllCorrect = correctSet.every(ans => selected.includes(ans));
+            // 2. Must NOT include any wrong answers
+            const hasNoWrong = !selected.some(ans => wrongSet.includes(ans));
+            
+            const isPerfect = hasAllCorrect && hasNoWrong && (selected.length === correctSet.length);
+
+            // UI Elements
+            const resultArea = document.getElementById('result-area');
+            const resultTitle = document.getElementById('result-title');
+            const resultMsg = document.getElementById('result-msg');
+            const analysisCard = document.getElementById('analysis-card');
+            const redoBtn = document.getElementById('redo-btn');
+
+            // Show Feedback
+            resultArea.style.display = 'block';
+            analysisCard.classList.remove('hidden');
+            redoBtn.classList.remove('hidden');
+
+            if (isPerfect) {
+                resultArea.className = 'result-success';
+                resultTitle.innerText = '✅ 完全正確！';
+                resultMsg.innerText = '恭喜！您的觀念非常清晰，已掌握韌性防護的核心：多層次且具彈性。';
+                
+                // Auto open all correct accordions logic could go here, but let user explore
+            } else {
+                resultArea.className = 'result-error';
+                resultTitle.innerText = '❌ 答案未完全正確';
+                
+                let msg = [];
+                if (selected.includes('D')) {
+                    msg.push('您選到了陷阱選項 (D)。單向閘道會導致開發工作停擺，不符合「彈性」需求。');
+                }
+                if (!hasAllCorrect) {
+                    msg.push('您漏選了部分重要的防護層級。這是一題複選題，EDR、PAM 與 Adaptive MFA 缺一不可。');
+                }
+                
+                resultMsg.innerText = msg.join(' ');
+            }
+
+            // Scroll to result
+            resultArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function resetQuiz() {
+            // Uncheck all
+            document.querySelectorAll('input[name="ans"]').forEach(cb => cb.checked = false);
+            
+            // Hide areas
+            document.getElementById('result-area').style.display = 'none';
+            document.getElementById('analysis-card').classList.add('hidden');
+            document.getElementById('redo-btn').classList.add('hidden');
+
+            // Close Accordions
+            document.querySelectorAll('.accordion-content').forEach(div => div.style.display = 'none');
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+            }
+        }
+
+        function toggleHint() {
+            const hint = document.getElementById('hint-content');
+            const btn = document.querySelector('.hint-btn');
+            
+            if (hint.style.display === 'block') {
+                hint.style.display = 'none';
+                btn.innerText = '查看提示';
+            } else {
+                hint.style.display = 'block';
+                btn.innerText = '隱藏提示';
+            }
+        }
+    </script>
+</body>
+</html>

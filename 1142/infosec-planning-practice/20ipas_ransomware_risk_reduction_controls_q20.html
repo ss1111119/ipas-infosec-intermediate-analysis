@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安重點衝刺：勒索軟體防護（Q20）</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1e40af;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-sub: #4b5563;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        header .icon {
+            font-size: 2rem;
+            background: rgba(255,255,255,0.1);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+        }
+
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+            padding-left: 15px;
+        }
+
+        /* Quiz Options Styles */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-label:hover {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        .option-label.selected {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        /* Checkbox styling */
+        input[type="checkbox"] {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-color);
+        }
+
+        /* Feedback Styles (After Submit) */
+        .option-label.correct-answer {
+            border-color: var(--success-color);
+            background-color: #f0fdf4;
+        }
+        
+        .option-label.wrong-choice {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+        }
+
+        .feedback-icon {
+            margin-left: auto;
+            font-weight: bold;
+        }
+
+        .correct-icon { color: var(--success-color); }
+        .wrong-icon { color: var(--error-color); }
+
+        /* Button Styles */
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Result Section */
+        #result-section {
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .result-success { background-color: #dcfce7; color: #166534; }
+        .result-fail { background-color: #fee2e2; color: #991b1b; }
+
+        /* Accordion / Details */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 12px 15px;
+            background-color: #f9fafb;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Hide default triangle */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        summary::after {
+            content: '+';
+            font-size: 1.2rem;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .detail-content {
+            padding: 15px;
+            border-top: 1px solid #e5e7eb;
+            background-color: white;
+            font-size: 0.95rem;
+        }
+
+        /* Core Concepts Section */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 600px) {
+            .concept-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .concept-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .concept-title {
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: white;
+            margin-right: 5px;
+        }
+
+        /* Pitfalls Section */
+        .pitfall-list li {
+            margin-bottom: 10px;
+            padding-left: 5px;
+        }
+        
+        .pitfall-tag {
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* Mnemonic Box */
+        .mnemonic-box {
+            background-color: #fffbeb;
+            border: 2px dashed #fcd34d;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            line-height: 1.8;
+            color: #78350f;
+        }
+
+        /* Self Check */
+        .self-check-item {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        
+        .hint-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .hint-text {
+            display: none;
+            margin-top: 8px;
+            color: var(--success-color);
+            font-weight: bold;
+            background: #f0fdf4;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="icon">🎓</div>
+        <div>
+            <h1 style="margin:0; font-size: 1.5rem;">iPAS 資安重點衝刺班</h1>
+            <p style="margin:0; opacity: 0.8;">單元：惡意程式與防護機制 (Q20)</p>
+        </div>
+    </header>
+
+    <!-- Quiz Section -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span style="background:#dbeafe; color:#1e40af; padding:2px 8px; border-radius:4px; font-size:0.8rem;">複選題</span>
+            <span id="status-badge" style="background:#e5e7eb; color:#374151; padding:2px 8px; border-radius:4px; font-size:0.8rem;">尚未作答</span>
+        </div>
+        
+        <div class="question-title">
+            企業可實際應用下列哪些防護措施，以協助降低勒索軟體（Ransomware）的風險？（複選）
+        </div>
+
+        <form id="quiz-form">
+            <div class="options-group">
+                <label class="option-label" id="label-A">
+                    <input type="checkbox" name="option" value="A">
+                    <span>(A) 定期執行異地備份重要資料</span>
+                    <span class="feedback-icon" id="icon-A"></span>
+                </label>
+
+                <label class="option-label" id="label-B">
+                    <input type="checkbox" name="option" value="B">
+                    <span>(B) 禁用所有資料加密功能以防止勒索軟體加密資料</span>
+                    <span class="feedback-icon" id="icon-B"></span>
+                </label>
+
+                <label class="option-label" id="label-C">
+                    <input type="checkbox" name="option" value="C">
+                    <span>(C) 使用應用程式白名單機制</span>
+                    <span class="feedback-icon" id="icon-C"></span>
+                </label>
+
+                <label class="option-label" id="label-D">
+                    <input type="checkbox" name="option" value="D">
+                    <span>(D) 僅依賴作業系統的內建安全功能</span>
+                    <span class="feedback-icon" id="icon-D"></span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn" id="submit-btn">提交答案</button>
+        </form>
+    </div>
+
+    <!-- Results & Analysis Section (Hidden initially) -->
+    <div id="result-section">
+        
+        <!-- Score Banner -->
+        <div id="result-banner" class="result-box">
+            <!-- JS will populate this -->
+        </div>
+
+        <!-- Detailed Explanations -->
+        <div class="card">
+            <h3 style="margin-top:0; border-bottom: 2px solid #f3f4f6; padding-bottom: 10px;">
+                🔍 名師選項詳解
+            </h3>
+            
+            <details>
+                <summary>
+                    <span><span style="color:var(--success-color); font-weight:bold;">(A) 正確</span>：定期執行異地備份</span>
+                </summary>
+                <div class="detail-content">
+                    <strong>為什麼它是正解？</strong><br>
+                    勒索軟體不僅加密電腦裡的檔案，還會搜尋並加密所有「連結中」的網路磁碟機或備份區。
+                    因此，備份必須遵守 <strong>3-2-1 原則</strong>，其中最重要的就是「異地」或「離線」，讓駭客摸不到備份檔，這是最後的救命稻草。
+                </div>
+            </details>
+
+            <details>
+                <summary>
+                    <span><span style="color:var(--error-color); font-weight:bold;">(B) 錯誤</span>：禁用資料加密功能</span>
+                </summary>
+                <div class="detail-content">
+                    <strong>這是常見的考試陷阱！</strong><br>
+                    勒索軟體（Ransomware）是自帶加密程式（Payload）來加密你的檔案，與你作業系統是否開啟 BitLocker 或其他加密功能完全無關。<br>
+                    反之，如果你禁用了系統加密，當駭客竊取資料（雙重勒索）時，你的資料將毫無保護，直接洩漏。
+                </div>
+            </details>
+
+            <details>
+                <summary>
+                    <span><span style="color:var(--success-color); font-weight:bold;">(C) 正確</span>：應用程式白名單</span>
+                </summary>
+                <div class="detail-content">
+                    <strong>為什麼它是正解？</strong><br>
+                    <strong>白名單 (Whitelisting)</strong> 採取「零信任」概念：只允許被核准的好程式執行，其他通通擋掉。<br>
+                    由於勒索軟體通常是外來的陌生程式，不在白名單內，因此無法啟動執行，是極為有效的預防手段。
+                </div>
+            </details>
+
+            <details>
+                <summary>
+                    <span><span style="color:var(--error-color); font-weight:bold;">(D) 錯誤</span>：僅依賴內建安全功能</span>
+                </summary>
+                <div class="detail-content">
+                    <strong>縱深防禦 (Defense in Depth) 很重要！</strong><br>
+                    作業系統內建的防護（如 Windows Defender）雖然有基礎保護力，但對於利用零日漏洞 (Zero-day) 或高級社交工程進入的勒索軟體往往防不勝防。企業需要多層次防護（如防火牆、EDR、備份、教育訓練）。
+                </div>
+            </details>
+        </div>
+
+        <!-- Core Concepts -->
+        <div class="card">
+            <h3 style="margin-top:0;">🛡️ 勒索軟體防護：核心觀念</h3>
+            <div class="concept-grid">
+                <div class="concept-item">
+                    <span class="concept-title">1. 預防 (Prevention)</span>
+                    <p style="font-size: 0.9rem; margin:0;">
+                        防止惡意程式「進入」或「執行」。<br>
+                        關鍵手段：<span style="color:var(--primary-color); font-weight:bold;">白名單機制</span>、修補漏洞、教育訓練（不點釣魚郵件）。
+                    </p>
+                </div>
+                <div class="concept-item">
+                    <span class="concept-title">2. 復原 (Recovery)</span>
+                    <p style="font-size: 0.9rem; margin:0;">
+                        當防線被突破時，能把資料救回來。<br>
+                        關鍵手段：<span style="color:var(--primary-color); font-weight:bold;">異地備份</span>、定期還原演練。沒有還原演練的備份等於沒備份。
+                    </p>
+                </div>
+            </div>
+            
+            <div style="margin-top:15px; background: #e0f2fe; padding:10px; border-radius:8px;">
+                <strong>為什麼「備份」是最後一道防線？</strong>
+                <p style="margin:5px 0 0 0; font-size:0.9rem;">
+                    因為防毒軟體可能被繞過，防火牆可能被穿透，但只要你有乾淨的、離線的備份，你就不需要支付贖金。
+                </p>
+            </div>
+        </div>
+
+        <!-- Pitfalls & Mnemonic -->
+        <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+            <!-- Pitfalls -->
+            <div class="card" style="margin-bottom:0; border-left: 5px solid var(--error-color);">
+                <h3 style="margin-top:0;">⚠️ 常見考試/實務陷阱</h3>
+                <ul class="pitfall-list" style="list-style: none; padding:0;">
+                    <li>
+                        <span class="pitfall-tag">陷阱 1</span>
+                        <strong>誤以為停用加密就能防勒索：</strong><br>
+                        這是完全錯誤的觀念，請分清楚「系統功能」與「惡意行為」。
+                    </li>
+                    <li>
+                        <span class="pitfall-tag">陷阱 2</span>
+                        <strong>高估單一防護：</strong><br>
+                        沒有任何單一軟體能 100% 阻擋勒索軟體，必須層層把關。
+                    </li>
+                    <li>
+                        <span class="pitfall-tag">陷阱 3</span>
+                        <strong>備份放在隨手可得處：</strong><br>
+                        備份若放在連線的網路磁碟機 (NAS) 且未做權限隔離，會被一起加密。一定要異地或離線！
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Mnemonic -->
+            <div class="card" style="margin-bottom:0; background: #fff7ed;">
+                <h3 style="margin-top:0; color:#9a3412;">🧠 老師的記憶口訣</h3>
+                <div class="mnemonic-box">
+                    「備份」謹記三二一，<br>
+                    「白單」管控沒問題，<br>
+                    「更新」系統補漏洞，<br>
+                    勒索軟體不恐懼！
+                </div>
+                <p style="text-align: center; font-size: 0.85rem; color: #9a3412; margin-top:10px;">
+                    * 3-2-1 原則：3份備份、2種介質、1份異地
+                </p>
+            </div>
+        </div>
+
+        <!-- Self Check -->
+        <div class="card" style="margin-top: 20px;">
+            <h3 style="margin-top:0;">📝 自我檢測（遮住答案想一想）</h3>
+            
+            <div class="self-check-item">
+                <p style="margin:0 0 5px 0;">Q1: 備份的「3-2-1 原則」中，「1」代表什麼意思？</p>
+                <button class="hint-btn" onclick="toggleHint('hint1')">顯示答案</button>
+                <div id="hint1" class="hint-text">1 份備份必須存放在「異地」（Off-site），避免火災或區域網路感染時全毀。</div>
+            </div>
+
+            <div class="self-check-item">
+                <p style="margin:0 0 5px 0;">Q2: 相比於「黑名單」，為什麼「白名單」對抗勒索軟體更有效？</p>
+                <button class="hint-btn" onclick="toggleHint('hint2')">顯示答案</button>
+                <div id="hint2" class="hint-text">因為勒索軟體變種太快，黑名單抓不勝抓；白名單則採取「非請勿入」原則，未知程式一律擋下。</div>
+            </div>
+        </div>
+        
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'}); location.reload();" class="btn" style="background-color: white; color: var(--text-sub); border: 2px solid #e5e7eb;">
+            🔄 重置題目再來一次
+        </button>
+
+    </div>
+</div>
+
+<script>
+    // Correct answers configuration
+    const CORRECT_ANSWERS = ['A', 'C'];
+
+    // UI Elements
+    const form = document.getElementById('quiz-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const resultSection = document.getElementById('result-section');
+    const statusBadge = document.getElementById('status-badge');
+    const optionLabels = {
+        'A': document.getElementById('label-A'),
+        'B': document.getElementById('label-B'),
+        'C': document.getElementById('label-C'),
+        'D': document.getElementById('label-D')
+    };
+    const feedbackIcons = {
+        'A': document.getElementById('icon-A'),
+        'B': document.getElementById('icon-B'),
+        'C': document.getElementById('icon-C'),
+        'D': document.getElementById('icon-D')
+    };
+
+    // Toggle styling for selected options
+    document.querySelectorAll('input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                this.parentElement.classList.add('selected');
+            } else {
+                this.parentElement.classList.remove('selected');
+            }
+        });
+    });
+
+    // Handle Submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // 1. Get User Selection
+        const formData = new FormData(form);
+        const userSelection = formData.getAll('option');
+
+        // 2. Logic Check
+        const isCorrect = 
+            userSelection.length === CORRECT_ANSWERS.length && 
+            userSelection.every(val => CORRECT_ANSWERS.includes(val));
+
+        // 3. Disable inputs
+        document.querySelectorAll('input[type="checkbox"]').forEach(input => input.disabled = true);
+        submitBtn.style.display = 'none';
+
+        // 4. Update Header Status
+        statusBadge.textContent = "已作答";
+        statusBadge.style.background = isCorrect ? "#dcfce7" : "#fee2e2";
+        statusBadge.style.color = isCorrect ? "#166534" : "#991b1b";
+
+        // 5. Render Detailed Feedback on Options
+        ['A', 'B', 'C', 'D'].forEach(opt => {
+            const isSelected = userSelection.includes(opt);
+            const isActuallyCorrect = CORRECT_ANSWERS.includes(opt);
+            const label = optionLabels[opt];
+            const icon = feedbackIcons[opt];
+
+            // Remove default selected class to avoid confusion, we will add specific result classes
+            label.classList.remove('selected');
+
+            if (isActuallyCorrect) {
+                label.classList.add('correct-answer'); // Highlight green background
+                if (isSelected) {
+                    icon.innerHTML = '✅ 正確選中'; 
+                    icon.classList.add('correct-icon');
+                } else {
+                    icon.innerHTML = '⚠️ 應選未選';
+                    icon.classList.add('wrong-icon');
+                }
+            } else {
+                // If this option is WRONG
+                if (isSelected) {
+                    label.classList.add('wrong-choice'); // Highlight red background
+                    icon.innerHTML = '❌ 錯誤選中';
+                    icon.classList.add('wrong-icon');
+                } else {
+                    // Correctly ignored
+                    icon.innerHTML = ''; // Nothing specific needed
+                }
+            }
+        });
+
+        // 6. Show Result Banner
+        const banner = document.getElementById('result-banner');
+        if (isCorrect) {
+            banner.className = "result-box result-success";
+            banner.innerHTML = `
+                <div style="font-size:2rem;">🏆</div>
+                <div>
+                    <h3 style="margin:0;">回答完全正確！</h3>
+                    <p style="margin:0;">觀念非常清晰，這題是資安考試的重點題型。</p>
+                </div>
+            `;
+        } else {
+            banner.className = "result-box result-fail";
+            banner.innerHTML = `
+                <div style="font-size:2rem;">⚠️</div>
+                <div>
+                    <h3 style="margin:0;">作答有誤</h3>
+                    <p style="margin:0;">正確答案應該是 <strong>A、C</strong>。請參考下方詳解修正觀念。</p>
+                </div>
+            `;
+        }
+
+        // 7. Reveal Analysis
+        resultSection.style.display = 'block';
+        
+        // Scroll to result
+        resultSection.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Helper for self check
+    function toggleHint(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+</script>
+
+</body>
+</html>

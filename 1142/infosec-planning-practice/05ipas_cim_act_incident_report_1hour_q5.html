@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS資安重點題型：資通安全管理法與事件通報 - Interactive Tutorial</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* Navy Blue for Professionalism */
+            --accent-color: #2980b9; /* Lighter Blue for highlights */
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --highlight-bg: #e8f4fc;
+        }
+
+        body {
+            font-family: "Segoe UI", "Microsoft JhengHei", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--primary-color);
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-top: 15px;
+        }
+
+        p, li {
+            font-size: 1rem;
+        }
+
+        /* Utility Classes */
+        .hidden { display: none; }
+        .bold { font-weight: bold; }
+        .highlight { background-color: #fff3cd; padding: 2px 5px; border-radius: 3px; }
+        .text-center { text-align: center; }
+
+        /* Sections */
+        .summary-box {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .scenario-box {
+            background-color: var(--highlight-bg);
+            padding: 20px;
+            border-left: 5px solid var(--accent-color);
+            margin-bottom: 25px;
+        }
+
+        .keyword-radar {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #555;
+            background: #fff;
+            padding: 10px;
+            border: 1px dashed var(--accent-color);
+        }
+
+        /* Quiz Area */
+        .question-area {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f0f0;
+        }
+
+        .option-label input {
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background-color: #34495e;
+        }
+
+        /* Feedback */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            margin: 20px 0;
+            position: relative;
+            padding-left: 20px;
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 20px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            z-index: 1;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 17px;
+            width: 2px;
+            height: 100%;
+            background: #ddd;
+        }
+        .timeline-item:last-child::after { display: none; }
+        .timeline-time { font-weight: bold; color: var(--accent-color); }
+
+        /* Accordion */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+        summary {
+            padding: 12px;
+            background-color: #f1f1f1;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Hide default arrow */
+        }
+        summary::after {
+            content: '+'; 
+            float: right;
+            font-weight: bold;
+        }
+        details[open] summary::after {
+            content: '-';
+        }
+        .accordion-content {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background-color: #eee;
+        }
+
+        /* Mnemonic & Traps */
+        .mnemonic-box {
+            border: 2px dashed var(--accent-color);
+            padding: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            background: #fff;
+            margin: 15px 0;
+        }
+        
+        .trap-box {
+            background-color: #fff5f5;
+            border-left: 5px solid var(--error-color);
+            padding: 15px;
+        }
+
+        /* Self Test */
+        .self-test-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .hint-btn {
+            background: none;
+            border: 1px solid #aaa;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 5px;
+            border-radius: 3px;
+        }
+        .hint-text {
+            display: none;
+            margin-top: 5px;
+            color: #666;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            h1 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- 30-sec Summary -->
+    <div class="summary-box">
+        <div style="font-weight: bold; margin-bottom: 5px;">30秒考前速記：</div>
+        iPAS 資安考題若出現「關鍵基礎設施」與「法定第一小時」，核心考點必為「通報程序」。無論技術如何緊急（斷網/復原），法律層面的首要義務是「分級、初評、通報」。
+    </div>
+
+    <h1>題組：資通安全管理法與緊急應變</h1>
+
+    <!-- Scenario -->
+    <div class="scenario-box">
+        <h3>【題組情境】</h3>
+        <p>
+            一家被政府依<span class="highlight">《資通安全管理法》（台灣規範政府機關與關鍵基礎設施資安管理與通報的法律）</span>核定為<span class="highlight">「關鍵基礎設施提供者」（影響民生或國家運作的重要單位，例如醫院、電力）</span>的區域醫療中心，其資訊環境為混合雲架構。院內核心的「電子病歷系統（EHR）」部署於本地資料中心，而新推出的「遠距醫療諮詢平台」採用雲端原生技術，並整合第三方開發的預約排程模組。
+        </p>
+        <p>
+            為提升效率，開發團隊被允許在配發的公務筆電上使用生成式 AI 輔助開發。某日上午，資安監控中心（SOC）的 AI 驅動偵測系統發出警報，顯示 EHR 主機出現<span class="highlight">「勒索軟體」（把檔案加密再要你付錢才能解鎖的惡意程式）</span>增加密行為，同時發現攻擊源頭來自一台開發人員的筆電；該筆電因執行了含有惡意程式碼的 AI 輔助工具而遭入侵。
+        </p>
+        
+        <div class="keyword-radar">
+            <strong>關鍵字雷達：</strong>關鍵基礎設施、勒索軟體、第一小時、法定、事件分級、初步損害評估、通報主管機關
+        </div>
+    </div>
+
+    <!-- Question -->
+    <div class="question-area">
+        <h3>【教學題目】</h3>
+        <p>身為該醫療中心的資安長（CISO），情境在發現勒索軟體活動的當下，根據台灣《資通安全管理法》的規定，您的團隊<strong>第一小時內最優先的法定應辦事項</strong>為下列何項？</p>
+        
+        <form id="quizForm">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A">
+                    (A) 立即支付勒索贖金以最快速度回復系統，避免影響病患照護
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B">
+                    (B) 全面斷開醫院對外網路，阻止威脅擴散並進行內部損害評估
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C">
+                    (C) 依據<span class="highlight">事件分級（依影響範圍與嚴重性把事件分成不同等級）</span>，完成初步損害評估與判斷，並於一小時內<span class="highlight">通報主管機關（依法在規定時間內告知主管機關發生資安事件）</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D">
+                    (D) 召集所有資訊人員，優先搶救被加密的電子病歷資料庫
+                </label>
+            </div>
+            <button type="button" class="btn-submit" onclick="submitAnswer()">提交答案</button>
+        </form>
+
+        <div id="feedback" class="feedback-area hidden"></div>
+    </div>
+
+    <!-- Explanations (Hidden initially) -->
+    <div id="explanationArea" class="hidden">
+        
+        <h2>第一小時應辦事項時間線（法定優先序）</h2>
+        <div class="timeline-container">
+            <div class="timeline-item">
+                <div class="timeline-time">T+0 分鐘：偵測到攻擊</div>
+                <div>SOC 系統發出警報，確認 EHR 主機異常。</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">T+15 分鐘：初步損害評估 & 事件分級</div>
+                <div>判斷是否涉及關鍵基礎設施運作、個資外洩數量，決定資安事件等級（1~4級）。</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">T+30 ~ 60 分鐘：通報主管機關</div>
+                <div><strong>此為法定強制動作。</strong>依據《資通安全管理法》，知悉資安事件後應於 1 小時內進行通報（特別是 3、4 級事件或關鍵基礎設施）。</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-time">T+60 分鐘後：損害控制與復原</div>
+                <div>完成通報後，持續進行阻斷擴散、蒐證、復原系統（如 B、D 選項的行為）。</div>
+            </div>
+        </div>
+
+        <h2>選項逐一解析</h2>
+        <details>
+            <summary>為什麼 (C) 是正確答案？</summary>
+            <div class="accordion-content">
+                <p>題目關鍵字是<strong>「法定」</strong>且<strong>「第一小時」</strong>。《資通安全管理法》及其子法明確規範，公務機關與特定非公務機關（如關鍵基礎設施提供者），在知悉資安事件後，必須先進行「損害評估」與「事件分級」，並在規定時間內（通常為 1 小時內）完成通報。這是法律義務，不做會違法。</p>
+            </div>
+        </details>
+        <details>
+            <summary>為什麼 (A) 是錯誤的？</summary>
+            <div class="accordion-content">
+                <p>支付贖金<strong>絕非</strong>法定優先事項，且通常不被資安治理框架鼓勵。付錢不保證能解密，還可能助長犯罪產業。此外，公務機關或關鍵基礎設施若支付贖金，可能衍生其他法律與合規問題。</p>
+            </div>
+        </details>
+        <details>
+            <summary>為什麼 (B) 不是最優先（雖然很重要）？</summary>
+            <div class="accordion-content">
+                <p>這是一個技術上的常見陷阱。「斷開網路」是<strong>技術阻斷（Containment）</strong>的正確手段，實務上會與通報同步進行。但考題問的是「法定應辦事項」，法律條文中對「通報」有明確的時間限制（1 小時），而斷網是應變措施的一部分。在單選題邏輯中，必須選出符合「法規要求時限」的選項，即通報程序。</p>
+            </div>
+        </details>
+        <details>
+            <summary>為什麼 (D) 不是最優先？</summary>
+            <div class="accordion-content">
+                <p>搶救資料屬於<strong>根除與復原（Eradication & Recovery）</strong>階段，通常發生在通報與圍堵之後。若未先進行評估與通報就埋頭搶修，可能違反法規通報時效，且可能破壞現場跡證（Forensics）。</p>
+            </div>
+        </details>
+
+        <h2>觀念補充與延伸</h2>
+        
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>面向</th>
+                    <th>核心重點</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>條文精神</strong></td>
+                    <td>關鍵基礎設施（CI）發生資安事件影響國家與社會甚鉅，因此強調<strong>「即時掌握」</strong>。法規要求快速分級並通報上級，以便國家級資安團隊（如 TWCERT/CC 或主管機關）能介入協助。</td>
+                </tr>
+                <tr>
+                    <td><strong>法定 vs 技術</strong></td>
+                    <td>
+                        <strong>法定優先：</strong>分級、評估、通報。<br>
+                        <strong>技術優先：</strong>識別、圍堵（斷網）、保存跡證。
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>變化題型</strong></td>
+                    <td>若題目主角改為「一般私人中小企業」（非關鍵基礎設施），則不受《資通安全管理法》的 1 小時通報限制，答案可能會偏向技術性止血（如 B）。但此題主角是<strong>醫院（關鍵基礎設施）</strong>，法遵為第一優先。</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>記憶口訣</h2>
+        <div class="mnemonic-box">
+            「關鍵一小時，分級評估快通報」
+        </div>
+
+        <h2>常見陷阱</h2>
+        <div class="trap-box">
+            <ul>
+                <li><strong>陷阱 1：</strong>看到勒索軟體就想先拔網路線（選 B）。<br>→ 實務上這沒錯，但考試問「資安法規定」，要選通報。</li>
+                <li><strong>陷阱 2：</strong>醫療人員天職是救人，直覺選恢復系統（選 A 或 D）。<br>→ 這是資安長（CISO）的考試，要以「法規合規」與「資安治理」視角作答。</li>
+                <li><strong>避坑指南：</strong>題目出現「資通安全管理法」、「第一小時」，請直接尋找包含「通報」的選項。</li>
+            </ul>
+        </div>
+
+        <h2>自我檢測</h2>
+        <div class="self-test-item">
+            <p><strong>Q1:</strong> 若該醫院發現攻擊僅影響員工餐廳的點餐系統，完全未觸及醫療核心，請問這會影響「事件分級」與通報時效嗎？</p>
+            <button class="hint-btn" onclick="toggleHint('hint1')">顯示提示</button>
+            <div id="hint1" class="hint-text">提示：事件分級依據「核心業務」影響程度而定。非核心業務影響等級較低，但身為關鍵基礎設施，仍需依規定時限通報，只是級別不同。</div>
+        </div>
+
+        <div class="self-test-item">
+            <p><strong>Q2:</strong> 通報主管機關後，是否代表資安團隊可以休息了？</p>
+            <button class="hint-btn" onclick="toggleHint('hint2')">顯示提示</button>
+            <div id="hint2" class="hint-text">提示：完全不行。通報只是法律程序的開始，技術上的「根除」、「復原」與「檢討」才正要開始。</div>
+        </div>
+        
+        <div class="self-test-item">
+            <p><strong>Q3:</strong> 根據資通安全管理法，若未依規定通報，誰會受罰？</p>
+            <button class="hint-btn" onclick="toggleHint('hint3')">顯示提示</button>
+            <div id="hint3" class="hint-text">提示：機關本身會受罰，且相關人員（如資安長、失職人員）可能面臨行政懲處。</div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function submitAnswer() {
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackDiv = document.getElementById('feedback');
+        const explanationArea = document.getElementById('explanationArea');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案再提交！');
+            return;
+        }
+
+        explanationArea.classList.remove('hidden');
+        feedbackDiv.classList.remove('hidden');
+
+        if (selectedValue === 'C') {
+            feedbackDiv.className = 'feedback-area feedback-correct';
+            feedbackDiv.innerHTML = '✅ 回答正確！<br>您的觀念非常清晰。關鍵基礎設施在第一小時內，首重「分級、初評與通報」。';
+        } else {
+            feedbackDiv.className = 'feedback-area feedback-incorrect';
+            feedbackDiv.innerHTML = `❌ 回答錯誤。<br>您選擇了 (${selectedValue})，但正確答案是 (C)。<br>請參考下方解析，了解為何「通報」在法律上最為優先。`;
+        }
+        
+        // Scroll to feedback explanation smoothly
+        feedbackDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function toggleHint(id) {
+        const hintElement = document.getElementById(id);
+        if (hintElement.style.display === 'block') {
+            hintElement.style.display = 'none';
+        } else {
+            hintElement.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

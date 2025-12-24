@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安教學：Q16 AI 可信任性要素 (Robustness, Reliability, Controllability)</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5; /* Indigo 600 */
+            --primary-dark: #3730a3; /* Indigo 800 */
+            --success-color: #16a34a; /* Green 600 */
+            --error-color: #dc2626; /* Red 600 */
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-light: #6b7280;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-icon {
+            font-size: 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        .subtitle { font-size: 0.9rem; color: #e0e7ff; }
+
+        /* Main Container */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Scenario Section */
+        .scenario-card {
+            border-left: 5px solid #2563eb;
+        }
+        
+        details summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #1e40af;
+            list-style: none; /* Remove default triangle */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        details summary::after {
+            content: "▼";
+            font-size: 0.8em;
+            transition: transform 0.2s;
+        }
+        
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        .scenario-text {
+            margin-top: 15px;
+            background-color: #eff6ff;
+            padding: 15px;
+            border-radius: 8px;
+            color: #1e3a8a;
+        }
+
+        /* Question Section */
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .highlight-red { color: var(--error-color); font-weight: bold; }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-label:hover {
+            border-color: #a5b4fc;
+            background-color: #f5f7ff;
+        }
+
+        .option-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            accent-color: var(--primary-color);
+        }
+
+        /* Checked state styling for UI feedback */
+        .option-label.checked {
+            border-color: var(--primary-color);
+            background-color: #eef2ff;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 25px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .submit-btn:hover { background-color: var(--primary-dark); }
+        .submit-btn:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        /* Results Section */
+        #result-area { display: none; margin-top: 25px; }
+
+        .feedback-box {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .feedback-correct { background-color: #dcfce7; border: 2px solid #86efac; color: #166534; }
+        .feedback-wrong { background-color: #fee2e2; border: 2px solid #fca5a5; color: #991b1b; }
+
+        .user-check-list {
+            text-align: left;
+            margin-top: 15px;
+            background: rgba(255,255,255,0.6);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .check-item { margin-bottom: 5px; }
+        .icon-ok { color: var(--success-color); font-weight: bold; }
+        .icon-err { color: var(--error-color); font-weight: bold; }
+        .icon-miss { color: #f59e0b; font-weight: bold; } /* Amber */
+
+        /* Analysis Accordion */
+        .accordion-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 15px;
+            background: #f9fafb;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .accordion-content {
+            padding: 15px;
+            display: none;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .accordion-content.show { display: block; }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: white;
+            margin-left: 10px;
+        }
+        .badge-correct { background-color: var(--success-color); }
+        .badge-wrong { background-color: var(--error-color); }
+
+        /* Core Concepts & Traps */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .concept-box {
+            background: #1f2937;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .concept-title { color: #fbbf24; font-weight: bold; margin-bottom: 5px; }
+
+        .trap-list li, .self-check li { margin-bottom: 10px; }
+
+        /* Self Check */
+        .reveal-btn {
+            background: none;
+            border: 1px dashed #6b7280;
+            color: #6b7280;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+        }
+        
+        .answer-text { display: none; font-weight: bold; color: var(--primary-color); margin-left: 10px;}
+        .answer-text.show { display: inline; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header-content { flex-direction: column; text-align: center; }
+            .concept-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <div class="header-icon">🛡️</div>
+            <div>
+                <h1>iPAS 資安名師講堂：AI 治理篇</h1>
+                <div class="subtitle">單元：ISO/IEC 42001 與 AI 可信任性要素 (Trustworthiness)</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- 1. Scenario Section -->
+        <div class="card scenario-card">
+            <details open>
+                <summary>題組共用情境（點擊收合/展開）</summary>
+                <div class="scenario-text">
+                    <p>企業為防範 AI 深度偽造（Deepfake）攻擊，已規劃導入影像辨識、聲音辨識或 AI 模組，並同時推動 <strong>ISO/IEC 42001 人工智慧管理系統（AIMS）</strong>，以確保 AI 系統的治理、風險控管與可信任性。</p>
+                </div>
+            </details>
+        </div>
+
+        <!-- 2. Quiz Section -->
+        <div class="card" id="quiz-section">
+            <h2 class="question-title">
+                【題目】在導入影像辨識、聲音辨識或 AI 模組時，為了確保導入系統的<span class="highlight-red">可信任性（Trustworthiness）</span>，應考量下列哪些項目？（複選）
+            </h2>
+            
+            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">
+                <span id="status-badge" style="background:#e5e7eb; padding:2px 6px; border-radius:4px;">尚未作答</span>
+            </p>
+
+            <form id="quiz-form">
+                <div class="options-group">
+                    <label class="option-label" onclick="toggleStyle(this)">
+                        <input type="checkbox" name="option" value="A">
+                        <span>(A) AI 強韌度（AI Robustness）</span>
+                    </label>
+                    <label class="option-label" onclick="toggleStyle(this)">
+                        <input type="checkbox" name="option" value="B">
+                        <span>(B) AI 可靠度（AI Reliability）</span>
+                    </label>
+                    <label class="option-label" onclick="toggleStyle(this)">
+                        <input type="checkbox" name="option" value="C">
+                        <span>(C) AI 可控性（AI Controllability）</span>
+                    </label>
+                    <label class="option-label" onclick="toggleStyle(this)">
+                        <input type="checkbox" name="option" value="D">
+                        <span>(D) AI 系統速度（AI System Speed）</span>
+                    </label>
+                </div>
+
+                <button type="button" class="submit-btn" onclick="submitQuiz()">提交答案</button>
+            </form>
+
+            <!-- 3. Result & Feedback Area -->
+            <div id="result-area">
+                <div id="feedback-box" class="feedback-box">
+                    <!-- Dynamic Content Here -->
+                </div>
+                
+                <div style="text-align: center; margin-top: 10px;">
+                    <button onclick="location.reload()" style="background:white; border:1px solid #ccc; padding:8px 15px; border-radius:20px; cursor:pointer;">
+                        🔄 清除重試
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Detailed Analysis (Hidden initially, shown after submit or by default for study) -->
+        <div class="card" id="analysis-section" style="display:none;">
+            <h3 style="margin-bottom: 15px; border-left: 4px solid var(--primary-color); padding-left: 10px;">💡 選項逐一解析</h3>
+            
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('acc-a')">
+                    (A) AI 強韌度 (Robustness)
+                    <span class="badge badge-correct">正確</span>
+                </div>
+                <div id="acc-a" class="accordion-content">
+                    <p><strong>定義：</strong>面對雜訊、數據中毒或對抗式攻擊時，AI 系統是否還能維持運作？</p>
+                    <p style="margin-top:5px; color:#666; font-size:0.9em;">情境解析：針對 Deepfake 防禦，如果駭客在圖片中加入人眼看不見的雜訊，系統是否會因此誤判？如果能抵抗這種干擾，就是具備強韌度。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('acc-b')">
+                    (B) AI 可靠度 (Reliability)
+                    <span class="badge badge-correct">正確</span>
+                </div>
+                <div id="acc-b" class="accordion-content">
+                    <p><strong>定義：</strong>系統在特定條件與時間內，能否持續表現出一致的準確度？</p>
+                    <p style="margin-top:5px; color:#666; font-size:0.9em;">情境解析：系統不能「心情好就準，心情不好就不準」。可靠度強調的是長時間運作下的穩定性與一致性。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('acc-c')">
+                    (C) AI 可控性 (Controllability)
+                    <span class="badge badge-correct">正確</span>
+                </div>
+                <div id="acc-c" class="accordion-content">
+                    <p><strong>定義：</strong>人類是否能在必要時介入、終止或修正 AI？</p>
+                    <p style="margin-top:5px; color:#666; font-size:0.9em;">情境解析：當 AI 判斷失誤造成混亂時，管理員必須能強制接手或關閉系統（Human-in-the-loop），確保 AI 不會脫離人類掌控。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion('acc-d')">
+                    (D) AI 系統速度 (System Speed)
+                    <span class="badge badge-wrong">錯誤</span>
+                </div>
+                <div id="acc-d" class="accordion-content">
+                    <p><strong>原因：</strong>速度屬於「效能 (Performance)」或「效率 (Efficiency)」指標。</p>
+                    <p style="margin-top:5px; color:#666; font-size:0.9em;">核心觀念：跑得很快但不安全的車，沒人敢坐。「可信任性」關注的是安全與治理，而非運算快慢。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Core Concepts -->
+        <div class="card">
+            <h3 style="margin-bottom: 15px; border-left: 4px solid #f59e0b; padding-left: 10px;">🔥 核心觀念白話文</h3>
+            <p>所謂<strong>「可信任 AI (Trustworthy AI)」</strong>，就是讓人類敢把任務交給 AI 的前提條件。就像選保鑣一樣，我們不在乎他跑百米幾秒（速度），我們在乎的是：</p>
+            
+            <div class="concept-grid">
+                <div class="concept-box">
+                    <div class="concept-title">強韌度 (Robustness)</div>
+                    <p>很耐打</p>
+                    <p style="font-size:0.8rem; opacity:0.8;">受到攻擊或干擾不會崩潰</p>
+                </div>
+                <div class="concept-box">
+                    <div class="concept-title">可靠度 (Reliability)</div>
+                    <p>很穩定</p>
+                    <p style="font-size:0.8rem; opacity:0.8;">表現始終如一，不會忽好忽壞</p>
+                </div>
+                <div class="concept-box">
+                    <div class="concept-title">可控性 (Controllability)</div>
+                    <p>聽話</p>
+                    <p style="font-size:0.8rem; opacity:0.8;">失控時人類可以隨時拉住煞車</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Traps & Mnemonics -->
+        <div class="card" style="background: #fffbeb; border: 1px solid #fcd34d;">
+            <h3 style="color: #92400e; margin-bottom: 10px;">⚠️ 常見考試陷阱</h3>
+            <ul class="trap-list" style="padding-left: 20px; color: #92400e;">
+                <li><strong>誤把「效能」當「信任」：</strong>看到「速度」、「吞吐量」、「成本低」請小心，這些是商業指標，不是安全指標。</li>
+                <li><strong>只看準確率 (Accuracy)：</strong>準確率 99% 但剩下的 1% 會造成毀滅性後果（缺乏強韌性），依然不是可信任 AI。</li>
+                <li><strong>忽略「人為介入」：</strong>任何強調「AI 完全自主、人類無須監控」的選項，通常在資安治理上都是錯誤的（缺乏可控性）。</li>
+            </ul>
+
+            <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 8px; border: 2px dashed #f59e0b; text-align: center;">
+                <h4 style="color: var(--primary-color);">🧠 記憶口訣</h4>
+                <p style="font-size: 1.2rem; font-weight: bold; margin: 10px 0;">「強、靠、控」</p>
+                <p style="color: #666;">強韌、可靠、可控</p>
+            </div>
+        </div>
+
+        <!-- 7. Self Check -->
+        <div class="card">
+            <h3>📝 自我檢測</h3>
+            <ul class="self-check" style="list-style: none; padding: 0; margin-top: 15px;">
+                <li style="border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    1. 駭客在圖片加入雜訊導致 AI 誤判，這是哪項指標不足？
+                    <button class="reveal-btn" onclick="toggleAnswer(this)">看答案</button>
+                    <span class="answer-text">強韌度 (Robustness)</span>
+                </li>
+                <li style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 10px;">
+                    2. 確保 AI 系統可以被人類強制關閉，是哪項指標？
+                    <button class="reveal-btn" onclick="toggleAnswer(this)">看答案</button>
+                    <span class="answer-text">可控性 (Controllability)</span>
+                </li>
+                <li style="margin-top: 10px;">
+                    3. AI 每秒可以處理 1000 張照片，代表它很可信任嗎？
+                    <button class="reveal-btn" onclick="toggleAnswer(this)">看答案</button>
+                    <span class="answer-text">否，這是效能 (Performance)，非可信任性。</span>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // 1. UI Interaction: Highlight selected options
+        function toggleStyle(label) {
+            const checkbox = label.querySelector('input');
+            // Give a small delay to let the checkbox state update
+            setTimeout(() => {
+                if(checkbox.checked) {
+                    label.classList.add('checked');
+                } else {
+                    label.classList.remove('checked');
+                }
+            }, 10);
+        }
+
+        // 2. Main Logic: Submit Quiz
+        function submitQuiz() {
+            const checkboxes = document.querySelectorAll('input[name="option"]');
+            const submitBtn = document.querySelector('.submit-btn');
+            const resultArea = document.getElementById('result-area');
+            const feedbackBox = document.getElementById('feedback-box');
+            const analysisSection = document.getElementById('analysis-section');
+            const statusBadge = document.getElementById('status-badge');
+
+            let selected = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) selected.push(cb.value);
+                cb.disabled = true; // Disable inputs after submit
+            });
+
+            // Correct Answer logic
+            const correctAnswers = ['A', 'B', 'C'];
+            
+            // Validation
+            if (selected.length === 0) {
+                alert("請至少選擇一個選項！");
+                checkboxes.forEach(cb => cb.disabled = false); // Re-enable
+                return;
+            }
+
+            // Check correctness
+            // User must satisfy: Length is 3 AND contains all A, B, C
+            const isPerfect = selected.length === 3 && 
+                              correctAnswers.every(ans => selected.includes(ans));
+            
+            // Build Feedback details
+            let detailHTML = '<div class="user-check-list">';
+            
+            // Check A
+            if (selected.includes('A')) detailHTML += '<div class="check-item"><span class="icon-ok">✔</span> 你選了 (A) 強韌度 - 正確</div>';
+            else detailHTML += '<div class="check-item"><span class="icon-miss">⚠️</span> 你漏了 (A) 強韌度</div>';
+
+            // Check B
+            if (selected.includes('B')) detailHTML += '<div class="check-item"><span class="icon-ok">✔</span> 你選了 (B) 可靠度 - 正確</div>';
+            else detailHTML += '<div class="check-item"><span class="icon-miss">⚠️</span> 你漏了 (B) 可靠度</div>';
+
+            // Check C
+            if (selected.includes('C')) detailHTML += '<div class="check-item"><span class="icon-ok">✔</span> 你選了 (C) 可控性 - 正確</div>';
+            else detailHTML += '<div class="check-item"><span class="icon-miss">⚠️</span> 你漏了 (C) 可控性</div>';
+
+            // Check D (Trap)
+            if (selected.includes('D')) detailHTML += '<div class="check-item"><span class="icon-err">❌</span> 你誤選 (D) 系統速度 - 這是陷阱！</div>';
+            
+            detailHTML += '</div>';
+
+            // Render Result
+            if (isPerfect) {
+                feedbackBox.className = "feedback-box feedback-correct";
+                feedbackBox.innerHTML = `
+                    <h2>🎉 完全正確！</h2>
+                    <p>觀念非常清晰，A、B、C 都是可信任性的核心要素。</p>
+                    ${detailHTML}
+                `;
+            } else {
+                feedbackBox.className = "feedback-box feedback-wrong";
+                feedbackBox.innerHTML = `
+                    <h2>⚠️ 答錯囉</h2>
+                    <p>正確答案是 <strong>(A)、(B)、(C)</strong></p>
+                    ${detailHTML}
+                `;
+            }
+
+            // Update UI State
+            resultArea.style.display = 'block';
+            analysisSection.style.display = 'block'; // Show analysis automatically
+            submitBtn.style.display = 'none'; // Hide submit button
+            statusBadge.innerText = "已作答";
+            statusBadge.style.background = "#4f46e5";
+            statusBadge.style.color = "white";
+
+            // Scroll to result
+            resultArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 3. Accordion Toggle
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+            } else {
+                content.classList.add('show');
+            }
+        }
+
+        // 4. Self Check Toggle
+        function toggleAnswer(btn) {
+            const answerSpan = btn.nextElementSibling;
+            if (answerSpan.classList.contains('show')) {
+                answerSpan.classList.remove('show');
+                btn.innerText = "看答案";
+            } else {
+                answerSpan.classList.add('show');
+                btn.innerText = "隱藏";
+            }
+        }
+    </script>
+</body>
+</html>

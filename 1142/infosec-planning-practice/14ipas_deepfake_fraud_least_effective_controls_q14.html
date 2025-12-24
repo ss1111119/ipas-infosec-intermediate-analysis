@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安重點解析：Deepfake 防禦策略 (Q14)</title>
+    <style>
+        /* --- 基礎設定 (Reset & Base) --- */
+        :root {
+            --primary-color: #2563eb; /* 專業藍 */
+            --primary-dark: #1e40af;
+            --secondary-color: #f59e0b; /* 警示黃 */
+            --success-color: #10b981; /* 正確綠 */
+            --error-color: #ef4444;   /* 錯誤紅 */
+            --bg-color: #f3f4f6;
+            --text-main: #1f2937;
+            --text-light: #6b7280;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* --- 標頭區塊 --- */
+        header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        header .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            background-color: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 15px;
+        }
+
+        /* --- 情境區塊 (Collapsible) --- */
+        .scenario-box {
+            background-color: #fffbeb;
+            border-left: 5px solid var(--secondary-color);
+            margin: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .scenario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            color: #92400e;
+            font-weight: bold;
+        }
+
+        .scenario-content {
+            margin-top: 10px;
+            color: #4b5563;
+            font-size: 0.95rem;
+            display: block; /* 預設展開 */
+        }
+        
+        .scenario-content.collapsed {
+            display: none;
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s;
+        }
+        .toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        /* --- 題目區塊 --- */
+        .question-area {
+            padding: 0 20px 20px 20px;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .highlight-red {
+            color: var(--error-color);
+            text-decoration: underline;
+            text-decoration-style: wavy;
+        }
+
+        /* --- 選項樣式 --- */
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        .option-label input {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* 選項被選中時的樣式 */
+        .option-label.selected {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        /* 答案揭曉後的樣式 */
+        .option-label.correct-answer {
+            border-color: var(--success-color);
+            background-color: #ecfdf5;
+        }
+        
+        .option-label.wrong-answer {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+            opacity: 0.7;
+        }
+
+        /* --- 按鈕 --- */
+        .btn-submit {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-submit:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* --- 解析區塊 (初始隱藏) --- */
+        .analysis-section {
+            display: none; /* 預設隱藏 */
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-banner {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .result-banner.correct {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #34d399;
+        }
+
+        .result-banner.incorrect {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #f87171;
+        }
+
+        /* --- 手風琴解析 --- */
+        details {
+            margin-bottom: 10px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 12px;
+            cursor: pointer;
+            background-color: #f3f4f6;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary:after {
+            content: "+";
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        details[open] summary:after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 15px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.95rem;
+            color: #4b5563;
+        }
+
+        /* --- 核心觀念 & 陷阱區塊 --- */
+        .info-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .concept-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .trap-box {
+            background-color: #fff1f2;
+            border-left: 4px solid var(--error-color);
+        }
+        
+        .mnemonic-box {
+            background-color: #fff7ed;
+            border: 2px dashed var(--secondary-color);
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        h3 {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        h3::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        /* --- 自我檢測 --- */
+        .quiz-mini {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .quiz-item {
+            margin-bottom: 15px;
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .quiz-question {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .quiz-answer {
+            display: none;
+            color: var(--primary-color);
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .toggle-ans-btn {
+            background: none;
+            border: 1px solid #ccc;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安補教名師</h1>
+        <div class="subtitle">單元：AI Deepfake 與商業詐騙防禦</div>
+    </header>
+
+    <!-- 情境區塊 -->
+    <div class="scenario-box">
+        <div class="scenario-header" onclick="toggleScenario()">
+            <span>📝 題組共用情境 (點擊收合/展開)</span>
+            <span class="toggle-icon">▼</span>
+        </div>
+        <div class="scenario-content" id="scenarioContent">
+            <p>企業面臨結合 AI 深度偽造（Deepfake）的語音與影像詐騙風險，攻擊者可模仿高階主管指示員工進行匯款。資安部門提出以下控制措施：</p>
+            <ol style="margin-left: 20px; margin-top: 10px;">
+                <li>阻擋深度偽造工具或相關不良內容網站</li>
+                <li>導入影像辨識、聲音辨識或 AI 模組</li>
+                <li>教育員工辨識深度偽造攻擊</li>
+                <li>財務與會計系統導入多因子認證（MFA）</li>
+                <li>電子郵件系統導入資料儲存加密</li>
+                <li>加強職務區隔（SoD），高額匯款需主管複核</li>
+                <li>專用視訊會議系統導入多因子認證</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- 題目與作答區 -->
+    <div class="question-area">
+        <div class="question-text">
+            <span style="color: var(--primary-color);">Q14.</span> 
+            請問為了有效防範 AI 深度偽造的語音與影像攻擊，降低組織同仁受到詐騙將公司的款項匯出造成營運損失，下列何項推動組合最為<span class="highlight-red">「無效」</span>？
+        </div>
+
+        <div class="options-grid" id="optionsContainer">
+            <label class="option-label" onclick="selectOption(this)">
+                <input type="radio" name="answer" value="A">
+                <span>(A) (1) 與 (2)</span>
+            </label>
+            <label class="option-label" onclick="selectOption(this)">
+                <input type="radio" name="answer" value="B">
+                <span>(B) (2) 與 (3)</span>
+            </label>
+            <label class="option-label" onclick="selectOption(this)">
+                <input type="radio" name="answer" value="C">
+                <span>(C) (3) 與 (4)</span>
+            </label>
+            <label class="option-label" onclick="selectOption(this)">
+                <input type="radio" name="answer" value="D">
+                <span>(D) (4) 與 (5)</span>
+            </label>
+        </div>
+
+        <button class="btn-submit" id="submitBtn" onclick="checkAnswer()">提交答案</button>
+    </div>
+
+    <!-- 解析與教學區 (作答後顯示) -->
+    <div class="analysis-section" id="analysisSection">
+        
+        <!-- 作答結果橫幅 -->
+        <div id="resultBanner" class="result-banner"></div>
+
+        <!-- 逐項解析 (Accordion) -->
+        <h3 style="color: var(--text-main);">🔍 選項逐一解析</h3>
+        
+        <details>
+            <summary>(A) (1) 與 (2) - 具有一定攔阻力</summary>
+            <div class="details-content">
+                <strong>(1) 阻擋工具網站：</strong>可以防止內部員工下載作惡工具，或防止連線到已知的惡意 Deepfake 生成站點。<br>
+                <strong>(2) 導入辨識模組：</strong>利用 AI 對抗 AI，系統若能自動偵測音訊或影像的偽造特徵，能提供早期預警。雖然不是 100% 準確，但屬於「有效」的防禦手段。
+            </div>
+        </details>
+
+        <details>
+            <summary>(B) (2) 與 (3) - 技術與意識並重</summary>
+            <div class="details-content">
+                <strong>(3) 教育訓練：</strong>提升員工對「老闆突然要求匯款」、「視訊畫質異常」、「聲音語調怪異」的警覺性，是社交工程防禦的最後一道防線，非常有效。
+            </div>
+        </details>
+
+        <details>
+            <summary>(C) (3) 與 (4) - 一半有效一半無效</summary>
+            <div class="details-content">
+                雖然 (3) 有效，但 (4) MFA 效果甚微。此選項因為包含有效措施，所以不是「最無效」的組合。
+            </div>
+        </details>
+
+        <details open style="border-color: var(--error-color); background-color: #fffbfb;">
+            <summary style="color: var(--error-color);">(D) (4) 與 (5) - 幾乎完全無效 (正確答案)</summary>
+            <div class="details-content">
+                <strong>(4) 財務系統 MFA：</strong> Deepfake 詐騙中，員工是「被騙」自願去匯款。員工的身分是合法的，登入也是員工親自操作的，MFA 會順利通過。MFA 防的是「帳號被駭」，防不了「本人被騙」。<br><br>
+                <strong>(5) 郵件加密：</strong> 題目情境是「視訊/語音」詐騙。郵件加密只能保護 Email 內容不被竊聽，對於老闆打視訊電話來叫你匯款這件事，毫無防禦能力。
+            </div>
+        </details>
+
+        <!-- 核心觀念 -->
+        <div class="info-box concept-box">
+            <h3 style="color: var(--primary-dark);">💡 核心觀念：為什麼傳統資安無效？</h3>
+            <p>Deepfake 詐騙攻擊的是<strong>「人 (Human Layer)」</strong>，而不是<strong>「系統 (System Layer)」</strong>。</p>
+            <ul style="margin-top: 10px;">
+                <li><strong>關鍵風險點：</strong> 人在面對權威（老闆）或緊急狀況時，會喪失判斷力。</li>
+                <li><strong>MFA 的盲點：</strong> MFA 只能證明「現在操作電腦的人真的是財務曉美」，但無法判斷「曉美是不是正在被假老闆騙去匯款」。</li>
+                <li><strong>加密的盲點：</strong> 就像是用「防彈運鈔車」去運送一箱「原本就要給詐騙集團的錢」。通道很安全，但決策本身是錯的。</li>
+            </ul>
+        </div>
+
+        <!-- 常見陷阱 -->
+        <div class="info-box trap-box">
+            <h3 style="color: #991b1b;">⚠️ 常見考試陷阱 (必考)</h3>
+            <ul>
+                <li><strong>陷阱 1：</strong> 看到「加密」就選。考生常以為加密是萬靈丹，但在社交工程中，加密通常無效。</li>
+                <li><strong>陷阱 2：</strong> 認為「MFA 開了就無敵」。請記住，MFA 防駭客登入，不防員工耍笨（被騙）。</li>
+                <li><strong>陷阱 3：</strong> 忽略詐騙本質是「流程問題」。最有效的解法往往不是技術（如防火牆），而是流程（如 SoD 職務區隔、電話回撥確認）。</li>
+            </ul>
+        </div>
+
+        <!-- 記憶口訣 -->
+        <div class="info-box mnemonic-box">
+            <h3 style="justify-content: center; color: #d97706;">🎓 名師記憶口訣</h3>
+            <p style="font-size: 1.2rem; font-weight: bold; margin: 10px 0;">
+                「郵件加密保隱私，不擋視訊假老闆；<br>
+                MFA 驗人不驗心，防盜容易防騙難。」
+            </p>
+        </div>
+
+        <!-- 自我檢測 -->
+        <div class="quiz-mini">
+            <h3 style="color: var(--text-main);">📝 自我檢測 (點擊按鈕看答案)</h3>
+            
+            <div class="quiz-item">
+                <div class="quiz-question">1. 財務人員收到老闆 Email 指示匯款至新帳戶，請問檢查「寄件者 SPF/DKIM」是否有助於防禦？</div>
+                <button class="toggle-ans-btn" onclick="toggleHint(this)">顯示答案</button>
+                <div class="quiz-answer"><strong>有幫助。</strong> BEC (商業郵件詐騙) 常涉及偽造寄件者，SPF/DKIM/DMARC 可驗證郵件來源真實性。但如果是 Deepfake 視訊，則 Email 驗證無效。</div>
+            </div>
+
+            <div class="quiz-item">
+                <div class="quiz-question">2. 若要最有效防範 Deepfake 帶來的錯誤匯款，成本最低且最有效的「非技術」手段是什麼？</div>
+                <button class="toggle-ans-btn" onclick="toggleHint(this)">顯示答案</button>
+                <div class="quiz-answer"><strong>建立「帶外確認 (Out-of-Band Authentication)」流程。</strong> 例如：掛斷視訊，直接打老闆的手機確認；或詢問只有真老闆知道的私密問題。</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // --- 互動邏輯 ---
+
+    // 1. 情境區塊收合
+    function toggleScenario() {
+        const content = document.getElementById('scenarioContent');
+        const icon = document.querySelector('.toggle-icon');
+        
+        if (content.classList.contains('collapsed')) {
+            content.classList.remove('collapsed');
+            icon.classList.remove('rotated');
+            icon.innerText = "▼";
+        } else {
+            content.classList.add('collapsed');
+            icon.classList.add('rotated');
+            icon.innerText = "▲";
+        }
+    }
+
+    // 2. 選項選擇樣式
+    function selectOption(label) {
+        // 如果已經提交過，禁止修改
+        if(document.getElementById('submitBtn').disabled) return;
+
+        // 清除所有選中樣式
+        document.querySelectorAll('.option-label').forEach(el => {
+            el.classList.remove('selected');
+        });
+
+        // 加上當前選中樣式
+        label.classList.add('selected');
+        
+        // 確保 radio 被選中
+        const radio = label.querySelector('input');
+        radio.checked = true;
+    }
+
+    // 3. 提交答案邏輯
+    function checkAnswer() {
+        const selected = document.querySelector('input[name="answer"]:checked');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultBanner = document.getElementById('resultBanner');
+        const analysisSection = document.getElementById('analysisSection');
+
+        if (!selected) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // 鎖定按鈕與選項
+        submitBtn.disabled = true;
+        submitBtn.innerText = "已完成作答";
+        
+        // 顯示解析區塊
+        analysisSection.style.display = 'block';
+
+        // 判斷對錯
+        const correctValue = 'D';
+        const userValue = selected.value;
+
+        // 標記選項顏色
+        document.querySelectorAll('.option-label').forEach(label => {
+            const input = label.querySelector('input');
+            label.classList.remove('selected'); // 移除選中藍色，改用對錯色
+            
+            if (input.value === correctValue) {
+                label.classList.add('correct-answer'); // 正解顯示綠色
+                // 加上打勾符號
+                const span = label.querySelector('span');
+                if(!span.innerHTML.includes('✓')) {
+                    span.innerHTML += ' <b style="color:var(--success-color)"> (正確答案) ✓</b>';
+                }
+            }
+            
+            if (input.value === userValue && userValue !== correctValue) {
+                label.classList.add('wrong-answer'); // 錯選顯示紅色
+                 const span = label.querySelector('span');
+                 span.innerHTML += ' <b style="color:var(--error-color)"> ✗</b>';
+            }
+        });
+
+        // 設定橫幅內容
+        if (userValue === correctValue) {
+            resultBanner.className = 'result-banner correct';
+            resultBanner.innerHTML = '🎉 恭喜答對！ 觀念非常清晰！';
+        } else {
+            resultBanner.className = 'result-banner incorrect';
+            resultBanner.innerHTML = '❌ 答錯了！ 請參考下方名師解析。';
+        }
+
+        // 自動捲動到解析區
+        setTimeout(() => {
+            analysisSection.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+    }
+
+    // 4. 自我檢測提示開關
+    function toggleHint(btn) {
+        const answerDiv = btn.nextElementSibling;
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+            btn.innerText = '顯示答案';
+        } else {
+            answerDiv.style.display = 'block';
+            btn.innerText = '隱藏答案';
+        }
+    }
+</script>
+
+</body>
+</html>

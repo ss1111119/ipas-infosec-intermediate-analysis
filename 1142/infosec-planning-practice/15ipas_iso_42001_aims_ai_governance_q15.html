@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安名師講堂：ISO/IEC 42001 (AIMS) 實戰解析 Q15</title>
+    <style>
+        :root {
+            --primary-color: #4F46E5; /* Indigo */
+            --primary-hover: #4338ca;
+            --success-color: #10B981; /* Green */
+            --error-color: #EF4444; /* Red */
+            --warning-bg: #FFF7ED; /* Orange Light */
+            --warning-border: #FDBA74;
+            --text-main: #1F2937;
+            --text-secondary: #4B5563;
+            --bg-color: #F3F4F6;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 25px;
+        }
+
+        /* Scenario Box */
+        .scenario-box {
+            background-color: #EFF6FF;
+            border-left: 5px solid #3B82F6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .scenario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .scenario-header h3 {
+            color: #1E40AF;
+            font-size: 1.2rem;
+        }
+
+        .toggle-icon {
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .scenario-content {
+            display: block; /* Default shown */
+        }
+        
+        .scenario-content.collapsed {
+            display: none;
+        }
+
+        .control-list {
+            background: white;
+            padding: 15px 20px 15px 40px;
+            border-radius: 6px;
+            border: 1px solid #DBEAFE;
+            margin-top: 10px;
+        }
+
+        .control-list li {
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+        }
+
+        /* Question Section */
+        .question-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-label:hover {
+            border-color: var(--primary-color);
+            background-color: #EEF2FF;
+        }
+
+        .option-label.selected {
+            border-color: var(--primary-color);
+            background-color: #EEF2FF;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+
+        .option-label.correct {
+            border-color: var(--success-color);
+            background-color: #ECFDF5;
+        }
+
+        .option-label.wrong {
+            border-color: var(--error-color);
+            background-color: #FEF2F2;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .status-icon {
+            margin-left: auto;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .submit-btn:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+
+        /* Feedback & Analysis Section */
+        .feedback-section {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s;
+        }
+
+        .result-banner {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+        }
+
+        .result-banner.success {
+            background-color: #ECFDF5;
+            border-color: #A7F3D0;
+            color: #065F46;
+        }
+
+        .result-banner.error {
+            background-color: #FEF2F2;
+            border-color: #FECACA;
+            color: #991B1B;
+        }
+
+        /* Accordion Styles */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        details summary {
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: #F9FAFB;
+            display: flex;
+            align-items: center;
+            list-style: none; /* Hide default triangle */
+        }
+        
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details summary::after {
+            content: '+'; 
+            margin-left: auto;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .details-content {
+            padding: 15px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .tag-correct {
+            background: #10B981;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+
+        .tag-wrong {
+            background: #9CA3AF;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+
+        /* Core Concepts */
+        .core-concept, .traps-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .core-concept {
+            background-color: #F0F9FF;
+            border: 1px solid #BAE6FD;
+        }
+
+        .traps-section {
+            background-color: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Mnemonic */
+        .mnemonic-box {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .mnemonic-text {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #FDE047; /* Yellow */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Self Check */
+        .self-check {
+            margin-top: 30px;
+            border-top: 2px dashed #E5E7EB;
+            padding-top: 20px;
+        }
+        
+        .check-item {
+            margin-bottom: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+        }
+
+        .hint-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .hint-text {
+            display: none;
+            margin-top: 8px;
+            color: #059669;
+            font-weight: bold;
+            font-size: 0.9rem;
+            background: #ECFDF5;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.4rem; }
+            .option-label { padding: 12px; }
+            .control-list { padding-left: 20px; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🧠 iPAS 資安名師講堂</h1>
+        <p>ISO/IEC 42001 (AIMS) 與 AI 治理實務 Q15</p>
+    </header>
+
+    <div class="content">
+
+        <!-- 題組情境區塊 -->
+        <div class="scenario-box">
+            <div class="scenario-header" onclick="toggleScenario()">
+                <h3>📖 題組共用情境 (點擊收合/展開)</h3>
+                <span id="scenarioIcon" class="toggle-icon">−</span>
+            </div>
+            <div id="scenarioContent" class="scenario-content">
+                <p>企業面臨結合 AI 深度偽造（Deepfake）的語音與影像詐騙風險，已規劃多項技術與流程控制措施。資安長進一步要求導入 <strong>ISO/IEC 42001 人工智慧管理系統（AIMS）</strong>，以系統化方式強化 AI 治理、風險管理與組織責任。</p>
+                <div class="control-list">
+                    <h4>既有控制措施：</h4>
+                    <ol>
+                        <li>阻擋深度偽造工具或相關不良內容網站</li>
+                        <li>導入影像辨識、聲音辨識或 AI 模組</li>
+                        <li>教育員工辨識深度偽造攻擊</li>
+                        <li>財務與會計系統導入多因子認證（MFA）</li>
+                        <li>電子郵件系統導入資料儲存加密</li>
+                        <li>加強職務區隔（SoD），高額匯款需主管複核</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 題目區塊 -->
+        <div class="question-section">
+            <div style="margin-bottom: 10px; font-weight: bold; color: var(--primary-color);">
+                <span id="answerStatus">⚪ 尚未作答</span>
+            </div>
+            <h2>Q. 資安長要求除了前述控制外，為了強化 AI 治理，導入 AIMS 過程中，下列何項組合與 AI 治理較具關聯？</h2>
+
+            <div class="options-group" id="optionsGroup">
+                <!-- 選項 A -->
+                <label class="option-label" onclick="selectOption('A')">
+                    <input type="radio" name="quiz" value="A">
+                    <span>(A) (1) 阻擋網站 與 (5) 資料加密</span>
+                    <span class="status-icon" id="icon-A"></span>
+                </label>
+
+                <!-- 選項 B -->
+                <label class="option-label" onclick="selectOption('B')">
+                    <input type="radio" name="quiz" value="B">
+                    <span>(B) (2) AI 偵測模組 與 (3) 員工 AI 識讀</span>
+                    <span class="status-icon" id="icon-B"></span>
+                </label>
+
+                <!-- 選項 C -->
+                <label class="option-label" onclick="selectOption('C')">
+                    <input type="radio" name="quiz" value="C">
+                    <span>(C) (3) 員工 AI 識讀 與 (4) 多因子認證</span>
+                    <span class="status-icon" id="icon-C"></span>
+                </label>
+
+                <!-- 選項 D -->
+                <label class="option-label" onclick="selectOption('D')">
+                    <input type="radio" name="quiz" value="D">
+                    <span>(D) (5) 資料加密 與 (6) 職務區隔</span>
+                    <span class="status-icon" id="icon-D"></span>
+                </label>
+            </div>
+
+            <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>提交答案</button>
+            <button class="submit-btn" id="retryBtn" onclick="resetQuiz()" style="display: none; background-color: #6B7280;">重新作答</button>
+        </div>
+
+        <!-- 解析與教學區塊 (作答後顯示) -->
+        <div id="feedbackSection" class="feedback-section">
+            
+            <!-- 結果橫幅 -->
+            <div id="resultBanner" class="result-banner">
+                <h3 id="resultTitle"></h3>
+                <p id="resultDesc"></p>
+            </div>
+
+            <!-- 選項詳細解析 -->
+            <div style="margin-bottom: 30px;">
+                <h3 class="section-title">💡 名師逐項解析</h3>
+                
+                <details>
+                    <summary><span class="tag-wrong">選項 A</span> (1) 阻擋網站 與 (5) 資料加密</summary>
+                    <div class="details-content">
+                        <strong>錯誤原因：</strong>這是標準的 ISO 27001 資安控制措施。網頁過濾與加密雖然能保護資料，但並未針對「AI 系統本身」或「AI 產出的內容」進行治理。
+                    </div>
+                </details>
+
+                <details open>
+                    <summary><span class="tag-correct">選項 B</span> (2) AI 偵測模組 與 (3) 員工 AI 識讀 (正解)</summary>
+                    <div class="details-content">
+                        <strong>正確原因：</strong>
+                        <ul>
+                            <li><strong>(2) 技術面：</strong>針對 Deepfake 這種 AI 威脅，使用專門的 AI 偵測工具（對抗式 AI）是針對該特定風險的有效控制。</li>
+                            <li><strong>(3) 人員面：</strong>ISO 42001 強調「能力 (Competence)」，員工必須具備識別 AI 生成內容的素養，這屬於 AI 治理中的人員管理。</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details>
+                    <summary><span class="tag-wrong">選項 C</span> (3) 員工 AI 識讀 與 (4) 多因子認證</summary>
+                    <div class="details-content">
+                        <strong>錯誤原因：</strong>雖然 (3) 正確，但 (4) MFA 是通用的身份驗證手段。無論是否有 AI 風險，企業都該做 MFA，因此它不是 AI 治理特有的核心項目。
+                    </div>
+                </details>
+
+                <details>
+                    <summary><span class="tag-wrong">選項 D</span> (5) 資料加密 與 (6) 職務區隔</summary>
+                    <div class="details-content">
+                        <strong>錯誤原因：</strong>SoD (職務區隔) 與加密都是傳統內控與資安的範疇。這些措施無法解決模型偏差、幻覺或 Deepfake 詐騙的核心問題。
+                    </div>
+                </details>
+            </div>
+
+            <!-- 核心觀念 -->
+            <div class="core-concept">
+                <h3 class="section-title">📘 核心觀念：ISO/IEC 42001 (AIMS) 到底在管什麼？</h3>
+                <p>很多同學會把 AIMS 當成「高級版的資安」。請記住，AI 治理管得更寬：</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>管模型：</strong>模型的透明度、解釋性、公平性。</li>
+                    <li><strong>管風險：</strong>AI 產出錯誤資訊（幻覺）、被惡意攻擊（Deepfake）、歧視偏見。</li>
+                    <li><strong>管流程：</strong>從資料蒐集、模型訓練到部署的生命週期管理。</li>
+                </ul>
+                <p style="margin-top: 10px; font-weight: bold; color: var(--primary-color);">為什麼本題選 B？</p>
+                <p>因為選項 B 包含了「用 AI 技術對抗 AI 風險」以及「人對於 AI 的認知能力」，這兩點是 ISO 27001 較少著墨，但 ISO 42001 極度重視的環節。</p>
+            </div>
+
+            <!-- 常見陷阱 -->
+            <div class="traps-section">
+                <h3 class="section-title">⚠️ 考試常見陷阱區</h3>
+                <ul style="margin-left: 20px;">
+                    <li style="margin-bottom: 8px;"><strong>陷阱 1：看到 MFA、防火牆、加密就選</strong><br>
+                        👉 錯！那是 ISO 27001 的地盤。如果題目問「AI 治理」，請找跟「模型、演算法、數據、AI 素養」有關的選項。</li>
+                    <li style="margin-bottom: 8px;"><strong>陷阱 2：以為 AI 治理只是「技術問題」</strong><br>
+                        👉 錯！AI 治理包含「組織責任」與「人員能力」。教育訓練（如選項 3）是治理的重要一環。</li>
+                    <li><strong>陷阱 3：混淆「輸入」與「輸出」控制</strong><br>
+                        👉 資安常保護輸入（不被駭客進來），AI 治理更常監控輸出（AI 產生了什麼鬼東西，是不是 Deepfake）。</li>
+                </ul>
+            </div>
+
+            <!-- 記憶口訣 -->
+            <div class="mnemonic-box">
+                <p>🔥 iPAS 必勝口訣 🔥</p>
+                <div class="mnemonic-text">「技術要專用，人員要識讀，才是真治理」</div>
+                <p style="font-size: 0.9rem; margin-top: 5px;">看到 AI 治理題，先找「專門對付 AI 的工具」與「懂 AI 的人」。</p>
+            </div>
+
+            <!-- 自我檢測 -->
+            <div class="self-check">
+                <h3 class="section-title">📝 隨堂自我檢測 (不計分)</h3>
+                
+                <div class="check-item">
+                    <p><strong>Q1: 企業擔心 AI 客服機器人講出種族歧視的話，這屬於哪種管理範疇？</strong></p>
+                    <button class="hint-btn" onclick="toggleHint('hint1')">顯示/隱藏 提示</button>
+                    <div id="hint1" class="hint-text">這是「AI 輸出風險」管理，屬於 ISO 42001 (AIMS) 的核心，而非傳統資安的機密性問題。</div>
+                </div>
+
+                <div class="check-item">
+                    <p><strong>Q2: 為了防止 AI 模型訓練資料被駭客竄改，導入了資料存取權限控管。這屬於？</strong></p>
+                    <button class="hint-btn" onclick="toggleHint('hint2')">顯示/隱藏 提示</button>
+                    <div id="hint2" class="hint-text">這屬於 ISO 27001 (資安) 與 ISO 42001 的交集。但本質上是保護資料完整性，偏向傳統資安手段。</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // 變數設定
+    let currentSelection = '';
+    const correctAnswer = 'B';
+    let isSubmitted = false;
+
+    // 取得 DOM 元素
+    const submitBtn = document.getElementById('submitBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const answerStatus = document.getElementById('answerStatus');
+    const options = document.querySelectorAll('.option-label');
+    const feedbackSection = document.getElementById('feedbackSection');
+    const resultBanner = document.getElementById('resultBanner');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultDesc = document.getElementById('resultDesc');
+    const scenarioContent = document.getElementById('scenarioContent');
+    const scenarioIcon = document.getElementById('scenarioIcon');
+
+    // 收合情境功能
+    function toggleScenario() {
+        scenarioContent.classList.toggle('collapsed');
+        if (scenarioContent.classList.contains('collapsed')) {
+            scenarioIcon.textContent = '+';
+        } else {
+            scenarioIcon.textContent = '−';
+        }
+    }
+
+    // 選擇選項功能
+    function selectOption(value) {
+        if (isSubmitted) return; // 已提交後不可更改
+
+        currentSelection = value;
+        
+        // 更新 UI 樣式
+        options.forEach(opt => {
+            opt.classList.remove('selected');
+            // 移除所有 radio 的 checked
+            const input = opt.querySelector('input');
+            if (input.value === value) {
+                opt.classList.add('selected');
+                input.checked = true;
+            }
+        });
+
+        // 啟用提交按鈕
+        submitBtn.disabled = false;
+        answerStatus.textContent = '🔵 已選擇，準備提交';
+    }
+
+    // 提交答案功能
+    function submitAnswer() {
+        if (!currentSelection) return;
+
+        isSubmitted = true;
+        submitBtn.style.display = 'none';
+        retryBtn.style.display = 'block';
+        
+        // 鎖定選項並顯示對錯
+        options.forEach(opt => {
+            const input = opt.querySelector('input');
+            const iconSpan = opt.querySelector('.status-icon');
+            
+            // 禁用點擊
+            opt.style.cursor = 'default';
+            input.disabled = true;
+
+            if (input.value === correctAnswer) {
+                opt.classList.add('correct');
+                iconSpan.textContent = '✅'; // 正確勾勾
+            } else if (input.value === currentSelection) {
+                opt.classList.add('wrong');
+                iconSpan.textContent = '❌'; // 錯誤叉叉
+            }
+        });
+
+        // 顯示結果橫幅
+        if (currentSelection === correctAnswer) {
+            answerStatus.textContent = '🟢 回答正確！';
+            resultBanner.className = 'result-banner success';
+            resultTitle.textContent = '🎉 恭喜答對！觀念非常清晰！';
+            resultDesc.textContent = '您正確掌握了 ISO 42001 對於「針對性技術」與「人員能力」的要求。';
+        } else {
+            answerStatus.textContent = '🔴 回答錯誤';
+            resultBanner.className = 'result-banner error';
+            resultTitle.textContent = '😅 答錯了，別灰心！';
+            resultDesc.textContent = `正確答案是 (B)。您選擇的選項偏向傳統資安，請參考下方解析。`;
+        }
+
+        // 顯示解析區塊
+        feedbackSection.style.display = 'block';
+        
+        // 滾動到解析區
+        setTimeout(() => {
+            feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+
+    // 重新作答功能
+    function resetQuiz() {
+        isSubmitted = false;
+        currentSelection = '';
+        
+        // 重置 UI
+        options.forEach(opt => {
+            opt.classList.remove('selected', 'correct', 'wrong');
+            opt.style.cursor = 'pointer';
+            opt.querySelector('input').checked = false;
+            opt.querySelector('input').disabled = false;
+            opt.querySelector('.status-icon').textContent = '';
+        });
+
+        submitBtn.disabled = true;
+        submitBtn.style.display = 'block';
+        retryBtn.style.display = 'none';
+        feedbackSection.style.display = 'none';
+        answerStatus.textContent = '⚪ 尚未作答';
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 顯示/隱藏提示功能
+    function toggleHint(id) {
+        const hint = document.getElementById(id);
+        if (hint.style.display === 'block') {
+            hint.style.display = 'none';
+        } else {
+            hint.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>
