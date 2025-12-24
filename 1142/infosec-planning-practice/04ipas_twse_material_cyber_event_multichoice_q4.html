@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iPAS資安重點複習：資安事件重大性標準</title>
+<style>
+    :root {
+        --primary-color: #2c3e50; /* 深藍灰，專業感 */
+        --accent-color: #2980b9; /* 亮藍，重點 */
+        --bg-color: #f5f6fa;
+        --card-bg: #ffffff;
+        --text-color: #333333;
+        --border-color: #dcdcdc;
+        --success-color: #27ae60;
+        --error-color: #c0392b;
+        --highlight-bg: #fff9c4;
+    }
+
+    body {
+        font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 20px;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: var(--card-bg);
+        padding: 40px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border-top: 5px solid var(--primary-color);
+    }
+
+    h1 {
+        font-size: 24px;
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    h2 {
+        font-size: 20px;
+        color: var(--accent-color);
+        margin-top: 30px;
+        margin-bottom: 15px;
+        border-left: 4px solid var(--accent-color);
+        padding-left: 10px;
+    }
+
+    h3 {
+        font-size: 18px;
+        color: var(--primary-color);
+        margin-top: 20px;
+        font-weight: bold;
+    }
+
+    .question-context {
+        background-color: #eef2f5;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        font-size: 16px;
+    }
+
+    .glossary {
+        color: #666;
+        font-size: 0.95em;
+        background-color: #fff;
+        padding: 2px 5px;
+        border-radius: 3px;
+        border: 1px solid #ddd;
+    }
+
+    .option-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+
+    .option-label {
+        display: flex;
+        align-items: flex-start;
+        cursor: pointer;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .option-label:hover {
+        background-color: #f0f8ff;
+    }
+
+    .option-label input[type="checkbox"] {
+        margin-top: 5px;
+        margin-right: 12px;
+        transform: scale(1.2);
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 4px;
+        font-family: inherit;
+        font-weight: bold;
+    }
+
+    #submitBtn {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    #submitBtn:hover {
+        background-color: #34495e;
+    }
+
+    #resetBtn {
+        background-color: #95a5a6;
+        color: white;
+    }
+
+    #resetBtn:hover {
+        background-color: #7f8c8d;
+    }
+
+    .feedback-area {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 4px;
+        display: none;
+    }
+
+    .feedback-correct {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+
+    .feedback-wrong {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+
+    .accordion {
+        background-color: #fff;
+        border: 1px solid var(--border-color);
+        margin-top: 10px;
+    }
+
+    .accordion-header {
+        background-color: #f1f1f1;
+        padding: 15px;
+        cursor: pointer;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .accordion-header::after {
+        content: '+';
+        font-size: 20px;
+    }
+
+    .accordion.active .accordion-header::after {
+        content: '-';
+    }
+
+    .accordion-content {
+        display: none;
+        padding: 15px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .accordion.active .accordion-content {
+        display: block;
+    }
+
+    .highlight-box {
+        background-color: var(--highlight-bg);
+        border: 1px solid #f9e79f;
+        padding: 15px;
+        margin-top: 15px;
+        border-radius: 4px;
+    }
+
+    .info-card {
+        border: 2px solid var(--primary-color);
+        padding: 20px;
+        margin-top: 20px;
+        background-color: #fff;
+        position: relative;
+    }
+
+    .info-card-title {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 5px 15px;
+        position: absolute;
+        top: -15px;
+        left: 20px;
+        font-weight: bold;
+    }
+
+    .trap-list li {
+        margin-bottom: 8px;
+        color: #c0392b;
+    }
+    
+    .trap-list li span {
+        color: var(--text-color);
+    }
+
+    .self-test-item {
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px dashed #ccc;
+    }
+
+    .hint-btn {
+        background: none;
+        border: 1px solid var(--accent-color);
+        color: var(--accent-color);
+        padding: 2px 8px;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .hint-text {
+        display: none;
+        margin-top: 5px;
+        color: #666;
+        font-style: italic;
+        font-size: 0.9em;
+    }
+
+    .footer-summary {
+        margin-top: 40px;
+        border-top: 3px double #ccc;
+        padding-top: 15px;
+        text-align: center;
+        font-weight: bold;
+        color: var(--primary-color);
+        background-color: #e8e8e8;
+        padding: 15px;
+    }
+
+    /* Helper classes for text highlighting */
+    .bold-red { color: #c0392b; font-weight: bold; }
+    .bold-blue { color: #2980b9; font-weight: bold; }
+
+    @media (max-width: 600px) {
+        .container { padding: 20px; }
+        h1 { font-size: 20px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資安法規與管理 - 重點試題 Q4</h1>
+    
+    <div class="question-context">
+        <p>近年<strong>資通安全事件</strong><span class="glossary">（資訊系統或網路被攻擊、入侵、資料外洩等事件）</span>與日俱增，為使上市公司充分揭露<strong>重大訊息</strong><span class="glossary">（公司必須對外公告、會影響投資人判斷的重要資訊）</span>，保障<strong>投資人知的權利</strong><span class="glossary">（投資人有權知道會影響投資決策的重要資訊）</span>，證交所已修訂問答集明確規範資安事件之<strong>「重大性」標準</strong><span class="glossary">（用來判斷事件是否「重大到必須公告」的規則）</span>。</p>
+        <p><strong>題目：關於造成公司重大損害或影響之描述，下列哪些最正確？（複選）</strong></p>
+    </div>
+
+    <form id="quizForm">
+        <div class="option-group">
+            <label class="option-label">
+                <input type="checkbox" name="option" value="A">
+                <span>(A) 媒體報導公司發生資通安全事件，可能影響投資人之投資決策</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="option" value="B">
+                <span>(B) 僅公司核心資通系統、官方網站等，遭駭客攻擊入侵致無法營運或正常提供服務</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="option" value="C">
+                <span>(C) 公司有個資、內部文件檔案資料外洩之虞等情事</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="option" value="D">
+                <span>(D) 公司對造成損害或影響之評估結果（如財務損失），可能影響投資人之投資決策</span>
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button type="button" id="submitBtn">提交答案</button>
+            <button type="button" id="resetBtn">重作一次</button>
+        </div>
+    </form>
+
+    <div id="feedbackArea" class="feedback-area"></div>
+
+    <!-- 解析區 (Accordion) -->
+    <div class="accordion" id="explanationSection">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+            選項逐一詳細解析
+        </div>
+        <div class="accordion-content">
+            <p><strong>正確答案：A、C、D</strong></p>
+            <ul>
+                <li><strong>(A) 正確：</strong> 重大性的判斷標準之一就是「市場觀感」。若媒體已經報導，且內容足以動搖投資人信心或決策，即便公司內部還在調查，仍具備重大性，需對外說明。</li>
+                <li><strong>(B) 錯誤（陷阱）：</strong> 錯在<strong>「僅」</strong>這個字。重大資安事件的定義範圍很廣，除了系統當機（可用性受損），還包含資料外洩（機密性受損）等。若只限制在核心系統無法營運，範圍過於狹隘。</li>
+                <li><strong>(C) 正確：</strong> 個資與機密文件外洩涉及法律責任（如個資法）與商譽損失，屬於極高風險事件，符合重大性標準。注意題目用語「之虞」（有風險就算），不一定要等到確定損失慘重才算。</li>
+                <li><strong>(D) 正確：</strong> 這是最直觀的標準。若經評估財務損失金額龐大，直接衝擊EPS或營運資金，當然會影響投資決策，必須公告。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 關鍵字提示 -->
+    <div class="highlight-box">
+        <h3>解題關鍵字</h3>
+        <p>看到 <strong>「可能影響投資決策」</strong>、<strong>「個資外洩」</strong>、<strong>「財務損失」</strong> 都要選。看到限制性字眼如 <strong>「僅」、「只有」</strong> 要提高警覺。</p>
+    </div>
+
+    <!-- 觀念補充與延伸 -->
+    <h2>觀念補充與延伸</h2>
+    <p><strong>1. 核心觀念定位：</strong><br>此題測驗考生對於「證交所對有價證券上市公司重大性之判斷原則」的理解。這是iPAS資安法規考科的必考重點。</p>
+    <p><strong>2. 規範精神白話解：</strong><br>證交所不希望公司「報喜不報憂」。只要發生足以讓股民覺得「天啊，這會影響我買賣這家公司股票意願」的資安大事，公司就有義務第一時間說清楚，不能因為只是「資料被偷但系統還能跑」就裝作沒事。</p>
+    <p><strong>3. 常見變形題：</strong><br>問：如果系統被駭但30分鐘內修復，且無資料外洩，也沒人知道，算重大嗎？<br>答：通常不算（未達重大性標準）。但若該系統停擺導致產線全停、損失上億，就算。</p>
+
+    <!-- 加分項：三大判斷軸小卡 -->
+    <div class="info-card">
+        <div class="info-card-title">資安事件「重大性」三大判斷軸</div>
+        <ol>
+            <li><strong>影響決策面：</strong> 消息出來後，投資人會不會因此想賣股票？</li>
+            <li><strong>資料資產面：</strong> 有沒有個資外洩？有沒有機密文件流出？（包含「有...之虞」）</li>
+            <li><strong>實質損害面：</strong> 核心系統是否掛掉？有沒有具體的財務損失？</li>
+        </ol>
+    </div>
+
+    <!-- 記憶口訣 -->
+    <div class="highlight-box" style="background-color: #e8f6f3; border-color: #a2d9ce;">
+        <h3>★ 3秒記憶口訣</h3>
+        <p style="font-size: 1.2em; text-align: center; color: #16a085; font-weight: bold;">
+            「媒體、個資、損害評，影響決策即發布」
+        </p>
+    </div>
+
+    <!-- 常見陷阱 -->
+    <h2>常見陷阱區</h2>
+    <ul class="trap-list">
+        <li>【陷阱 1】 <span>以為只有「系統當機」才算資安事件。其實「資料被偷」（系統雖然正常運作）往往罰更重、影響更久。</span></li>
+        <li>【陷阱 2】 <span>看到「之虞」（可能發生但未確定）就不選。法規強調風險預警，有外洩「之虞」就已經構成重大風險。</span></li>
+        <li>【陷阱 3】 <span>忽略「投資人決策」這個終極指標。不管技術細節為何，只要嚴重到影響股價或投資意願，就是重大。</span></li>
+    </ul>
+
+    <!-- 自我檢測 -->
+    <h2>自我檢測（延伸思考）</h2>
+    <div class="self-test-item">
+        <p>Q1. 若公司發生勒索病毒攻擊，但備份還原成功，沒付贖金，也沒有資料外洩證據，是否一定需要發布重訊？</p>
+        <button class="hint-btn" onclick="toggleHint('hint1')">顯示/隱藏提示</button>
+        <p id="hint1" class="hint-text">提示：回歸「重大性」判斷。若無重大損害且未影響營運，通常不強制，但需依各別主管機關規定。</p>
+    </div>
+    <div class="self-test-item">
+        <p>Q2. 「核心資通系統」的定義是所有系統嗎？</p>
+        <button class="hint-btn" onclick="toggleHint('hint2')">顯示/隱藏提示</button>
+        <p id="hint2" class="hint-text">提示：不是。通常指直接影響公司產能、服務提供的關鍵系統（如銀行帳務、工廠產線控制）。</p>
+    </div>
+    <div class="self-test-item">
+        <p>Q3. 選項 B 如果把「僅」字拿掉，會變成正確選項嗎？</p>
+        <button class="hint-btn" onclick="toggleHint('hint3')">顯示/隱藏提示</button>
+        <p id="hint3" class="hint-text">提示：會。核心系統遭攻擊致無法營運，確實是重大事件的一種情況。</p>
+    </div>
+
+    <!-- 頁尾摘要 -->
+    <div class="footer-summary">
+        考前30秒速記：重大資安事件不限於系統當機，包含個資外洩、媒體負面報導、鉅額財損。關鍵在於「是否影響投資人決策」。
+    </div>
+
+</div>
+
+<script>
+    // 定義正確答案
+    const correctAnswers = ['A', 'C', 'D'];
+
+    // DOM 元素
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const form = document.getElementById('quizForm');
+    const accordion = document.getElementById('explanationSection');
+
+    // 提交按鈕監聽
+    submitBtn.addEventListener('click', function() {
+        // 取得所有被勾選的選項
+        const checkedOptions = Array.from(document.querySelectorAll('input[name="option"]:checked'))
+                                    .map(input => input.value);
+
+        // 檢查是否未作答
+        if (checkedOptions.length === 0) {
+            alert('請至少勾選一個選項再提交！');
+            return;
+        }
+
+        // 判斷邏輯
+        let isPerfect = true;
+        let missed = [];
+        let wrong = [];
+        let correctChecked = [];
+
+        // 檢查漏選 (應選但未選)
+        correctAnswers.forEach(ans => {
+            if (!checkedOptions.includes(ans)) {
+                missed.push(ans);
+                isPerfect = false;
+            } else {
+                correctChecked.push(ans);
+            }
+        });
+
+        // 檢查多選/錯選 (選了但不應選)
+        checkedOptions.forEach(opt => {
+            if (!correctAnswers.includes(opt)) {
+                wrong.push(opt);
+                isPerfect = false;
+            }
+        });
+
+        // 產生回饋 HTML
+        let feedbackHTML = '';
+        
+        if (isPerfect) {
+            feedbackArea.className = 'feedback-area feedback-correct';
+            feedbackHTML = `
+                <h3>★ 完全正確！</h3>
+                <p>恭喜你！觀念非常清晰。</p>
+                <p>正確答案就是：<strong>${correctAnswers.join('、')}</strong></p>
+            `;
+            // 自動展開解析
+            accordion.classList.add('active');
+        } else {
+            feedbackArea.className = 'feedback-area feedback-wrong';
+            feedbackHTML = `
+                <h3>可惜，還差一點！</h3>
+                <p><strong>你勾選了：</strong> ${checkedOptions.join('、') || '無'}</p>
+                <p><strong>正確答案應為：</strong> ${correctAnswers.join('、')}</p>
+                <hr style="border:0; border-top:1px dashed #ccc; margin:10px 0;">
+                <p><strong>診斷分析：</strong></p>
+                <ul>
+                    ${correctChecked.length > 0 ? `<li style="color:#155724">勾對了：${correctChecked.join('、')} (很好！)</li>` : ''}
+                    ${missed.length > 0 ? `<li style="color:#c0392b">漏勾了：${missed.join('、')} (這是正確的，應該選)</li>` : ''}
+                    ${wrong.length > 0 ? `<li style="color:#c0392b">多勾了：${wrong.join('、')} (這是陷阱，不該選)</li>` : ''}
+                </ul>
+                <p>請參考下方詳細解析，找出盲點！</p>
+            `;
+            // 自動展開解析
+            accordion.classList.add('active');
+        }
+
+        feedbackArea.innerHTML = feedbackHTML;
+        feedbackArea.style.display = 'block';
+        
+        // 滾動到回饋區
+        feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    // 重作按鈕監聽
+    resetBtn.addEventListener('click', function() {
+        // 清空 checkbox
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = false);
+
+        // 隱藏並清空回饋區
+        feedbackArea.style.display = 'none';
+        feedbackArea.innerHTML = '';
+
+        // 收合解析
+        accordion.classList.remove('active');
+
+        // 滾動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Accordion 切換功能
+    function toggleAccordion(header) {
+        header.parentElement.classList.toggle('active');
+    }
+
+    // 提示切換功能
+    function toggleHint(id) {
+        const hint = document.getElementById(id);
+        if (hint.style.display === 'block') {
+            hint.style.display = 'none';
+        } else {
+            hint.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>
