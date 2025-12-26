@@ -3,60 +3,71 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>零信任神殿圖｜可互動點擊教學模板（離線版）</title>
+  <title>零信任五色圖鑑｜ZTA Visual Guide</title>
   <style>
     :root{
-      --bg:#f7f7fb;
+      --bg:#f8fafc;
       --card:#ffffff;
-      --ink:#111827;
-      --muted:#6b7280;
-      --line:#e5e7eb;
-      --accent:#111827;
-      --good:#0f766e;
-      --bad:#b42318;
-      --shadow: 0 8px 24px rgba(17,24,39,.08);
-      --radius: 14px;
-      --radius2: 10px;
-      --pad: 16px;
-      --pad2: 12px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC","Microsoft JhengHei", Arial, sans-serif;
+      --ink:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      
+      /* Mnemonic Colors (記憶色) */
+      --c-identity: #0ea5e9; /* Blue: Digital ID */
+      --c-devices: #10b981;  /* Green: Health Status */
+      --c-networks: #f59e0b; /* Orange: Firewalls/Flow */
+      --c-apps: #8b5cf6;     /* Purple: Logic/API */
+      --c-data: #ef4444;     /* Red: Core Asset */
+      --c-base: #475569;     /* Slate: Foundation */
+
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      
+      --radius: 16px;
+      --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
     }
     html,body{height:100%;}
     body{
       margin:0;
-      font-family: var(--sans);
+      font-family: var(--font-sans);
       color: var(--ink);
       background: var(--bg);
-      line-height: 1.55;
+      line-height: 1.6;
     }
+    
+    /* Layout */
     header{
-      padding: 18px 18px 10px 18px;
-      max-width: 1100px;
+      padding: 24px 20px 16px 20px;
+      max-width: 1200px;
       margin: 0 auto;
+      text-align: center;
     }
     .title{
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: .2px;
-      margin: 0 0 6px 0;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--ink);
+      margin: 0 0 8px 0;
     }
     .subtitle{
       margin:0;
       color: var(--muted);
-      font-size: 14px;
+      font-size: 15px;
     }
+    
     main{
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 10px 18px 26px 18px;
+      padding: 10px 20px 40px 20px;
       display: grid;
-      grid-template-columns: 1.25fr .95fr;
-      gap: 14px;
+      grid-template-columns: 1.4fr 1fr; /* More space for temple */
+      gap: 20px;
+      align-items: start;
     }
-    @media (max-width: 980px){
+    @media (max-width: 1024px){
       main{grid-template-columns: 1fr; }
     }
+
+    /* Cards */
     .card{
       background: var(--card);
       border: 1px solid var(--line);
@@ -67,752 +78,537 @@
     .card h2{
       font-size: 16px;
       margin:0;
-      padding: 14px 16px;
+      padding: 16px 20px;
       border-bottom: 1px solid var(--line);
-      background: #fafafa;
-    }
-    .card .content{
-      padding: 14px 16px 16px 16px;
-    }
-    .hint{
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 6px;
-    }
-    .row{
+      background: #f8fafc;
+      font-weight: 700;
       display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .pill{
-      display:inline-flex;
       align-items:center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background:#fff;
-      font-size: 13px;
-      color: var(--ink);
-      cursor: default;
-      user-select:none;
-    }
-    .dot{
-      width:10px;height:10px;border-radius:999px;background: var(--accent);
-      display:inline-block;
-    }
-    .pill .dot.good{background: var(--good);}
-    .pill .dot.bad{background: var(--bad);}
-    .btn{
-      appearance:none;
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--ink);
-      padding: 9px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 13px;
-    }
-    .btn:hover{background:#fafafa;}
-    .btn.primary{
-      border-color: var(--ink);
-      background: var(--ink);
-      color:#fff;
-    }
-    .btn.primary:hover{filter: brightness(1.05);}
-    .btn:disabled{
-      opacity:.55;
-      cursor:not-allowed;
+      gap:8px;
     }
 
-    /* Temple */
-    .temple-wrap{
-      padding: 14px 16px 16px 16px;
-    }
+    /* Temple Structure */
+    .temple-wrap{ padding: 20px; }
     .temple{
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%);
-      padding: 14px;
       position: relative;
-      overflow: hidden;
     }
+    
+    /* Pediment (Roof) */
+    .pediment{
+      background: var(--ink);
+      color: white;
+      text-align: center;
+      padding: 16px;
+      border-radius: 12px 12px 4px 4px; /* Roof shape hint */
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+    .p-title{ font-size: 16px; font-weight: 800; margin:0; }
+    .p-sub{ font-size: 12px; opacity: 0.8; margin: 4px 0 0 0; }
+
+    /* Pillars Grid */
     .temple-grid{
       display:grid;
-      grid-template-columns: 1fr 1fr 1fr 1.2fr 1fr;
-      gap: 10px;
-      align-items: end;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
     }
-    @media (max-width: 980px){
-      .temple-grid{grid-template-columns: 1fr 1fr; }
+    @media (max-width: 600px){
+      .temple-grid{ grid-template-columns: 1fr; }
     }
-    .pediment{
-      height: 54px;
-      margin: 0 0 12px 0;
-      border-radius: 14px 14px 12px 12px;
-      background: #111827;
-      color:#fff;
-      display:flex;
-      flex-direction: column;
-      justify-content:center;
-      padding: 10px 12px;
-      position: relative;
-    }
-    .pediment .p-title{
-      font-size: 14px;
-      font-weight: 800;
-      letter-spacing: .2px;
-      margin: 0;
-    }
-    .pediment .p-sub{
-      margin: 2px 0 0 0;
-      font-size: 12px;
-      opacity: .9;
-    }
+
+    /* Column Styles - The Color Logic */
     .col{
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background:#fff;
+      border: 2px solid transparent; /* Prepare for active state */
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
       position: relative;
       display:flex;
       flex-direction: column;
-      justify-content: space-between;
-      min-height: 170px;
-      cursor: pointer;
-      transition: transform .08s ease, box-shadow .08s ease, border-color .08s ease;
-      box-shadow: 0 10px 18px rgba(17,24,39,.05);
+      height: 100%;
+      min-height: 180px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border-top: 4px solid var(--col-color, #ccc); /* Top color bar */
     }
+    
+    /* Individual Pillar Colors */
+    .col[data-key="identity"] { --col-color: var(--c-identity); --bg-tint: #f0f9ff; }
+    .col[data-key="devices"]  { --col-color: var(--c-devices);  --bg-tint: #ecfdf5; }
+    .col[data-key="networks"] { --col-color: var(--c-networks); --bg-tint: #fffbeb; }
+    .col[data-key="apps"]     { --col-color: var(--c-apps);     --bg-tint: #f5f3ff; }
+    .col[data-key="data"]     { --col-color: var(--c-data);     --bg-tint: #fef2f2; }
+
     .col:hover{
-      transform: translateY(-2px);
-      border-color: #cbd5e1;
-      box-shadow: 0 14px 26px rgba(17,24,39,.08);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      background: var(--bg-tint);
     }
     .col.active{
-      border-color: #111827;
-      box-shadow: 0 18px 30px rgba(17,24,39,.10);
-      transform: translateY(-2px);
+      border-color: var(--col-color);
+      background: var(--bg-tint);
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.03);
     }
-    .col-head{
-      padding: 12px 12px 0 12px;
-    }
-    .col-k{
-      font-size: 12px;
+
+    .col-num{
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
       color: var(--muted);
-      margin: 0 0 6px 0;
+      font-weight: 700;
+      margin-bottom: 4px;
     }
-    .col-v{
-      margin:0;
+    .col-title{
       font-size: 15px;
       font-weight: 800;
-      letter-spacing: .1px;
-    }
-    .col-tag{
-      margin-top: 8px;
-      display:flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .tag{
-      font-size: 12px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 4px 8px;
       color: var(--ink);
-      background: #fafafa;
-      user-select: none;
+      margin: 0 0 8px 0;
+      line-height: 1.2;
     }
-    .col-body{
-      padding: 10px 12px 12px 12px;
-      font-size: 13px;
-      color: var(--muted);
+    /* Color code the title text too */
+    .col[data-key="identity"] .col-title { color: var(--c-identity); }
+    .col[data-key="devices"] .col-title  { color: var(--c-devices); }
+    .col[data-key="networks"] .col-title { color: var(--c-networks); }
+    .col[data-key="apps"] .col-title     { color: var(--c-apps); }
+    .col[data-key="data"] .col-title     { color: var(--c-data); }
+
+    .col-tags{
+      display:flex;
+      flex-direction: column;
+      gap: 6px;
     }
-    .base{
-      margin-top: 12px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
+    .mini-tag{
+      font-size: 11px;
       background: #fff;
-      box-shadow: 0 10px 18px rgba(17,24,39,.05);
-      padding: 12px;
+      border: 1px solid var(--line);
+      padding: 3px 6px;
+      border-radius: 4px;
+      color: var(--muted);
+      text-align: center;
     }
-    .base-title{
-      margin:0 0 8px 0;
-      font-size: 13px;
-      font-weight: 800;
+
+    /* Base */
+    .base-area{
+      margin-top: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .base-label{
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      margin: 0 0 8px 0;
+      text-align: center;
     }
     .base-grid{
       display:grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-    }
-    @media (max-width: 980px){
-      .base-grid{grid-template-columns: 1fr; }
+      gap: 8px;
     }
     .base-item{
       border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 10px 10px;
-      background:#fafafa;
+      background: #f8fafc;
+      padding: 10px 4px;
+      border-radius: 6px;
+      text-align: center;
       cursor: pointer;
+      transition: all .2s;
     }
-    .base-item:hover{background:#f3f4f6;}
+    .base-item:hover{ background: #f1f5f9; border-color: var(--c-base); }
     .base-item.active{
-      border-color:#111827;
-      background:#fff;
+      background: #cbd5e1;
+      border-color: var(--c-base);
+      color: #0f172a;
+      font-weight: 700;
     }
-    .base-item .b1{
-      margin:0;
-      font-size: 13px;
-      font-weight: 800;
-    }
-    .base-item .b2{
-      margin:4px 0 0 0;
-      font-size: 12px;
-      color: var(--muted);
-    }
+    .b-txt{ font-size: 12px; line-height: 1.3; }
 
-    /* Panel */
-    .panel{
-      padding: 14px 16px 16px 16px;
+    /* Right Panel */
+    .panel-content{ padding: 20px; }
+    .indicator-bar{
+      height: 4px;
+      width: 40px;
+      border-radius: 99px;
+      background: var(--line);
+      margin-bottom: 12px;
     }
-    .panel .k{
-      color: var(--muted);
-      font-size: 12px;
-      margin:0 0 6px 0;
-    }
-    .panel .v{
-      margin:0 0 10px 0;
-      font-size: 16px;
-      font-weight: 900;
-    }
-    .panel .desc{
-      margin:0;
-      font-size: 13px;
-      color: var(--ink);
-    }
-    .panel .desc p{
-      margin: 10px 0;
-      color: var(--ink);
-      font-size: 13px;
-    }
-    .panel ul{
-      margin: 8px 0 0 18px;
-      padding:0;
-      color: var(--ink);
-      font-size: 13px;
-    }
-    .panel li{margin: 6px 0;}
+    .p-head-k{ font-size: 13px; color: var(--muted); margin:0; }
+    .p-head-v{ font-size: 20px; font-weight: 800; margin: 4px 0 16px 0; }
+    
+    .desc-box p{ font-size: 15px; margin: 0 0 12px 0; color: #334155; }
+    .desc-box ul{ margin: 0; padding-left: 20px; color: #334155; }
+    .desc-box li{ margin-bottom: 6px; }
+
     .callout{
-      border: 1px solid var(--line);
-      background: #fafafa;
-      border-radius: 12px;
-      padding: 10px 12px;
-      margin-top: 10px;
-      font-size: 13px;
-      color: var(--ink);
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #f1f5f9;
+      border-left: 4px solid var(--c-base);
     }
-    .callout strong{font-weight: 900;}
-    .mono{
-      font-family: var(--mono);
-      font-size: 12px;
-    }
+    .callout.trap{ background: #fff1f2; border-left-color: var(--c-data); color: #991b1b; }
+    .callout.exam{ background: #eff6ff; border-left-color: var(--c-identity); color: #1e40af; }
 
-    /* Quiz */
-    .quiz{
-      display:grid;
-      gap: 10px;
+    /* Quiz Area */
+    .quiz-section{
+      margin-top: 24px;
+      border-top: 1px solid var(--line);
+      padding-top: 20px;
     }
-    .q{
+    .q-title{ font-weight: 700; font-size: 15px; margin: 0 0 12px 0; }
+    .opt-label{
+      display: flex;
+      gap: 12px;
+      padding: 10px 12px;
       border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px;
-      background:#fff;
-    }
-    .q-title{
-      margin:0 0 8px 0;
-      font-size: 13px;
-      font-weight: 900;
-    }
-    .opt{
-      display:flex;
-      gap: 10px;
-      padding: 8px 10px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
       cursor: pointer;
-      user-select: none;
-      margin-top: 8px;
+      font-size: 14px;
       align-items: flex-start;
-      background:#fff;
     }
-    .opt:hover{background:#fafafa;}
-    .opt input{margin-top: 2px;}
-    .opt .t{
-      font-size: 13px;
-      color: var(--ink);
-    }
-    .result{
-      border-radius: 12px;
+    .opt-label:hover{ background: #f8fafc; }
+    .opt-label input{ margin-top: 4px; }
+    
+    .btn-row{ margin-top: 12px; display:flex; gap: 10px; }
+    .btn{
+      padding: 8px 16px;
+      border-radius: 6px;
       border: 1px solid var(--line);
-      padding: 10px 12px;
-      font-size: 13px;
-      background:#fafafa;
-      margin-top: 10px;
-      display:none;
+      background: #fff;
+      font-weight: 600;
+      cursor: pointer;
     }
-    .result.good{border-color: rgba(15,118,110,.35); background: rgba(15,118,110,.06); color: var(--good); display:block;}
-    .result.bad{border-color: rgba(180,35,24,.35); background: rgba(180,35,24,.06); color: var(--bad); display:block;}
-    details{
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 10px 12px;
-      background:#fff;
-      margin-top: 10px;
+    .btn-primary{ background: var(--ink); color: #fff; border-color: var(--ink); }
+    .btn-primary:hover{ opacity: 0.9; }
+
+    .result-box{
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
     }
-    details summary{
-      cursor:pointer;
-      font-weight: 800;
-      font-size: 13px;
-      color: var(--ink);
-      list-style: none;
-    }
-    details summary::-webkit-details-marker{display:none;}
-    details .d{
-      margin-top: 10px;
-      color: var(--ink);
-      font-size: 13px;
-    }
-    .small{
-      font-size: 12px;
-      color: var(--muted);
-    }
+    .result-box.correct{ background: #ecfdf5; color: #065f46; border: 1px solid #10b981; display:block; }
+    .result-box.wrong{ background: #fef2f2; color: #991b1b; border: 1px solid #ef4444; display:block; }
 
     footer{
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 18px 24px 18px;
-      color: var(--muted);
+      text-align: center;
+      padding: 20px;
       font-size: 12px;
+      color: var(--muted);
+      max-width: 800px;
+      margin: 0 auto;
     }
-    .sep{height:1px;background:var(--line);margin: 12px 0;}
+
   </style>
 </head>
 <body>
+
 <header>
-  <h1 class="title">零信任神殿圖｜可互動點擊教學模板（離線版）</h1>
-  <p class="subtitle">用「神殿五大支柱」建立零信任（Zero Trust Architecture，ZTA：不預設信任、持續驗證）的完整概念，避免把零信任誤解成單一工具。</p>
+  <h1 class="title">零信任五色圖鑑 (Zero Trust 5-Color Guide)</h1>
+  <p class="subtitle">點擊不同顏色的支柱，利用視覺聯想（Color Association）強化記憶。</p>
 </header>
 
 <main>
-  <!-- Left: Temple -->
+  <!-- Temple Visual -->
   <section class="card">
-    <h2>零信任神殿（點擊支柱或底座）</h2>
+    <h2>
+      <span style="width:10px;height:10px;background:var(--ink);border-radius:50%;display:inline-block;"></span>
+      互動神殿圖（請點擊彩色支柱）
+    </h2>
     <div class="temple-wrap">
-      <div class="temple" role="application" aria-label="Zero Trust Temple Interactive">
+      <div class="temple">
         <div class="pediment">
-          <p class="p-title">Zero Trust Architecture（ZTA：零信任架構）</p>
-          <p class="p-sub">核心精神：永不預設信任（Never Trust），持續驗證（Always Verify），最小權限（Least Privilege）</p>
+          <p class="p-title">Zero Trust Architecture (ZTA)</p>
+          <p class="p-sub">核心：永不信任，持續驗證</p>
         </div>
-
+        
         <div class="temple-grid" id="pillarGrid">
-          <!-- Pillars -->
-          <div class="col" tabindex="0" data-key="identity" aria-label="Identity pillar">
-            <div class="col-head">
-              <p class="col-k">Pillar 1</p>
-              <p class="col-v">Identity（身分）</p>
-              <div class="col-tag">
-                <span class="tag">MFA（多因子驗證）</span>
-                <span class="tag">SSO（單一登入）</span>
-              </div>
+          <!-- 1. Identity (Blue) -->
+          <div class="col" tabindex="0" data-key="identity">
+            <div class="col-num">PILLAR 1</div>
+            <div class="col-title">Identity<br>身分</div>
+            <div class="col-tags">
+              <span class="mini-tag">MFA 多因子</span>
+              <span class="mini-tag">SSO 單一登入</span>
             </div>
-            <div class="col-body">確保「是誰」可信：帳號、角色、權限、登入風險。</div>
+          </div>
+          
+          <!-- 2. Devices (Green) -->
+          <div class="col" tabindex="0" data-key="devices">
+            <div class="col-num">PILLAR 2</div>
+            <div class="col-title">Devices<br>設備</div>
+            <div class="col-tags">
+              <span class="mini-tag">健康度檢查</span>
+              <span class="mini-tag">MDM 管理</span>
+            </div>
+          </div>
+          
+          <!-- 3. Networks (Orange) -->
+          <div class="col" tabindex="0" data-key="networks">
+            <div class="col-num">PILLAR 3</div>
+            <div class="col-title">Networks<br>網路</div>
+            <div class="col-tags">
+              <span class="mini-tag">微隔離</span>
+              <span class="mini-tag">流量加密</span>
+            </div>
           </div>
 
-          <div class="col" tabindex="0" data-key="devices" aria-label="Devices pillar">
-            <div class="col-head">
-              <p class="col-k">Pillar 2</p>
-              <p class="col-v">Devices（設備）</p>
-              <div class="col-tag">
-                <span class="tag">端點健康度</span>
-                <span class="tag">MDM（裝置管理）</span>
-              </div>
+          <!-- 4. Apps (Purple) -->
+          <div class="col" tabindex="0" data-key="apps">
+            <div class="col-num">PILLAR 4</div>
+            <div class="col-title">Apps<br>應用</div>
+            <div class="col-tags">
+              <span class="mini-tag">API 安全</span>
+              <span class="mini-tag">動態授權</span>
             </div>
-            <div class="col-body">確保「用什麼設備」可信：是否受管控、是否合規、是否中毒。</div>
           </div>
 
-          <div class="col" tabindex="0" data-key="networks" aria-label="Networks pillar">
-            <div class="col-head">
-              <p class="col-k">Pillar 3</p>
-              <p class="col-v">Networks（網路）</p>
-              <div class="col-tag">
-                <span class="tag">微隔離</span>
-                <span class="tag">白名單</span>
-              </div>
+          <!-- 5. Data (Red) -->
+          <div class="col" tabindex="0" data-key="data">
+            <div class="col-num">PILLAR 5</div>
+            <div class="col-title">Data<br>資料</div>
+            <div class="col-tags">
+              <span class="mini-tag">DLP 防外洩</span>
+              <span class="mini-tag">分類分級</span>
             </div>
-            <div class="col-body">限制橫向移動：把網路切細、只允許必要連線。</div>
-          </div>
-
-          <div class="col" tabindex="0" data-key="apps" aria-label="Applications and Workloads pillar">
-            <div class="col-head">
-              <p class="col-k">Pillar 4</p>
-              <p class="col-v">Applications &amp; Workloads（應用與工作負載）</p>
-              <div class="col-tag">
-                <span class="tag">API 存取</span>
-                <span class="tag">工作負載身分</span>
-              </div>
-            </div>
-            <div class="col-body">確保「系統/服務本身」可信：應用權限、API 保護、服務間存取。</div>
-          </div>
-
-          <div class="col" tabindex="0" data-key="data" aria-label="Data pillar">
-            <div class="col-head">
-              <p class="col-k">Pillar 5</p>
-              <p class="col-v">Data（資料）</p>
-              <div class="col-tag">
-                <span class="tag">DLP</span>
-                <span class="tag">加密</span>
-              </div>
-            </div>
-            <div class="col-body">確保「資料不亂跑」：分類分級、存取控管、外洩防護。</div>
           </div>
         </div>
 
-        <div class="base" aria-label="Temple base controls">
-          <p class="base-title">底座（必備支撐：點擊）</p>
+        <div class="base-area">
+          <p class="base-label">底座（Base）</p>
           <div class="base-grid" id="baseGrid">
-            <div class="base-item" tabindex="0" data-key="visibility" aria-label="Visibility and Analytics">
-              <p class="b1">Visibility &amp; Analytics（可視性與分析）</p>
-              <p class="b2">看得見、才能管得住：紀錄、監控、分析行為。</p>
+            <div class="base-item" tabindex="0" data-key="visibility">
+              <div class="b-txt">Visibility<br>可視性</div>
             </div>
-            <div class="base-item" tabindex="0" data-key="automation" aria-label="Automation and Orchestration">
-              <p class="b1">Automation &amp; Orchestration（自動化與協同）</p>
-              <p class="b2">讓應變更快：自動封鎖、流程串接、SOAR。</p>
+            <div class="base-item" tabindex="0" data-key="automation">
+              <div class="b-txt">Automation<br>自動化</div>
             </div>
-            <div class="base-item" tabindex="0" data-key="governance" aria-label="Governance">
-              <p class="b1">Governance（治理）</p>
-              <p class="b2">訂規則、分責任：政策、標準、稽核與RACI。</p>
+            <div class="base-item" tabindex="0" data-key="governance">
+              <div class="b-txt">Governance<br>治理</div>
             </div>
           </div>
-          <p class="hint">操作提示：點擊任一支柱或底座，即會在右側顯示「白話說明、常見控制、考點與陷阱」。</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Right: Panel + Quiz -->
+  <!-- Info Panel -->
   <aside class="card">
-    <h2>解說面板與小測驗</h2>
-    <div class="panel">
-      <p class="k" id="panelK">目前選取</p>
-      <p class="v" id="panelV">請先點擊左側神殿的支柱或底座</p>
-      <div class="desc" id="panelDesc">
-        <p>本模板用「神殿」比喻零信任：如果只做其中一根柱子（例如只做白名單），整座神殿仍然不穩，因為攻擊會從其他面向進來。</p>
-        <div class="callout">
-          <strong>考試快速判斷：</strong>看到選項出現「只要…就可以完全符合…」或「單一措施即可達成零信任」通常是錯的。
-        </div>
+    <div class="panel-content">
+      <div class="indicator-bar" id="indicatorBar"></div>
+      <p class="p-head-k" id="panelK">準備就緒</p>
+      <h3 class="p-head-v" id="panelV">請點擊左側任一支柱</h3>
+      
+      <div class="desc-box" id="panelDesc">
+        <p>每一種顏色代表一個重點領域。試著將顏色與概念連結：</p>
+        <ul>
+          <li><strong style="color:var(--c-identity)">藍色 (Identity)</strong>：數位身分證，這是進入的第一道關卡。</li>
+          <li><strong style="color:var(--c-devices)">綠色 (Devices)</strong>：設備健康燈號，綠燈才放行。</li>
+          <li><strong style="color:var(--c-networks)">橘色 (Networks)</strong>：警戒線與隔離區，避免橫向擴散。</li>
+          <li><strong style="color:var(--c-apps)">紫色 (Apps)</strong>：應用邏輯與權限的智慧層。</li>
+          <li><strong style="color:var(--c-data)">紅色 (Data)</strong>：最核心、最敏感的資料心臟。</li>
+        </ul>
       </div>
 
-      <div class="sep"></div>
+      <!-- Quiz -->
+      <div class="quiz-section">
+        <p class="q-title">🔥 觀念快問快答</p>
+        <p style="font-size:14px; margin-bottom:12px;">題目：企業已導入「VPN 與防火牆」，認為已達成零信任。請問這主要違反了哪一根支柱的精神？</p>
+        
+        <label class="opt-label">
+          <input type="radio" name="q1" value="A">
+          <span>A. 違反 Identity（身分）：因為 VPN 通常只驗證一次，缺乏持續驗證。</span>
+        </label>
+        <label class="opt-label">
+          <input type="radio" name="q1" value="B">
+          <span>B. 違反 Networks（網路）：因為零信任不該使用任何網路設備。</span>
+        </label>
+        <label class="opt-label">
+          <input type="radio" name="q1" value="C">
+          <span>C. 完全沒違反，VPN 就是零信任的標準實作。</span>
+        </label>
 
-      <div class="quiz" aria-label="Quick quiz">
-        <div class="q">
-          <p class="q-title">小測驗（單選）：下列何者最可能是錯誤觀念？</p>
-          <label class="opt"><input type="radio" name="q1" value="A" /><span class="t">A. 微隔離（Micro-Segmentation：把網路切得很細）可限制橫向移動，屬於網路層控制。</span></label>
-          <label class="opt"><input type="radio" name="q1" value="B" /><span class="t">B. 只要設定白名單（Allowlist：只允許指定對象）就可以完全符合零信任需求。</span></label>
-          <label class="opt"><input type="radio" name="q1" value="C" /><span class="t">C. DLP（Data Loss Prevention：防止資料被不當帶走）可在資料層協助落實存取與使用控管。</span></label>
-          <label class="opt"><input type="radio" name="q1" value="D" /><span class="t">D. 零信任強調持續驗證，不因內網就自動信任。</span></label>
-
-          <div class="row" style="margin-top:10px;">
-            <button class="btn primary" id="submitBtn">提交答案</button>
-            <button class="btn" id="resetBtn">重作一次</button>
-          </div>
-
-          <div class="result" id="resultBox"></div>
-
-          <details id="explainBox">
-            <summary>展開解析（與神殿圖連動）</summary>
-            <div class="d">
-              <p>本題正確答案為 <strong>B</strong>。原因：零信任是一套架構，必須同時考量身分、設備、網路、應用與資料等面向，並配合治理、可視性與自動化。只靠白名單是「單一控制」，無法覆蓋整體需求。</p>
-              <div class="callout">
-                <strong>神殿比喻：</strong>只蓋一根柱子不是神殿。少了其他支柱或底座，攻擊者仍可從「設備不合規」「身分被盜」「資料外洩」等面向突破。
-              </div>
-              <p class="small">你也可以點擊左側 Networks（網路）支柱，或 Data（資料）支柱，觀察面板說明如何把白名單、微隔離、DLP 分別放到正確位置。</p>
-            </div>
-          </details>
-
-          <details>
-            <summary>快速記憶口訣</summary>
-            <div class="d">
-              <p><strong>「零信任不是一把鎖，是一整套門禁系統」</strong></p>
-              <ul>
-                <li>身分要驗（Identity）</li>
-                <li>設備要查（Devices）</li>
-                <li>網路要切（Networks）</li>
-                <li>應用要管（Apps &amp; Workloads）</li>
-                <li>資料要護（Data）</li>
-              </ul>
-            </div>
-          </details>
-
-          <details>
-            <summary>常見陷阱與避坑指南</summary>
-            <div class="d">
-              <ul>
-                <li><strong>陷阱：</strong>把白名單、VPN、單一產品當成「零信任已完成」。</li>
-                <li><strong>心理盲點：</strong>看到「強大產品」就覺得能包辦全部。</li>
-                <li><strong>避坑指南：</strong>看到「只要…就完全…」先警覺；再問自己：身分、設備、資料有沒有一起管？</li>
-              </ul>
-            </div>
-          </details>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="submitBtn">提交</button>
+          <button class="btn" id="resetBtn">重置</button>
         </div>
-
-        <div class="q">
-          <p class="q-title">模板使用方式（你只要改這裡）</p>
-          <ul class="small">
-            <li>要換題目：修改本頁「小測驗」題幹與四個選項文字。</li>
-            <li>要對應題組：在右側解析文字加入「本題正確答案為 X」即可。</li>
-            <li>要加更多互動：可新增第二題小測驗，或在面板加入「對應考點」區塊。</li>
-          </ul>
-          <div class="callout">
-            <strong>離線要求：</strong>本檔案未引用外部圖片、外部 JS/CSS；可直接用瀏覽器開啟。
-          </div>
-        </div>
+        <div class="result-box" id="resultBox"></div>
       </div>
     </div>
   </aside>
 </main>
 
 <footer>
-  <div class="sep"></div>
-  <div>備註：本頁以 NIST SP 800-207（零信任架構）常見「五大支柱＋底座」概念做教學比喻，適用於考前快速建立知識架構。你可直接複製此 HTML 作為通用模板。</div>
+  <p>Memory Guide: Blue(ID) • Green(Dev) • Orange(Net) • Purple(App) • Red(Data)</p>
 </footer>
 
 <script>
-  // Data model for panels
-  const panelData = {
+  const data = {
     identity: {
-      k: "Pillar 1",
+      color: "var(--c-identity)",
+      k: "Pillar 1 (Blue)",
       v: "Identity（身分）",
-      p: [
-        "白話解釋：你要先確定「是誰」在用系統，不能只靠『在內網』就信任。",
-        "常見控制：MFA（多因子驗證：不只密碼）、SSO（單一登入：一組登入串多系統）、身分風險評分、特權帳號管理。",
-        "考點：零信任把身分當核心，不論內外部都要驗證與授權。"
-      ],
-      bullets: [
-        "MFA：降低帳密被盜就能登入的風險",
-        "最小權限（Least Privilege：只給必要權限）",
-        "特權帳號：需更嚴格控管與稽核"
-      ],
-      trap: "常見陷阱：把『VPN 進內網』當成身分驗證完成。零信任要求更細緻、持續的驗證。"
+      desc: `
+        <p><strong>顏色記憶：</strong>藍色代表理性的「數位身分證」。</p>
+        <p><strong>核心概念：</strong>不論在內網或外網，都要確認「你是誰」。</p>
+        <ul>
+          <li><strong>MFA (多因子驗證)</strong>：密碼不夠，還要手機/指紋。</li>
+          <li><strong>Least Privilege (最小權限)</strong>：只給你工作需要的最低權限。</li>
+        </ul>
+        <div class="callout trap"><strong>陷阱：</strong>以為有帳號密碼就是零信任。錯！必須要加上 MFA 與動態風險評估。</div>
+      `
     },
     devices: {
-      k: "Pillar 2",
+      color: "var(--c-devices)",
+      k: "Pillar 2 (Green)",
       v: "Devices（設備）",
-      p: [
-        "白話解釋：就算是同一個人，用不同設備登入也不一定安全；設備可能中毒或沒更新。",
-        "常見控制：MDM（行動裝置管理：管手機/筆電）、端點健康度檢查、EDR（端點偵測與回應：抓異常行為）。",
-        "考點：零信任會把『設備是否合規』納入存取決策。"
-      ],
-      bullets: [
-        "設備合規（Compliance：符合公司安全要求）才給存取",
-        "補丁更新（Patch：修補漏洞）是基本",
-        "不受管控設備：權限更嚴或直接拒絕"
-      ],
-      trap: "常見陷阱：只看帳號，不看設備；結果駭客用被植入木馬的設備照樣通過。"
+      desc: `
+        <p><strong>顏色記憶：</strong>綠色代表「設備健康度」，必須綠燈才放行。</p>
+        <p><strong>核心概念：</strong>人是對的，但如果電腦中毒（不健康），一樣不能進來。</p>
+        <ul>
+          <li><strong>EDR</strong>：偵測端點有沒有異常行為。</li>
+          <li><strong>Patch Management</strong>：作業系統有沒有更新到最新。</li>
+        </ul>
+        <div class="callout exam"><strong>考點：</strong>自帶設備 (BYOD) 也要納入管理範圍，不能因為是員工私人手機就放寬標準。</div>
+      `
     },
     networks: {
-      k: "Pillar 3",
+      color: "var(--c-networks)",
+      k: "Pillar 3 (Orange)",
       v: "Networks（網路）",
-      p: [
-        "白話解釋：內網不是安全區，攻擊者一旦進來就可能『橫向移動』；所以要把路切細、連線變少。",
-        "常見控制：微隔離（Micro-Segmentation：把網路切得很細）、白名單（Allowlist：只允許指定連線）、限制 RDP（遠端桌面）。",
-        "考點：白名單是工具之一，但不等於零信任本身。"
-      ],
-      bullets: [
-        "微隔離：把可連線的範圍縮小",
-        "限制 RDP：降低被暴力破解與濫用",
-        "不要用『一條大內網』把所有系統串在一起"
-      ],
-      trap: "常見陷阱：以為『只要設白名單』就完成零信任（通常是考題的錯誤敘述）。"
+      desc: `
+        <p><strong>顏色記憶：</strong>橘色代表「隔離線」與「警戒區」。</p>
+        <p><strong>核心概念：</strong>預設網路充滿威脅，必須把網路切得很細（微隔離）。</p>
+        <ul>
+          <li><strong>Micro-Segmentation (微隔離)</strong>：就像潛水艇的艙門，一區進水不會淹沒全船。</li>
+          <li><strong>Encryption</strong>：流量全程加密。</li>
+        </ul>
+        <div class="callout trap"><strong>陷阱：</strong>傳統 VPN 是「進了門就全家通」，零信任網路則是「進了門還是一間間鎖著」。</div>
+      `
     },
     apps: {
-      k: "Pillar 4",
-      v: "Applications & Workloads（應用與工作負載）",
-      p: [
-        "白話解釋：不只使用者要管，系統與系統之間的呼叫（API）也要管，避免服務被冒用。",
-        "常見控制：API 存取控管、服務身分（Workload Identity：服務也有身分）、金鑰管理。",
-        "考點：零信任不只管『人』，也管『服務』。"
-      ],
-      bullets: [
-        "API Key/Token：要有生命週期管理",
-        "服務間權限：也要最小化",
-        "應用層控管：避免權限過大造成濫用"
-      ],
-      trap: "常見陷阱：只管人員登入，不管後端服務互打，導致內部 API 成為攻擊通道。"
+      color: "var(--c-apps)",
+      k: "Pillar 4 (Purple)",
+      v: "Applications（應用）",
+      desc: `
+        <p><strong>顏色記憶：</strong>紫色代表複雜的「邏輯層」與「智慧」。</p>
+        <p><strong>核心概念：</strong>保護應用程式與 API，不讓它們成為跳板。</p>
+        <ul>
+          <li><strong>API Security</strong>：防止 API 被濫用。</li>
+          <li><strong>Container Security</strong>：容器化環境的安全。</li>
+        </ul>
+      `
     },
     data: {
-      k: "Pillar 5",
+      color: "var(--c-data)",
+      k: "Pillar 5 (Red)",
       v: "Data（資料）",
-      p: [
-        "白話解釋：最後要保護的是資料本身；就算有人登入成功，也不能隨便把資料帶走。",
-        "常見控制：DLP（防止資料被不當帶走）、加密（Encryption：把資料變成看不懂的密文）、資料分級分類。",
-        "考點：資料層要做到『誰可以看』『可不可以下載』『能不能外傳』。"
-      ],
-      bullets: [
-        "DLP：偵測與阻擋敏感資料外傳",
-        "加密：保護傳輸與儲存",
-        "資料分級：不同等級用不同控管"
-      ],
-      trap: "常見陷阱：只管登入，不管資料使用行為；結果合法登入也能造成外洩。"
+      desc: `
+        <p><strong>顏色記憶：</strong>紅色代表「心臟」與「最高機密」。</p>
+        <p><strong>核心概念：</strong>這是駭客的最終目標。所有防線失效時，資料本身要能自保。</p>
+        <ul>
+          <li><strong>DLP (防外洩)</strong>：偵測敏感資料傳輸。</li>
+          <li><strong>Encryption at Rest</strong>：檔案躺在硬碟裡也要加密。</li>
+        </ul>
+      `
     },
     visibility: {
-      k: "Base",
-      v: "Visibility & Analytics（可視性與分析）",
-      p: [
-        "白話解釋：你要看得見系統發生什麼事，才知道誰在存取、哪裡有異常。",
-        "常見控制：集中式日誌（Log：系統紀錄）、監控告警、行為分析。",
-        "考點：沒有可視性，零信任就只剩規則，缺乏實際監督。"
-      ],
-      bullets: [
-        "日誌集中：方便追查",
-        "異常告警：縮短發現時間",
-        "分析：找出可疑行為模式"
-      ],
-      trap: "常見陷阱：有規則沒監控，出事才知道，無法快速定位與處置。"
+      color: "var(--c-base)",
+      k: "Base (Gray)",
+      v: "Visibility & Analytics",
+      desc: `
+        <p><strong>概念：</strong>如果看不見（沒有 Log），就無法管理。</p>
+        <p>這包含收集所有支柱的 Log，並用 AI/SIEM 進行分析。</p>
+      `
     },
     automation: {
-      k: "Base",
-      v: "Automation & Orchestration（自動化與協同）",
-      p: [
-        "白話解釋：事情發生很快，靠人工一個個處理太慢；要用自動化讓反應更快。",
-        "常見控制：SOAR（安全協同自動化回應：把告警變流程）、自動封鎖、工單串接。",
-        "考點：零信任在大規模環境要靠自動化才能落地。"
-      ],
-      bullets: [
-        "自動封鎖：縮短暴露時間",
-        "流程協同：跨系統一致處理",
-        "降低人為疏漏"
-      ],
-      trap: "常見陷阱：沒有流程與自動化，規模一大就做不到持續驗證與快速反應。"
+      color: "var(--c-base)",
+      k: "Base (Gray)",
+      v: "Automation",
+      desc: `
+        <p><strong>概念：</strong>人工反應太慢，必須靠自動化（SOAR）來快速封鎖攻擊。</p>
+      `
     },
     governance: {
-      k: "Base",
-      v: "Governance（治理）",
-      p: [
-        "白話解釋：要有規則與責任分工，不然做了很多工具也會各做各的。",
-        "常見控制：政策與標準、稽核、RACI（責任分工：誰負責/誰核准/誰諮詢/誰被告知）。",
-        "考點：零信任不是只買產品，還要制度化管理。"
-      ],
-      bullets: [
-        "政策：規定怎麼做",
-        "標準：定最低安全門檻",
-        "稽核：確認有做到"
-      ],
-      trap: "常見陷阱：沒有治理，導致各地各系統標準不一致，形成漏洞。"
+      color: "var(--c-base)",
+      k: "Base (Gray)",
+      v: "Governance",
+      desc: `
+        <p><strong>概念：</strong>這是政策與規則。沒有規則，技術只是空殼。</p>
+      `
     }
   };
 
-  const panelK = document.getElementById("panelK");
-  const panelV = document.getElementById("panelV");
-  const panelDesc = document.getElementById("panelDesc");
+  const panelK = document.getElementById('panelK');
+  const panelV = document.getElementById('panelV');
+  const panelDesc = document.getElementById('panelDesc');
+  const indicator = document.getElementById('indicatorBar');
+  const pillars = document.querySelectorAll('.col');
+  const bases = document.querySelectorAll('.base-item');
 
-  const pillarEls = Array.from(document.querySelectorAll("#pillarGrid .col"));
-  const baseEls = Array.from(document.querySelectorAll("#baseGrid .base-item"));
-
-  function clearActive(){
-    pillarEls.forEach(el => el.classList.remove("active"));
-    baseEls.forEach(el => el.classList.remove("active"));
+  function resetActive(){
+    pillars.forEach(p => p.classList.remove('active'));
+    bases.forEach(b => b.classList.remove('active'));
   }
 
-  function setPanel(key){
-    const d = panelData[key];
-    if(!d) return;
-    panelK.textContent = "目前選取：" + d.k;
-    panelV.textContent = d.v;
-
-    const html = `
-      <p>${d.p[0]}</p>
-      <p>${d.p[1]}</p>
-      <p>${d.p[2]}</p>
-      <ul>
-        ${d.bullets.map(x => `<li>${x}</li>`).join("")}
-      </ul>
-      <div class="callout"><strong>常見陷阱：</strong>${d.trap}</div>
-      <div class="callout"><strong>考試提示：</strong><span class="mono">「只要…就完全符合…」</span> 這種語氣通常在考你「過度簡化」的錯誤觀念。</div>
-    `;
-    panelDesc.innerHTML = html;
-  }
-
-  function bindClick(el, key){
-    el.addEventListener("click", () => {
-      clearActive();
-      el.classList.add("active");
-      setPanel(key);
-    });
-    el.addEventListener("keydown", (e) => {
-      if(e.key === "Enter" || e.key === " "){
-        e.preventDefault();
-        el.click();
-      }
-    });
-  }
-
-  pillarEls.forEach(el => bindClick(el, el.dataset.key));
-  baseEls.forEach(el => bindClick(el, el.dataset.key));
-
-  // Quiz logic
-  const submitBtn = document.getElementById("submitBtn");
-  const resetBtn = document.getElementById("resetBtn");
-  const resultBox = document.getElementById("resultBox");
-  const explainBox = document.getElementById("explainBox");
-
-  function getSelected(){
-    const checked = document.querySelector('input[name="q1"]:checked');
-    return checked ? checked.value : null;
-  }
-
-  submitBtn.addEventListener("click", () => {
-    const v = getSelected();
-    if(!v){
-      resultBox.className = "result bad";
-      resultBox.textContent = "請先選擇一個選項再提交。";
-      return;
+  function activate(key, el){
+    resetActive();
+    el.classList.add('active');
+    
+    const info = data[key];
+    if(info){
+      panelK.textContent = info.k;
+      panelV.textContent = info.v;
+      panelV.style.color = info.color;
+      panelDesc.innerHTML = info.desc;
+      indicator.style.backgroundColor = info.color;
     }
-    if(v === "B"){
-      resultBox.className = "result good";
-      resultBox.textContent = "正確。零信任是架構，不能只靠白名單就完成。";
-      explainBox.open = true;
+  }
 
-      // Auto-highlight Networks pillar to reinforce the typical exam trap
-      const networks = pillarEls.find(x => x.dataset.key === "networks");
-      if(networks){
-        clearActive();
-        networks.classList.add("active");
-        setPanel("networks");
-      }
-    }else{
-      resultBox.className = "result bad";
-      resultBox.textContent = "錯誤。注意：零信任不是單一控制；看到「只要…就完全…」通常是錯的。";
-      explainBox.open = true;
+  pillars.forEach(p => {
+    p.addEventListener('click', () => activate(p.dataset.key, p));
+  });
+
+  bases.forEach(b => {
+    b.addEventListener('click', () => activate(b.dataset.key, b));
+  });
+
+  // Quiz Logic
+  const submitBtn = document.getElementById('submitBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const resultBox = document.getElementById('resultBox');
+
+  submitBtn.addEventListener('click', () => {
+    const sel = document.querySelector('input[name="q1"]:checked');
+    if(!sel) return;
+    
+    if(sel.value === 'A'){
+      resultBox.className = "result-box correct";
+      resultBox.innerHTML = "<strong>答對了！</strong><br>傳統 VPN 常被視為「邊界防禦」，一旦驗證通過往往獲得過大權限。零信任強調「身分」必須持續驗證，不能因為連上 VPN 就無條件信任。";
+      
+      // Auto highlight Identity
+      const idCol = document.querySelector('.col[data-key="identity"]');
+      if(idCol) activate('identity', idCol);
+      
+    } else {
+      resultBox.className = "result-box wrong";
+      resultBox.innerHTML = "<strong>答錯囉。</strong><br>提示：問題在於「預設信任」與「一次性驗證」。請回想一下藍色支柱（Identity）的概念。";
     }
   });
 
-  resetBtn.addEventListener("click", () => {
-    document.querySelectorAll('input[name="q1"]').forEach(r => r.checked = false);
-    resultBox.className = "result";
-    resultBox.textContent = "";
-    explainBox.open = false;
-    clearActive();
-    panelK.textContent = "目前選取";
-    panelV.textContent = "請先點擊左側神殿的支柱或底座";
-    panelDesc.innerHTML = `
-      <p>本模板用「神殿」比喻零信任：如果只做其中一根柱子（例如只做白名單），整座神殿仍然不穩，因為攻擊會從其他面向進來。</p>
-      <div class="callout">
-        <strong>考試快速判斷：</strong>看到選項出現「只要…就可以完全符合…」或「單一措施即可達成零信任」通常是錯的。
-      </div>
-    `;
+  resetBtn.addEventListener('click', () => {
+    document.querySelectorAll('input[name="q1"]').forEach(i => i.checked = false);
+    resultBox.style.display = 'none';
   });
+
 </script>
+
 </body>
 </html>
