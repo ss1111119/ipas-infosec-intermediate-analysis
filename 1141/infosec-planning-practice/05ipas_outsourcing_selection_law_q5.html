@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安教學：提交董事會的資安報告重點</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --secondary: #64748b;
+            --success: #16a34a;
+            --error: #dc2626;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        /* 進度條 */
+        .progress-container {
+            position: sticky;
+            top: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            z-index: 100;
+        }
+
+        .progress-label {
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar-bg {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: var(--primary);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .scenario-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .question-box {
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        .options {
+            margin-top: 20px;
+        }
+
+        .option-item {
+            display: block;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: #f1f5f9;
+        }
+
+        .option-item.correct {
+            border-color: var(--success);
+            background-color: #f0fdf4;
+        }
+
+        .option-item.wrong {
+            border-color: var(--error);
+            background-color: #fef2f2;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        .btn-reset {
+            background: var(--secondary);
+            margin-left: 10px;
+        }
+
+        /* 折疊區塊 */
+        .collapsible {
+            background-color: #f8fafc;
+            color: var(--text);
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collapsible:after {
+            content: '\002B';
+            font-weight: bold;
+            float: right;
+            margin-left: 5px;
+        }
+
+        .active:after {
+            content: "\2212";
+        }
+
+        .content {
+            padding: 0 18px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background-color: white;
+            border-left: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .content-inner {
+            padding: 20px 0;
+        }
+
+        .keyword {
+            background-color: #fef08a;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .highlight-text {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .self-check-item {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .ans-toggle {
+            color: var(--primary);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .ans-hidden {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--secondary);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .card { padding: 15px; }
+            h1 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安證照：【題組 5】第 39 題解析</h1>
+    </header>
+
+    <div class="progress-container">
+        <div class="progress-label">
+            <span>學習達成率</span>
+            <span id="progress-text">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div id="progress-bar" class="progress-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- 題目區塊 -->
+    <div class="card">
+        <h3>【題組情境】</h3>
+        <p>你在整理一份「完整的資安測試報告」準備提交給董事會。<br>
+        董事會關注的是風險、影響、決策與改善方向，不需要過多執行細節。因此報告內容需要以高層可理解、可決策為主。</p>
+        
+        <img src="https://i.meee.com.tw/fKYFg1V.jpg" alt="資安測試報告情境圖" class="scenario-img">
+
+        <div class="question-box">
+            <p><strong>第 39 題（單選題）</strong></p>
+            <p>你在整理將完整的測試報告準備提交給董事會，下列何項內容最「不」重要？</p>
+        </div>
+
+        <div class="options" id="quiz-options">
+            <label class="option-item" onclick="checkAnswer('A', this)">
+                (A) 測試人員背景與工具版本
+            </label>
+            <label class="option-item" onclick="checkAnswer('B', this)">
+                (B) 執行測試所需耗費的時間
+            </label>
+            <label class="option-item" onclick="checkAnswer('C', this)">
+                (C) 符合公司期望及需求的結論
+            </label>
+            <label class="option-item" onclick="checkAnswer('D', this)">
+                (D) 弱點評估結果、評估計分的方法論、分數與修補建議
+            </label>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+        <div id="action-btns" style="display:none;">
+            <button class="btn" onclick="showCorrectAnswer()">顯示正確答案</button>
+            <button class="btn btn-reset" onclick="resetQuiz()">重設作答</button>
+        </div>
+    </div>
+
+    <!-- 第一步：找關鍵字 -->
+    <button class="collapsible" onclick="toggleCollapsible(this, 'step1')">第一步：找關鍵字</button>
+    <div class="content">
+        <div class="content-inner">
+            <ul>
+                <li><span class="keyword">提交給董事會</span>：指企業最高決策層。他們重視大方向的風險控制與資源分配。</li>
+                <li><span class="keyword">完整測試報告</span>：正式的文件，必須包含測試結論、發現、評估標準與後續處置。</li>
+                <li><span class="keyword">最不重要</span>：這是一個負向題。我們要從選項中找一個「雖然可能出現在技術報告中，但對董事會決策貢獻最低」的資訊。</li>
+                <li><span class="keyword">弱點評估、計分方法論</span>：例如 CVSS（共通弱點評分系統，用來量化安全風險嚴重程度的標準）。</li>
+                <li><span class="keyword">修補建議</span>：告訴公司該做什麼、先做什麼（優先順序）。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 第二步：白話翻譯 -->
+    <button class="collapsible" onclick="toggleCollapsible(this, 'step2')">第二步：白話翻譯</button>
+    <div class="content">
+        <div class="content-inner">
+            <p>這題在問：你要給公司的大老闆們看一份資安測試結果，大老闆最需要的是能用來做「投資決策」或「判斷風險」的資訊。請問下面哪一個選項對他們最沒有用？</p>
+        </div>
+    </div>
+
+    <!-- 第三步：解題思路 -->
+    <button class="collapsible" onclick="toggleCollapsible(this, 'step3')">第三步：解題思路</button>
+    <div class="content">
+        <div class="content-inner">
+            <p><span class="highlight-text">考點觀念：</span>報告必須依讀者分級。董事會看的是風險、影響與建議，技術人員看的是細節與過程。</p>
+            <p><strong>解題步驟：</strong></p>
+            <ol>
+                <li>思考董事會關心什麼：資安風險有多大？會賠多少錢？要花多少錢修？哪些要先處理？</li>
+                <li>判斷選項資訊的性質：是「決策用」還是「純管理用」？</li>
+                <li>排除與風險決策無關的行政細節。</li>
+            </ol>
+            <hr>
+            <p><strong>白話比喻：</strong></p>
+            <p>董事會就像是「學校校長」。校長需要知道的是校園牆壁是否有裂縫（風險）、裂縫有多深（分數）、是否會倒塌（影響）、要花多少經費找廠商修補（建議）。</p>
+            <p>至於維修工人在檢查裂縫時「花了幾個小時」，這對校長決定「要不要撥款維修」這件事來說，是最不重要的細節。</p>
+        </div>
+    </div>
+
+    <!-- 第四步：選項分析 -->
+    <button class="collapsible" onclick="toggleCollapsible(this, 'step4')">第四步：選項分析</button>
+    <div class="content">
+        <div class="content-inner">
+            <p><strong>(A) 測試人員背景與工具版本</strong><br>
+            這代表這份報告的「權威性」與「工具可靠性」。雖然不是核心決策點，但能增加報告的可信度，讓董事會知道這不是隨便找人測的。</p>
+            
+            <p><strong>(B) 執行測試所需耗費的時間（正確答案）</strong><br>
+            這是專案管理的行政資訊。對董事會評估「公司目前資安風險有多高」或「該不該增加資安預算」沒有直接幫助。這屬於執行層面的瑣事。</p>
+            
+            <p><strong>(C) 符合公司期望及需求的結論</strong><br>
+            董事會最看重「結論」。這能告訴他們這次測試是否達到當初設定的目標，是判斷專案成功與否的關鍵指標。</p>
+            
+            <p><strong>(D) 弱點評估結果、評估計分的方法論、分數與修補建議</strong><br>
+            這告訴董事會：風險在哪、嚴重程度多高（分數）、我們是用什麼標準判斷的（方法論）、接下來要做什麼（建議）。這是資安決策的核心數據。</p>
+        </div>
+    </div>
+
+    <!-- 觀念補充與延伸 -->
+    <button class="collapsible" onclick="toggleCollapsible(this, 'step5')">觀念補充與延伸</button>
+    <div class="content">
+        <div class="content-inner">
+            <p><span class="highlight-text">核心觀念：</span>Executive Reporting（高層管理報告）。</p>
+            <ul>
+                <li><strong>董事會報告（Executive Summary）：</strong> 重點在於「結論」、「風險等級」、「所需資源」、「改善優先序」。</li>
+                <li><strong>方法論（Methodology）：</strong> 判斷的依據。沒有方法論，分數就只是數字，沒有公信力。</li>
+                <li><strong>修補建議（Remediation）：</strong> 解決問題的行動方案。</li>
+            </ul>
+            <p><strong>觸類旁通：</strong></p>
+            <ul>
+                <li>如果是給「開發團隊」：需要的是 Log、Payload（攻擊載荷）、詳細的重現步驟。</li>
+                <li>如果是給「稽核單位」：需要的是 測試範圍、完整日誌、工具版本資訊 以備查驗。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 記憶口訣 -->
+    <button class="collapsible" onclick="toggleCollapsible(this, 'step6')">記憶口訣</button>
+    <div class="content">
+        <div class="content-inner">
+            <p>「董事會看風險，不看耗時」</p>
+            <p>「結論、分數、建議是重點」</p>
+        </div>
+    </div>
+
+    <!-- 常見陷阱 -->
+    <button class="collapsible" onclick="toggleCollapsible(this, 'step7')">常見陷阱</button>
+    <div class="content">
+        <div class="content-inner">
+            <p><strong>陷阱：</strong> 以為「完整報告」就是要鉅細靡遺把所有過程寫進去。</p>
+            <p><strong>真相：</strong> 報告的「完整性」取決於「受眾的需求」。對董事會來說，與風險決策無關的資訊，即便再詳細也是雜訊。</p>
+        </div>
+    </div>
+
+    <!-- 正確答案區 -->
+    <div class="card" style="border-top: 5px solid var(--success);">
+        <p><strong>最終答案：(B)</strong></p>
+        <p>一句話理由：董事會重視的是風險影響與改善資源決策，測試耗時屬於執行層的行政資訊，對高層決策價值最低。</p>
+    </div>
+
+    <!-- 自我檢測 -->
+    <div class="card">
+        <h3>自我檢測（點擊查看解答）</h3>
+        
+        <div class="self-check-item">
+            <p>1) 如果報告對象改成「開發團隊」，哪一項內容會變得更重要？為什麼？</p>
+            <span class="ans-toggle" onclick="toggleAns(this)">顯示解答與解析</span>
+            <div class="ans-hidden">
+                詳細的弱點觸發步驟與 Log。因為開發團隊需要這些資訊來「重現問題」並「修復漏洞」。
+            </div>
+        </div>
+
+        <div class="self-check-item">
+            <p>2) 為什麼董事會需要看「評估方法論與分數」，而不是只看弱點列表？</p>
+            <span class="ans-toggle" onclick="toggleAns(this)">顯示解答與解析</span>
+            <div class="ans-hidden">
+                弱點列表太過破碎，董事會無法判斷哪個該先修。「分數」能將風險量化，而「方法論」確保這個分數具備公正客觀的判斷標準。
+            </div>
+        </div>
+
+        <div class="self-check-item">
+            <p>3) 你會如何寫出董事會版的 Executive Summary（高層摘要）？</p>
+            <span class="ans-toggle" onclick="toggleAns(this)">顯示解答與解析</span>
+            <div class="ans-hidden">
+                包含：1. 發現幾項重大風險。2. 對公司業務的可能影響。3. 建議的修復預算與時間表。
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        iPAS 資安人才培訓系列 - 模擬解析系統
+    </footer>
+</div>
+
+<script>
+    let progress = {
+        answered: false,
+        expanded: new Set(),
+        selfCheck: new Set()
+    };
+
+    function updateProgress() {
+        let score = 0;
+        if (progress.answered) score += 33.4;
+        if (progress.expanded.size >= 1) score += 33.3;
+        if (progress.selfCheck.size >= 1) score += 33.3;
+        
+        const finalScore = Math.min(Math.round(score), 100);
+        document.getElementById('progress-bar').style.width = finalScore + '%';
+        document.getElementById('progress-text').innerText = finalScore + '%';
+    }
+
+    function checkAnswer(choice, element) {
+        if (progress.answered) return;
+
+        const items = document.querySelectorAll('.option-item');
+        items.forEach(item => item.classList.remove('correct', 'wrong'));
+
+        const feedback = document.getElementById('feedback');
+        feedback.style.display = 'block';
+
+        if (choice === 'B') {
+            element.classList.add('correct');
+            feedback.innerText = '正確！董事會要的是風險與決策資訊，不是執行耗時。';
+            feedback.style.color = 'var(--success)';
+            feedback.style.backgroundColor = '#f0fdf4';
+        } else {
+            element.classList.add('wrong');
+            feedback.innerText = '錯誤。提示：董事會要的是可用於投資決策的資訊。';
+            feedback.style.color = 'var(--error)';
+            feedback.style.backgroundColor = '#fef2f2';
+        }
+
+        document.getElementById('action-btns').style.display = 'block';
+        progress.answered = true;
+        updateProgress();
+    }
+
+    function showCorrectAnswer() {
+        const items = document.querySelectorAll('.option-item');
+        items[1].classList.add('correct');
+    }
+
+    function resetQuiz() {
+        const items = document.querySelectorAll('.option-item');
+        items.forEach(item => item.classList.remove('correct', 'wrong'));
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('action-btns').style.display = 'none';
+        progress.answered = false;
+        updateProgress();
+    }
+
+    function toggleCollapsible(btn, id) {
+        btn.classList.toggle("active");
+        var content = btn.nextElementSibling;
+        if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+            progress.expanded.add(id);
+            updateProgress();
+        }
+    }
+
+    function toggleAns(el) {
+        const ans = el.nextElementSibling;
+        const isHidden = window.getComputedStyle(ans).display === 'none';
+        ans.style.display = isHidden ? 'block' : 'none';
+        el.innerText = isHidden ? '隱藏解答' : '顯示解答與解析';
+        
+        if (isHidden) {
+            progress.selfCheck.add(el.innerText);
+            updateProgress();
+        }
+    }
+</script>
+
+</body>
+</html>

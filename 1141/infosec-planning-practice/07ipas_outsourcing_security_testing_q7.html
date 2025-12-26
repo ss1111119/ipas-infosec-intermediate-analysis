@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題組教學：委外與供應鏈安全</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding-bottom: 50px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 15px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+
+        h2 {
+            margin: 5px 0 0;
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+            font-weight: normal;
+        }
+
+        /* Scenario Box */
+        .scenario-box {
+            background-color: #fff8e1;
+            border: 2px solid #ffe082;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .scenario-label {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background-color: #ffca28;
+            color: #000;
+            padding: 2px 10px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        /* Question Section */
+        .question-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f7fa;
+        }
+
+        .option-input {
+            margin-top: 5px;
+            margin-right: 12px;
+        }
+
+        /* Buttons */
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Feedback Area */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section (Accordion) */
+        #explanation-section {
+            display: none; /* Hidden by default */
+            margin-top: 30px;
+        }
+
+        details {
+            background-color: var(--card-bg);
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 15px;
+            background-color: #e9ecef;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            list-style: none; /* Hide default arrow */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .content {
+            padding: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        /* Highlight Styles */
+        mark {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .highlight-term {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        /* Visual Diagrams (CSS Only) */
+        .diagram-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .box {
+            border: 2px solid var(--secondary-color);
+            padding: 10px;
+            border-radius: 6px;
+            background: white;
+            text-align: center;
+            min-width: 80px;
+            font-size: 0.9rem;
+        }
+
+        .arrow {
+            font-weight: bold;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+
+        .box.highlight {
+            border-color: var(--error-color);
+            color: var(--error-color);
+            border-style: dashed;
+        }
+
+        /* Utility */
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #eee;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+        
+        ul {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安題組教學：委外安全</h1>
+        <h2>主題：委外管理、複委託與供應鏈風險</h2>
+    </header>
+
+    <!-- 題組共用情境 -->
+    <div class="scenario-box">
+        <span class="scenario-label">題組共用情境</span>
+        <p>A 公司主要核心業務係提供國內各大金融機構（均屬資通安全管理法規範對象）有關系統之客製化開發業務，合作夥伴 B 公司為長年承接 A 公司旗下與金融機構委託業務。</p>
+        <p>甲為國內首屈一指之金融機構，今有一金融系統委外開發專案，其專案包含多項開發及核心系統：X 系統（資通系統防護需求等級為高級）、Y 系統（資通系統防護需求等級為中級），以及 Z 系統（資通系統防護需求等級為普級）。委託金額為新台幣捌仟萬元整，專案開發為期一年。</p>
+    </div>
+
+    <!-- 題目區域 -->
+    <div class="question-card">
+        <div class="question-text">
+            <span class="badge">第 7 題</span>
+            A 公司承攬甲金融機構（屬資通安全管理法規範對象）所委託之系統開發案，B 公司受 A 公司之複委託，辦理部份系統開發業務，且 B 公司所負責之 Y 系統，部份系統程式碼係取自外部第三方所開發之程式碼。下列說明何者最適切？
+        </div>
+        
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="q7" value="A" class="option-input">
+                <span>(A) 受託業務之委託金額未達新台幣一千萬元以上，故無需辦理安全性檢測</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q7" value="B" class="option-input">
+                <span>(B) 本案應由 B 公司負責提供安全性檢測證明</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q7" value="C" class="option-input">
+                <span>(C) 甲金融機構自行或另行委託第三方進行安全性檢測</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q7" value="D" class="option-input">
+                <span>(D) 應標示 B 公司非自行開發之內容，但無須提供其來源及提供授權證明</span>
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">提交答案</button>
+            <button class="btn-retry" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback-area"></div>
+    </div>
+
+    <!-- 解析區域 -->
+    <div id="explanation-section">
+        
+        <!-- A. 重點整理 -->
+        <details>
+            <summary>A. 題組情境重點整理</summary>
+            <div class="content">
+                <ul>
+                    <li><strong>委外關係：</strong>甲金融機構（業主）&rarr; 委託給 A 公司 &rarr; A 再複委託給 B 公司。</li>
+                    <li><strong>系統分級：</strong>
+                        <ul>
+                            <li>X 系統：高級</li>
+                            <li>Y 系統：中級（本題主角）</li>
+                            <li>Z 系統：普級</li>
+                        </ul>
+                    </li>
+                    <li><strong>本題新增條件：</strong>B 公司負責的 Y 系統中，使用了「外部第三方開發之程式碼」。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- B. 題目重述 (已在上方，此處略過或可再次強調) -->
+
+        <!-- C. 第一步：找關鍵字 -->
+        <details>
+            <summary>B & C. 題目關鍵字解析</summary>
+            <div class="content">
+                <p>請用螢光筆在腦中標示以下重點：</p>
+                <ul>
+                    <li><mark>資通安全管理法</mark>：代表甲必須依法合規，責任重大。</li>
+                    <li><mark>複委託</mark>：甲 &rarr; A &rarr; B，層層外包容易導致管控疏漏。</li>
+                    <li><mark>安全性檢測</mark>（Security Testing：用測試找出弱點/漏洞）：確保系統沒問題的手段。</li>
+                    <li><mark>第三方程式碼</mark>（Third-party Code：不是自己寫的程式碼）：引入了外部供應鏈風險。</li>
+                    <li><mark>最適切</mark>：選最好的做法，而不只是勉強及格的。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- D. 第二步：白話翻譯 -->
+        <details>
+            <summary>D. 白話翻譯：這題在問什麼？</summary>
+            <div class="content">
+                <p>用日常口語來說：</p>
+                <blockquote>
+                    「系統裡面有一部分不是開發商自己寫的（是拿別人的程式碼來用），這樣風險比較難掌握。在這種情況下，<strong>到底該由誰來做安全檢查，才最能讓業主（甲）放心且符合法律規定？</strong>」
+                </blockquote>
+            </div>
+        </details>
+
+        <!-- E. 第三步：解題思路 -->
+        <details>
+            <summary>E. 解題思路與視覺化圖解</summary>
+            <div class="content">
+                <h3>觀念核心：委外系統的安全性檢測責任與供應鏈風險</h3>
+                
+                <h4>圖解 1：外包鏈與風險來源</h4>
+                <div class="diagram-container">
+                    <div class="box">甲金融機構</div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="box">A 公司</div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="box">B 公司</div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="box highlight">第三方程式碼<br>(潛在漏洞?)</div>
+                </div>
+
+                <h4>圖解 2：正確的責任鏈</h4>
+                <div class="diagram-container">
+                    <div class="box">甲 (最終責任)</div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="box" style="border-color:var(--success-color); background:#eff; font-weight:bold;">自行或找第三方驗證</div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="box">確保 B 的程式碼安全</div>
+                </div>
+
+                <h4>解題步驟：</h4>
+                <ol>
+                    <li><strong>確認身分：</strong>甲是受監管對象，也是最終負責人。</li>
+                    <li><strong>判斷需求：</strong>「安全性檢測」最重要的是「獨立性」與「公信力」。</li>
+                    <li><strong>風險加成：</strong>因為用了第三方程式碼，可能有未知的後門或漏洞，不能只聽開發商（B）的一面之詞。</li>
+                </ol>
+                <p><strong>原則：</strong>委外不等於免責。測試最好由「甲自行或獨立第三方」執行，避免「球員兼裁判」的利益衝突。</p>
+            </div>
+        </details>
+
+        <!-- F. 第四步：選項分析 -->
+        <details open> <!-- Default open on correct answer for better flow -->
+            <summary>F. 選項逐一分析 (A~D)</summary>
+            <div class="content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>選項</th>
+                            <th>判斷</th>
+                            <th>白話解析</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A) 未達一千萬無需檢測</td>
+                            <td><span style="color:red">不適切</span></td>
+                            <td>是否做資安檢測取決於<strong>系統等級、風險高低與合規要求</strong>，而不是單純看金額門檻。中級系統涉及資安法，通常都需要檢測。</td>
+                        </tr>
+                        <tr>
+                            <td>(B) 由 B 公司提供證明</td>
+                            <td><span style="color:red">不最適切</span></td>
+                            <td>B 是寫程式的人，由他自己證明自己安全，缺乏<strong>獨立性</strong>（球員兼裁判）。雖然 B 應該做內測，但對甲來說，這不是最可靠的依據。</td>
+                        </tr>
+                        <tr>
+                            <td>(C) 甲自行或委託第三方檢測</td>
+                            <td><span style="color:green; font-weight:bold;">最適切</span></td>
+                            <td>由業主（甲）自己測，或花錢找與 A/B 無關的專業第三方來測，結果最<strong>客觀、公正</strong>，也最符合資安法對機關監管的要求。</td>
+                        </tr>
+                        <tr>
+                            <td>(D) 標示非自行開發但免授權</td>
+                            <td><span style="color:red">不適切</span></td>
+                            <td>只標示不夠！第三方程式碼必須清楚交代<strong>來源</strong>並提供<strong>授權證明</strong>。否則未來若有版權糾紛或資安漏洞，甲會無法追溯與修補。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        <!-- G. 觀念補充 -->
+        <details>
+            <summary>G. 觀念補充與延伸</summary>
+            <div class="content">
+                <p><strong>核心觀念定位：</strong>資安管理 &rarr; 委外管理 / 供應鏈安全（Supply Chain Security）。</p>
+                
+                <h4>定義整理：</h4>
+                <ul>
+                    <li><strong>供應鏈風險：</strong>用到別人寫的東西（函式庫、套件），你就要承擔它可能有洞、被植入木馬或授權不合法的風險。</li>
+                    <li><strong>獨立性：</strong>檢測的人不應該跟被測的人利益綁在一起。</li>
+                </ul>
+
+                <h4>觸類旁通：</h4>
+                <ul>
+                    <li><strong>安全性檢測 vs 自我宣告：</strong>前者是透過滲透測試、弱點掃描等技術手段驗證；後者只是廠商口頭保證。</li>
+                    <li><strong>第三方程式碼 vs 開源元件（Open Source）：</strong>開源是公開授權可使用的程式碼，但仍需遵守授權條款（如 GPL, MIT）並注意漏洞修補。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- H. 記憶口訣 -->
+        <details>
+            <summary>H. 記憶口訣</summary>
+            <div class="content">
+                <p style="font-size: 1.2rem; text-align: center; background: #e8f6f3; padding: 15px; border-radius: 8px;">
+                    <strong>「委外也不卸責；檢測要獨立；第三方要追源與授權」</strong>
+                </p>
+            </div>
+        </details>
+
+        <!-- I. 常見陷阱 -->
+        <details>
+            <summary>I. 常見陷阱與避坑指南</summary>
+            <div class="content">
+                <ul>
+                    <li><strong>易錯點 1：</strong>把「金額門檻」當成要不要檢測的唯一條件（選項 A 的陷阱）。</li>
+                    <li><strong>易錯點 2：</strong>心理覺得「廠商最懂系統」，所以讓廠商測最準（忽略了利益衝突）。</li>
+                </ul>
+                <div style="background: #fff0f0; padding: 10px; border-left: 4px solid var(--error-color);">
+                    <strong>避坑指南：</strong><br>
+                    看到「資通安全管理法」＋「委外」 &rarr; 優先選<strong>「甲要能掌握、能稽核、結果可信」</strong>的選項。
+                </div>
+            </div>
+        </details>
+
+        <!-- J. 正確答案 -->
+        <details>
+            <summary>J. 正確答案</summary>
+            <div class="content">
+                <p><strong>答案：(C)</strong></p>
+                <p>理由：甲才是最終負責者，應自行或找獨立第三方做檢測以確保客觀可信。</p>
+            </div>
+        </details>
+
+        <!-- K. 自我檢測 -->
+        <details>
+            <summary>K. 自我檢測（含解答）</summary>
+            <div class="content">
+                <p>試著回答以下問題來確認你是否真的懂了：</p>
+                <ol>
+                    <li>
+                        <strong>問題：</strong>如果 B 公司提供的檢測報告很完整，甲還需要第三方檢測嗎？理由是什麼？<br>
+                        <div style="background-color: #e8f8f5; padding: 10px; border-left: 4px solid var(--success-color); margin-top: 5px; border-radius: 4px;">
+                            <strong>解答：</strong><span style="color: #155724;">需要。因為 B 公司是系統開發者，存在「球員兼裁判」的利益衝突。為了確保檢測結果的客觀性與獨立性，甲機構應自行或委託無關的第三方進行複測，這也是資安稽核的重點。</span>
+                        </div>
+                    </li>
+                    <li style="margin-top:15px;">
+                        <strong>問題：</strong>第三方程式碼的「來源」與「授權」為什麼和資安有關？<br>
+                        <div style="background-color: #e8f8f5; padding: 10px; border-left: 4px solid var(--success-color); margin-top: 5px; border-radius: 4px;">
+                            <strong>解答：</strong><span style="color: #155724;">來源不明的程式碼可能被植入惡意後門或木馬（供應鏈攻擊）；未經授權使用則可能導致法律訴訟，甚至被迫停止使用系統，影響營運持續性（Availability）。</span>
+                        </div>
+                    </li>
+                    <li style="margin-top:15px;">
+                        <strong>問題：</strong>若系統等級從中級改成高級，檢測的頻率與深度通常會怎麼變？<br>
+                        <div style="background-color: #e8f8f5; padding: 10px; border-left: 4px solid var(--success-color); margin-top: 5px; border-radius: 4px;">
+                            <strong>解答：</strong><span style="color: #155724;">會變得更嚴格。例如：檢測頻率可能增加（如從一年一次變半年一次）；檢測深度可能從單純弱點掃描增加到源碼檢測（Code Review）與滲透測試（Penetration Test）。</span>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </details>
+
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        const options = document.getElementsByName('q7');
+        let selectedValue = null;
+        
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const explanationSection = document.getElementById('explanation-section');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+        
+        if (selectedValue === 'C') {
+            // Correct Answer
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = '✅ 回答正確！<br>甲機構自行或委託第三方檢測，最能確保獨立性與合規。';
+            explanationSection.style.display = 'block';
+            
+            // Auto open the Option Analysis
+            const allDetails = explanationSection.querySelectorAll('details');
+            // Close all first to reset visual flow, then open specific ones if needed
+            // But here we just reveal the section.
+        } else {
+            // Wrong Answers with specific hints
+            feedbackArea.className = 'feedback-wrong';
+            let hint = '';
+            
+            switch(selectedValue) {
+                case 'A':
+                    hint = '提示：你把「是否需檢測」誤綁在金額門檻上了。資安法看的是風險等級喔！';
+                    break;
+                case 'B':
+                    hint = '提示：你忽略了檢測的「獨立性」。球員兼裁判（利益衝突）是資安檢測的大忌。';
+                    break;
+                case 'D':
+                    hint = '提示：你忽略了第三方程式碼必須「追溯來源」與「取得授權」，這也是資安風險的一環。';
+                    break;
+            }
+            
+            feedbackArea.innerHTML = `❌ 回答錯誤。<br>${hint}<br>再試一次看看！`;
+            explanationSection.style.display = 'none'; // Hide explanation until correct
+        }
+    }
+
+    function resetQuiz() {
+        // Clear radio buttons
+        const options = document.getElementsByName('q7');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // Hide feedback and explanation
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('explanation-section').style.display = 'none';
+
+        // Close all details
+        const details = document.querySelectorAll('details');
+        details.forEach((detail) => {
+            if (!detail.querySelector('summary').textContent.includes('選項逐一分析')) {
+                detail.removeAttribute('open');
+            }
+        });
+
+        // Scroll to top of question
+        document.querySelector('.question-card').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

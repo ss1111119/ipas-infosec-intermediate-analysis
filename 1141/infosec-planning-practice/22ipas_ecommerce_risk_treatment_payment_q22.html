@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安【題組題】教學 - 風險處理措施</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .scenario-box {
+            background-color: #eef2f3;
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .question-box {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Interaction Area */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+            border-color: var(--accent-color);
+        }
+
+        input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        #submitBtn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #submitBtn:hover {
+            background-color: #1a252f;
+        }
+
+        #retryBtn {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Hidden initially */
+        }
+
+        #retryBtn:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Feedback Area */
+        #feedbackArea {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section (Accordion) */
+        .explanation-container {
+            margin-top: 30px;
+            display: none; /* Hidden until correct */
+            border-top: 2px dashed #ddd;
+            padding-top: 20px;
+        }
+
+        .accordion {
+            background-color: #f9f9f9;
+            color: #444;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1rem;
+            transition: 0.4s;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion:hover {
+            background-color: #e9e9e9;
+        }
+
+        .accordion:after {
+            content: '+'; /* Character instead of icon */
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion.active:after {
+            content: '-';
+        }
+
+        .panel {
+            padding: 0 15px;
+            background-color: white;
+            display: none; /* Hidden by default */
+            overflow: hidden;
+            border-left: 3px solid var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .panel p, .panel li {
+            font-size: 0.95rem;
+            margin: 10px 0;
+        }
+
+        /* Highlights */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .keyword {
+            color: #d35400;
+            font-weight: bold;
+        }
+
+        /* Visual Diagram - 4 Quadrants */
+        .quadrant-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .quadrant {
+            border: 1px solid #ccc;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        .quadrant h4 { margin: 0 0 5px 0; font-size: 1rem; }
+        .quadrant p { margin: 0; font-size: 0.8rem; color: #666; }
+
+        .q-correct {
+            border: 2px solid var(--success-color);
+            background-color: #e8f5e9;
+            position: relative;
+        }
+
+        .q-correct::after {
+            content: "(本題答案)";
+            display: block;
+            font-size: 0.75rem;
+            color: var(--success-color);
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: var(--primary-color);
+        }
+
+        /* Self Check Hidden Answers */
+        .self-check-answer {
+            background-color: #eee;
+            color: #eee; /* Hide text initially */
+            padding: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .self-check-answer:hover {
+            background-color: #ddd;
+        }
+
+        .self-check-answer.revealed {
+            color: #333;
+            background-color: #d1ecf1;
+        }
+
+        .self-check-instruction {
+            font-size: 0.8rem;
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>題組 3（第 21–24 題共用）／主題：風險處理</h1>
+        <p style="color: #666; font-size: 0.9rem; margin-top:5px;">iPAS 資訊安全工程師 - 考前觀念衝刺</p>
+    </header>
+
+    <!-- 題組共用情境 -->
+    <div class="scenario-box">
+        <span class="scenario-title">【題組共用情境】</span>
+        K 公司為國內股票上市食品之製造商，公司新建置網路販售系統，將產品直接銷售給國內的消費者，並暫時不提供將所販售產品寄到本國以外的地區。公司在規劃與建置此網路販售系統時，需同步考量法規遵循、資安要求與系統安全設計，以確保營運與消費者資料安全。
+    </div>
+
+    <!-- 題目 -->
+    <div class="question-box">
+        <span style="color: var(--accent-color);">【第 22 題】</span>
+        公司於建置系統時評估自行負責金流作業風險過大，決定將網路金流作業交由合格之金資服務機構辦理，不自行處理金流作業。請問此項決策屬下列何項風險處理措施？
+    </div>
+
+    <!-- 選項互動區 -->
+    <div class="options-group" id="quizForm">
+        <label class="option-label" onclick="selectOption('A')">
+            <input type="radio" name="answer" value="A">
+            (A) 風險緩解（Risk Mitigation：把風險降低）
+        </label>
+        <label class="option-label" onclick="selectOption('B')">
+            <input type="radio" name="answer" value="B">
+            (B) 風險避免（Risk Avoidance：不做高風險的事情，直接避開）
+        </label>
+        <label class="option-label" onclick="selectOption('C')">
+            <input type="radio" name="answer" value="C">
+            (C) 風險分擔（Risk Sharing：把風險分給他人一起承擔，例如外包/保險）
+        </label>
+        <label class="option-label" onclick="selectOption('D')">
+            <input type="radio" name="answer" value="D">
+            (D) 風險保留（Risk Retention：接受風險，自己承擔）
+        </label>
+    </div>
+
+    <div class="btn-group">
+        <button id="submitBtn" onclick="submitAnswer()">提交答案</button>
+        <button id="retryBtn" onclick="resetQuiz()">重作一次</button>
+    </div>
+
+    <!-- 反饋區 -->
+    <div id="feedbackArea"></div>
+
+    <!-- 詳細解析區（答對後顯示） -->
+    <div id="explanationArea" class="explanation-container">
+        
+        <h2 style="border-left: 5px solid var(--accent-color); padding-left: 10px;">試題解析</h2>
+        <p style="margin-bottom: 20px;">請點選下方區塊展開詳細內容：</p>
+
+        <!-- A. 題組情境重點整理 -->
+        <button class="accordion">A. 題組情境重點整理</button>
+        <div class="panel">
+            <ul>
+                <li>網路販售系統會碰到「金流作業（付款處理）」的風險。</li>
+                <li>公司評估後覺得自己做風險太大。</li>
+                <li>決策：選擇<strong>「不自行處理金流」</strong>，改由合格金資服務機構處理。</li>
+                <li>本題考點：這是四種風險處理中的哪一種？</li>
+            </ul>
+        </div>
+
+        <!-- B. 題目重述 (略，已在上方顯示) -->
+
+        <!-- C. 第一步：找關鍵字 -->
+        <button class="accordion">C. 第一步：找關鍵字</button>
+        <div class="panel">
+            <p>請用螢光筆在心中畫出以下重點：</p>
+            <ul>
+                <li><span class="highlight">自行負責金流作業風險過大</span></li>
+                <li>決定<span class="highlight">交由合格金資服務機構辦理</span></li>
+                <li><span class="highlight keyword">不自行處理金流作業</span>（這是最關鍵的一句！）</li>
+                <li>問：屬何項<span class="highlight">風險處理措施</span>？</li>
+            </ul>
+            <p><strong>解釋：</strong>題目最關鍵的是「不做（不自行處理）」，這代表直接避開了風險源頭。</p>
+        </div>
+
+        <!-- D. 第二步：白話翻譯 -->
+        <button class="accordion">D. 第二步：白話翻譯</button>
+        <div class="panel">
+            <p>用高中生日常口語來說：</p>
+            <p>公司覺得自己處理刷卡、管錢這件事太危險了，怕資料外洩賠不完，所以決定<strong>「自己根本不要碰這件事」</strong>，把這個功能排除在公司系統之外，找銀行或支付公司全權處理。</p>
+        </div>
+
+        <!-- E. 第三步：解題思路 -->
+        <button class="accordion">E. 第三步：解題思路</button>
+        <div class="panel">
+            <p><strong>這題在考什麼？</strong> 一句話：四種風險處理策略的判斷。</p>
+            <h4>解題步驟：</h4>
+            <ol>
+                <li><strong>先看公司有沒有「繼續做」金流作業？</strong> 題目說「不自行處理」＝ 不做。</li>
+                <li><strong>不做某個高風險活動</strong> → 直覺反應是「風險避免」。</li>
+                <li><strong>排除法：</strong> 不是降低（還在做）、不是接受（自己扛）、也不是分擔（雖然有第三方，但重點是公司本身停止了該活動）。</li>
+            </ol>
+            <h4>原理與規則（白話）：</h4>
+            <ul>
+                <li><strong>風險避免 (Avoidance)：</strong>把風險源移除（例如：怕摔車就不騎車、怕個資外洩就不收集個資）。</li>
+                <li><strong>風險分擔 (Sharing/Transfer)：</strong>仍做這件事，但把部分風險責任或損失分給他人（例如：買保險、簽約轉嫁賠償責任）。</li>
+                <li><strong>風險緩解 (Mitigation)：</strong>仍做這件事，但加裝控制措施讓風險降低（例如：加裝防火牆、資料加密、權限控管）。</li>
+                <li><strong>風險保留 (Retention)：</strong>知道有風險但接受它，自己承擔後果（通常是因為成本不划算或風險很小）。</li>
+            </ul>
+        </div>
+
+        <!-- F. 第四步：選項分析 -->
+        <button class="accordion">F. 第四步：選項分析</button>
+        <div class="panel">
+            <!-- 視覺化圖表 -->
+            <div class="quadrant-grid">
+                <div class="quadrant q-correct">
+                    <h4>風險避免</h4>
+                    <p>不做了 / 避開</p>
+                </div>
+                <div class="quadrant">
+                    <h4>風險緩解</h4>
+                    <p>繼續做 + 加強防護</p>
+                </div>
+                <div class="quadrant">
+                    <h4>風險分擔</h4>
+                    <p>繼續做 + 找人扛責任</p>
+                </div>
+                <div class="quadrant">
+                    <h4>風險保留</h4>
+                    <p>繼續做 + 自己吞</p>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th width="20%">選項</th>
+                        <th width="20%">關鍵動作</th>
+                        <th width="60%">原因（白話）</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>(A) 緩解</td>
+                        <td>繼續做</td>
+                        <td>緩解是「繼續做」但加措施降低風險；題目是「不自行處理」，不符合。</td>
+                    </tr>
+                    <tr style="background-color: #e8f5e9;">
+                        <td>(B) 避免</td>
+                        <td>不做</td>
+                        <td><strong>正確。</strong>公司決定不做金流處理，把高風險活動排除，直接避開風險源。</td>
+                    </tr>
+                    <tr>
+                        <td>(C) 分擔</td>
+                        <td>繼續做</td>
+                        <td>分擔通常指「仍持有資產或服務」但轉移財務損失（如保險）。題目用語「不自行處理」更強烈傾向於避開活動。</td>
+                    </tr>
+                    <tr>
+                        <td>(D) 保留</td>
+                        <td>接受</td>
+                        <td>保留是接受風險自己扛；題目是選擇不做，反而是避開。</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- G. 觀念補充與延伸 -->
+        <button class="accordion">G. 觀念補充與延伸</button>
+        <div class="panel">
+            <h4>核心觀念定位</h4>
+            <p>資安管理 → 風險管理 → <strong>風險處理 (Risk Treatment)</strong></p>
+            <p>考試常見度：<strong>必考</strong>（超級常考這種「四選一」的情境題）。</p>
+            
+            <h4>觸類旁通（易混淆點）</h4>
+            <p><strong>「外包」到底算分擔還是避免？</strong></p>
+            <ul>
+                <li>這要看題目的敘述重點。</li>
+                <li>如果題目強調「仍提供服務，但透過合約要求廠商賠償」→ 偏向 <strong>風險分擔</strong>。</li>
+                <li>如果題目強調（像本題）「自己不處理」、「不自行作業」→ 偏向 <strong>風險避免</strong>（因為對公司內部而言，這個風險活動消失了）。</li>
+            </ul>
+        </div>
+
+        <!-- H. 記憶口訣 -->
+        <button class="accordion">H. 記憶口訣</button>
+        <div class="panel">
+            <p style="font-size: 1.2rem; text-align: center; color: var(--primary-color); font-weight: bold; padding: 20px; border: 2px dashed #ccc;">
+                「不做就避免；<br>要做才談降、分、留」
+            </p>
+        </div>
+
+        <!-- I. 常見陷阱 -->
+        <button class="accordion">I. 常見陷阱</button>
+        <div class="panel">
+            <ul>
+                <li><strong>易錯點：</strong>看到「交給第三方」或「外包」，就直覺選 (C) 風險分擔。</li>
+                <li><strong>避坑指南：</strong>先抓動詞！看公司是「徹底不做」還是「繼續做但交給別人做」？</li>
+                <li><strong>關鍵字判定：</strong>題目出現「不自行處理」、「停止」、「不提供」通常就是 <strong>風險避免</strong>。</li>
+            </ul>
+        </div>
+
+        <!-- J. 正確答案 -->
+        <button class="accordion">J. 正確答案</button>
+        <div class="panel">
+            <p><strong>答案：(B)</strong></p>
+            <p>一句話理由：公司選擇不自行處理金流，等於把高風險活動排除，屬於風險避免。</p>
+        </div>
+
+        <!-- K. 自我檢測 -->
+        <button class="accordion">K. 自我檢測（點擊下方灰底查看答案）</button>
+        <div class="panel">
+            <p class="self-check-instruction">請試著回答下列變化題，點擊灰色方塊即可看到參考答案。</p>
+            
+            <div style="margin-bottom: 15px;">
+                <p>1) 如果公司仍提供金流服務，但買了資安保險，把可能損失轉給保險公司，較像哪一種風險處理？</p>
+                <div class="self-check-answer" onclick="this.classList.add('revealed')">
+                    參考答案：風險分擔（Risk Sharing）。
+                </div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <p>2) 如果公司自己做金流，但導入更嚴格的權限控管、加密與監控，較像哪一種風險處理？</p>
+                <div class="self-check-answer" onclick="this.classList.add('revealed')">
+                    參考答案：風險緩解（Risk Mitigation）。
+                </div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <p>3) 如果公司評估金流風險很小，決定不特別加措施也不外包，自己承擔，較像哪一種？</p>
+                <div class="self-check-answer" onclick="this.classList.add('revealed')">
+                    參考答案：風險保留（Risk Retention）。
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Accordion Logic
+    var acc = document.getElementsByClassName("accordion");
+    for (var i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        });
+    }
+
+    // Quiz Interaction Logic
+    let selectedAnswer = "";
+
+    function selectOption(value) {
+        // Prevent changing answer after submission if we want to lock it (optional, but good for exams)
+        // Here we allow changing selection before submit
+        selectedAnswer = value;
+        // Visual feedback for selection handled by radio button native behavior
+    }
+
+    function submitAnswer() {
+        const feedbackEl = document.getElementById('feedbackArea');
+        const explanationEl = document.getElementById('explanationArea');
+        const retryBtn = document.getElementById('retryBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const quizForm = document.getElementById('quizForm');
+        
+        // Get checked radio
+        const radios = document.getElementsByName('answer');
+        let checkedValue = null;
+        for(let r of radios){
+            if(r.checked) checkedValue = r.value;
+        }
+
+        if (!checkedValue) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        feedbackEl.style.display = "block";
+        submitBtn.style.display = "none";
+        retryBtn.style.display = "block";
+
+        // Disable inputs
+        for(let r of radios) r.disabled = true;
+
+        if (checkedValue === 'B') {
+            // Correct
+            feedbackEl.className = "feedback-correct";
+            feedbackEl.innerHTML = "✅ 回答正確！<br>觀念正確：不自行處理金流 = 避開風險源。";
+            explanationEl.style.display = "block";
+            
+            // Auto scroll to explanation
+            setTimeout(() => {
+                explanationEl.scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+
+        } else {
+            // Incorrect
+            feedbackEl.className = "feedback-incorrect";
+            let hint = "❌ 回答錯誤。";
+            if(checkedValue === 'C') hint += "<br>提示：雖然有第三方介入，但公司是選擇「不做」這個動作，而非「共同承擔」。";
+            else hint += "<br>提示：先看題目是否在說『不自行處理（不做）』，不做通常是風險避免。";
+            
+            feedbackEl.innerHTML = hint;
+        }
+    }
+
+    function resetQuiz() {
+        const feedbackEl = document.getElementById('feedbackArea');
+        const explanationEl = document.getElementById('explanationArea');
+        const retryBtn = document.getElementById('retryBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // Reset UI
+        feedbackEl.style.display = "none";
+        explanationEl.style.display = "none";
+        retryBtn.style.display = "none";
+        submitBtn.style.display = "block";
+
+        // Reset Inputs
+        const radios = document.getElementsByName('answer');
+        for(let r of radios) {
+            r.checked = false;
+            r.disabled = false;
+        }
+
+        // Close all accordions
+        var acc = document.getElementsByClassName("accordion");
+        var panels = document.getElementsByClassName("panel");
+        for (var i = 0; i < acc.length; i++) {
+            acc[i].classList.remove("active");
+            panels[i].style.display = "none";
+        }
+        
+        // Reset self-checks
+        const selfChecks = document.getElementsByClassName("self-check-answer");
+        for(let sc of selfChecks) {
+            sc.classList.remove("revealed");
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安觀念題教學：控制措施類型</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f5f6fa;
+            --text-color: #2d3436;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 1.4rem;
+            margin-top: 25px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .question-box {
+            background-color: #eaf2f8;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid #d5dbdb;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .options-group {
+            margin: 20px 0;
+        }
+
+        .option-label {
+            display: block;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            border: 2px solid #dfe6e9;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent-color);
+            background-color: #f0f8ff;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        #submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #submit-btn:hover {
+            background-color: #1a252f;
+        }
+
+        #reset-btn {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        #reset-btn:hover {
+            background-color: #7f8c8d;
+        }
+
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d5f5e3;
+            color: #196f3d;
+            border: 1px solid #abebc6;
+        }
+
+        .feedback-incorrect {
+            background-color: #fadbd8;
+            color: #943126;
+            border: 1px solid #f5b7b1;
+        }
+
+        /* Accordion Styles */
+        details {
+            background-color: #fff;
+            border: 1px solid #dfe6e9;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            list-style: none; /* Remove default triangle */
+            position: relative;
+        }
+
+        summary::after {
+            content: '+';
+            position: absolute;
+            right: 20px;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid #dfe6e9;
+        }
+
+        .details-content {
+            padding: 20px;
+            color: #444;
+        }
+
+        /* Content Highlighting */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .keyword {
+            color: #d35400;
+            font-weight: bold;
+        }
+
+        /* Timeline CSS */
+        .timeline-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            text-align: center;
+            flex-wrap: wrap;
+        }
+
+        .timeline-step {
+            flex: 1;
+            position: relative;
+            padding: 15px;
+            background: #ecf0f1;
+            border-radius: var(--border-radius);
+            margin: 5px;
+            border: 2px solid transparent;
+        }
+
+        .timeline-step.prevent { border-color: #3498db; }
+        .timeline-step.detect { border-color: #f39c12; }
+        .timeline-step.correct { border-color: #2ecc71; }
+
+        .arrow {
+            font-size: 1.5rem;
+            color: #7f8c8d;
+            padding: 0 10px;
+        }
+
+        .step-title {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .step-desc {
+            font-size: 0.9rem;
+            color: #636e72;
+        }
+
+        /* Table */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .analysis-table th, .analysis-table td {
+            border: 1px solid #dfe6e9;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .analysis-table th {
+            background-color: #f1f2f6;
+            color: var(--primary-color);
+        }
+
+        /* Self Check specific */
+        .self-check-item {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 15px;
+        }
+        
+        .answer-reveal {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f3f4;
+            border-left: 4px solid var(--success-color);
+        }
+
+        /* Hide analysis initially */
+        #analysis-section {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed #bdc3c7;
+            padding-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安觀念題互動教學</h1>
+        <p>主題：控制措施類型（預防 / 偵測 / 修正）</p>
+    </header>
+
+    <!-- Part A: Question -->
+    <section id="quiz-section">
+        <h2>A. 題目</h2>
+        <div class="question-box">
+            26. Arc 公司於數日前遭受電子郵件社交工程攻擊（Social Engineering：利用人性弱點誘騙點擊或交出資訊），員工點選外部寄來的電子郵件並開啟電子郵件夾帶的勒索軟體（Ransomware：把檔案加密後勒索贖金），造成公司內部多台電腦內的檔案被加密。經過事件風險評鑑後，發覺針對此類事件未來改善的方式為：<br>
+            (1) 事前缺乏教育訓練<br>
+            (2) 以及事發時未有備份資料足以提供使用者復原使用<br>
+            請問，上述所指二種控制措施，分別屬於何種控制措施類型？
+        </div>
+
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A"> (A) 偵測性（Detective：事中發現問題） & 修正性（Corrective：事後修復/復原）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B"> (B) 修正性（Corrective） & 偵測性（Detective）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C"> (C) 預防性（Preventive：事前避免發生） & 修正性（Corrective）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D"> (D) 偵測性（Detective） & 預防性（Preventive）
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button id="submit-btn" onclick="checkAnswer()">提交答案</button>
+            <button id="reset-btn" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback-area"></div>
+    </section>
+
+    <!-- Analysis Section (Hidden until submitted) -->
+    <div id="analysis-section">
+        
+        <!-- Part B: Keywords -->
+        <details>
+            <summary>B. 第一步：找關鍵字</summary>
+            <div class="details-content">
+                <ul>
+                    <li><span class="highlight keyword">電子郵件社交工程攻擊</span>：題目情境。</li>
+                    <li><span class="highlight keyword">勒索軟體</span>：造成資料被加密的攻擊工具。</li>
+                    <li><span class="highlight keyword">事前缺乏教育訓練</span>：第一項控制措施，關鍵在於「事前」。</li>
+                    <li><span class="highlight keyword">事發時未有備份資料足以復原</span>：第二項控制措施，關鍵在於「復原」。</li>
+                    <li><span class="highlight keyword">控制措施類型</span>：本題考點。</li>
+                </ul>
+                <p><strong>線索分析：</strong>題目已經明確指出「事前」與「復原」這兩個關鍵時間點與目的，這是判斷控制類型最直接的依據。</p>
+            </div>
+        </details>
+
+        <!-- Part C: Translation -->
+        <details>
+            <summary>C. 第二步：白話翻譯</summary>
+            <div class="details-content">
+                <p>用高中生日常口語來說：</p>
+                <p>這間公司被釣魚信騙到，員工點了附件就中勒索病毒。事後檢討發現有兩個大問題：</p>
+                <ol>
+                    <li>平常沒教大家不要亂點奇怪的信（發生在事前）。</li>
+                    <li>出事的時候，沒有備份可以把資料救回來（發生在事後）。</li>
+                </ol>
+                <p>題目要問這兩件事，在資安專業上分別叫什麼類型的控制？</p>
+            </div>
+        </details>
+
+        <!-- Part D: Thinking Process -->
+        <details open>
+            <summary>D. 第三步：解題思路（含時間軸）</summary>
+            <div class="details-content">
+                <p><strong>考點核心：</strong>控制措施三大類型（預防 / 偵測 / 修正）。</p>
+                
+                <p><strong>視覺化時間軸：</strong></p>
+                <div class="timeline-container">
+                    <div class="timeline-step prevent">
+                        <span class="step-title">1. 事前（Pre-incident）</span>
+                        <span class="step-desc">預防性 (Preventive)<br><strong>教育訓練</strong></span>
+                    </div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="timeline-step detect">
+                        <span class="step-title">2. 事中（During）</span>
+                        <span class="step-desc">偵測性 (Detective)<br>警報、監控</span>
+                    </div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="timeline-step correct">
+                        <span class="step-title">3. 事後（Post-incident）</span>
+                        <span class="step-desc">修正性 (Corrective)<br><strong>備份復原</strong></span>
+                    </div>
+                </div>
+
+                <p><strong>原理與規則（白話）：</strong></p>
+                <ul>
+                    <li><strong>預防性（Preventive）：</strong>像「門鎖」與「不要亂點的訓練」，目的在讓事件根本不要發生。</li>
+                    <li><strong>偵測性（Detective）：</strong>像「防盜鈴」與「監控螢幕」，目的在事件發生時或剛發生時立刻被發現。</li>
+                    <li><strong>修正性（Corrective）：</strong>像「修理窗戶」與「還原備份」，目的在把被破壞的東西修回可用的狀態。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- Part E: Option Analysis -->
+        <details>
+            <summary>E. 第四步：選項分析</summary>
+            <div class="details-content">
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th>選項</th>
+                            <th>內容分析</th>
+                            <th>判定</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A)</td>
+                            <td>說教育訓練是偵測，備份是修正。</td>
+                            <td>錯誤（教育訓練不是用來偵測問題的）</td>
+                        </tr>
+                        <tr>
+                            <td>(B)</td>
+                            <td>說教育訓練是修正，備份是偵測。</td>
+                            <td>錯誤（完全顛倒）</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #d5f5e3;">(C)</td>
+                            <td><strong>教育訓練屬預防性</strong>（降低中招機率）；<br><strong>備份復原屬修正性</strong>（出事後還原檔案）。</td>
+                            <td style="background-color: #d5f5e3; font-weight:bold;">正確</td>
+                        </tr>
+                        <tr>
+                            <td>(D)</td>
+                            <td>說備份是預防。</td>
+                            <td>錯誤（備份無法阻止勒索軟體加密，只能事後復原）</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        <!-- Part F: Concept Extension -->
+        <details>
+            <summary>F. 觀念補充與延伸</summary>
+            <div class="details-content">
+                <p><strong>核心觀念定位：</strong>資安管理 &rarr; 控制措施類型。</p>
+                <p><strong>定義整理：</strong></p>
+                <ul>
+                    <li><strong>預防性（Preventive）：</strong>事前把門關好，降低發生機率。例如：防火牆規則、權限控管、教育訓練。</li>
+                    <li><strong>偵測性（Detective）：</strong>事中/事後立刻發現，讓你知道出事了。例如：入侵偵測系統（IDS）、日誌審查（Log Review）。</li>
+                    <li><strong>修正性（Corrective）：</strong>事後修復與復原，把損害拉回正常。例如：備份還原、修補漏洞（Patching）、重灌系統。</li>
+                </ul>
+                <p><strong>變化題型：</strong></p>
+                <ol>
+                    <li>若把「部署 IDS」放進選項，問它是什麼？答：偵測性。</li>
+                    <li>若把「封鎖惡意網域」放進選項，問它是什麼？答：預防性。</li>
+                    <li>若把「災難復原計畫」放進選項，問它是什麼？答：修正性。</li>
+                </ol>
+            </div>
+        </details>
+
+        <!-- Part G: Mnemonic -->
+        <details>
+            <summary>G. 記憶口訣</summary>
+            <div class="details-content">
+                <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold;">
+                    「先防（Prevent）再抓（Detect）最後修（Correct）」
+                </p>
+            </div>
+        </details>
+
+        <!-- Part H: Common Pitfalls -->
+        <details>
+            <summary>H. 常見陷阱</summary>
+            <div class="details-content">
+                <ul>
+                    <li><strong>易錯點：</strong>很多學生會把「備份」當成「預防」。心裡會想「我有備份就能預防資料遺失」。但以資安控制定義來說，備份並沒有阻止攻擊發生（檔案還是被加密了），它是讓你事後能把資料救回來，所以是<strong>修正/復原</strong>。</li>
+                    <li><strong>避坑指南：</strong>先問一句話：這個措施是「讓事情別發生」？是「用來發現有人入侵」？還是「出事後把東西修好」？</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- Part I: Answer -->
+        <details>
+            <summary>I. 正確答案</summary>
+            <div class="details-content">
+                <p><strong>答案：C</strong></p>
+                <p>一句話理由：教育訓練是事前避免（預防性），備份復原是事後修復（修正性）。</p>
+            </div>
+        </details>
+
+        <!-- Part J: Self Check -->
+        <details>
+            <summary>J. 自我檢測（點擊檢視答案）</summary>
+            <div class="details-content">
+                
+                <div class="self-check-item">
+                    <p>1) 如果公司部署郵件防毒/附件沙箱（Sandbox：在隔離環境測試附件），比較偏哪一類控制？</p>
+                    <details>
+                        <summary>顯示參考答案</summary>
+                        <div class="answer-reveal">
+                            參考答案：<strong>預防性（Preventive）</strong>。雖然它有偵測行為，但主要目的是在惡意軟體進入使用者信箱前就將其攔截，阻止感染發生。
+                        </div>
+                    </details>
+                </div>
+
+                <div class="self-check-item">
+                    <p>2) 如果公司導入集中式日誌監控，能在勒索軟體大量加密檔案時發出告警，偏哪一類控制？</p>
+                    <details>
+                        <summary>顯示參考答案</summary>
+                        <div class="answer-reveal">
+                            參考答案：<strong>偵測性（Detective）</strong>。它的作用是「發現問題」並通知管理員。
+                        </div>
+                    </details>
+                </div>
+
+                <div class="self-check-item">
+                    <p>3) 如果公司建立災難復原演練（DR Drill：定期演練備份還原），偏哪一類控制？</p>
+                    <details>
+                        <summary>顯示參考答案</summary>
+                        <div class="answer-reveal">
+                            參考答案：<strong>修正性（Corrective）</strong>。這是為了確保出事時能夠順利修復系統與資料。
+                        </div>
+                    </details>
+                </div>
+
+            </div>
+        </details>
+
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        const feedbackArea = document.getElementById('feedback-area');
+        const analysisSection = document.getElementById('analysis-section');
+
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        analysisSection.style.display = 'block';
+        feedbackArea.style.display = 'block';
+
+        if (selectedValue === 'C') {
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = '恭喜答對！正確答案是 (C)。<br>請往下閱讀詳細解析。';
+            
+            // Auto open logic explanation if correct
+            const allDetails = analysisSection.querySelectorAll('details');
+            // Keep user manual control mostly, but ensure 'Thinking Process' is open
+        } else {
+            feedbackArea.className = 'feedback-incorrect';
+            feedbackArea.innerHTML = '答案錯誤。提示：<br>1. 教育訓練是為了「事前」不讓員工點擊。<br>2. 備份是為了「事後」被加密時還能救回檔案。<br>請參考下方解析修正觀念。';
+        }
+
+        // Scroll to feedback
+        feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetQuiz() {
+        // Clear radios
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // Hide sections
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('analysis-section').style.display = 'none';
+        
+        // Reset details to closed state (except specific ones if needed, but closing all is cleaner)
+        const details = document.querySelectorAll('details');
+        details.forEach(d => {
+            if(d.querySelector('summary').innerText.includes('解題思路')) {
+                d.open = true; // Keep logic open by default when revealed
+            } else {
+                d.open = false;
+            }
+        });
+
+        // Scroll top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

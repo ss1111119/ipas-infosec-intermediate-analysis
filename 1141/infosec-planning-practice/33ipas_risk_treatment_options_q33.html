@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安教學：風險處理選項 Risk Treatment</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --highlight-color: #fff3cd;
+            --border-color: #ddd;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-top: 5px;
+        }
+
+        /* Question Section */
+        .question-box {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options label {
+            display: block;
+            margin-bottom: 12px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .options label:hover {
+            background-color: #f0f8ff;
+        }
+
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        /* Buttons */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        #submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #submit-btn:hover {
+            background-color: #1a252f;
+        }
+
+        #reset-btn {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        #reset-btn:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Feedback Area */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section (Accordion) */
+        #explanation-container {
+            margin-top: 30px;
+            display: none; /* Hidden initially */
+            border-top: 2px dashed var(--border-color);
+            padding-top: 20px;
+        }
+
+        .section-title {
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .accordion {
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .accordion-header {
+            background-color: #f1f1f1;
+            color: #444;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.05rem;
+            font-weight: bold;
+            transition: 0.4s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header:hover, .accordion-header.active {
+            background-color: #e2e6ea;
+            color: var(--primary-color);
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion-header.active::after {
+            content: '-';
+        }
+
+        .accordion-panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            border-top: 1px solid transparent;
+        }
+
+        .accordion-panel.open {
+            border-top: 1px solid var(--border-color);
+            padding: 15px 18px;
+            max-height: 1000px; /* Arbitrary large height for transition */
+        }
+
+        /* Content Styling */
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .concept-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .concept-table th, .concept-table td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        .concept-table th {
+            background-color: #f2f2f2;
+            color: var(--primary-color);
+        }
+
+        .ref-answer {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 3px solid var(--accent-color);
+            display: none;
+        }
+
+        .show-answer-btn {
+            background-color: white;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            margin-top: 5px;
+        }
+        
+        .show-answer-btn:hover {
+            background-color: #f0f8ff;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .question-text {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安觀念檢測</h1>
+        <h2>主題：風險處理選項 Risk Treatment</h2>
+    </header>
+
+    <!-- SECTION A: 題目 -->
+    <div class="question-box">
+        <div class="question-text">
+            33. 有關風險處理選項之敘述，下列何項「有誤」？
+        </div>
+        <form id="quiz-form">
+            <div class="options">
+                <label>
+                    <input type="radio" name="option" value="A">
+                    (A) 風險處理選項一定為相互排斥的
+                </label>
+                <label>
+                    <input type="radio" name="option" value="B">
+                    (B) 選擇最適當的風險處理選項應包含達成目標所獲得之潛在利益及實施的成本
+                </label>
+                <label>
+                    <input type="radio" name="option" value="C">
+                    (C) 風險處理選項包含承受或增加風險以尋求機會
+                </label>
+                <label>
+                    <input type="radio" name="option" value="D">
+                    (D) 風險處理選項包含移除風險來源
+                </label>
+            </div>
+            
+            <div id="feedback-area"></div>
+
+            <div class="btn-group">
+                <button type="button" id="submit-btn" onclick="checkAnswer()">提交答案</button>
+                <button type="button" id="reset-btn" onclick="resetQuiz()">重作一次</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 解析區塊 -->
+    <div id="explanation-container">
+        <div class="section-title">詳細解析與觀念引導</div>
+
+        <!-- SECTION B: 第一步 -->
+        <div class="accordion">
+            <button class="accordion-header">第一步：找關鍵字</button>
+            <div class="accordion-panel">
+                <p>請用「螢光筆」在腦中標示出以下重點：</p>
+                <ul>
+                    <li><span class="highlight">風險處理選項</span> (Risk Treatment Options)</li>
+                    <li><span class="highlight">有誤</span> (注意是否定題！)</li>
+                    <li><span class="highlight">相互排斥</span> (Mutually Exclusive，指只能選一個，不能共存)</li>
+                    <li><span class="highlight">潛在利益</span> vs <span class="highlight">成本</span></li>
+                    <li><span class="highlight">承受或增加風險</span></li>
+                    <li><span class="highlight">移除風險來源</span></li>
+                </ul>
+                <p><strong>解釋：</strong>本題關鍵在於判斷「風險處理選項之間，是否一定只能選一種？還是可以混用？」</p>
+            </div>
+        </div>
+
+        <!-- SECTION C: 第二步 -->
+        <div class="accordion">
+            <button class="accordion-header">第二步：白話翻譯</button>
+            <div class="accordion-panel">
+                <p>用高中生日常口語來說，這題是在問：</p>
+                <p style="background-color: #eef; padding: 10px; border-radius: 5px;">
+                    「當公司遇到可能會發生的壞事（風險）時，有很多種應對方法。下面哪一句關於應對方法的敘述，其實是<strong>講錯</strong>的？」
+                </p>
+            </div>
+        </div>
+
+        <!-- SECTION D: 第三步 -->
+        <div class="accordion">
+            <button class="accordion-header">第三步：解題思路</button>
+            <div class="accordion-panel">
+                <p><strong>這題在考什麼觀念？</strong><br>
+                一句話總結：風險處理選項可以同時並用，不一定只能選一種。</p>
+
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li><strong>回想處理方式：</strong>腦中搜尋風險處理的四種常見手段（避免、降低、轉移、承受）。</li>
+                    <li><strong>判斷合理性：</strong>思考實務上，我們是不是常常「買了保險（轉移）」同時又「裝防火牆（降低）」？是的，我們常常混用。</li>
+                    <li><strong>找出過度絕對化：</strong>選項 (A) 說「一定」互相排斥，這就是要把路堵死，通常這種說法都有問題。</li>
+                </ol>
+
+                <p><strong>原理與規則（白話版）：</strong></p>
+                <ul>
+                    <li>風險處理不是「非黑即白」。</li>
+                    <li>實務上常同時使用多種方式。例如：一邊安裝防毒軟體來「降低」中毒機率，一邊也做好心理準備「承受」萬一中毒後的重灌工作（剩餘風險）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SECTION E: 第四步 -->
+        <div class="accordion">
+            <button class="accordion-header">第四步：選項分析</button>
+            <div class="accordion-panel">
+                <ul>
+                    <li>
+                        <strong>(A) 風險處理選項一定為相互排斥的 [錯誤，所以選它]</strong><br>
+                        <span style="color: #555;">為什麼有誤？</span> 風險處理選項<strong>不一定互斥</strong>，實務上極可能同時採用多種方式。<br>
+                        <em>例子：</em>我們先裝防火牆（降低風險），然後幫機房買火災險（分擔風險），最後對於真的很小的當機機率選擇不理會（承受風險）。這三者是並行的。
+                    </li>
+                    <hr style="border: 0; border-top: 1px dashed #ccc; margin: 10px 0;">
+                    <li>
+                        <strong>(B) 選擇...應包含達成目標所獲得之潛在利益及實施的成本 [正確]</strong><br>
+                        <span style="color: #555;">為什麼正確？</span> 做任何資安防護都要算CP值。如果保護一個價值100元的資料要花100萬元，那就不划算了。這就是「成本效益分析」。
+                    </li>
+                    <hr style="border: 0; border-top: 1px dashed #ccc; margin: 10px 0;">
+                    <li>
+                        <strong>(C) 風險處理選項包含承受或增加風險以尋求機會 [正確]</strong><br>
+                        <span style="color: #555;">為什麼正確？</span> 有時候為了賺錢（商機），我們願意承擔一點風險。這叫做「風險接受」。甚至為了搶快上市，可能會暫時增加一點風險，這是商業決策的一部分。
+                    </li>
+                    <hr style="border: 0; border-top: 1px dashed #ccc; margin: 10px 0;">
+                    <li>
+                        <strong>(D) 風險處理選項包含移除風險來源 [正確]</strong><br>
+                        <span style="color: #555;">為什麼正確？</span> 這就是「風險避免」。<br>
+                        <em>例子：</em>如果去某個戰亂國家做生意太危險，公司決定「直接撤出該國市場」，這就是移除了風險來源。
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SECTION F: 觀念補充 -->
+        <div class="accordion">
+            <button class="accordion-header">觀念補充與延伸</button>
+            <div class="accordion-panel">
+                <p><strong>核心觀念定位：</strong><br>
+                資安管理流程：識別風險 → 分析風險 → 評估風險 → <strong>風險處理 (Risk Treatment)</strong><br>
+                <em>考試常見度：非常高 ★★★★★</em></p>
+
+                <p><strong>定義整理（白話對照表）：</strong><br>
+                風險處理是指「對已識別的風險採取行動」。ISO 27005 標準中常見的四類方式：</p>
+
+                <table class="concept-table">
+                    <thead>
+                        <tr>
+                            <th>處理方式</th>
+                            <th>白話說明</th>
+                            <th>常見例子</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>風險避免</strong><br>(Avoidance)</td>
+                            <td>我不玩了、我躲開</td>
+                            <td>因為怕網站被駭，決定關閉網站功能，改用紙本作業。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>風險降低/緩解</strong><br>(Mitigation)</td>
+                            <td>做防護措施讓傷害變小</td>
+                            <td>安裝防火牆、定期更新密碼、備份資料。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>風險分擔/轉移</strong><br>(Sharing / Transfer)</td>
+                            <td>找別人一起扛</td>
+                            <td>購買資安保險、將業務外包給專業廠商。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>風險承受</strong><br>(Acceptance)</td>
+                            <td>兩手一攤，隨它去</td>
+                            <td>風險太小或處理成本太高，決定不處理，出事了就認賠。</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p><strong>觸類旁通：</strong><br>
+                就算我們努力「降低」風險，最後剩下的那一點點風險（稱為<strong>剩餘風險</strong>），通常只能選擇「承受」。這再次證明了選項(A)是錯的，因為降低與承受常同時發生。</p>
+            </div>
+        </div>
+
+        <!-- SECTION G: 記憶口訣 -->
+        <div class="accordion">
+            <button class="accordion-header">記憶口訣</button>
+            <div class="accordion-panel">
+                <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold;">
+                    「風險不是單選題，常常是複選題」
+                </p>
+                <p>意思是：處理風險的方法可以混搭，不用只選一個。</p>
+            </div>
+        </div>
+
+        <!-- SECTION H: 常見陷阱 -->
+        <div class="accordion">
+            <button class="accordion-header">常見陷阱</button>
+            <div class="accordion-panel">
+                <ul>
+                    <li><strong>易錯點：</strong>看到「互斥 (Mutually Exclusive)」這個專業名詞，會直覺覺得好像很有邏輯、很數學，就覺得它是對的。</li>
+                    <li><strong>心理盲點：</strong>學生常把風險處理當作考試，以為只能選一條路走。其實經營公司是多管齊下的。</li>
+                    <li><strong>避坑指南：</strong>在社會科或管理類的考題中，看到「一定」、「必然」、「只能」、「絕對」這類字眼，通常有 90% 的機率是有問題的選項。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SECTION I: 正確答案 -->
+        <div class="accordion">
+            <button class="accordion-header">正確答案</button>
+            <div class="accordion-panel">
+                <p style="font-size: 1.5rem; color: var(--success-color); font-weight: bold;">答案：(A)</p>
+                <p><strong>一句話理由：</strong>風險處理選項可並用，不一定相互排斥。</p>
+            </div>
+        </div>
+
+        <!-- SECTION J: 自我檢測 -->
+        <div class="accordion">
+            <button class="accordion-header">自我檢測</button>
+            <div class="accordion-panel">
+                <p>試著回答下列問題，確認你真的懂了：</p>
+                
+                <!-- Q1 -->
+                <div style="margin-bottom: 15px;">
+                    <strong>1) 為什麼風險降低後還需要承受剩餘風險？</strong>
+                    <button class="show-answer-btn" onclick="toggleRefAnswer('ans1')">看參考答案</button>
+                    <div id="ans1" class="ref-answer">
+                        參考答案：因為控制措施不可能百分之百消除風險，總會有一點點風險殘留，這部分通常只能接受（承受）。
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div style="margin-bottom: 15px;">
+                    <strong>2) 停止某項高風險業務屬於哪一種風險處理？</strong>
+                    <button class="show-answer-btn" onclick="toggleRefAnswer('ans2')">看參考答案</button>
+                    <div id="ans2" class="ref-answer">
+                        參考答案：風險避免 (Avoidance)。直接移除風險來源。
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div style="margin-bottom: 15px;">
+                    <strong>3) 購買保險屬於哪一種風險處理方式？</strong>
+                    <button class="show-answer-btn" onclick="toggleRefAnswer('ans3')">看參考答案</button>
+                    <div id="ans3" class="ref-answer">
+                        參考答案：風險分擔（或轉移） (Sharing / Transfer)。將損失轉嫁給保險公司。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- End Explanation Container -->
+
+</div>
+
+<script>
+    // Accordion Logic
+    const acc = document.getElementsByClassName("accordion-header");
+    for (let i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            const panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+                panel.classList.remove("open");
+            } else {
+                panel.classList.add("open");
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            }
+        });
+    }
+
+    // Toggle Reference Answer Logic
+    function toggleRefAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === "block") {
+            el.style.display = "none";
+        } else {
+            el.style.display = "block";
+            // Recalculate parent accordion height
+            const panel = el.closest('.accordion-panel');
+            panel.style.maxHeight = panel.scrollHeight + "px";
+        }
+    }
+
+    // Quiz Logic
+    function checkAnswer() {
+        const options = document.getElementsByName('option');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const explanationContainer = document.getElementById('explanation-container');
+        const resetBtn = document.getElementById('reset-btn');
+        const submitBtn = document.getElementById('submit-btn');
+
+        if (!selectedValue) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+        resetBtn.style.display = 'block'; // Show reset button
+
+        if (selectedValue === 'A') {
+            // Correct
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = '正確！選項 (A) 的敘述是有誤的。<br>請往下查看詳細解析，理解為什麼風險處理不一定互斥。';
+            submitBtn.style.display = 'none'; // Hide submit button to encourage reading
+            explanationContainer.style.display = 'block'; // Show explanation
+            
+            // Auto scroll to explanation
+            setTimeout(() => {
+                explanationContainer.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+
+        } else {
+            // Incorrect
+            feedbackArea.className = 'feedback-incorrect';
+            feedbackArea.innerHTML = '錯誤。提示：請思考一下，風險處理的四種方法（避免、降低、轉移、承受）真的只能四選一嗎？有沒有可能同時並用？';
+            // Do NOT show explanation yet on wrong answer, encourage trying again.
+        }
+    }
+
+    function resetQuiz() {
+        // Clear radios
+        const options = document.getElementsByName('option');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // Reset UI elements
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('explanation-container').style.display = 'none';
+        document.getElementById('submit-btn').style.display = 'inline-block';
+        document.getElementById('reset-btn').style.display = 'none';
+
+        // Close all accordions
+        const panels = document.getElementsByClassName("accordion-panel");
+        const headers = document.getElementsByClassName("accordion-header");
+        for (let i = 0; i < panels.length; i++) {
+            panels[i].style.maxHeight = null;
+            panels[i].classList.remove("open");
+            headers[i].classList.remove("active");
+        }
+
+        // Close reference answers
+        const refAnswers = document.getElementsByClassName("ref-answer");
+        for (let i = 0; i < refAnswers.length; i++) {
+            refAnswers[i].style.display = "none";
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

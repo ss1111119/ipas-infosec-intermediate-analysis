@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安觀念題教學 - 供應鏈遠端存取架構</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            background: #edf2f7;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            list-style: none;
+            padding: 0;
+        }
+
+        .option-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-item:hover {
+            background-color: #f0f7ff;
+            border-color: var(--accent-color);
+        }
+
+        .option-item input[type="radio"] {
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+
+        .option-label {
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        .btn-retry:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Feedback Section */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section (Accordion) */
+        .explanation-section {
+            display: none; /* Hidden until submitted */
+            margin-top: 30px;
+        }
+
+        .accordion {
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f1f1f1;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #e2e6ea;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            background-color: #fff;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .accordion.active .accordion-content {
+            padding: 15px;
+            max-height: 2000px; /* Large enough to fit content */
+            border-top: 1px solid #ddd;
+        }
+
+        /* Content Styling */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .important-text {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        .concept-tag {
+            display: inline-block;
+            background: #e1f5fe;
+            color: #0277bd;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        /* Visual Diagram */
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .diagram-step {
+            background: white;
+            border: 2px solid var(--accent-color);
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            position: relative;
+            box-shadow: 2px 2px 0px #eee;
+        }
+
+        .arrow {
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: var(--primary-color);
+        }
+
+        /* Self Check Toggle */
+        .self-check-item {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 10px;
+        }
+
+        .check-question {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .check-answer-btn {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.9rem;
+            text-decoration: underline;
+        }
+
+        .check-answer-content {
+            display: none;
+            margin-top: 5px;
+            padding: 8px;
+            background: #f9f9f9;
+            border-left: 3px solid var(--success-color);
+            color: #555;
+        }
+
+        @media (max-width: 600px) {
+            .diagram-container {
+                flex-direction: column;
+            }
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>iPAS 資安觀念題教學</h1>
+            <div class="subtitle">主題：供應鏈遠端存取架構</div>
+        </header>
+
+        <!-- Quiz Section -->
+        <div class="quiz-section">
+            <div class="question-text">
+                18. 關於設計供應鏈遠端存取架構的敘述，下列何項最「不」適切？
+            </div>
+            <ul class="options">
+                <li class="option-item">
+                    <input type="radio" name="q18" id="optA" value="A">
+                    <label for="optA" class="option-label">(A) 身份識別應該要有多重身份驗證機制（Multi-Factor Authentication，MFA：不只用密碼，還要搭配其他驗證）</label>
+                </li>
+                <li class="option-item">
+                    <input type="radio" name="q18" id="optB" value="B">
+                    <label for="optB" class="option-label">(B) 可以透過虛擬私人網路（Virtual Private Network，VPN：在不安全網路上建立加密通道）做存取控制</label>
+                </li>
+                <li class="option-item">
+                    <input type="radio" name="q18" id="optC" value="C">
+                    <label for="optC" class="option-label">(C) 使用資料外洩防護（Data Loss Prevention，DLP：防止資料被不當外流）即可做到個人資料保護</label>
+                </li>
+                <li class="option-item">
+                    <input type="radio" name="q18" id="optD" value="D">
+                    <label for="optD" class="option-label">(D) 可以透過傳輸加密保護營業秘密</label>
+                </li>
+            </ul>
+
+            <div class="btn-group">
+                <button class="btn-submit" onclick="submitAnswer()">提交答案</button>
+                <button class="btn-retry" onclick="resetQuiz()">重作一次</button>
+            </div>
+
+            <div id="feedback" class="feedback"></div>
+        </div>
+
+        <!-- Explanation Section -->
+        <div id="explanation" class="explanation-section">
+            
+            <!-- A. 題目 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">A. 題目回顧</div>
+                <div class="accordion-content">
+                    <p><strong>18. 關於設計供應鏈遠端存取架構的敘述，下列何項最「不」適切？</strong></p>
+                </div>
+            </div>
+
+            <!-- B. 第一步：找關鍵字 -->
+            <div class="accordion active">
+                <div class="accordion-header" onclick="toggleAccordion(this)">B. 第一步：找關鍵字</div>
+                <div class="accordion-content">
+                    <p>請用「螢光筆」在腦中標註以下重點：</p>
+                    <ul>
+                        <li><span class="highlight">供應鏈遠端存取</span>：這是情境（外部人員連進來）。</li>
+                        <li><span class="highlight">最「不」適切</span>：這是目標（要選錯誤的、有漏洞的）。</li>
+                        <li><span class="highlight">多重身份驗證（MFA）</span>：工具 A。</li>
+                        <li><span class="highlight">VPN</span>：工具 B。</li>
+                        <li><span class="highlight">資料外洩防護（DLP）</span>：工具 C。</li>
+                        <li><span class="highlight">傳輸加密</span>：工具 D。</li>
+                    </ul>
+                    <p class="important-text">線索提示：看到「即可做到」這種絕對且過度簡化的語氣，通常就是問題所在。</p>
+                </div>
+            </div>
+
+            <!-- C. 第二步：白話翻譯 -->
+            <div class="accordion active">
+                <div class="accordion-header" onclick="toggleAccordion(this)">C. 第二步：白話翻譯</div>
+                <div class="accordion-content">
+                    <p>這題用高中生日常口語來說就是：</p>
+                    <blockquote style="border-left: 4px solid #3498db; padding-left: 10px; color: #555;">
+                        「當我們要開放權限讓外部廠商（供應鏈）遠端連進公司修電腦或查資料時，下面哪一個想法太天真、不符合資安嚴謹的實務？」
+                    </blockquote>
+                </div>
+            </div>
+
+            <!-- D. 第三步：解題思路 -->
+            <div class="accordion active">
+                <div class="accordion-header" onclick="toggleAccordion(this)">D. 第三步：解題思路</div>
+                <div class="accordion-content">
+                    <p><strong>這題在考什麼觀念？</strong><br>
+                    一句話：供應鏈遠端存取的分層防護與工具定位。</p>
+                    
+                    <p><strong>解題步驟：</strong></p>
+                    <ol>
+                        <li>先找「身份、通道、加密」這類基本且正確的資安作法（MFA、VPN、加密通常是好事）。</li>
+                        <li>再找「只靠單一工具就說能完全保護」的選項（資安沒有銀彈）。</li>
+                        <li>判斷是否違反「縱深防禦」與「多層控制」概念。</li>
+                    </ol>
+
+                    <p><strong>原理與規則（白話）：</strong></p>
+                    <ul>
+                        <li>供應鏈遠端存取風險極高（因為對方環境你管不到），絕不能只靠單一技術。</li>
+                        <li>每個資安工具都有專屬的「守備範圍」，DLP 管資料流向，但管不到誰登入、管不到連線是否被竊聽。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- E. 第四步：選項分析 -->
+            <div class="accordion active">
+                <div class="accordion-header" onclick="toggleAccordion(this)">E. 第四步：選項分析</div>
+                <div class="accordion-content">
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>選項</th>
+                                    <th>工具角色</th>
+                                    <th>是否過度誇大</th>
+                                    <th>原因（白話解析）</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>(A) MFA</td>
+                                    <td>驗證「你是誰」</td>
+                                    <td>否</td>
+                                    <td><strong>適切</strong>。遠端存取最怕帳密被盜，MFA (多重驗證) 加上手機或指紋驗證，大幅降低盜用風險。</td>
+                                </tr>
+                                <tr>
+                                    <td>(B) VPN</td>
+                                    <td>建立「安全通道」</td>
+                                    <td>否</td>
+                                    <td><strong>適切</strong>。VPN (虛擬私人網路) 像是建立一條專屬加密隧道，並可限制誰能進入這條隧道。</td>
+                                </tr>
+                                <tr style="background-color: #ffebee;">
+                                    <td>(C) DLP</td>
+                                    <td>防止「資料帶走」</td>
+                                    <td><span class="important-text">是</span></td>
+                                    <td><strong>不適切</strong>。DLP (資料外洩防護) 只能擋住資料不被傳出去。但如果駭客已經偷到帳號登進來，他可以在系統內破壞，DLP 擋不住這些。說「即可做到個資保護」太誇張。</td>
+                                </tr>
+                                <tr>
+                                    <td>(D) 加密</td>
+                                    <td>保護「內容隱私」</td>
+                                    <td>否</td>
+                                    <td><strong>適切</strong>。傳輸加密確保資料在網路上跑的時候，就算被攔截也看不懂內容（營業秘密）。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- F. 觀念補充與延伸 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">F. 觀念補充與延伸</div>
+                <div class="accordion-content">
+                    <p><strong>核心觀念定位：</strong></p>
+                    <div>
+                        <span class="concept-tag">資安防護</span>
+                        <span class="concept-tag">供應鏈安全</span>
+                        <span class="concept-tag">縱深防禦</span>
+                    </div>
+                    <p><strong>遠端存取防護層示意圖：</strong></p>
+                    <div class="diagram-container">
+                        <div class="diagram-step">
+                            <strong>1. 身份驗證</strong><br>
+                            <small>MFA 多重驗證</small>
+                        </div>
+                        <div class="arrow">&rarr;</div>
+                        <div class="diagram-step">
+                            <strong>2. 加密通道</strong><br>
+                            <small>VPN / TLS</small>
+                        </div>
+                        <div class="arrow">&rarr;</div>
+                        <div class="diagram-step">
+                            <strong>3. 存取控制</strong><br>
+                            <small>最小權限原則</small>
+                        </div>
+                        <div class="arrow">&rarr;</div>
+                        <div class="diagram-step">
+                            <strong>4. 資料防護</strong><br>
+                            <small>DLP / 加密</small>
+                        </div>
+                    </div>
+
+                    <p><strong>觸類旁通（對比概念）：</strong></p>
+                    <ul>
+                        <li><strong>單一控制 vs 多層防護 (Defense in Depth)</strong>：資安像剝洋蔥，要有很多層，壞了一層還有下一層。</li>
+                        <li><strong>Who / How / What</strong>：
+                            <ul>
+                                <li>MFA 管 Who (誰)</li>
+                                <li>VPN/加密 管 How (如何傳輸)</li>
+                                <li>DLP 管 What (什麼資料)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- G. 記憶口訣 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">G. 記憶口訣</div>
+                <div class="accordion-content">
+                    <p style="font-size: 1.2rem; text-align: center; color: var(--secondary-color); font-weight: bold;">
+                        「遠端供應鏈，身份先驗；<br>通道要鎖，資料要護；<br>單靠 DLP 不會贏」
+                    </p>
+                </div>
+            </div>
+
+            <!-- H. 常見陷阱 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">H. 常見陷阱</div>
+                <div class="accordion-content">
+                    <ul>
+                        <li><strong>易錯點：</strong>看到 DLP 就覺得「資料一定安全」。DLP 常常會有誤判或漏抓，並非萬能。</li>
+                        <li><strong>心理盲點：</strong>把工具名稱當成完整解法。工具只是手段，策略才是核心。</li>
+                        <li><strong>避坑指南：</strong>
+                            <ul>
+                                <li>題目出現「只要…就可以…」、「即可做到…」、「完全防止…」這類絕對詞彙，99% 是錯的。</li>
+                                <li>想一想：少了這個工具，其他風險（如帳號被盜）真的都消失了嗎？</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- I. 正確答案 -->
+            <div class="accordion active">
+                <div class="accordion-header" onclick="toggleAccordion(this)">I. 正確答案</div>
+                <div class="accordion-content">
+                    <p style="font-size: 1.5rem; color: var(--success-color); font-weight: bold;">答案：(C)</p>
+                    <p><strong>一句話理由：</strong>DLP 只是資料外洩防護工具之一，無法單獨完成全面的個資保護，忽略了身份驗證與系統安全。</p>
+                </div>
+            </div>
+
+            <!-- J. 自我檢測 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">J. 自我檢測</div>
+                <div class="accordion-content">
+                    <div class="self-check-item">
+                        <div class="check-question">1) 為什麼供應鏈遠端存取特別容易成為攻擊入口？</div>
+                        <button class="check-answer-btn" onclick="toggleAnswer(this)">顯示參考答案</button>
+                        <div class="check-answer-content">參考答案：因為涉及外部人員、外部設備與網路，企業對其控管程度較低（你不能控制廠商的電腦有沒有中毒），攻擊者容易利用這條信任連線入侵。</div>
+                    </div>
+
+                    <div class="self-check-item">
+                        <div class="check-question">2) DLP 通常搭配哪些其他控制措施一起使用，效果才完整？</div>
+                        <button class="check-answer-btn" onclick="toggleAnswer(this)">顯示參考答案</button>
+                        <div class="check-answer-content">參考答案：身分驗證（MFA）、權限控管（IAM）、加密技術、稽核紀錄（Log）、端點防護（EDR）等。</div>
+                    </div>
+
+                    <div class="self-check-item">
+                        <div class="check-question">3) 如果只有 VPN，沒有 MFA，會有什麼風險？</div>
+                        <button class="check-answer-btn" onclick="toggleAnswer(this)">顯示參考答案</button>
+                        <div class="check-answer-content">參考答案：帳密一旦被釣魚郵件騙走或外洩，攻擊者有了帳密就能通過 VPN 直接連入內部系統，VPN 本身無法分辨操作者是本人還是駭客。</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function submitAnswer() {
+            const options = document.getElementsByName('q18');
+            let selectedValue = null;
+
+            for (const option of options) {
+                if (option.checked) {
+                    selectedValue = option.value;
+                    break;
+                }
+            }
+
+            const feedback = document.getElementById('feedback');
+            const explanation = document.getElementById('explanation');
+            const retryBtn = document.querySelector('.btn-retry');
+            const submitBtn = document.querySelector('.btn-submit');
+
+            if (!selectedValue) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            // Show explanation section
+            explanation.style.display = 'block';
+            retryBtn.style.display = 'block';
+            submitBtn.style.display = 'none';
+
+            // Disable radio buttons
+            options.forEach(opt => opt.disabled = true);
+
+            // Logic for feedback
+            feedback.style.display = 'block';
+            feedback.className = 'feedback'; // Reset classes
+
+            if (selectedValue === 'C') {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '✅ 正確！觀念很清楚喔。<br>DLP 雖然有用，但絕對不是用了它就能解決所有個資保護問題。請往下看詳細解析。';
+            } else {
+                feedback.classList.add('incorrect');
+                feedback.innerHTML = '❌ 答錯了，別氣餒！<br>提示：注意看哪個選項把單一工具的功能講得太神了（過度誇大）。請往下看解析找答案。';
+            }
+        }
+
+        function resetQuiz() {
+            const options = document.getElementsByName('q18');
+            const feedback = document.getElementById('feedback');
+            const explanation = document.getElementById('explanation');
+            const retryBtn = document.querySelector('.btn-retry');
+            const submitBtn = document.querySelector('.btn-submit');
+
+            // Reset radio buttons
+            options.forEach(opt => {
+                opt.checked = false;
+                opt.disabled = false;
+            });
+
+            // Hide sections
+            feedback.style.display = 'none';
+            explanation.style.display = 'none';
+            retryBtn.style.display = 'none';
+            submitBtn.style.display = 'block';
+
+            // Collapse self-check answers
+            const checkContents = document.querySelectorAll('.check-answer-content');
+            checkContents.forEach(content => content.style.display = 'none');
+            const checkBtns = document.querySelectorAll('.check-answer-btn');
+            checkBtns.forEach(btn => btn.innerText = '顯示參考答案');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            item.classList.toggle('active');
+        }
+
+        function toggleAnswer(btn) {
+            const content = btn.nextElementSibling;
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                btn.innerText = '顯示參考答案';
+            } else {
+                content.style.display = 'block';
+                btn.innerText = '隱藏參考答案';
+            }
+        }
+    </script>
+</body>
+</html>

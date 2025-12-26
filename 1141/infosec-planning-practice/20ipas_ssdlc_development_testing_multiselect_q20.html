@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安互動教學：SSDLC 開發與測試階段</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --highlight-bg: #fff3cd;
+            --correct-color: #27ae60;
+            --error-color: #c0392b;
+            --border-color: #ddd;
+            --bg-color: #f9f9f9;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        /* SSDLC Flowchart */
+        .flowchart {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #eef2f5;
+            border-radius: 6px;
+        }
+
+        .step {
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            position: relative;
+            color: #7f8c8d;
+        }
+
+        .step:not(:last-child)::after {
+            content: "→";
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-weight: bold;
+        }
+        
+        /* Last child margin fix for wrapping */
+        .step:not(:last-child) {
+            margin-right: 15px;
+        }
+
+        .step.active {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: bold;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            background-color: #fff;
+            border: 2px solid var(--primary-color);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .question-type {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .options label {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .options label:hover {
+            background: #e2e6ea;
+        }
+
+        .options input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion Styles */
+        .accordion {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-header {
+            background-color: #f1f1f1;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9e9e9;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 20px;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion-item.active .accordion-content {
+            display: block;
+        }
+
+        /* Specific Content Styles */
+        .highlight-text {
+            background-color: var(--highlight-bg);
+            padding: 2px 4px;
+            border-radius: 2px;
+            border-bottom: 2px solid #f1c40f;
+        }
+
+        .concept-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        .concept-table th, .concept-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .concept-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .concept-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Self Check Styles */
+        details {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .answer-text {
+            margin-top: 10px;
+            padding-left: 10px;
+            border-left: 3px solid var(--accent-color);
+            color: #555;
+        }
+
+        @media (max-width: 600px) {
+            .step:not(:last-child)::after {
+                content: "↓";
+                right: 50%;
+                top: auto;
+                bottom: -22px;
+                transform: translateX(50%);
+            }
+            .step:not(:last-child) {
+                margin-right: 0;
+                margin-bottom: 25px;
+            }
+            .flowchart {
+                flex-direction: column;
+                align-items: center;
+            }
+            .step {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>SSDLC：開發與測試階段</h1>
+    </header>
+
+    <!-- Visual Flowchart -->
+    <div class="flowchart">
+        <div class="step">需求</div>
+        <div class="step">設計</div>
+        <div class="step active">開發</div>
+        <div class="step active">測試</div>
+        <div class="step">上線</div>
+        <div class="step">維運</div>
+    </div>
+
+    <!-- Interactive Quiz Section (Section A) -->
+    <section class="quiz-section">
+        <div class="question-text">
+            <span class="question-type">複選題</span>
+            20. 在安全開發生命週期（SSDLC：把資安納入系統開發每個階段）中，有關「開發與測試階段」，可以協助降低資安風險的有下列哪些項目？
+        </div>
+        
+        <div class="options">
+            <label>
+                <input type="checkbox" name="q20" value="A">
+                (A) 部署網頁應用程式防火牆（WAF：保護已上線網站的防火牆）
+            </label>
+            <label>
+                <input type="checkbox" name="q20" value="B">
+                (B) 滲透測試（Penetration Testing：模擬駭客實際攻擊）
+            </label>
+            <label>
+                <input type="checkbox" name="q20" value="C">
+                (C) 原始碼檢測（Source Code Review / SAST：檢查程式碼是否有漏洞）
+            </label>
+            <label>
+                <input type="checkbox" name="q20" value="D">
+                (D) 第三方元件資安檢測（Third-party Component Security Testing：檢查套件/函式庫是否有漏洞）
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">提交答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback-box" class="feedback"></div>
+    </section>
+
+    <!-- Explanation Accordions (Sections B-J) -->
+    <div class="accordion">
+        
+        <!-- Section B -->
+        <div class="accordion-item" id="section-b">
+            <div class="accordion-header" onclick="toggleAccordion('section-b')">B. 第一步：找關鍵字</div>
+            <div class="accordion-content">
+                <p>請用螢光筆在心中標示以下關鍵字：</p>
+                <ul>
+                    <li><span class="highlight-text">安全開發生命週期（SSDLC）</span></li>
+                    <li><span class="highlight-text">開發與測試階段</span></li>
+                    <li><span class="highlight-text">降低資安風險</span></li>
+                    <li><span class="highlight-text">複選</span></li>
+                </ul>
+                <p><strong>核心解析：</strong>這題的重點在於區分「不同階段」該做什麼事。題目限制範圍在系統還沒正式對外服務之前的「開發」與「測試」階段，所以必須選出這個時期能找出漏洞的手段。</p>
+            </div>
+        </div>
+
+        <!-- Section C -->
+        <div class="accordion-item" id="section-c">
+            <div class="accordion-header" onclick="toggleAccordion('section-c')">C. 第二步：白話翻譯</div>
+            <div class="accordion-content">
+                <p>這題目如果翻譯成高中生日常用語，就是在問：</p>
+                <p style="font-size: 1.1em; font-weight: bold; color: var(--primary-color);">
+                    「當我們還在寫程式、或者系統剛寫好正在測試的時候，要做哪些事情才能先把漏洞找出來修掉？」
+                </p>
+                <p>關鍵是：系統還沒正式給外人用喔！</p>
+            </div>
+        </div>
+
+        <!-- Section D -->
+        <div class="accordion-item" id="section-d">
+            <div class="accordion-header" onclick="toggleAccordion('section-d')">D. 第三步：解題思路</div>
+            <div class="accordion-content">
+                <p><strong>這題在考什麼？</strong> 一句話：SSDLC 各階段的資安工具定位。</p>
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>先想「程式還沒上線時，可以做哪些檢查」。</li>
+                    <li>把「上線後才會用的防護工具」先排除（看到防火牆先懷疑）。</li>
+                    <li>記得這是複選題，要全選正確。</li>
+                </ol>
+                <p><strong>原理與規則：</strong></p>
+                <ul>
+                    <li>SSDLC 的核心精神是「越早發現漏洞，修復成本越低」。</li>
+                    <li>開發與測試階段的重點在「找漏洞、修漏洞」，而不是「擋攻擊」。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section E -->
+        <div class="accordion-item" id="section-e">
+            <div class="accordion-header" onclick="toggleAccordion('section-e')">E. 第四步：選項分析</div>
+            <div class="accordion-content">
+                <table class="concept-table">
+                    <thead>
+                        <tr>
+                            <th>選項</th>
+                            <th>工具/方法</th>
+                            <th>屬於哪個階段</th>
+                            <th>解析</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A)</td>
+                            <td>網頁應用程式防火牆 (WAF)</td>
+                            <td>上線/維運</td>
+                            <td>這是「盾牌」，系統上線後用來擋攻擊的。開發時系統還沒上線，通常不會先部屬這個。</td>
+                        </tr>
+                        <tr>
+                            <td>(B)</td>
+                            <td>滲透測試</td>
+                            <td>測試階段</td>
+                            <td><strong>正確。</strong>模擬駭客攻擊，在系統上線前找出實際可被利用的漏洞。</td>
+                        </tr>
+                        <tr>
+                            <td>(C)</td>
+                            <td>原始碼檢測 (SAST)</td>
+                            <td>開發階段</td>
+                            <td><strong>正確。</strong>就像 Word 的拼字檢查，程式還沒跑起來就能檢查程式碼有沒有寫錯。</td>
+                        </tr>
+                        <tr>
+                            <td>(D)</td>
+                            <td>第三方元件資安檢測</td>
+                            <td>開發/測試</td>
+                            <td><strong>正確。</strong>現代系統很多功能是用別人寫好的套件，這是在檢查這些「食材」有沒有毒。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section F -->
+        <div class="accordion-item" id="section-f">
+            <div class="accordion-header" onclick="toggleAccordion('section-f')">F. 觀念補充與延伸</div>
+            <div class="accordion-content">
+                <p><strong>核心觀念定位：</strong></p>
+                <ul>
+                    <li>安全開發 → SSDLC</li>
+                    <li>考試常見度：必考（非常愛考「哪一階段做什麼」）</li>
+                </ul>
+                <p><strong>定義整理：</strong></p>
+                <ul>
+                    <li><strong>SSDLC：</strong>把資安活動放進需求、設計、開發、測試、上線、維運每一階段。</li>
+                    <li><strong>開發與測試階段：</strong>重點在「主動檢測」與「修補漏洞」。</li>
+                </ul>
+                <p><strong>觸類旁通：</strong></p>
+                <ul>
+                    <li><strong>SAST（靜態檢測）：</strong>看程式碼（白箱），在開發階段做。</li>
+                    <li><strong>DAST（動態檢測/滲透測試）：</strong>打系統（黑箱），在測試階段做。</li>
+                </ul>
+                <p><strong>變化題型：</strong></p>
+                <ol>
+                    <li>問「下列哪一項屬於上線後防護？」→ 答案通常會是 WAF 或 IDS/IPS。</li>
+                    <li>給一個工具，問屬於 SSDLC 哪個階段。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Section G -->
+        <div class="accordion-item" id="section-g">
+            <div class="accordion-header" onclick="toggleAccordion('section-g')">G. 記憶口訣</div>
+            <div class="accordion-content">
+                <p style="background-color: #e8f6f3; padding: 15px; border-left: 5px solid var(--correct-color);">
+                    <strong>口訣：</strong><br>
+                    「寫程式先找洞：看原始碼、打滲透、查套件；WAF 是上線後」
+                </p>
+            </div>
+        </div>
+
+        <!-- Section H -->
+        <div class="accordion-item" id="section-h">
+            <div class="accordion-header" onclick="toggleAccordion('section-h')">H. 常見陷阱</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>易錯點：</strong>看到「防火牆」三個字就覺得好安心、一定是資安好選項。錯！要看「階段」，開發時還沒有牆可以防。</li>
+                    <li><strong>心理盲點：</strong>把「防禦（Shield）」和「檢測（Check）」混在一起。開發測試是做健康檢查，上線維運才是穿防彈衣。</li>
+                    <li><strong>避坑指南：</strong>題目出現「開發與測試」→ 優先選「檢測、測試、掃描、Review」這類動詞。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section I -->
+        <div class="accordion-item" id="section-i">
+            <div class="accordion-header" onclick="toggleAccordion('section-i')">I. 正確答案</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.2rem; font-weight: bold; color: var(--correct-color);">正確答案：B、C、D</p>
+                <p><strong>一句話理由：</strong>開發與測試階段的重點是找出並修補漏洞（B、C、D），而非部署上線後的防護設備（A）。</p>
+            </div>
+        </div>
+
+        <!-- Section J -->
+        <div class="accordion-item" id="section-j">
+            <div class="accordion-header" onclick="toggleAccordion('section-j')">J. 自我檢測</div>
+            <div class="accordion-content">
+                <p>試著回答以下問題，點擊問題查看參考答案：</p>
+                
+                <details>
+                    <summary>1. 為什麼在開發階段修漏洞比上線後修便宜？</summary>
+                    <div class="answer-text">
+                        參考答案：因為影響範圍小、不需緊急修補或停機，修正成本與風險都較低。
+                    </div>
+                </details>
+
+                <details>
+                    <summary>2. WAF 應該放在 SSDLC 的哪一個階段？</summary>
+                    <div class="answer-text">
+                        參考答案：上線與維運階段，作為防禦外部攻擊的控制措施。
+                    </div>
+                </details>
+
+                <details>
+                    <summary>3. 第三方套件為什麼是資安風險來源？</summary>
+                    <div class="answer-text">
+                        參考答案：因為其程式碼非自行撰寫，若存在漏洞，攻擊者可直接利用（例如知名的 Log4j 事件）。
+                    </div>
+                </details>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        // 取得所有勾選的選項
+        const checkboxes = document.querySelectorAll('input[name="q20"]:checked');
+        let selectedValues = [];
+        checkboxes.forEach((checkbox) => {
+            selectedValues.push(checkbox.value);
+        });
+
+        // 排序以便比對
+        selectedValues.sort();
+        
+        // 正確答案
+        const correctAnswers = ['B', 'C', 'D'];
+        
+        const feedbackBox = document.getElementById('feedback-box');
+        
+        // 檢查答案邏輯
+        const isCorrect = JSON.stringify(selectedValues) === JSON.stringify(correctAnswers);
+
+        feedbackBox.style.display = 'block';
+        feedbackBox.className = 'feedback'; // 重置 class
+
+        if (isCorrect) {
+            feedbackBox.classList.add('success');
+            feedbackBox.innerHTML = '正確！<br>開發與測試階段的重點在於「檢測」與「修補」漏洞。請閱讀下方詳細解析。';
+            // 自動展開「正確答案」區塊 (Section I) 與「選項分析」 (Section E)
+            expandAccordion('section-i');
+            expandAccordion('section-e');
+        } else {
+            feedbackBox.classList.add('error');
+            let msg = '錯誤。';
+            if (selectedValues.length === 0) {
+                msg += '您沒有選擇任何項目。';
+            } else {
+                msg += '請再想一想：開發與測試的重點是「找漏洞」，不是「擋攻擊」。';
+                
+                // 檢查是否選了 A
+                if (selectedValues.includes('A')) {
+                    msg += '<br>提示：WAF 是系統上線後才用得到的防護工具。';
+                }
+                // 檢查是否漏選
+                if (!selectedValues.includes('B') || !selectedValues.includes('C') || !selectedValues.includes('D')) {
+                    msg += '<br>提示：原始碼檢測、滲透測試、第三方套件檢查都是這階段該做的。';
+                }
+            }
+            feedbackBox.innerHTML = msg;
+        }
+    }
+
+    function resetQuiz() {
+        // 清空 checkbox
+        const checkboxes = document.querySelectorAll('input[name="q20"]');
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = false;
+        });
+
+        // 隱藏回饋區
+        const feedbackBox = document.getElementById('feedback-box');
+        feedbackBox.style.display = 'none';
+        feedbackBox.className = 'feedback';
+
+        // 關閉所有手風琴
+        const contents = document.querySelectorAll('.accordion-content');
+        const items = document.querySelectorAll('.accordion-item');
+        contents.forEach(content => content.style.display = 'none');
+        items.forEach(item => item.classList.remove('active'));
+    }
+
+    function toggleAccordion(id) {
+        const item = document.getElementById(id);
+        const content = item.querySelector('.accordion-content');
+        
+        // 簡單切換 active class
+        if (item.classList.contains('active')) {
+            item.classList.remove('active');
+            content.style.display = 'none';
+        } else {
+            item.classList.add('active');
+            content.style.display = 'block';
+        }
+    }
+
+    function expandAccordion(id) {
+        const item = document.getElementById(id);
+        const content = item.querySelector('.accordion-content');
+        if (!item.classList.contains('active')) {
+            item.classList.add('active');
+            content.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

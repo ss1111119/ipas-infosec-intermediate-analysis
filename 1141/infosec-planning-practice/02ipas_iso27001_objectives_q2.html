@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題目解析：ISO/IEC 27001 資訊安全目標</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --correct-color: #27ae60;
+            --error-color: #c0392b;
+            --light-gray: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: var(--secondary-color);
+            margin-top: 5px;
+            font-weight: normal;
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            background-color: var(--light-gray);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #e9ecef;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: #fff;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .feedback-msg {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section (Accordion) */
+        .explanation-container {
+            display: none; /* Hidden by default */
+            margin-top: 30px;
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #fff;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #f8f9fa;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 20px;
+            color: var(--accent-color);
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-item.active .accordion-header {
+            background-color: #e3f2fd;
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 20px;
+            background-color: #fff;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion-item.active .accordion-content {
+            display: block;
+        }
+
+        /* Content Styles */
+        .highlight-keyword {
+            background-color: yellow;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .concept-flow {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .flow-box {
+            background: #fff;
+            border: 2px solid var(--accent-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .flow-arrow {
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .ref-box {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid var(--accent-color);
+            margin: 10px 0;
+        }
+
+        .mnemonic-box {
+            background-color: #fff3cd;
+            padding: 15px;
+            border: 2px dashed #ffeeba;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        /* Self Check Answer Box */
+        .answer-reveal {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f1f8e9;
+            border: 1px solid #c5e1a5;
+            border-radius: 4px;
+        }
+        
+        details {
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        summary {
+            font-weight: bold;
+            color: var(--accent-color);
+            outline: none;
+        }
+        
+        /* Mobile adjustment */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            .concept-flow {
+                flex-direction: column;
+            }
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>題號：02</h1>
+        <h2>主題：ISO/IEC 27001:2022 資訊安全目標 (Information Security Objectives)</h2>
+    </header>
+
+    <div class="quiz-section">
+        <div class="question-text">
+            下列何項「不」是 ISO/IEC 27001:2022 資訊安全目標應滿足之事項？
+        </div>
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                (A) 與資訊安全政策一致
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                (B) 於適切時，更新之
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                (C) 被傳達
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                (D) 以紙本文件提供
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">提交答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback" class="feedback-msg"></div>
+    </div>
+
+    <!-- 解析區塊：答對後顯示 -->
+    <div id="explanation-area" class="explanation-container">
+        
+        <!-- A. 題目 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">A. 題目重述</div>
+            <div class="accordion-content">
+                <p>下列何項「不」是 ISO/IEC 27001:2022 資訊安全目標應滿足之事項？</p>
+                <ul>
+                    <li>(A) 與資訊安全政策一致</li>
+                    <li>(B) 於適切時，更新之</li>
+                    <li>(C) 被傳達</li>
+                    <li>(D) 以紙本文件提供</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- B. 第一步：找關鍵字 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">B. 第一步：找關鍵字</div>
+            <div class="accordion-content">
+                <p>請圈出以下重點：</p>
+                <ul>
+                    <li><span class="highlight-keyword">不</span>：這是否定題，要選「錯誤」或「非必要」的選項。</li>
+                    <li><span class="highlight-keyword">ISO/IEC 27001:2022</span>：指資安管理系統 (ISMS) 的最新版國際標準，解題要依據標準條文，不能憑個人感覺。</li>
+                    <li><span class="highlight-keyword">資訊安全目標</span>：這是題目核心。目標 (Objectives) 是為了達成政策而設定的具體成果。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- C. 第二步：白話翻譯 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">C. 第二步：白話翻譯</div>
+            <div class="accordion-content">
+                <p><strong>翻譯蒟蒻：</strong></p>
+                <p>「依照國際標準的規定，公司在設定『今年的資安要做成什麼樣子（目標）』的時候，哪一個條件是<strong>沒被規定一定要這樣做</strong>的？」</p>
+            </div>
+        </div>
+
+        <!-- D. 第三步：解題思路 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">D. 第三步：解題思路</div>
+            <div class="accordion-content">
+                <p><strong>核心考點：</strong> ISO 27001 第 6.2 條款「資訊安全目標」的具體要求。</p>
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>回想 ISO 標準對於「目標 (Objectives)」的管理邏輯：要具體、可測量、大家都知道。</li>
+                    <li>回想 ISO 對於「文件 (Documentation)」的現代化定義：強調內容存在，不限制載體。</li>
+                    <li>檢查選項，找出哪個限制過於狹隘或不符合數位化趨勢。</li>
+                </ol>
+                <p><strong>原理與規則：</strong></p>
+                <div class="ref-box">
+                    標準規定，資安目標必須：
+                    <br>1. 與資安政策 (Policy) 一致。
+                    <br>2. 可量測 (Measurable)。
+                    <br>3. 被傳達 (Communicated)。
+                    <br>4. 在適當時更新。
+                    <br>5. 必須以「文件化資訊 (Documented Information)」的方式保存。
+                </div>
+                <p>注意！「文件化資訊」指的是資訊本身及其儲存媒體，可以是電子檔、系統紀錄、網頁或紙本，標準<strong>從未強制限定只能用紙本</strong>。</p>
+            </div>
+        </div>
+
+        <!-- E. 第四步：選項分析 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">E. 第四步：選項分析</div>
+            <div class="accordion-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="15%">選項</th>
+                            <th width="20%">是否屬要求</th>
+                            <th>白話解析</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A)</td>
+                            <td>是 (O)</td>
+                            <td>目標是為了實踐政策而設的。如果政策說「保護客戶隱私」，目標就不能是「公開所有數據」，兩者必須方向一致。</td>
+                        </tr>
+                        <tr>
+                            <td>(B)</td>
+                            <td>是 (O)</td>
+                            <td>計畫趕不上變化。當公司業務改變或駭客手法翻新，目標當然要跟著修訂更新。</td>
+                        </tr>
+                        <tr>
+                            <td>(C)</td>
+                            <td>是 (O)</td>
+                            <td>目標定出來如果沒人知道，就沒人會去執行。所以一定要公告周知，傳達給相關人員。</td>
+                        </tr>
+                        <tr>
+                            <td>(D)</td>
+                            <td><strong>否 (X)</strong></td>
+                            <td>標準只要求留存「文件化資訊 (Documented Information)」。電子郵件、PDF、Intranet 公告截圖都可以，<strong>不一定要印成紙本</strong>。強制紙本反而不環保且效率低。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- F. 觀念補充與延伸 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">F. 觀念補充與延伸</div>
+            <div class="accordion-content">
+                <p><strong>核心觀念定位：</strong></p>
+                <ul>
+                    <li>屬於章節：第 6 章 規劃 (Planning)。</li>
+                    <li>考試常見度：<strong>必考</strong>。目標設定與文件化要求是管理系統的基礎。</li>
+                </ul>
+
+                <p><strong>標準條文定義 (ISO 27001:2022 6.2)：</strong></p>
+                <p>資訊安全目標應：</p>
+                <ul>
+                    <li>與資訊安全政策一致。</li>
+                    <li>可量測 (若可行)。</li>
+                    <li>考量適用之資訊安全要求事項。</li>
+                    <li>被監控。</li>
+                    <li>被傳達。</li>
+                    <li>於適切時，更新之。</li>
+                    <li><strong>(關鍵) 應備妥文件化資訊。</strong></li>
+                </ul>
+
+                <p><strong>觸類旁通：階層關係圖</strong></p>
+                <div class="concept-flow">
+                    <div class="flow-box">資安政策 (Policy)<br><small>老闆說的大方向/願景</small></div>
+                    <div class="flow-arrow">&#8594;</div>
+                    <div class="flow-box">資安目標 (Objectives)<br><small>具體要達成的成果</small></div>
+                    <div class="flow-arrow">&#8594;</div>
+                    <div class="flow-box">計畫與控制 (Plans)<br><small>誰來做？何時做？</small></div>
+                    <div class="flow-arrow">&#8594;</div>
+                    <div class="flow-box">評估與改善 (Check/Act)<br><small>有沒有達標？</small></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- G. 記憶口訣 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">G. 記憶口訣</div>
+            <div class="accordion-content">
+                <div class="mnemonic-box">
+                    「一策二量三傳達，監控更新留文檔」
+                </div>
+                <p>解釋：</p>
+                <ul>
+                    <li>一策：與<strong>策</strong>略(政策)一致</li>
+                    <li>二量：可<strong>量</strong>測</li>
+                    <li>三傳達：被<strong>傳達</strong></li>
+                    <li>監控：被監控</li>
+                    <li>更新：適時更新</li>
+                    <li>留文檔：保留<strong>文</strong>件化資訊 (非紙本)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- H. 常見陷阱 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">H. 常見陷阱</div>
+            <div class="accordion-content">
+                <p><strong>心理盲點：</strong></p>
+                <p>很多同學看到「文件」二字，直覺聯想到「印出來的紙」。但在 ISO 標準術語中，「文件化資訊 (Documented Information)」包含了任何形式的紀錄（電子檔、資料庫紀錄、錄音錄影皆可）。</p>
+                <p><strong>避坑指南：</strong></p>
+                <p>看到「必須以紙本」、「必須書面蓋章」這類限定「物理載體」的描述，通常都是錯誤選項。現代標準強調的是「可追溯性」與「完整性」，而非載體形式。</p>
+            </div>
+        </div>
+
+        <!-- I. 正確答案 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">I. 正確答案</div>
+            <div class="accordion-content">
+                <p><strong>正確答案：(D)</strong></p>
+                <p><strong>一句話理由：</strong> 標準只要求資訊要被記錄保存 (文件化)，沒規定一定要浪費紙張印出來。</p>
+            </div>
+        </div>
+
+        <!-- J. 自我檢測 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">J. 自我檢測</div>
+            <div class="accordion-content">
+                <p>試著回答以下問題，檢驗是否真懂：</p>
+                <ol>
+                    <li>如果公司的資安目標是「盡力就好」，這符合 ISO 要求嗎？ (提示：思考「可量測」原則)</li>
+                    <li>資安目標只需要資安部門經理知道就好，其他員工不用知道，這樣對嗎？ (提示：思考「被傳達」原則)</li>
+                </ol>
+                <details>
+                    <summary>點此顯示自我檢測參考答案</summary>
+                    <div class="answer-reveal">
+                        <p><strong>參考解答：</strong></p>
+                        <ol>
+                            <li><strong>不符合。</strong> ISO 27001 要求資安目標應是「可量測的 (Measurable)」。<br>「盡力就好」過於抽象，無法判斷是否達成。正確的目標範例：「將核心系統中斷時間控制在每年 4 小時以內」或「今年完成 100% 員工資安教育訓練」。</li>
+                            <li><strong>不對。</strong> ISO 27001 要求目標必須「被傳達 (Communicated)」給相關層級與職能的人員。<br>如果只有經理知道，其他員工不知道努力的方向，將難以落實資安管理系統的有效性。</li>
+                        </ol>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        // 取得使用者選取的選項
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackDiv = document.getElementById('feedback');
+        const explanationArea = document.getElementById('explanation-area');
+
+        // 清除舊的樣式
+        feedbackDiv.className = 'feedback-msg';
+        feedbackDiv.style.display = 'block';
+
+        if (!selectedValue) {
+            feedbackDiv.textContent = '請先選擇一個選項再提交！';
+            feedbackDiv.classList.add('feedback-error');
+            return;
+        }
+
+        if (selectedValue === 'D') {
+            // 答對
+            feedbackDiv.innerHTML = '<strong>正確！</strong> (D) 是本題的正確答案。<br>解析區塊已展開，請往下閱讀詳細說明。';
+            feedbackDiv.classList.add('feedback-correct');
+            
+            // 顯示並展開解析
+            explanationArea.style.display = 'block';
+            expandAllAccordions();
+            
+            // 捲動到解析區
+            setTimeout(() => {
+                explanationArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+
+        } else {
+            // 答錯
+            feedbackDiv.innerHTML = '<strong>錯誤。</strong> <br>提示：ISO 標準強調的是「證據與紀錄」的存在，而非「紙張」這種物理形式。<br>你可能把「需文件化 (Documented)」誤解成「一定要紙本 (Paper)」。請再想一下！';
+            feedbackDiv.classList.add('feedback-error');
+            
+            // 答錯時隱藏解析，強迫重想
+            explanationArea.style.display = 'none';
+        }
+    }
+
+    function resetQuiz() {
+        // 清除選項
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // 隱藏訊息與解析
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('explanation-area').style.display = 'none';
+
+        // 摺疊所有解析
+        const contents = document.querySelectorAll('.accordion-content');
+        const items = document.querySelectorAll('.accordion-item');
+        
+        contents.forEach(content => content.style.display = 'none');
+        items.forEach(item => item.classList.remove('active'));
+    }
+
+    // 點擊摺疊/展開功能
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        const content = header.nextElementSibling;
+        
+        if (content.style.display === 'block') {
+            content.style.display = 'none';
+            item.classList.remove('active');
+        } else {
+            content.style.display = 'block';
+            item.classList.add('active');
+        }
+    }
+
+    // 全部展開 (答對時使用)
+    function expandAllAccordions() {
+        const contents = document.querySelectorAll('.accordion-content');
+        const items = document.querySelectorAll('.accordion-item');
+        
+        contents.forEach(content => content.style.display = 'block');
+        items.forEach(item => item.classList.add('active'));
+    }
+</script>
+
+</body>
+</html>

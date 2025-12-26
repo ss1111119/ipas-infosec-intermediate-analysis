@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安衝刺班：題組5 - 軟體供應鏈風險管理 (Q40)</title>
+    <style>
+        /* 基礎設定 */
+        :root {
+            --primary-color: #2c3e50; /* 深藍灰 */
+            --accent-color: #d35400; /* 穩重的橘色 */
+            --highlight-bg: #fff3cd; /* 柔和黃 */
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* 基準字級 */
+        }
+
+        /* 標題字級限制：不可比內文大超過 1 個字級 */
+        h1, h2, h3, h4 {
+            font-size: 18px; 
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* 強調樣式 */
+        mark {
+            background-color: var(--highlight-bg);
+            color: #d35400;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .keyword-box {
+            background-color: #f0f4f8;
+            border: 1px solid #d1d9e6;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .keyword-item {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .keyword-reason {
+            color: #666;
+            font-size: 0.95em;
+            margin-left: 10px;
+        }
+
+        /* 題目區域 */
+        .question-box {
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 6px;
+            background-color: #fff;
+            margin-bottom: 25px;
+        }
+
+        .context-note {
+            background-color: #e8f6f3;
+            color: #16a085;
+            padding: 10px;
+            font-size: 0.95em;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .options-list li {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .options-list li:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* 互動控制項 */
+        input[type="checkbox"] {
+            transform: scale(1.2);
+            margin-right: 10px;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區域 (預設隱藏) */
+        #explanation-area {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed #ddd;
+            padding-top: 20px;
+        }
+
+        .step-title {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        /* 摺疊面板 */
+        details {
+            margin-bottom: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        summary {
+            padding: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: #f1f1f1;
+            list-style: none; /* 隱藏預設箭頭 */
+        }
+        
+        summary::after {
+            content: "+"; 
+            float: right;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        /* 情境小互動 */
+        .mini-game {
+            background-color: #fff8e1;
+            border: 1px solid #ffe0b2;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 30px;
+        }
+
+        .mini-question {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .mini-feedback {
+            font-size: 0.9em;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        /* 自我檢測表格 */
+        .self-check-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .self-check-table th, .self-check-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .self-check-table th {
+            background-color: #f2f2f2;
+        }
+
+        /* 隱藏/顯示控制 */
+        .reveal-answer {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
+        
+        .answer-hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 導言 -->
+    <div style="margin-bottom: 20px;">
+        <span style="background:var(--primary-color); color:white; padding:5px 10px; border-radius:4px;">資安短期衝刺班</span>
+        <span style="margin-left:10px; font-weight:bold;">講師：Gemini 老師</span>
+        <p>各位同學好！歡迎來到資安基礎特訓。今天我們要挑戰的是「軟體供應鏈安全」的經典題型。不要看到很長的專有名詞就害怕，只要抓住關鍵字，這類題目其實是在考你「有沒有概念」。準備好了嗎？我們開始！</p>
+    </div>
+
+    <!-- 題目區域 -->
+    <div class="question-box">
+        <div class="context-note">
+            【題組 5】本題屬於第 37–40 題共用情境
+        </div>
+        <p style="margin-bottom: 10px;"><strong>情境摘要：</strong><br>
+        簡單來說，現代企業開發軟體很少從零開始寫，都是用很多「第三方元件」拼起來的。這叫「軟體供應鏈」。為了怕這些外部來源不乾淨、有漏洞或被動手腳，企業必須做風險管理。這包含了檢查合約、修補漏洞、威脅建模，還有最重要的一點：需要有實際的手段來「預防」壞東西混進去，以及「檢測」軟體有沒有問題。</p>
+        
+        <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+
+        <h3>40. 【題組 5】情境如附圖所示，在軟體供應鏈中的風險管理上，有以下哪些方式進行資安預防及檢測？(複選)</h3>
+        
+        <p style="color:#666; font-size:0.9em;">（附圖描述：一張流程圖，標示軟體開發生命週期中，不同階段對應的安全檢查點，包含來源管理、建置檢測等環節。）</p>
+
+        <div id="quiz-area">
+            <ul class="options-list">
+                <li><label><input type="checkbox" name="q40" value="A"> (A) 軟體物料清單（Software Bill of Materials, SBOM）</label></li>
+                <li><label><input type="checkbox" name="q40" value="B"> (B) 原始碼檢測及防毒掃描</label></li>
+                <li><label><input type="checkbox" name="q40" value="C"> (C) IAS-99</label></li>
+                <li><label><input type="checkbox" name="q40" value="D"> (D) SEMI 197</label></li>
+            </ul>
+            
+            <button class="btn" onclick="checkAnswer()">送出作答</button>
+            <button class="btn btn-outline" onclick="resetQuiz()">重置</button>
+            <button class="btn btn-outline" id="toggle-explain-btn" onclick="toggleExplanation()">一鍵看解析</button>
+
+            <div id="feedback-display" class="feedback"></div>
+        </div>
+    </div>
+
+    <!-- 完整解析區域 (預設隱藏) -->
+    <div id="explanation-area">
+        
+        <!-- 第一步：找關鍵字 -->
+        <div class="keyword-box">
+            <span class="step-title">第一步：找關鍵字</span>
+            <p>拿起你的螢光筆，這些詞決定了答案的方向：</p>
+            <div class="keyword-item"><mark>軟體供應鏈</mark> <span class="keyword-reason">→ 題目主題，代表軟體是「拼裝」來的。</span></div>
+            <div class="keyword-item"><mark>風險管理</mark> <span class="keyword-reason">→ 我們要控制危險。</span></div>
+            <div class="keyword-item"><mark>資安預防</mark>、<mark>檢測</mark> <span class="keyword-reason">→ 題目問的是具體的「手段」或「動作」。</span></div>
+            <div class="keyword-item"><mark>複選</mark> <span class="keyword-reason">→ 暗示答案可能不只一個，不要選了一個就跑。</span></div>
+            <div class="keyword-item"><mark>SBOM</mark> <span class="keyword-reason">→ 選項關鍵詞，這是供應鏈安全最紅的名詞。</span></div>
+            <div class="keyword-item"><mark>原始碼檢測</mark>、<mark>防毒掃描</mark> <span class="keyword-reason">→ 選項關鍵詞，這是很直覺的檢查動作。</span></div>
+        </div>
+
+        <!-- 第二步：白話翻譯 -->
+        <div>
+            <span class="step-title">第二步：白話翻譯</span>
+            <p><strong>高中生日常語翻譯：</strong><br>
+            「既然我們的軟體是像拼樂高一樣，用很多外面的廠商和套件組起來的，那有什麼『具體方法』可以幫我們先預防出事，或者拿來檢查裡面有沒有被加料？」</p>
+            <p><strong>專有名詞翻譯蒟蒻：</strong></p>
+            <ul>
+                <li><strong>軟體供應鏈</strong>：你的系統用了很多別人做的程式、套件與服務，像拼裝車一樣，零件來自四面八方。</li>
+                <li><strong>SBOM (軟體物料清單)</strong>：就像食品包裝背後的「成分表」。列出這個軟體到底用了哪些套件、第幾版，有問題才查得到。</li>
+                <li><strong>原始碼檢測</strong>：用專門的軟體工具去掃描程式碼，自動找出哪裡寫得不好、有漏洞。</li>
+                <li><strong>防毒掃描</strong>：這個大家最熟，就是用病毒特徵去抓有沒有木馬或惡意程式藏在裡面。</li>
+            </ul>
+        </div>
+        <br>
+
+        <!-- 第三步：解題思路 -->
+        <div>
+            <span class="step-title">第三步：解題思路</span>
+            <p><strong>這題考什麼？</strong><br>辨識出哪些選項是針對供應鏈風險的「實質預防/檢測工具」。</p>
+            <p><strong>解題三步驟：</strong></p>
+            <ol>
+                <li><strong>辨識方法/工具：</strong> 先看選項，(A)是清單，(B)是掃描動作。這兩個都很像在「做事」。</li>
+                <li><strong>過濾標準代號：</strong> 看 (C) 和 (D)，IAS-99 和 SEMI 197 看起來像標準編號。雖然標準很重要，但題目問的是「方式進行預防及檢測」，通常優先選具體的「執行手段」。而且這兩個代號與本題情境（通用軟體供應鏈）關聯較低。</li>
+                <li><strong>確認關聯性：</strong> SBOM 是為了知道成分（預防/檢測基礎），掃描是為了抓毒（檢測）。完全命中題意。</li>
+            </ol>
+            <p><strong>原理與規則：</strong></p>
+            <ul>
+                <li>為什麼 <strong>SBOM</strong> 算？因為不知道用了什麼就無法管理。當某個開源元件爆出漏洞，有 SBOM 才能幾秒鐘內查出「我有沒有用這個爛掉的零件」。</li>
+                <li>為什麼 <strong>原始碼檢測/防毒</strong> 算？這是最直接的「檢測」。在軟體上線前（預防）或運作中（檢測）找出問題。</li>
+            </ul>
+            <p style="background:#e3f2fd; padding:10px; border-radius:4px;"><strong>💡 生活比喻：</strong><br>
+            <strong>SBOM</strong> 就像買便當附的「成分表」，你要先知道裡面有沒有花生，才能預防花生過敏。<br>
+            <strong>防毒掃描</strong> 就像機場的「安檢門與X光機」，有人想帶危險物品（病毒）進來，嗶嗶聲就會響。</p>
+        </div>
+        <br>
+
+        <!-- 第四步：選項分析 -->
+        <div>
+            <span class="step-title">第四步：選項分析</span>
+            <p>點擊下方選項展開詳細理由：</p>
+            
+            <details>
+                <summary>(A) 軟體物料清單（SBOM）— 正確</summary>
+                <div class="details-content">
+                    <strong>為什麼對？</strong><br>
+                    這是近年軟體供應鏈安全的核心。它詳細記錄了軟體的所有組成成分。有它才能在供應鏈攻擊發生時，快速進行風險盤點與應變。它既是預防（採購前審查成分）也是檢測（出事時比對成分）的基礎。
+                </div>
+            </details>
+
+            <details>
+                <summary>(B) 原始碼檢測及防毒掃描 — 正確</summary>
+                <div class="details-content">
+                    <strong>為什麼對？</strong><br>
+                    這是最典型的技術檢測手段。「原始碼檢測」可以找出程式寫法上的安全漏洞；「防毒掃描」可以找出被供應商或駭客植入的惡意程式。兩者都是直接對軟體進行檢查。
+                </div>
+            </details>
+
+            <details>
+                <summary>(C) IAS-99 — 錯誤</summary>
+                <div class="details-content">
+                    <strong>為什麼錯？</strong><br>
+                    這裡應該是指 ISA-99（或 IEC 62443 系列標準），是針對「工業自動化與控制系統」的資安標準。雖然跟資安有關，但它是一個標準架構，不是一個直接用來做「軟體供應鏈預防與檢測」的工具名稱。且這題情境是通用軟體開發，選項誘答性高。
+                </div>
+            </details>
+
+            <details>
+                <summary>(D) SEMI 197 — 錯誤</summary>
+                <div class="details-content">
+                    <strong>為什麼錯？</strong><br>
+                    SEMI 標準通常與半導體設備資安有關（如 SEMI E187）。同樣地，這是一個標準代號，並非「軟體供應鏈的檢測方式/工具」。看到這種英文+數字的代號，如果題目沒有特別鋪陳該產業情境，通常是用來混淆視聽的。
+                </div>
+            </details>
+        </div>
+        <br>
+
+        <!-- 第五步：觀念補充 -->
+        <div style="border-left: 4px solid var(--accent-color); padding-left: 15px; background: #fffaf0;">
+            <span class="step-title" style="background:var(--accent-color);">第五步：觀念補充與延伸</span>
+            <p><strong>核心觀念定位：</strong> 這裡談的是「把資安做在流程裡」。</p>
+            <ul>
+                <li><strong>SCA (Software Composition Analysis)</strong>：這通常跟 SBOM 一起講。SCA 是工具，用來分析軟體成分並自動比對有沒有已知漏洞。</li>
+                <li><strong>CI/CD</strong>：持續整合/持續部署。現在的軟體開發像流水線，我們要把 (A) 和 (B) 這些檢查自動放進流水線裡，這叫「DevSecOps」。</li>
+            </ul>
+            <p><strong>觸類旁通：</strong></p>
+            <ul>
+                <li><strong>變化題型：</strong> 若題目問「Log4j 漏洞爆發，老闆問我們家系統有沒有受影響？」這時候你最需要哪個東西？ 答案是 <strong>SBOM</strong>。</li>
+            </ul>
+        </div>
+        <br>
+
+        <!-- 記憶口訣 -->
+        <div>
+            <span class="step-title">記憶口訣</span>
+            <p style="font-size:1.2em; font-weight:bold; color:var(--primary-color);">
+                「A 看成分表 (SBOM)、B 做大掃描；<br>
+                英文代號看起來猛，不一定是檢測招。」
+            </p>
+        </div>
+
+        <!-- 常見陷阱 -->
+        <div style="margin-top: 20px;">
+            <span class="step-title" style="background:#c0392b;">常見陷阱與避坑指南</span>
+            <p><strong>❌ 心理盲點：</strong> 很多同學看到 IAS-99 或 SEMI 197 這種看起來很專業的「明牌」，就會覺得「這一定是某個厲害的標準，選它準沒錯」。</p>
+            <p><strong>✅ 避坑指南：</strong> 題目問的是「方式」或「手段」。請優先選那些「你真的可以拿來執行的動作」（如：列清單、掃描）。如果只是個代號，且你沒看過它直接對應到檢測工具，請先保留懷疑。</p>
+        </div>
+
+        <hr>
+
+        <!-- 正確答案 -->
+        <div style="text-align: center; margin: 30px 0;">
+            <h3>正確答案：A, B</h3>
+            <p><strong>一句話理由：</strong> SBOM 能掌握用了哪些第三方元件，原始碼檢測與防毒掃描能直接找出漏洞與惡意程式。</p>
+        </div>
+
+    </div>
+
+    <!-- 情境小互動 -->
+    <div class="mini-game">
+        <h3>🎮 情境挑戰：供應鏈危機處理</h3>
+        <p><strong>情境：</strong> 剛剛新聞發布，一個知名的開源圖片處理套件爆發「高風險漏洞」，你的公司系統可能也有用這個套件，駭客正在嘗試攻擊！</p>
+        
+        <div class="mini-question">
+            <p><strong>Q1. 老闆衝過來問：「我們系統有沒有用這個爛掉的套件？」你會立刻查看什麼資料來回答？</strong></p>
+            <label><input type="radio" name="mini1" value="wrong"> 防毒軟體日誌</label><br>
+            <label><input type="radio" name="mini1" value="correct"> SBOM (軟體物料清單)</label><br>
+            <div id="mini1-feedback" class="mini-feedback"></div>
+        </div>
+
+        <div class="mini-question" style="border-bottom:none;">
+            <p><strong>Q2. 為了預防下次又用到有問題的程式碼，你會建議在自動化開發流程 (CI/CD) 中加入什麼？</strong></p>
+            <label><input type="radio" name="mini2" value="wrong1"> 只有原始碼檢測</label><br>
+            <label><input type="radio" name="mini2" value="wrong2"> 只有防毒掃描</label><br>
+            <label><input type="radio" name="mini2" value="correct"> 兩者最好都要有</label>
+            <div id="mini2-feedback" class="mini-feedback"></div>
+        </div>
+    </div>
+
+    <!-- 自我檢測 -->
+    <div style="margin-top: 30px;">
+        <h3>📝 自我檢測 (點擊問題看答案)</h3>
+        <table class="self-check-table">
+            <tr>
+                <th>問題</th>
+                <th>參考答案</th>
+            </tr>
+            <tr>
+                <td>
+                    <details>
+                        <summary>1. SBOM 最像生活中的哪一種資訊？(單選)</summary>
+                        <div class="details-content">
+                            選項：(A) 說明書 (B) 食品成分表 (C) 發票<br>
+                            <span class="reveal-answer" onclick="this.nextElementSibling.style.display='inline'">看答案</span>
+                            <span class="answer-hidden"><strong>(B)</strong>。理由：列出所有組成內容物。</span>
+                        </div>
+                    </details>
+                </td>
+                <td>答案：(B)</td>
+            </tr>
+            <tr>
+                <td>
+                    <details>
+                        <summary>2. 如果漏洞公告出來，你第一時間需要哪個資料來判斷是否受影響？(單選)</summary>
+                        <div class="details-content">
+                            選項：(A) 防毒軟體 (B) SBOM (C) 原始碼<br>
+                            <span class="reveal-answer" onclick="this.nextElementSibling.style.display='inline'">看答案</span>
+                            <span class="answer-hidden"><strong>(B)</strong>。理由：因為你要先確認「有沒有用它」。</span>
+                        </div>
+                    </details>
+                </td>
+                <td>答案：(B)</td>
+            </tr>
+            <tr>
+                <td>
+                    <details>
+                        <summary>3. 原始碼檢測屬於「預防」還是「檢測」？(思考題)</summary>
+                        <div class="details-content">
+                            <span class="reveal-answer" onclick="this.nextElementSibling.style.display='inline'">看答案</span>
+                            <span class="answer-hidden">其實<strong>兩者皆是</strong>。在開發階段做是「預防」漏洞上線；在上線後定期掃描是「檢測」新發現的問題。但本題歸類在預防及檢測手段中。</span>
+                        </div>
+                    </details>
+                </td>
+                <td>預防與檢測皆可</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    // 主要題目互動邏輯
+    function checkAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="q40"]:checked');
+        const feedbackDiv = document.getElementById('feedback-display');
+        let selectedValues = [];
+        checkboxes.forEach((checkbox) => {
+            selectedValues.push(checkbox.value);
+        });
+
+        // 排序以便比對
+        selectedValues.sort();
+        const correctAnswers = ['A', 'B'];
+        const isCorrect = JSON.stringify(selectedValues) === JSON.stringify(correctAnswers);
+
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+
+        if (isCorrect) {
+            feedbackDiv.innerHTML = '✅ <strong>完全正確！</strong> 太棒了，你已經掌握了供應鏈檢測的精髓。<br>答案正是 (A) SBOM 與 (B) 原始碼檢測/防毒掃描。';
+        } else {
+            // 分析錯誤
+            let missing = correctAnswers.filter(x => !selectedValues.includes(x));
+            let extra = selectedValues.filter(x => !correctAnswers.includes(x));
+            
+            let msg = '❌ <strong>還差一點點！</strong><br>';
+            if (selectedValues.length === 0) {
+                msg += '你還沒有勾選任何選項喔！這題是複選題。';
+            } else {
+                msg += `你目前勾選了：${selectedValues.join(', ')}。<br>`;
+                if (missing.length > 0) msg += `👉 你漏選了：${missing.join(', ')} (這些也是有效的方法喔)<br>`;
+                if (extra.length > 0) msg += `👉 你多選了：${extra.join(', ')} (這些通常不是檢測方法，而是標準代號)<br>`;
+            }
+            feedbackDiv.innerHTML = msg;
+        }
+    }
+
+    function resetQuiz() {
+        const checkboxes = document.querySelectorAll('input[name="q40"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        const feedbackDiv = document.getElementById('feedback-display');
+        feedbackDiv.style.display = 'none';
+        feedbackDiv.innerHTML = '';
+        
+        // 重置情境題
+        document.querySelectorAll('input[name="mini1"]').forEach(r => r.checked = false);
+        document.getElementById('mini1-feedback').innerHTML = '';
+        document.querySelectorAll('input[name="mini2"]').forEach(r => r.checked = false);
+        document.getElementById('mini2-feedback').innerHTML = '';
+        
+        // 收合解析
+        document.getElementById('explanation-area').style.display = 'none';
+        document.getElementById('toggle-explain-btn').textContent = '一鍵看解析';
+    }
+
+    function toggleExplanation() {
+        const area = document.getElementById('explanation-area');
+        const btn = document.getElementById('toggle-explain-btn');
+        if (area.style.display === 'none' || area.style.display === '') {
+            area.style.display = 'block';
+            btn.textContent = '收合解析';
+            // 捲動到解析區
+            area.scrollIntoView({behavior: "smooth"});
+        } else {
+            area.style.display = 'none';
+            btn.textContent = '一鍵看解析';
+        }
+    }
+
+    // 情境小互動邏輯
+    document.querySelectorAll('input[name="mini1"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const feedback = document.getElementById('mini1-feedback');
+            if (this.value === 'correct') {
+                feedback.style.color = 'green';
+                feedback.innerHTML = '⭕ 沒錯！先看成分表(SBOM)最快知道有沒有中招。';
+            } else {
+                feedback.style.color = 'red';
+                feedback.innerHTML = '❌ 防毒日誌只能看到被攔截的紀錄，無法確認軟體內部是否包含該漏洞元件。';
+            }
+        });
+    });
+
+    document.querySelectorAll('input[name="mini2"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const feedback = document.getElementById('mini2-feedback');
+            if (this.value === 'correct') {
+                feedback.style.color = 'green';
+                feedback.innerHTML = '⭕ 正確！多層防護是資安的基本原則，兩者互補最安全。';
+            } else {
+                feedback.style.color = '#d35400'; // 橘色提示
+                feedback.innerHTML = '⚠️ 雖然有用，但建議兩個都要！原始碼抓寫法漏洞，防毒抓惡意程式，缺一不可。';
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安觀念解析：控制措施實施階段</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --light-bg: #ecf0f1;
+            --highlight-bg: #fff3cd;
+            --border-color: #bdc3c7;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f6f7;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .header-info {
+            background-color: var(--light-bg);
+            padding: 10px;
+            text-align: center;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9f9f9;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 24px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-toggle-answer {
+            background-color: #e67e22;
+            color: white;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Feedback Area */
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion Styles */
+        .accordion {
+            background-color: #eee;
+            color: #444;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.05rem;
+            transition: 0.4s;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .accordion:first-of-type {
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+
+        .accordion:last-of-type {
+            border-bottom: none;
+        }
+
+        .active, .accordion:hover {
+            background-color: #ccc;
+        }
+
+        .accordion:after {
+            content: '+';
+            font-size: 1.2rem;
+            color: #777;
+            font-weight: bold;
+        }
+
+        .active:after {
+            content: "-";
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .panel-content {
+            padding: 15px 0;
+        }
+
+        /* Content Styling */
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        .concept-box {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            text-align: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .concept-step {
+            flex: 1;
+            min-width: 120px;
+            border: 2px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            background: #fff;
+            position: relative;
+        }
+
+        .concept-step h4 {
+            margin: 0 0 5px 0;
+            color: var(--accent-color);
+        }
+
+        .step-arrow {
+            display: none;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .tag-yes {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .tag-no {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+        
+        /* Answer Reveal Section */
+        #self-check-answers {
+            display: none;
+            margin-top: 15px;
+            border-top: 1px dashed #ccc;
+            padding-top: 15px;
+            background-color: #fcfcfc;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        
+        #self-check-answers p {
+            margin-bottom: 10px;
+        }
+
+        @media screen and (min-width: 600px) {
+            .concept-step:not(:last-child)::after {
+                content: "→";
+                position: absolute;
+                right: -15px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 1.5rem;
+                color: var(--border-color);
+                z-index: 1;
+                background: white; 
+                height: 20px;
+                line-height: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資安觀念解析：控制措施實施階段</h1>
+    
+    <div class="header-info">
+        題號：04ipas_control_detective_multiselect_q4 | 主題：資安管理與控制措施分類
+    </div>
+
+    <!-- Quiz Section -->
+    <div class="quiz-section">
+        <div class="question-text">
+            【複選題】<br>
+            控制措施實施階段可分成事前、事中及事後等三項。請問下列哪些屬於「事中控制類型（如偵測 Detective）」的應用方式？
+        </div>
+        
+        <div class="options-group">
+            <label class="option-label">
+                <input type="checkbox" name="option" value="A">
+                (A) 監控入侵檢測系統（IDS）
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="option" value="B">
+                (B) 檢核稽核日誌報表（Audit Log Report Reviews）
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="option" value="C">
+                (C) 定期弱點掃描（Vulnerability Scan）
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="option" value="D">
+                (D) 監控錄影監視系統（CCTV）
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">提交答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <!-- Accordion Section -->
+    <button class="accordion">A. 題目</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p><strong>【複選題】</strong></p>
+            <p>控制措施實施階段可分成事前、中及後等三項。請問下列哪些屬於「事中控制類型（如偵測 Detective）」的應用方式？（複選）</p>
+            <ul>
+                <li>(A) 監控入侵檢測系統（IDS）</li>
+                <li>(B) 檢核稽核日誌報表（Audit Log Report Reviews）</li>
+                <li>(C) 定期弱點掃描（Vulnerability Scan）</li>
+                <li>(D) 監控錄影監視系統（CCTV）</li>
+            </ul>
+        </div>
+    </div>
+
+    <button class="accordion">B. 第一步：找關鍵字</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p>請拿起您的螢光筆，在題目中畫出以下重點：</p>
+            <ul>
+                <li><span class="highlight">「事前 / 事中 / 事後」</span>：這代表題目在考「時間點」與「目的」。</li>
+                <li><span class="highlight">「偵測（Detective）」</span>：這是解題核心。Detective 的字根是 Detect（發現、查出）。</li>
+            </ul>
+            <p><strong>解釋：</strong> 看到「偵測」這兩個字，腦中要馬上浮現「警報器」、「監視器」或「日誌檢查」這類用來「發現壞事正在發生」的工具。</p>
+        </div>
+    </div>
+
+    <button class="accordion">C. 第二步：白話翻譯</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p>這題用高中生日常口語來說，其實是在問：</p>
+            <p style="font-size: 1.1em; color: var(--accent-color); font-weight: bold;">
+                「下面哪幾個選項，是在事情『正在發生』或『剛發生』的時候，用來『發現並通知』管理員有問題的手段？」
+            </p>
+        </div>
+    </div>
+
+    <button class="accordion">D. 第三步：解題思路</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p><strong>這題在考什麼觀念？</strong> 控制措施的分類與用途。</p>
+            
+            <p><strong>原理與規則（控制三階段）：</strong></p>
+            <div class="concept-box">
+                <div class="concept-step">
+                    <h4>1. 事前 Prevent</h4>
+                    <p>預防控制</p>
+                    <small>讓壞事無法發生<br>(如：鎖門、防火牆)</small>
+                </div>
+                <div class="concept-step" style="border-color: var(--accent-color); background: #f0f8ff;">
+                    <h4>2. 事中 Detect</h4>
+                    <p>偵測控制</p>
+                    <small>壞事發生時被發現<br>(如：警鈴、監視器)</small>
+                </div>
+                <div class="concept-step">
+                    <h4>3. 事後 Recover</h4>
+                    <p>糾正/復原控制</p>
+                    <small>發生後補救<br>(如：備份還原)</small>
+                </div>
+            </div>
+
+            <p><strong>解題步驟：</strong></p>
+            <ol>
+                <li>先判斷手段是否發生在「攻擊當下」或「持續監控中」。</li>
+                <li>再判斷該手段的主要目的是「阻擋（事前）」還是「看見（事中）」。</li>
+            </ol>
+        </div>
+    </div>
+
+    <button class="accordion">E. 第四步：選項分析</button>
+    <div class="panel">
+        <div class="panel-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>措施選項</th>
+                        <th>白話功能解釋</th>
+                        <th>分類</th>
+                        <th>是否為事中偵測</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>(A) IDS<br>(入侵檢測系統)</td>
+                        <td>就像保全系統，感應到有人闖入會叫，但不會主動鎖門。</td>
+                        <td>偵測 (Detective)</td>
+                        <td class="tag-yes">是</td>
+                    </tr>
+                    <tr>
+                        <td>(B) 檢核稽核日誌<br>(Audit Log Reviews)</td>
+                        <td>每天檢查警衛室的訪客登記簿，看有沒有可疑人士進來過。</td>
+                        <td>偵測 (Detective)</td>
+                        <td class="tag-yes">是</td>
+                    </tr>
+                    <tr>
+                        <td>(C) 定期弱點掃描<br>(Vulnerability Scan)</td>
+                        <td>就像「年度健康檢查」，提早找出哪裡有病灶，趁還沒發病前治療。這是為了預防未來被攻擊。</td>
+                        <td>事前/預防<br>(Preventive)</td>
+                        <td class="tag-no">否</td>
+                    </tr>
+                    <tr>
+                        <td>(D) CCTV<br>(監視錄影系統)</td>
+                        <td>裝攝影機看著現場，用來發現當下有沒有異常狀況。</td>
+                        <td>偵測 (Detective)</td>
+                        <td class="tag-yes">是</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>重點補充：</strong> (C) 弱點掃描雖然有個「掃描（Scan）」動作，但它通常是「定期（如每季）」執行的，目的是找出漏洞去修補（預防被駭），而不是在駭客攻擊當下發出警報。</p>
+        </div>
+    </div>
+
+    <button class="accordion">F. 觀念補充與延伸</button>
+    <div class="panel">
+        <div class="panel-content">
+            <h3>核心觀念定位</h3>
+            <ul>
+                <li><strong>資安管理 → 控制措施分類</strong></li>
+                <li><strong>考試常見度：</strong> 必考（常以單選或複選出現，分數好拿但易混淆）。</li>
+            </ul>
+
+            <h3>定義整理</h3>
+            <ul>
+                <li><strong>偵測控制 (Detective Control)：</strong> 用來「發現」異常或事件。重點在於「看見」和「警示」。</li>
+                <li><strong>預防控制 (Preventive Control)：</strong> 用來「阻止」事件發生。重點在於「阻擋」和「隔離」。</li>
+                <li><strong>補救控制 (Corrective / Recovery Control)：</strong> 用來「事後修復」。重點在於「還原」和「止血」。</li>
+            </ul>
+
+            <h3>觸類旁通</h3>
+            <ul>
+                <li><strong>對比概念 - IDS vs IPS：</strong>
+                    <ul>
+                        <li>IDS (Intrusion Detection System)：只會叫，是「偵測」。</li>
+                        <li>IPS (Intrusion Prevention System)：會叫也會擋，偏向「預防/保護」。</li>
+                    </ul>
+                </li>
+                <li><strong>對比概念 - 弱點掃描 vs 即時監控：</strong>
+                    <ul>
+                        <li>弱點掃描 (Vuln Scan)：找系統破洞（靜態、事前）。</li>
+                        <li>即時監控 (Real-time Monitoring)：找正在鑽洞的人（動態、事中）。</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <button class="accordion">G. 記憶口訣</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p style="font-size: 1.2rem; text-align: center; border: 2px dashed var(--accent-color); padding: 15px; border-radius: 8px;">
+                「事前是用『擋』的（防火牆），<br>
+                事中是用『看』的（監視器、日誌），<br>
+                事後是用『補』的（備份）。」
+            </p>
+            <p style="text-align: center; margin-top: 10px;">
+                <strong>精簡版：事中就是「正在看」，看到才知道出事。</strong>
+            </p>
+        </div>
+    </div>
+
+    <button class="accordion">H. 常見陷阱</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p><strong>最容易選錯：</strong> 誤選 (C) 定期弱點掃描。</p>
+            <p><strong>心理盲點：</strong> 考生看到「掃描」兩個字，就覺得是在「偵測」東西，所以誤以為是 Detective。</p>
+            <p><strong>避坑指南：</strong></p>
+            <ul>
+                <li>問自己一句話：「這個動作是在攻擊發生的『當下』即時發現，還是在沒事的時候『定期檢查』身體健康？」</li>
+                <li>如果是定期檢查身體（找弱點），那就是「事前預防」。</li>
+            </ul>
+        </div>
+    </div>
+
+    <button class="accordion">I. 正確答案</button>
+    <div class="panel">
+        <div class="panel-content">
+            <h3 style="color: var(--success-color);">答案：A、B、D</h3>
+            <p><strong>一句話理由：</strong> 凡是「即時或持續監看異常」的，才是事中偵測控制。IDS、日誌檢核、CCTV 都符合此特徵。</p>
+        </div>
+    </div>
+
+    <button class="accordion">J. 自我檢測</button>
+    <div class="panel">
+        <div class="panel-content">
+            <p>試著回答以下問題，檢驗自己是否真的懂了（建議先思考再看答案）：</p>
+            <ol>
+                <li>如果把題目中的 IDS (入侵檢測系統) 換成 IPS (入侵防禦系統)，分類會不會改變？</li>
+                <li>「異地備份磁帶」屬於哪一種控制？為什麼？</li>
+                <li>SIEM (資安事件管理平台，負責收集並分析 Log) 算不算事中控制？</li>
+            </ol>
+            
+            <button class="btn-toggle-answer" onclick="toggleAnswers()">顯示/隱藏 參考解答</button>
+
+            <div id="self-check-answers">
+                <p><strong>1. IPS (入侵防禦系統)</strong><br>
+                會變成 <span class="tag-no">事前/預防 (Preventive)</span>。雖然 IPS 也有偵測功能，但它的核心價值在於發現攻擊時能「主動阻擋」封包，讓攻擊失敗，所以歸類在預防。</p>
+
+                <p><strong>2. 異地備份磁帶</strong><br>
+                屬於 <span class="highlight">事後/復原 (Corrective/Recovery)</span>。備份本身無法阻止攻擊，也無法即時發現攻擊，它是等到資料已經損毀了，用來把資料救回來的手段。</p>
+
+                <p><strong>3. SIEM (資安事件管理平台)</strong><br>
+                屬於 <span class="tag-yes">事中/偵測 (Detective)</span>。SIEM 的作用就是收集並分析大量的日誌，找出異常行為並發出警報，就像一個超強的「自動化監視中心」。</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Accordion Logic
+    var acc = document.getElementsByClassName("accordion");
+    for (var i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            }
+        });
+    }
+
+    // Quiz Logic
+    function checkAnswer() {
+        const correctAnswers = ['A', 'B', 'D'];
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        let selectedValues = [];
+        
+        checkboxes.forEach((checkbox) => {
+            selectedValues.push(checkbox.value);
+        });
+
+        // Sort to ensure order matches
+        selectedValues.sort();
+        
+        const feedbackDiv = document.getElementById('feedback');
+        
+        // Logic: Arrays must match exactly in length and content
+        const isCorrect = JSON.stringify(selectedValues) === JSON.stringify(correctAnswers);
+        
+        feedbackDiv.style.display = 'block';
+        
+        if (isCorrect) {
+            feedbackDiv.className = 'feedback correct';
+            feedbackDiv.innerHTML = '【正確】<br>恭喜你！完全正確！<br>請點擊下方解析區塊查看詳細說明。';
+            // Open Step I (Answer) automatically
+            expandAccordionByTitle('I. 正確答案');
+            expandAccordionByTitle('E. 第四步：選項分析');
+        } else {
+            feedbackDiv.className = 'feedback incorrect';
+            let msg = '【錯誤】<br>';
+            if (selectedValues.length === 0) {
+                msg += '您沒有選擇任何選項。';
+            } else {
+                msg += '複選題需要「完全命中」才算對喔！<br>';
+                if (selectedValues.includes('C')) {
+                    msg += '<br>提示：您選了 (C)，請思考「弱點掃描」是即時發現攻擊，還是提早檢查漏洞？';
+                } else if (selectedValues.length < 3) {
+                    msg += '<br>提示：還有其他屬於「監控」或「檢核」的選項沒選到。';
+                }
+            }
+            feedbackDiv.innerHTML = msg;
+        }
+    }
+
+    function resetQuiz() {
+        // Clear checkboxes
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = false;
+        });
+
+        // Hide feedback
+        const feedbackDiv = document.getElementById('feedback');
+        feedbackDiv.style.display = 'none';
+
+        // Collapse all accordions
+        var panels = document.getElementsByClassName("panel");
+        var accordions = document.getElementsByClassName("accordion");
+        for (var i = 0; i < panels.length; i++) {
+            panels[i].style.maxHeight = null;
+            accordions[i].classList.remove("active");
+        }
+        
+        // Hide answers
+        document.getElementById('self-check-answers').style.display = 'none';
+
+        // Scroll to top
+        document.querySelector('.quiz-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function expandAccordionByTitle(titleText) {
+        var accordions = document.getElementsByClassName("accordion");
+        for (var i = 0; i < accordions.length; i++) {
+            if (accordions[i].innerText.includes(titleText)) {
+                if (!accordions[i].classList.contains("active")) {
+                    accordions[i].click();
+                }
+            }
+        }
+    }
+    
+    // Toggle Answers
+    function toggleAnswers() {
+        var answerDiv = document.getElementById('self-check-answers');
+        var panel = answerDiv.closest('.panel');
+        
+        if (answerDiv.style.display === "none" || answerDiv.style.display === "") {
+            answerDiv.style.display = "block";
+        } else {
+            answerDiv.style.display = "none";
+        }
+        
+        // Resize panel to fit new content
+        panel.style.maxHeight = panel.scrollHeight + "px";
+    }
+</script>
+
+</body>
+</html>

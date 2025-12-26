@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q39 軟體風險管理控制教學 - 資安短期衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --highlight-bg: #f1c40f;
+            --bg-color: #f5f6fa;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 16px; /* 基礎字級 */
+            padding: 20px;
+        }
+
+        /* 嚴格控制標題字級，不超過內文 1 個字級 (18px) */
+        h1, h2, h3 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .context-box {
+            background-color: #e8f4fc;
+            border: 1px solid #b6e0fe;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+        }
+
+        /* 重點標示樣式 */
+        mark {
+            background-color: var(--highlight-bg);
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .highlight-text {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        /* 表單與互動元件 */
+        .question-option {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .question-option:hover {
+            background-color: #f8f9fa;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #34495e;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+        }
+
+        .result-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+            font-weight: bold;
+        }
+
+        .result-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區域隱藏與顯示 */
+        #analysis-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .step-block {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .step-block:last-child {
+            border-bottom: none;
+        }
+
+        /* 摺疊選單樣式 */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+        }
+
+        summary {
+            padding: 10px;
+            background-color: #f1f1f1;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+        }
+        
+        summary::after {
+            content: "+";
+            float: right;
+            font-weight: bold;
+        }
+        
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 15px;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+        }
+
+        /* 情境小測驗樣式 */
+        .mini-quiz {
+            background-color: #fff3cd;
+            padding: 15px;
+            border: 1px solid #ffeeba;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 14px;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 14px;
+            color: #7f8c8d;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 頁面標題 -->
+    <div class="card" style="text-align: center;">
+        <h1>資安短期衝刺班：軟體風險管理實戰</h1>
+        <p>單元：供應鏈安全與控制措施</p>
+    </div>
+
+    <!-- 題組定位 -->
+    <div class="context-box">
+        <h2>【題組 5】情境說明</h2>
+        <p><strong>情境摘要：</strong></p>
+        <p>現代企業開發軟體時，會用到大量別人寫好的程式碼（軟體供應鏈）。為了避免駭客利用這些外部零件入侵，或者避免軟體漏洞沒人修，企業必須透過「管理手段」和「技術控制」來降低風險。這通常會參考 NIST 或 ISO 等國際標準，重點包含「管理第三方元件」、「修補程式漏洞」以及「簽訂資安合約」等工作。</p>
+        <p style="font-size: 14px; color: #666; margin-top: 5px;">（本情境適用於第 37 至 40 題，本頁面專注解析第 39 題）</p>
+    </div>
+
+    <!-- 題目區域 -->
+    <div class="card">
+        <h2>39. 題目練習</h2>
+        <p>【題組 5】情境如附圖所示（即上述情境摘要），下列何者<span class="highlight-text">「不」</span>是正確的軟體風險管理控制方法？</p>
+        
+        <form id="quiz-form">
+            <label class="question-option">
+                <input type="radio" name="answer" value="A"> (A) 第三方元件弱點管理
+            </label>
+            <label class="question-option">
+                <input type="radio" name="answer" value="B"> (B) 於合約中載明軟體開發之資安修補責任
+            </label>
+            <label class="question-option">
+                <input type="radio" name="answer" value="C"> (C) 定期巡檢軟體弱點與更新
+            </label>
+            <label class="question-option">
+                <input type="radio" name="answer" value="D"> (D) 透過第三方軟體庫進行更新
+            </label>
+        </form>
+
+        <div id="result-box" class="result-box"></div>
+
+        <div style="margin-top: 20px;">
+            <button class="btn" onclick="checkAnswer()">送出作答</button>
+            <button class="btn btn-reset" onclick="resetQuiz()">重置</button>
+            <button class="btn" style="background-color: var(--accent-color);" onclick="toggleAnalysis()">一鍵看解析</button>
+        </div>
+    </div>
+
+    <!-- 解析區域 (預設隱藏) -->
+    <div id="analysis-section" class="card">
+        <!-- 1. 找關鍵字 -->
+        <div class="step-block">
+            <h2>第一步：找關鍵字</h2>
+            <p>請拿出你的螢光筆，這題的線索在這裡：</p>
+            <ul>
+                <li><mark>軟體風險管理</mark>：題目的核心範圍，要是能「降低風險」的方法才算。</li>
+                <li><mark>控制方法</mark>：指的是一種「手段」或「規範」，用來防止壞事發生。</li>
+                <li><mark>第三方元件</mark>：別人寫的程式碼，通常風險最高，因為你無法控制它。</li>
+                <li><mark>弱點</mark> / <mark>更新</mark>：資安維運的日常工作。</li>
+                <li><mark>合約</mark>：具有法律效力的管理手段。</li>
+                <li><mark>不 是 正確</mark>：<strong>(陷阱！)</strong> 要選出那個「做法有問題」或「本身不是控制手段」的選項。</li>
+            </ul>
+        </div>
+
+        <!-- 2. 白話翻譯 -->
+        <div class="step-block">
+            <h2>第二步：名師白話翻譯</h2>
+            <p><strong>題目在問：</strong>「下面哪些做法是管理軟體風險的好方法？題目要你找 <span class="highlight-text">那一個其實不算正確/安全的方法</span>。」</p>
+            <p><strong>專有名詞解釋：</strong></p>
+            <ul>
+                <li><strong>軟體風險管理：</strong>就是找出軟體哪裡可能出事（被駭、壞掉），然後想辦法降低出事機率或減少損失。</li>
+                <li><strong>第三方元件：</strong>別人寫好的套件或函式庫（例如 OpenSSL），你直接拿來用，省時間但有風險。</li>
+                <li><strong>弱點管理：</strong>持續追蹤系統有沒有破洞（漏洞），有的話就要補起來，降低被打的機會。</li>
+                <li><strong>合約責任：</strong>白紙黑字寫清楚，如果軟體出包，廠商要在幾天內修好，不然要賠錢。</li>
+            </ul>
+        </div>
+
+        <!-- 3. 解題思路 -->
+        <div class="step-block">
+            <h2>第三步：解題思路</h2>
+            <p><strong>這題考什麼？</strong> 分清楚「控制方法（Control）」與單純的「更新途徑（Action）」是否安全可靠。</p>
+            <p><strong>邏輯推演：</strong></p>
+            <ol>
+                <li><strong>檢查誰在「降低風險」：</strong>
+                    <ul>
+                        <li>管理弱點 (A) -> 降低被打機率 -> 正確。</li>
+                        <li>明確責任 (B) -> 確保有人修 -> 正確。</li>
+                        <li>定期更新 (C) -> 保持健康 -> 正確。</li>
+                    </ul>
+                </li>
+                <li><strong>檢查「透過第三方軟體庫更新」(D)：</strong>
+                    <ul>
+                        <li>這是「做更新」這個動作，但是來源是「第三方軟體庫」（如公共的 npm, PyPI, Docker Hub）。</li>
+                        <li><strong>思考：</strong>這個來源百分之百可信嗎？如果駭客上傳了惡意更新怎麼辦？</li>
+                    </ul>
+                </li>
+                <li><strong>結論：</strong>選項 (D) 只是描述一個動作，而且如果沒有搭配「驗證簽章」、「來源檢查」等控制措施，直接從第三方庫更新反而是一種<strong>「引入風險」</strong>的行為，不配稱為「正確的控制方法」。</li>
+            </ol>
+            <div class="mini-quiz" style="background-color: #e8f6f3; border-color: #d1f2eb;">
+                <p><strong>生活比喻：</strong></p>
+                <p>選項 (A)(B)(C) 就像是：「你自己定期保養車子、知道誰負責維修、檢查零件狀況。」（這是管理）</p>
+                <p>選項 (D) 就像是：「零件壞了，直接跟路邊不明店家隨便拿一個裝上去。」（這叫亂來，不叫管理）</p>
+            </div>
+        </div>
+
+        <!-- 4. 選項分析 -->
+        <div class="step-block">
+            <h2>第四步：選項詳細分析</h2>
+            <p>點擊下方選項展開詳細說明：</p>
+            
+            <details>
+                <summary>(A) 第三方元件弱點管理</summary>
+                <div class="details-content">
+                    <p><strong>為什麼這是對的控制方法？</strong></p>
+                    <p>現代軟體有 80% 以上是引用開源或第三方程式碼。這些元件最常爆出漏洞（例如知名的 Log4j 事件）。如果不去「管理」它，駭客就能輕易入侵。所以建立清單（SBOM）、追蹤漏洞，是絕對必要的風險控制。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>(B) 於合約中載明軟體開發之資安修補責任</summary>
+                <div class="details-content">
+                    <p><strong>為什麼這是對的控制方法？</strong></p>
+                    <p>這是「管理層面」的控制。如果沒簽合約，廠商可能射後不理，軟體爛了也沒人修。合約寫明「發現重大漏洞需 3 天內修復」，才有法律約束力來降低風險。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>(C) 定期巡檢軟體弱點與更新</summary>
+                <div class="details-content">
+                    <p><strong>為什麼這是對的控制方法？</strong></p>
+                    <p>這是最基本的資安衛生習慣。弱點是會隨著時間不斷被發現的，所以必須「定期」檢查跟更新，才能維持防護力。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>(D) 透過第三方軟體庫進行更新</summary>
+                <div class="details-content">
+                    <p><strong>為什麼這是 <span class="highlight-text">不正確</span> 的？</strong></p>
+                    <p>關鍵在於它描述得太粗糙且缺乏檢核。</p>
+                    <p>直接從公共的第三方軟體庫（Repository）拉取更新，存在「供應鏈攻擊」的風險。駭客可能會搶註類似的套件名稱（Typosquatting），或是入侵開發者的帳號上傳惡意版本。</p>
+                    <p><strong>正確的做法應該是：</strong>在更新前，必須進行「來源驗證」、「數位簽章驗證」、「雜湊值比對」，或者企業內部建立「受信任的鏡像倉庫（Private Mirror）」，經過掃描確認乾淨後才准更新。單純說「透過第三方庫更新」不但不是控制，反而是漏洞。</p>
+                </div>
+            </details>
+        </div>
+
+        <!-- 5. 觀念補充 -->
+        <div class="step-block">
+            <h2>觀念補充與延伸</h2>
+            <p><span class="tag">必考觀念</span> <strong>供應鏈安全 (Supply Chain Security)</strong></p>
+            <ul>
+                <li><strong>Patch (修補)：</strong>把程式漏洞補起來的更新檔。</li>
+                <li><strong>Dependency (相依套件)：</strong>你的程式運作所依賴的別人寫的程式。</li>
+                <li><strong>Repository (套件庫)：</strong>集中存放各種軟體套件的地方（如 GitHub, NPM）。</li>
+            </ul>
+            <p><strong>觸類旁通：</strong></p>
+            <ul>
+                <li><strong>更新 (Update) vs 升級 (Upgrade)：</strong>更新通常指小幅度的修補漏洞；升級通常指大幅度的版本變更，可能帶來功能改變，但也可能導致舊功能壞掉（可用性風險）。</li>
+            </ul>
+        </div>
+
+        <!-- 6. 記憶口訣與陷阱 -->
+        <div class="step-block">
+            <h2>記憶口訣 & 常見陷阱</h2>
+            <div style="background-color: #fce4ec; padding: 10px; border-left: 5px solid #e91e63; margin-bottom: 10px;">
+                <strong>口訣：</strong>
+                <p>「A 管漏洞、B 管責任、C 要巡檢；只靠第三方庫更新 (D) 最危險！」</p>
+            </div>
+            <p><strong>避坑指南：</strong></p>
+            <p>看到「更新」相關選項，請在心中做「三問檢查」：</p>
+            <ol>
+                <li>來源可信嗎？</li>
+                <li>完整性（檔案沒被改過）有驗證嗎？</li>
+                <li>出了事找得到人負責嗎？</li>
+            </ol>
+            <p>如果只有單純的「下載更新」，那就是錯的。</p>
+        </div>
+
+        <!-- 7. 情境小互動 -->
+        <div class="step-block">
+            <h2>情境模擬小測驗</h2>
+            <div class="mini-quiz">
+                <p><strong>情境：</strong>某程式設計師小明，為了趕專案進度，直接把公司的伺服器設定為「自動從網路上的公共套件庫下載最新版軟體」，結果隔天伺服器就被植入挖礦程式。</p>
+                <p>請問小明犯了什麼錯？（請回答是非題）</p>
+                
+                <div style="margin-top: 10px; border-top: 1px solid #ddd; padding-top: 10px;">
+                    <p>1. 小明應該先驗證下載檔案的數位簽章，確認來源是真的開發者。</p>
+                    <button class="btn" style="padding: 5px 10px; font-size: 14px;" onclick="checkMini(1, true)">是 (O)</button>
+                    <button class="btn" style="padding: 5px 10px; font-size: 14px;" onclick="checkMini(1, false)">否 (X)</button>
+                    <p id="mini-feedback-1" style="font-size: 14px; margin-top: 5px; color: #666;"></p>
+                </div>
+
+                <div style="margin-top: 10px; border-top: 1px solid #ddd; padding-top: 10px;">
+                    <p>2. 公司應該建立內部的「私有倉庫」，先把外部軟體掃描過濾後，才讓伺服器更新。</p>
+                    <button class="btn" style="padding: 5px 10px; font-size: 14px;" onclick="checkMini(2, true)">是 (O)</button>
+                    <button class="btn" style="padding: 5px 10px; font-size: 14px;" onclick="checkMini(2, false)">否 (X)</button>
+                    <p id="mini-feedback-2" style="font-size: 14px; margin-top: 5px; color: #666;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. 自我檢測 -->
+        <div class="step-block">
+            <h2>自我檢測 (想一想)</h2>
+            <details>
+                <summary>Q1: 為什麼合約中要寫「修補時限」（例如：重大漏洞 24 小時內修補）？</summary>
+                <div class="details-content">
+                    參考答案：因為駭客利用漏洞的速度很快（零時差攻擊）。如果沒有規定時限，廠商可能會拖延，導致企業在這段空窗期被駭客入侵。這就是「時效性」的風險控制。
+                </div>
+            </details>
+            <details>
+                <summary>Q2: 什麼是「第三方元件」？舉個例子。</summary>
+                <div class="details-content">
+                    參考答案：就是不是你自己公司寫的，而是拿別人寫好的程式碼來用。例如網頁開發常用的 jQuery、React，或是後端用的 Log4j、OpenSSL。
+                </div>
+            </details>
+            <details>
+                <summary>Q3: 如果套件庫被植入惡意版本，企業該怎麼防範？</summary>
+                <div class="details-content">
+                    參考答案：1. 使用軟體物料清單 (SBOM) 掌握用了什麼。 2. 鎖定版本號，不要自動更新到最新版 (Pin version)。 3. 驗證雜湊值 (Hash) 或簽章。 4. 使用軟體成分分析工具 (SCA) 掃描。
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>資安短期衝刺班 - 軟體開發安全系列教材</p>
+    </div>
+</div>
+
+<script>
+    // ---------------------------------------------------------
+    // 主題互動邏輯
+    // ---------------------------------------------------------
+    function checkAnswer() {
+        const form = document.getElementById('quiz-form');
+        const selected = form.querySelector('input[name="answer"]:checked');
+        const resultBox = document.getElementById('result-box');
+
+        if (!selected) {
+            resultBox.style.display = 'block';
+            resultBox.className = 'result-box'; // reset class
+            resultBox.style.backgroundColor = '#f0f0f0';
+            resultBox.style.color = '#333';
+            resultBox.textContent = '請先選擇一個答案！';
+            return;
+        }
+
+        const answer = selected.value;
+        resultBox.style.display = 'block';
+
+        if (answer === 'D') {
+            resultBox.className = 'result-box result-correct';
+            resultBox.innerHTML = `
+                答對了！[V] <br>
+                你的選擇：(D) <br>
+                <strong>解析：</strong>沒錯，單純「透過第三方庫更新」若無驗證機制，反而是一種引入風險的行為，不能算是有校的控制方法。
+            `;
+            // 自動展開解析區
+            document.getElementById('analysis-section').style.display = 'block';
+        } else {
+            resultBox.className = 'result-box result-wrong';
+            resultBox.innerHTML = `
+                答錯了 [X] <br>
+                你的選擇：(${answer}) <br>
+                正確答案是：(D) <br>
+                <strong>提示：</strong>題目問的是「不正確」的方法。選項 (A)、(B)、(C) 都是降低風險的好手段。請思考一下，隨便從網路上下載更新安全嗎？<br>
+                <small>點擊「一鍵看解析」按鈕了解詳情。</small>
+            `;
+        }
+    }
+
+    function resetQuiz() {
+        const form = document.getElementById('quiz-form');
+        form.reset();
+        document.getElementById('result-box').style.display = 'none';
+        document.getElementById('analysis-section').style.display = 'none';
+        
+        // 重置小測驗
+        document.getElementById('mini-feedback-1').textContent = '';
+        document.getElementById('mini-feedback-2').textContent = '';
+        
+        // 關閉所有 details
+        const details = document.querySelectorAll('details');
+        details.forEach((d) => {
+            d.removeAttribute('open');
+        });
+        
+        window.scrollTo(0, 0);
+    }
+
+    function toggleAnalysis() {
+        const section = document.getElementById('analysis-section');
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
+            // 滾動到解析區
+            section.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    // ---------------------------------------------------------
+    // 情境小測驗邏輯
+    // ---------------------------------------------------------
+    function checkMini(questionNum, isYes) {
+        const feedbackEl = document.getElementById(`mini-feedback-${questionNum}`);
+        
+        // 兩題答案都是 True (是)
+        if (isYes) {
+            feedbackEl.style.color = 'green';
+            feedbackEl.innerHTML = '<strong>正確！[V]</strong> 這是必要的防護措施。';
+        } else {
+            feedbackEl.style.color = 'red';
+            feedbackEl.innerHTML = '<strong>錯誤 [X]</strong>。這正是防止供應鏈攻擊的關鍵手段，如果不做就太危險了。';
+        }
+    }
+
+    // ---------------------------------------------------------
+    // 預留給第 37, 38, 40 題的整合介面 (未來擴充用)
+    // ---------------------------------------------------------
+    // TODO: Add function switchQuestion(qId)
+    // TODO: Add data structure for other questions
+</script>
+
+</body>
+</html>

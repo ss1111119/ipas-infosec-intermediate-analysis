@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安複選題解析：CNS 27002 電子通訊安全</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --border-color: #bdc3c7;
+            --highlight-bg: #fff3cd;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-top: 25px;
+            margin-bottom: 10px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        /* Quiz Section */
+        .quiz-box {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .options label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .options label:hover {
+            background-color: #ecf0f1;
+        }
+
+        .options input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        #submitBtn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #resetBtn {
+            background-color: var(--border-color);
+            color: #333;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Feedback Area */
+        #feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis Section (Accordions) */
+        #analysisArea {
+            display: none; /* Hidden by default until correct */
+            margin-top: 30px;
+        }
+
+        details {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: #ecf0f1;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Remove default triangle */
+            position: relative;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            position: absolute;
+            right: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .content {
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        /* Highlight classes */
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .term-def {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Visual Diagram CSS */
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #fafafa;
+            border: 1px dashed #ccc;
+            flex-wrap: wrap;
+        }
+
+        .node {
+            background: white;
+            border: 2px solid var(--primary-color);
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .arrow-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .arrow-line {
+            width: 100px;
+            height: 2px;
+            background-color: var(--primary-color);
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .arrow-line::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: -4px;
+            border-left: 8px solid var(--primary-color);
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+
+        .risk-label {
+            font-size: 0.8rem;
+            color: var(--error-color);
+            background: #fff;
+            border: 1px solid var(--error-color);
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #ecf0f1;
+            font-weight: bold;
+        }
+
+        .check-green { color: var(--success-color); font-weight: bold; }
+        .cross-red { color: var(--error-color); font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>CNS 27002 電子通訊安全</h1>
+        <p>高中生資安觀念衝刺教學</p>
+    </header>
+
+    <!-- Visual Diagram Area (CSS Only) -->
+    <div class="diagram-container">
+        <div class="node">寄送端</div>
+        <div class="arrow-container">
+            <div class="risk-label">風險：惡意軟體</div>
+            <div class="risk-label">風險：攔截竊聽</div>
+            <div class="arrow-line"></div>
+        </div>
+        <div class="node">接收端</div>
+    </div>
+    <div style="text-align: center; font-size: 0.9em; color: #666; margin-bottom: 20px;">
+        圖說：資料傳送風險示意圖 (傳輸過程需防護)
+    </div>
+
+    <!-- Quiz Section -->
+    <div class="quiz-box">
+        <div class="question-text">
+            【複選題】<br>
+            12. 依照 CNS 27002:2023 的建議，於使用電子通訊設施進行資訊傳送時，規則、程序及協議宜考量下列哪些項目？
+        </div>
+        <div class="options">
+            <label>
+                <input type="checkbox" id="optA" value="A">
+                (A) 偵測及防範可透過使用電子通訊傳輸之惡意軟體
+            </label>
+            <label>
+                <input type="checkbox" id="optB" value="B">
+                (B) 方便使用者存取，電子郵件自動轉寄至外部郵件位址
+            </label>
+            <label>
+                <input type="checkbox" id="optC" value="C">
+                (C) 保護以附件形式通訊之敏感性電子資訊
+            </label>
+            <label>
+                <input type="checkbox" id="optD" value="D">
+                (D) 依使用者習慣自主使用即時傳訊等外部公共服務
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button id="submitBtn" onclick="checkAnswer()">提交答案</button>
+            <button id="resetBtn" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback"></div>
+    </div>
+
+    <!-- Interactive Analysis Content (Accordions) -->
+    <div id="analysisArea">
+        <h2 style="text-align:center; border:none;">▼ 詳細解析 (點擊展開) ▼</h2>
+
+        <!-- A. 題目 -->
+        <details>
+            <summary>A. 題目解析</summary>
+            <div class="content">
+                <p><strong>題目：</strong>依照 CNS 27002:2023 的建議，於使用電子通訊設施進行資訊傳送時，規則、程序及協議宜考量下列哪些項目？（複選）</p>
+                <p><strong>說明：</strong>本題為複選題，必須選出所有正確的資安管理措施，少選或多選皆不給分。</p>
+            </div>
+        </details>
+
+        <!-- B. 第一步：找關鍵字 -->
+        <details>
+            <summary>B. 第一步：找關鍵字</summary>
+            <div class="content">
+                <ul>
+                    <li><span class="highlight">CNS 27002:2023</span> <span class="term-def">(資訊安全控制措施的實作指引，是資安管理的標準參考書)</span></li>
+                    <li><span class="highlight">電子通訊設施</span> <span class="term-def">(指 Email、Line、Slack、檔案傳輸等溝通工具)</span></li>
+                    <li><span class="highlight">規則、程序及協議</span> <span class="term-def">(指公司制定的 SOP 與政策)</span></li>
+                    <li><span class="highlight">宜考量</span> <span class="term-def">(指建議應該要做的重點事項)</span></li>
+                </ul>
+                <p><strong>為什麼重要：</strong>這些字眼告訴我們，這題問的是「依照資安標準，公司應該怎麼管通訊軟體」，而不是問使用者怎麼用最方便。</p>
+            </div>
+        </details>
+
+        <!-- C. 第二步：白話翻譯 -->
+        <details>
+            <summary>C. 第二步：白話翻譯</summary>
+            <div class="content">
+                <p>這題用高中生的話來說就是：</p>
+                <blockquote style="background:#f9f9f9; padding:10px; border-left:4px solid #333;">
+                    「當我們用 Email 或即時通訊軟體傳資料時，公司或學校應該訂什麼規則，才能保護資料不外洩、不中毒，而且又不會被駭客入侵？」
+                </blockquote>
+            </div>
+        </details>
+
+        <!-- D. 第三步：解題思路 -->
+        <details open>
+            <summary>D. 第三步：解題思路</summary>
+            <div class="content">
+                <p><strong>這題在考什麼：</strong>電子通訊使用時的資安管理重點。</p>
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>先找「降低風險、保護資料」的選項 (通常含有防護、偵測、保護等字眼)。</li>
+                    <li>排除「只為方便、但增加外洩風險」的做法 (通常含有自動轉寄、自主任意使用等字眼)。</li>
+                    <li>複選題要全選正確。</li>
+                </ol>
+                <p><strong>原理與規則：</strong></p>
+                <ul>
+                    <li>CNS 27002 著重「風險控管」而非「使用便利」。便利性若犧牲了安全性，通常就是錯的。</li>
+                    <li>電子通訊是駭客最愛用的入侵管道 (釣魚郵件、惡意連結)，所以需特別嚴格防護。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- E. 第四步：選項分析 -->
+        <details open>
+            <summary>E. 第四步：選項分析</summary>
+            <div class="content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="15%">選項</th>
+                            <th width="15%">評估</th>
+                            <th>白話原因與分析</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A)</td>
+                            <td class="check-green">正確</td>
+                            <td>
+                                <strong>偵測惡意軟體：</strong>Email 和通訊軟體最常被夾帶病毒或木馬。公司必須要有掃毒機制，這是在「降低風險」。
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>(B)</td>
+                            <td class="cross-red">不適切</td>
+                            <td>
+                                <strong>自動轉寄至外部：</strong>這為了方便，但把公司內部信轉到私人信箱 (如 Gmail)，公司就無法管控資料了，這是「增加外洩風險」。
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>(C)</td>
+                            <td class="check-green">正確</td>
+                            <td>
+                                <strong>保護附件敏感資訊：</strong>附件常有報價單、個資。標準建議要對附件加密或管控，這是在「保護資料」。
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>(D)</td>
+                            <td class="cross-red">不適切</td>
+                            <td>
+                                <strong>自主使用外部服務：</strong>讓員工隨意用自己的 Line 或 FB 傳公事，資料流向不明且無法稽核，這是「管理失控」。
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        <!-- F. 觀念補充與延伸 -->
+        <details>
+            <summary>F. 觀念補充與延伸</summary>
+            <div class="content">
+                <p><strong>核心觀念定位：</strong></p>
+                <ul>
+                    <li>領域：資訊安全管理 &rarr; 通訊安全與資料保護。</li>
+                    <li>重要性：CNS / ISO 27002 管理類題目中的常考題。</li>
+                </ul>
+                <p><strong>定義整理：</strong></p>
+                <ul>
+                    <li><strong>電子通訊安全：</strong>確保資料在傳送過程中不被竊取 (Confidentiality)、不被偷改 (Integrity) 或誤傳。</li>
+                </ul>
+                <p><strong>觸類旁通：</strong></p>
+                <ul>
+                    <li><strong>便利性 vs 安全性：</strong>資安管理中，若兩者衝突，通常優先考量安全性 (或尋求平衡)，絕不會無限放大便利性。</li>
+                    <li><strong>內部受控 vs 外部公共：</strong>內部架設的伺服器公司管得到；外部免費服務 (如個人雲端硬碟) 公司管不到，風險極高。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- G. 記憶口訣 -->
+        <details>
+            <summary>G. 記憶口訣</summary>
+            <div class="content">
+                <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold; background: #e8f4f8; padding: 15px; border-radius: 8px;">
+                    「電子通訊要防毒，附件傳輸要保護；<br>
+                    方便過頭資安走，外部轉寄不可無 (管控)。」
+                </p>
+                <p>記住：<strong>選「保護、偵測」，刪「自動轉寄、隨意使用」。</strong></p>
+            </div>
+        </details>
+
+        <!-- H. 常見陷阱 -->
+        <details>
+            <summary>H. 常見陷阱</summary>
+            <div class="content">
+                <ul>
+                    <li><strong>易錯點：</strong>把「方便使用」當成管理優先。覺得「自動轉寄很方便啊，為什麼不行？」&rarr; 因為公司資料會流出去。</li>
+                    <li><strong>心理盲點：</strong>覺得平常用 Line 傳檔案很正常。&rarr; 在資安規範中，非受控的外部通訊軟體是重大隱憂。</li>
+                    <li><strong>避坑指南：</strong>
+                        <ul>
+                            <li>看到 27002 題目，先選「控管、保護、偵測」。</li>
+                            <li>出現「自動、自由、無限制」等字眼，通常代表風險。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- I. 正確答案 -->
+        <details>
+            <summary>I. 正確答案</summary>
+            <div class="content">
+                <p style="font-size: 1.5rem; color: var(--success-color); font-weight: bold;">答案：A、C</p>
+                <p><strong>一句話理由：</strong>通訊安全重點在於「防範惡意程式」與「保護敏感資訊」，而非單純提升個人的使用便利性。</p>
+            </div>
+        </details>
+
+        <!-- J. 自我檢測 -->
+        <details>
+            <summary>J. 自我檢測 (思考題)</summary>
+            <div class="content">
+                <p>試著回答以下問題，確認觀念是否吸收：</p>
+                <ol>
+                    <li>為什麼電子郵件的「附件」比郵件內文更容易造成資安事件？ (提示：惡意程式藏哪裡？)</li>
+                    <li>若公司允許員工使用即時通訊軟體 (如 Line)，還能加哪些控管措施才安全？ (提示：禁止傳檔？紀錄留存？)</li>
+                    <li>為什麼「自動轉寄」到外部信箱，在資安稽核時常被列為重大缺失？ (提示：機密資料去哪了？)</li>
+                </ol>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;">
+
+                <details style="background-color: #f8f9fa; border: none;">
+                    <summary style="background-color: #e9ecef; color: #495057;">查看參考解答</summary>
+                    <div class="content" style="background-color: #f8f9fa;">
+                        <ol>
+                            <li>
+                                <strong>附件風險較高：</strong><br>
+                                惡意軟體（如病毒、勒索軟體）通常偽裝成執行檔（.exe）、腳本或含有巨集的 Office 文件夾帶在附件中。使用者下載並開啟附件時，惡意程式就會執行。單純的純文字內文較難直接觸發攻擊。
+                            </li>
+                            <li style="margin-top: 10px;">
+                                <strong>即時通訊控管措施：</strong><br>
+                                若必須開放，可採取的控管包含：限制傳輸檔案的功能（只能傳訊）、實施對話內容留存稽核（Log 紀錄）、禁止討論機密等級以上的專案、或強制要求使用企業版帳號以便統一管理。
+                            </li>
+                            <li style="margin-top: 10px;">
+                                <strong>自動轉寄的高風險：</strong><br>
+                                一旦信件自動轉寄到私人信箱（如 Gmail），該資料就脫離了公司的資安防護網（防火牆、DLP）。公司無法追蹤該資料的流向，也無法在員工離職時刪除該資料，若私人帳號被駭，公司機密也會連帶外洩。
+                            </li>
+                        </ol>
+                    </div>
+                </details>
+            </div>
+        </details>
+    </div>
+
+</div>
+
+<script>
+    function checkAnswer() {
+        // 取得所有 checkbox 的狀態
+        const optA = document.getElementById('optA').checked;
+        const optB = document.getElementById('optB').checked;
+        const optC = document.getElementById('optC').checked;
+        const optD = document.getElementById('optD').checked;
+
+        const feedback = document.getElementById('feedback');
+        const analysisArea = document.getElementById('analysisArea');
+
+        // 正確答案邏輯：A 與 C 必須勾選，且 B 與 D 不可勾選
+        const isCorrect = (optA && optC && !optB && !optD);
+
+        // 判斷是否有勾選任何選項
+        if (!optA && !optB && !optC && !optD) {
+            feedback.style.display = 'block';
+            feedback.className = 'feedback-error';
+            feedback.innerHTML = '請先勾選選項再提交！';
+            analysisArea.style.display = 'none';
+            return;
+        }
+
+        feedback.style.display = 'block';
+
+        if (isCorrect) {
+            feedback.className = 'feedback-correct';
+            feedback.innerHTML = '恭喜答對！完全正確。<br>請往下閱讀詳細解析以鞏固觀念。';
+            // 答對時展開解析區
+            analysisArea.style.display = 'block';
+            // 自動捲動到解析區
+            setTimeout(() => {
+                analysisArea.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        } else {
+            feedback.className = 'feedback-error';
+            let msg = '答案錯誤。';
+            
+            // 簡易除錯提示
+            if (optB || optD) {
+                msg += '<br>提示：選項 (B) 和 (D) 是為了便利但會「增加風險」的行為，不符合資安規範。';
+            } else if (!optA || !optC) {
+                msg += '<br>提示：這是複選題，您少選了具備防護功能的選項。';
+            }
+            
+            msg += '<br>請重新思考後再試一次！';
+            feedback.innerHTML = msg;
+            analysisArea.style.display = 'none'; // 答錯不顯示解析，鼓勵重試
+        }
+    }
+
+    function resetQuiz() {
+        // 清空所有勾選
+        document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+        
+        // 隱藏回饋與解析
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('analysisArea').style.display = 'none';
+        
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

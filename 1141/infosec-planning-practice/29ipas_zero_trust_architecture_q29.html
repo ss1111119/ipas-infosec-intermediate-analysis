@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題組教學：零信任架構 (Q29)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --text-color: #333;
+            --light-bg: #ffffff;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--light-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+            margin-top: 25px;
+            background-color: #e8f4f8;
+            padding: 10px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .scenario-box {
+            background-color: #fff8e1;
+            border: 1px solid #ffe0b2;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .scenario-label {
+            font-weight: bold;
+            color: #d35400;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .question-box {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        /* Quiz Interaction */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0faff;
+        }
+
+        .option-label input {
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion Style */
+        .accordion {
+            background-color: #eee;
+            color: #444;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1rem;
+            transition: 0.4s;
+            margin-top: 5px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion:hover, .active {
+            background-color: #ccc;
+        }
+
+        .accordion:after {
+            content: '+';
+            font-size: 1.2rem;
+            color: #777;
+        }
+
+        .active:after {
+            content: "-";
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            display: none;
+            overflow: hidden;
+            border: 1px solid #eee;
+            border-top: none;
+            margin-bottom: 10px;
+        }
+
+        .panel-content {
+            padding: 15px 0;
+        }
+
+        /* Visual Elements */
+        .highlight {
+            background-color: #fff176;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .zt-diagram {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .zt-pillar {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            width: 18%; /* 5 items approx */
+            min-width: 80px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zt-base {
+            background-color: var(--secondary-color);
+            color: white;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: var(--primary-color);
+        }
+
+        .term-explanation {
+            color: #555;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .zt-pillar {
+                width: 45%;
+            }
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>題組 4／NIST SP 800-207 零信任架構 (Q29)</h1>
+    </div>
+
+    <!-- A. 題組情境重點整理 -->
+    <div class="accordion">A. 題組情境重點整理</div>
+    <div class="panel" style="display:block;"> <!-- Default open for context -->
+        <div class="panel-content">
+            <div class="scenario-box">
+                <span class="scenario-label">題組 4（第 29–32 題共用）</span>
+                <p>2020 年美國國家標準技術研究院（NIST：美國制定資安與科技標準的重要機構）正式發布標準文件 SP 800-207：零信任架構（Zero Trust Architecture，ZTA）。零信任已從概念逐漸進階至實務部署規劃。</p>
+                <p>某企業之資安管理人員，因應供應鏈上下游要求，包含遠端使用供應鏈管理系統、資料存取、設備辨識與權限控管等需求，依循 NIST SP 800-207 進行規劃，以下為規劃零信任架構時所遇到的問題。</p>
+            </div>
+            <ul>
+                <li><strong>定義：</strong> NIST SP 800-207 是目前全球零信任架構的權威標準。</li>
+                <li><strong>範圍：</strong> 零信任不只管網路，還包含身分、設備、應用與資料。</li>
+                <li><strong>考點：</strong> 本題組在考驗你對零信任「實務規劃」的正確理解，特別是辨別常見誤區。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- B. 題目 -->
+    <div class="question-area">
+        <div class="question-box">
+            【第 29 題】關於規劃零信任資安架構的敘述，下列何者有誤？
+        </div>
+        
+        <div class="options-group" id="quizOptions">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                <span>(A) 白名單之非法遠端連線（RDP：遠端桌面協定，一種遠端控制電腦的工具）是零信任在網路層的控制項目之一</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                <span>(B) 只要設定白名單就可以完全符合零信任之需求</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                <span>(C) 資安微隔離（Micro-Segmentation：把網路切得很細，避免駭客亂竄）是零信任在網路層的控制項目之一</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                <span>(D) 資料存取的零信任可以透過防治資料外洩（Data Loss Prevention，DLP：防止資料被不當帶走或傳送的技術）方案落實</span>
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-submit" onclick="submitAnswer()">提交答案</button>
+            <button class="btn btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback" class="feedback-area"></div>
+    </div>
+
+    <!-- 解析區塊：隱藏直到提交 -->
+    <div id="explanation-section" style="display:none;">
+        <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+        
+        <!-- C. 第一步：找關鍵字 -->
+        <button class="accordion">C. 第一步：找關鍵字</button>
+        <div class="panel">
+            <div class="panel-content">
+                <ul>
+                    <li><span class="highlight">零信任資安架構</span></li>
+                    <li><span class="highlight">有誤</span>（這題是選錯的）</li>
+                    <li><span class="highlight">白名單</span>（只允許清單內的人通過）</li>
+                    <li><span class="highlight">微隔離</span>（Micro-Segmentation）</li>
+                    <li><span class="highlight">DLP</span>（Data Loss Prevention，防止資料外洩）</li>
+                </ul>
+                <p><strong>解釋：</strong> 題目的關鍵在於是否把「零信任」這樣複雜的架構，誤解成「只做單一控制（如白名單）」就能搞定。</p>
+            </div>
+        </div>
+
+        <!-- D. 第二步：白話翻譯 -->
+        <button class="accordion">D. 第二步：白話翻譯</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>用高中生日常口語來說：</p>
+                <p>零信任是一種很嚴謹、很龜毛的資安態度。題目問的是：下面哪個說法「太天真」、「太簡化」了？特別是那種聲稱「做了一件事就天下無敵」的選項。</p>
+            </div>
+        </div>
+
+        <!-- E. 第三步：解題思路 -->
+        <button class="accordion">E. 第三步：解題思路</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>這題在考什麼觀念？</strong></p>
+                <p>一句話：零信任是多層面、持續驗證的整體架構，絕對不是單一技術或產品。</p>
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>檢查每個選項是否符合「多層控制、持續驗證」的精神。</li>
+                    <li>找出「過度簡化零信任」的絕對性說法。</li>
+                </ol>
+                <p><strong>原理與規則（白話）：</strong></p>
+                <ul>
+                    <li>零信任核心精神是「永不預設信任，始終驗證（Never Trust, Always Verify）」。</li>
+                    <li>必須同時結合身分、設備、網路、應用、資料等多個面向，而非只靠一張「白名單」。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- F. 第四步：選項分析 -->
+        <button class="accordion">F. 第四步：選項分析</button>
+        <div class="panel">
+            <div class="panel-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="15%">選項</th>
+                            <th width="20%">是否符合零信任</th>
+                            <th>原因（白話解析）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A)</td>
+                            <td>符合</td>
+                            <td>限制 RDP（遠端連線）並使用白名單管理來源，確實是「網路層」控制的一環。這是對的措施。</td>
+                        </tr>
+                        <tr>
+                            <td>(B)</td>
+                            <td><strong>不符合</strong></td>
+                            <td><strong>錯誤所在：</strong>「只要...就可以完全...」。只設白名單無法確認使用者身分是否被盜、電腦是否中毒。零信任需要多層防護，單靠白名單遠遠不夠。</td>
+                        </tr>
+                        <tr>
+                            <td>(C)</td>
+                            <td>符合</td>
+                            <td>微隔離（把大區網切成很多小房間）可以防止駭客進來後到處亂跑（橫向移動），是零信任網路層的重要手段。</td>
+                        </tr>
+                        <tr>
+                            <td>(D)</td>
+                            <td>符合</td>
+                            <td>DLP（防外洩系統）能監控資料是否被不當傳輸，這是落實「資料層」零信任的具體工具。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- G. 觀念補充與延伸 -->
+        <button class="accordion">G. 觀念補充與延伸</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>1. 視覺化：零信任五大支柱（Five Pillars）</strong></p>
+                <div class="zt-diagram">
+                    <div class="zt-pillar">身分<br>(Identity)</div>
+                    <div class="zt-pillar">設備<br>(Device)</div>
+                    <div class="zt-pillar">網路<br>(Network)</div>
+                    <div class="zt-pillar">應用程式<br>(App)</div>
+                    <div class="zt-pillar">資料<br>(Data)</div>
+                    <div class="zt-base">基礎底座：可視性 (Visibility) 與 分析 (Analytics) / 自動化與編排 (Automation) / 治理 (Governance)</div>
+                </div>
+
+                <p><strong>2. 核心觀念定位：</strong></p>
+                <ul>
+                    <li><strong>零信任架構（ZTA）：</strong> 現代資安架構核心，必考題。</li>
+                    <li><strong>定義整理：</strong> 不因為你在公司內網就信任你，所有存取請求都要經過驗證。</li>
+                </ul>
+                <p><strong>3. 變化題型：</strong></p>
+                <ul>
+                    <li>問「哪一項不是零信任的核心原則？」</li>
+                    <li>問「零信任需涵蓋哪些層面？」(答案就是上面的五大支柱)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- H. 記憶口訣 -->
+        <button class="accordion">H. 記憶口訣</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p style="font-size: 1.2rem; text-align: center; color: var(--primary-color); font-weight: bold;">
+                    「零信任不是一把鎖，而是一整套門禁系統」
+                </p>
+                <p>鎖（白名單）只是系統的一部分，不能代表整個系統。</p>
+            </div>
+        </div>
+
+        <!-- I. 常見陷阱 -->
+        <button class="accordion">I. 常見陷阱</button>
+        <div class="panel">
+            <div class="panel-content">
+                <ul>
+                    <li><strong>易錯點：</strong> 很多學生會以為白名單很嚴格，所以就是零信任。錯！它只是手段之一。</li>
+                    <li><strong>心理盲點：</strong> 看到「完全符合」這種絕對的字眼要提高警覺。</li>
+                    <li><strong>避坑指南：</strong> 在資安題目中，看到「只要...就...」幾乎 99% 都是錯的選項。資安沒有「絕對安全」或「單一解法」。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- J. 正確答案 -->
+        <button class="accordion">J. 正確答案</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p style="font-size: 1.5rem; color: var(--wrong-color); font-weight: bold;">答案：(B)</p>
+                <p><strong>一句話理由：</strong> 零信任是多層、持續驗證的架構，不可能只靠白名單就完成。</p>
+            </div>
+        </div>
+
+        <!-- K. 自我檢測 -->
+        <button class="accordion">K. 自我檢測</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>試著回答以下問題，點擊題目可查看參考答案：</p>
+                
+                <details style="margin-bottom: 10px; cursor: pointer;">
+                    <summary><strong>1) 為什麼零信任要強調「持續驗證」？</strong></summary>
+                    <p style="padding-left: 20px; color: var(--secondary-color);">參考答案：因為身分、設備與行為都可能隨時間改變（例如登入後一分鐘電腦中毒），不能一次驗證就永久信任。</p>
+                </details>
+
+                <details style="margin-bottom: 10px; cursor: pointer;">
+                    <summary><strong>2) 微隔離主要在防止哪一類攻擊？</strong></summary>
+                    <p style="padding-left: 20px; color: var(--secondary-color);">參考答案：防止攻擊者在內網中橫向移動（像是在船艙內移動，如果每個艙門都鎖著，災害就不會擴散）。</p>
+                </details>
+
+                <details style="cursor: pointer;">
+                    <summary><strong>3) DLP 在零信任中主要保護哪一層？</strong></summary>
+                    <p style="padding-left: 20px; color: var(--secondary-color);">參考答案：資料層（Data）。</p>
+                </details>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Accordion Functionality
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        });
+    }
+
+    // Quiz Functionality
+    function submitAnswer() {
+        var radios = document.getElementsByName('answer');
+        var selectedValue = null;
+        for (var radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        var feedbackDiv = document.getElementById('feedback');
+        var explanationSection = document.getElementById('explanation-section');
+
+        if (!selectedValue) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        explanationSection.style.display = "block"; // Show all explanations
+
+        if (selectedValue === 'B') {
+            feedbackDiv.innerHTML = "<h3>✅ 答對了！</h3><p>觀念正確！單靠白名單無法滿足零信任架構的完整需求。請閱讀下方解析了解更多細節。</p>";
+            feedbackDiv.className = "feedback-area feedback-correct";
+            feedbackDiv.style.display = "block";
+            
+            // Auto open the key analysis section
+            var keyAnalysis = acc[4]; // Approximate index for Analysis section
+            if(keyAnalysis && !keyAnalysis.classList.contains("active")) {
+                keyAnalysis.click();
+            }
+        } else {
+            feedbackDiv.innerHTML = "<h3>❌ 答錯了</h3><p>提示：零信任是一個「架構」，不是單一功能的設定。選項 (A)、(C)、(D) 都是零信任架構中某一「層」的正確控制手段，只有 (B) 的說法太過武斷。請參考下方解析。</p>";
+            feedbackDiv.className = "feedback-area feedback-wrong";
+            feedbackDiv.style.display = "block";
+        }
+    }
+
+    function resetQuiz() {
+        // Clear radios
+        var radios = document.getElementsByName('answer');
+        for (var radio of radios) {
+            radio.checked = false;
+        }
+
+        // Hide feedback and explanations
+        document.getElementById('feedback').style.display = "none";
+        document.getElementById('explanation-section').style.display = "none";
+
+        // Close all accordions except the first one (Context)
+        for (var j = 1; j < acc.length; j++) {
+            acc[j].classList.remove("active");
+            acc[j].nextElementSibling.style.display = "none";
+        }
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

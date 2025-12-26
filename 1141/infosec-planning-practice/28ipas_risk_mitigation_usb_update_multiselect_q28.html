@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安重點解析：風險緩解</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+            --highlight-color: #fff3cd;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Heiti TC", "Microsoft JhengHei", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: var(--secondary-color);
+            margin-top: 25px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        /* Question Section */
+        .question-box {
+            background-color: #f1f8ff;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #d1e7dd;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f0f0;
+        }
+
+        .option-label input[type="checkbox"] {
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Feedback */
+        #feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .result-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion Styles */
+        .accordion-container {
+            display: none; /* Hidden by default until correct answer */
+            margin-top: 30px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .accordion {
+            background-color: #eee;
+            color: #444;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: 0.4s;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion:hover, .accordion.active {
+            background-color: #ddd;
+        }
+
+        .accordion:after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .accordion.active:after {
+            content: '-';
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            border-left: 3px solid #ddd;
+        }
+
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Flowchart CSS */
+        .flowchart {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 10px;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+
+        .flow-step {
+            background: white;
+            border: 2px solid var(--secondary-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .arrow {
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        /* Table CSS */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Self Check Details */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .answer-text {
+            margin-top: 10px;
+            padding-left: 15px;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        
+        .term-def {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>風險緩解：機台程式更新風險</h1>
+    </header>
+
+    <!-- Part A: Question -->
+    <section>
+        <div class="question-box">
+            <p class="question-text">
+                28. 【複選題】<br>
+                甲公司因 A 製程所用之所有機台當機，造成生產線停工、影響產品生產。經公司資安人員分析評估後，確認發生原因為廠商透過 USB 更新機台應用程式過程控制不當，導致機台程式異常所致。請問下列哪些選項為降低機台程式更新異常的風險緩解（Risk Mitigation：降低風險發生機率或影響程度）措施？
+            </p>
+            <form id="quiz-form">
+                <div class="options-group">
+                    <label class="option-label">
+                        <input type="checkbox" name="option" value="A">
+                        (A) 將 A 製程委外處理
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="option" value="B">
+                        (B) 要求 USB 使用前，應掃毒確認無異常
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="option" value="C">
+                        (C) 要求負責機台之廠商提供保證金，減少公司因此產生可能的營運損失
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="option" value="D">
+                        (D) 要求機台需分多批次更新程式，每批更新確認安全無誤後，方可進行下一批之更新作業
+                    </label>
+                </div>
+            </form>
+            <div class="btn-group">
+                <button class="btn-submit" onclick="submitAnswer()">提交答案</button>
+                <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+            </div>
+            <div id="feedback-area"></div>
+        </div>
+    </section>
+
+    <!-- Hidden Analysis Section -->
+    <div id="analysis-container" class="accordion-container">
+        
+        <!-- Part B: Step 1 Keywords -->
+        <button class="accordion">B. 第一步：找關鍵字</button>
+        <div class="panel">
+            <p>請注意題目中的重點標示：</p>
+            <ul>
+                <li><span class="highlight">機台當機／生產線停工</span>：這是已發生的後果。</li>
+                <li><span class="highlight">USB 更新程式</span>：這是問題發生的途徑。</li>
+                <li><span class="highlight">控制不當</span>：這是根本原因。</li>
+                <li><span class="highlight">風險緩解（Risk Mitigation）</span>：這是題目要求的解法。</li>
+            </ul>
+            <p><strong>解釋：</strong>本題重點在「降低更新過程出錯的機率或影響」，不是把風險轉走或不做。</p>
+        </div>
+
+        <!-- Part C: Step 2 Translation -->
+        <button class="accordion">C. 第二步：白話翻譯</button>
+        <div class="panel">
+            <p>用白話文來說：</p>
+            <p>工廠機台因為用 USB 更新程式出包，導致停工。現在要想辦法「讓以後更新比較不容易出事（降低機率）」或者「就算出事也不會全掛（降低影響）」，哪些做法真的能做到這兩點？</p>
+        </div>
+
+        <!-- Part D: Step 3 Logic -->
+        <button class="accordion">D. 第三步：解題思路</button>
+        <div class="panel">
+            <p><strong>這題在考什麼觀念？</strong><br>
+            四種風險處理策略（避免、轉移、緩解、接受）中，「風險緩解」的實務判斷。</p>
+            
+            <p><strong>解題步驟：</strong></p>
+            <ol>
+                <li>判斷該措施是否「仍然繼續做 USB 更新」？（如果是停止不做，通常是避免）。</li>
+                <li>該措施是否能「降低出錯機率」或「縮小影響範圍」？</li>
+                <li>排除「避免風險（完全不做）」與「風險分擔（找人賠錢）」的類型。</li>
+            </ol>
+            
+            <p><strong>原理與規則（白話）：</strong></p>
+            <ul>
+                <li><strong>風險緩解 (Risk Mitigation)：</strong>事情照做，但加上控制措施讓它比較不容易出事，或出事時比較不痛。</li>
+                <li>不是不做（那是避免），也不是只談賠錢（那是分擔/轉移）。</li>
+            </ul>
+        </div>
+
+        <!-- Part E: Option Analysis -->
+        <button class="accordion">E. 第四步：選項分析</button>
+        <div class="panel">
+            <p><strong>(A) 將 A 製程委外處理</strong><br>
+            為什麼不是？委外等於自己不處理該製程，屬於「風險避免」或「風險轉移」，並沒有降低更新過程本身的技術風險。</p>
+
+            <p><strong>(B) 要求 USB 使用前，應掃毒確認無異常</strong><br>
+            為什麼是？掃毒可以直接減少惡意程式或病毒透過 USB 進入機台的機會，這是在「降低發生機率」。</p>
+
+            <p><strong>(C) 要求負責機台之廠商提供保證金</strong><br>
+            為什麼不是？收保證金只能彌補事後的財務損失，無法讓機台更新比較不出錯。這屬於「風險分擔（轉移）」。</p>
+
+            <p><strong>(D) 要求機台需分多批次更新程式</strong><br>
+            為什麼是？分批更新（例如先更 10 台，沒事再更下一批）可以避免一次全部當機。這是典型的「降低影響範圍」。</p>
+
+            <!-- Comparison Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>選項</th>
+                        <th>是否降低發生機率</th>
+                        <th>是否降低影響範圍</th>
+                        <th>風險處理類型</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>(A) 委外</td>
+                        <td>否</td>
+                        <td>否</td>
+                        <td>風險避免 / 轉移</td>
+                    </tr>
+                    <tr>
+                        <td>(B) 掃毒</td>
+                        <td>是</td>
+                        <td>否</td>
+                        <td><strong>風險緩解</strong></td>
+                    </tr>
+                    <tr>
+                        <td>(C) 保證金</td>
+                        <td>否</td>
+                        <td>否 (僅補償財務)</td>
+                        <td>風險分擔 / 轉移</td>
+                    </tr>
+                    <tr>
+                        <td>(D) 分批更新</td>
+                        <td>否</td>
+                        <td>是</td>
+                        <td><strong>風險緩解</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Part F: Supplement -->
+        <button class="accordion">F. 觀念補充與延伸</button>
+        <div class="panel">
+            <p><strong>更新流程風險控制圖：</strong></p>
+            <div class="flowchart">
+                <div class="flow-step">USB 更新</div>
+                <div class="arrow">&rarr;</div>
+                <div class="flow-step">掃毒 (緩解)</div>
+                <div class="arrow">&rarr;</div>
+                <div class="flow-step">分批更新 (緩解)</div>
+                <div class="arrow">&rarr;</div>
+                <div class="flow-step">確認安全</div>
+            </div>
+
+            <p><strong>核心觀念定位：</strong></p>
+            <ul>
+                <li>資安管理 &rarr; 風險管理與風險處理</li>
+                <li>考試常見度：必考（風險處理判定出現率極高）。</li>
+            </ul>
+
+            <p><strong>定義整理（白話）：</strong></p>
+            <ul>
+                <li><strong>風險緩解 (Risk Mitigation)：</strong>採取控制措施，降低風險發生的「機率」或「影響程度」。</li>
+            </ul>
+
+            <p><strong>觸類旁通（對比概念）：</strong></p>
+            <ul>
+                <li>掃毒、分批更新、加裝防火牆 &rarr; <strong>緩解</strong></li>
+                <li>委外不做、關閉功能 &rarr; <strong>避免</strong></li>
+                <li>保險、合約求償、保證金 &rarr; <strong>分擔 (或轉移)</strong></li>
+            </ul>
+        </div>
+
+        <!-- Part G: Mnemonic -->
+        <button class="accordion">G. 記憶口訣</button>
+        <div class="panel">
+            <p style="font-size: 1.1em; color: var(--secondary-color); font-weight: bold;">
+                「風險要緩解：先檢查、再分批；不做是避免，賠錢是分擔」
+            </p>
+        </div>
+
+        <!-- Part H: Common Traps -->
+        <button class="accordion">H. 常見陷阱</button>
+        <div class="panel">
+            <ul>
+                <li><strong>易錯點：</strong>看到「保證金」或「罰款」就以為是風險降低。其實那只是錢的補償，機台還是會壞。</li>
+                <li><strong>心理盲點：</strong>把「降低財務損失」誤當成「降低資安事件發生」。</li>
+                <li><strong>避坑指南：</strong>問自己一句話：這個措施有沒有讓「出錯比較不容易發生」？如果有，就是緩解；如果只是事後拿錢，就是分擔。</li>
+            </ul>
+        </div>
+
+        <!-- Part I: Answer -->
+        <button class="accordion">I. 正確答案</button>
+        <div class="panel">
+            <p><strong>正確答案：B、D</strong></p>
+            <p><strong>一句話理由：</strong>掃毒（B）與分批更新（D）能直接降低程式更新異常的發生機率或影響範圍。</p>
+        </div>
+
+        <!-- Part J: Self Check -->
+        <button class="accordion">J. 自我檢測</button>
+        <div class="panel">
+            <p>請嘗試回答下列變形題，點擊標題查看答案：</p>
+            
+            <details>
+                <summary>1) 如果公司建立「更新前測試環境」先測試程式，屬於哪一種風險處理？</summary>
+                <div class="answer-text">參考答案：風險緩解 (Risk Mitigation)。<br><span class="term-def">理由：透過測試找出 Bug，降低實際上線出錯的機率。</span></div>
+            </details>
+
+            <details>
+                <summary>2) 如果公司決定完全停止使用 USB，改用安全的集中更新系統，較接近哪一種？</summary>
+                <div class="answer-text">參考答案：風險避免 (Risk Avoidance)。<br><span class="term-def">理由：停止使用原本有風險的途徑（USB），就是避免掉該途徑的風險。</span></div>
+            </details>
+
+            <details>
+                <summary>3) 如果公司購買營運中斷保險，較接近哪一種？</summary>
+                <div class="answer-text">參考答案：風險分擔 (Risk Sharing) 或 風險轉移。<br><span class="term-def">理由：涉及保險與金錢賠償，是將財務後果分擔給保險公司。</span></div>
+            </details>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Accordion Logic
+    var acc = document.getElementsByClassName("accordion");
+    for (var i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            }
+        });
+    }
+
+    // Quiz Logic
+    function submitAnswer() {
+        // Correct answers are B and D
+        const correctAnswers = ['B', 'D'];
+        
+        // Get user selections
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        let userAnswers = [];
+        checkboxes.forEach((checkbox) => {
+            userAnswers.push(checkbox.value);
+        });
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const analysisContainer = document.getElementById('analysis-container');
+
+        // Sort arrays to compare content regardless of order
+        userAnswers.sort();
+        correctAnswers.sort();
+
+        // Check equality
+        const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctAnswers);
+
+        feedbackArea.style.display = 'block';
+
+        if (isCorrect) {
+            feedbackArea.className = 'result-correct';
+            feedbackArea.innerHTML = '正確答案！<br>恭喜你答對了。已為您展開詳細解析。';
+            analysisContainer.style.display = 'block';
+            
+            // Auto open all accordions for review
+            var allAcc = document.getElementsByClassName("accordion");
+            for (var j = 0; j < allAcc.length; j++) {
+                allAcc[j].classList.add("active");
+                var panel = allAcc[j].nextElementSibling;
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            }
+        } else {
+            feedbackArea.className = 'result-wrong';
+            // Specific hint based on prompt requirements
+            feedbackArea.innerHTML = '回答錯誤。<br>提示：風險緩解是降低發生或影響，不是委外或拿錢補。<br>（需全選 B、D 才算正確）';
+        }
+    }
+
+    function resetQuiz() {
+        // Clear checkboxes
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = false;
+        });
+
+        // Hide feedback
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'none';
+        feedbackArea.innerHTML = '';
+
+        // Hide and collapse analysis
+        const analysisContainer = document.getElementById('analysis-container');
+        analysisContainer.style.display = 'none';
+
+        var allAcc = document.getElementsByClassName("accordion");
+        for (var j = 0; j < allAcc.length; j++) {
+            allAcc[j].classList.remove("active");
+            var panel = allAcc[j].nextElementSibling;
+            panel.style.maxHeight = null;
+        }
+
+        // Close details in self check
+        const details = document.querySelectorAll('details');
+        details.forEach((detail) => {
+            detail.removeAttribute('open');
+        });
+    }
+</script>
+
+</body>
+</html>

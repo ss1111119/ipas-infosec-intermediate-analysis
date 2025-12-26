@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安重點解析：風險處理優先順序</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+            --highlight-color: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        /* Quiz Styles */
+        .quiz-section {
+            background: #fff;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            list-style: none;
+        }
+
+        .option-item {
+            margin-bottom: 10px;
+        }
+
+        .option-item label {
+            display: block;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-item label:hover {
+            background-color: #f0f8ff;
+            border-color: var(--accent-color);
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        input[type="radio"]:checked + label {
+            background-color: #e8f4fd;
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Feedback Styles */
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis Section Styles */
+        .analysis-container {
+            display: none; /* Hidden initially */
+            margin-top: 30px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        details {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 12px;
+            background-color: #eee;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Remove default triangle in some browsers */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            background-color: #fff;
+        }
+
+        /* Visual Chart: Risk Thermometer */
+        .risk-chart-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .risk-bar {
+            display: flex;
+            height: 40px;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: white;
+            font-weight: bold;
+            line-height: 40px;
+        }
+
+        .risk-safe {
+            width: 50%;
+            background-color: var(--success-color);
+        }
+
+        .risk-danger {
+            width: 50%;
+            background-color: var(--error-color);
+            position: relative;
+        }
+
+        .threshold-marker {
+            position: absolute;
+            left: 50%;
+            top: -10px;
+            bottom: -10px;
+            width: 4px;
+            background-color: #333;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        
+        .chart-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: var(--primary-color);
+        }
+
+        /* Highlights */
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        .term {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            .risk-bar {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>主題：風險處理優先順序與文件化</h1>
+        <p>iPAS 資訊安全工程師能力鑑定 - 重點考題解析</p>
+    </header>
+
+    <!-- Quiz Section -->
+    <div class="quiz-section">
+        <div class="question-text">
+            A. 題目：<br>
+            35. 有關如何進行風險處理的描述，下列何者最「不」適切？
+        </div>
+        <ul class="options">
+            <li class="option-item">
+                <input type="radio" name="answer" id="optA" value="A">
+                <label for="optA">(A) 在風險處理的過程中，有可能會需要因為導入的工具，管理新的風險</label>
+            </li>
+            <li class="option-item">
+                <input type="radio" name="answer" id="optB" value="B">
+                <label for="optB">(B) 超過可接受風險之資產，應先將此風險列入觀察，後續再予以處理</label>
+            </li>
+            <li class="option-item">
+                <input type="radio" name="answer" id="optC" value="C">
+                <label for="optC">(C) 風險擁有者與利害相關者（Stakeholders：受影響的人/單位），都需要瞭解風險處理後之剩餘風險（Residual Risk：做完控制後仍然存在的風險）的結果</label>
+            </li>
+            <li class="option-item">
+                <input type="radio" name="answer" id="optD" value="D">
+                <label for="optD">(D) 風險處理後之殘餘風險，必須文件化記錄並定期審查，確認風險處理是有效控制風險的</label>
+            </li>
+        </ul>
+
+        <div class="btn-group">
+            <button class="btn btn-submit" onclick="submitAnswer()">提交答案</button>
+            <button class="btn btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback-box" class="feedback"></div>
+    </div>
+
+    <!-- Analysis Container (Initially Hidden) -->
+    <div id="analysis-container" class="analysis-container">
+        
+        <!-- B. 第一步 -->
+        <details open>
+            <summary>B. 第一步：找關鍵字</summary>
+            <div class="details-content">
+                <p>請注意題目中的以下關鍵詞：</p>
+                <ul>
+                    <li><span class="highlight">風險處理</span></li>
+                    <li><span class="highlight">最不適切</span>（這是反向題）</li>
+                    <li><span class="highlight">新的風險</span></li>
+                    <li><span class="highlight">超過可接受風險</span></li>
+                    <li><span class="highlight">列入觀察</span></li>
+                    <li><span class="highlight">剩餘風險</span></li>
+                    <li><span class="highlight">文件化</span>、<span class="highlight">定期審查</span></li>
+                </ul>
+                <p style="margin-top: 10px;"><strong>解釋：</strong>本題核心是「超過可接受風險」到底該怎麼辦，能不能先放著不處理？</p>
+            </div>
+        </details>
+
+        <!-- C. 第二步 -->
+        <details>
+            <summary>C. 第二步：白話翻譯</summary>
+            <div class="details-content">
+                <p>用高中生日常口語來說：</p>
+                <p>「如果風險數值已經爆表了，正常的邏輯應該是趕快想辦法解決（處理），而不是把它先放進『觀察名單』說以後再說。」</p>
+                <p>題目要找哪一個說法是<strong>最不合理</strong>的。</p>
+            </div>
+        </details>
+
+        <!-- D. 第三步 -->
+        <details>
+            <summary>D. 第三步：解題思路</summary>
+            <div class="details-content">
+                <p><strong>這題在考什麼觀念？</strong></p>
+                <p>一句話：風險超過可接受門檻就要優先處理，不能只觀察不處理。</p>
+                <br>
+                <p><strong>解題步驟：</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>先辨識「超過可接受風險」代表已經超標。</li>
+                    <li>檢查選項是否符合風險管理流程：處理、降低、分擔、避免或正式接受。</li>
+                    <li>找出「拖延處理」或「不合流程」的敘述。</li>
+                </ol>
+                <br>
+                <p><strong>原理與規則（白話）：</strong></p>
+                <ul>
+                    <li><span class="term">可接受風險（Risk Appetite/Tolerance：組織願意承擔的風險範圍）</span>是底線。</li>
+                    <li>超過底線就要採取行動（<span class="term">風險處理</span>），不能只是「觀察」。</li>
+                </ul>
+                
+                <!-- Risk Chart Visualization -->
+                <div class="risk-chart-container">
+                    <h3>風險門檻示意圖</h3>
+                    <div style="position: relative; margin-top: 20px;">
+                        <div class="threshold-marker"></div>
+                        <div class="risk-bar">
+                            <div class="risk-safe">可接受範圍 (Safe)</div>
+                            <div class="risk-danger">不可接受 (Action Required!)</div>
+                        </div>
+                        <div class="chart-labels">
+                            <span>低風險</span>
+                            <span style="font-weight:bold;">可接受門檻</span>
+                            <span>高風險</span>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #555; margin-top: 10px;">一旦跨過中間那條線，就必須採取行動，不能只是「看著它」。</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- E. 第四步 -->
+        <details>
+            <summary>E. 第四步：選項分析</summary>
+            <div class="details-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="15%">選項</th>
+                            <th width="20%">是否適切</th>
+                            <th>原因（白話解析）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A)</td>
+                            <td style="color: var(--success-color); font-weight: bold;">適切</td>
+                            <td>新工具可能帶來新風險（例如設定錯誤、權限擴大），所以需要同時管理，這是合理的。</td>
+                        </tr>
+                        <tr>
+                            <td>(B)</td>
+                            <td style="color: var(--error-color); font-weight: bold;">最不適切</td>
+                            <td><strong>題目答案。</strong>超過<span class="term">可接受風險</span>應優先處理或升級通報決策，不能先「列入觀察」拖延。</td>
+                        </tr>
+                        <tr>
+                            <td>(C)</td>
+                            <td style="color: var(--success-color); font-weight: bold;">適切</td>
+                            <td>風險處理後的<span class="term">剩餘風險</span>要讓風險擁有者與利害關係人知情，才能做決策與承擔。</td>
+                        </tr>
+                        <tr>
+                            <td>(D)</td>
+                            <td style="color: var(--success-color); font-weight: bold;">適切</td>
+                            <td><span class="term">殘餘風險</span>需要文件化與定期審查，確認控制有效與風險狀態是否改變。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        <!-- F. 觀念補充 -->
+        <details>
+            <summary>F. 觀念補充與延伸</summary>
+            <div class="details-content">
+                <p><strong>核心觀念定位：</strong></p>
+                <ul>
+                    <li>風險管理 → 風險處理與追蹤（監控/審查）</li>
+                    <li>考試常見度：高（「超過可接受風險」如何處理是常考陷阱）</li>
+                </ul>
+                <br>
+                <p><strong>定義整理（白話）：</strong></p>
+                <ul>
+                    <li><strong>可接受風險：</strong>組織可承擔的範圍。</li>
+                    <li><strong>風險超標：</strong>超出範圍，需處理或升級決策。</li>
+                    <li><strong>殘餘風險：</strong>做完控制後仍存在的風險。</li>
+                </ul>
+                <br>
+                <p><strong>觸類旁通（對比概念）：</strong></p>
+                <ul>
+                    <li><span class="term">觀察（Monitoring：持續看）</span> &ne; <span class="term">處理（Treatment：採取行動）</span>。觀察通常用於「低風險」或「已接受的風險」。</li>
+                </ul>
+                <br>
+                <p><strong>變化題型：</strong></p>
+                <ol>
+                    <li>把「超過可接受風險」改成「接近可接受上限」，問是否可先觀察（此時可能可）。</li>
+                    <li>問「超標風險未處理」會造成什麼治理問題（責任不清、審計缺失）。</li>
+                </ol>
+            </div>
+        </details>
+
+        <!-- G. 記憶口訣 -->
+        <details>
+            <summary>G. 記憶口訣</summary>
+            <div class="details-content">
+                <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold; background: #f0f8ff; padding: 15px; border-radius: 10px;">
+                    「風險超標先處理，別只掛觀察」
+                </p>
+            </div>
+        </details>
+
+        <!-- H. 常見陷阱 -->
+        <details>
+            <summary>H. 常見陷阱</summary>
+            <div class="details-content">
+                <ul>
+                    <li><strong>易錯點：</strong>把「列入觀察」誤認為是合理的第一步。</li>
+                    <li><strong>心理盲點：</strong>覺得先記起來等有空再做也行（實務上高風險不能等）。</li>
+                    <li><strong>避坑指南：</strong>看到「超過可接受風險」就要立刻想到：處理/升級核決/限制使用，而不是觀察。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- I. 正確答案 -->
+        <details open>
+            <summary>I. 正確答案</summary>
+            <div class="details-content">
+                <p><strong>答案：(B)</strong></p>
+                <p><strong>一句話理由：</strong>風險已超過可接受範圍應優先處理，不能只列入觀察延後。</p>
+            </div>
+        </details>
+
+        <!-- J. 自我檢測 -->
+        <details>
+            <summary>J. 自我檢測（點擊展開參考答案）</summary>
+            <div class="details-content">
+                <div style="margin-bottom: 15px;">
+                    <p><strong>1) 如果風險超標但短期無法完全消除，你可以怎麼做？</strong></p>
+                    <details style="margin-top: 5px; border: none; background: #fafafa;">
+                        <summary style="font-size: 0.9rem; color: #666;">查看參考答案</summary>
+                        <p style="padding: 10px; color: var(--success-color);">參考答案：先採取降低控制、暫停/限制使用（避免）、或分擔部分風險，同時由風險擁有者核可剩餘風險。</p>
+                    </details>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <p><strong>2) 為什麼新工具可能帶來新風險？</strong></p>
+                    <details style="margin-top: 5px; border: none; background: #fafafa;">
+                        <summary style="font-size: 0.9rem; color: #666;">查看參考答案</summary>
+                        <p style="padding: 10px; color: var(--success-color);">參考答案：可能出現設定錯誤、權限配置不當、相容性問題或新的攻擊面。</p>
+                    </details>
+                </div>
+
+                <div>
+                    <p><strong>3) 為什麼殘餘風險要文件化並定期審查？</strong></p>
+                    <details style="margin-top: 5px; border: none; background: #fafafa;">
+                        <summary style="font-size: 0.9rem; color: #666;">查看參考答案</summary>
+                        <p style="padding: 10px; color: var(--success-color);">參考答案：因為環境會變，文件化可追責與稽核，審查可確認控制是否仍有效。</p>
+                    </details>
+                </div>
+            </div>
+        </details>
+
+    </div>
+</div>
+
+<script>
+    function submitAnswer() {
+        // 取得使用者選擇的選項
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackBox = document.getElementById('feedback-box');
+        const analysisContainer = document.getElementById('analysis-container');
+
+        // 檢查是否已作答
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // 顯示解析區塊
+        analysisContainer.style.display = 'block';
+        
+        // 滾動到解析區塊
+        setTimeout(() => {
+            analysisContainer.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+
+        // 判斷對錯
+        if (selectedValue === 'B') {
+            feedbackBox.textContent = '恭喜答對！正確答案是 (B)。超過可接受風險應優先處理。';
+            feedbackBox.className = 'feedback correct';
+        } else {
+            feedbackBox.textContent = '答錯了！正確答案是 (B)。提示：超標風險不能只觀察，必須行動。';
+            feedbackBox.className = 'feedback wrong';
+        }
+        
+        feedbackBox.style.display = 'block';
+
+        // 展開所有解析詳情以便閱讀 (可選，這裡設定展開前幾個重要的)
+        const details = document.querySelectorAll('details');
+        details.forEach(detail => detail.open = true);
+    }
+
+    function resetQuiz() {
+        // 清除選項
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // 隱藏回饋與解析
+        document.getElementById('feedback-box').style.display = 'none';
+        document.getElementById('analysis-container').style.display = 'none';
+        
+        // 滾動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // 重置 Accordion 狀態 (除了 B 和 I 預設展開外，其他關閉，或是全部關閉重來)
+        const details = document.querySelectorAll('details');
+        details.forEach((detail, index) => {
+             // 恢復預設狀態：只有 B (index 0) 展開
+             if(index === 0) detail.open = true;
+             else detail.open = false;
+        });
+    }
+</script>
+
+</body>
+</html>

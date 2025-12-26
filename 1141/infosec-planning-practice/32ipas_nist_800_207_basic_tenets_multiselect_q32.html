@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題組教學：NIST SP 800-207 零信任基本規則</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --spacing-unit: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        header h2 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            font-weight: normal;
+        }
+
+        .scenario-box {
+            background-color: #e8f4fc;
+            border-left: 5px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .question-box {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-list {
+            list-style: none;
+        }
+
+        .option-item {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .option-item input[type="checkbox"] {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .action-area {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 0 10px;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #1a252f;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        .btn-retry:hover {
+            background-color: #7f8c8d;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion Styles */
+        .explanation-section {
+            margin-top: 30px;
+            display: none; /* Hidden until submitted */
+        }
+
+        .accordion {
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: white;
+        }
+
+        .accordion.active .accordion-content {
+            padding: 15px;
+            max-height: 2000px; /* Arbitrary large height for expansion */
+            border-top: 1px solid #ddd;
+        }
+
+        /* Highlights and Keywords */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .term-def {
+            color: #666;
+            font-size: 0.9em;
+            margin-left: 5px;
+        }
+
+        /* Visual Cards CSS */
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .rule-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .rule-card h4 {
+            color: var(--success-color);
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .rule-card p {
+            font-size: 0.9rem;
+        }
+
+        .trap-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            border: 2px dashed var(--error-color);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .trap-card h4 {
+            color: var(--error-color);
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        /* Table Styles */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .analysis-table th, .analysis-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .analysis-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .analysis-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>題組 4｜NIST SP 800-207 零信任基本規則</h1>
+        <h2>iPAS 資安【題組題｜複選題】互動教學</h2>
+    </header>
+
+    <div class="scenario-box">
+        <strong>【題組共用情境】</strong>
+        <p>依循 NIST SP 800-207（Zero Trust Architecture，ZTA：零信任架構），企業因應供應鏈上下游需求，包含遠端使用供應鏈管理系統、資料存取、設備辨識與權限控管等，規劃零信任資安架構。</p>
+        <p style="margin-top:10px; font-size: 0.9em; color: #555;">（情境強調：零信任涵蓋身分、設備、網路、應用與工作負載、資料等層面，並以「持續驗證、動態決策」落實存取控管。）</p>
+    </div>
+
+    <!-- 互動教學內容結構 A -->
+    <div class="accordion">
+        <div class="accordion-header">A. 題組情境重點整理</div>
+        <div class="accordion-content">
+            <ul>
+                <li>本題回到 NIST SP 800-207 的「基本規則（Tenets：基本信條/原則）」。</li>
+                <li>核心精神是：「所有存取都要保護」、「持續監控」、「把一切當資源」。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 互動教學內容結構 B -->
+    <div class="question-box">
+        <div class="question-text">【第 32 題】關於 NIST SP 800-207 零信任架構（Zero Trust Architecture，ZTA）的基本規則敘述，下列何者正確？（複選）</div>
+        <div class="options-list">
+            <label class="option-item">
+                <input type="checkbox" name="q32" value="A">
+                <span>(A) 所有的通訊都需被保護，無論其所在之網路位置</span>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" name="q32" value="B">
+                <span>(B) 須觀察與量測所擁有資產與相關資產，其完整性與安全態勢</span>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" name="q32" value="C">
+                <span>(C) 運算服務（Computing Service：提供運算能力的服務）和資料來源（Data Sources：資料的產出或存放來源）皆可視為資源</span>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" name="q32" value="D">
+                <span>(D) 應先蒐集資產、網路架構等現狀，建立資產清冊</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="action-area">
+        <button class="btn-submit" onclick="submitAnswer()">提交答案</button>
+        <button class="btn-retry" onclick="resetQuiz()">重作一次</button>
+    </div>
+
+    <div id="feedback-msg" class="feedback"></div>
+
+    <!-- 解析內容，預設隱藏，提交後顯示 -->
+    <div id="explanation-area" class="explanation-section">
+        
+        <!-- 互動教學內容結構 C -->
+        <div class="accordion">
+            <div class="accordion-header">C. 第一步：找關鍵字</div>
+            <div class="accordion-content">
+                <p>請注意題目中的關鍵字：</p>
+                <ul>
+                    <li>(A) <span class="highlight">所有通訊</span>都需被保護、<span class="highlight">無論網路位置</span>。</li>
+                    <li>(B) <span class="highlight">觀察與量測</span>、<span class="highlight">完整性與安全態勢</span>。</li>
+                    <li>(C) <span class="highlight">運算服務</span>、<span class="highlight">資料來源</span>視為<span class="highlight">資源</span>。</li>
+                    <li>(D) <span class="highlight">資產清冊</span>（注意：這是前置作業）。</li>
+                </ul>
+                <p style="margin-top:10px;"><strong>初步判斷：</strong>A、B、C 都是零信任「基本規則」的標準句型；D 比較像是在做架構前的盤點工作。</p>
+            </div>
+        </div>
+
+        <!-- 互動教學內容結構 D -->
+        <div class="accordion">
+            <div class="accordion-header">D. 第二步：白話翻譯</div>
+            <div class="accordion-content">
+                <p>用高中生日常口語來說明這些規則：</p>
+                <ol style="margin-left: 20px;">
+                    <li><strong>(A) 不管在哪都要防：</strong> 零信任就是不管你在公司內網還是外面星巴克，通訊連線都要加密保護。</li>
+                    <li><strong>(B) 隨時檢查體檢表：</strong> 要一直監控你的設備有沒有被偷偷改掉（完整性），以及現在安不安全（安全態勢）。</li>
+                    <li><strong>(C) 什麼都算資源：</strong> 不只是檔案伺服器，連雲端運算能力、資料庫來源，通通都算是要被控管的「資源」。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- 互動教學內容結構 E -->
+        <div class="accordion">
+            <div class="accordion-header">E. 第三步：解題思路</div>
+            <div class="accordion-content">
+                <p><strong>這題在考什麼觀念？</strong><br>
+                辨識「零信任基本規則」與「前置準備工作」的差別。</p>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                <p><strong>解題步驟：</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>先找出像「永不預設信任、持續監控、資源皆需保護」這類長期原則的敘述。</li>
+                    <li>再排除屬於「專案導入準備」的一次性或階段性敘述。</li>
+                </ol>
+                <p style="margin-top:10px;"><strong>原理與規則（白話）：</strong><br>
+                基本規則是「長期一直成立的原則」；資產清冊是「導入前/導入中要做的管理活動」，雖然重要，但NIST 800-207 將其列為導入步驟或假設，而非定義架構本質的七大信條（Tenets）之一。</p>
+            </div>
+        </div>
+
+        <!-- 互動教學內容結構 F -->
+        <div class="accordion active">
+            <div class="accordion-header">F. 第四步：選項分析</div>
+            <div class="accordion-content">
+                <!-- 視覺化圖表：基本規則 vs 導入準備 -->
+                <div class="cards-container">
+                    <div class="rule-card">
+                        <h4>(A) 通訊保護</h4>
+                        <p>不看網路位置<br>一視同仁</p>
+                    </div>
+                    <div class="rule-card">
+                        <h4>(B) 持續觀測</h4>
+                        <p>檢查完整性<br>安全態勢</p>
+                    </div>
+                    <div class="rule-card">
+                        <h4>(C) 定義資源</h4>
+                        <p>運算與資料<br>皆視為資源</p>
+                    </div>
+                    <div class="trap-card">
+                        <h4>(D) 導入準備</h4>
+                        <p>建立資產清冊<br>(非基本原則)</p>
+                    </div>
+                </div>
+
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th width="15%">選項</th>
+                            <th width="20%">是否正確</th>
+                            <th>原因解析（白話）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A)</td>
+                            <td style="color:var(--success-color); font-weight:bold;">正確</td>
+                            <td>零信任不因你在內網就信任你，所有網路通訊（Communication）都必須加密和驗證。</td>
+                        </tr>
+                        <tr>
+                            <td>(B)</td>
+                            <td style="color:var(--success-color); font-weight:bold;">正確</td>
+                            <td>系統必須持續監控設備的狀態（如：有沒有中毒、修補程式有沒有裝），這叫安全態勢（Security Posture）。</td>
+                        </tr>
+                        <tr>
+                            <td>(C)</td>
+                            <td style="color:var(--success-color); font-weight:bold;">正確</td>
+                            <td>資源的定義很廣，包含你用的運算能力（如雲端主機）和資料來源，都要納入保護範圍。</td>
+                        </tr>
+                        <tr>
+                            <td>(D)</td>
+                            <td style="color:var(--error-color); font-weight:bold;">錯誤</td>
+                            <td>「建立資產清冊」是實施零信任的「準備工作」或「理想狀態」，但不屬於 NIST 條列的「基本規則（Tenets）」句型重點。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 互動教學內容結構 G -->
+        <div class="accordion">
+            <div class="accordion-header">G. 觀念補充與延伸</div>
+            <div class="accordion-content">
+                <p><strong>核心觀念定位：</strong></p>
+                <ul>
+                    <li>零信任基本規則（Tenets）是考試常客。</li>
+                    <li>常考點：A/B/C 這類敘述。</li>
+                </ul>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                <p><strong>名詞定義（白話）：</strong></p>
+                <ul>
+                    <li><strong>安全態勢 (Security Posture)：</strong> 目前的安全狀況好不好？有沒有漏洞？</li>
+                    <li><strong>完整性 (Integrity)：</strong> 資料或系統有沒有被偷偷改掉？</li>
+                    <li><strong>資源 (Resource)：</strong> 任何需要被存取與保護的東西。</li>
+                </ul>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                <p><strong>變化題型：</strong></p>
+                <ol>
+                    <li>把「所有資源都要被視為資源」改寫成「所有資料都要加密」來混淆（雖然要加密，但語意不同）。</li>
+                    <li>把「網路位置無關」混成「內網可視為可信」來考錯誤敘述。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- 互動教學內容結構 H -->
+        <div class="accordion">
+            <div class="accordion-header">H. 記憶口訣</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold;">
+                    「不看位置、都要保護；<br>要看狀態、都算資源。」
+                </p>
+            </div>
+        </div>
+
+        <!-- 互動教學內容結構 I -->
+        <div class="accordion">
+            <div class="accordion-header">I. 常見陷阱</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>易錯點：</strong>把「導入準備工作」誤當成「基本規則」。</li>
+                    <li><strong>心理盲點：</strong>看到「資產清冊」這幾個字很專業，就覺得一定是正確原則。</li>
+                    <li><strong>避坑指南：</strong>問自己：這句話是「永遠成立的原則」還是「專案開始前要做的工作」？如果是工作項目（如盤點、採購），通常不是 Tenets。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 互動教學內容結構 J -->
+        <div class="accordion">
+            <div class="accordion-header">J. 正確答案</div>
+            <div class="accordion-content">
+                <p><strong>正確選項：A、B、C</strong></p>
+                <p>理由：A/B/C 符合 NIST SP 800-207 零信任七大核心基本規則；D 是導入盤點工作，不屬於基本規則敘述重點。</p>
+            </div>
+        </div>
+
+        <!-- 互動教學內容結構 K -->
+        <div class="accordion">
+            <div class="accordion-header">K. 自我檢測</div>
+            <div class="accordion-content">
+                <div class="accordion" style="margin-top: 10px;">
+                    <div class="accordion-header" style="background-color: #eef;">1. 為什麼零信任不能以「內網」作為信任判斷？</div>
+                    <div class="accordion-content">
+                        <p><strong>參考答案：</strong>因為內網也可能被駭客入侵或有內鬼，所在的網路位置不代表絕對安全。</p>
+                    </div>
+                </div>
+                <div class="accordion" style="margin-top: 10px;">
+                    <div class="accordion-header" style="background-color: #eef;">2. 為什麼要持續量測安全態勢？</div>
+                    <div class="accordion-content">
+                        <p><strong>參考答案：</strong>因為資產的狀態會隨時間變動（例如今天中毒了、明天軟體過期了），需動態決策而非一次性放行。</p>
+                    </div>
+                </div>
+                <div class="accordion" style="margin-top: 10px;">
+                    <div class="accordion-header" style="background-color: #eef;">3. 為什麼雲端運算服務也算資源？</div>
+                    <div class="accordion-content">
+                        <p><strong>參考答案：</strong>因為它提供了可被存取與濫用的運算能力，一旦被駭可能被拿來挖礦或攻擊他人，故需被保護與控管。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Accordion Logic
+    const accordions = document.querySelectorAll('.accordion-header');
+    accordions.forEach(header => {
+        header.addEventListener('click', () => {
+            const parent = header.parentElement;
+            parent.classList.toggle('active');
+        });
+    });
+
+    // Quiz Logic
+    function submitAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="q32"]');
+        let selected = [];
+        checkboxes.forEach(cb => {
+            if (cb.checked) selected.push(cb.value);
+        });
+
+        // Sort to ensure order comparison works
+        selected.sort();
+        const correctAnswers = ['A', 'B', 'C'];
+        
+        // Check if exactly A, B, C are selected
+        const isCorrect = JSON.stringify(selected) === JSON.stringify(correctAnswers);
+
+        const feedbackDiv = document.getElementById('feedback-msg');
+        const explanationArea = document.getElementById('explanation-area');
+        const retryBtn = document.querySelector('.btn-retry');
+        const submitBtn = document.querySelector('.btn-submit');
+
+        feedbackDiv.style.display = 'block';
+        
+        if (isCorrect) {
+            feedbackDiv.textContent = '完全正確！(A)(B)(C) 皆為零信任基本規則。請往下閱讀詳細解析。';
+            feedbackDiv.className = 'feedback correct';
+            explanationArea.style.display = 'block';
+            
+            // Automatically expand the Analysis section (Section F is index 5 in main accordions list if strictly counting headers)
+            // But logic was "Auto expand logic handled by class active". Let's scroll to explanation.
+            explanationArea.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            feedbackDiv.innerHTML = '答案錯誤。<br>提示：基本規則請尋找 A/B/C 的句型；資產清冊（D）屬於導入前置工作。<br>請記得這是複選題，少選或多選都算錯喔！';
+            feedbackDiv.className = 'feedback wrong';
+            explanationArea.style.display = 'none'; // Keep hidden if wrong
+        }
+
+        // Switch buttons
+        submitBtn.style.display = 'none';
+        retryBtn.style.display = 'inline-block';
+        
+        // Disable checkboxes
+        checkboxes.forEach(cb => cb.disabled = true);
+    }
+
+    function resetQuiz() {
+        const checkboxes = document.querySelectorAll('input[name="q32"]');
+        checkboxes.forEach(cb => {
+            cb.checked = false;
+            cb.disabled = false;
+        });
+
+        const feedbackDiv = document.getElementById('feedback-msg');
+        feedbackDiv.style.display = 'none';
+        feedbackDiv.className = 'feedback';
+
+        const explanationArea = document.getElementById('explanation-area');
+        explanationArea.style.display = 'none';
+
+        const retryBtn = document.querySelector('.btn-retry');
+        const submitBtn = document.querySelector('.btn-submit');
+        
+        submitBtn.style.display = 'inline-block';
+        retryBtn.style.display = 'none';
+        
+        // Reset Accordions in explanation area (optional, but good for UX)
+        // const sectionAccordions = explanationArea.querySelectorAll('.accordion');
+        // sectionAccordions.forEach(acc => acc.classList.remove('active'));
+    }
+</script>
+
+</body>
+</html>

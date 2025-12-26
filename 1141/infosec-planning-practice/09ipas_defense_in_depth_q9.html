@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安觀念題解析 - 縱深防禦</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Heiti TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header {
+            border-bottom: 2px solid var(--accent-color);
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        /* Question Section */
+        .question-box {
+            background-color: #fcfcfc;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .options label {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .options label:hover {
+            background-color: #f0f8ff;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #submitBtn {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        #submitBtn:hover {
+            background-color: #2980b9;
+        }
+
+        #resetBtn {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        #resetBtn:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Feedback */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis Section (Hidden by default) */
+        #analysis-content {
+            display: none;
+            margin-top: 30px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        /* Accordion Styles */
+        details {
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: #f1f2f6;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Hide default triangle in some browsers */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::after {
+            content: '+';
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        details[open] summary {
+            background-color: #e9ecef;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-content {
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        /* Utility Styles */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .keyword-box {
+            background-color: #fff;
+            border: 1px dashed var(--accent-color);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Onion Diagram */
+        .onion-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            padding: 10px;
+        }
+
+        .onion-circle {
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative; /* 關鍵修正：確保內部絕對定位的標籤是相對於當前圓圈，而不是最外層 */
+        }
+
+        .layer-outer {
+            width: 320px;
+            height: 320px;
+            background-color: #a8d0e6; /* Light Blue */
+            border: 2px solid #3498db;
+            /* position: relative;  Removed because it's now in .onion-circle */
+        }
+
+        .layer-middle {
+            width: 210px;
+            height: 210px;
+            background-color: #f7dc6f; /* Yellow */
+            border: 2px solid #f1c40f;
+        }
+
+        .layer-inner {
+            width: 90px;
+            height: 90px;
+            background-color: #e74c3c; /* Red */
+            border: 2px solid #c0392b;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .layer-label {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            width: 100%; /* 確保文字區塊寬度與圓圈一致，以便置中 */
+            left: 0;
+            pointer-events: none; /* 讓點擊事件穿透文字，避免遮擋 */
+        }
+
+        .label-outer { top: 30px; }
+        .label-middle { top: 20px; }
+
+        /* Term explanation style */
+        .term-explain {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安觀念題解析：縱深防禦</h1>
+    </header>
+
+    <!-- A. 題目 -->
+    <section class="question-box">
+        <p><strong>9. 下列關於「縱深防禦」的描述，何者較「不」合適？</strong></p>
+        <div class="options">
+            <label>
+                <input type="radio" name="answer" value="A">
+                (A) 縱深防禦是一種網路安全策略，它使用多種安全產品和做法來保護組織的網路、Web 資產和資源
+            </label>
+            <label>
+                <input type="radio" name="answer" value="B">
+                (B) 縱深防禦有時與「分層式安全性」一詞互換使用，因為它依賴於多個控制層（實體、技術和管理）的安全解決方案
+            </label>
+            <label>
+                <input type="radio" name="answer" value="C">
+                (C) 縱深防禦透過實作多種安全產品和做法可以幫助偵測和阻止出現的攻擊，使組織能夠有效地緩解各種威脅
+            </label>
+            <label>
+                <input type="radio" name="answer" value="D">
+                <input type="hidden" id="correct-val" value="D">
+                (D) 縱深防禦安全策略中，運用一個功能強大的產品來阻止攻擊者和其他威脅
+            </label>
+        </div>
+    </section>
+
+    <div class="controls">
+        <button id="submitBtn">提交答案</button>
+        <button id="resetBtn">重作一次</button>
+    </div>
+
+    <div id="feedback-area"></div>
+
+    <!-- 解析內容區塊 (初始隱藏) -->
+    <div id="analysis-content">
+        
+        <!-- B. 第一步：找關鍵字 -->
+        <details class="explanation-block">
+            <summary>B. 第一步：找關鍵字</summary>
+            <div class="accordion-content">
+                <div class="keyword-box">
+                    <p>請拿出心中的螢光筆，將以下詞彙標記起來：</p>
+                    <ul>
+                        <li><span class="highlight">縱深防禦</span></li>
+                        <li><span class="highlight">分層式安全性</span></li>
+                        <li><span class="highlight">多種</span>安全產品</li>
+                        <li><span class="highlight">一個</span>功能強大的產品</li>
+                        <li>較<span class="highlight">「不」</span>合適</li>
+                    </ul>
+                </div>
+                <p><strong>關鍵線索：</strong>請注意題目中的對比，(A)、(B)、(C) 都提到了「多種」、「分層」、「多個」，只有 (D) 強調使用「一個」產品。這就是解題的突破口。</p>
+            </div>
+        </details>
+
+        <!-- C. 第二步：白話翻譯 -->
+        <details class="explanation-block">
+            <summary>C. 第二步：白話翻譯</summary>
+            <div class="accordion-content">
+                <p>如果用我們日常的語言來翻譯這道題目，它其實是在問：</p>
+                <blockquote style="border-left: 4px solid #ddd; padding-left: 10px; color: #555;">
+                    「關於縱深防禦（Defense in Depth，就像城堡有好幾道城牆與護城河），哪一句話講錯了？是不是真的只要買一個超強的防毒軟體或防火牆就天下無敵了？」
+                </blockquote>
+            </div>
+        </details>
+
+        <!-- D. 第三步：解題思路 -->
+        <details class="explanation-block">
+            <summary>D. 第三步：解題思路</summary>
+            <div class="accordion-content">
+                <p><strong>這題在考什麼觀念？</strong><br>
+                縱深防禦的核心精神：<span class="highlight">絕對不依賴單一防線。</span></p>
+                
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>先抓住縱深防禦的關鍵字：「多層」、「多種」、「洋蔥式」。</li>
+                    <li>檢查四個選項，找出哪一個違反了「不要只靠單一防線」的原則。</li>
+                </ol>
+
+                <p><strong>原理與規則（白話版）：</strong></p>
+                <ul>
+                    <li><strong>資安假設：</strong>我們假設駭客很厲害，第一道門「一定會被突破」。</li>
+                    <li><strong>應對策略：</strong>所以我們要設計很多層，讓駭客突破第一層後，還會撞到第二層、第三層，拖延時間並增加被發現的機會。這就是「一層被破，還有下一層」。</li>
+                </ul>
+
+                <!-- 洋蔥式防禦示意圖 -->
+                <div class="onion-wrapper">
+                    <div class="onion-circle layer-outer layer-1">
+                        <span class="layer-label label-outer">外層：實體安全<br><span style="font-size:10px; font-weight:normal;">(警衛/門禁)</span></span>
+                        <div class="onion-circle layer-middle layer-2">
+                            <span class="layer-label label-middle">中層：技術/網路<br><span style="font-size:10px; font-weight:normal;">(防火牆/權限)</span></span>
+                            <div class="onion-circle layer-inner layer-3">
+                                內層：資料<br><span style="font-size:10px; font-weight:normal;">(加密)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <!-- E. 第四步：選項分析 -->
+        <details class="explanation-block">
+            <summary>E. 第四步：選項分析</summary>
+            <div class="accordion-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="15%">選項</th>
+                            <th width="20%">符合「多層」精神？</th>
+                            <th>詳細原因分析</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A)</td>
+                            <td><span style="color:green">符合</span></td>
+                            <td>提到「多種安全產品和做法」，且保護範圍包含網路、Web 資產 <span class="term-explain">(網站相關的資料與功能)</span>，這是標準的縱深防禦定義。</td>
+                        </tr>
+                        <tr>
+                            <td>(B)</td>
+                            <td><span style="color:green">符合</span></td>
+                            <td>提到「分層式安全性」，並列舉了實體、技術和管理三個控制層 <span class="term-explain">(管控措施的層級)</span>，這正是縱深防禦的實作架構。</td>
+                        </tr>
+                        <tr>
+                            <td>(C)</td>
+                            <td><span style="color:green">符合</span></td>
+                            <td>提到「偵測和阻止」並行，且使用「多種」產品。縱深防禦不只防禦，也包含在不同層級進行偵測。</td>
+                        </tr>
+                        <tr>
+                            <td>(D)</td>
+                            <td><span style="color:red">嚴重違反</span></td>
+                            <td>提到運用「一個」功能強大的產品。這違反了資安的核心原則——單點失效 <span class="term-explain">(Single Point of Failure：一個點壞了全盤皆輸)</span>。沒有任何單一產品能擋住所有攻擊。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        <!-- F. 觀念補充與延伸 -->
+        <details class="explanation-block">
+            <summary>F. 觀念補充與延伸</summary>
+            <div class="accordion-content">
+                <p><strong>核心觀念定位：</strong></p>
+                <ul>
+                    <li>領域：資安防護架構 &rarr; 防禦策略</li>
+                    <li>重要性：<span class="highlight">必考</span>（觀念題出現頻率極高）</li>
+                </ul>
+
+                <p><strong>定義（白話）：</strong></p>
+                <p>縱深防禦（Defense in Depth）：不是只靠一把鎖，而是設立很多道門、養狗、裝監視器、鎖保險箱。目的是爭取時間，讓防禦者有機會反應。</p>
+
+                <p><strong>觸類旁通：</strong></p>
+                <ul>
+                    <li><strong>對比概念：</strong>單點防禦（Single Point of Defense） vs 縱深防禦。前者危險，後者安全。</li>
+                    <li><strong>變化題型：</strong>
+                        <ul>
+                            <li>問「下列何者最符合縱深防禦？」&rarr; 找答案中有「多層、實體+技術+管理、異質備援」的選項。</li>
+                            <li>問「哪一個做法最違反縱深防禦精神？」&rarr; 找依賴「單一設備」或「邊界防禦」的選項。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- G. 記憶口訣 -->
+        <details class="explanation-block">
+            <summary>G. 記憶口訣</summary>
+            <div class="accordion-content">
+                <div style="background-color: #e8f6f3; padding: 15px; border-radius: 5px; text-align: center; font-size: 1.2em; font-weight: bold; color: #16a085;">
+                    「資安不靠一招鮮，一層倒了還有下一層」
+                </div>
+            </div>
+        </details>
+
+        <!-- H. 常見陷阱 -->
+        <details class="explanation-block">
+            <summary>H. 常見陷阱</summary>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>迷思：</strong>學生最容易搞混，把「很強的次世代防火牆」誤以為就是縱深防禦。</li>
+                    <li><strong>心理盲點：</strong>覺得公司花大錢買了最貴的產品就安全了（這是錯誤的「銀彈」思維）。</li>
+                    <li><strong>避坑指南：</strong>
+                        <ul>
+                            <li>看到「縱深防禦」&rarr; 立刻找<span class="highlight">「多層、多樣」</span>。</li>
+                            <li>看到「單一、唯一、只有一個」&rarr; 高機率是錯的選項。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- I. 正確答案 -->
+        <details class="explanation-block">
+            <summary>I. 正確答案</summary>
+            <div class="accordion-content">
+                <p style="font-size: 1.2em;"><strong>正確答案：D</strong></p>
+                <p><strong>一句話理由：</strong>縱深防禦絕不是靠一個很強的產品，而是多層防護體系一起運作。</p>
+            </div>
+        </details>
+
+        <!-- J. 自我檢測 -->
+        <details class="explanation-block">
+            <summary>J. 自我檢測與參考解答</summary>
+            <div class="accordion-content">
+                <p>試著回答以下問題，確認是否真正理解：</p>
+                <ol>
+                    <li><strong>情境一：</strong>如果一家公司安裝了防火牆、入侵偵測系統 (IDS)、並強制員工使用多重驗證 (MFA)，這符合縱深防禦嗎？為什麼？</li>
+                    <li><strong>情境二：</strong>如果某公司只有一套端點偵測系統 (EDR)，但完全沒有人員管理與標準作業流程，這算完整的縱深防禦嗎？</li>
+                    <li><strong>觀念題：</strong>為什麼資安專家在設計架構時，會假設「一定有人能突破第一道防線」？</li>
+                </ol>
+
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ccc;">
+                    <p><strong>【參考解答】</strong></p>
+                    <ul style="list-style-type: disc; margin-left: 20px;">
+                        <li style="margin-bottom: 10px;">
+                            <strong>針對情境一：<span style="color: green;">符合。</span></strong><br>
+                            <span class="term-explain">因為它結合了不同層面的防護措施。防火牆擋在邊界（網路層），IDS 負責監控異常（偵測層），MFA 確保帳號安全（身分認證層）。這具備了「多層次」與「多種技術」的特性，是縱深防禦的好例子。</span>
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            <strong>針對情境二：<span style="color: red;">不算完整。</span></strong><br>
+                            <span class="term-explain">縱深防禦的三大支柱是「技術、管理、實體」。只有很強的工具（EDR）屬於技術層，但缺乏「管理層」（如：誰來監控警報？發生事情的 SOP 是什麼？），一旦工具失效或無人回應警報，防禦就會崩潰。</span>
+                        </li>
+                        <li>
+                            <strong>針對觀念題：<span style="color: #2c3e50;">因為「沒有完美的防禦」。</span></strong><br>
+                            <span class="term-explain">軟體可能有未知的漏洞（Zero-day）、員工可能會因為疲累點開釣魚郵件（人為疏失）。假設第一道防線一定會失敗，才能強迫設計者建立第二道、第三道防線（如：即使防火牆被穿透，還有內部網段隔離），確保損害被控制在最小範圍。</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </details>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const feedbackArea = document.getElementById('feedback-area');
+        const analysisContent = document.getElementById('analysis-content');
+        const accordions = document.querySelectorAll('details');
+        
+        // 提交按鈕邏輯
+        submitBtn.addEventListener('click', function() {
+            // 取得選中的選項
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            
+            if (!selectedOption) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            const isCorrect = selectedOption.value === 'D';
+            
+            // 顯示回饋區域
+            feedbackArea.style.display = 'block';
+            
+            if (isCorrect) {
+                // 答對邏輯
+                feedbackArea.innerHTML = '恭喜答對！正確答案是 (D)。<br>解析已展開，請詳細閱讀下方說明。';
+                feedbackArea.className = 'feedback-correct';
+                
+                // 顯示並展開解析
+                analysisContent.style.display = 'block';
+                accordions.forEach(acc => {
+                    acc.open = true;
+                });
+                
+                // 捲動到解析區
+                analysisContent.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                // 答錯邏輯
+                feedbackArea.innerHTML = '答案錯誤。提示：縱深防禦的重點是「洋蔥」般的結構，不是靠單一強大的工具。<br>請重新思考題目中「一個」與「多種」的差別。';
+                feedbackArea.className = 'feedback-wrong';
+                
+                // 隱藏解析（如果之前已經打開過，這裡選擇不強制關閉，避免體驗不佳，僅在未打開時保持隱藏）
+                if (analysisContent.style.display !== 'block') {
+                    analysisContent.style.display = 'none';
+                }
+            }
+        });
+
+        // 重作按鈕邏輯
+        resetBtn.addEventListener('click', function() {
+            // 清除選項
+            const radios = document.querySelectorAll('input[name="answer"]');
+            radios.forEach(radio => radio.checked = false);
+            
+            // 隱藏回饋與解析
+            feedbackArea.style.display = 'none';
+            feedbackArea.className = '';
+            feedbackArea.innerHTML = '';
+            
+            analysisContent.style.display = 'none';
+            accordions.forEach(acc => {
+                acc.open = false;
+            });
+
+            // 捲動回頂部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+</script>
+
+</body>
+</html>

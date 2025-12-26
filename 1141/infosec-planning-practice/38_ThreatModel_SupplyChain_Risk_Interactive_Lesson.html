@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q38 供應鏈資安風險互動教學</title>
+    <style>
+        /* --- 基礎設定 --- */
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* 內文基準大小 */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* --- 標題樣式控制 (嚴格控制字級) --- */
+        h1 {
+            font-size: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            font-size: 18px; /* 標題不超過內文太多 */
+            color: #0056b3;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            border-left: 4px solid #0056b3;
+            padding-left: 10px;
+        }
+
+        h4 {
+            font-size: 17px;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #444;
+        }
+
+        /* --- 題組情境區塊 --- */
+        .scenario-box {
+            background-color: #eef7ff;
+            border: 1px solid #cce5ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .question-meta {
+            font-weight: bold;
+            color: #d9534f;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* --- 重點標示 --- */
+        mark {
+            background-color: #fffacd; /* 柔和黃 */
+            color: #333;
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+
+        .keyword-explanation {
+            background: #f9f9f9;
+            padding: 10px;
+            border-left: 3px solid #999;
+            margin: 5px 0 15px 0;
+            font-size: 0.95em;
+        }
+
+        /* --- 互動答題區 --- */
+        .quiz-area {
+            background-color: #fff;
+            border: 2px solid #eee;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .options-group label {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .options-group label:hover {
+            background-color: #f0f0f0;
+        }
+
+        .options-group input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        /* --- 按鈕樣式 --- */
+        .btn {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            background-color: #004494;
+        }
+
+        .btn-reset {
+            background-color: #6c757d;
+        }
+
+        .btn-reset:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-toggle {
+            background-color: #28a745;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-toggle:hover {
+            background-color: #218838;
+        }
+
+        /* --- 回饋訊息 --- */
+        #feedback-msg {
+            margin-top: 15px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* --- 解析區域 (預設隱藏) --- */
+        #analysis-section {
+            display: none;
+            margin-top: 20px;
+            border-top: 2px dashed #ccc;
+            padding-top: 10px;
+        }
+
+        /* --- 表格樣式 --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        /* --- 摺疊區塊 (Details/Summary) --- */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        summary {
+            background-color: #f8f9fa;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 移除預設箭頭，可自訂但此處保持簡潔 */
+        }
+        
+        summary::after {
+            content: "+"; 
+            float: right;
+            font-weight: bold;
+        }
+        
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details div {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background-color: #fff;
+        }
+
+        /* --- 小測驗樣式 --- */
+        .mini-quiz-box {
+            background-color: #fff8e1;
+            border: 1px solid #ffecb3;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        
+        .mini-quiz-result {
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .result-correct { color: green; }
+        .result-wrong { color: red; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安短期衝刺班：高中生資安入門 (題組 5)</h1>
+
+    <!-- 題組共用情境 -->
+    <div class="scenario-box">
+        <span class="question-meta">【題組 5】(第 37–40 題共用情境)</span>
+        <p>情境：在風險管理上，使用威脅評估模型進行供應鏈資安風險評估。供應鏈安全（軟體供應鏈上下游、第三方元件、框架與標準）是本題組核心。</p>
+    </div>
+
+    <!-- 題目資訊 -->
+    <div class="quiz-area">
+        <span class="question-meta">第 38 題</span>
+        <p>情境如附圖所示（本題純文字描述），在風險管理上，使用威脅評估模型進行供應鏈資安風險評估。請問下何者敘述錯誤？</p>
+        
+        <div class="options-group" id="main-quiz-options">
+            <label><input type="radio" name="q38" value="A"> (A) DREAD 是威脅建模的一種模式</label>
+            <label><input type="radio" name="q38" value="B"> (B) STRIDE 是威脅建模的一種模式</label>
+            <label><input type="radio" name="q38" value="C"> (C) VAST 是威脅建模的一種模式</label>
+            <label><input type="radio" name="q38" value="D"> (D) NIST 是國際標準的威脅建模</label>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button class="btn" onclick="checkMainAnswer()">送出作答</button>
+            <button class="btn btn-reset" onclick="resetPage()">重置</button>
+        </div>
+
+        <div id="feedback-msg"></div>
+    </div>
+
+    <!-- 解析展開按鈕 -->
+    <button class="btn btn-toggle" onclick="toggleAnalysis()" id="toggle-btn">一鍵看名師解析 (展開)</button>
+
+    <!-- 完整解析區 (預設隱藏) -->
+    <div id="analysis-section">
+        
+        <!-- 第一步 -->
+        <h2>第一步：找關鍵字</h2>
+        <p>請拿出螢光筆，圈出以下關鍵字：</p>
+        <div class="keyword-explanation">
+            <p><mark>風險管理</mark>：為什麼這是線索？因為這是這題的大目標，要我們做管理。</p>
+            <p><mark>威脅評估模型</mark>：為什麼這是線索？這是題目的核心，問你用什麼「工具」來評估。</p>
+            <p><mark>供應鏈</mark>：為什麼這是線索？提醒我們場景是在軟體上下游。</p>
+            <p><mark>威脅建模</mark>：為什麼這是線索？這是專有名詞 Threat Modeling，是這題考分類的主角。</p>
+            <p><mark>DREAD / STRIDE / VAST / NIST</mark>：為什麼這是線索？這四個是選項主角，要我們判斷誰是「冒牌貨」。</p>
+        </div>
+
+        <!-- 第二步 -->
+        <h2>第二步：白話翻譯</h2>
+        <p>這題用高中生聽得懂的話來說，就是在問：「<strong>下面四個選項，哪一個名詞被說錯身分了？</strong>」</p>
+        <ul>
+            <li><strong>威脅建模 (Threat Modeling)</strong>：把壞人可能怎麼攻擊我們的方法，先分門別類列出來，事先想好怎麼防禦的過程。</li>
+            <li><strong>供應鏈 (Supply Chain)</strong>：你寫程式時，用的函式庫、硬體、軟體都不是自己從頭做的，而是來自很多上游廠商，這就是供應鏈。</li>
+            <li><strong>DREAD</strong>：一種幫風險「打分數」的方法 (例如：破壞力多少分、難度多少分)。</li>
+            <li><strong>STRIDE</strong>：一種把攻擊手法分成「六大類」的方法 (例如：假冒身分、篡改資料)。</li>
+            <li><strong>VAST</strong>：一種專門為大型企業流程設計的威脅建模方法，講究視覺化。</li>
+            <li><strong>NIST</strong>：它是美國國家標準與技術研究院 (政府機構)，它負責「制定標準」和「發布指引」，它本身不是一個「模型名稱」。</li>
+        </ul>
+
+        <!-- 第三步 -->
+        <h2>第三步：解題思路</h2>
+        <p><strong>這題在考什麼觀念？</strong> 分清「威脅建模方法 (Method/Model)」與「標準/機構 (Standard/Institute)」。</p>
+        <h4>解題步驟：</h4>
+        <ol>
+            <li>先把選項分成「方法/模型」與「機構/標準」兩類。</li>
+            <li>檢查 A、B、C 選項：DREAD、STRIDE、VAST 確實都是用來評估或分類威脅的「方法」。</li>
+            <li>檢查 D 選項：NIST 是一個「機構」，它會發布很多文件告訴你怎麼做資安，但不會把一個模型命名為 "NIST"。</li>
+        </ol>
+        <h4>生活比喻：</h4>
+        <p>STRIDE 和 DREAD 就像是老師發給你的「<strong>檢查清單</strong>」或「<strong>計分表</strong>」，用來檢查考卷錯哪裡。</p>
+        <p>NIST 就像是「<strong>教育部</strong>」或是「<strong>大考中心</strong>」，它是負責制定考試規則的單位，而不是那張檢查清單本身。</p>
+
+        <!-- 第四步 -->
+        <h2>第四步：選項分析</h2>
+        <p>點擊下方選項查看詳細說明：</p>
+        
+        <details>
+            <summary>(A) DREAD 是威脅建模的一種模式</summary>
+            <div>
+                <p><strong>判斷：正確</strong></p>
+                <p><strong>原因：</strong> DREAD 是一種經典的風險評分模型。它透過 Damage (破壞力)、Reproducibility (再現性) 等五個指標把風險量化成數字。</p>
+                <p><strong>與題幹連結：</strong> 在供應鏈評估中，可用來計算某個漏洞有多危險。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>(B) STRIDE 是威脅建模的一種模式</summary>
+            <div>
+                <p><strong>判斷：正確</strong></p>
+                <p><strong>原因：</strong> STRIDE 是微軟提出的模型，用來分類威脅 (例如：S=Spoofing 欺騙)。它是最常見的威脅建模方法。</p>
+                <p><strong>與題幹連結：</strong> 可用來盤點供應鏈中每個環節可能遭受的攻擊類型。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>(C) VAST 是威脅建模的一種模式</summary>
+            <div>
+                <p><strong>判斷：正確</strong></p>
+                <p><strong>原因：</strong> VAST (Visual, Agile, and Simple Threat modeling) 是專注於整個企業開發流程的建模方法，強調與敏捷開發整合。</p>
+                <p><strong>與題幹連結：</strong> 適合用在大型軟體供應鏈的開發流程管理。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>(D) NIST 是國際標準的威脅建模</summary>
+            <div>
+                <p><strong>判斷：錯誤 (這是正確答案)</strong></p>
+                <p><strong>原因：</strong> NIST (National Institute of Standards and Technology) 是美國的「機構」。NIST 確實有出版關於供應鏈風險管理的文件 (如 NIST SP 800-161)，也有資安框架 (CSF)，但「NIST」這四個字本身是單位名稱，不是一個叫做「NIST 模型」的建模方法。</p>
+            </div>
+        </details>
+
+        <!-- 觀念補充 -->
+        <h2>觀念補充與延伸</h2>
+        <p>這類題目常考「名詞辨識」。請記住下表：</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>名稱</th>
+                    <th>性質</th>
+                    <th>功能關鍵字</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>STRIDE</td>
+                    <td>方法 / 模型</td>
+                    <td><strong>分類</strong>威脅 (六大類)</td>
+                </tr>
+                <tr>
+                    <td>DREAD</td>
+                    <td>方法 / 模型</td>
+                    <td><strong>評分</strong>風險 (算分數)</td>
+                </tr>
+                <tr>
+                    <td>VAST</td>
+                    <td>方法 / 模型</td>
+                    <td><strong>企業級/敏捷</strong>流程</td>
+                </tr>
+                <tr>
+                    <td>NIST</td>
+                    <td><strong>機構 / 來源</strong></td>
+                    <td>提供<strong>標準、指引、框架</strong></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h4>常見陷阱：</h4>
+        <p>看到英文縮寫不要慌。先問自己：它是在「幫威脅分類/打分數」，還是在「訂規範/出指南」？如果是訂規範的知名單位 (如 NIST, ISO)，通常就不是模型名稱。</p>
+
+        <!-- 記憶口訣 -->
+        <h2>記憶口訣</h2>
+        <div style="background:#e8f5e9; padding:15px; border-radius:5px; border-left:5px solid #28a745;">
+            <p><strong>口訣：</strong>「<strong>NIST 是警察局，抓壞人要用方法 (STRIDE/DREAD)。</strong>」</p>
+            <p>解釋：NIST 是機構 (警察局)，而 STRIDE/DREAD 是抓壞人的具體招式 (方法)。</p>
+        </div>
+
+        <!-- 正確答案 -->
+        <h2>正確答案</h2>
+        <p style="font-size: 1.2em; color: #d9534f; font-weight: bold;">答案：(D)</p>
+        <p>NIST 是機構/框架與指引來源，不是威脅建模模型。</p>
+
+        <!-- 自我檢測 -->
+        <h2>自我檢測</h2>
+        <p>試試看以下三題，觀念通了嗎？</p>
+
+        <details>
+            <summary>1. STRIDE 的用途比較像「分類」還是「評分」？</summary>
+            <div>
+                <p><strong>參考答案：分類</strong></p>
+                <p>STRIDE 是將威脅分為六種類別 (Spoofing, Tampering, etc.)，主要用於識別威脅。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>2. DREAD 是用來做「威脅分類」還是「風險打分」？</summary>
+            <div>
+                <p><strong>參考答案：風險打分</strong></p>
+                <p>DREAD 計算五個維度的分數平均值，用來決定哪個風險要優先處理。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>3. NIST 比較像「模型」還是「提供標準/指引的機構」？</summary>
+            <div>
+                <p><strong>參考答案：提供標準/指引的機構</strong></p>
+                <p>NIST 出版許多標準文件 (SP 800 系列)，它是制定規則的單位。</p>
+            </div>
+        </details>
+
+        <!-- 小情境互動 -->
+        <h2>小情境快速測驗</h2>
+        <div class="mini-quiz-box">
+            <p>情境：某系統供應鏈包含多個套件，團隊要做風險評估。</p>
+            
+            <p><strong>Q1. 主管問：「我們要找一個國際公認的標準指引來參考」，請問該去查閱 STRIDE 還是 NIST 的文件？</strong></p>
+            <button class="btn" onclick="checkMiniQuiz(1, 'STRIDE')">STRIDE</button>
+            <button class="btn" onclick="checkMiniQuiz(1, 'NIST')">NIST</button>
+            <span id="mini-result-1" class="mini-quiz-result"></span>
+
+            <hr style="border-top:1px dashed #ccc; margin: 15px 0;">
+
+            <p><strong>Q2. 工程師說：「我想計算一下這個漏洞的嚴重程度分數」，他該用 DREAD 還是 STRIDE？</strong></p>
+            <button class="btn" onclick="checkMiniQuiz(2, 'DREAD')">DREAD</button>
+            <button class="btn" onclick="checkMiniQuiz(2, 'STRIDE')">STRIDE</button>
+            <span id="mini-result-2" class="mini-quiz-result"></span>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- JS 邏輯區 -->
+<script>
+    // 主要答題邏輯
+    function checkMainAnswer() {
+        // 取得使用者選擇
+        const options = document.getElementsByName('q38');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackDiv = document.getElementById('feedback-msg');
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.className = ''; // 清除之前的類別
+
+        if (!selectedValue) {
+            feedbackDiv.innerText = "請先選擇一個選項再送出！";
+            feedbackDiv.style.backgroundColor = "#fff3cd";
+            feedbackDiv.style.color = "#856404";
+            feedbackDiv.style.border = "1px solid #ffeeba";
+            return;
+        }
+
+        if (selectedValue === 'D') {
+            feedbackDiv.innerText = "答對了！(D) 是正確答案。NIST 是機構名稱，不是模型名稱。";
+            feedbackDiv.className = "correct";
+        } else {
+            feedbackDiv.innerText = "答錯了！您選了 (" + selectedValue + ")。提示：先判斷每個名詞是「具體方法」還是「制定標準的單位」？誰像是「警察局」，誰像是「抓人技巧」？";
+            feedbackDiv.className = "wrong";
+        }
+    }
+
+    // 重置頁面邏輯
+    function resetPage() {
+        // 清空 radio
+        const options = document.getElementsByName('q38');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // 隱藏回饋
+        const feedbackDiv = document.getElementById('feedback-msg');
+        feedbackDiv.style.display = 'none';
+
+        // 收合解析區
+        const analysisSection = document.getElementById('analysis-section');
+        analysisSection.style.display = 'none';
+        
+        // 重置按鈕文字
+        const toggleBtn = document.getElementById('toggle-btn');
+        toggleBtn.innerText = "一鍵看名師解析 (展開)";
+
+        // 收合所有 Details
+        const details = document.getElementsByTagName('details');
+        for(const d of details) {
+            d.removeAttribute('open');
+        }
+
+        // 清空小測驗結果
+        document.getElementById('mini-result-1').innerText = "";
+        document.getElementById('mini-result-2').innerText = "";
+    }
+
+    // 解析展開/收合邏輯
+    function toggleAnalysis() {
+        const section = document.getElementById('analysis-section');
+        const btn = document.getElementById('toggle-btn');
+
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
+            btn.innerText = "收合解析";
+        } else {
+            section.style.display = 'none';
+            btn.innerText = "一鍵看名師解析 (展開)";
+        }
+    }
+
+    // 小測驗邏輯
+    function checkMiniQuiz(qIndex, answer) {
+        const resultSpan = document.getElementById('mini-result-' + qIndex);
+        
+        if (qIndex === 1) {
+            if (answer === 'NIST') {
+                resultSpan.innerText = "⭕ 正確！NIST 提供標準指引。";
+                resultSpan.className = "mini-quiz-result result-correct";
+            } else {
+                resultSpan.innerText = "❌ 錯誤，STRIDE 是分類攻擊的方法，不是指引文件。";
+                resultSpan.className = "mini-quiz-result result-wrong";
+            }
+        } else if (qIndex === 2) {
+            if (answer === 'DREAD') {
+                resultSpan.innerText = "⭕ 正確！DREAD 用來算分數。";
+                resultSpan.className = "mini-quiz-result result-correct";
+            } else {
+                resultSpan.innerText = "❌ 錯誤，STRIDE 是用來分類，不是算分數。";
+                resultSpan.className = "mini-quiz-result result-wrong";
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

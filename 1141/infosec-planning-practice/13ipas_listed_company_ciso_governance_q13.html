@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安互動教學 - 上市上櫃公司資通安全控管指引</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Heiti TC", "Microsoft JhengHei", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .scenario-box {
+            background-color: #eef7fb;
+            border: 1px solid #bce0fd;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .scenario-label {
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 10px;
+            text-decoration: underline;
+        }
+
+        .question-box {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            background-color: #fff;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f0f0;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        #submitBtn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #resetBtn {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Result & Feedback */
+        #resultArea {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none; 
+            font-weight: bold;
+        }
+
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis Sections (Accordion) */
+        .analysis-container {
+            display: none; /* Hidden initially */
+            margin-top: 30px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 20px;
+        }
+
+        details {
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: #f1f1f1;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Hide default triangle */
+            position: relative;
+        }
+
+        summary::after {
+            content: "+";
+            position: absolute;
+            right: 15px;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            background-color: #e9ecef;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .details-content {
+            padding: 15px;
+            background-color: #fff;
+        }
+
+        /* Keyword Highlights */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        /* Diagram CSS */
+        .diagram-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .diagram-box {
+            width: 200px;
+            padding: 10px;
+            text-align: center;
+            border: 2px solid var(--primary-color);
+            background-color: #fff;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .diagram-arrow {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 10px solid var(--primary-color);
+            margin: 5px 0;
+        }
+
+        .box-board { background-color: #d6eaf8; }
+        .box-mgmt { background-color: #d4edda; border-color: #27ae60; font-weight: bold; } /* Target */
+        .box-ciso { background-color: #fcf3cf; border-style: dashed; }
+        .box-tech { background-color: #f2f2f2; border-style: dotted; }
+
+        /* Table */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .analysis-table th, .analysis-table td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        .analysis-table th {
+            background-color: #f1f1f1;
+            width: 25%;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.2rem;
+            }
+            .analysis-table th, .analysis-table td {
+                display: block;
+                width: 100%;
+            }
+            .analysis-table th {
+                background-color: #e9ecef;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>題組 2／主題：上市上櫃公司資安治理與權責</h1>
+    </header>
+
+    <!-- Context Section -->
+    <div class="scenario-box">
+        <span class="scenario-label">題組 2 共用情境</span>
+        <p>
+            在準備上市公司的董事會會議中，資通安全是議程的重點。此次會議主要討論如何加強公司的資通安全（資訊與通訊安全）防護及管理機制，應對生成式 AI（能夠創造內容的人工智慧技術）的威脅，以及了解最新的資安框架更新如何融入公司治理之中。資通安全主管向董事會介紹我國上市上櫃公司資通安全控管指引，強調該指引要求設置專責人員來訂定資通安全政策及目標。
+        </p>
+        <p>
+            董事成員亦提出生成式 AI 在攻擊中的利用，並說明攻擊者如何利用生成式 AI 提升攻擊效率。資通安全主管進一步解釋因應策略，並說明公司需對此類威脅採取防護措施。
+        </p>
+        <p>
+            在外部顧問簡報時，提到美國國家標準與技術研究院（NIST）所建立的網路安全框架（Cybersecurity Framework, CSF），於 2024 年 3 月公布更新版本 2.0。新版 CSF 與既有 CSF 的差異，包含新增「治理（Govern）」功能，以及強調資源配置與衡量效率。
+        </p>
+        <p>
+            最終管理部門針對上市櫃公司資安人員教育訓練，強調教育訓練應落實至公司每一位成員，並應有成效檢核機制，以確保訓練有效。
+        </p>
+    </div>
+
+    <!-- Question Section -->
+    <div class="question-box">
+        13. 依據我國上市上櫃公司資通安全控管指引，為協助公司強化資通安全防護及管理機制，於該指引中明文規定必須設置專責人員訂定資通安全政策及目標，本項明文要求必須由公司內部哪一個職務以上核定政策及目標？
+    </div>
+
+    <!-- Interaction Area -->
+    <form id="quizForm">
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                (A) 監察人
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                (B) 資訊主管
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                (C) 董事
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                (D) 副總經理
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button type="button" id="submitBtn" onclick="checkAnswer()">提交答案</button>
+            <button type="button" id="resetBtn" onclick="resetQuiz()">重作一次</button>
+        </div>
+    </form>
+
+    <!-- Feedback Area -->
+    <div id="resultArea"></div>
+
+    <!-- Explanation Area (Accordion) -->
+    <div id="analysisContainer" class="analysis-container">
+        
+        <!-- Step 1: Keywords -->
+        <details id="step1">
+            <summary>第一步：找關鍵字</summary>
+            <div class="details-content">
+                <ul>
+                    <li><span class="highlight">上市上櫃公司</span>：這類公司規模大，受金管會高度監管。</li>
+                    <li><span class="highlight">資通安全控管指引</span>：這是解題依據的法規名稱。</li>
+                    <li><span class="highlight">明文規定</span>：必須依照條文，不能憑感覺。</li>
+                    <li><span class="highlight">核定政策及目標</span>：這是關鍵動作。「核定」代表最終同意權。</li>
+                    <li><span class="highlight">哪一個職務以上</span>：在問「最低層級」的要求。</li>
+                </ul>
+                <p><strong>為什麼「核定層級」是核心？</strong><br>因為資安政策牽涉到全公司的預算、人力與業務流程，一般中階主管無法調動全公司資源。</p>
+            </div>
+        </details>
+
+        <!-- Step 2: Translation -->
+        <details id="step2">
+            <summary>第二步：白話翻譯</summary>
+            <div class="details-content">
+                <p>用高中生聽得懂的話來說：</p>
+                <p>這題在問：「在大型上市公司裡，要訂定『資安大方向』這件事，不是資訊工程師自己關起門來寫一寫就好的。法規規定，這份文件必須要由<strong>夠高層級的長官</strong>簽名蓋章才算數。請問這個長官至少要什麼等級？」</p>
+            </div>
+        </details>
+
+        <!-- Step 3: Logic -->
+        <details id="step3">
+            <summary>第三步：解題思路</summary>
+            <div class="details-content">
+                <p><strong>這題在考什麼觀念？</strong><br>上市櫃公司資安治理（Governance）的權責層級。</p>
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>抓到對象是<strong>「上市上櫃公司」</strong>：對公司治理要求最高。</li>
+                    <li>抓動作是<strong>「政策與目標」</strong>：這屬於管理決策層次，不是單純的技術操作。</li>
+                    <li>判斷職務層級：
+                        <ul>
+                            <li>資安政策是「公司治理」事項。</li>
+                            <li>必須由高階管理層核定，才能確保跨部門的資源與權責到位。</li>
+                            <li>法規《上市上櫃公司資通安全控管指引》明確指出是<strong>副總經理</strong>層級。</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </details>
+
+        <!-- Visual Diagram -->
+        <details id="diagramStep" open>
+            <summary>治理層級示意圖</summary>
+            <div class="details-content" style="background-color: #fafafa;">
+                <div class="diagram-container">
+                    <div class="diagram-box box-board">董事會<br>(監督與方向)</div>
+                    <div class="diagram-arrow"></div>
+                    <div class="diagram-box box-mgmt">高階管理層<br>(副總經理以上)<br>★ 負責核定政策 ★</div>
+                    <div class="diagram-arrow"></div>
+                    <div class="diagram-box box-ciso">資安/資訊主管<br>(規劃與建議)</div>
+                    <div class="diagram-arrow"></div>
+                    <div class="diagram-box box-tech">技術人員<br>(執行與操作)</div>
+                </div>
+            </div>
+        </details>
+
+        <!-- Step 4: Option Analysis -->
+        <details id="step4">
+            <summary>第四步：選項分析</summary>
+            <div class="details-content">
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th>選項</th>
+                            <th>核定權責?</th>
+                            <th>原因解析（白話）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A) 監察人</td>
+                            <td>不適切</td>
+                            <td>監察人負責「監督」公司運作是否合法，通常不涉入公司的實際經營管理決策（那是總經理他們的事）。</td>
+                        </tr>
+                        <tr>
+                            <td>(B) 資訊主管</td>
+                            <td>不適切</td>
+                            <td>資訊主管（CIO）是政策的「起草者」與「執行者」，但他不能「自己核定自己寫的政策」，層級不夠高到可以指揮全公司。</td>
+                        </tr>
+                        <tr>
+                            <td>(C) 董事</td>
+                            <td>不最適切</td>
+                            <td>董事組成董事會，負責大方向決策。雖然層級夠高，但「指引」明文要求的是具備實際管理權的「管理階層」（Management），而非監督角色的董事（Director）。</td>
+                        </tr>
+                        <tr>
+                            <td><strong>(D) 副總經理</strong></td>
+                            <td><strong>正確</strong></td>
+                            <td><strong>副總經理屬於「高階管理階層」，有權力調動資源並代表公司核定管理政策與目標。這是指引中的明確要求。</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        <!-- Concepts & Extension -->
+        <details id="step5">
+            <summary>觀念補充與延伸</summary>
+            <div class="details-content">
+                <h3>核心觀念定位</h3>
+                <ul>
+                    <li><strong>資安治理（Governance）</strong>：指公司如何管理資安的責任架構。重點在於「誰負責」、「誰核定」。</li>
+                    <li><strong>考試常見度</strong>：常考。只要看到「上市櫃公司」、「指引」，通常都在考合規性（Compliance）。</li>
+                </ul>
+                <h3>定義整理</h3>
+                <ul>
+                    <li><strong>資通安全控管指引</strong>：金管會為了讓上市櫃公司有規可循，要求大家用制度化方式管理資安的文件。</li>
+                    <li><strong>資安政策與目標</strong>：就像班規或校規，定義公司在資安上的「方向」（如：零信任）與「要達成的結果」（如：零重大外洩）。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- Mnemonic & Traps -->
+        <details id="step6">
+            <summary>記憶口訣與常見陷阱</summary>
+            <div class="details-content">
+                <h3>記憶口訣</h3>
+                <p style="font-size: 1.2rem; color: var(--accent-color); font-weight: bold;">
+                    「資安是治理，不是 IT；政策一定高層拍板。」
+                </p>
+                <p>想著：副總經理（VP）簽字才算數。</p>
+
+                <h3>常見陷阱</h3>
+                <ul>
+                    <li><strong>易錯點</strong>：看到題目有「資通安全」四個字，就反射動作選「(B) 資訊主管」。</li>
+                    <li><strong>心理盲點</strong>：學生常以為「誰最懂電腦技術，就由誰決定」，但公司法規講的是「誰扛責任」。</li>
+                    <li><strong>避坑指南</strong>：題目出現「政策、目標、核定」這些關鍵字時，請直接往「高階管理層」（如副總、總經理）去找答案。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- Correct Answer -->
+        <details id="step7">
+            <summary>正確答案</summary>
+            <div class="details-content">
+                <p><strong>答案：D</strong></p>
+                <p>一句話理由：資通安全政策與目標屬公司治理事項，依法須由副總經理以上之高階管理層核定，以確保公司整體的承諾與資源支持。</p>
+            </div>
+        </details>
+
+        <!-- Self Check -->
+        <details id="step8">
+            <summary>自我檢測</summary>
+            <div class="details-content">
+                <ol>
+                    <li>
+                        <strong>為什麼資安政策不能只由資訊主管自行決定？</strong><br>
+                        <span style="color: #666; font-size: 0.9rem;">(點擊看答案：因為資訊主管職權僅限於資訊部門，無法強制要求業務、財務等其他部門配合，需更高層級授權。)</span>
+                    </li>
+                    <li style="margin-top: 10px;">
+                        <strong>如果公司未設副總經理，應由哪一層級核定較合理？</strong><br>
+                        <span style="color: #666; font-size: 0.9rem;">(點擊看答案：應由相當於副總經理級別以上，或直接由總經理核定。)</span>
+                    </li>
+                    <li style="margin-top: 10px;">
+                        <strong>為什麼近年資安被納入董事會議程？</strong><br>
+                        <span style="color: #666; font-size: 0.9rem;">(點擊看答案：因為資安風險已變成重大營運風險，可能導致公司倒閉或股價大跌，董事會必須履行監督責任。)</span>
+                    </li>
+                </ol>
+            </div>
+        </details>
+
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const resultArea = document.getElementById('resultArea');
+        const analysisContainer = document.getElementById('analysisContainer');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        resultArea.style.display = 'block';
+        analysisContainer.style.display = 'block';
+
+        if (selectedValue === 'D') {
+            resultArea.className = 'correct';
+            resultArea.innerHTML = '✅ 回答正確！<br>你的觀念很正確，清楚分辨了「執行」與「決策」的層級差異。請參閱下方詳細解析。';
+            
+            // Open critical explanations automatically
+            document.getElementById('step3').open = true;
+            document.getElementById('step4').open = true;
+        } else {
+            resultArea.className = 'incorrect';
+            let feedback = '❌ 回答錯誤。<br>';
+            if (selectedValue === 'B') {
+                feedback += '提示：你可能選了「資訊主管」。請注意，資訊主管負責「執行」，但「政策核定」需要更高層級的授權喔！';
+            } else if (selectedValue === 'A') {
+                feedback += '提示：監察人負責「監督」，通常不涉入公司的管理決策制定。';
+            } else {
+                feedback += '提示：董事主要負責董事會運作，但指引特別要求的是「管理階層」的專責主管。';
+            }
+            feedback += '<br>別氣餒，請看下方解析，弄懂「治理層級」就沒問題了！';
+            resultArea.innerHTML = feedback;
+            
+            // Open Logic explanation
+            document.getElementById('step3').open = true;
+        }
+        
+        // Scroll to result
+        resultArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetQuiz() {
+        // Clear radio buttons
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // Hide result and analysis
+        document.getElementById('resultArea').style.display = 'none';
+        document.getElementById('analysisContainer').style.display = 'none';
+        
+        // Close all details
+        const details = document.getElementsByTagName('details');
+        for (const detail of details) {
+            // Keep diagram open if preferred, or close all except diagram? 
+            // Let's close all except diagram for cleaner reset
+            if (detail.id !== 'diagramStep') {
+                detail.open = false;
+            }
+        }
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

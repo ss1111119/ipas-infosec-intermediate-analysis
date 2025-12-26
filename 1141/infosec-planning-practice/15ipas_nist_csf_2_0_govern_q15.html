@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安【題組題】教學 - NIST CSF 2.0</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --border-radius: 8px;
+            --spacing: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            margin: 10px 0 0 0;
+            font-weight: normal;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        /* Scenario Section */
+        .scenario-box {
+            background-color: #eef2f7;
+            padding: 20px;
+            border-left: 5px solid var(--accent-color);
+            border-radius: 4px;
+            margin-bottom: 30px;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Summary Points */
+        .summary-points {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .summary-points h3 {
+            margin-top: 0;
+            font-size: 1rem;
+            color: var(--accent-color);
+        }
+
+        .summary-points ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        /* Question Section */
+        .question-section {
+            margin-bottom: 30px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f0f0;
+            border-color: #bbb;
+        }
+
+        .option-label.selected {
+            border-color: var(--accent-color);
+            background-color: #ebf5fb;
+        }
+
+        .option-input {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Buttons */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #1a252f;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis / Accordion Section */
+        .analysis-container {
+            margin-top: 40px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+            display: none; /* Hidden initially */
+        }
+
+        details {
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Remove default triangle */
+            position: relative;
+            padding-right: 40px;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            background-color: #e9ecef;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .details-content {
+            padding: 20px;
+            background-color: white;
+        }
+
+        /* Highlights & Visuals */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+
+        .term-box {
+            background-color: #e8f6f3;
+            padding: 10px;
+            border-left: 4px solid var(--success-color);
+            margin: 10px 0;
+        }
+
+        /* CSF Functions Visualization */
+        .csf-visual {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .csf-card {
+            flex: 1 1 140px;
+            padding: 15px;
+            text-align: center;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .csf-card.new-function {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: #2980b9;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+            position: relative;
+        }
+
+        .csf-card.new-function::before {
+            content: "NEW (2.0)";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e74c3c;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: var(--primary-color);
+        }
+
+        /* Self Check Toggle */
+        .self-check-item {
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 15px;
+        }
+
+        .toggle-answer-btn {
+            background: none;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .toggle-answer-btn:hover {
+            background-color: #eaf2f8;
+        }
+
+        .answer-box {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-left: 3px solid var(--success-color);
+            color: #333;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            .csf-card {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <span class="badge">題組 2</span>
+        <h1>NIST CSF 2.0：新增 Govern (治理)</h1>
+        <h2>iPAS 資安【題組題】互動教學</h2>
+    </header>
+
+    <!-- A. 題組情境重點整理 -->
+    <div class="scenario-box">
+        <span class="scenario-title">【題組共用情境】(題組 2：第 13–16 題共用)</span>
+        <p>在準備上市公司的董事會會議中，資通安全是議程的重點。此次會議主要討論如何加強公司的資通安全防護及管理機制，應對生成式 AI 帶來的威脅，以及了解最新資安框架更新如何融入公司治理之中。</p>
+        <p>外部顧問於簡報中提到美國國家標準與技術研究院 NIST（National Institute of Standards and Technology：美國制定標準的政府研究機構）建立的網路安全框架 CSF（Cybersecurity Framework：網路安全框架），在 2024 年 3 月公布 2.0 版更新，將原本 5 大功能擴增為 6 大功能，新增的功能用來強化治理與資源配置，使整體資安管理更有效率。</p>
+        
+        <div class="summary-points">
+            <h3>重點整理</h3>
+            <ul>
+                <li>CSF 是一個框架（Framework：一套整理好的做法地圖）。</li>
+                <li>2.0 版從 5 個功能變為 6 個功能。</li>
+                <li>新增的功能重點：與「治理、資源配置」有關。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- B. 題目 (互動區) -->
+    <div class="question-section">
+        <div class="question-text">
+            第 15 題（單選）：<br>
+            NIST CSF 於近年來已成為世界各國使用率最高的資安框架之一，2024 年 3 月 NIST 公佈最新版 2.0 版，其功能自原有的 5 個主功能擴增成為 6 大主要功能。新的管理功能加強了原有的 5 個功能外，也使 CSF 更具有效率的方式將寶貴且有限的資源做最佳投注。在 2.0 版新增的功能，於發佈資料中稱之為下列何項？
+        </div>
+        
+        <div class="options" id="options-container">
+            <label class="option-label" onclick="selectOption(this, 'A')">
+                <input type="radio" name="answer" value="A" class="option-input">
+                (A) 識別（Identify）
+            </label>
+            <label class="option-label" onclick="selectOption(this, 'B')">
+                <input type="radio" name="answer" value="B" class="option-input">
+                (B) 響應（Respond）
+            </label>
+            <label class="option-label" onclick="selectOption(this, 'C')">
+                <input type="radio" name="answer" value="C" class="option-input">
+                (C) 治理（Govern）
+            </label>
+            <label class="option-label" onclick="selectOption(this, 'D')">
+                <input type="radio" name="answer" value="D" class="option-input">
+                (D) 復原（Recover）
+            </label>
+        </div>
+
+        <div class="feedback" id="feedback-area"></div>
+
+        <div class="btn-group">
+            <button class="btn btn-submit" id="submit-btn" onclick="submitAnswer()">提交答案</button>
+            <button class="btn btn-reset" id="reset-btn" onclick="resetQuiz()">重作一次</button>
+        </div>
+    </div>
+
+    <!-- 解析區 (提交後顯示) -->
+    <div class="analysis-container" id="analysis-section">
+        <h3 style="color: var(--primary-color);">詳細解析</h3>
+
+        <!-- C. 第一步：找關鍵字 -->
+        <details open>
+            <summary>第一步：找關鍵字</summary>
+            <div class="details-content">
+                <p>請用「螢光筆」心態標示題目中的重點：</p>
+                <ul>
+                    <li><span class="highlight">NIST CSF</span></li>
+                    <li><span class="highlight">2.0 版</span></li>
+                    <li><span class="highlight">5 個主功能 → 6 大功能</span></li>
+                    <li><span class="highlight">新增的功能</span></li>
+                    <li><span class="highlight">管理 / 資源最佳投注</span></li>
+                </ul>
+                <div class="term-box">
+                    <strong>解釋：</strong> 題目文字雖長，但核心其實是在問「CSF 2.0 新增的那一個功能名稱是什麼」。
+                </div>
+            </div>
+        </details>
+
+        <!-- D. 第二步：白話翻譯 -->
+        <details>
+            <summary>第二步：白話翻譯</summary>
+            <div class="details-content">
+                <p>用高中生日常口語來理解：</p>
+                <p>以前 CSF 像是「做資安的五大步驟」，現在多加了一步，專門管「誰負責、怎麼決策、資源怎麼分配」。題目就是要你選出這個「負責管事」的新功能名字。</p>
+            </div>
+        </details>
+
+        <!-- E. 第三步：解題思路 -->
+        <details open>
+            <summary>第三步：解題思路</summary>
+            <div class="details-content">
+                <p><strong>這題在考什麼觀念？</strong><br>
+                NIST CSF 2.0 的功能變更與新增功能名稱。</p>
+                
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>先記住 CSF 2.0 新增的是「Govern」（治理）。</li>
+                    <li>再用排除法：Identify、Respond、Recover 都是原本 5 功能的一部分，所以都不是新增的。</li>
+                </ol>
+
+                <p><strong>原理與規則：</strong></p>
+                <ul>
+                    <li>CSF 的「功能（Function：大分類）」是用來整理資安工作。</li>
+                    <li>新增 Govern 是為了把「公司治理與資安管理責任」拉進框架核心，讓資源配置更合理，不再只是技術人員在做事。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- F. 第四步：選項分析 -->
+        <details>
+            <summary>第四步：選項分析（逐一檢視）</summary>
+            <div class="details-content">
+                <ul>
+                    <li><strong>(A) Identify（識別）：</strong><br>為什麼不是？這是原本就有的功能。用來盤點資產、了解風險與環境。</li>
+                    <li><strong>(B) Respond（響應/應變）：</strong><br>為什麼不是？這是原本就有的功能。用來處理資安事件（例如：通報、處置、溝通）。</li>
+                    <li><strong>(C) Govern（治理）：</strong><br><span style="color: var(--success-color); font-weight: bold;">是正確答案。</span>這是 CSF 2.0 新增的功能，強調治理、責任、政策制定、資源分配與風險決策。</li>
+                    <li><strong>(D) Recover（復原）：</strong><br>為什麼不是？這是原本就有的功能。用來在事件後恢復服務、改善韌性。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- G. 觀念補充與延伸 -->
+        <details>
+            <summary>觀念補充：六大功能視覺圖表</summary>
+            <div class="details-content">
+                <p><strong>CSF 2.0 六大功能圖示：</strong></p>
+                <div class="csf-visual">
+                    <div class="csf-card new-function">GOVERN<br>治理</div>
+                    <div class="csf-card">IDENTIFY<br>識別</div>
+                    <div class="csf-card">PROTECT<br>保護</div>
+                    <div class="csf-card">DETECT<br>偵測</div>
+                    <div class="csf-card">RESPOND<br>響應</div>
+                    <div class="csf-card">RECOVER<br>復原</div>
+                </div>
+
+                <p><strong>功能對照表：</strong></p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>功能</th>
+                            <th>白話在做什麼</th>
+                            <th>例子</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Govern (治理)</strong></td>
+                            <td>誰負責、怎麼管、資源怎麼分</td>
+                            <td>制定資安政策、分配預算</td>
+                        </tr>
+                        <tr>
+                            <td>Identify (識別)</td>
+                            <td>搞清楚「我有什麼、風險在哪」</td>
+                            <td>盤點電腦數量、風險評估</td>
+                        </tr>
+                        <tr>
+                            <td>Protect (保護)</td>
+                            <td>先把門鎖好（控制措施）</td>
+                            <td>裝防火牆、員工教育訓練</td>
+                        </tr>
+                        <tr>
+                            <td>Detect (偵測)</td>
+                            <td>有事要看得見</td>
+                            <td>監控異常流量、看 Log</td>
+                        </tr>
+                        <tr>
+                            <td>Respond (響應)</td>
+                            <td>出事要會處理</td>
+                            <td>中毒後的通報、隔離主機</td>
+                        </tr>
+                        <tr>
+                            <td>Recover (復原)</td>
+                            <td>出事後要能復原</td>
+                            <td>還原備份資料</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        <!-- H. 記憶口訣 -->
+        <details>
+            <summary>記憶口訣</summary>
+            <div class="details-content">
+                <div class="term-box">
+                    <strong>口訣：</strong>「識保偵應復，再加治理管資源」
+                </div>
+                <ul>
+                    <li>識 = Identify</li>
+                    <li>保 = Protect</li>
+                    <li>偵 = Detect</li>
+                    <li>應 = Respond</li>
+                    <li>復 = Recover</li>
+                    <li><strong>治 = Govern (新增的！)</strong></li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- I. 常見陷阱 -->
+        <details>
+            <summary>常見陷阱與避坑指南</summary>
+            <div class="details-content">
+                <ul>
+                    <li><strong>易錯點：</strong> 看到「管理」二字就選 Identify，因為覺得盤點資產很像在做管理。</li>
+                    <li><strong>心理盲點：</strong> 容易把「按流程做事」當成「治理決策」。</li>
+                    <li><strong>避坑指南：</strong> 只要題目出現「資源配置、責任、決策、公司治理」這些關鍵字 → 請直接想到 <strong>Govern</strong>。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- J. 正確答案 -->
+        <div class="term-box" style="margin-top: 20px; border-left-color: var(--primary-color);">
+            <strong>正確答案：(C)</strong><br>
+            一句話理由：CSF 2.0 新增的第六大功能就是「Govern（治理）」，用來統領其他五項功能。
+        </div>
+
+        <!-- K. 自我檢測 -->
+        <div style="margin-top: 30px;">
+            <h3>自我檢測 (Self Check)</h3>
+            
+            <div class="self-check-item">
+                <p><strong>題目 1：</strong>請用一句話說明「Govern（治理）」跟「Identify（識別）」差在哪？</p>
+                <button class="toggle-answer-btn" onclick="toggleAnswer('ans1')">顯示參考答案</button>
+                <div id="ans1" class="answer-box">
+                    <strong>參考答案：</strong><br>Govern 重點在權責、政策、決策與資源配置；Identify 重點在盤點資產、理解風險與現況。
+                </div>
+            </div>
+
+            <div class="self-check-item">
+                <p><strong>題目 2：</strong>把「制定資安政策並要求主管核定」分類到 CSF 哪個功能？為什麼？</p>
+                <button class="toggle-answer-btn" onclick="toggleAnswer('ans2')">顯示參考答案</button>
+                <div id="ans2" class="answer-box">
+                    <strong>參考答案：</strong><br>Govern；因為屬於治理、政策與權責決策。
+                </div>
+            </div>
+
+            <div class="self-check-item">
+                <p><strong>題目 3：</strong>把「發生勒索軟體事件後進行通報與隔離」分類到 CSF 哪個功能？為什麼？</p>
+                <button class="toggle-answer-btn" onclick="toggleAnswer('ans3')">顯示參考答案</button>
+                <div id="ans3" class="answer-box">
+                    <strong>參考答案：</strong><br>Respond；因為屬於事件處置、通報、應變行動。
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 變數與狀態
+    let selectedValue = null;
+    const correctValue = 'C';
+    const analysisSection = document.getElementById('analysis-section');
+    const feedbackArea = document.getElementById('feedback-area');
+    const submitBtn = document.getElementById('submit-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const options = document.querySelectorAll('.option-label');
+
+    // 選擇選項
+    function selectOption(element, value) {
+        // 如果已經提交過，禁止更改
+        if (submitBtn.disabled) return;
+
+        // 清除舊選擇樣式
+        options.forEach(opt => opt.classList.remove('selected'));
+        
+        // 設定新選擇
+        element.classList.add('selected');
+        const radio = element.querySelector('input[type="radio"]');
+        radio.checked = true;
+        selectedValue = value;
+    }
+
+    // 提交答案
+    function submitAnswer() {
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // 鎖定選項
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+        submitBtn.style.cursor = 'not-allowed';
+        
+        // 顯示重置按鈕
+        submitBtn.style.display = 'none';
+        resetBtn.style.display = 'inline-block';
+
+        // 判斷對錯
+        feedbackArea.style.display = 'block';
+        if (selectedValue === correctValue) {
+            feedbackArea.className = 'feedback correct';
+            feedbackArea.innerHTML = '✅ 回答正確！<br>太棒了，您已經掌握了 NIST CSF 2.0 的核心更新。請往下查看完整解析。';
+            // 自動展開解析
+            analysisSection.style.display = 'block';
+            // 滾動到解析區
+            setTimeout(() => {
+                analysisSection.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        } else {
+            feedbackArea.className = 'feedback incorrect';
+            feedbackArea.innerHTML = '❌ 回答錯誤。<br>提示：CSF 2.0 新增的功能與「資源配置、決策」有關，不是原本的五個功能喔。<br>請往下看解析來釐清觀念。';
+            // 雖然錯誤，但也顯示解析供學習
+            analysisSection.style.display = 'block';
+        }
+    }
+
+    // 重作一次
+    function resetQuiz() {
+        // 重置變數
+        selectedValue = null;
+        
+        // 重置 UI - 選項
+        options.forEach(opt => {
+            opt.classList.remove('selected');
+            opt.querySelector('input').checked = false;
+        });
+
+        // 重置 UI - 按鈕與區域
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+        submitBtn.style.display = 'inline-block';
+        
+        resetBtn.style.display = 'none';
+        
+        feedbackArea.style.display = 'none';
+        analysisSection.style.display = 'none';
+        
+        // 關閉所有自我檢測的答案
+        document.querySelectorAll('.answer-box').forEach(box => {
+            box.style.display = 'none';
+        });
+        
+        // 滾動回題目
+        document.querySelector('.question-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 自我檢測答案開關
+    function toggleAnswer(id) {
+        const answerBox = document.getElementById(id);
+        const btn = answerBox.previousElementSibling;
+        
+        if (answerBox.style.display === 'block') {
+            answerBox.style.display = 'none';
+            btn.innerText = '顯示參考答案';
+        } else {
+            answerBox.style.display = 'block';
+            btn.innerText = '隱藏參考答案';
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安【題組題】互動教學 - ZTMM 原則</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --text-color: #333333;
+            --highlight-color: #fff3cd;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        /* Card Style */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        /* Scenario */
+        .scenario-text {
+            background-color: #f0f7fb;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        /* Quiz */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f1f1f1;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            margin-top: 5px;
+        }
+
+        .option-label.selected {
+            border-color: var(--accent-color);
+            background-color: #eef7fd;
+        }
+
+        .btn-container {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Feedback */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion / Analysis */
+        #analysis-container {
+            display: none; /* Hidden initially */
+            margin-top: 30px;
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #fff;
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            transition: background 0.2s;
+        }
+
+        .accordion-header:hover {
+            background-color: #f9f9f9;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .accordion-header.active {
+            background-color: #f0f7fb;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-header.active::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: #fff;
+        }
+
+        .accordion-body {
+            padding: 20px;
+            font-size: 0.95rem;
+        }
+
+        /* Content Styling */
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .term-explanation {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Table */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .analysis-table th, .analysis-table td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        .analysis-table th {
+            background-color: #f0f0f0;
+            color: var(--primary-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.3rem; }
+            .btn-container { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>題組 4／CISA 零信任成熟模型 ZTMM</h1>
+        <h2>iPAS 資安 互動式教學</h2>
+    </header>
+
+    <!-- Context Section -->
+    <div class="card">
+        <div class="section-title">A. 題組情境與重點</div>
+        <div class="scenario-text">
+            <p><strong>【情境】</strong></p>
+            <p>依循 NIST SP 800-207（Zero Trust Architecture，ZTA：<span class="term-explanation">零信任架構</span>）與 CISA（美國網路安全暨基礎設施安全局）所提出之零信任成熟模型 ZTMM（Zero Trust Maturity Model：<span class="term-explanation">一種評估企業導入零信任架構完整程度的標準與指引</span>），企業因應供應鏈上下游需求，包含遠端使用供應鏈管理系統（<span class="term-explanation">管理產品從原物料到消費者手上一連串過程的資訊系統</span>）、資料存取、設備辨識與雲端服務，進行零信任架構之設計與部署。</p>
+            <p style="margin-top: 10px;"><strong>【情境重點】</strong></p>
+            <ul>
+                <li>CISA ZTMM 強調「成熟度」與「全面納管」。</li>
+                <li>零信任涵蓋：身分、設備、網路、應用與工作負載、資料。</li>
+                <li><strong>強調：「任何資料來源與運算服務，皆視為需被保護的資源」。</strong></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Quiz Section -->
+    <div class="card">
+        <div class="section-title">B. 題目</div>
+        <div class="question-text">
+            【第 31 題】CISA 零信任成熟模型（ZTMM），針對遠端使用供應鏈管理系統、資料存取、設備辨識等項目規劃零信任架構。關於設計與部署原則的敘述，下列何者最正確？
+        </div>
+        
+        <div class="options-container" id="quiz-options">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                <span>(A) 員工自帶裝置可以不算在零信任架構中</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                <span>(B) 雲端資料來源與運算服務，不納入零信任架構</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                <span>(C) 所有的資料來源與運算服務，都要被當作是資源</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                <span>(D) 在允許存取之前，所有資源的身分鑑別與授權機制，不需監控結果動態決定</span>
+            </label>
+        </div>
+
+        <div class="btn-container">
+            <button class="btn btn-submit" id="submit-btn">提交答案</button>
+            <button class="btn btn-reset" id="reset-btn">重作一次</button>
+        </div>
+
+        <div id="feedback-area"></div>
+    </div>
+
+    <!-- Analysis Section (Initially Hidden) -->
+    <div id="analysis-container">
+        
+        <!-- Step 1: Keywords -->
+        <div class="accordion-item">
+            <div class="accordion-header">C. 第一步：找關鍵字</div>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <p>請用螢光筆標示出以下重點：</p>
+                    <div>
+                        <span class="keyword-tag">零信任成熟模型 (ZTMM)</span>
+                        <span class="keyword-tag">設計與部署原則</span>
+                        <span class="keyword-tag">資料來源</span>
+                        <span class="keyword-tag">運算服務</span>
+                        <span class="keyword-tag">資源</span>
+                    </div>
+                    <p class="highlight" style="margin-top: 10px;">解釋：本題關鍵在於定義「什麼東西要被視為資源」。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Translation -->
+        <div class="accordion-item">
+            <div class="accordion-header">D. 第二步：白話翻譯</div>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <p>用高中生日常口語來說：</p>
+                    <p>零信任不是只保護公司辦公室裡的電腦，而是<strong>「只要是存著資料的地方，或者是會跑程式的系統，不管在哪裡，通通都要當成是需要被管的『資源』」</strong>。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Logic -->
+        <div class="accordion-item">
+            <div class="accordion-header">E. 第三步：解題思路</div>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <p><strong>這題在考什麼觀念？</strong></p>
+                    <p>一句話：零信任的核心是「所有東西都是資源，都不能預設信任」。</p>
+                    <p><strong>解題步驟：</strong></p>
+                    <ol>
+                        <li>檢查選項是否試圖「排除」某些設備、資料或雲端服務（若有排除，通常是錯的）。</li>
+                        <li>找出最符合「全面納入、不預設信任」的敘述。</li>
+                    </ol>
+                    <p><strong>原理與規則（白話）：</strong></p>
+                    <ul>
+                        <li>零信任假設任何位置（包含公司內部）、任何來源都不安全。</li>
+                        <li>因此必須「全部」納入管理與驗證，沒有例外。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Option Analysis -->
+        <div class="accordion-item">
+            <div class="accordion-header">F. 第四步：選項分析</div>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <table class="analysis-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">選項</th>
+                                <th style="width: 25%;">是否符合 ZTMM</th>
+                                <th>原因（白話解析）</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>(A)</td>
+                                <td style="color: var(--error-color);">不符合</td>
+                                <td><strong>BYOD（員工自帶裝置）</strong>反而是零信任必須納管的高風險對象，因為這類設備容易帶病毒進公司。</td>
+                            </tr>
+                            <tr>
+                                <td>(B)</td>
+                                <td style="color: var(--error-color);">不符合</td>
+                                <td><strong>雲端服務</strong>正是零信任架構的重要保護標的。現在很多系統都在雲端，怎麼可能不納入？</td>
+                            </tr>
+                            <tr>
+                                <td>(C)</td>
+                                <td style="color: var(--success-color); font-weight: bold;">符合 (正解)</td>
+                                <td>符合零信任與 ZTMM 核心精神：<strong>所有</strong>資料來源與運算服務都是資源，缺一不可。</td>
+                            </tr>
+                            <tr>
+                                <td>(D)</td>
+                                <td style="color: var(--error-color);">不符合</td>
+                                <td>零信任強調<strong>「持續監控、動態決策」</strong>。不是進門驗證一次身分證就永遠放行，而是要在過程中一直看著你有沒有做壞事。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: Concepts -->
+        <div class="accordion-item">
+            <div class="accordion-header">G. 觀念補充與延伸</div>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <p><strong>核心觀念定位：</strong></p>
+                    <ul>
+                        <li><strong>主題：</strong>零信任成熟模型（ZTMM）。</li>
+                        <li><strong>考試常見度：</strong>高（常考「全部納入」與「動態決策」這兩個概念）。</li>
+                    </ul>
+                    <p><strong>定義整理（白話）：</strong></p>
+                    <ul>
+                        <li><strong>資源：</strong>指任何資料、系統、服務、API（應用程式介面，程式之間溝通的橋樑）、雲端運算環境。</li>
+                    </ul>
+                    <p><strong>觸類旁通：</strong></p>
+                    <ul>
+                        <li>內部系統 vs 雲端服務：在零信任眼中地位平等，都要管。</li>
+                    </ul>
+                    <p><strong>變化題型：</strong></p>
+                    <ol>
+                        <li>題目可能會問「外包廠商的系統是否納入零信任？」答案是：要。</li>
+                        <li>題目可能會問「IoT（物聯網設備，如監視器）或 OT（工廠操作科技設備）是否為資源？」答案是：要，只要能連網或有資料，都是資源。</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 6: Mnemonic -->
+        <div class="accordion-item">
+            <div class="accordion-header">H. 記憶口訣</div>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent-color); text-align: center;">
+                        「零信任眼中，沒有例外，通通都是資源」
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 7: Traps -->
+        <div class="accordion-item">
+            <div class="accordion-header">I. 常見陷阱</div>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <ul>
+                        <li><strong>易錯點：</strong>以為只有「公司防火牆內的系統」才算資源，忽略了雲端或員工自己的手機。</li>
+                        <li><strong>心理盲點：</strong>把雲端或外包服務當成「別人的責任」，覺得不用管。</li>
+                        <li><strong>避坑指南：</strong>考試時只要看到選項寫「不納入」、「可以不用管」、「視為外部而不需保護」，那幾乎一定是錯的。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 8: Correct Answer -->
+        <div class="accordion-item">
+            <div class="accordion-header">J. 正確答案</div>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <p><strong>答案：(C)</strong></p>
+                    <p><strong>一句話理由：</strong>零信任與 ZTMM 要求所有資料來源與運算服務皆視為資源並納入管理，不可排除。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 9: Self Check -->
+        <div class="accordion-item">
+            <div class="accordion-header">K. 自我檢測</div>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <p>試著回答以下問題（點擊問題查看參考答案）：</p>
+                    
+                    <details style="margin-bottom: 10px; cursor: pointer;">
+                        <summary><strong>1) 為什麼 BYOD 反而更需要納入零信任？</strong></summary>
+                        <p style="padding-left: 20px; color: var(--success-color);">參考答案：因為設備不完全受公司控管，風險更高，更容易成為駭客入侵的跳板。</p>
+                    </details>
+
+                    <details style="margin-bottom: 10px; cursor: pointer;">
+                        <summary><strong>2) 為什麼雲端服務不能排除在零信任之外？</strong></summary>
+                        <p style="padding-left: 20px; color: var(--success-color);">參考答案：因為資料與運算仍屬公司資產，雖然放在外部（雲端），但不代表那是安全環境，仍需嚴格驗證。</p>
+                    </details>
+
+                    <details style="cursor: pointer;">
+                        <summary><strong>3) ZTMM 為何強調「成熟度」？</strong></summary>
+                        <p style="padding-left: 20px; color: var(--success-color);">參考答案：因為零信任不是「有」或「沒有」的開關，而是一個逐步落實、持續精進的過程（從傳統型進步到最佳化）。</p>
+                    </details>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const submitBtn = document.getElementById('submit-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const options = document.querySelectorAll('input[name="answer"]');
+        const feedbackArea = document.getElementById('feedback-area');
+        const analysisContainer = document.getElementById('analysis-container');
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        const optionLabels = document.querySelectorAll('.option-label');
+
+        // Styles for selected option
+        options.forEach(opt => {
+            opt.addEventListener('change', function() {
+                optionLabels.forEach(label => label.classList.remove('selected'));
+                if(this.checked) {
+                    this.parentElement.classList.add('selected');
+                }
+            });
+        });
+
+        // Submit Logic
+        submitBtn.addEventListener('click', function() {
+            let selectedValue = null;
+            options.forEach(opt => {
+                if (opt.checked) selectedValue = opt.value;
+            });
+
+            if (!selectedValue) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            // Show Analysis Section
+            analysisContainer.style.display = 'block';
+            
+            // Scroll to feedback
+            feedbackArea.style.display = 'block';
+
+            if (selectedValue === 'C') {
+                feedbackArea.textContent = '恭喜答對！正確答案是 (C)。請往下閱讀詳細解析。';
+                feedbackArea.className = 'feedback-correct';
+                
+                // Auto open explanation
+                const firstAccordion = document.querySelector('.accordion-header');
+                if(firstAccordion) {
+                    firstAccordion.classList.add('active');
+                    const content = firstAccordion.nextElementSibling;
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            } else {
+                feedbackArea.textContent = '答錯囉！提示：零信任的核心概念是「所有東西都是資源」。請往下看解析找答案。';
+                feedbackArea.className = 'feedback-wrong';
+            }
+        });
+
+        // Reset Logic
+        resetBtn.addEventListener('click', function() {
+            options.forEach(opt => {
+                opt.checked = false;
+                opt.parentElement.classList.remove('selected');
+            });
+            feedbackArea.style.display = 'none';
+            analysisContainer.style.display = 'none';
+            
+            // Close all accordions
+            accordionHeaders.forEach(header => {
+                header.classList.remove('active');
+                header.nextElementSibling.style.maxHeight = null;
+            });
+
+            // Reset details in self check
+            const details = document.querySelectorAll('details');
+            details.forEach(d => d.removeAttribute('open'));
+            
+            window.scrollTo(0, 0);
+        });
+
+        // Accordion Logic
+        accordionHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

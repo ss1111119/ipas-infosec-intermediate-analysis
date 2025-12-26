@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題組教學 - 第 23 題</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --highlight-bg: #fff3cd;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-color: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-top: 5px;
+            margin-bottom: 0;
+        }
+
+        /* Scenario Box */
+        .scenario-box {
+            background-color: #e8f4f8;
+            border-left: 5px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* Question Section */
+        .question-section {
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: var(--light-bg);
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        /* Buttons */
+        .btn-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        #submitBtn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #retryBtn {
+            background-color: var(--border-color);
+            color: var(--text-color);
+            display: none; /* Hidden by default */
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Feedback */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis / Accordion Section */
+        #analysis-container {
+            margin-top: 30px;
+            display: none; /* Hidden initially */
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .section-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            margin-bottom: 0;
+            border-radius: 5px 5px 0 0;
+            font-size: 1.1rem;
+        }
+
+        .accordion {
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f1f1f1;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion.active .accordion-content {
+            display: block;
+        }
+
+        /* Highlighter */
+        .highlight {
+            background-color: yellow;
+            padding: 0 2px;
+            font-weight: bold;
+        }
+
+        .highlight-blue {
+            background-color: #d1ecf1;
+            padding: 0 2px;
+            font-weight: bold;
+        }
+
+        /* CIA Card Visualization */
+        .cia-card {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .cia-item {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 15px 5px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .cia-item.focus {
+            border-color: var(--accent-color);
+            background-color: #eaf2ff;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+
+        .cia-item.answer {
+            border-color: var(--success-color);
+            background-color: #e8f5e9;
+        }
+
+        .cia-title {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .cia-desc {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Comparison Table */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .analysis-table th, .analysis-table td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        .analysis-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .analysis-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .correct-row {
+            background-color: #d4edda !important;
+        }
+
+        /* Self Test */
+        .self-test-item {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 10px;
+        }
+
+        .self-test-q {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .self-test-a {
+            display: none;
+            color: var(--success-color);
+            margin-top: 5px;
+            padding: 5px 10px;
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .show-ans-btn {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            margin-left: 10px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資訊安全工程師初級 - 考前衝刺</h1>
+        <h2>題組 3（第 21–24 題共用）／主題：CIA 三要素</h2>
+    </header>
+
+    <!-- A. 題組情境 -->
+    <div class="scenario-box">
+        <span class="scenario-title">【題組情境】（第 21–24 題共用）</span>
+        <p>K 公司為國內股票上市食品之製造商，公司新建置網路販售系統，將產品直接銷售給國內的消費者，並暫時不提供將所販售產品寄到本國以外的地區。公司在規劃與建置此網路販售系統時，需同步考量法規遵循、資安要求與系統安全設計，以確保營運與消費者資料安全。</p>
+    </div>
+
+    <!-- A. 重點整理 (Hidden in analysis, but concept is usually pre-read. As per structure requirements, this is Section A inside the output flow, but I will put the quiz first for interaction) -->
+    <!-- Note: Following the prompt's structural requirement strictly for the content. The prompt asks for interactive quiz first, then analysis. -->
+
+    <!-- B. 題目 -->
+    <div class="question-section">
+        <div class="question-text">
+            第 23 題：建置網路販售系統時，公司考量該系統之機密性、可用性、完整性（CIA：資安三要素）規劃了相關控制項目，請問下列何項系統建置規劃<span class="highlight">「不」屬</span>機密性（Confidentiality：不該看到的人看不到）的考量？
+        </div>
+
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="q23" value="A">
+                (A) 規定使用多因子認證（MFA：不只密碼，還要搭配其他驗證）登入系統
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q23" value="B">
+                (B) 要求定期更改密碼
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q23" value="C">
+                (C) 建置即時系統備援機制
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q23" value="D">
+                (D) 使用 TLS 1.3（Transport Layer Security：傳輸層安全協定）加密通訊協定
+            </label>
+        </div>
+
+        <div class="btn-area">
+            <button id="submitBtn" onclick="checkAnswer()">提交答案</button>
+            <button id="retryBtn" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback-area"></div>
+    </div>
+
+    <!-- 解析區塊：提交後顯示 -->
+    <div id="analysis-container">
+        
+        <!-- A. 題組情境重點整理 -->
+        <div class="accordion active">
+            <div class="accordion-header" onclick="toggleAccordion(this)">A. 題組情境重點整理</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>核心目標：</strong>網路販售系統需要保護消費者資料與交易資訊。</li>
+                    <li><strong>規劃框架：</strong>CIA 三要素（機密性、完整性、可用性）是規劃資安控制的基本框架。</li>
+                    <li><strong>本題焦點：</strong>題目要找出哪個規劃<strong>不是</strong>在保護「機密性」。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- C. 第一步：找關鍵字 -->
+        <div class="accordion active">
+            <div class="accordion-header" onclick="toggleAccordion(this)">C. 第一步：找關鍵字</div>
+            <div class="accordion-content">
+                <p>請拿起螢光筆，圈出題目的重點：</p>
+                <ul>
+                    <li>目標屬性：<span class="highlight">機密性（Confidentiality）</span></li>
+                    <li>判斷條件：<span class="highlight">「不」屬</span></li>
+                    <li>選項關鍵詞：
+                        <ul>
+                            <li>(A) <span class="highlight-blue">多因子認證</span></li>
+                            <li>(B) <span class="highlight-blue">更改密碼</span></li>
+                            <li>(C) <span class="highlight-blue">備援機制</span></li>
+                            <li>(D) <span class="highlight-blue">TLS 1.3 加密通訊</span></li>
+                        </ul>
+                    </li>
+                </ul>
+                <p><strong>解釋：</strong>機密性重點在「防止未授權的人看到資料」，備援則比較像「系統能不能用」。</p>
+            </div>
+        </div>
+
+        <!-- D. 第二步：白話翻譯 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">D. 第二步：白話翻譯</div>
+            <div class="accordion-content">
+                <p>用高中生日常口語來翻譯這題：</p>
+                <blockquote>
+                    「下面哪個措施是在『防偷看』？哪個是在『防當機』？題目要你選出<strong>不是防偷看</strong>的那個（也就是防當機或防亂改的）。」
+                </blockquote>
+            </div>
+        </div>
+
+        <!-- E. 第三步：解題思路 -->
+        <div class="accordion active">
+            <div class="accordion-header" onclick="toggleAccordion(this)">E. 第三步：解題思路</div>
+            <div class="accordion-content">
+                <p><strong>這題在考什麼？</strong> 一句話：CIA 三要素的控制措施分類。</p>
+                
+                <div class="cia-card">
+                    <div class="cia-item focus">
+                        <span class="cia-title">機密性<br>(Confidentiality)</span>
+                        <span class="cia-desc">不該看的人看不到<br>(上鎖、加密、驗證)</span>
+                    </div>
+                    <div class="cia-item">
+                        <span class="cia-title">完整性<br>(Integrity)</span>
+                        <span class="cia-desc">資料不能被亂改<br>(簽章、雜湊)</span>
+                    </div>
+                    <div class="cia-item answer">
+                        <span class="cia-title">可用性<br>(Availability)</span>
+                        <span class="cia-desc">要用時用得到<br>(備援、備份)</span>
+                    </div>
+                </div>
+
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>把選項分成兩類：「身分驗證/存取控制/加密」 vs 「備援/不中斷」。</li>
+                    <li>身分驗證（如密碼、MFA）與加密（如 TLS）通常是在保護機密性。</li>
+                    <li>備援機制通常偏向可用性（Availability：系統壞了還有備用的頂上來）。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- F. 第四步：選項分析 -->
+        <div class="accordion active">
+            <div class="accordion-header" onclick="toggleAccordion(this)">F. 第四步：選項分析</div>
+            <div class="accordion-content">
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th>選項</th>
+                            <th>對應 CIA 要素</th>
+                            <th>原因（白話解析）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A) 多因子認證 (MFA)</td>
+                            <td>機密性</td>
+                            <td>增加登入門檻，確認你是本人，防止帳號被盜後資料被別人看光。</td>
+                        </tr>
+                        <tr>
+                            <td>(B) 定期更改密碼</td>
+                            <td>機密性</td>
+                            <td>降低舊密碼外洩的風險，避免未授權的人偷登入看資料。</td>
+                        </tr>
+                        <tr class="correct-row">
+                            <td>(C) 即時系統備援機制</td>
+                            <td><strong>可用性</strong></td>
+                            <td>重點是「主機掛了，副機馬上接手」，確保服務不中斷，跟防偷看無關。<strong>（正確答案）</strong></td>
+                        </tr>
+                        <tr>
+                            <td>(D) TLS 1.3 加密通訊</td>
+                            <td>機密性</td>
+                            <td>在資料傳輸過程中加密（變成亂碼），避免駭客在半路竊聽看到內容。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- G. 觀念補充與延伸 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">G. 觀念補充與延伸</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>核心觀念定位：</strong>這是資安最基礎的 CIA 三要素，考試出現率極高（必考）。</li>
+                    <li><strong>定義整理：</strong>
+                        <ul>
+                            <li><strong>機密性：</strong>不該看的人看不到。</li>
+                            <li><strong>可用性：</strong>要用時用得到。</li>
+                            <li><strong>完整性：</strong>資料不能被亂改。</li>
+                        </ul>
+                    </li>
+                    <li><strong>觸類旁通（對比概念）：</strong>
+                        <ul>
+                            <li>TLS（保密） vs 備援（可用）。</li>
+                            <li>MFA（防冒用，保密） vs 稽核日誌（Log，抓誰改了資料，偏完整性與不可否認性）。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- H. 記憶口訣 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">H. 記憶口訣</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent-color); text-align: center;">
+                    「機密防偷看：驗證＋加密」<br>
+                    「可用防當機：備援先上」
+                </p>
+            </div>
+        </div>
+
+        <!-- I. 常見陷阱 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">I. 常見陷阱</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>易錯點：</strong>看到「系統安全」就以為全部都屬於機密性，忘記安全也包含「系統不能壞掉」。</li>
+                    <li><strong>心理盲點：</strong>容易把「安全性」與「穩定性（可用性）」混為一談。</li>
+                    <li><strong>避坑指南：</strong>只要看到「備援」、「容錯」、「HA（High Availability：高可用性）」、「備份」，請優先想到<strong>可用性</strong>。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- J. 正確答案 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">J. 正確答案</div>
+            <div class="accordion-content">
+                <p><strong>答案：(C)</strong></p>
+                <p><strong>一句話理由：</strong>即時備援是為了不中斷服務，屬於可用性，不是機密性。</p>
+            </div>
+        </div>
+
+        <!-- K. 自我檢測 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">K. 自我檢測</div>
+            <div class="accordion-content">
+                <div class="self-test-item">
+                    <div class="self-test-q">1) 如果資料被竄改（例如金額 100 被改成 1000）但沒外洩，主要影響 CIA 哪一項？
+                        <button class="show-ans-btn" onclick="toggleAnswer('ans1')">看答案</button>
+                    </div>
+                    <div id="ans1" class="self-test-a">參考答案：完整性（Integrity）。</div>
+                </div>
+                
+                <div class="self-test-item">
+                    <div class="self-test-q">2) 如果網站當機（Server Down）導致無法下單，主要影響 CIA 哪一項？
+                        <button class="show-ans-btn" onclick="toggleAnswer('ans2')">看答案</button>
+                    </div>
+                    <div id="ans2" class="self-test-a">參考答案：可用性（Availability）。</div>
+                </div>
+
+                <div class="self-test-item">
+                    <div class="self-test-q">3) TLS 主要在保護「傳輸途中」的哪一種風險？
+                        <button class="show-ans-btn" onclick="toggleAnswer('ans3')">看答案</button>
+                    </div>
+                    <div id="ans3" class="self-test-a">參考答案：防竊聽，保護機密性（Confidentiality）。</div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- End Analysis Container -->
+
+    <div class="footer">
+        HTML 互動教學產生器 &copy; 2024
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        const options = document.getElementsByName('q23');
+        let selectedValue = null;
+
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const analysisContainer = document.getElementById('analysis-container');
+        const submitBtn = document.getElementById('submitBtn');
+        const retryBtn = document.getElementById('retryBtn');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // Disable inputs
+        for (const option of options) {
+            option.disabled = true;
+        }
+        submitBtn.style.display = 'none';
+        retryBtn.style.display = 'inline-block';
+        analysisContainer.style.display = 'block';
+
+        feedbackArea.style.display = 'block';
+        feedbackArea.className = ''; // reset classes
+
+        if (selectedValue === 'C') {
+            feedbackArea.textContent = '恭喜答對！(C) 是正確答案。即時備援屬於「可用性」。請往下查看詳細解析。';
+            feedbackArea.classList.add('feedback-correct');
+        } else {
+            feedbackArea.textContent = '答案錯誤。提示：題目問的是「不」屬於機密性（防偷看）的項目。備援機制主要是為了防當機。請往下查看詳細解析。';
+            feedbackArea.classList.add('feedback-incorrect');
+            
+            // Auto open the analysis option section specifically if wrong
+            // But default behavior is fine (A, C, E, F are open by default in HTML)
+        }
+
+        // Scroll to feedback
+        feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetQuiz() {
+        const options = document.getElementsByName('q23');
+        for (const option of options) {
+            option.checked = false;
+            option.disabled = false;
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const analysisContainer = document.getElementById('analysis-container');
+        const submitBtn = document.getElementById('submitBtn');
+        const retryBtn = document.getElementById('retryBtn');
+
+        feedbackArea.style.display = 'none';
+        analysisContainer.style.display = 'none';
+        submitBtn.style.display = 'inline-block';
+        retryBtn.style.display = 'none';
+        
+        // Reset self test answers
+        const selfTestAnswers = document.querySelectorAll('.self-test-a');
+        selfTestAnswers.forEach(ans => ans.style.display = 'none');
+
+        // Scroll back to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        item.classList.toggle('active');
+    }
+
+    function toggleAnswer(id) {
+        const ans = document.getElementById(id);
+        if (ans.style.display === 'block') {
+            ans.style.display = 'none';
+        } else {
+            ans.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

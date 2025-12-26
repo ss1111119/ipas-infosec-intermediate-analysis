@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安【題組題】互動教學 - 第 21 題</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --light-bg: #f8f9fa;
+            --border-color: #e9ecef;
+            --highlight-color: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-top: 0;
+            color: var(--accent-color);
+        }
+
+        .scenario-box {
+            background-color: var(--light-bg);
+            border-left: 5px solid var(--accent-color);
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .scenario-tag {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .quiz-container {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent-color);
+            background-color: #f0f7fb;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #1a252f;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanations Accordion Styles */
+        .explanation-section {
+            display: none; /* Hidden by default */
+            margin-top: 40px;
+            border-top: 1px solid #eee;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-header {
+            width: 100%;
+            padding: 15px;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header:hover {
+            background-color: #f9f9f9;
+        }
+
+        .accordion-header::after {
+            content: "+";
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .accordion-header.active::after {
+            content: "-";
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 15px 20px;
+            background-color: #fff;
+            color: #555;
+        }
+
+        .accordion-content.show {
+            display: block;
+        }
+
+        /* Highlighter & Specific Content Styles */
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 0 4px;
+            border-radius: 2px;
+            border-bottom: 2px solid #ffd700;
+        }
+
+        .term-def {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .concept-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .diagram-box {
+            border: 2px solid var(--accent-color);
+            padding: 10px 15px;
+            border-radius: 8px;
+            background: white;
+            font-weight: bold;
+            min-width: 140px;
+        }
+
+        .diagram-arrow {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .diagram-box.not-needed {
+            border-color: #95a5a6;
+            color: #7f8c8d;
+            border-style: dashed;
+            background: #fdfdfd;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: var(--primary-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .diagram-arrow {
+                transform: rotate(90deg);
+                margin: 5px 0;
+            }
+            .concept-diagram {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>iPAS 資訊安全工程師初級 - 考前衝刺</h1>
+    <p style="margin-top: 5px; color: #666;">題組 3（第 21–24 題共用）第 21 題：網路販售系統建置考量</p>
+</header>
+
+<main>
+    <!-- Scenario Section -->
+    <div class="scenario-box">
+        <span class="scenario-tag">題組情境（共用）</span>
+        <p>
+            K 公司為國內股票上市（指公司股票在證券交易所公開交易，需受嚴格監管）食品之製造商，公司新建置網路販售系統，將產品直接銷售給國內的消費者，並暫時不提供將所販售產品寄到本國以外的地區。公司在規劃與建置此網路販售系統時，需同步考量法規遵循（指企業活動必須符合相關法律與規定）、資安要求與系統安全設計，以確保營運與消費者資料安全。
+        </p>
+    </div>
+
+    <!-- Quiz Section -->
+    <div class="quiz-container">
+        <div class="question-text">
+            第 21 題：請問公司在建置此網路販售系統時，下列何項為最「不」需要考慮的項目？
+        </div>
+        
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="q21" value="A">
+                (A) 主管機關的要求
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q21" value="B">
+                (B) 法令規定
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q21" value="C">
+                (C) 公司資安長的專長
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q21" value="D">
+                (D) 系統安全需求
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">提交答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback" class="feedback-area"></div>
+    </div>
+
+    <!-- Detailed Explanation Section (Initially Hidden) -->
+    <div id="explanationArea" class="explanation-section">
+        <h2>解析與觀念導讀</h2>
+
+        <!-- A. 題組情境重點整理 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">A. 題組情境重點整理</button>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>主體：</strong>上市公司（需受高度監管）建置網路販售系統。</li>
+                    <li><strong>對象：</strong>國內消費者（涉及個資保護）。</li>
+                    <li><strong>條件：</strong>題目明確指出需涉及「法規遵循」與「資安要求」。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- B. 題目（完整重述） -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">B. 題目重述</button>
+            <div class="accordion-content">
+                <p>請問公司在建置此網路販售系統時，下列何項為最「不」需要考慮的項目？</p>
+            </div>
+        </div>
+
+        <!-- C. 第一步：找關鍵字 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">C. 第一步：找關鍵字</button>
+            <div class="accordion-content">
+                <p>請用螢光筆在腦中畫出重點：</p>
+                <ul>
+                    <li><span class="highlight">建置網路販售系統</span>：這是一個「規劃與建立」的過程。</li>
+                    <li><span class="highlight">最「不」需要考慮</span>：這是反向題，要找「非必要」或「層級較低」的選項。</li>
+                    <li>比較對象：<span class="highlight">主管機關</span> vs <span class="highlight">法令規定</span> vs <span class="highlight">系統安全需求</span> vs <span class="highlight">資安長的專長</span>。</li>
+                </ul>
+                <p><strong>關鍵思考：</strong>題目是在問「制度、法規與系統需求」這類客觀條件，還是「個人能力」這類主觀條件？</p>
+            </div>
+        </div>
+
+        <!-- D. 第二步：白話翻譯 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">D. 第二步：白話翻譯</button>
+            <div class="accordion-content">
+                <p>用高中生日常口語來說：</p>
+                <p>「當一家大公司要架設一個購物網站時，哪些事情是『一定要』想清楚並遵守的？哪一件事情雖然好，但『不是架設系統時的必要條件』？」</p>
+            </div>
+        </div>
+
+        <!-- E. 第三步：解題思路 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">E. 第三步：解題思路</button>
+            <div class="accordion-content">
+                <p><strong>這題在考什麼觀念？</strong></p>
+                <p>一句話：系統建置時應考量的是「客觀的要求與需求（Requirements）」，而不是「某個人的專長（Expertise）」。</p>
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>先找「外在強制或必要條件」：法規、主管機關（不遵守會違法或被罰）。</li>
+                    <li>再找「系統本身必備的條件」：系統安全需求（沒有這個系統會被駭）。</li>
+                    <li>排除與「個人能力」有關的選項：如果資安長專長不足，公司應該聘請顧問或外包，而不是因為他不會就不做，反之亦然。專長不該決定系統的規格。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- F. 第四步：選項分析 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">F. 第四步：選項分析（逐一檢視）</button>
+            <div class="accordion-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>選項</th>
+                            <th>是否必要考量</th>
+                            <th>原因（白話解釋）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A) 主管機關的要求</td>
+                            <td>必要 (V)</td>
+                            <td>上市公司受金管會等機關監理，不遵守會被罰款或處分。</td>
+                        </tr>
+                        <tr>
+                            <td>(B) 法令規定</td>
+                            <td>必要 (V)</td>
+                            <td>包含個資法、消費者保護法等。這是底線，一定要守法。</td>
+                        </tr>
+                        <tr>
+                            <td>(C) 公司資安長的專長</td>
+                            <td><strong>非必要 (X)</strong></td>
+                            <td>專長影響「怎麼執行」，但不能因為資安長擅長 A 就只做 A，不擅長 B 就不做 B。系統需求應依據業務與法規而定，不應受限於單一人的能力。</td>
+                        </tr>
+                        <tr>
+                            <td>(D) 系統安全需求</td>
+                            <td>必要 (V)</td>
+                            <td>系統需要防火牆、加密等功能保護資料，這是系統運作的基本條件。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- G. 觀念補充與延伸 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">G. 觀念補充與延伸</button>
+            <div class="accordion-content">
+                <div class="concept-diagram">
+                    <div class="diagram-box">法規要求 / 主管機關<br><small>(強制力來源)</small></div>
+                    <div class="diagram-arrow">&rarr;</div>
+                    <div class="diagram-box">系統安全需求<br><small>(功能規格)</small></div>
+                    <div class="diagram-arrow">&rarr;</div>
+                    <div class="diagram-box not-needed">人員個人專長<br><small>(執行層面/非建置條件)</small></div>
+                </div>
+
+                <p><strong>核心觀念定位：</strong></p>
+                <ul>
+                    <li>系統建置與資安治理 &rarr; 規劃階段考量事項。</li>
+                    <li>考試常見度：常考（基本觀念題）。</li>
+                </ul>
+                <p><strong>定義整理（白話）：</strong></p>
+                <ul>
+                    <li><strong>主管機關要求：</strong>政府對上市公司與特定產業的管理規範（如金管會）。</li>
+                    <li><strong>系統安全需求：</strong>系統必須具備的資安功能與防護水準（如：要不要加密？要不要雙重驗證？）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- H. 記憶口訣 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">H. 記憶口訣</button>
+            <div class="accordion-content">
+                <p style="font-size: 1.2rem; color: var(--accent-color); font-weight: bold; text-align: center;">
+                    「建系統 看法規、看需求，不是看誰比較厲害」
+                </p>
+            </div>
+        </div>
+
+        <!-- I. 常見陷阱 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">I. 常見陷阱</button>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>易錯點：</strong>看到「資安長（CISO）」就以為跟資安一定有關，覺得很重要。</li>
+                    <li><strong>心理盲點：</strong>誤把「專業能力」當作「系統建置的必要考量項目」。</li>
+                    <li><strong>避坑指南：</strong>題目問「需不需要考慮」時，優先選「制度性、強制性、客觀性」的項目。人的因素通常是變動的，不應成為系統規格的依據。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- J. 正確答案 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">J. 正確答案</button>
+            <div class="accordion-content">
+                <p><strong>答案：(C)</strong></p>
+                <p><strong>一句話理由：</strong>系統建置必須考量法規與安全需求，而不是特定人員的專長。</p>
+            </div>
+        </div>
+
+        <!-- K. 自我檢測 -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion(this)">K. 自我檢測（點擊展開參考答案）</button>
+            <div class="accordion-content">
+                <div style="margin-bottom: 15px;">
+                    <strong>1) 為什麼法令規定在系統建置時一定要優先考量？</strong>
+                    <details style="margin-top: 5px; color: #555; background: #f9f9f9; padding: 10px;">
+                        <summary style="cursor: pointer; color: var(--accent-color);">參考答案</summary>
+                        因為不符合法規可能導致違法、罰鍰或系統被要求下架。
+                    </details>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>2) 系統安全需求通常會包含哪些內容？</strong>
+                    <details style="margin-top: 5px; color: #555; background: #f9f9f9; padding: 10px;">
+                        <summary style="cursor: pointer; color: var(--accent-color);">參考答案</summary>
+                        身分驗證、存取控制、加密、稽核紀錄等。
+                    </details>
+                </div>
+                <div>
+                    <strong>3) 為什麼「某位主管很專業」不能當作不考慮制度的理由？</strong>
+                    <details style="margin-top: 5px; color: #555; background: #f9f9f9; padding: 10px;">
+                        <summary style="cursor: pointer; color: var(--accent-color);">參考答案</summary>
+                        制度是長期與全公司適用，不能依賴單一個人的能力；人會離職，但系統與法規要求會持續存在。
+                    </details>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    function checkAnswer() {
+        const options = document.getElementsByName('q21');
+        let selectedValue = null;
+        
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedback = document.getElementById('feedback');
+        const explanationArea = document.getElementById('explanationArea');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        if (selectedValue === 'C') {
+            feedback.className = 'feedback-area feedback-correct';
+            feedback.innerHTML = '回答正確！<br>正確答案是 (C)。請往下閱讀完整解析。';
+            feedback.style.display = 'block';
+            explanationArea.style.display = 'block';
+            
+            // Auto expand the first few key sections for better UX
+            const headers = document.querySelectorAll('.accordion-header');
+            // Expand Section E (Logic) and J (Answer)
+            headers[4].classList.add('active');
+            headers[4].nextElementSibling.classList.add('show');
+            headers[9].classList.add('active');
+            headers[9].nextElementSibling.classList.add('show');
+            
+            // Scroll to explanation
+            setTimeout(() => {
+                explanationArea.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+
+        } else {
+            feedback.className = 'feedback-area feedback-wrong';
+            feedback.innerHTML = '回答錯誤。<br>提示：題目重點在於「制度與需求」，而非依賴「個人能力」。想想看，如果換了一位資安長，系統的需求會改變嗎？請再試一次。';
+            feedback.style.display = 'block';
+            explanationArea.style.display = 'none';
+        }
+    }
+
+    function resetQuiz() {
+        // Clear radio buttons
+        const options = document.getElementsByName('q21');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // Hide feedback
+        const feedback = document.getElementById('feedback');
+        feedback.style.display = 'none';
+
+        // Hide and collapse explanations
+        const explanationArea = document.getElementById('explanationArea');
+        explanationArea.style.display = 'none';
+
+        const contents = document.querySelectorAll('.accordion-content');
+        const headers = document.querySelectorAll('.accordion-header');
+        
+        contents.forEach(content => content.classList.remove('show'));
+        headers.forEach(header => header.classList.remove('active'));
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleAccordion(header) {
+        header.classList.toggle('active');
+        const content = header.nextElementSibling;
+        content.classList.toggle('show');
+    }
+</script>
+
+</body>
+</html>

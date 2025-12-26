@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安考前衝刺 - 題組3 第24題</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f5f6fa;
+            --text-color: #2c3e50;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header {
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        /* Scenario Box */
+        .scenario-box {
+            background-color: #e8f4f8;
+            border-left: 5px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Question Section */
+        .question-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background: #e9ecef;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion */
+        .accordion-section {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .accordion {
+            background-color: #fff;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: 0.4s;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion:hover, .accordion.active {
+            background-color: #f1f1f1;
+            color: var(--accent-color);
+        }
+
+        .accordion::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .accordion.active::after {
+            content: '-';
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            border-bottom: 1px solid transparent;
+        }
+
+        .panel-content {
+            padding: 20px 0;
+        }
+
+        /* Highlight & Formatting */
+        mark {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        .highlight-keyword {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        /* Visual Diagram */
+        .concept-map {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .map-box {
+            border: 2px solid var(--accent-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            width: 45%;
+            background: #fff;
+        }
+
+        .map-arrow {
+            display: block;
+            font-size: 1.5rem;
+            margin: 10px 0;
+            color: var(--secondary-color);
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Self Check specific */
+        .self-check-item {
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .check-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .check-answer-btn {
+            background-color: #ecf0f1;
+            color: #333;
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            margin-bottom: 5px;
+        }
+
+        .check-answer-content {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f8f5;
+            color: #16a085;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安【題組 3】第 24 題（複選）</h1>
+        <div class="subtitle">主題：個資外洩事件與法規遵循</div>
+    </header>
+
+    <!-- Section A included in context -->
+    <div class="scenario-box">
+        <span class="scenario-title">題組情境（題組 3：第 21–24 題共用）</span>
+        <p>K 公司為國內股票上市 (公司股票在證券市場公開買賣) 食品之製造商，公司新建置網路販售系統，將產品直接銷售給國內的消費者，並暫時不提供將所販售產品寄到本國以外的地區。公司在規劃與建置此網路販售系統時，需同步考量法規遵循、資安要求與系統安全設計，以確保營運與消費者資料安全。</p>
+        <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+        <p><strong>重點整理：</strong><br>1. 上市公司<br>2. 大量會員個資外洩<br>3. 資料被拿到國外網站販售</p>
+    </div>
+
+    <!-- Section B: Question (Interactive) -->
+    <div class="question-section">
+        <div class="question-text">
+            第 24 題（複選）：網路販售系統上線 6 個月後，公司收到證券主管機關 (負責監督管理證券市場的政府單位) 通知，大量會員資料被人於國外網站上架販售。請問發生此個資外洩 (個人資料被不當竊取或公開) 事件，公司於回應此資安事件時，須注意下列哪些法令規章？
+        </div>
+        
+        <div class="checkbox-group">
+            <label class="option-label">
+                <input type="checkbox" id="optA" name="answer">
+                (A) 電腦處理個人資料保護法
+            </label>
+            <label class="option-label">
+                <input type="checkbox" id="optB" name="answer">
+                (B) 上市上櫃公司資通安全管控指引
+            </label>
+            <label class="option-label">
+                <input type="checkbox" id="optC" name="answer">
+                (C) 個人資料保護法
+            </label>
+            <label class="option-label">
+                <input type="checkbox" id="optD" name="answer">
+                (D) 食品安全衛生管理法
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">提交答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <!-- Explanation Sections (Initially collapsed) -->
+    <div class="accordion-section" id="explanationArea" style="display:none;">
+        
+        <!-- Section C -->
+        <button class="accordion">第一步：找關鍵字</button>
+        <div class="panel">
+            <div class="panel-content">
+                <ul>
+                    <li><mark>上市公司</mark>：決定了除了基本法律外，還受證券主管機關管轄。</li>
+                    <li><mark>個資外洩事件</mark>：發生了資料被偷賣的事件，這是核心問題。</li>
+                    <li><mark>證券主管機關通知</mark>：暗示了監管單位已經介入。</li>
+                    <li><mark>須注意哪些法令規章</mark>：題目問的是「法規遵循」。</li>
+                </ul>
+                <p style="margin-top:10px;"><strong>解析：</strong>關鍵公式 = <span class="highlight-keyword">上市公司 + 個人資料外洩 + 資安事件回應</span></p>
+            </div>
+        </div>
+
+        <!-- Section D -->
+        <button class="accordion">第二步：白話翻譯</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>用白話文說就是：</p>
+                <p>「這家在股市掛牌賣股票的大公司，會員名單被偷走拿去國外網站賣，政府都來關切了。請問公司現在要收拾善後，哪幾條法律或規定是『一定要』拿出來遵守的？」</p>
+            </div>
+        </div>
+
+        <!-- Section E -->
+        <button class="accordion">第三步：解題思路</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>這題在考什麼？</strong> 個資外洩事件涉及的法規與資安治理責任。</p>
+                <br>
+                <p><strong>解題邏輯：</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>先判斷事件性質：是「個人資料外洩」，所以一定會碰到保護個人資料的法律。</li>
+                    <li>再看公司身分：是「上市公司」，所以需遵循證券主管機關對於上市公司的特別資安指引。</li>
+                    <li>排除法：把跟這次「資料事件」沒直接關係的法律刪掉。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Section F -->
+        <button class="accordion">第四步：選項分析</button>
+        <div class="panel">
+            <div class="panel-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="15%">選項</th>
+                            <th width="35%">法規名稱</th>
+                            <th width="15%">是否適用</th>
+                            <th>原因 (白話)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A)</td>
+                            <td>電腦處理個人資料保護法</td>
+                            <td>❌ 不選</td>
+                            <td>這是「舊法」，已經被現在的「個人資料保護法」取代了，現在沒有這部法。</td>
+                        </tr>
+                        <tr>
+                            <td>(B)</td>
+                            <td>上市上櫃公司資通安全管控指引</td>
+                            <td>✅ 必選</td>
+                            <td>因為 K 公司是「上市公司」，發生資安事件時，必須依照這份指引向主管機關通報並改善。</td>
+                        </tr>
+                        <tr>
+                            <td>(C)</td>
+                            <td>個人資料保護法</td>
+                            <td>✅ 必選</td>
+                            <td>因為發生了「個資外洩」，這部法專門在管資料怎麼蒐集、外洩了怎麼辦。</td>
+                        </tr>
+                        <tr>
+                            <td>(D)</td>
+                            <td>食品安全衛生管理法</td>
+                            <td>❌ 不選</td>
+                            <td>這部法是管「食物有沒有毒、乾不乾淨」，跟這次「會員資料被偷」沒有直接關係。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section G -->
+        <button class="accordion">觀念補充與延伸</button>
+        <div class="panel">
+            <div class="panel-content">
+                <div class="concept-map">
+                    <div class="map-box">
+                        <strong>事件性質：個資外洩</strong>
+                        <span class="map-arrow">⬇</span>
+                        <span style="color:var(--success-color); font-weight:bold;">個人資料保護法</span>
+                        <p style="font-size:0.9rem; color:#666;">(不管是不是上市公司都要守)</p>
+                    </div>
+                    <div class="map-box">
+                        <strong>公司身分：上市公司</strong>
+                        <span class="map-arrow">⬇</span>
+                        <span style="color:var(--success-color); font-weight:bold;">資通安全管控指引</span>
+                        <p style="font-size:0.9rem; color:#666;">(證券主管機關要求的特別規範)</p>
+                    </div>
+                </div>
+                
+                <p><strong>定義整理：</strong></p>
+                <ul>
+                    <li><strong>個資外洩：</strong> 未經授權 (沒有得到允許) 揭露、流出個人資料。</li>
+                    <li><strong>資通安全管控指引：</strong> 證券主管機關要求上市櫃公司落實資安治理 (管理資安的一套規則) 的規範。</li>
+                </ul>
+                <br>
+                <p><strong>變化題型：</strong></p>
+                <ul>
+                    <li>如果題目改成「非上市公司」→ 答案可能只剩下個資法。</li>
+                    <li>如果題目改成「系統當機但沒掉資料」→ 可能就不選個資法。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section H -->
+        <button class="accordion">記憶口訣</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent-color); text-align: center;">
+                    「個資外洩先看法；上市公司再加管控指引」
+                </p>
+            </div>
+        </div>
+
+        <!-- Section I -->
+        <button class="accordion">常見陷阱</button>
+        <div class="panel">
+            <div class="panel-content">
+                <ul>
+                    <li><strong>易錯點：</strong> 看到題目說 K 公司是「食品製造商」，就直覺想選 (D) 食品安全衛生管理法。</li>
+                    <li><strong>心理盲點：</strong> 這是用「公司產業別」去選，而不是用「發生什麼事」去選。</li>
+                    <li><strong>避坑指南：</strong>
+                        <ol>
+                            <li>先問自己：這是「資料被偷」還是「吃到壞東西」？ → 資料被偷，所以刪掉食安法。</li>
+                            <li>再看公司身分：是不是上市公司？ → 是，所以要選管控指引。</li>
+                        </ol>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section J -->
+        <button class="accordion">正確答案</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>正確答案：(B)、(C)</strong></p>
+                <p><strong>一句話理由：</strong> 上市公司發生個資外洩，須同時遵循個人資料保護法及證券主管機關的資通安全管控指引。</p>
+            </div>
+        </div>
+
+        <!-- Section K -->
+        <button class="accordion">自我檢測</button>
+        <div class="panel">
+            <div class="panel-content">
+                <div class="self-check-item">
+                    <span class="check-question">1. 若 K 公司是一般中小企業 (非上市公司)，發生相同個資外洩事件，最主要需遵循哪一部法？</span>
+                    <button class="check-answer-btn" onclick="toggleAnswer('ans1')">看參考答案</button>
+                    <div id="ans1" class="check-answer-content">參考答案：個人資料保護法。(一般公司不受證券主管機關的資安指引規範)。</div>
+                </div>
+
+                <div class="self-check-item">
+                    <span class="check-question">2. 為什麼上市公司發生資安事件要特別通報主管機關？</span>
+                    <button class="check-answer-btn" onclick="toggleAnswer('ans2')">看參考答案</button>
+                    <div id="ans2" class="check-answer-content">參考答案：因涉及廣大投資人權益與市場秩序，主管機關需監督資安治理狀況。</div>
+                </div>
+
+                <div class="self-check-item">
+                    <span class="check-question">3. 若事件僅造成網站短暫當機，未涉及任何個資流出，是否一定適用個資法？</span>
+                    <button class="check-answer-btn" onclick="toggleAnswer('ans3')">看參考答案</button>
+                    <div id="ans3" class="check-answer-content">參考答案：不一定 (或否)。需視是否有個人資料被蒐集、處理、利用或侵害，若純粹硬體故障未涉資料，則不適用個資法。</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Accordion Logic
+    var acc = document.getElementsByClassName("accordion");
+    for (var i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            }
+        });
+    }
+
+    // Quiz Logic
+    function checkAnswer() {
+        const optA = document.getElementById('optA').checked;
+        const optB = document.getElementById('optB').checked;
+        const optC = document.getElementById('optC').checked;
+        const optD = document.getElementById('optD').checked;
+        
+        const feedbackDiv = document.getElementById('feedback');
+        const explanationArea = document.getElementById('explanationArea');
+
+        // Check conditions: B and C must be true, A and D must be false
+        if (optB && optC && !optA && !optD) {
+            feedbackDiv.textContent = "回答正確！太棒了！請往下查看詳細解析。";
+            feedbackDiv.className = "feedback correct";
+            feedbackDiv.style.display = "block";
+            
+            // Show explanation area
+            explanationArea.style.display = "block";
+            
+            // Auto expand the first few sections for better UX
+            setTimeout(() => {
+                const firstAcc = document.querySelector('.accordion');
+                if(firstAcc && !firstAcc.classList.contains('active')) {
+                    firstAcc.click();
+                }
+            }, 300);
+
+        } else {
+            let msg = "回答錯誤。";
+            if (!optB && !optC && !optA && !optD) {
+                msg += " 請勾選答案。";
+            } else {
+                msg += " 提示：請注意事件性質是「個資外洩」，且公司身分為「上市公司」。(需全對才給分)";
+            }
+            feedbackDiv.textContent = msg;
+            feedbackDiv.className = "feedback wrong";
+            feedbackDiv.style.display = "block";
+            explanationArea.style.display = "none";
+        }
+    }
+
+    function resetQuiz() {
+        // Uncheck all
+        document.getElementById('optA').checked = false;
+        document.getElementById('optB').checked = false;
+        document.getElementById('optC').checked = false;
+        document.getElementById('optD').checked = false;
+        
+        // Hide feedback
+        const feedbackDiv = document.getElementById('feedback');
+        feedbackDiv.style.display = "none";
+        
+        // Hide explanations
+        const explanationArea = document.getElementById('explanationArea');
+        explanationArea.style.display = "none";
+
+        // Collapse all accordions
+        var acc = document.getElementsByClassName("accordion");
+        for (var i = 0; i < acc.length; i++) {
+            acc[i].classList.remove("active");
+            var panel = acc[i].nextElementSibling;
+            panel.style.maxHeight = null;
+        }
+
+        // Collapse self-check answers
+        const selfChecks = document.getElementsByClassName('check-answer-content');
+        for (let j = 0; j < selfChecks.length; j++) {
+            selfChecks[j].style.display = 'none';
+        }
+    }
+
+    // Toggle Self Check Answers
+    function toggleAnswer(id) {
+        var ans = document.getElementById(id);
+        if (ans.style.display === "block") {
+            ans.style.display = "none";
+        } else {
+            ans.style.display = "block";
+        }
+        // Resize parent panel if needed
+        var parentPanel = ans.closest('.panel');
+        if (parentPanel) {
+            parentPanel.style.maxHeight = parentPanel.scrollHeight + "px";
+        }
+    }
+</script>
+
+</body>
+</html>

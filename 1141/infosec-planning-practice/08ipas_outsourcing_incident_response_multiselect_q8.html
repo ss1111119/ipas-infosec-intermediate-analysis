@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題組解析：委外開發資安事件處置</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --text-color: #333333;
+            --highlight-color: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-top: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .scenario-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--accent-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .scenario-label {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 2px 10px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .question-box {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        .options-group {
+            margin-top: 20px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .option-item input[type="checkbox"] {
+            margin-top: 5px;
+            margin-right: 15px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .option-label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Flowchart Styles */
+        .flowchart-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .flow-step {
+            background-color: #eef2f3;
+            border: 1px solid #bdc3c7;
+            padding: 10px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .flow-arrow {
+            color: #95a5a6;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Accordion Styles */
+        .accordion {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-header {
+            background-color: #fff;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .accordion-header:hover {
+            background-color: #f8f9fa;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-item.active .accordion-header {
+            background-color: #f0f7fb;
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 20px;
+            background-color: #fff;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .accordion-item.active .accordion-content {
+            display: block;
+        }
+
+        /* Content Styling inside Accordion */
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .term {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .term-def {
+            font-size: 0.9em;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: var(--primary-color);
+        }
+
+        .tag-pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .tag-notify { background-color: #e67e22; }
+        .tag-fix { background-color: #27ae60; }
+        .tag-manage { background-color: #8e44ad; }
+        .tag-audit { background-color: #7f8c8d; }
+
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安考題：互動式解析</h1>
+        <p>主題：委外開發的資安事件處置（題組 5-8）</p>
+    </header>
+
+    <!-- 題組情境 -->
+    <div class="scenario-box">
+        <span class="scenario-label">題組共用情境</span>
+        <p>A 公司主要核心業務係提供國內各大金融機構（均屬資通安全管理法規範對象）有關系統之客製化開發業務，合作夥伴 B 公司為長年承接 A 公司旗下與金融機構委託業務。甲為國內首屈一指之金融機構，今有一金融系統委外開發專案，其專案包含多項開發及核心系統：X 系統（資通系統防護需求等級為高級）、Y 系統（資通系統防護需求等級為中級），以及 Z 系統（資通系統防護需求等級為普級）。委託金額為新台幣捌仟萬元整，專案開發為期一年。</p>
+    </div>
+
+    <!-- 題目區域 -->
+    <div class="question-box">
+        <div style="margin-bottom: 15px; font-weight: bold; color: var(--error-color);">【題組】第 8 題（複選題）</div>
+        <p>A 公司承攬甲金融機構（屬資通安全管理法規範對象）所委託之系統開發案，B 公司受 A 公司之複委託，辦理部份系統開發業務。B 公司於開發所負責之 Y 系統過程中，系統開發工程師將開發區之電腦私自連接外部網路，因故導致該電腦受駭客攻擊，造成部份系統程式碼外洩之重大資通安全事件。關於此資通安全事件之處置，下列哪些最適切？（複選）</p>
+
+        <div class="options-group" id="quizForm">
+            <label class="option-item">
+                <input type="checkbox" name="option" value="A">
+                <span class="option-label">(A) 辦理對 B 公司網路維護工程師之適任性查核</span>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" name="option" value="B">
+                <span class="option-label">(B) B 公司通報 A 公司並通知甲金融機構資通安全事件</span>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" name="option" value="C">
+                <span class="option-label">(C) B 公司採行補救措施</span>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" name="option" value="D">
+                <span class="option-label">(D) 甲金融機構決議解除複委託業務，確認複委託之受託者返還、移交、刪除或銷毀履行契約而持有之資料</span>
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">提交答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback" class="feedback-area"></div>
+    </div>
+
+    <!-- 解析區域 (Accordion) -->
+    <div id="explanationArea" class="accordion hidden">
+        
+        <!-- A. 題組情境重點整理 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">A. 題組情境重點整理</div>
+            <div class="accordion-content">
+                <h3>外包關係鏈</h3>
+                <div class="flowchart-container">
+                    <div class="flow-step">甲金融機構<br>(業主/最終負責)</div>
+                    <div class="flow-arrow">委託 &rarr;</div>
+                    <div class="flow-step">A 公司<br>(主承包商)</div>
+                    <div class="flow-arrow">複委託 &rarr;</div>
+                    <div class="flow-step">B 公司<br>(協力廠商/出事點)</div>
+                </div>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+                <h3>事件發生流程</h3>
+                <div class="flowchart-container">
+                    <div class="flow-step">B 工程師私接外網</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">電腦被駭客攻擊</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step" style="background-color: #fcedee; border-color: #e74c3c; color: #c0392b;">系統程式碼外洩<br>(重大資安事件)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- B. 題目 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">B. 題目重述</div>
+            <div class="accordion-content">
+                <p><strong>題目：</strong>關於此資通安全事件之處置，下列哪些最適切？（請注意本題為<strong>複選</strong>）</p>
+                <p><strong>選項簡述：</strong></p>
+                <ul>
+                    <li>(A) 查核 B 的「網路維護工程師」適任性</li>
+                    <li>(B) B 通報 A，A 通知甲</li>
+                    <li>(C) B 進行補救</li>
+                    <li>(D) 甲解除複委託，要求資料刪除/銷毀</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- C. 第一步：找關鍵字 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">C. 第一步：找關鍵字</div>
+            <div class="accordion-content">
+                <p>請在閱讀題目時，特別留意以下螢光筆標示的詞彙：</p>
+                <ul>
+                    <li><span class="highlight">重大資通安全事件</span>：代表影響嚴重，處理層級高。</li>
+                    <li><span class="highlight">私自連接外部網路</span>：事件的起因（違規操作）。</li>
+                    <li><span class="highlight">程式碼外洩</span>：造成的損害結果。</li>
+                    <li><span class="highlight">通報</span>：事件發生時的溝通動作。</li>
+                    <li><span class="highlight">補救措施</span>：減少損害的動作。</li>
+                    <li><span class="highlight">解除複委託 / 資料返還與刪除</span>：合約層面的最終處置。</li>
+                    <li><span class="highlight">最適切（複選）</span>：這題不只一個答案。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- D. 第二步：白話翻譯 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">D. 第二步：白話翻譯</div>
+            <div class="accordion-content">
+                <p><strong>用高中生的語言來說：</strong></p>
+                <p>這題就是說：外包廠商 B 的工程師不乖，違反規定把開發用的電腦接上外網，結果被駭客入侵，把程式碼偷光光了。</p>
+                <p>現在老闆（甲機構）和主承包商（A 公司）很生氣，題目問你：「事情發生當下，這三間公司第一時間該怎麼做才對？」</p>
+            </div>
+        </div>
+
+        <!-- E. 第三步：解題思路 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">E. 第三步：解題思路</div>
+            <div class="accordion-content">
+                <p><strong>考點觀念：</strong>委外事件的通報、處置、與合約/資料處理要求。</p>
+                
+                <h4>解題三步驟：</h4>
+                <ol>
+                    <li><strong>分類處置動作：</strong>先把選項分成「通報（通知誰）」、「應變（先止血）」、「善後（資料與合約）」三大類。</li>
+                    <li><strong>核心檢查：</strong>
+                        <ul>
+                            <li>通報：目的是讓最終負責者（甲）知道，因為甲受金管會等法規監管。</li>
+                            <li>補救：目的是把漏洞補起來，不讓災情擴大。</li>
+                            <li>善後：既然出包了，解除合約時要把資料拿回來或銷毀，不然對方電腦裡還有備份怎麼辦？</li>
+                        </ul>
+                    </li>
+                    <li><strong>挑選組合：</strong>複選題要選出所有「合理且必要」的步驟。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- F. 第四步：選項分析 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">F. 第四步：選項分析（逐一檢視）</div>
+            <div class="accordion-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>選項</th>
+                            <th>類別</th>
+                            <th>判斷</th>
+                            <th>原因解析</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A) 查核網路維護工程師適任性</td>
+                            <td><span class="tag-pill tag-audit">追責/管理</span></td>
+                            <td>不適切</td>
+                            <td><strong>找錯人且順序不對。</strong><br>1. 闖禍的是「開發工程師」，查核「網路維護工程師」做什麼？<br>2. 當務之急是止血，不是查核人員。</td>
+                        </tr>
+                        <tr>
+                            <td>(B) B 通報 A 並通知甲</td>
+                            <td><span class="tag-pill tag-notify">通報</span></td>
+                            <td><span style="color:var(--success-color); font-weight:bold;">最適切</span></td>
+                            <td>依據責任鏈，B 是受託者，必須回報 A；甲是業主且受資安法規範，必須知情以進行法規通報。</td>
+                        </tr>
+                        <tr>
+                            <td>(C) B 採行補救措施</td>
+                            <td><span class="tag-pill tag-fix">補救</span></td>
+                            <td><span style="color:var(--success-color); font-weight:bold;">最適切</span></td>
+                            <td>事件發生當下，肇事者 B 必須立刻斷網、清除惡意程式、修補漏洞（Incident Containment）。</td>
+                        </tr>
+                        <tr>
+                            <td>(D) 解除複委託，資料返還/銷毀</td>
+                            <td><span class="tag-pill tag-manage">善後</span></td>
+                            <td><span style="color:var(--success-color); font-weight:bold;">最適切</span></td>
+                            <td>發生重大違規，甲有權解約。解約最重要的是<strong>確保資料不殘留</strong>在 B 手上，避免二次外洩。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- G. 觀念補充與延伸 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">G. 觀念補充與延伸</div>
+            <div class="accordion-content">
+                <p><strong>核心觀念定位：</strong>資安管理 &rarr; 委外管理 + 事件應變（Incident Response）。</p>
+                <p><strong>考試常見度：</strong><span style="color:red; font-weight:bold;">必考</span>。委外資安事件是近年熱門題型。</p>
+                
+                <h4>白話定義整理：</h4>
+                <ul>
+                    <li><span class="term">資通安全事件</span><span class="term-def">（系統或資料被攻擊、外洩、破壞的意外狀況）</span></li>
+                    <li><span class="term">重大事件</span><span class="term-def">（影響範圍大，需要更快速且正式的通報與處置）</span></li>
+                    <li><span class="term">通報</span><span class="term-def">（Notify：在規定時間內，把壞消息告訴應該知道的人）</span></li>
+                    <li><span class="term">補救措施</span><span class="term-def">（先止血不再流，再把傷口縫好）</span></li>
+                </ul>
+
+                <h4>觸類旁通：</h4>
+                <p><strong>開發區隔離（Dev Segmentation）：</strong>開發用的電腦通常很危險（權限大、程式碼多），所以嚴格規定「物理隔離」或「邏輯隔離」，絕對不能私接外網（Internet），這就是本題肇事的主因。</p>
+            </div>
+        </div>
+
+        <!-- H. 記憶口訣 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">H. 記憶口訣</div>
+            <div class="accordion-content">
+                <div style="background-color: #fcf8e3; padding: 15px; border-left: 5px solid #f1c40f;">
+                    <p style="font-size: 1.1rem; font-weight: bold;">「先通報、再止血、最後善後；委外也要收回資料」</p>
+                </div>
+                <p style="margin-top:10px;">
+                    1. <strong>通報</strong>：B &rarr; A &rarr; 甲<br>
+                    2. <strong>止血</strong>：B 要補救<br>
+                    3. <strong>善後</strong>：甲要解約並刪除資料
+                </p>
+            </div>
+        </div>
+
+        <!-- I. 常見陷阱 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">I. 常見陷阱</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>易錯點：</strong>看到 (A) 選項寫得很專業「適任性查核」，就以為是正確的管理手段。但請注意題目情境是「開發工程師」犯錯，不是「網路維護工程師」。</li>
+                    <li><strong>心理盲點：</strong>很多學生覺得「處罰人」最重要。但在資安事件處理流程（IR）中，<strong>「止損（通報+補救）」永遠優於「追責」</strong>。</li>
+                    <li><strong>避坑指南：</strong>遇到這種題目先問三件事：
+                        <ol>
+                            <li>誰要知道？（通報對象）</li>
+                            <li>怎麼止血？（補救措施）</li>
+                            <li>資料怎麼處理？（銷毀/返還）</li>
+                        </ol>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- J. 正確答案 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">J. 正確答案</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.5rem; color: var(--success-color); font-weight: bold; text-align: center;">B、C、D</p>
+                <p style="text-align: center;">一句話理由：事件處置要同時做到「通報、補救、以及資料與合約善後」。</p>
+            </div>
+        </div>
+
+        <!-- K. 自我檢測 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">K. 自我檢測（含參考解答）</div>
+            <div class="accordion-content">
+                <ol>
+                    <li style="margin-bottom: 20px;">
+                        <strong>若工程師沒有私接外網，而是因為開了釣魚信件中毒，處置的前三個核心步驟（通報、補救、善後）會改變嗎？</strong>
+                        <div style="background-color: #e8f6f3; padding: 12px; border-radius: 6px; margin-top: 8px; border-left: 4px solid var(--success-color); color: #2c3e50;">
+                            <span style="font-weight: bold; color: var(--success-color);">答：不會改變。</span><br>
+                            資安事件應變流程（Incident Response）是標準程序。無論「入侵途徑」是私接外網還是釣魚郵件，一旦發生資安事故，管理流程依然必須包含：
+                            <ul style="margin-top:5px; margin-bottom:0;">
+                                <li><strong>通報</strong>（告知權責單位與主管機關）</li>
+                                <li><strong>應變/補救</strong>（止血、隔離、清除惡意程式）</li>
+                                <li><strong>善後</strong>（復原、檢討與合約/資料處理）</li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li style="margin-bottom: 20px;">
+                        <strong>若 B 公司已經自行把毒殺掉了（補救），但覺得太丟臉所以沒有通知甲，這樣為什麼仍然不合格？</strong>
+                        <div style="background-color: #e8f6f3; padding: 12px; border-radius: 6px; margin-top: 8px; border-left: 4px solid var(--success-color); color: #2c3e50;">
+                            <span style="font-weight: bold; color: var(--success-color);">答：違反「通報義務」與無法評估擴大損害。</span><br>
+                            1. <strong>法規與合約要求：</strong>受資安法規範的單位（甲）必須在時限內向上通報，B 隱匿會害甲違法。<br>
+                            2. <strong>風險評估：</strong>B 自行殺毒可能只解決了表面問題，若駭客已將資料竊出（如本題的程式碼外洩），甲完全不知情，就無法進行後續的損害控管（如通知客戶、換鑰匙等）。
+                        </div>
+                    </li>
+                    <li>
+                        <strong>選項 (D) 提到的「返還/刪除/銷毀」，主要目的是為了防止哪一類風險（機密性/完整性/可用性）的持續喪失？</strong>
+                        <div style="background-color: #e8f6f3; padding: 12px; border-radius: 6px; margin-top: 8px; border-left: 4px solid var(--success-color); color: #2c3e50;">
+                            <span style="font-weight: bold; color: var(--success-color);">答：機密性（Confidentiality）。</span><br>
+                            程式碼是公司的核心資產。若合約解除後，外包商（B）手上仍持有備份，這些資料就有外流或被不當利用的風險。要求「銷毀/刪除」就是為了確保資料不再被非授權者持有，維護機密性。
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        // 取得所有勾選的 checkbox
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        let selectedValues = [];
+        checkboxes.forEach((checkbox) => {
+            selectedValues.push(checkbox.value);
+        });
+
+        // 排序後比對，確保順序不影響判斷
+        selectedValues.sort();
+        
+        // 正確答案
+        const correctAnswers = ['B', 'C', 'D'];
+        const feedbackDiv = document.getElementById('feedback');
+        const explanationArea = document.getElementById('explanationArea');
+
+        // 判斷邏輯：長度要一樣，且內容完全一致（全對才算對）
+        const isCorrect = JSON.stringify(selectedValues) === JSON.stringify(correctAnswers);
+
+        if (isCorrect) {
+            feedbackDiv.textContent = "回答正確！太棒了！請查看下方詳細解析。";
+            feedbackDiv.className = "feedback-area feedback-correct";
+            feedbackDiv.style.display = "block";
+            
+            // 自動展開解析區
+            explanationArea.classList.remove('hidden');
+            
+            // 自動展開第一個解析項目
+            const firstItem = explanationArea.querySelector('.accordion-item');
+            if(firstItem && !firstItem.classList.contains('active')) {
+                firstItem.classList.add('active');
+            }
+
+            // 滾動到回饋區
+            feedbackDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        } else {
+            let msg = "回答錯誤。";
+            if (selectedValues.length === 0) {
+                msg += " 您沒有勾選任何選項。";
+            } else {
+                msg += " 本題為複選題，必須「完全正確」才算得分。";
+                if (selectedValues.includes('A')) {
+                    msg += " 提示：選項 (A) 的對象正確嗎？現在優先要做的是查核還是止血？";
+                } else if (selectedValues.length < 3) {
+                    msg += " 提示：您可能少選了必要的處置步驟（通報、補救、善後缺一不可）。";
+                }
+            }
+            feedbackDiv.textContent = msg;
+            feedbackDiv.className = "feedback-area feedback-wrong";
+            feedbackDiv.style.display = "block";
+        }
+    }
+
+    function resetQuiz() {
+        // 清空 checkbox
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = false;
+        });
+
+        // 隱藏回饋與解析
+        const feedbackDiv = document.getElementById('feedback');
+        feedbackDiv.style.display = "none";
+        
+        const explanationArea = document.getElementById('explanationArea');
+        explanationArea.classList.add('hidden');
+
+        // 收起所有折疊選單
+        const accordionItems = document.querySelectorAll('.accordion-item');
+        accordionItems.forEach(item => {
+            item.classList.remove('active');
+        });
+    }
+
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        item.classList.toggle('active');
+    }
+</script>
+
+</body>
+</html>

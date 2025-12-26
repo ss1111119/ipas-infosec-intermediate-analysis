@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安觀念題教學：風險分析與評估流程</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --highlight-color: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-bottom: 5px solid var(--accent-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: #555;
+            font-weight: normal;
+        }
+
+        /* Quiz Card */
+        .quiz-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent-color);
+            background-color: #f0f8ff;
+        }
+
+        .option-btn.selected {
+            border-color: var(--accent-color);
+            background-color: #e8f4fd;
+            box-shadow: 0 0 0 2px var(--accent-color) inset;
+        }
+
+        .action-area {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 10px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .btn-submit:hover {
+            background-color: #1a252f;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: #fff;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Feedback */
+        #feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis / Accordion Section */
+        #analysis-section {
+            display: none; /* Initially Hidden */
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .accordion {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .accordion-header {
+            padding: 15px 20px;
+            background-color: #fff;
+            border-bottom: 1px solid transparent;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            transition: background 0.2s;
+        }
+
+        .accordion-header:hover {
+            background-color: #f8f9fa;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .accordion.active .accordion-header {
+            border-bottom: 1px solid var(--border-color);
+            background-color: #f0f4f8;
+        }
+
+        .accordion.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 20px;
+            background-color: #fff;
+        }
+
+        .accordion.active .accordion-content {
+            padding: 20px;
+            max-height: 1000px; /* Arbitrary large value for slide effect */
+        }
+
+        /* Content Styling */
+        .highlight-text {
+            background-color: var(--highlight-color);
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #856404;
+        }
+
+        .concept-tag {
+            display: inline-block;
+            background-color: #e1f5fe;
+            color: #0277bd;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        /* Cycle Diagram CSS */
+        .cycle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .cycle-step {
+            flex: 1;
+            min-width: 100px;
+            background: #fff;
+            border: 2px solid var(--accent-color);
+            color: var(--primary-color);
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            position: relative;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .cycle-arrow {
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Table */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        .analysis-table th, .analysis-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .analysis-table th {
+            background-color: #f2f2f2;
+            color: var(--primary-color);
+        }
+
+        .status-ok {
+            color: var(--correct-color);
+            font-weight: bold;
+        }
+
+        .status-no {
+            color: var(--wrong-color);
+            font-weight: bold;
+        }
+
+        /* Self Check Details */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 10px;
+            background: #fafafa;
+        }
+
+        summary {
+            cursor: pointer;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .answer-box {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff;
+            border-left: 3px solid var(--correct-color);
+            color: #333;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .cycle-container {
+                flex-direction: column;
+            }
+            .cycle-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安觀念題教學</h1>
+        <h2>主題：風險分析與評估流程</h2>
+    </header>
+
+    <!-- Quiz Section -->
+    <div class="quiz-card" id="quiz-area">
+        <div class="question-text">
+            27. 關於風險分析與評估之敘述，下列何者最「不」適切？
+        </div>
+
+        <div class="options-group">
+            <button class="option-btn" onclick="selectOption('A')" id="btn-A">(A) 公司最好至少每年定期執行一次風險評鑑</button>
+            <button class="option-btn" onclick="selectOption('B')" id="btn-B">(B) 公司營運重大改變時，應進行風險評鑑</button>
+            <button class="option-btn" onclick="selectOption('C')" id="btn-C">(C) 重大風險項目完成風險處理後，不需進行風險再評估</button>
+            <button class="option-btn" onclick="selectOption('D')" id="btn-D">(D) 進行風險分析與評估前，應先了解相關背景資訊（例如：法規要求、技術環境…）</button>
+        </div>
+
+        <div class="action-area">
+            <button class="btn btn-submit" onclick="submitAnswer()">提交答案</button>
+            <button class="btn btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback"></div>
+    </div>
+
+    <!-- Analysis Section (Hidden until submitted) -->
+    <div id="analysis-section">
+        
+        <!-- A. 題目 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">A. 題目回顧</div>
+            <div class="accordion-content">
+                <p><strong>題目：</strong>關於風險分析與評估之敘述，下列何者最「不」適切？</p>
+                <p><strong>選項：</strong></p>
+                <ul>
+                    <li>(A) 公司最好至少每年定期執行一次風險評鑑</li>
+                    <li>(B) 公司營運重大改變時，應進行風險評鑑</li>
+                    <li>(C) 重大風險項目完成風險處理後，不需進行風險再評估</li>
+                    <li>(D) 進行風險分析與評估前，應先了解相關背景資訊</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- B. 關鍵字 -->
+        <div class="accordion active">
+            <div class="accordion-header" onclick="toggleAccordion(this)">B. 第一步：找關鍵字</div>
+            <div class="accordion-content">
+                <p>請拿出心裡的螢光筆，將以下詞彙畫起來：</p>
+                <ul>
+                    <li><span class="highlight-text">風險分析與評估</span>：考試的主題。</li>
+                    <li><span class="highlight-text">最「不」適切</span>：要找錯誤的、不合理的選項。</li>
+                    <li><span class="highlight-text">定期執行</span>、<span class="highlight-text">營運重大改變</span>：這是兩個重要的觸發時機。</li>
+                    <li><span class="highlight-text">風險處理後</span>、<span class="highlight-text">風險再評估</span>：<strong style="color:var(--wrong-color);">這是本題決勝點！</strong></li>
+                    <li><span class="highlight-text">背景資訊</span>：評估前的準備工作。</li>
+                </ul>
+                <p style="margin-top:10px;"><strong>關鍵思考：</strong>「風險處理（Risk Treatment，採取措施降低風險）」做完之後，真的就沒事了嗎？</p>
+            </div>
+        </div>
+
+        <!-- C. 白話翻譯 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">C. 第二步：白話翻譯</div>
+            <div class="accordion-content">
+                <p>我們用高中生日常口語把這題翻譯一遍：</p>
+                <div style="background:#f0f8ff; padding:15px; border-radius:8px; margin:10px 0;">
+                    「公司在做資安風險檢查的時候，下面哪一種心態是<strong style="color:var(--wrong-color);">最母湯（錯誤）</strong>的？」
+                    <ul>
+                        <li>(A) 每年至少固定做一次檢查。 (聽起來很合理)</li>
+                        <li>(B) 公司有大變動（比如換系統）時要做檢查。 (聽起來也很合理)</li>
+                        <li>(C) 嚴重的問題修好之後，就不用再回頭檢查了。 (咦？修完不用驗收嗎？)</li>
+                        <li>(D) 開始檢查前，先搞清楚狀況（法律規定、用了什麼技術）。 (這是基本常識)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- D. 解題思路 -->
+        <div class="accordion active">
+            <div class="accordion-header" onclick="toggleAccordion(this)">D. 第三步：解題思路</div>
+            <div class="accordion-content">
+                <p><strong>核心觀念：</strong>風險管理是循環流程，不是做一次就結束。</p>
+                
+                <h4 style="margin-top:10px;">視覺化流程圖：</h4>
+                <div class="cycle-container">
+                    <div class="cycle-step">1. 背景建立</div>
+                    <div class="cycle-arrow">➤</div>
+                    <div class="cycle-step">2. 風險評估</div>
+                    <div class="cycle-arrow">➤</div>
+                    <div class="cycle-step">3. 風險處理</div>
+                    <div class="cycle-arrow">➤</div>
+                    <div class="cycle-step" style="border-color:var(--wrong-color); background:#fff0f0;">4. 再評估<br>(關鍵)</div>
+                </div>
+
+                <h4 style="margin-top:10px;">解題步驟：</h4>
+                <ol>
+                    <li><strong>想像情境：</strong>這就像你要考大學。</li>
+                    <li><strong>模擬流程：</strong>模考考差了（風險評估）→ 補習加強（風險處理）→ 補習完之後呢？當然要再考一次模考（風險再評估），確認成績有沒有進步！</li>
+                    <li><strong>找出錯誤：</strong>選項 (C) 說「處理後不需再評估」，就等於「補習完不用再考試確認」，這是非常危險且不合邏輯的。</li>
+                </ol>
+                <p style="margin-top:10px;"><strong>原理：</strong>即使做了防護措施，風險通常不會變成零，剩下的風險稱為「剩餘風險（Residual Risk，處理後仍存在的風險）」，必須確認這個剩餘風險是否已低到公司可接受的範圍。</p>
+            </div>
+        </div>
+
+        <!-- E. 選項分析 -->
+        <div class="accordion active">
+            <div class="accordion-header" onclick="toggleAccordion(this)">E. 第四步：選項分析</div>
+            <div class="accordion-content">
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th width="15%">選項</th>
+                            <th width="20%">是否正確</th>
+                            <th>白話原因解析</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A)</td>
+                            <td><span class="status-ok">適切</span></td>
+                            <td><strong>定期健檢概念。</strong>環境與駭客技術一直在變，國際標準（如 ISO 27001）通常建議至少每年做一次評鑑。</td>
+                        </tr>
+                        <tr>
+                            <td>(B)</td>
+                            <td><span class="status-ok">適切</span></td>
+                            <td><strong>變動帶來風險。</strong>公司合併、換新機房或推新APP，都會產生新漏洞，當然要馬上評估。</td>
+                        </tr>
+                        <tr>
+                            <td>(C)</td>
+                            <td><span class="status-no">不適切</span></td>
+                            <td><strong>違反循環原則。</strong>裝了防火牆（處理）不代表防火牆一定設定正確，必須「再評估」確認風險是否真的降低了。</td>
+                        </tr>
+                        <tr>
+                            <td>(D)</td>
+                            <td><span class="status-ok">適切</span></td>
+                            <td><strong>先做功課。</strong>如果不先了解「法規要求」或「技術環境」，評估出來的結果會不準確或不適用。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- F. 觀念補充 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">F. 觀念補充與延伸</div>
+            <div class="accordion-content">
+                <p><span class="concept-tag">核心定位</span> 資安管理 → 風險管理流程（Risk Management）</p>
+                <p><span class="concept-tag">考試熱度</span> ★★★★★ (必考題)</p>
+                
+                <h4 style="margin-top:10px;">重要名詞定義：</h4>
+                <ul>
+                    <li><strong>風險評鑑 (Risk Assessment)：</strong>包含找出風險、分析風險有多嚴重、評估發生的可能性。</li>
+                    <li><strong>風險處理 (Risk Treatment)：</strong>面對風險的手段，包含降低（修補）、避免（不以身試險）、轉移（買保險）、保留（接受風險）。</li>
+                    <li><strong>風險再評估 (Risk Re-assessment)：</strong>處理措施實施後，確認「剩餘風險」是否已經在可接受範圍內。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- G. 記憶口訣 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">G. 記憶口訣</div>
+            <div class="accordion-content">
+                <div style="border: 2px dashed var(--accent-color); padding: 15px; text-align: center; border-radius: 10px; font-size: 1.2rem; font-weight: bold; color: var(--primary-color);">
+                    「風險不是修完就算，<br>處理之後一定再看！」
+                </div>
+            </div>
+        </div>
+
+        <!-- H. 常見陷阱 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">H. 常見陷阱</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>易錯點：</strong>很多學生以為裝了防毒軟體或防火牆（風險處理），事情就結束了。</li>
+                    <li><strong>心理盲點：</strong>把風險管理當成「一次性」的交作業，忘記它是「持續循環」的過程。</li>
+                    <li><strong>避坑指南：</strong>只要題目出現「之後不用再...」、「一次就完成...」這種武斷的敘述，通常都是錯誤選項。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- I. 正確答案 -->
+        <div class="accordion active">
+            <div class="accordion-header" onclick="toggleAccordion(this)">I. 正確答案</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.2rem;"><strong>正確答案：(C)</strong></p>
+                <p><strong>一句話理由：</strong>風險處理後仍需再評估，確認「剩餘風險」是否已降低至可接受程度，這是風險管理的基本流程。</p>
+            </div>
+        </div>
+
+        <!-- J. 自我檢測 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">J. 自我檢測</div>
+            <div class="accordion-content">
+                <p>試著回答以下問題，點擊展開查看答案：</p>
+                
+                <details>
+                    <summary>1. 為什麼風險處理後還可能存在風險？</summary>
+                    <div class="answer-box">
+                        <strong>參考答案：</strong>因為資安控制措施（如防火牆、密碼鎖）不一定百分之百有效，或者可能產生新的副作用，這些留下來的風險稱為「剩餘風險」。
+                    </div>
+                </details>
+
+                <details>
+                    <summary>2. 如果再評估後發現風險仍過高，下一步應怎麼做？</summary>
+                    <div class="answer-box">
+                        <strong>參考答案：</strong>如果剩餘風險仍高於公司的可接受水準，必須重新選擇或加強風險處理措施（例如加購更強的防護設備），直到風險降低為止。
+                    </div>
+                </details>
+
+                <details>
+                    <summary>3. 為什麼法規與技術環境屬於風險評估前的重要背景資訊？</summary>
+                    <div class="answer-box">
+                        <strong>參考答案：</strong>因為它們決定了評估的標準。例如：如果是銀行業，受到金管會嚴格監管（法規背景），那麼一點點資料外洩的風險都會被評定為「極高風險」；如果不了解這背景，可能會誤判嚴重性。
+                    </div>
+                </details>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let selectedOption = null;
+
+    function selectOption(option) {
+        // 清除所有選取狀態
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+
+        // 設定當前選取
+        document.getElementById('btn-' + option).classList.add('selected');
+        selectedOption = option;
+        
+        // 隱藏回饋與解析（若想讓使用者重新思考）
+        document.getElementById('feedback').style.display = 'none';
+    }
+
+    function submitAnswer() {
+        const feedbackEl = document.getElementById('feedback');
+        const analysisSection = document.getElementById('analysis-section');
+
+        if (!selectedOption) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedbackEl.style.display = 'block';
+        feedbackEl.classList.remove('feedback-correct', 'feedback-wrong');
+
+        if (selectedOption === 'C') {
+            feedbackEl.textContent = '恭喜答對！正確答案就是 (C)。請往下閱讀詳細解析。';
+            feedbackEl.classList.add('feedback-correct');
+            // 展開解析區塊
+            analysisSection.style.display = 'block';
+            
+            // 自動滾動到解析區
+            setTimeout(() => {
+                analysisSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+
+        } else {
+            feedbackEl.innerHTML = '答案錯誤。<br>提示：風險管理是一個「循環」流程，做完處理就真的沒事了嗎？<br>再試一次，或點擊答案 (C) 查看解析。';
+            feedbackEl.classList.add('feedback-wrong');
+            // 答錯暫不顯示解析，鼓勵重試
+        }
+    }
+
+    function resetQuiz() {
+        selectedOption = null;
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('analysis-section').style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        item.classList.toggle('active');
+    }
+</script>
+
+</body>
+</html>

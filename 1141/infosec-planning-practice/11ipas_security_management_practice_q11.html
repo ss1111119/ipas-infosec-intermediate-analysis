@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安觀念題教學：資訊安全管理實務</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --text-color: #333;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+
+        .question-box {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9f9f9;
+            border-color: var(--accent-color);
+        }
+
+        .option-input {
+            margin-right: 15px;
+            margin-top: 5px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #1a252f;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Result Feedback */
+        #result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .result-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion Styles */
+        .accordion-container {
+            margin-top: 30px;
+            display: none; /* Hidden by default */
+        }
+
+        .accordion-item {
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f1f1f1;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9e9e9;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 20px;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+        }
+
+        /* Specific Content Styles */
+        .highlight-yellow {
+            background-color: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .highlight-keyword {
+            border-bottom: 2px solid var(--accent-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .step-title {
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .comparison-diagram {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            gap: 20px;
+        }
+
+        .diagram-box {
+            flex: 1;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+
+        .diagram-left {
+            background-color: #e8f6f3;
+            border: 2px solid #a2d9ce;
+        }
+
+        .diagram-right {
+            background-color: #fdedec;
+            border: 2px solid #fadbd8;
+        }
+
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .analysis-table th, .analysis-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .analysis-table th {
+            background-color: #f2f2f2;
+            width: 20%;
+        }
+
+        .analysis-table td:nth-child(2) {
+            width: 15%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .correct-text { color: var(--success-color); }
+        .wrong-text { color: var(--error-color); }
+
+        ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .comparison-diagram {
+                flex-direction: column;
+            }
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>資訊安全管理實務與常見原則</h1>
+        <h2>iPAS 資安觀念題型解析</h2>
+    </header>
+
+    <!-- Part A: Question -->
+    <div class="question-box">
+        <div class="question-text">
+            11. 請問下列對於「資訊安全管理實務」的描述何者較「不」正確？
+        </div>
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A" class="option-input">
+                <span>(A) 縱深防禦（Defense in Depth）指在實體、系統、網路或網宇（Cyberspace：網路空間）中建置了多層的防禦機制</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B" class="option-input">
+                <span>(B) 零信任架構（ZTA：不預設信任任何人或設備）已成為國內主流，目前國內企業組織的資訊及工控系統都已廣為採用零信任架構</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C" class="option-input">
+                <span>(C) 僅知原則（Need-to-Know Principle：只讓需要知道的人知道）與最小權限原則（Principle of Least Privilege，POLP：只給完成工作所需的最小權限）仍然是可供參考的資安管理實務原則</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D" class="option-input">
+                <span>(D) 職務區隔（Separation of Duties，SoD）也是管理層面的安全機制，也可以透過技術層面來加強，使得工作分成多人分層負責，避免個人進行非授權的工作或提升偵測的能力</span>
+            </label>
+        </div>
+
+        <div id="result-area"></div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">提交答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+    </div>
+
+    <!-- Explanation Accordion Container -->
+    <div class="accordion-container" id="explanation-container">
+        
+        <!-- Part B: Step 1 Keywords -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">第一步：找關鍵字</div>
+            <div class="accordion-content">
+                <span class="step-title">螢光筆標示：</span>
+                <ul>
+                    <li><span class="highlight-yellow">較「不」正確</span>（注意否定詞）</li>
+                    <li><span class="highlight-keyword">縱深防禦</span></li>
+                    <li><span class="highlight-keyword">零信任架構</span>（<span class="wrong-text">已成為主流、都已廣為採用</span>）</li>
+                    <li><span class="highlight-keyword">僅知原則 / 最小權限</span></li>
+                    <li><span class="highlight-keyword">職務區隔</span></li>
+                </ul>
+                <p><strong>特別注意：</strong>「已成為主流、都已廣為採用」是極高風險用語。在資安考試中，看到「全部」、「都已」、「完美」等絕對性字眼，通常都是陷阱。</p>
+            </div>
+        </div>
+
+        <!-- Part C: Step 2 Translation -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">第二步：白話翻譯</div>
+            <div class="accordion-content">
+                <p>這題其實在問：<strong>「下列哪一個說法講得太滿、吹牛吹過頭，與現實狀況不符？」</strong></p>
+                <p>題目不是考你名詞定義（因為四個選項的定義大致都對），而是考你對「現況」的判斷。</p>
+            </div>
+        </div>
+
+        <!-- Part D: Step 3 Logic -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">第三步：解題思路</div>
+            <div class="accordion-content">
+                <span class="step-title">這題在考什麼觀念？</span>
+                <p><strong>資安管理原則的正確理解與現況判斷。</strong></p>
+                
+                <span class="step-title">解題步驟：</span>
+                <ol>
+                    <li><strong>先確認長期通用原則：</strong>像「縱深防禦」、「最小權限」、「職務區隔」這些是老牌且正確的原則，只要定義沒寫錯，通常都是對的。</li>
+                    <li><strong>再找「過度武斷」的選項：</strong>檢查描述現況的語句。新技術（如零信任）通常是「趨勢」，很少是「現狀已全面完成」。</li>
+                </ol>
+
+                <span class="step-title">原理與規則（白話）：</span>
+                <ul>
+                    <li>資安原則多為長期適用，不會因為新技術出來舊原則就失效。</li>
+                    <li>新架構（如零信任）屬於「趨勢」與「目標」，不等於「全面落地」。尤其工控系統（OT）因為設備老舊，要導入零信任非常困難。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Part E: Step 4 Option Analysis -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">第四步：選項分析</div>
+            <div class="accordion-content">
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th>選項</th>
+                            <th>描述正確性</th>
+                            <th>原因（白話解析）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A) 縱深防禦</td>
+                            <td class="correct-text">正確</td>
+                            <td>定義正確。就像城堡要有護城河、城牆、守衛等多層保護，不能只靠一道門。</td>
+                        </tr>
+                        <tr>
+                            <td>(B) 零信任架構</td>
+                            <td class="wrong-text">不正確</td>
+                            <td><strong>陷阱！</strong>零信任確實是趨勢，但說國內企業和「工控系統」都「已廣為採用」是錯的。工控系統更新很慢，很多連防毒都裝不了，更別說零信任。</td>
+                        </tr>
+                        <tr>
+                            <td>(C) 僅知原則 / 最小權限</td>
+                            <td class="correct-text">正確</td>
+                            <td>這是不變的真理。不管技術怎麼變，權限給越少越安全，只讓該知道的人知道，這原則永遠適用。</td>
+                        </tr>
+                        <tr>
+                            <td>(D) 職務區隔 (SoD)</td>
+                            <td class="correct-text">正確</td>
+                            <td>定義正確。例如：開支票的人和核准支票的人不能是同一個，這就是 SoD。這可以用人管，也可以用系統卡控（技術加強）。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Part F: Concepts -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">觀念補充與延伸</div>
+            <div class="accordion-content">
+                <span class="step-title">核心觀念定位：</span>
+                <p>資安管理實務 &rarr; 原則與架構（常考觀念題）</p>
+
+                <span class="step-title">原則 vs 架構 對照示意：</span>
+                <div class="comparison-diagram">
+                    <div class="diagram-box diagram-left">
+                        <h3>長期原則</h3>
+                        <p><strong>歷久彌新，永遠適用</strong></p>
+                        <hr>
+                        <ul style="text-align: left;">
+                            <li>SoD (職務區隔)</li>
+                            <li>POLP (最小權限)</li>
+                            <li>Need-to-Know (僅知原則)</li>
+                            <li>Defense in Depth (縱深防禦)</li>
+                        </ul>
+                    </div>
+                    <div class="diagram-box diagram-right">
+                        <h3>新興架構/趨勢</h3>
+                        <p><strong>正在發展，尚未全面普及</strong></p>
+                        <hr>
+                        <ul style="text-align: left;">
+                            <li>Zero Trust (零信任)</li>
+                            <li>AI 資安防禦</li>
+                        </ul>
+                        <p style="font-size: 0.9em; color: #c0392b;">注意：題目若說「已全面完成」，通常是錯的。</p>
+                    </div>
+                </div>
+
+                <span class="step-title">定義整理（白話）：</span>
+                <ul>
+                    <li><strong>縱深防禦：</strong>多道防線，不只一招。像洋蔥一樣一層層包起來。</li>
+                    <li><strong>零信任架構：</strong>不預設信任。不管你是老闆還是網管，每次存取資料都要檢查身分，不做一次性通關。</li>
+                    <li><strong>僅知原則 / 最小權限：</strong>知道與能做的都要剛剛好。你是工讀生就不要給你總經理的權限。</li>
+                    <li><strong>職務區隔：</strong>把關鍵流程拆給不同角色，避免球員兼裁判。</li>
+                </ul>
+
+                <span class="step-title">觸類旁通：</span>
+                <p><strong>趨勢 (Trend) vs 普遍落地 (Widely Adopted)</strong>：這是兩個概念。AI 是趨勢，但不是每家公司都在用 AI 寫程式。</p>
+            </div>
+        </div>
+
+        <!-- Part G: Mnemonic -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">記憶口訣</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.2em; font-weight: bold; color: var(--accent-color); text-align: center; border: 2px dashed var(--accent-color); padding: 15px;">
+                    「原則長久用，架構看成熟；<br>
+                    講到『都已採用』要小心。」
+                </p>
+                <p>解釋：老原則（最小權限、職務區隔）通常是對的；新架構（零信任）若說成「大家都用好了」，那就是陷阱。</p>
+            </div>
+        </div>
+
+        <!-- Part H: Common Traps -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">常見陷阱</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>盲目崇拜新名詞：</strong> 容易誤選原因是因為看到「零信任」這三個字很潮、很紅，就覺得它一定對。</li>
+                    <li><strong>心理盲點：</strong> 把「政府推動的趨勢」誤當成「企業實際的現況」。</li>
+                    <li><strong>避坑指南：</strong> 題目出現「全部」、「都已」、「全面」、「絕對」等字眼時，請立刻開啟警鈴，優先檢查其真實性。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Part I: Correct Answer -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">正確答案</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.5em; font-weight: bold; color: var(--success-color);">答案：(B)</p>
+                <p><strong>一句話理由：</strong>零信任是發展趨勢，但尚未在國內「所有」企業與工控系統全面採用，敘述過於誇大。</p>
+            </div>
+        </div>
+
+        <!-- Part J: Self Check -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">自我檢測（不提供答案）</div>
+            <div class="accordion-content">
+                <p>試著回答以下問題，確認是否真正理解：</p>
+                <ol>
+                    <li>為什麼工控系統（如水電廠控制系統）導入零信任通常比一般 IT 系統更困難？（提示：設備壽命與即時性要求）</li>
+                    <li>若題目把 (B) 選項改成「零信任架構已逐漸成為國內資安推動的趨勢」，這句話還會是不正確的嗎？</li>
+                    <li>「僅知原則」與「最小權限」在雲端環境（Cloud）中如何實作？</li>
+                </ol>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const resultArea = document.getElementById('result-area');
+        const explanationContainer = document.getElementById('explanation-container');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        explanationContainer.style.display = 'block';
+        
+        if (selectedValue === 'B') {
+            resultArea.className = 'result-correct';
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = '恭喜答對！<br>零信任雖然是趨勢，但說「全面採用」與現實不符。';
+            // Open the first few accordions for reinforcement
+            expandAccordion(0); 
+            expandAccordion(3); 
+        } else {
+            resultArea.className = 'result-wrong';
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = '答案錯誤。<br>提示：請注意選項中是否有「過度武斷」或「與現實不符」的描述。你可能把「趨勢」誤當成「全面現況」了。';
+        }
+
+        // Scroll to result
+        resultArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetQuiz() {
+        // Clear radio buttons
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // Hide result and explanations
+        document.getElementById('result-area').style.display = 'none';
+        document.getElementById('explanation-container').style.display = 'none';
+
+        // Collapse all accordions
+        const items = document.querySelectorAll('.accordion-item');
+        items.forEach(item => {
+            item.classList.remove('active');
+            item.querySelector('.accordion-content').style.display = 'none';
+        });
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        const content = item.querySelector('.accordion-content');
+        
+        // Toggle current
+        if (item.classList.contains('active')) {
+            item.classList.remove('active');
+            content.style.display = 'none';
+        } else {
+            item.classList.add('active');
+            content.style.display = 'block';
+        }
+    }
+
+    function expandAccordion(index) {
+        const items = document.querySelectorAll('.accordion-item');
+        if (items[index]) {
+            items[index].classList.add('active');
+            items[index].querySelector('.accordion-content').style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

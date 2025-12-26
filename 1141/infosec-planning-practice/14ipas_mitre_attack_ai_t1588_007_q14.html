@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題組教學 - MITRE ATT&CK 與 AI</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header-tag {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        /* Scenario Box */
+        .scenario-box {
+            background-color: #ecf0f1;
+            border-left: 5px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Question Area */
+        .question-area {
+            margin-bottom: 30px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent-color);
+            background-color: #f0f8ff;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        /* Buttons */
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        #submit-btn {
+            background-color: var(--accent-color);
+            color: white;
+            flex: 2;
+        }
+
+        #submit-btn:hover {
+            background-color: #2980b9;
+        }
+
+        #reset-btn {
+            background-color: #95a5a6;
+            color: white;
+            flex: 1;
+            display: none; /* Hidden by default */
+        }
+
+        #reset-btn:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Feedback */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Analysis / Accordion */
+        .analysis-section {
+            margin-top: 40px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            display: none; /* Hidden until submitted */
+        }
+
+        details {
+            margin-bottom: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            user-select: none;
+            outline: none;
+        }
+
+        summary:hover {
+            background-color: #e2e6ea;
+        }
+
+        .details-content {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+        /* Content Styling inside Accordion */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .term-def {
+            color: #666;
+            font-size: 0.9em;
+            font-weight: normal;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        /* Table Styling */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        .analysis-table th, .analysis-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .analysis-table th {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .analysis-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Visual Attack Flow */
+        .flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .flow-step {
+            background-color: white;
+            border: 2px solid var(--secondary-color);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .flow-arrow {
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .flow-highlight {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .flow-container {
+                flex-direction: column;
+            }
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <span class="header-tag">題組 2（第 13–16 題共用）</span>
+        <h1>主題：MITRE ATT&CK 與 生成式 AI</h1>
+        <p>本互動網頁專為高中生考前衝刺設計，請詳細閱讀情境並作答。</p>
+    </header>
+
+    <!-- Section A included in visual presentation as the scenario box -->
+    <div class="scenario-box">
+        <span class="scenario-title">【題組共用情境】</span>
+        <p>在準備上市公司的董事會會議中，資通安全是議程的重點。此次會議主要討論如何加強公司的資通安全防護及管理機制，應對生成式 AI<span class="term-def">（Generative AI，能產生文字、程式、圖片等內容的人工智慧）</span>帶來的威脅，以及了解最新資安框架如何融入公司治理之中。</p>
+        <br>
+        <p>會議中提到攻擊者也會利用生成式 AI 提升攻擊效率，因此資安主管正在整理常見攻擊框架，並向管理層說明 MITRE ATT&CK<span class="term-def">（攻擊者戰術技術知識庫）</span>如何用「戰術（Tactic）」與「技術（Technique）」描述攻擊流程。</p>
+    </div>
+
+    <!-- Section B: Question -->
+    <div class="question-area">
+        <div class="question-text">
+            第 14 題：情境如題組所述，生成式 AI 也成為攻擊者利用的利器之一，為使生成式 AI 於攻擊進程中可被識別，MITRE ATT&CK 也在 2024 年 4 月 26 日所釋出的 15.01 版本中將 AI 納入，並於技術中新增了一個分類名為 <strong>T1588.007 Artificial Intelligence</strong>。而攻擊與防護是相庭抗禮，上述新增的攻擊技術，為下列 ATT&CK 的哪一個戰術進程？
+        </div>
+
+        <div class="options-grid">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                <span>(A) Impact（衝擊）</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                <span>(B) Persistence（維持）</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                <span>(C) Defense Evasion（防禦規避）</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                <span>(D) Resource Development（資源開發）</span>
+            </label>
+        </div>
+
+        <div class="feedback-area" id="feedback-display"></div>
+
+        <div class="btn-group">
+            <button id="submit-btn" onclick="checkAnswer()">提交答案</button>
+            <button id="reset-btn" onclick="resetQuiz()">重作一次</button>
+        </div>
+    </div>
+
+    <!-- Explanation Sections (Hidden until answered) -->
+    <div id="analysis-container" class="analysis-section">
+        <h3>解析與觀念釐清</h3>
+        <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">點擊下方區塊可展開詳細說明</p>
+
+        <!-- A: 題組情境重點整理 -->
+        <details open>
+            <summary>A. 題組情境重點整理</summary>
+            <div class="details-content">
+                <ul>
+                    <li><strong>生成式 AI</strong>：能產生文字、程式碼、圖片的 AI，現在被攻擊者濫用。</li>
+                    <li><strong>MITRE ATT&CK</strong>：一個專門描述駭客攻擊流程、技術與戰術的全球知識庫。</li>
+                    <li><strong>本題核心</strong>：題目給了一個編號 <strong>T1588.007</strong>，問這個「技術」屬於哪個「戰術」。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- C: 第一步：找關鍵字 -->
+        <details>
+            <summary>C. 第一步：找關鍵字</summary>
+            <div class="details-content">
+                <p>請拿起你心中的螢光筆，將以下詞彙標記起來：</p>
+                <ul>
+                    <li><span class="highlight">MITRE ATT&CK</span></li>
+                    <li><span class="highlight">15.01 版本</span>（暗示這是新的變動）</li>
+                    <li><span class="highlight">T1588.007 Artificial Intelligence</span>（關鍵編號與名稱）</li>
+                    <li><span class="highlight">戰術（Tactic）</span>：攻擊者想達成的階段性目的。</li>
+                    <li><span class="highlight">技術（Technique）</span>：達成目的具體做法。</li>
+                </ul>
+                <p><strong>解題鑰匙：</strong>本題要考的是你知不知道「AI 技術」在攻擊鏈中被歸類在「哪個目的階段」。</p>
+            </div>
+        </details>
+
+        <!-- D: 第二步：白話翻譯 -->
+        <details>
+            <summary>D. 第二步：白話翻譯</summary>
+            <div class="details-content">
+                <p>用高中生日常口語來說：</p>
+                <p>這題不是在問你 AI 數學原理是什麼，而是在問：<strong>「當攻擊者想要用 AI 來做壞事時，MITRE 把『準備 AI 這個工具』的這個動作，算是在攻擊流程的哪一步？」</strong></p>
+            </div>
+        </details>
+
+        <!-- E: 第三步：解題思路 -->
+        <details>
+            <summary>E. 第三步：解題思路</summary>
+            <div class="details-content">
+                <p><strong>這題在考什麼觀念？</strong> 一句話：ATT&CK 戰術分類與 Resource Development 的含義。</p>
+                <div style="background-color: #e8f6f3; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>解題步驟：</strong>
+                    <ol>
+                        <li>看到 <strong>T1588.*</strong> 這種編號 → 若有背過編號，T1588 是「Obtain Capabilities（取得能力）」。</li>
+                        <li>即使沒背編號，判斷 AI 在這裡的角色是「工具」。攻擊者要用 AI 寫程式、寫釣魚信，必須先「取得/開發」這個 AI 模型或服務。</li>
+                        <li>對照四個戰術，找最符合「準備資源」的選項。</li>
+                    </ol>
+                </div>
+                <p><strong>原理與規則（白話）：</strong></p>
+                <ul>
+                    <li><strong>Resource Development（資源開發）</strong>：攻擊前或攻擊中，準備或取得攻擊所需資源的階段（例如：買伺服器、註冊假帳號、取得 AI 工具、寫惡意程式）。</li>
+                    <li>AI 被當成攻擊資源（例如用 AI 產生釣魚信、寫惡意程式片段、改寫腳本）時，就落在「準備資源/能力」的戰術脈絡。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- F: 第四步：選項分析 -->
+        <details open>
+            <summary>F. 第四步：選項分析（重點必看）</summary>
+            <div class="details-content">
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th width="20%">選項</th>
+                            <th width="35%">戰術在做什麼（白話）</th>
+                            <th width="15%">是否符合</th>
+                            <th>原因</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A) Impact<br>（衝擊）</td>
+                            <td>造成破壞或影響結果（如：刪檔、加密勒索、破壞服務）。</td>
+                            <td>否</td>
+                            <td>題目是說把 AI 納入技術分類（準備工具），而不是描述 AI 造成的破壞結果。</td>
+                        </tr>
+                        <tr>
+                            <td>(B) Persistence<br>（維持）</td>
+                            <td>讓攻擊者能長期留在系統（如：開機自動執行、安裝後門）。</td>
+                            <td>否</td>
+                            <td>AI 技術分類本身不是「駐留」的手段。</td>
+                        </tr>
+                        <tr>
+                            <td>(C) Defense Evasion<br>（防禦規避）</td>
+                            <td>躲避偵測（如：隱藏檔案、關閉防毒、混淆程式碼）。</td>
+                            <td>否</td>
+                            <td>雖然 AI 可以用來輔助規避，但在 T1588 的分類脈絡下，它被視為「取得的能力/資源」。</td>
+                        </tr>
+                        <tr>
+                            <td>(D) Resource Development<br>（資源開發）</td>
+                            <td>攻擊者取得、建立或開發攻擊所需的資源與能力。</td>
+                            <td><strong>是</strong></td>
+                            <td><strong>T1588.007</strong> 把 AI 視為攻擊者可取得與利用的<strong>資源/能力</strong>，用於支援後續攻擊活動。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        <!-- G: 觀念補充與延伸 -->
+        <details>
+            <summary>G. 觀念補充與延伸</summary>
+            <div class="details-content">
+                <p><strong>攻擊流程簡化軸：</strong></p>
+                <div class="flow-container">
+                    <div class="flow-step flow-highlight">1. 資源開發<br>(Resource Dev.)<br><span>準備 AI、買工具</span></div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">2. 初始存取<br>(Initial Access)<br><span>寄釣魚信</span></div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">3. 執行與規避<br>(Execution/Evasion)<br><span>跑程式、躲防毒</span></div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">4. 衝擊<br>(Impact)<br><span>勒索、刪除</span></div>
+                </div>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                <p><strong>常考定義整理：</strong></p>
+                <ul>
+                    <li><strong>戰術（Tactic）</strong>：攻擊流程中的「目的/階段」（Why）。</li>
+                    <li><strong>技術（Technique）</strong>：完成目的的「方法」（How）。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- H: 記憶口訣 -->
+        <details>
+            <summary>H. 記憶口訣</summary>
+            <div class="details-content">
+                <p style="font-size: 1.1rem; text-align: center; background: #fffbe6; padding: 10px; border-radius: 5px;">
+                    「<strong>資源開發</strong>先備料，工具能力先準好；<br>造成衝擊才算 Impact。」
+                </p>
+            </div>
+        </details>
+
+        <!-- I: 常見陷阱 -->
+        <details>
+            <summary>I. 常見陷阱</summary>
+            <div class="details-content">
+                <ul>
+                    <li><strong>陷阱 1</strong>：看到 "AI" 就直覺選 "Impact"（衝擊）或 "Defense Evasion"（防禦規避），因為覺得 AI 很強、很難防。</li>
+                    <li><strong>心理盲點</strong>：容易把「工具很厲害」誤當成「造成的結果」。</li>
+                    <li><strong>避坑指南</strong>：做題時先問自己「這是在『準備東西』還是在『造成效果』？」只要是在收集、打造、取得工具與能力，多半往 <strong>Resource Development</strong> 想。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- J: 正確答案 -->
+        <details>
+            <summary>J. 正確答案</summary>
+            <div class="details-content">
+                <p><strong>答案：(D)</strong></p>
+                <p><strong>一句話理由：</strong>T1588.007 把 AI 視為攻擊者可取得與利用的攻擊資源/能力，屬於資源開發階段。</p>
+            </div>
+        </details>
+
+        <!-- K: 自我檢測 -->
+        <details>
+            <summary>K. 自我檢測</summary>
+            <div class="details-content">
+                <p>試著回答以下問題來確認觀念（點擊問題查看參考答案）：</p>
+                <details style="margin-left: 15px; border: none; background: transparent;">
+                    <summary style="background: transparent; color: #3498db; text-decoration: underline; padding: 5px;">1. 若題目改成「用 AI 生成釣魚信寄給員工」，你會判斷它偏向哪個戰術？</summary>
+                    <div style="padding: 5px 15px; color: #555;">
+                        參考答案：這通常涉及 <strong>Initial Access（初始存取）</strong> 的 Phishing 技術，AI 只是用來讓信件更逼真。如果是指「製作」這封信的過程，則是 Resource Development。
+                    </div>
+                </details>
+                <details style="margin-left: 15px; border: none; background: transparent;">
+                    <summary style="background: transparent; color: #3498db; text-decoration: underline; padding: 5px;">2. 如果攻擊者用 AI 來把惡意程式變形以躲避防毒，會更接近哪個戰術？</summary>
+                    <div style="padding: 5px 15px; color: #555;">
+                        參考答案：這屬於 <strong>Defense Evasion（防禦規避）</strong>，因為目的是「躲避偵測」。
+                    </div>
+                </details>
+                <details style="margin-left: 15px; border: none; background: transparent;">
+                    <summary style="background: transparent; color: #3498db; text-decoration: underline; padding: 5px;">3. 你能用一句話區分「資源開發」與「造成衝擊」嗎？</summary>
+                    <div style="padding: 5px 15px; color: #555;">
+                        參考答案：「資源開發」是事前磨刀（準備工具），「造成衝擊」是事後殺人（破壞結果）。
+                    </div>
+                </details>
+            </div>
+        </details>
+
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        // Get selected radio button
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackDisplay = document.getElementById('feedback-display');
+        const analysisContainer = document.getElementById('analysis-container');
+        const resetBtn = document.getElementById('reset-btn');
+        const submitBtn = document.getElementById('submit-btn');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // Lock inputs
+        for (const option of options) {
+            option.disabled = true;
+        }
+        submitBtn.style.display = 'none';
+        resetBtn.style.display = 'block';
+
+        // Check logic
+        if (selectedValue === 'D') {
+            feedbackDisplay.innerHTML = '✅ 正確！太棒了，觀念很清楚！<br>T1588.007 是「取得人工智慧能力」，屬於 Resource Development。';
+            feedbackDisplay.className = 'feedback-area feedback-correct';
+        } else {
+            let hint = '';
+            if (selectedValue === 'A') {
+                hint = '（提示：你把「準備工具」誤當成「造成結果」了。AI 是手段，不是最終的破壞。）';
+            } else if (selectedValue === 'B') {
+                hint = '（提示：維持是「留在系統內」，這題是在講「分類」與「資源準備」。）';
+            } else if (selectedValue === 'C') {
+                hint = '（提示：規避是「躲偵測」，雖然 AI 可用於規避，但此處分類重點在於將 AI 納入「攻擊資源」的類型。）';
+            }
+            
+            feedbackDisplay.innerHTML = `❌ 錯誤。<br>${hint}<br>請看下方解析了解原因。`;
+            feedbackDisplay.className = 'feedback-area feedback-incorrect';
+        }
+
+        // Show feedback and analysis
+        feedbackDisplay.style.display = 'block';
+        analysisContainer.style.display = 'block';
+        
+        // Scroll to feedback
+        feedbackDisplay.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetQuiz() {
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+            option.disabled = false;
+        }
+
+        const feedbackDisplay = document.getElementById('feedback-display');
+        const analysisContainer = document.getElementById('analysis-container');
+        const resetBtn = document.getElementById('reset-btn');
+        const submitBtn = document.getElementById('submit-btn');
+
+        feedbackDisplay.style.display = 'none';
+        analysisContainer.style.display = 'none';
+        resetBtn.style.display = 'none';
+        submitBtn.style.display = 'block';
+
+        // Close all details
+        const details = document.querySelectorAll('details');
+        details.forEach((detail) => {
+            // Keep specific ones open if desired, or close all except first?
+            // Let's reset to default state: First one open maybe? 
+            // The request says "Accordion" but not explicit reset state, closing all is safer for "Re-do".
+            if(detail.querySelector('summary').innerText.includes('A. 題組情境')) {
+                detail.open = true;
+            } else if (detail.parentElement.id === 'analysis-container' && detail.querySelector('summary').innerText.includes('F. 第四步')) {
+                 detail.open = true; // Keep analysis open as default for better UX upon re-checking
+            } else {
+                detail.open = false;
+            }
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安觀念題互動教學：職務區隔 (SoD)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f5f6fa;
+            --text-color: #2d3436;
+            --panel-bg: #ffffff;
+            --border-color: #dcdde1;
+            --highlight-color: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--panel-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        /* Question Section */
+        .question-box {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover {
+            background-color: #f1f2f6;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: inherit;
+            font-weight: bold;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Feedback Section */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-success {
+            background-color: #d4edda;
+            color: var(--success-color);
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-error {
+            background-color: #f8d7da;
+            color: var(--error-color);
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section (Hidden initially) */
+        #explanation-container {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 20px;
+        }
+
+        /* Accordion Styles */
+        .accordion {
+            background-color: #f1f2f6;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: 0.4s;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.05rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion:hover, .accordion.active {
+            background-color: #e2e6ea;
+            color: var(--accent-color);
+        }
+
+        .accordion:after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion.active:after {
+            content: '-';
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--border-color);
+        }
+
+        .panel-content {
+            padding: 15px 0;
+        }
+
+        /* Formatting Helpers */
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        .term-box {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid var(--accent-color);
+            margin: 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f2f6;
+            color: var(--primary-color);
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Diagram Styles */
+        .process-diagram {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .process-step {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            position: relative;
+            font-size: 0.9rem;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .process-arrow {
+            color: var(--text-color);
+            font-weight: bold;
+        }
+
+        .process-control {
+            border: 2px dashed var(--error-color);
+            color: var(--error-color);
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            text-align: center;
+            border-radius: 5px;
+            background-color: #fff5f5;
+        }
+
+        .diagram-container {
+            text-align: center;
+        }
+
+        .diagram-caption {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .process-diagram {
+                flex-direction: column;
+            }
+            .process-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安觀念互動教學<br><span style="font-size: 0.7em;">職務區隔 SoD 與補償性控制</span></h1>
+    </header>
+
+    <!-- Visual Diagram -->
+    <div class="diagram-container">
+        <div class="process-diagram">
+            <div class="process-step">申請</div>
+            <div class="process-arrow">→</div>
+            <div class="process-step">核准</div>
+            <div class="process-arrow">→</div>
+            <div class="process-step">執行</div>
+            <div class="process-arrow">→</div>
+            <div class="process-step">記錄</div>
+            <div class="process-arrow">→</div>
+            <div class="process-step">覆核</div>
+        </div>
+        <div class="diagram-caption">標準流程：理想情況由不同角色負責（職務區隔）</div>
+        <div class="process-control">
+            若人手不足（無法區隔），需使用：活動監視、稽核存底、管理監督
+        </div>
+    </div>
+
+    <!-- Section A: Question -->
+    <section class="question-box">
+        <h2>題目</h2>
+        <p>10. 設計職務區隔（SoD）控制措施時，宜考量共謀之可能性。小型組織可能發現難以實施職務區隔，但於可能及可行之情況下，宜儘可能使用此原則。難以區隔職務時，宜考量採行相關控制措施來輔助，下列何者控制措施較「不」適切？</p>
+        
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="option" value="A">
+                (A) 全權負責
+            </label>
+            <label class="option-label">
+                <input type="radio" name="option" value="B">
+                (B) 活動監視
+            </label>
+            <label class="option-label">
+                <input type="radio" name="option" value="C">
+                (C) 稽核存底
+            </label>
+            <label class="option-label">
+                <input type="radio" name="option" value="D">
+                (D) 管理監督
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="submitAnswer()">提交答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback-area"></div>
+    </section>
+
+    <!-- Interactive Explanation Section -->
+    <div id="explanation-container">
+        
+        <!-- B. First Step: Keywords -->
+        <button class="accordion">第一步：找關鍵字</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>請用螢光筆在腦中畫出以下重點：</p>
+                <ul>
+                    <li><span class="highlight">職務區隔（SoD）</span></li>
+                    <li><span class="highlight">共謀</span></li>
+                    <li><span class="highlight">小型組織難以實施</span></li>
+                    <li><span class="highlight">輔助控制措施</span></li>
+                    <li><span class="highlight">較「不」適切</span></li>
+                </ul>
+                <div class="term-box">
+                    <strong>關鍵邏輯：</strong><br>
+                    為什麼要找「輔助控制措施」？因為這是為了補強風險，而不是去放大風險。題目問的是「不適切」，代表我們要找一個會讓風險變得更高的選項。
+                </div>
+            </div>
+        </div>
+
+        <!-- C. Second Step: Translation -->
+        <button class="accordion">第二步：白話翻譯</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>用高中生日常口語來說：</strong></p>
+                <p>如果公司人手太少，沒辦法把工作拆給不同人做（比如收錢和記帳是同一人），那就要用「盯著看螢幕、留下操作紀錄、主管常常來檢查」這些方法來降低那個人作弊的機會。</p>
+                <p>題目問的是：<strong>下面哪一個方法反而會讓事情變得更糟、更容易作弊？</strong></p>
+            </div>
+        </div>
+
+        <!-- D. Third Step: Logic -->
+        <button class="accordion">第三步：解題思路</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>這題在考什麼觀念？</strong><br>
+                一句話：職務區隔與「補償性控制措施」的概念。</p>
+                
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>先理解 SoD 的目的：避免一個人從頭到尾自己做、自己核准、自己改帳（防止球員兼裁判）。</li>
+                    <li>當 SoD 做不到（例如小公司只有 3 個人），就要找「能增加被發現機率」的補強手段。</li>
+                    <li>找出會讓風險更大的選項。</li>
+                </ol>
+
+                <p><strong>原理與規則（白話）：</strong></p>
+                <ul>
+                    <li><strong>SoD：</strong>是「把權力拆開」來降低舞弊機會。</li>
+                    <li><strong>補償性控制（Compensating Control）：</strong>當主要防線（拆分職務）做不到時，用其他方法補上缺口，通常是「監控、稽核、主管覆核」這類手段。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- E. Fourth Step: Options Analysis -->
+        <button class="accordion">第四步：選項分析</button>
+        <div class="panel">
+            <div class="panel-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 25%">選項</th>
+                            <th style="width: 20%">是否適切</th>
+                            <th>原因（白話解析）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background-color: #fff0f0;">
+                            <td><strong>(A) 全權負責</strong></td>
+                            <td style="color: var(--error-color); font-weight: bold;">不適切</td>
+                            <td>把權力集中在同一人身上，等於反向違反了職務區隔，完全沒有監督機制，作弊更容易。</td>
+                        </tr>
+                        <tr>
+                            <td>(B) 活動監視</td>
+                            <td style="color: var(--success-color);">適切</td>
+                            <td>雖然是一人做，但我裝監視器或系統監控（Log 監測），一旦有異常操作（如半夜改資料）馬上告警，提高「被抓到的風險」。</td>
+                        </tr>
+                        <tr>
+                            <td>(C) 稽核存底</td>
+                            <td style="color: var(--success-color);">適切</td>
+                            <td>把所有操作都留下不可竄改的紀錄（Audit Trail），事後稽核人員可以追查，讓員工不敢亂來。</td>
+                        </tr>
+                        <tr>
+                            <td>(D) 管理監督</td>
+                            <td style="color: var(--success-color);">適切</td>
+                            <td>透過主管定期抽查、覆核簽章，或是強制雙人確認，來彌補無法拆分職務的漏洞。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- F. Concepts Extension -->
+        <button class="accordion">觀念補充與延伸</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>核心觀念定位：</strong>資安管理 / 內控 → 存取控制與舞弊防制、職務區隔。</p>
+                <p><strong>考試常見度：</strong>非常常考（內控與稽核題型的必考題）。</p>
+
+                <div class="term-box">
+                    <strong>定義整理：</strong>
+                    <ul>
+                        <li><strong>職務區隔（SoD - Separation of Duties）：</strong>把「做事、核准、記帳、保管」這四種權責拆給不同角色，避免一人獨大。</li>
+                        <li><strong>共謀（Collusion）：</strong>兩個以上的人串通一起作弊（例如：採購跟會計講好一起貪汙），這會讓 SoD 失效。</li>
+                        <li><strong>補償性控制（Compensating Control）：</strong>人手不足或環境限制時，用其他控管方式（如加強稽核）來把安全分數補回來。</li>
+                    </ul>
+                </div>
+
+                <p><strong>觸類旁通（對比概念）：</strong></p>
+                <ul>
+                    <li><strong>最小權限（Least Privilege） vs 職務區隔：</strong>
+                        <br>最小權限是「只給需要的權限」（程度問題）；職務區隔是「把流程角色拆開」（結構問題）。</li>
+                    <li><strong>控制類型：</strong>
+                        <br>預防（Preventive，如權限設定） vs 偵測（Detective，如看 Log） vs 補救（Corrective，如備份還原）。本題的 B、C、D 多屬於偵測性控制。</li>
+                </ul>
+
+                <p><strong>變化題型：</strong></p>
+                <ul>
+                    <li>問「哪一項最能補強 SoD 不足？」通常選「強制休假」或「工作輪調」（讓別人接手就有機會發現弊端）。</li>
+                    <li>給一個小公司情境，問應採哪些補償性控制（複選題）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- G. Mnemonic -->
+        <button class="accordion">記憶口訣</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold; background: #fff; padding: 20px; border-radius: 8px; border: 2px dashed var(--accent-color);">
+                    「拆不開就要盯：<br>盯操作、留紀錄、主管看；<br>別把全權給一人」
+                </p>
+            </div>
+        </div>
+
+        <!-- H. Common Traps -->
+        <button class="accordion">常見陷阱</button>
+        <div class="panel">
+            <div class="panel-content">
+                <ul>
+                    <li><strong>學生最容易搞混：</strong>把「全權負責」誤以為是「責任清楚」所以好。其實在資安裡，權責過度集中就是最大的風險源。</li>
+                    <li><strong>心理盲點：</strong>把管理效率（少人做比較快、不用跑流程）當成安全。SoD 很多時候是故意犧牲效率來換取安全的。</li>
+                    <li><strong>避坑指南：</strong>看到 SoD 題目先問自己：「這個選項是讓權力更集中（壞），還是讓行為更容易被發現（好）？」</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- I. Correct Answer -->
+        <button class="accordion">正確答案</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>答案：(A)</strong></p>
+                <p><strong>一句話理由：</strong>SoD 做不到時應補強監控與稽核，而不是把權力更集中在一人手上。</p>
+            </div>
+        </div>
+
+        <!-- J. Self Check -->
+        <button class="accordion">自我檢測與參考解答</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>請試著回答以下問題，確認是否真的理解：</p>
+                <ol>
+                    <li>如果同一人可以「新增供應商」又可以「核准付款」，這違反 SoD 的哪個精神？</li>
+                    <li>小公司只有 2 個人，如何用「雙人覆核」當補償性控制？</li>
+                    <li>為什麼題目特別提到「共謀」？共謀會讓哪些控制失效？</li>
+                </ol>
+                <hr style="border: 0; border-top: 1px dashed var(--border-color); margin: 20px 0;">
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
+                    <strong>參考解答：</strong>
+                    <ul style="list-style-type: none; padding-left: 0;">
+                        <li style="margin-bottom: 15px;">
+                            <strong>1. 違反什麼精神？</strong><br>
+                            違反了「球員兼裁判」的防弊精神。如果這兩件事同一人做，他可以虛設一家假公司，然後自己批准付款給這家假公司，輕鬆掏空資金。
+                        </li>
+                        <li style="margin-bottom: 15px;">
+                            <strong>2. 2 人公司怎麼做雙人覆核？</strong><br>
+                            強制設定「關鍵操作（如匯款）」必須 A 經手、B 同意才能生效。雖然人少，但透過流程強迫兩人都要看過，讓 A 不能瞞著 B 亂搞。
+                        </li>
+                        <li>
+                            <strong>3. 關於共謀？</strong><br>
+                            共謀（Collusion）是指兩個人串通好一起作弊。它會讓「職務區隔 (SoD)」直接失效，因為 SoD 是假設這兩人會互相監督；如果他們講好一起貪污，把權力拆開也沒用。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Accordion Logic
+    var acc = document.getElementsByClassName("accordion");
+    for (var i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            }
+        });
+    }
+
+    // Submit Answer Logic
+    function submitAnswer() {
+        var options = document.getElementsByName('option');
+        var selectedValue = null;
+        for (var i = 0; i < options.length; i++) {
+            if (options[i].checked) {
+                selectedValue = options[i].value;
+                break;
+            }
+        }
+
+        var feedback = document.getElementById('feedback-area');
+        var explanation = document.getElementById('explanation-container');
+
+        if (!selectedValue) {
+            alert('請選擇一個選項！');
+            return;
+        }
+
+        feedback.style.display = 'block';
+        feedback.className = ''; // Reset classes
+
+        if (selectedValue === 'A') {
+            feedback.textContent = '恭喜答對！正確答案是 (A)。下方解析已為您展開。';
+            feedback.classList.add('feedback-success');
+            explanation.style.display = 'block';
+            
+            // Optional: Automatically open all panels for review
+            // var allPanels = document.getElementsByClassName("panel");
+            // var allAcc = document.getElementsByClassName("accordion");
+            // for(var j=0; j<allPanels.length; j++){
+            //     allPanels[j].style.maxHeight = allPanels[j].scrollHeight + "px";
+            //     allAcc[j].classList.add("active");
+            // }
+        } else {
+            feedback.textContent = '答錯了。提示：你可能把「效率/責任集中」誤當成「風險降低」。請重新思考：哪一個選項會讓作弊更容易？';
+            feedback.classList.add('feedback-error');
+            explanation.style.display = 'none'; // Hide explanation on wrong answer
+        }
+    }
+
+    // Reset Quiz Logic
+    function resetQuiz() {
+        var options = document.getElementsByName('option');
+        for (var i = 0; i < options.length; i++) {
+            options[i].checked = false;
+        }
+
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('explanation-container').style.display = 'none';
+
+        // Close all accordions
+        var panels = document.getElementsByClassName("panel");
+        var headers = document.getElementsByClassName("accordion");
+        for (var i = 0; i < panels.length; i++) {
+            panels[i].style.maxHeight = null;
+            headers[i].classList.remove("active");
+        }
+    }
+</script>
+
+</body>
+</html>

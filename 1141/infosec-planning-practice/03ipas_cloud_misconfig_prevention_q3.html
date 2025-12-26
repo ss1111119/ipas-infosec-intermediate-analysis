@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安考題解析 - 雲端錯誤設定與預防</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #2980b9;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --border-color: #bdc3c7;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin: 0;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 18px;
+            margin-top: 5px;
+            font-weight: normal;
+        }
+
+        /* Question Section */
+        .question-box {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+        }
+
+        input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* Interactive Buttons */
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        #submitBtn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #submitBtn:hover {
+            opacity: 0.9;
+        }
+
+        #resetBtn {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Initially hidden */
+        }
+
+        /* Feedback Section */
+        #feedbackArea {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion Styles */
+        .explanation-container {
+            margin-top: 30px;
+            display: none; /* Hidden until submitted */
+        }
+
+        .accordion {
+            background-color: #e9ecef;
+            color: #444;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 16px;
+            font-weight: bold;
+            transition: 0.4s;
+            border-bottom: 1px solid #dcdcdc;
+        }
+
+        .accordion:first-of-type {
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+
+        .accordion:last-of-type {
+            border-bottom: none;
+        }
+
+        .active, .accordion:hover {
+            background-color: #dfe6e9;
+            color: var(--accent-color);
+        }
+
+        .accordion:after {
+            content: '+';
+            font-size: 18px;
+            color: #777;
+            float: right;
+            margin-left: 5px;
+        }
+
+        .active:after {
+            content: "-";
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            display: none; /* Hidden by default */
+            overflow: hidden;
+            border-left: 3px solid var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .panel-content {
+            padding: 15px 0;
+        }
+
+        /* Highlight & Formatting */
+        .highlight {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .term {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* Diagrams */
+        .diagram-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            background: #fff;
+            border: 1px solid var(--secondary-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .arrow {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        /* Control Measure Categories */
+        .measure-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .measure-col {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .measure-title {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        /* Comparison Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: var(--primary-color);
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .measure-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安能力鑑定 - 考前衝刺</h1>
+        <h2>主題：雲端錯誤設定與資料外洩預防 (Q3)</h2>
+    </header>
+
+    <!-- Quiz Section -->
+    <div class="question-box">
+        <div class="question-text">
+            2023 年發現某國際知名汽車大廠於將近 10 年期間，將超過 200 萬輛車子位置資訊公開在網路上，車上攝影機拍攝的影像也曝險了將近 7 年。經其內部分析，事件主要原因在於對員工的資料處理政策說明不夠徹底，導致雲端環境錯誤設定所致。請問下列何項措施，最「不」能防止類似事件再次發生？
+        </div>
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                (A) 強化員工教育訓練
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                (B) 訂訂更明確之雲端資安政策
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                (C) 執行雲端弱點掃描
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                (D) 備份雲端環境設定
+            </label>
+        </div>
+
+        <div class="action-area">
+            <button id="submitBtn" onclick="checkAnswer()">提交答案</button>
+            <button id="resetBtn" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedbackArea"></div>
+    </div>
+
+    <!-- Explanation Section (Hidden initially) -->
+    <div class="explanation-container" id="explanationArea">
+        <h3>詳細解析</h3>
+
+        <!-- A. 題目 -->
+        <button class="accordion">A. 題目回顧</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>題目：</strong>2023 年發現某國際知名汽車大廠...（略）...事件主要原因在於對員工的資料處理政策說明不夠徹底，導致雲端環境錯誤設定所致。請問下列何項措施，最「不」能防止類似事件再次發生？</p>
+            </div>
+        </div>
+
+        <!-- B. 第一步：找關鍵字 -->
+        <button class="accordion">B. 第一步：找關鍵字</button>
+        <div class="panel">
+            <div class="panel-content">
+                <ul>
+                    <li><span class="highlight">雲端環境錯誤設定</span>：這是問題的核心。即雲端服務的權限、公開範圍或存取規則設定錯誤（Cloud Misconfiguration），例如把「私有」設成「公開」。</li>
+                    <li><span class="highlight">政策說明不夠徹底</span>：這是造成錯誤的「人為因素」。</li>
+                    <li><span class="highlight">最「不」能防止</span>：題目要找無效或效果最差的手段，也就是「做了也擋不住外洩」的選項。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- C. 第二步：白話翻譯 -->
+        <button class="accordion">C. 第二步：白話翻譯</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>這家車廠出包了，因為老闆沒把規則講清楚，員工手殘把雲端資料設成「公開」，導致個資被看光光。如果我們要避免下次再發生這種「設錯導致外洩」的事，下面哪一招是沒有用的？</p>
+            </div>
+        </div>
+
+        <!-- D. 第三步：解題思路 -->
+        <button class="accordion">D. 第三步：解題思路</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>核心考點：</strong> 資安控制措施的分類：<span class="term">預防 (Prevent)</span> vs <span class="term">復原 (Recover)</span> 的差異。</p>
+                
+                <p><strong>因果流程圖：</strong></p>
+                <div class="diagram-box">
+                    <div class="flow-step">政策說明不足</div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="flow-step">人為錯誤設定 (Misconfiguration)</div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="flow-step">資料變公開</div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="flow-step">長期資料曝險 (Exposure)</div>
+                </div>
+
+                <p><strong>控制措施分類圖：</strong></p>
+                <div class="measure-grid">
+                    <div class="measure-col">
+                        <span class="measure-title" style="color:#27ae60;">預防 (Prevent)</span>
+                        事前阻止發生。<br><br>例如：教育訓練、防火牆、存取控制政策。
+                    </div>
+                    <div class="measure-col">
+                        <span class="measure-title" style="color:#f39c12;">偵測 (Detect)</span>
+                        發生時能發現。<br><br>例如：弱點掃描、入侵偵測系統、Log 監控。
+                    </div>
+                    <div class="measure-col">
+                        <span class="measure-title" style="color:#2980b9;">復原 (Recover)</span>
+                        出事後還原資料。<br><br>例如：<strong>備份</strong>、異地備援。
+                    </div>
+                </div>
+
+                <p><strong>原理：</strong>題目問「防止發生」，所以要選「預防」或「偵測」類的措施。而「備份」是為了當資料損毀或被勒索時救回資料，它無法阻止你把資料設成公開。</p>
+            </div>
+        </div>
+
+        <!-- E. 第四步：選項分析 -->
+        <button class="accordion">E. 第四步：選項分析</button>
+        <div class="panel">
+            <div class="panel-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>選項</th>
+                            <th>分類</th>
+                            <th>能防止再發生嗎？</th>
+                            <th>白話解析</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A) 強化員工教育訓練</td>
+                            <td>預防</td>
+                            <td>可以</td>
+                            <td>教員工怎麼正確設定，降低人為手殘機率。</td>
+                        </tr>
+                        <tr>
+                            <td>(B) 訂定更明確之雲端資安政策</td>
+                            <td>預防</td>
+                            <td>可以</td>
+                            <td>把規則定好，什麼能開、什麼不能開，這是一切安全的基礎。</td>
+                        </tr>
+                        <tr>
+                            <td>(C) 執行雲端弱點掃描</td>
+                            <td>偵測</td>
+                            <td>可以</td>
+                            <td>用工具自動檢查有沒有洞（例如設成公開的儲存桶），發現了就能修，避免長期外洩。</td>
+                        </tr>
+                        <tr style="background-color: #fff3cd;">
+                            <td><strong>(D) 備份雲端環境設定</strong></td>
+                            <td><strong>復原</strong></td>
+                            <td><strong>不行</strong></td>
+                            <td>備份只是把當前的設定「存一份起來」。如果你把權限設成公開（錯誤狀態），備份檔裡也就是公開的。還原備份後，資料依然是公開的，完全沒解決外洩問題。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- F. 觀念補充與延伸 -->
+        <button class="accordion">F. 觀念補充與延伸（舉一反三）</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>章節定位：</strong> 雲端安全 (Cloud Security) - 必考題型。</p>
+                <p><strong>重要定義：</strong></p>
+                <ul>
+                    <li><strong>雲端錯誤設定 (Misconfiguration)：</strong> Gartner 曾預測「99% 的雲端資安事件都是客戶自己的錯」，通常就是指設定錯誤（例如 AWS S3 Bucket 權限設為 Public）。</li>
+                    <li><strong>最小權限原則 (Principle of Least Privilege)：</strong> 只給員工工作所需的最小權限，避免誤開過大權限。</li>
+                </ul>
+                <p><strong>觸類旁通（易混淆名詞）：</strong></p>
+                <ul>
+                    <li><strong>弱點掃描 (Vulnerability Scanning)：</strong> 像健康檢查，找系統哪裡有已知的病（漏洞）。</li>
+                    <li><strong>組態稽核 (Configuration Audit)：</strong> 像拿檢查表對答案，檢查設定有沒有符合規定（例如密碼長度是否足夠）。</li>
+                    <li><strong>雲端安全態勢管理 (CSPM, Cloud Security Posture Management)：</strong> 專門用來自動化監控雲端設定有沒有設錯的工具，是防止此類事件的最佳解法之一。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- G. 記憶口訣 -->
+        <button class="accordion">G. 記憶口訣</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p style="font-size: 1.1em; color: var(--accent-color); font-weight: bold;">
+                    「訓練政策是預防，掃描偵測補破網；<br>
+                    備份只管救檔案，無法阻擋門大開。」
+                </p>
+            </div>
+        </div>
+
+        <!-- H. 常見陷阱 -->
+        <button class="accordion">H. 常見陷阱</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>盲點：</strong> 很多學生看到「備份」就覺得是好東西，一定選不下去。心裡會想「有備份就是安全啊」。</p>
+                <p><strong>避坑指南：</strong></p>
+                <ol>
+                    <li>看到選項問「防止發生」，先確認這是屬於 CIA 的哪一環。</li>
+                    <li>資料外洩是 Confidentiality (機密性) 問題。</li>
+                    <li>備份是解決 Availability (可用性) 與 Integrity (完整性) 問題。</li>
+                    <li><strong>問自己：</strong>「如果我把大門打開（設成公開），備份鑰匙（備份設定）能不能幫我把門關上？」答案是不能。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- I. 正確答案 -->
+        <button class="accordion">I. 正確答案</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p><strong>正確答案：(D)</strong></p>
+                <p><strong>一句話理由：</strong> 備份是用來「還原」資料的，無法「阻止」別人偷看你的公開資料。</p>
+            </div>
+        </div>
+
+        <!-- J. 自我檢測 -->
+        <button class="accordion">J. 自我檢測</button>
+        <div class="panel">
+            <div class="panel-content">
+                <p>試著回答以下問題（不提供標準答案，請自我思考）：</p>
+                <ol>
+                    <li>如果今天發生的是「勒索病毒加密檔案」，(D) 備份雲端環境設定 會變成有效措施嗎？</li>
+                    <li>承上題，如果是勒索病毒，(A) 教育訓練 還有用嗎？為什麼？</li>
+                    <li>除了備份，還有什麼資安措施是屬於「復原」階段的？</li>
+                </ol>
+
+                <button onclick="toggleSelfCheckAnswers()" style="background-color: #7f8c8d; color: white; font-size: 0.9em; padding: 5px 10px; margin-top: 10px;">顯示/隱藏 參考解答</button>
+                
+                <div id="selfCheckAnswers" style="display: none; margin-top: 15px; background-color: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 3px solid #27ae60;">
+                    <p><strong>參考解答：</strong></p>
+                    <ol>
+                        <li><strong>有效。</strong> 因為勒索病毒破壞的是資料的「可用性」（Availability），也就是讓你打不開檔案。此時「備份」是讓資料回復原狀（Recovery）的最主要手段，不像本題是資料外洩（被偷看），備份對外洩無效，但對勒索有效。</li>
+                        <li><strong>有用。</strong> 勒索病毒常透過社交工程（如釣魚郵件）入侵。教育訓練屬於「預防」層級，能教員工不亂點不明連結，從源頭阻斷感染機會，依然是資安防護的第一道防線。</li>
+                        <li><strong>異地備援 (Remote Backup / Disaster Recovery Site)</strong>：主機房毀損時切換到備用機房；<strong>營運持續計畫 (BCP)</strong>：啟動緊急應變流程讓業務不中斷；<strong>系統映像檔重灌 (Re-imaging)</strong>：中毒後直接還原乾淨的系統狀態。</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Accordion Logic
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        });
+    }
+
+    // Quiz Logic
+    function checkAnswer() {
+        var radios = document.getElementsByName('answer');
+        var selectedValue = null;
+        for (var radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        var feedbackDiv = document.getElementById('feedbackArea');
+        var explanationDiv = document.getElementById('explanationArea');
+        var resetBtn = document.getElementById('resetBtn');
+        var submitBtn = document.getElementById('submitBtn');
+
+        if (!selectedValue) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        feedbackDiv.style.display = "block";
+        explanationDiv.style.display = "block"; // Show explanation accordions
+        resetBtn.style.display = "inline-block";
+        submitBtn.style.display = "none";
+
+        // Logic for feedback
+        if (selectedValue === 'D') {
+            feedbackDiv.className = "feedback-correct";
+            feedbackDiv.innerHTML = "<strong>回答正確！</strong> (D) 是正確選項。<br>你抓到了重點：「備份」無法防止資料外洩，它是用來復原的。請閱讀下方解析了解更多細節。";
+            // Auto open the Option Analysis panel
+            acc[4].click(); 
+        } else {
+            feedbackDiv.className = "feedback-wrong";
+            feedbackDiv.innerHTML = "<strong>回答錯誤。</strong> <br>提示：你可能覺得「備份」是好習慣所以它能預防問題。但請思考：「備份」能阻止你把權限設成公開嗎？<br>請查看下方 <strong>D. 第三步：解題思路</strong> 與 <strong>E. 第四步：選項分析</strong>。";
+            // Auto open the Logic panel
+            acc[3].click();
+        }
+    }
+
+    function resetQuiz() {
+        var radios = document.getElementsByName('answer');
+        for (var radio of radios) {
+            radio.checked = false;
+        }
+
+        document.getElementById('feedbackArea').style.display = "none";
+        document.getElementById('explanationArea').style.display = "none";
+        document.getElementById('resetBtn').style.display = "none";
+        document.getElementById('submitBtn').style.display = "inline-block";
+
+        // Close all accordions
+        for (i = 0; i < acc.length; i++) {
+            acc[i].classList.remove("active");
+            acc[i].nextElementSibling.style.display = "none";
+        }
+        
+        // Hide self check answers if open
+        document.getElementById("selfCheckAnswers").style.display = "none";
+
+        // Scroll back to top
+        window.scrollTo(0, 0);
+    }
+
+    function toggleSelfCheckAnswers() {
+        var x = document.getElementById("selfCheckAnswers");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安觀念題教學：跨國企業資安策略制定</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .quiz-section {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            list-style: none;
+        }
+
+        .option-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-item:hover {
+            background-color: #f0f8ff;
+        }
+
+        .option-item input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-retry {
+            background-color: var(--text-color);
+            margin-left: 10px;
+            display: none; /* Hidden by default */
+        }
+
+        .result-message {
+            margin-top: 15px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .result-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion Styles */
+        .analysis-container {
+            display: none; /* Hidden initially */
+            padding: 20px;
+            background-color: #fafafa;
+        }
+
+        .accordion {
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: white;
+        }
+
+        .accordion-header {
+            padding: 15px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .accordion-header.active::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Specific Content Styles */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+
+        .term-def {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Visual Funnel */
+        .funnel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .funnel-layer {
+            text-align: center;
+            color: white;
+            padding: 8px;
+            margin-bottom: 2px;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .layer-1 { width: 90%; background-color: #2c3e50; clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%); }
+        .layer-2 { width: 80%; background-color: #34495e; clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%); }
+        .layer-3 { width: 70%; background-color: #7f8c8d; clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%); }
+        .layer-4 { width: 60%; background-color: #bdc3c7; color: #333; clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); border: 2px dashed #c0392b; }
+
+        .funnel-label {
+            font-size: 0.85rem;
+            margin-top: 5px;
+            color: #666;
+        }
+
+        /* Table */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .analysis-table th, .analysis-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .analysis-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .analysis-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Self Check Toggle */
+        .self-check-answer {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f4f8;
+            border-left: 4px solid var(--accent-color);
+            color: #2980b9;
+        }
+
+        .toggle-answer-btn {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>跨國資安策略：CISO 優先評估因素</h1>
+        <p>iPAS 資安觀念題型解析</p>
+    </header>
+
+    <!-- Quiz Section -->
+    <div class="quiz-section">
+        <div class="question-block">
+            <h3>題目：</h3>
+            <p class="question-text">
+                25. 您服務的公司在不同國家或地域皆有設置服務據點，而您也是該公司總部單位的資訊安全長（CISO：公司最高資安主管），當您預計制定該公司的資訊安全發展策略時，下列何者是資訊安全長最「不」需優先評估的因素？
+            </p>
+            <ul class="options">
+                <li class="option-item">
+                    <label>
+                        <input type="radio" name="answer" value="A">
+                        (A) 基層員工和管理階層對於資通安全不同的認知態度
+                    </label>
+                </li>
+                <li class="option-item">
+                    <label>
+                        <input type="radio" name="answer" value="B">
+                        (B) 能否解決因為不同國家時差，而連絡到更上層的高層主管
+                    </label>
+                </li>
+                <li class="option-item">
+                    <label>
+                        <input type="radio" name="answer" value="C">
+                        (C) 不同地域所需遵循的法規和行政規範之項目
+                    </label>
+                </li>
+                <li class="option-item">
+                    <label>
+                        <input type="radio" name="answer" value="D">
+                        (D) 全球各國的營業安控政策及流程的一致性
+                    </label>
+                </li>
+            </ul>
+        </div>
+        
+        <button class="btn" id="submitBtn" onclick="checkAnswer()">提交答案</button>
+        <button class="btn btn-retry" id="retryBtn" onclick="resetQuiz()">重作一次</button>
+
+        <div id="resultMessage" class="result-message"></div>
+    </div>
+
+    <!-- Analysis Section (Hidden until answered) -->
+    <div class="analysis-container" id="analysisContainer">
+        
+        <!-- B. Step 1 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">第一步：找關鍵字</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><span class="highlight">不同國家或地域</span>：跨國情境。</li>
+                    <li><span class="highlight">總部資訊安全長（CISO）</span>：負責最高層級的規劃。</li>
+                    <li><span class="highlight">制定資訊安全發展策略</span>：長期方向，非日常瑣事。</li>
+                    <li><span class="highlight">最「不」需優先評估</span>：選出相對次要的項目。</li>
+                    <li><strong>關鍵對比</strong>：認知態度、法規規範、政策一致性 <span style="color:red;">VS</span> 時差連絡。</li>
+                </ul>
+                <p style="margin-top:10px;"><strong>解釋：</strong>制定策略要先看「治理、法規、文化與一致性」，而不是「聯絡便利性」。</p>
+            </div>
+        </div>
+
+        <!-- C. Step 2 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">第二步：白話翻譯</div>
+            <div class="accordion-content">
+                <p>用高中生日常口語來說：</p>
+                <p>公司現在跨國經營，你是負責全公司資安的大頭目，你要規劃整間公司未來的資安大方向。題目問你，下面哪一件事「不是」你在規劃大方向時最先要煩惱的？哪一個比較像是「日常溝通方不方便」這種可以靠排班解決的小事？</p>
+            </div>
+        </div>
+
+        <!-- D. Step 3 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">第三步：解題思路</div>
+            <div class="accordion-content">
+                <p><strong>這題在考什麼觀念？</strong><br>
+                跨國資安策略制定的優先考量：法遵、文化、治理一致性。</p>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                <p><strong>解題步驟：</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>把選項分成「策略層面（Strategy）」與「執行/溝通層面（Operations）」。</li>
+                    <li>策略層面通常包含：法規差異、組織文化、全球一致的政策流程。</li>
+                    <li>「時差聯絡高層」偏向執行面的溝通協調問題，不是策略制定時最優先的評估因素。</li>
+                </ol>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                <p><strong>原理與規則（白話）：</strong></p>
+                <ul>
+                    <li>資安策略是「公司要怎麼管資安」的方向盤。</li>
+                    <li>優先看會影響方向盤的：法遵風險、組織文化、全球治理一致性。</li>
+                    <li>聯絡時間差雖然麻煩，但可以用流程與代理人機制解決，不會改變策略的核心方向。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- E. Step 4 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">第四步：選項分析與比較圖表</div>
+            <div class="accordion-content">
+                
+                <!-- Visual Funnel Diagram -->
+                <div class="funnel-container">
+                    <div class="funnel-label">【策略優先順序漏斗】</div>
+                    <div class="funnel-layer layer-1">法遵與規範 (C)</div>
+                    <div class="funnel-layer layer-2">治理一致性 (D)</div>
+                    <div class="funnel-layer layer-3">文化與認知 (A)</div>
+                    <div class="funnel-layer layer-4">↓ 作業溝通 (B) - 非優先</div>
+                </div>
+
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th>選項</th>
+                            <th>層級</th>
+                            <th>須優先評估?</th>
+                            <th>原因解析（白話）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A) 認知態度</td>
+                            <td>策略/文化</td>
+                            <td>是</td>
+                            <td><strong>資安文化 (Security Culture)</strong>：大家重不重視資安，直接決定策略能不能落地執行，必須先評估。</td>
+                        </tr>
+                        <tr style="background-color: #fff3cd;">
+                            <td>(B) 時差聯絡</td>
+                            <td>作業/溝通</td>
+                            <td><strong style="color:red;">否</strong></td>
+                            <td>這是<strong>運作與排班</strong>問題。可透過值班、授權代理人解決，不影響大方向制定。</td>
+                        </tr>
+                        <tr>
+                            <td>(C) 法規規範</td>
+                            <td>策略/法遵</td>
+                            <td>是</td>
+                            <td><strong>合規 (Compliance)</strong>：如果不符合當地法律（如歐盟 GDPR），公司會被罰巨款或停業，絕對最優先。</td>
+                        </tr>
+                        <tr>
+                            <td>(D) 政策一致性</td>
+                            <td>策略/治理</td>
+                            <td>是</td>
+                            <td><strong>治理 (Governance)</strong>：全球標準如果不一樣，駭客會打最弱的國家分部，所以必須規劃一致性。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- F. Concepts -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">觀念補充與延伸</div>
+            <div class="accordion-content">
+                <p><strong>核心觀念定位：</strong></p>
+                <ul>
+                    <li>資安治理與策略 → CISO 職責與跨國治理。</li>
+                    <li>考試常見度：中高（管理觀念題常出）。</li>
+                </ul>
+                <p style="margin-top:10px;"><strong>定義整理（白話）：</strong></p>
+                <ul>
+                    <li><strong>資安策略</strong>：資安投資方向、優先順序與治理方式的規劃。</li>
+                    <li><strong>法遵 (Compliance)</strong>：符合法律與規範（如個資法），是跨國策略的硬限制。</li>
+                </ul>
+                <p style="margin-top:10px;"><strong>觸類旁通（對比概念）：</strong></p>
+                <ul>
+                    <li><strong>策略 (Strategy)</strong>：做什麼、先做什麼（What & Why）。</li>
+                    <li><strong>作業 (Operations)</strong>：每天怎麼做、怎麼聯絡（How & When）。</li>
+                    <li><strong>治理一致性</strong>（同一套規則） vs <strong>地方彈性</strong>（依法規調整）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- G. Mnemonic -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">記憶口訣</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.2rem; font-weight: bold; color: var(--primary-color); text-align: center;">
+                    「跨國做策略：先看法、再看人、還要一致；<br>時差連絡是排班，不是方向」
+                </p>
+            </div>
+        </div>
+
+        <!-- H. Traps -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">常見陷阱</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>易錯點</strong>：把「高層聯絡」誤認為策略一定要先解決的問題。</li>
+                    <li><strong>心理盲點</strong>：看到「高層主管」這四個字，直覺覺得很重要所以就選它。</li>
+                    <li><strong>避坑指南</strong>：題目問「策略優先評估」→ 腦中要想「制度、法規、治理」；不要被「溝通便利性」帶走。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- I. Answer -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">正確答案</div>
+            <div class="accordion-content">
+                <p style="font-size: 1.5rem; color: var(--success-color); font-weight: bold;">答案：(B)</p>
+                <p><strong>一句話理由：</strong>時差聯絡屬於營運管理問題，可用流程與授權解決，非資安策略最優先評估的核心因素。</p>
+            </div>
+        </div>
+
+        <!-- J. Self Check -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">自我檢測</div>
+            <div class="accordion-content">
+                
+                <div style="margin-bottom: 15px;">
+                    <p><strong>1) 為什麼跨國公司制定資安策略一定要先盤點各地法規？</strong></p>
+                    <button class="toggle-answer-btn" onclick="toggleAnswer('ans1')">顯示/隱藏參考答案</button>
+                    <div id="ans1" class="self-check-answer">
+                        參考答案：因為法規會限制資料處理、通報義務與系統設計，不符合可能違法或被處罰。
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <p><strong>2) 若各國分公司資安政策不一致，最可能造成什麼風險？</strong></p>
+                    <button class="toggle-answer-btn" onclick="toggleAnswer('ans2')">顯示/隱藏參考答案</button>
+                    <div id="ans2" class="self-check-answer">
+                        參考答案：標準不一導致弱點出現在最低標準的地方，成為攻擊入口，且稽核與管理困難。
+                    </div>
+                </div>
+
+                <div>
+                    <p><strong>3) 如果真的有「時差聯絡高層」問題，通常用什麼方式處理？</strong></p>
+                    <button class="toggle-answer-btn" onclick="toggleAnswer('ans3')">顯示/隱藏參考答案</button>
+                    <div id="ans3" class="self-check-answer">
+                        參考答案：建立授權代理、值班與升級通報流程、明確 RACI（責任分工）與應變門檻。
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>© 2025 iPAS 資安教學模組 | 專供學習使用</p>
+    </footer>
+</div>
+
+<script>
+    function checkAnswer() {
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const resultDiv = document.getElementById('resultMessage');
+        const analysisContainer = document.getElementById('analysisContainer');
+        const submitBtn = document.getElementById('submitBtn');
+        const retryBtn = document.getElementById('retryBtn');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        resultDiv.style.display = 'block';
+        submitBtn.style.display = 'none';
+        retryBtn.style.display = 'inline-block';
+        
+        // Show analysis regardless of right or wrong, to allow learning
+        analysisContainer.style.display = 'block';
+
+        if (selectedValue === 'B') {
+            resultDiv.className = 'result-message result-correct';
+            resultDiv.innerHTML = '✓ 答對了！<br>解析已展開，請詳細閱讀下方內容。';
+            // Open the logic and analysis tabs automatically for positive reinforcement
+            const accordions = document.getElementsByClassName('accordion-content');
+            // Open Step 3 and Step 4
+            accordions[2].style.display = 'block'; 
+            accordions[2].previousElementSibling.classList.add('active');
+            accordions[3].style.display = 'block';
+            accordions[3].previousElementSibling.classList.add('active');
+        } else {
+            resultDiv.className = 'result-message result-incorrect';
+            resultDiv.innerHTML = '✗ 答錯了。<br>提示：策略優先看法遵、治理一致性與文化，不是聯絡便利性。<br>請閱讀下方解析找出原因。';
+            // Open Step 4 (Analysis) automatically for review
+            const accordions = document.getElementsByClassName('accordion-content');
+            accordions[3].style.display = 'block';
+            accordions[3].previousElementSibling.classList.add('active');
+        }
+
+        // Scroll to result
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetQuiz() {
+        // Clear radio buttons
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // Reset UI elements
+        document.getElementById('resultMessage').style.display = 'none';
+        document.getElementById('analysisContainer').style.display = 'none';
+        document.getElementById('submitBtn').style.display = 'inline-block';
+        document.getElementById('retryBtn').style.display = 'none';
+
+        // Close all accordions
+        const headers = document.querySelectorAll('.accordion-header');
+        const contents = document.querySelectorAll('.accordion-content');
+        
+        headers.forEach(header => header.classList.remove('active'));
+        contents.forEach(content => content.style.display = 'none');
+        
+        // Hide self-check answers
+        const answers = document.querySelectorAll('.self-check-answer');
+        answers.forEach(ans => ans.style.display = 'none');
+
+        window.scrollTo(0, 0);
+    }
+
+    function toggleAccordion(header) {
+        header.classList.toggle('active');
+        const content = header.nextElementSibling;
+        if (content.style.display === "block") {
+            content.style.display = "none";
+        } else {
+            content.style.display = "block";
+        }
+    }
+
+    function toggleAnswer(id) {
+        const element = document.getElementById(id);
+        if (element.style.display === "block") {
+            element.style.display = "none";
+        } else {
+            element.style.display = "block";
+        }
+    }
+</script>
+
+</body>
+</html>

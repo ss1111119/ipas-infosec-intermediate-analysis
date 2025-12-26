@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題組解析：委外與複委託的資安管控</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f5f7fa;
+            --text-color: #333;
+            --border-color: #ddd;
+            --highlight-color: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            color: var(--secondary-color);
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+            margin-top: 30px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+            margin-top: 20px;
+        }
+
+        .scenario-box {
+            background-color: #eef2f7;
+            border: 1px solid #ced4da;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .scenario-label {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 2px 10px;
+            font-size: 0.9rem;
+            border-radius: 3px;
+        }
+
+        .question-box {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: block;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input {
+            margin-right: 10px;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion Styles */
+        .accordion {
+            margin-top: 30px;
+            display: none; /* Hidden by default */
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: #f1f3f5;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .accordion-content {
+            padding: 20px;
+            display: none;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+            padding: 2px 4px;
+        }
+
+        .term {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* Diagram Styles */
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: #fff;
+            border: 1px dashed #ccc;
+        }
+
+        .diagram-box {
+            border: 2px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            background: white;
+            min-width: 120px;
+            font-weight: bold;
+        }
+
+        .diagram-arrow {
+            margin: 0 15px;
+            position: relative;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+        }
+
+        .diagram-arrow::after {
+            content: "→";
+            display: block;
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .diagram-controls {
+            width: 100%;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--error-color);
+            border-top: 1px dotted #ccc;
+            padding-top: 10px;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f3f5;
+            font-weight: bold;
+        }
+
+        .tag-yes { color: var(--success-color); font-weight: bold; }
+        .tag-no { color: var(--error-color); font-weight: bold; }
+
+        .note-box {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        /* Answer Section Styles */
+        #selfCheckAnswers {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f0fff4;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安題組解析：委外與複委託的資安管控</h1>
+    </header>
+
+    <!-- 題組共用情境 -->
+    <div class="scenario-box">
+        <span class="scenario-label">題組共用情境</span>
+        <p>A 公司主要核心業務係提供國內各大金融機構（均屬資通安全管理法規範對象）有關系統之客製化開發業務，合作夥伴 B 公司為長年承接 A 公司旗下與金融機構委託業務。甲為國內首屈一指之金融機構，今有一金融系統委外開發專案，其專案包含多項開發及核心系統：X 系統（資通系統防護需求等級為高級）、Y 系統（資通系統防護需求等級為中級），以及 Z 系統（資通系統防護需求等級為普級）。委託金額為新台幣捌仟萬元整，專案開發為期一年。</p>
+    </div>
+
+    <!-- 題目區域 -->
+    <div class="question-box">
+        【題組】第 6 題（單選）<br>
+        A 公司今成功承攬甲金融機構（屬資通安全管理法規範對象）所委託之系統開發案，因案量過大，故 A 公司一如以往，擬尋求合作夥伴 B 公司執行本案之部分系統開發業務，並尋求取得甲金融機構之同意。有關甲金融機構就 A 公司辦理受託業務之「複委託」事項，其應注意之事項，下列說明何者最「不」適切？
+    </div>
+
+    <!-- 選項區域 -->
+    <div class="options-group">
+        <label class="option-label">
+            <input type="radio" name="answer" value="A"> (A) 複委託之範圍
+        </label>
+        <label class="option-label">
+            <input type="radio" name="answer" value="B"> (B) 複委託之對象
+        </label>
+        <label class="option-label">
+            <input type="radio" name="answer" value="C"> (C) 複委託之金額
+        </label>
+        <label class="option-label">
+            <input type="radio" name="answer" value="D"> (D) 複委託之受託者應具備之資通安全維護措施
+        </label>
+    </div>
+
+    <!-- 按鈕區域 -->
+    <div>
+        <button class="btn" id="submitBtn">提交答案</button>
+        <button class="btn btn-reset" id="resetBtn">重作一次</button>
+    </div>
+
+    <!-- 反饋區域 -->
+    <div id="feedback-area"></div>
+
+    <!-- 解析區域 (Accordion) -->
+    <div class="accordion" id="explanationArea">
+        
+        <!-- A. 題組情境重點整理 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                A. 題組情境重點整理
+                <span>▼</span>
+            </div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>甲方（委託人）：</strong>甲金融機構（必須遵守資通安全管理法）。</li>
+                    <li><strong>乙方（受託人）：</strong>A 公司（主承包商）。</li>
+                    <li><strong>丙方（分包商）：</strong>B 公司（複委託對象）。</li>
+                    <li><strong>系統等級：</strong>涉及高級（X）、中級（Y）、普級（Z）系統。</li>
+                    <li><strong>事件原因：</strong>A 公司案量過大，需要將部分業務分包給 B 公司，並正在尋求甲的同意。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- B. 題目 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                B. 題目重述
+                <span>▼</span>
+            </div>
+            <div class="accordion-content">
+                <p>簡單來說：甲金融機構要審核 A 公司把工作轉包給 B 公司的這個行為，甲「最不需要」優先考慮哪個項目？</p>
+            </div>
+        </div>
+
+        <!-- C. 第一步：找關鍵字 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                C. 第一步：找關鍵字
+                <span>▼</span>
+            </div>
+            <div class="accordion-content">
+                <p>請注意題目中的以下字眼：</p>
+                <ul>
+                    <li><span class="highlight">資通安全管理法</span>：代表一切都要依法規標準，強調風險控管。</li>
+                    <li><span class="highlight">受託業務</span>：別人委託你做的工作。</li>
+                    <li><span class="highlight">複委託 (Subcontracting)</span>：把已接到的外包工作再外包出去，也就是俗稱的「二包」。</li>
+                    <li><span class="highlight">取得甲金融機構同意</span>：這是關鍵程序，代表甲方有審核權。</li>
+                    <li><span class="highlight">最「不」適切</span>：四個選項中，哪一個跟「資安風險管理」最沒關係？</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- D. 第二步：白話翻譯 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                D. 第二步：白話翻譯
+                <span>▼</span>
+            </div>
+            <div class="accordion-content">
+                <p><strong>情境翻譯：</strong> A 公司接了甲銀行的案子，忙不過來，想把一部分丟給 B 公司做。甲銀行身為業主，必須嚴格把關，以免 A 把東西交給隨便一家爛公司做，導致銀行系統被駭。</p>
+                <p><strong>甲在想什麼：</strong> 「我只要確保我的系統安全、資料不外洩。至於你們生意之間怎麼談錢，只要不影響品質和安全，我不需要管那麼細。」</p>
+            </div>
+        </div>
+
+        <!-- E. 第三步：解題思路 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                E. 第三步：解題思路
+                <span>▼</span>
+            </div>
+            <div class="accordion-content">
+                <p><strong>這題在考什麼觀念？</strong><br>
+                一句話：<span class="term">委外/供應鏈安全 (Supply Chain Security)</span> 的資安管控重點。</p>
+                
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>先抓住甲關心的是「資安風險」而非「商業價格」。</li>
+                    <li>再看每個選項是否與「風險可控」直接相關。</li>
+                    <li>找出最不適切者。</li>
+                </ol>
+
+                <p><strong>原理與規則：</strong></p>
+                <ul>
+                    <li>委外不等於把責任丟出去；甲仍要確保外包鏈每一層都達到資安要求。</li>
+                    <li>複委託要管三件事：做哪些（範圍）、給誰做（對象）、怎麼管資安（措施）。</li>
+                </ul>
+
+                <div class="diagram-container">
+                    <div class="diagram-box">甲金融機構<br>(業主/責任方)</div>
+                    <div class="diagram-arrow">委外<br>Outsourcing</div>
+                    <div class="diagram-box">A 公司<br>(受託者)</div>
+                    <div class="diagram-arrow">複委託<br>Subcontracting</div>
+                    <div class="diagram-box">B 公司<br>(次受託者)</div>
+                    <div class="diagram-controls">
+                        <strong>甲需管控重點：</strong><br>
+                        1. 同意權 (Yes/No)<br>
+                        2. 範圍 (做什麼)<br>
+                        3. 對象 (B是誰)<br>
+                        4. 資安措施 (B安不安全)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- F. 第四步：選項分析 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                F. 第四步：選項分析
+                <span>▼</span>
+            </div>
+            <div class="accordion-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>選項</th>
+                            <th>內容</th>
+                            <th>屬於資安管控重點？</th>
+                            <th>原因（白話解析）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>(A)</td>
+                            <td>複委託之範圍</td>
+                            <td class="tag-yes">是，適切</td>
+                            <td>如果範圍不清，B 公司可能接觸到不該碰的機密資料（如核心系統 X），這直接影響風險。</td>
+                        </tr>
+                        <tr>
+                            <td>(B)</td>
+                            <td>複委託之對象</td>
+                            <td class="tag-yes">是，適切</td>
+                            <td>甲必須知道 B 公司是誰。如果 B 公司是有中資背景或黑名單廠商，絕對不能同意。這叫「背景查核」。</td>
+                        </tr>
+                        <tr>
+                            <td>(C)</td>
+                            <td>複委託之金額</td>
+                            <td class="tag-no">否，不適切</td>
+                            <td>這是 A 跟 B 之間的商業合約。A 賺多賺少、分多少錢給 B，跟甲系統會不會被駭客入侵沒有「直接」關聯。</td>
+                        </tr>
+                        <tr>
+                            <td>(D)</td>
+                            <td>受託者應具備之措施</td>
+                            <td class="tag-yes">是，適切</td>
+                            <td>B 公司如果不做防毒、不補漏洞、沒有門禁，甲的資料交給他就死定了。這是最核心的管控點。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- G. 觀念補充與延伸 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                G. 觀念補充與延伸
+                <span>▼</span>
+            </div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>核心觀念定位：</strong>資安管理 → 委外管理 / 供應鏈安全（Supply Chain Security：確保整條外包鏈也是安全的）。</li>
+                    <li><strong>考試常見度：</strong>非常常考（尤其愛考「最不適切/最不正確」）。</li>
+                    <li><strong>定義精神：</strong>資通安全管理法子法要求，公務機關或特定非公務機關（如關鍵基礎設施），委外辦理資通系統建置，應在契約明訂「複委託之範圍、對象及應具備之資通安全維護措施」。</li>
+                    <li><strong>觸類旁通：</strong>
+                        <ul>
+                            <li><strong>商務條件 vs 資安條件：</strong>價格、付款方式是商務；權限、加密、稽核權是資安。</li>
+                        </ul>
+                    </li>
+                    <li><strong>變化題型：</strong>
+                        <ul>
+                            <li>若題目問「若複委託涉及高級系統」，甲最可能加強什麼？答案通常是「限制複委託範圍」或「加強稽核頻率」。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- H. 記憶口訣 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                H. 記憶口訣
+                <span>▼</span>
+            </div>
+            <div class="accordion-content">
+                <div class="note-box">
+                    <strong>口訣：</strong>「再外包，管三件：做什麼（範圍）、給誰做（對象）、怎麼保安全（措施）；不是管多少錢（金額）。」
+                </div>
+            </div>
+        </div>
+
+        <!-- I. 常見陷阱 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                I. 常見陷阱
+                <span>▼</span>
+            </div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>容易誤選點：</strong>看到「金額」就以為很重要，覺得預算低會影響品質。雖然間接相關，但在資安法規與合約審查中，金額屬於商業機密，通常不是資安審查的「必要查核項目」。</li>
+                    <li><strong>心理盲點：</strong>把「管理」直覺等同於「管預算」。</li>
+                    <li><strong>避坑指南：</strong>看到資安法相關題目，先問自己：「這個選項能不能直接降低被駭客攻擊的風險？」</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- J. 正確答案 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                J. 正確答案
+                <span>▼</span>
+            </div>
+            <div class="accordion-content">
+                <p><strong>正確答案：(C)</strong></p>
+                <p>理由：複委託管控重點在範圍、對象與資安措施，金額屬 A 與 B 之間的商務協議，與防止資安風險無直接關聯。</p>
+            </div>
+        </div>
+
+        <!-- K. 自我檢測 -->
+        <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                K. 自我檢測（試著回答看看）
+                <span>▼</span>
+            </div>
+            <div class="accordion-content">
+                <ol>
+                    <li>若題目把 (C) 改成「複委託後的稽核方式」，答案會不會變？為什麼？</li>
+                    <li>若 B 公司要接觸「高級」系統資料，甲應加哪些具體控管？</li>
+                    <li>「取得同意」的目的，是在管責任還是管風險？請用一句話說明。</li>
+                </ol>
+                <button class="btn btn-reset" id="toggleAnswersBtn" style="margin-top: 10px; font-size: 0.9rem;">顯示參考解答</button>
+                <div id="selfCheckAnswers">
+                    <p style="margin-top:0;"><strong>參考解答：</strong></p>
+                    <ol>
+                        <li><strong>會變。</strong>因為「稽核方式」是確認資安落實的重要手段，屬於適切的管控項目。若改成此選項，則 (C) 就不再是「最不適切」的答案。</li>
+                        <li><strong>具體控管：</strong>應要求資料加密（傳輸與儲存）、實施多因子認證 (MFA)、採行最小權限原則，並限制只能在特定網段或 VDI 環境作業，不可將資料落地到 B 公司個人電腦。</li>
+                        <li><strong>管風險。</strong>同意權是為了確保「甲知道誰在碰系統」，避免未知廠商引入不可控的資安風險；責任則是隨之確立的法律後果。</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const feedbackArea = document.getElementById('feedback-area');
+    const explanationArea = document.getElementById('explanationArea');
+    const radioInputs = document.querySelectorAll('input[name="answer"]');
+    const toggleAnswersBtn = document.getElementById('toggleAnswersBtn');
+    const selfCheckAnswers = document.getElementById('selfCheckAnswers');
+
+    function toggleAccordion(header) {
+        header.classList.toggle('active');
+        const content = header.nextElementSibling;
+        content.classList.toggle('active');
+    }
+
+    submitBtn.addEventListener('click', () => {
+        let selectedValue = null;
+        radioInputs.forEach(input => {
+            if (input.checked) {
+                selectedValue = input.value;
+            }
+        });
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+        
+        if (selectedValue === 'C') {
+            // Correct Answer
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = '✅ 回答正確！<br>複委託金額屬於「商務層面」，非資安法規關注的「風險控制」重點。<br>請往下閱讀完整解析。';
+            explanationArea.style.display = 'block';
+            
+            // Automatically open the first few important sections
+            const headers = document.querySelectorAll('.accordion-header');
+            // Open Section F (Analysis) and J (Answer) specifically
+            toggleAccordion(headers[5]); // Section F
+        } else {
+            // Incorrect Answer
+            feedbackArea.className = 'feedback-incorrect';
+            feedbackArea.innerHTML = '❌ 答案錯誤。<br>提示：你可能選到了一個「確實很重要」的資安管控項目。<br>請思考：甲銀行最關心的是「系統安不安全」，而不是 A 公司跟 B 公司「怎麼談生意（錢）」。<br>請查看下方的「選項分析」表與「陷阱」區塊。';
+            explanationArea.style.display = 'block'; // Show explanation even if wrong, to help learn
+        }
+
+        // Scroll to feedback
+        feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    resetBtn.addEventListener('click', () => {
+        // Clear selection
+        radioInputs.forEach(input => input.checked = false);
+        // Hide areas
+        feedbackArea.style.display = 'none';
+        explanationArea.style.display = 'none';
+        // Reset accordion states
+        const contents = document.querySelectorAll('.accordion-content');
+        contents.forEach(content => content.classList.remove('active'));
+        // Hide self check answers
+        selfCheckAnswers.style.display = 'none';
+        toggleAnswersBtn.textContent = '顯示參考解答';
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    toggleAnswersBtn.addEventListener('click', () => {
+        if (selfCheckAnswers.style.display === 'none' || selfCheckAnswers.style.display === '') {
+            selfCheckAnswers.style.display = 'block';
+            toggleAnswersBtn.textContent = '隱藏參考解答';
+        } else {
+            selfCheckAnswers.style.display = 'none';
+            toggleAnswersBtn.textContent = '顯示參考解答';
+        }
+    });
+</script>
+
+</body>
+</html>

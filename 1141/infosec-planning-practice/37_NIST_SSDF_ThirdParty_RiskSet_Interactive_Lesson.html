@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安衝刺班：NIST SSDF 與第三方元件風險（題組 5）</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --highlight-bg: #f1c40f;
+            --light-bg: #ecf0f1;
+            --border-radius: 8px;
+            --spacing: 20px;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f6f7;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 1.5em;
+        }
+
+        h1 {
+            text-align: center;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+            font-size: 24px;
+        }
+
+        h2 {
+            font-size: 20px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+            background-color: #fff5f5;
+        }
+
+        h3 {
+            font-size: 18px;
+            color: #555;
+        }
+
+        .scenario-box {
+            background-color: #e8f6f3;
+            border: 1px solid #a3e4d7;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        .question-box {
+            background-color: #fff;
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .options-list li {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .options-list li:hover {
+            background-color: var(--light-bg);
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+        }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+            font-weight: bold;
+        }
+
+        .result-correct {
+            background-color: #d4efdf;
+            color: #145a32;
+            border: 1px solid #27ae60;
+        }
+
+        .result-wrong {
+            background-color: #fadbd8;
+            color: #7b241c;
+            border: 1px solid #c0392b;
+        }
+
+        mark {
+            background-color: var(--highlight-bg);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .keyword-explanation {
+            font-size: 0.9em;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .callout {
+            border-left: 4px solid var(--accent-color);
+            background-color: #fff9f9;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .analogy {
+            background-color: #eaf2f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .trap-check {
+            border: 1px dashed #e67e22;
+            padding: 15px;
+            background-color: #fdf2e9;
+        }
+
+        /* Utility for hiding/showing steps */
+        .step-content {
+            margin-top: 15px;
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.8em;
+            color: #7f8c8d;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header & Context -->
+    <h1>資安短期衝刺班：軟體供應鏈安全特訓</h1>
+    <div class="scenario-box">
+        <h3>【題組 5】第 37–40 題共用情境</h3>
+        <p><strong>情境說明：</strong>各產業對於軟體供應鏈安全的韌性要求，包含供應鏈上下游的公司資訊安全、軟體安全等。在風險管理方面，可透過參考導入 ISO 或 NIST 等框架，以達到有效的管控。</p>
+        <p><em>老師提點：本頁面重點處理第 37 題，為後續的供應鏈治理打基礎。請注意「NIST」與「第三方元件」這兩個關鍵概念。</em></p>
+    </div>
+
+    <!-- The Question -->
+    <div class="question-box">
+        <h3>37. 在美國國家標準暨技術研究院（NIST）訂定的軟體開發安全框架（Secure Software Development Framework, SSDF）中，針對第三方元件弱點的風險管控，下列達成風險管控的方式何者錯誤？</h3>
+        <form id="quizForm">
+            <ul class="options-list">
+                <li><label><input type="radio" name="q37" value="A"> (A) 盤點各系統使用的第三方元件清單</label></li>
+                <li><label><input type="radio" name="q37" value="B"> (B) 清查第三方元件的弱點</label></li>
+                <li><label><input type="radio" name="q37" value="C"> (C) 持續監控第三方元件弱點情資</label></li>
+                <li><label><input type="radio" name="q37" value="D"> (D) 使用較不知名的第三方元件</label></li>
+            </ul>
+            <button type="button" class="btn" onclick="checkAnswer()">提交答案</button>
+            <button type="button" class="btn btn-reset" onclick="resetQuiz()">重置練習</button>
+        </form>
+
+        <div id="resultBox" class="result-box"></div>
+    </div>
+
+    <!-- Hidden Analysis Section (Revealed after simple interaction or scrolling) -->
+    <div id="analysisSection">
+        
+        <h2>第一步：找關鍵字（名師帶你畫重點）</h2>
+        <p>看到題目不要慌，先抓出解題線索：</p>
+        <ul>
+            <li><mark>NIST</mark> <span class="keyword-explanation">→ 這是標準與規則的制定者（美國官方）。</span></li>
+            <li><mark>SSDF</mark> <span class="keyword-explanation">→ 這是規則書的名稱（軟體開發安全框架）。</span></li>
+            <li><mark>第三方元件</mark> <span class="keyword-explanation">→ 這是風險來源（別人寫的程式碼）。</span></li>
+            <li><mark>弱點</mark> <span class="keyword-explanation">→ 這是我們要防範的洞。</span></li>
+            <li><mark>風險管控</mark> <span class="keyword-explanation">→ 這是目標（要讓風險可被控制）。</span></li>
+        </ul>
+
+        <h2>第二步：白話翻譯（高中生秒懂版）</h2>
+        <div class="callout">
+            <p><strong>老師翻譯：</strong>「美國政府出了一本叫 SSDF 的書，教大家怎麼安全地寫軟體。書裡說，如果你開發軟體時有『引用別人的程式碼（第三方元件）』，要怎麼做才不會被駭客入侵？下面哪個做法是<strong>大錯特錯</strong>的？」</p>
+            <p><strong>專有名詞小辭典：</strong></p>
+            <ul>
+                <li><strong>NIST：</strong>美國負責定標準的大型官方機構，資安界的大神。</li>
+                <li><strong>SSDF：</strong>把資安檢查放進寫程式流程的一套SOP。</li>
+                <li><strong>第三方元件：</strong>像是蓋房子買現成的窗戶，不是自己做的，通常是網路下載的開源套件或函式庫。</li>
+                <li><strong>弱點：</strong>程式碼裡面的漏洞，壞人可以鑽進來。</li>
+            </ul>
+        </div>
+
+        <h2>第三步：解題思路與生活比喻</h2>
+        <div class="analogy">
+            <p><strong>生活比喻：汽車維修</strong></p>
+            <p>想像你在經營修車廠，你要進口「煞車皮（第三方元件）」來幫客人修車。</p>
+            <ul>
+                <li>(A) 盤點清單：記下來買了哪些煞車皮，裝在誰的車上。（正確）</li>
+                <li>(B) 清查弱點：檢查這批煞車皮有沒有原廠召回公告。（正確）</li>
+                <li>(C) 持續監控：訂閱新聞，看這款煞車皮有沒有出事。（正確）</li>
+                <li>(D) <strong>使用不知名零件：</strong>故意去用沒人聽過、路邊撿來的雜牌零件，覺得沒人知道就沒事？（錯誤！這最危險，因為出事了也沒人通知你。）</li>
+            </ul>
+        </div>
+        
+        <p><strong>SSDF 的核心邏輯：</strong> 「可見性」與「可管理性」。你看不到、不知道的東西，就無法保護。不知名的元件通常缺乏維護、沒有社群修補漏洞，風險極高。</p>
+
+        <h2>第四步：選項詳細分析</h2>
+        <p>點擊下方標題展開詳細說明：</p>
+
+        <details>
+            <summary>(A) 盤點各系統使用的第三方元件清單（正確的做法）</summary>
+            <div class="step-content">
+                <p>這就是所謂的「建立資產清單」或 SBOM（軟體物料清單）的概念。你必須先知道你用了什麼，當那個元件出事時，你才知道自己受影響。這是最基礎的管控。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>(B) 清查第三方元件的弱點（正確的做法）</summary>
+            <div class="step-content">
+                <p>在使用之前或使用中，必須去比對 CVE（通用漏洞揭露）資料庫，看看你用的這個版本是不是已經被公告有大漏洞。如果有，就不能用，或者要更新。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>(C) 持續監控第三方元件弱點情資（正確的做法）</summary>
+            <div class="step-content">
+                <p>資安不是一次性的。今天沒漏洞，明天可能就被駭客發現新漏洞。所以要「持續監控」相關新聞與資安通報，這符合 SSDF 的精神。</p>
+            </div>
+        </details>
+
+        <details open>
+            <summary>(D) 使用較不知名的第三方元件（錯誤的做法，本題答案）</summary>
+            <div class="step-content">
+                <p style="color: var(--accent-color); font-weight: bold;">這是嚴重的錯誤觀念！</p>
+                <p>很多人以為「越少人用的東西，駭客越懶得研究，所以越安全」，這叫做「隱匿式安全（Security by Obscurity）」，在現代資安中是完全行不通的。</p>
+                <p><strong>為什麼錯？</strong></p>
+                <ol>
+                    <li>不知名的元件通常開發者少，甚至不再維護（End of Life）。</li>
+                    <li>發現漏洞時，沒有社群或原廠會發布修補程式（Patch）。</li>
+                    <li>SSDF 要求使用的是「受到良好維護且可驗證」的元件。</li>
+                </ol>
+            </div>
+        </details>
+
+        <h2>觀念補充與延伸（銜接題組 38–40）</h2>
+        <div class="scenario-box">
+            <p>掌握這題後，接下來的 38、39、40 題通常會考延伸應用。請先把這些名詞記在腦海裡：</p>
+            <ul>
+                <li><strong>軟體供應鏈（Software Supply Chain）：</strong>寫軟體就像做菜，買來的醬油（套件）、鍋具（開發工具）都算是供應鏈的一環。如果醬油有毒，菜就有毒。</li>
+                <li><strong>SBOM（軟體物料清單）：</strong>就像食品包裝背後的成分表。SSDF 強烈要求要有這張表，出事時才能馬上查到。</li>
+            </ul>
+            <p><strong>思考題（不需作答，想一下就好）：</strong></p>
+            <ul>
+                <li>如果今天新聞報導知名套件 Log4j 爆發漏洞，身為資安人員，你第一件事要拿什麼出來檢查？（答案線索：選項 A）</li>
+            </ul>
+        </div>
+
+        <h2>記憶口訣與常見陷阱</h2>
+        <div class="trap-check">
+            <p><strong>口訣：</strong>「盤、查、盯 都正確，冷門亂用最危險。」</p>
+            <p><strong>常見陷阱（避坑檢查表）：</strong></p>
+            <ul>
+                <li>[ ] 以為「不知名＝沒人攻擊」。事實是：駭客用掃描工具掃全網，不管你知不知名，有洞就打。</li>
+                <li>[ ] 以為「盤點一次就夠」。事實是：軟體會更新，要持續監控（選項 C）。</li>
+            </ul>
+        </div>
+
+        <div class="question-box" style="border-color: #27ae60;">
+            <h3>正確答案：D</h3>
+            <p><strong>一句話理由：</strong>NIST SSDF 要求供應鏈透明可管，不知名的元件缺乏維護與監控機制，風險不可控。</p>
+        </div>
+
+        <h2>自我檢測（小測驗）</h2>
+        <p>確認你是否真的懂了！</p>
+        
+        <div style="background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+            <p><strong>Q1. 為什麼「隱匿式安全（用沒人知道的套件）」是無效的？</strong></p>
+            <button class="btn" onclick="toggleAnswer('ans1')">看答案</button>
+            <div id="ans1" style="display:none; margin-top:10px; color: var(--primary-color);">
+                因為自動化掃描工具可以輕易找出通用弱點，且冷門套件通常沒人修補漏洞，反而變成孤兒，風險更高。
+            </div>
+        </div>
+
+        <div style="background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
+            <p><strong>Q2. SSDF 框架中，對於第三方元件最重要的第一步通常是什麼？</strong></p>
+            <button class="btn" onclick="toggleAnswer('ans2')">看答案</button>
+            <div id="ans2" style="display:none; margin-top:10px; color: var(--primary-color);">
+                建立清單（盤點）。你必須先知道自己有什麼（選項 A），才能進行後續的管理與監控。
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>資安短期衝刺班教材 | 離線版教材 | 題組 5 - Q37 解析</p>
+    </footer>
+
+</div>
+
+<script>
+    function checkAnswer() {
+        const form = document.getElementById('quizForm');
+        const selected = form.querySelector('input[name="q37"]:checked');
+        const resultBox = document.getElementById('resultBox');
+
+        if (!selected) {
+            alert('請先選擇一個答案喔！');
+            return;
+        }
+
+        resultBox.style.display = 'block';
+        resultBox.className = 'result-box'; // reset classes
+
+        if (selected.value === 'D') {
+            resultBox.classList.add('result-correct');
+            resultBox.innerHTML = `
+                <p>【答對了！】太棒了！</p>
+                <p>既然要作風險管控，使用「不知名、無人維護」的元件反而會增加不可控的風險，這完全違反 NIST SSDF 的精神。</p>
+                <p>請往下看詳細解析，鞏固觀念！</p>
+            `;
+        } else {
+            resultBox.classList.add('result-wrong');
+            let explanation = '';
+            if (selected.value === 'A') explanation = '「盤點清單」是風險管控的第一步，這是正確且必要的做法喔！題目問的是「錯誤」的方式。';
+            if (selected.value === 'B') explanation = '「清查弱點」能幫我們避開地雷，這是非常正確的做法！題目問的是「錯誤」的方式。';
+            if (selected.value === 'C') explanation = '「持續監控」才能應對新出現的威脅，這也是正確的做法！題目問的是「錯誤」的方式。';
+            
+            resultBox.innerHTML = `
+                <p>【答錯囉】別灰心，這題考的是逆向思考。</p>
+                <p>${explanation}</p>
+                <p>請往下看「選項 D」為什麼是大忌。</p>
+            `;
+        }
+        
+        // Auto scroll to analysis
+        document.getElementById('analysisSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetQuiz() {
+        const form = document.getElementById('quizForm');
+        const resultBox = document.getElementById('resultBox');
+        form.reset();
+        resultBox.style.display = 'none';
+        resultBox.className = 'result-box';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'none') {
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

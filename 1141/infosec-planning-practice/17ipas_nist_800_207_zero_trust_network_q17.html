@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安觀念題教學 - NIST SP 800-207 零信任</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        /* Quiz Section */
+        .quiz-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f7fa;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Feedback Area */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Accordion Styles */
+        .accordion {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 10px;
+        }
+
+        .accordion-header {
+            padding: 18px 25px;
+            background-color: #fff;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.05rem;
+        }
+
+        .accordion-header:hover {
+            background-color: #f9f9f9;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+
+        .accordion.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: #fff;
+        }
+
+        .accordion-content-inner {
+            padding: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Visuals & Highlights */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .diagram-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f1f2f6;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .diagram-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #bdc3c7;
+            text-align: center;
+            width: 280px;
+        }
+
+        .diagram-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        /* Custom diagram styling */
+        .perimeter-model .zone-trust {
+            background: #d4edda;
+            padding: 10px;
+            margin-bottom: 5px;
+            border: 1px dashed green;
+        }
+        .perimeter-model .zone-untrust {
+            background: #f8d7da;
+            padding: 10px;
+            border: 1px dashed red;
+        }
+        
+        .zt-model .connection {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+        .zt-badge {
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Self Test Answer Reveal */
+        .answer-reveal {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f4fd;
+            border-left: 4px solid var(--accent-color);
+            display: none;
+        }
+        .show-answer-btn {
+            background: none;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        .show-answer-btn:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .diagram-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安觀念題教學</h1>
+        <h2>NIST SP 800-207：零信任架構的網路觀念</h2>
+    </header>
+
+    <!-- Question Section -->
+    <div class="quiz-card">
+        <div class="question-text">
+            17. 關於 NIST SP 800-207 零信任架構（Zero Trust Architecture, ZTA：不預設信任任何人或設備、每次都要驗證）中的網路敘述，下列何項錯誤？
+        </div>
+        <div class="options">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                (A) 企業內部網路不可視為隱式信任區（Implicit Trust Zone：不用驗證就自動信任的區域）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                (B) 內部網路中的設備可能非企業所有或受企業管控
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                (C) 遠距企業人員可完全信任他們本地的網路連線
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                (D) 資產與流程於企業和非企業之基礎設施移動時，必須為一致的安全標準
+            </label>
+        </div>
+
+        <div id="feedback-area"></div>
+
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">提交答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+    </div>
+
+    <!-- Accordion Sections -->
+    <div id="explanation-container">
+        
+        <!-- Section A: Question Restatement -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">A. 題目完整重述</div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p><strong>題目：</strong>關於 NIST SP 800-207 零信任架構（Zero Trust Architecture, ZTA）中的網路敘述，下列何項錯誤？</p>
+                    <p><strong>選項：</strong><br>
+                    (A) 企業內部網路不可視為隱式信任區（Implicit Trust Zone）<br>
+                    (B) 內部網路中的設備可能非企業所有或受企業管控<br>
+                    (C) 遠距企業人員可完全信任他們本地的網路連線<br>
+                    (D) 資產與流程於企業和非企業之基礎設施移動時，必須為一致的安全標準</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section B: Keywords -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">B. 第一步：找關鍵字</div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p>請用螢光筆在腦中標示以下重點：</p>
+                    <ul>
+                        <li><span class="highlight">NIST SP 800-207</span>（美國國家標準技術研究院發布的標準文件）</li>
+                        <li><span class="highlight">零信任架構（ZTA）</span></li>
+                        <li><span class="highlight">網路敘述</span></li>
+                        <li><span class="highlight">何項錯誤</span>（注意是選錯誤的！）</li>
+                        <li><span class="highlight">隱式信任區</span></li>
+                        <li><span class="highlight">遠距人員</span></li>
+                        <li><span class="highlight">完全信任</span>（這四個字是超級關鍵字）</li>
+                    </ul>
+                    <p><strong>關鍵提示：</strong>為什麼「完全信任」與「零信任」在語意上天然對立？因為零信任的核心就是「永不信任，始終驗證」，所以看到「完全信任」通常就是問題所在。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section C: Plain Translation -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">C. 第二步：白話翻譯</div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p>用高中生日常口語來翻譯這題的意思：</p>
+                    <div style="background: #eef; padding: 15px; border-radius: 5px;">
+                        <p>零信任的意思就是：<strong>「不要因為你在公司辦公室裡面，或者你在家裡連上網，就覺得自己很安全。」</strong></p>
+                        <p>每一次連線都要當作「可能已經有壞人在旁邊」，所以都要檢查。</p>
+                        <p>題目問：<strong>下面哪一句話跟這個「疑神疑鬼、小心謹慎」的精神是衝突的？</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section D: Logic -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">D. 第三步：解題思路</div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p><strong>這題在考什麼觀念？</strong><br>一句話：零信任的網路假設與信任邊界。</p>
+                    
+                    <h4>解題步驟：</h4>
+                    <ol>
+                        <li>先記住零信任核心：不因位置（內網/外網/遠端）就自動信任。</li>
+                        <li>看見「可完全信任」這種絕對語氣，優先懷疑。</li>
+                        <li>檢查其他選項是否符合「內外都可能不可信、要一致標準」的精神。</li>
+                    </ol>
+
+                    <h4>原理與規則（白話版）：</h4>
+                    <ul>
+                        <li><strong>零信任把網路視為不可靠</strong>（Assume Breach：假設可能已被入侵）：假設駭客已經在網路上了。</li>
+                        <li><strong>信任要建立在什麼上？</strong>要建立在「驗證（Verify：查身分/設備狀態）」與「最小權限（Least Privilege：只給需要的權限）」上，而不是建立在「你在哪裡上網」。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section E: Option Analysis -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">E. 第四步：選項分析（詳解）</div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 15%">選項</th>
+                                <th style="width: 20%">是否符合零信任</th>
+                                <th>關鍵理由（白話）</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>(A)</td>
+                                <td style="color: green; font-weight: bold;">符合</td>
+                                <td>內網不能當成自動信任區（隱式信任區），因為內網也可能被駭客入侵或有內鬼。</td>
+                            </tr>
+                            <tr>
+                                <td>(B)</td>
+                                <td style="color: green; font-weight: bold;">符合</td>
+                                <td>現在大家會帶自己手機（BYOD）或外包商設備進公司，這些設備不一定安全，所以不能因為在內網就信它。</td>
+                            </tr>
+                            <tr>
+                                <td>(C)</td>
+                                <td style="color: red; font-weight: bold;">不符合 (錯誤)</td>
+                                <td>遠端人員在家裡或咖啡店，那些 Wi-Fi 很危險，絕對不能「完全信任」，一定要驗證。</td>
+                            </tr>
+                            <tr>
+                                <td>(D)</td>
+                                <td style="color: green; font-weight: bold;">符合</td>
+                                <td>不管資料搬到雲端還是放在公司機房，都要用同一套嚴格的標準來檢查，不能有差別待遇。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section F: Concepts & Extensions -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">F. 觀念補充與延伸</div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <h4>視覺化圖解：傳統 vs 零信任</h4>
+                    <div class="diagram-container">
+                        <div class="diagram-box perimeter-model">
+                            <span class="diagram-title">1. 傳統邊界式防禦</span>
+                            <div class="zone-untrust">網際網路 (外網)<br><strong>不信任</strong></div>
+                            <div style="border-top: 4px solid #34495e; margin: 5px 0; font-weight:bold;">防火牆 (邊界)</div>
+                            <div class="zone-trust">企業內網 (內網)<br><strong>信任 (預設安全)</strong></div>
+                            <p style="font-size: 0.8rem; color: #666;">缺點：駭客一旦進來就暢行無阻</p>
+                        </div>
+
+                        <div class="diagram-box zt-model">
+                            <span class="diagram-title">2. 零信任架構 (ZTA)</span>
+                            <div class="connection">
+                                <span>使用者</span>
+                                <span class="zt-badge">驗證</span>
+                                <span>應用程式</span>
+                            </div>
+                            <div class="connection">
+                                <span>設備</span>
+                                <span class="zt-badge">驗證</span>
+                                <span>資料庫</span>
+                            </div>
+                            <div class="connection">
+                                <span>在家辦公</span>
+                                <span class="zt-badge">驗證</span>
+                                <span>雲端服務</span>
+                            </div>
+                            <p style="font-size: 0.8rem; color: #666;">重點：不分內外，每一段都要查票</p>
+                        </div>
+                    </div>
+
+                    <h4>核心觀念整理：</h4>
+                    <ul>
+                        <li><strong>零信任（Zero Trust）：</strong>任何連線都要驗證與授權，不靠「網路位置」給信任。</li>
+                        <li><strong>隱式信任區（Implicit Trust Zone）：</strong>不用查就信的區域（零信任要打破它，消除隱式信任）。</li>
+                        <li><strong>一致安全標準：</strong>不管在公司機房或雲端，都用同一套安全要求。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section G: Mnemonics -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">G. 記憶口訣</div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold;">
+                        「零信任：不看位置只看驗證；不說全信要說要驗」
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section H: Common Pitfalls -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">H. 常見陷阱</div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <ul>
+                        <li><strong>易錯點：</strong>把「在公司內網」或「開 VPN」當成就安全、就能信任。</li>
+                        <li><strong>心理盲點：</strong>人會把熟悉環境（家裡網路）當成安全環境。</li>
+                        <li><strong>避坑指南：</strong>
+                            <ul>
+                                <li>看到「完全信任」四個字，在零信任題目中幾乎必錯。</li>
+                                <li>遠端連線要想：本地 Wi-Fi、路由器、共享網路都可能有風險。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section I: Correct Answer -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">I. 正確答案</div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p style="font-size: 1.2rem;"><strong>答案：C</strong></p>
+                    <p><strong>一句話理由：</strong>零信任不允許因遠端或本地網路就「完全信任」，必須持續驗證與控管。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section J: Self Assessment -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">J. 自我檢測</div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <div style="margin-bottom: 20px;">
+                        <p><strong>1) 如果員工在公司內網，但用的是個人筆電（非公司管控），零信任會怎麼看待？</strong></p>
+                        <button class="show-answer-btn" onclick="toggleAnswer('ans1')">看參考答案</button>
+                        <div id="ans1" class="answer-reveal">
+                            參考答案：仍視為不可信或需重新驗證，必須看裝置狀態與身分授權，而不是因為在內網就信任。
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <p><strong>2) 只要開了 VPN，就等於零信任嗎？為什麼？</strong></p>
+                        <button class="show-answer-btn" onclick="toggleAnswer('ans2')">看參考答案</button>
+                        <div id="ans2" class="answer-reveal">
+                            參考答案：不是。VPN 主要提供加密通道；零信任還要求身分驗證、細粒度授權、最小權限與持續評估。
+                        </div>
+                    </div>
+
+                    <div>
+                        <p><strong>3) 為什麼題目 (D) 說「一致的安全標準」符合零信任？</strong></p>
+                        <button class="show-answer-btn" onclick="toggleAnswer('ans3')">看參考答案</button>
+                        <div id="ans3" class="answer-reveal">
+                            參考答案：因為零信任不依賴位置，資產在地端或雲端移動都應維持相同的驗證、授權與控管要求。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function checkAnswer() {
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        
+        if (!selectedValue) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+        
+        // Remove previous classes
+        feedbackArea.classList.remove('feedback-correct', 'feedback-incorrect');
+
+        if (selectedValue === 'C') {
+            // Correct
+            feedbackArea.innerHTML = "<strong>正確！ (C)</strong><br>解析已展開，請詳讀下方內容以加深印象。";
+            feedbackArea.classList.add('feedback-correct');
+            
+            // Auto open the Option Analysis and Logic sections
+            const headers = document.querySelectorAll('.accordion-header');
+            // Logic is index 3 (Section D), Analysis is index 4 (Section E)
+            // But let's just open Section E for direct feedback
+            const analysisHeader = headers[4]; 
+            const analysisContent = analysisHeader.nextElementSibling;
+            
+            analysisHeader.parentElement.classList.add('active');
+            analysisContent.style.maxHeight = analysisContent.scrollHeight + "px";
+
+            // Also open Correct Answer (Section I)
+            const answerHeader = headers[8];
+            const answerContent = answerHeader.nextElementSibling;
+            answerHeader.parentElement.classList.add('active');
+            answerContent.style.maxHeight = answerContent.scrollHeight + "px";
+
+        } else {
+            // Incorrect
+            feedbackArea.classList.add('feedback-incorrect');
+            let hint = "";
+            switch(selectedValue) {
+                case 'A':
+                    hint = "提示：零信任強調「消除」隱式信任區，所以內網確實不能視為自動信任區。這句話是對的。";
+                    break;
+                case 'B':
+                    hint = "提示：現代企業環境中，BYOD（自帶設備）很常見，內網設備確實可能不受控。這句話是對的。";
+                    break;
+                case 'D':
+                    hint = "提示：零信任強調不管在哪裡，安全標準都要一樣嚴格。這句話是對的。";
+                    break;
+            }
+            feedbackArea.innerHTML = `<strong>錯誤</strong>。你選擇了 (${selectedValue})。<br>${hint}<br>請再思考一下「零信任」對「信任」的看法。`;
+        }
+    }
+
+    function resetQuiz() {
+        // Clear radios
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+        
+        // Hide feedback
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'none';
+
+        // Collapse all accordions
+        const accordions = document.querySelectorAll('.accordion');
+        accordions.forEach(acc => {
+            acc.classList.remove('active');
+            acc.querySelector('.accordion-content').style.maxHeight = null;
+        });
+
+        // Hide all self-test answers
+        const answers = document.querySelectorAll('.answer-reveal');
+        answers.forEach(ans => ans.style.display = 'none');
+    }
+
+    function toggleAccordion(header) {
+        const accordion = header.parentElement;
+        const content = header.nextElementSibling;
+
+        accordion.classList.toggle('active');
+
+        if (accordion.classList.contains('active')) {
+            content.style.maxHeight = content.scrollHeight + "px";
+        } else {
+            content.style.maxHeight = null;
+        }
+    }
+
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

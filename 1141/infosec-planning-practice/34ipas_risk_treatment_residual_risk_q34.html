@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安互動式教學：風險處理與剩餘風險</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --text-color: #333;
+            --panel-bg: #ffffff;
+            --highlight-color: #fffacd;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Heiti TC", "Microsoft JhengHei", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Question Section */
+        .question-box {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #eaf2f8;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        /* Options */
+        .options {
+            list-style: none;
+            padding: 0;
+        }
+
+        .option-item {
+            margin-bottom: 10px;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-item:hover {
+            border-color: var(--accent-color);
+            background-color: #f0f8ff;
+        }
+
+        .option-item.selected {
+            border-color: var(--primary-color);
+            background-color: #d6eaf8;
+        }
+
+        .option-label {
+            font-weight: bold;
+            margin-right: 10px;
+            min-width: 25px;
+        }
+
+        /* Buttons */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #1a252f;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Accordion for Explanation */
+        .explanation-container {
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+            display: none; /* Hidden initially */
+        }
+
+        .accordion {
+            background-color: #f1f1f1;
+            color: #444;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: 0.4s;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .accordion:hover, .accordion.active {
+            background-color: #ddd;
+        }
+
+        .accordion:after {
+            content: '+';
+            font-size: 1.2rem;
+            color: #777;
+        }
+
+        .accordion.active:after {
+            content: '-';
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            display: none;
+            overflow: hidden;
+            border: 1px solid #f1f1f1;
+            border-top: none;
+            margin-bottom: 10px;
+        }
+
+        .panel p, .panel ul, .panel li {
+            margin: 10px 0;
+        }
+
+        /* Visual Elements */
+        .highlight {
+            background-color: var(--highlight-color);
+            padding: 2px 4px;
+            border-radius: 2px;
+            border-bottom: 2px solid #f1c40f;
+        }
+
+        .flowchart {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .flow-step {
+            background: #fff;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 4px;
+            position: relative;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .flow-step:not(:last-child)::after {
+            content: "→";
+            display: block;
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        /* Mobile adjust for flowchart */
+        @media (max-width: 600px) {
+            .flowchart {
+                flex-direction: column;
+                align-items: center;
+            }
+            .flow-step {
+                width: 80%;
+            }
+            .flow-step:not(:last-child)::after {
+                content: "↓";
+                right: 50%;
+                top: auto;
+                bottom: -22px;
+                transform: translateX(50%);
+            }
+        }
+
+        /* Analysis Table */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        .analysis-table th, .analysis-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .analysis-table th {
+            background-color: var(--primary-color);
+            color: white;
+            width: 15%;
+        }
+        
+        .analysis-table td.status {
+            width: 15%;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Self Check Details */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .answer-reveal {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-left: 3px solid var(--success-color);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>風險處理與剩餘風險核可</h1>
+    </header>
+
+    <!-- Content Structure A: Question -->
+    <section>
+        <div class="question-box">
+            34. 針對風險處理的描述，下列何者最「不」適切？
+        </div>
+        <ul class="options" id="options-list">
+            <li class="option-item" onclick="selectOption('A')">
+                <span class="option-label">(A)</span>
+                <span>風險處理計畫的核准，須取得風險擁有者（Risk Owner：對該風險負責的人/單位）的核准</span>
+            </li>
+            <li class="option-item" onclick="selectOption('B')">
+                <span class="option-label">(B)</span>
+                <span>風險處理需考量組織所獲得之潛在利益與實施的成本等因素，選擇最適當的風險處理方式</span>
+            </li>
+            <li class="option-item" onclick="selectOption('C')">
+                <span class="option-label">(C)</span>
+                <span>執行完風險處理後，預計會降低到可接受風險以下，剩餘之資訊安全風險（Residual Risk：做完控制後仍然存在的風險）不需要風險擁有者再次的核可</span>
+            </li>
+            <li class="option-item" onclick="selectOption('D')">
+                <span class="option-label">(D)</span>
+                <span>風險處理可以選取多種方式同時進行</span>
+            </li>
+        </ul>
+
+        <div class="controls">
+            <button class="btn btn-submit" onclick="submitAnswer()">提交答案</button>
+            <button class="btn btn-reset" onclick="resetQuiz()">重作一次</button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+    </section>
+
+    <!-- Explanation Area -->
+    <div id="explanation" class="explanation-container">
+        
+        <!-- B. First Step: Keywords -->
+        <button class="accordion">第一步：找關鍵字</button>
+        <div class="panel">
+            <p><strong>請注意題目中的重點詞彙：</strong></p>
+            <ul>
+                <li><span class="highlight">風險處理</span></li>
+                <li><span class="highlight">最不適切</span>（選錯的）</li>
+                <li><span class="highlight">風險擁有者核准</span></li>
+                <li><span class="highlight">潛在利益與成本</span></li>
+                <li><span class="highlight">剩餘風險</span></li>
+                <li><span class="highlight">不需要再次核可</span>（這是最可疑的點）</li>
+                <li><span class="highlight">多種方式同時進行</span></li>
+            </ul>
+            <p><strong>解釋：</strong>本題關鍵在於判斷「剩餘風險是否仍需被正式接受/核可」。</p>
+        </div>
+
+        <!-- C. Second Step: Plain Translation -->
+        <button class="accordion">第二步：白話翻譯</button>
+        <div class="panel">
+            <p>用日常口語來說，這題是在問：</p>
+            <blockquote>
+                「你做了很多防護措施之後（例如裝了防毒軟體、設了防火牆），風險雖然變小了，但通常不會變成 0。這時候剩下那一丁點風險，在流程上應該怎麼處理？題目要你找出哪個說法是胡說八道的。」
+            </blockquote>
+        </div>
+
+        <!-- D. Third Step: Logic -->
+        <button class="accordion">第三步：解題思路</button>
+        <div class="panel">
+            <h3>這題在考什麼觀念？</h3>
+            <p>一句話總結：<strong>剩餘風險必須由風險擁有者正式接受/核可，而不是做完控制就自動算通過。</strong></p>
+            
+            <h3>解題步驟：</h3>
+            <ol>
+                <li>先確認風險處理計畫需不需要核准（答案：通常需要）。</li>
+                <li>再確認做完控制後的「剩餘風險」要不要接受（答案：通常需要）。</li>
+                <li>找到把「剩餘風險核可」省略掉的錯誤敘述。</li>
+            </ol>
+
+            <h3>標準流程圖：</h3>
+            <div class="flowchart">
+                <div class="flow-step">風險評估</div>
+                <div class="flow-step">選擇處理方式</div>
+                <div class="flow-step">風險處理計畫核准</div>
+                <div class="flow-step">實施控制</div>
+                <div class="flow-step">重新評估</div>
+                <div class="flow-step" style="background:#fffacd; border-color: #c0392b;">剩餘風險接受（簽核）</div>
+            </div>
+
+            <h3>原理與規則（白話）：</h3>
+            <ul>
+                <li>風險處理只能「降低」風險，很難完全「消除」。</li>
+                <li>因此，最後一定會有「剩餘風險」。</li>
+                <li>這剩下的風險必須有人負責，這個動作叫「風險接受（Risk Acceptance：正式同意承擔）」。</li>
+                <li>接受風險的人必須是<strong>風險擁有者</strong>（Risk Owner）或依組織授權的主管。</li>
+            </ul>
+        </div>
+
+        <!-- E. Fourth Step: Option Analysis -->
+        <button class="accordion">第四步：選項分析</button>
+        <div class="panel">
+            <table class="analysis-table">
+                <thead>
+                    <tr>
+                        <th>選項</th>
+                        <th>是否適切</th>
+                        <th>關鍵理由（白話）</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>(A)</td>
+                        <td class="status" style="color:green;">適切</td>
+                        <td>做計畫要花錢、花人，當然要負責人（風險擁有者）簽名同意。</td>
+                    </tr>
+                    <tr>
+                        <td>(B)</td>
+                        <td class="status" style="color:green;">適切</td>
+                        <td>做資安不能不計代價，要看「花這筆錢值不值得」（CP值），也就是成本效益分析。</td>
+                    </tr>
+                    <tr>
+                        <td>(C)</td>
+                        <td class="status" style="color:red;">不適切</td>
+                        <td>這是錯的！即使風險降很低，老闆（風險擁有者）還是要畫押說「好，剩下的風險我扛」，不能自動省略。</td>
+                    </tr>
+                    <tr>
+                        <td>(D)</td>
+                        <td class="status" style="color:green;">適切</td>
+                        <td>可以同時買保險（移轉）又裝防火牆（降低），多管齊下沒問題。</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- F. Concepts & Extension -->
+        <button class="accordion">觀念補充與延伸</button>
+        <div class="panel">
+            <h3>核心觀念定位</h3>
+            <ul>
+                <li>資安管理 &rarr; 風險管理 &rarr; 風險處理與風險接受。</li>
+                <li><strong>考試常見度：非常高</strong>。特別是「風險擁有者」、「剩餘風險」與「接受程序」的關係。</li>
+            </ul>
+            <h3>定義整理（白話）</h3>
+            <ul>
+                <li><strong>風險擁有者（Risk Owner）</strong>：對風險結果負責的人或單位（通常是業務單位主管，不是資安人員喔！）。</li>
+                <li><strong>剩餘風險（Residual Risk）</strong>：做完控制措施後，仍然存在的風險。</li>
+                <li><strong>風險接受（Risk Acceptance）</strong>：決策者確認剩餘風險在可接受範圍，並正式核可（簽字負責）。</li>
+            </ul>
+            <h3>觸類旁通</h3>
+            <p><strong>風險降低（Mitigation） &ne; 風險接受（Acceptance）</strong>：降低是手段，接受是決策。</p>
+        </div>
+
+        <!-- G. Memory Mnemonic -->
+        <button class="accordion">記憶口訣</button>
+        <div class="panel">
+            <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold;">
+                「風險降得下來，也要主人點頭」
+            </p>
+            <p style="text-align: center; font-size: 0.9rem;">
+                （意指：不管風險變得多小，最後一定要有風險擁有者點頭答應接受）
+            </p>
+        </div>
+
+        <!-- H. Common Traps -->
+        <button class="accordion">常見陷阱</button>
+        <div class="panel">
+            <ul>
+                <li><strong>易錯點</strong>：誤以為「控制措施做完了」就等於「風險消失了」或「事情結束了」。</li>
+                <li><strong>心理盲點</strong>：看到題目寫「預計會降低到可接受風險以下」，就覺得既然都可接受了，幹嘛還要簽核？（請記得：公事公辦，可接受也要簽名畫押）。</li>
+                <li><strong>避坑指南</strong>：問自己：「最後出事了誰負責？」如果沒有最後那個簽核動作，就變成沒人負責。</li>
+            </ul>
+        </div>
+
+        <!-- I. Correct Answer -->
+        <button class="accordion">正確答案</button>
+        <div class="panel">
+            <p style="font-size: 1.5rem; font-weight: bold; color: var(--error-color);">
+                答案：(C)
+            </p>
+            <p><strong>一句話理由：</strong>剩餘風險仍需風險擁有者正式接受/核可，不能省略。</p>
+        </div>
+
+        <!-- J. Self Check -->
+        <button class="accordion">自我檢測</button>
+        <div class="panel">
+            <p>點擊問題查看參考答案：</p>
+            
+            <details>
+                <summary>1) 為什麼剩餘風險需要核可？</summary>
+                <div class="answer-reveal">
+                    參考答案：因為風險不會變成 0，仍需由負責者（Risk Owner）確認他知道並願意承擔這最後剩下的風險。
+                </div>
+            </details>
+
+            <details>
+                <summary>2) 風險處理做完後，哪一個文件或動作可表示「風險接受」？</summary>
+                <div class="answer-reveal">
+                    參考答案：風險接受紀錄/簽核（Risk Acceptance Sign-off），必須由風險擁有者執行。
+                </div>
+            </details>
+
+            <details>
+                <summary>3) 如果風險擁有者不接受剩餘風險，下一步可能怎麼做？</summary>
+                <div class="answer-reveal">
+                    參考答案：必須追加控制措施進一步降低風險，或者改採其他處理方式（如保險分擔、或是直接避免不做該業務），直到降到他願意接受為止。
+                </div>
+            </details>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let selectedOption = null;
+    const correctOption = 'C';
+
+    function selectOption(option) {
+        selectedOption = option;
+        
+        // Remove selected class from all options
+        const options = document.querySelectorAll('.option-item');
+        options.forEach(el => {
+            el.classList.remove('selected');
+        });
+
+        // Add selected class to clicked option
+        const selectedEl = Array.from(options).find(el => el.textContent.trim().startsWith(`(${option})`));
+        if (selectedEl) {
+            selectedEl.classList.add('selected');
+        }
+    }
+
+    function submitAnswer() {
+        if (!selectedOption) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        const feedbackEl = document.getElementById('feedback');
+        const explanationEl = document.getElementById('explanation');
+        
+        // Show Feedback
+        feedbackEl.style.display = 'block';
+        if (selectedOption === correctOption) {
+            feedbackEl.className = 'feedback correct';
+            feedbackEl.innerHTML = '回答正確！<br>剩餘風險必須由風險擁有者正式核可。';
+            // Auto open explanation logic (optional, but requested structure implies showing it)
+            explanationEl.style.display = 'block';
+            
+            // Open the first few accordions for better UX
+            const firstAccordion = document.querySelector('.accordion');
+            if(firstAccordion) {
+                firstAccordion.classList.add('active');
+                firstAccordion.nextElementSibling.style.display = 'block';
+            }
+        } else {
+            feedbackEl.className = 'feedback incorrect';
+            feedbackEl.innerHTML = '回答錯誤。<br>提示：即使風險降低了，誰要對最後剩下的風險負責？';
+            explanationEl.style.display = 'block'; // Show explanation even if wrong so they can learn
+        }
+
+        // Scroll to feedback
+        feedbackEl.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetQuiz() {
+        selectedOption = null;
+        
+        // Reset UI classes
+        const options = document.querySelectorAll('.option-item');
+        options.forEach(el => {
+            el.classList.remove('selected');
+        });
+
+        // Hide Feedback and Explanation
+        document.getElementById('feedback').style.display = 'none';
+        const explanationEl = document.getElementById('explanation');
+        explanationEl.style.display = 'none';
+
+        // Close all accordions
+        const accs = document.querySelectorAll('.accordion');
+        accs.forEach(acc => {
+            acc.classList.remove('active');
+            acc.nextElementSibling.style.display = 'none';
+        });
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Accordion Logic
+    const accordions = document.getElementsByClassName("accordion");
+    for (let i = 0; i < accordions.length; i++) {
+        accordions[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            const panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

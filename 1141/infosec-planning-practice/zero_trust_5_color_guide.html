@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>零信任神殿圖｜可互動點擊教學模板（離線版）</title>
+  <style>
+    :root{
+      --bg:#f7f7fb;
+      --card:#ffffff;
+      --ink:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --accent:#111827;
+      --good:#0f766e;
+      --bad:#b42318;
+      --shadow: 0 8px 24px rgba(17,24,39,.08);
+      --radius: 14px;
+      --radius2: 10px;
+      --pad: 16px;
+      --pad2: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC","Microsoft JhengHei", Arial, sans-serif;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.55;
+    }
+    header{
+      padding: 18px 18px 10px 18px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .title{
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      margin: 0 0 6px 0;
+    }
+    .subtitle{
+      margin:0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    main{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 10px 18px 26px 18px;
+      display: grid;
+      grid-template-columns: 1.25fr .95fr;
+      gap: 14px;
+    }
+    @media (max-width: 980px){
+      main{grid-template-columns: 1fr; }
+    }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card h2{
+      font-size: 16px;
+      margin:0;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fafafa;
+    }
+    .card .content{
+      padding: 14px 16px 16px 16px;
+    }
+    .hint{
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+    .row{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background:#fff;
+      font-size: 13px;
+      color: var(--ink);
+      cursor: default;
+      user-select:none;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;background: var(--accent);
+      display:inline-block;
+    }
+    .pill .dot.good{background: var(--good);}
+    .pill .dot.bad{background: var(--bad);}
+    .btn{
+      appearance:none;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 9px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .btn:hover{background:#fafafa;}
+    .btn.primary{
+      border-color: var(--ink);
+      background: var(--ink);
+      color:#fff;
+    }
+    .btn.primary:hover{filter: brightness(1.05);}
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    /* Temple */
+    .temple-wrap{
+      padding: 14px 16px 16px 16px;
+    }
+    .temple{
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%);
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .temple-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr 1.2fr 1fr;
+      gap: 10px;
+      align-items: end;
+    }
+    @media (max-width: 980px){
+      .temple-grid{grid-template-columns: 1fr 1fr; }
+    }
+    .pediment{
+      height: 54px;
+      margin: 0 0 12px 0;
+      border-radius: 14px 14px 12px 12px;
+      background: #111827;
+      color:#fff;
+      display:flex;
+      flex-direction: column;
+      justify-content:center;
+      padding: 10px 12px;
+      position: relative;
+    }
+    .pediment .p-title{
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      margin: 0;
+    }
+    .pediment .p-sub{
+      margin: 2px 0 0 0;
+      font-size: 12px;
+      opacity: .9;
+    }
+    .col{
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background:#fff;
+      position: relative;
+      display:flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 170px;
+      cursor: pointer;
+      transition: transform .08s ease, box-shadow .08s ease, border-color .08s ease;
+      box-shadow: 0 10px 18px rgba(17,24,39,.05);
+    }
+    .col:hover{
+      transform: translateY(-2px);
+      border-color: #cbd5e1;
+      box-shadow: 0 14px 26px rgba(17,24,39,.08);
+    }
+    .col.active{
+      border-color: #111827;
+      box-shadow: 0 18px 30px rgba(17,24,39,.10);
+      transform: translateY(-2px);
+    }
+    .col-head{
+      padding: 12px 12px 0 12px;
+    }
+    .col-k{
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 6px 0;
+    }
+    .col-v{
+      margin:0;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: .1px;
+    }
+    .col-tag{
+      margin-top: 8px;
+      display:flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .tag{
+      font-size: 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: var(--ink);
+      background: #fafafa;
+      user-select: none;
+    }
+    .col-body{
+      padding: 10px 12px 12px 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .base{
+      margin-top: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      box-shadow: 0 10px 18px rgba(17,24,39,.05);
+      padding: 12px;
+    }
+    .base-title{
+      margin:0 0 8px 0;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .base-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 980px){
+      .base-grid{grid-template-columns: 1fr; }
+    }
+    .base-item{
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 10px;
+      background:#fafafa;
+      cursor: pointer;
+    }
+    .base-item:hover{background:#f3f4f6;}
+    .base-item.active{
+      border-color:#111827;
+      background:#fff;
+    }
+    .base-item .b1{
+      margin:0;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .base-item .b2{
+      margin:4px 0 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Panel */
+    .panel{
+      padding: 14px 16px 16px 16px;
+    }
+    .panel .k{
+      color: var(--muted);
+      font-size: 12px;
+      margin:0 0 6px 0;
+    }
+    .panel .v{
+      margin:0 0 10px 0;
+      font-size: 16px;
+      font-weight: 900;
+    }
+    .panel .desc{
+      margin:0;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .panel .desc p{
+      margin: 10px 0;
+      color: var(--ink);
+      font-size: 13px;
+    }
+    .panel ul{
+      margin: 8px 0 0 18px;
+      padding:0;
+      color: var(--ink);
+      font-size: 13px;
+    }
+    .panel li{margin: 6px 0;}
+    .callout{
+      border: 1px solid var(--line);
+      background: #fafafa;
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .callout strong{font-weight: 900;}
+    .mono{
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    /* Quiz */
+    .quiz{
+      display:grid;
+      gap: 10px;
+    }
+    .q{
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background:#fff;
+    }
+    .q-title{
+      margin:0 0 8px 0;
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .opt{
+      display:flex;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      cursor: pointer;
+      user-select: none;
+      margin-top: 8px;
+      align-items: flex-start;
+      background:#fff;
+    }
+    .opt:hover{background:#fafafa;}
+    .opt input{margin-top: 2px;}
+    .opt .t{
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .result{
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      font-size: 13px;
+      background:#fafafa;
+      margin-top: 10px;
+      display:none;
+    }
+    .result.good{border-color: rgba(15,118,110,.35); background: rgba(15,118,110,.06); color: var(--good); display:block;}
+    .result.bad{border-color: rgba(180,35,24,.35); background: rgba(180,35,24,.06); color: var(--bad); display:block;}
+    details{
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background:#fff;
+      margin-top: 10px;
+    }
+    details summary{
+      cursor:pointer;
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--ink);
+      list-style: none;
+    }
+    details summary::-webkit-details-marker{display:none;}
+    details .d{
+      margin-top: 10px;
+      color: var(--ink);
+      font-size: 13px;
+    }
+    .small{
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    footer{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 18px 24px 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .sep{height:1px;background:var(--line);margin: 12px 0;}
+  </style>
+</head>
+<body>
+<header>
+  <h1 class="title">零信任神殿圖｜可互動點擊教學模板（離線版）</h1>
+  <p class="subtitle">用「神殿五大支柱」建立零信任（Zero Trust Architecture，ZTA：不預設信任、持續驗證）的完整概念，避免把零信任誤解成單一工具。</p>
+</header>
+
+<main>
+  <!-- Left: Temple -->
+  <section class="card">
+    <h2>零信任神殿（點擊支柱或底座）</h2>
+    <div class="temple-wrap">
+      <div class="temple" role="application" aria-label="Zero Trust Temple Interactive">
+        <div class="pediment">
+          <p class="p-title">Zero Trust Architecture（ZTA：零信任架構）</p>
+          <p class="p-sub">核心精神：永不預設信任（Never Trust），持續驗證（Always Verify），最小權限（Least Privilege）</p>
+        </div>
+
+        <div class="temple-grid" id="pillarGrid">
+          <!-- Pillars -->
+          <div class="col" tabindex="0" data-key="identity" aria-label="Identity pillar">
+            <div class="col-head">
+              <p class="col-k">Pillar 1</p>
+              <p class="col-v">Identity（身分）</p>
+              <div class="col-tag">
+                <span class="tag">MFA（多因子驗證）</span>
+                <span class="tag">SSO（單一登入）</span>
+              </div>
+            </div>
+            <div class="col-body">確保「是誰」可信：帳號、角色、權限、登入風險。</div>
+          </div>
+
+          <div class="col" tabindex="0" data-key="devices" aria-label="Devices pillar">
+            <div class="col-head">
+              <p class="col-k">Pillar 2</p>
+              <p class="col-v">Devices（設備）</p>
+              <div class="col-tag">
+                <span class="tag">端點健康度</span>
+                <span class="tag">MDM（裝置管理）</span>
+              </div>
+            </div>
+            <div class="col-body">確保「用什麼設備」可信：是否受管控、是否合規、是否中毒。</div>
+          </div>
+
+          <div class="col" tabindex="0" data-key="networks" aria-label="Networks pillar">
+            <div class="col-head">
+              <p class="col-k">Pillar 3</p>
+              <p class="col-v">Networks（網路）</p>
+              <div class="col-tag">
+                <span class="tag">微隔離</span>
+                <span class="tag">白名單</span>
+              </div>
+            </div>
+            <div class="col-body">限制橫向移動：把網路切細、只允許必要連線。</div>
+          </div>
+
+          <div class="col" tabindex="0" data-key="apps" aria-label="Applications and Workloads pillar">
+            <div class="col-head">
+              <p class="col-k">Pillar 4</p>
+              <p class="col-v">Applications &amp; Workloads（應用與工作負載）</p>
+              <div class="col-tag">
+                <span class="tag">API 存取</span>
+                <span class="tag">工作負載身分</span>
+              </div>
+            </div>
+            <div class="col-body">確保「系統/服務本身」可信：應用權限、API 保護、服務間存取。</div>
+          </div>
+
+          <div class="col" tabindex="0" data-key="data" aria-label="Data pillar">
+            <div class="col-head">
+              <p class="col-k">Pillar 5</p>
+              <p class="col-v">Data（資料）</p>
+              <div class="col-tag">
+                <span class="tag">DLP</span>
+                <span class="tag">加密</span>
+              </div>
+            </div>
+            <div class="col-body">確保「資料不亂跑」：分類分級、存取控管、外洩防護。</div>
+          </div>
+        </div>
+
+        <div class="base" aria-label="Temple base controls">
+          <p class="base-title">底座（必備支撐：點擊）</p>
+          <div class="base-grid" id="baseGrid">
+            <div class="base-item" tabindex="0" data-key="visibility" aria-label="Visibility and Analytics">
+              <p class="b1">Visibility &amp; Analytics（可視性與分析）</p>
+              <p class="b2">看得見、才能管得住：紀錄、監控、分析行為。</p>
+            </div>
+            <div class="base-item" tabindex="0" data-key="automation" aria-label="Automation and Orchestration">
+              <p class="b1">Automation &amp; Orchestration（自動化與協同）</p>
+              <p class="b2">讓應變更快：自動封鎖、流程串接、SOAR。</p>
+            </div>
+            <div class="base-item" tabindex="0" data-key="governance" aria-label="Governance">
+              <p class="b1">Governance（治理）</p>
+              <p class="b2">訂規則、分責任：政策、標準、稽核與RACI。</p>
+            </div>
+          </div>
+          <p class="hint">操作提示：點擊任一支柱或底座，即會在右側顯示「白話說明、常見控制、考點與陷阱」。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Right: Panel + Quiz -->
+  <aside class="card">
+    <h2>解說面板與小測驗</h2>
+    <div class="panel">
+      <p class="k" id="panelK">目前選取</p>
+      <p class="v" id="panelV">請先點擊左側神殿的支柱或底座</p>
+      <div class="desc" id="panelDesc">
+        <p>本模板用「神殿」比喻零信任：如果只做其中一根柱子（例如只做白名單），整座神殿仍然不穩，因為攻擊會從其他面向進來。</p>
+        <div class="callout">
+          <strong>考試快速判斷：</strong>看到選項出現「只要…就可以完全符合…」或「單一措施即可達成零信任」通常是錯的。
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="quiz" aria-label="Quick quiz">
+        <div class="q">
+          <p class="q-title">小測驗（單選）：下列何者最可能是錯誤觀念？</p>
+          <label class="opt"><input type="radio" name="q1" value="A" /><span class="t">A. 微隔離（Micro-Segmentation：把網路切得很細）可限制橫向移動，屬於網路層控制。</span></label>
+          <label class="opt"><input type="radio" name="q1" value="B" /><span class="t">B. 只要設定白名單（Allowlist：只允許指定對象）就可以完全符合零信任需求。</span></label>
+          <label class="opt"><input type="radio" name="q1" value="C" /><span class="t">C. DLP（Data Loss Prevention：防止資料被不當帶走）可在資料層協助落實存取與使用控管。</span></label>
+          <label class="opt"><input type="radio" name="q1" value="D" /><span class="t">D. 零信任強調持續驗證，不因內網就自動信任。</span></label>
+
+          <div class="row" style="margin-top:10px;">
+            <button class="btn primary" id="submitBtn">提交答案</button>
+            <button class="btn" id="resetBtn">重作一次</button>
+          </div>
+
+          <div class="result" id="resultBox"></div>
+
+          <details id="explainBox">
+            <summary>展開解析（與神殿圖連動）</summary>
+            <div class="d">
+              <p>本題正確答案為 <strong>B</strong>。原因：零信任是一套架構，必須同時考量身分、設備、網路、應用與資料等面向，並配合治理、可視性與自動化。只靠白名單是「單一控制」，無法覆蓋整體需求。</p>
+              <div class="callout">
+                <strong>神殿比喻：</strong>只蓋一根柱子不是神殿。少了其他支柱或底座，攻擊者仍可從「設備不合規」「身分被盜」「資料外洩」等面向突破。
+              </div>
+              <p class="small">你也可以點擊左側 Networks（網路）支柱，或 Data（資料）支柱，觀察面板說明如何把白名單、微隔離、DLP 分別放到正確位置。</p>
+            </div>
+          </details>
+
+          <details>
+            <summary>快速記憶口訣</summary>
+            <div class="d">
+              <p><strong>「零信任不是一把鎖，是一整套門禁系統」</strong></p>
+              <ul>
+                <li>身分要驗（Identity）</li>
+                <li>設備要查（Devices）</li>
+                <li>網路要切（Networks）</li>
+                <li>應用要管（Apps &amp; Workloads）</li>
+                <li>資料要護（Data）</li>
+              </ul>
+            </div>
+          </details>
+
+          <details>
+            <summary>常見陷阱與避坑指南</summary>
+            <div class="d">
+              <ul>
+                <li><strong>陷阱：</strong>把白名單、VPN、單一產品當成「零信任已完成」。</li>
+                <li><strong>心理盲點：</strong>看到「強大產品」就覺得能包辦全部。</li>
+                <li><strong>避坑指南：</strong>看到「只要…就完全…」先警覺；再問自己：身分、設備、資料有沒有一起管？</li>
+              </ul>
+            </div>
+          </details>
+        </div>
+
+        <div class="q">
+          <p class="q-title">模板使用方式（你只要改這裡）</p>
+          <ul class="small">
+            <li>要換題目：修改本頁「小測驗」題幹與四個選項文字。</li>
+            <li>要對應題組：在右側解析文字加入「本題正確答案為 X」即可。</li>
+            <li>要加更多互動：可新增第二題小測驗，或在面板加入「對應考點」區塊。</li>
+          </ul>
+          <div class="callout">
+            <strong>離線要求：</strong>本檔案未引用外部圖片、外部 JS/CSS；可直接用瀏覽器開啟。
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<footer>
+  <div class="sep"></div>
+  <div>備註：本頁以 NIST SP 800-207（零信任架構）常見「五大支柱＋底座」概念做教學比喻，適用於考前快速建立知識架構。你可直接複製此 HTML 作為通用模板。</div>
+</footer>
+
+<script>
+  // Data model for panels
+  const panelData = {
+    identity: {
+      k: "Pillar 1",
+      v: "Identity（身分）",
+      p: [
+        "白話解釋：你要先確定「是誰」在用系統，不能只靠『在內網』就信任。",
+        "常見控制：MFA（多因子驗證：不只密碼）、SSO（單一登入：一組登入串多系統）、身分風險評分、特權帳號管理。",
+        "考點：零信任把身分當核心，不論內外部都要驗證與授權。"
+      ],
+      bullets: [
+        "MFA：降低帳密被盜就能登入的風險",
+        "最小權限（Least Privilege：只給必要權限）",
+        "特權帳號：需更嚴格控管與稽核"
+      ],
+      trap: "常見陷阱：把『VPN 進內網』當成身分驗證完成。零信任要求更細緻、持續的驗證。"
+    },
+    devices: {
+      k: "Pillar 2",
+      v: "Devices（設備）",
+      p: [
+        "白話解釋：就算是同一個人，用不同設備登入也不一定安全；設備可能中毒或沒更新。",
+        "常見控制：MDM（行動裝置管理：管手機/筆電）、端點健康度檢查、EDR（端點偵測與回應：抓異常行為）。",
+        "考點：零信任會把『設備是否合規』納入存取決策。"
+      ],
+      bullets: [
+        "設備合規（Compliance：符合公司安全要求）才給存取",
+        "補丁更新（Patch：修補漏洞）是基本",
+        "不受管控設備：權限更嚴或直接拒絕"
+      ],
+      trap: "常見陷阱：只看帳號，不看設備；結果駭客用被植入木馬的設備照樣通過。"
+    },
+    networks: {
+      k: "Pillar 3",
+      v: "Networks（網路）",
+      p: [
+        "白話解釋：內網不是安全區，攻擊者一旦進來就可能『橫向移動』；所以要把路切細、連線變少。",
+        "常見控制：微隔離（Micro-Segmentation：把網路切得很細）、白名單（Allowlist：只允許指定連線）、限制 RDP（遠端桌面）。",
+        "考點：白名單是工具之一，但不等於零信任本身。"
+      ],
+      bullets: [
+        "微隔離：把可連線的範圍縮小",
+        "限制 RDP：降低被暴力破解與濫用",
+        "不要用『一條大內網』把所有系統串在一起"
+      ],
+      trap: "常見陷阱：以為『只要設白名單』就完成零信任（通常是考題的錯誤敘述）。"
+    },
+    apps: {
+      k: "Pillar 4",
+      v: "Applications & Workloads（應用與工作負載）",
+      p: [
+        "白話解釋：不只使用者要管，系統與系統之間的呼叫（API）也要管，避免服務被冒用。",
+        "常見控制：API 存取控管、服務身分（Workload Identity：服務也有身分）、金鑰管理。",
+        "考點：零信任不只管『人』，也管『服務』。"
+      ],
+      bullets: [
+        "API Key/Token：要有生命週期管理",
+        "服務間權限：也要最小化",
+        "應用層控管：避免權限過大造成濫用"
+      ],
+      trap: "常見陷阱：只管人員登入，不管後端服務互打，導致內部 API 成為攻擊通道。"
+    },
+    data: {
+      k: "Pillar 5",
+      v: "Data（資料）",
+      p: [
+        "白話解釋：最後要保護的是資料本身；就算有人登入成功，也不能隨便把資料帶走。",
+        "常見控制：DLP（防止資料被不當帶走）、加密（Encryption：把資料變成看不懂的密文）、資料分級分類。",
+        "考點：資料層要做到『誰可以看』『可不可以下載』『能不能外傳』。"
+      ],
+      bullets: [
+        "DLP：偵測與阻擋敏感資料外傳",
+        "加密：保護傳輸與儲存",
+        "資料分級：不同等級用不同控管"
+      ],
+      trap: "常見陷阱：只管登入，不管資料使用行為；結果合法登入也能造成外洩。"
+    },
+    visibility: {
+      k: "Base",
+      v: "Visibility & Analytics（可視性與分析）",
+      p: [
+        "白話解釋：你要看得見系統發生什麼事，才知道誰在存取、哪裡有異常。",
+        "常見控制：集中式日誌（Log：系統紀錄）、監控告警、行為分析。",
+        "考點：沒有可視性，零信任就只剩規則，缺乏實際監督。"
+      ],
+      bullets: [
+        "日誌集中：方便追查",
+        "異常告警：縮短發現時間",
+        "分析：找出可疑行為模式"
+      ],
+      trap: "常見陷阱：有規則沒監控，出事才知道，無法快速定位與處置。"
+    },
+    automation: {
+      k: "Base",
+      v: "Automation & Orchestration（自動化與協同）",
+      p: [
+        "白話解釋：事情發生很快，靠人工一個個處理太慢；要用自動化讓反應更快。",
+        "常見控制：SOAR（安全協同自動化回應：把告警變流程）、自動封鎖、工單串接。",
+        "考點：零信任在大規模環境要靠自動化才能落地。"
+      ],
+      bullets: [
+        "自動封鎖：縮短暴露時間",
+        "流程協同：跨系統一致處理",
+        "降低人為疏漏"
+      ],
+      trap: "常見陷阱：沒有流程與自動化，規模一大就做不到持續驗證與快速反應。"
+    },
+    governance: {
+      k: "Base",
+      v: "Governance（治理）",
+      p: [
+        "白話解釋：要有規則與責任分工，不然做了很多工具也會各做各的。",
+        "常見控制：政策與標準、稽核、RACI（責任分工：誰負責/誰核准/誰諮詢/誰被告知）。",
+        "考點：零信任不是只買產品，還要制度化管理。"
+      ],
+      bullets: [
+        "政策：規定怎麼做",
+        "標準：定最低安全門檻",
+        "稽核：確認有做到"
+      ],
+      trap: "常見陷阱：沒有治理，導致各地各系統標準不一致，形成漏洞。"
+    }
+  };
+
+  const panelK = document.getElementById("panelK");
+  const panelV = document.getElementById("panelV");
+  const panelDesc = document.getElementById("panelDesc");
+
+  const pillarEls = Array.from(document.querySelectorAll("#pillarGrid .col"));
+  const baseEls = Array.from(document.querySelectorAll("#baseGrid .base-item"));
+
+  function clearActive(){
+    pillarEls.forEach(el => el.classList.remove("active"));
+    baseEls.forEach(el => el.classList.remove("active"));
+  }
+
+  function setPanel(key){
+    const d = panelData[key];
+    if(!d) return;
+    panelK.textContent = "目前選取：" + d.k;
+    panelV.textContent = d.v;
+
+    const html = `
+      <p>${d.p[0]}</p>
+      <p>${d.p[1]}</p>
+      <p>${d.p[2]}</p>
+      <ul>
+        ${d.bullets.map(x => `<li>${x}</li>`).join("")}
+      </ul>
+      <div class="callout"><strong>常見陷阱：</strong>${d.trap}</div>
+      <div class="callout"><strong>考試提示：</strong><span class="mono">「只要…就完全符合…」</span> 這種語氣通常在考你「過度簡化」的錯誤觀念。</div>
+    `;
+    panelDesc.innerHTML = html;
+  }
+
+  function bindClick(el, key){
+    el.addEventListener("click", () => {
+      clearActive();
+      el.classList.add("active");
+      setPanel(key);
+    });
+    el.addEventListener("keydown", (e) => {
+      if(e.key === "Enter" || e.key === " "){
+        e.preventDefault();
+        el.click();
+      }
+    });
+  }
+
+  pillarEls.forEach(el => bindClick(el, el.dataset.key));
+  baseEls.forEach(el => bindClick(el, el.dataset.key));
+
+  // Quiz logic
+  const submitBtn = document.getElementById("submitBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const resultBox = document.getElementById("resultBox");
+  const explainBox = document.getElementById("explainBox");
+
+  function getSelected(){
+    const checked = document.querySelector('input[name="q1"]:checked');
+    return checked ? checked.value : null;
+  }
+
+  submitBtn.addEventListener("click", () => {
+    const v = getSelected();
+    if(!v){
+      resultBox.className = "result bad";
+      resultBox.textContent = "請先選擇一個選項再提交。";
+      return;
+    }
+    if(v === "B"){
+      resultBox.className = "result good";
+      resultBox.textContent = "正確。零信任是架構，不能只靠白名單就完成。";
+      explainBox.open = true;
+
+      // Auto-highlight Networks pillar to reinforce the typical exam trap
+      const networks = pillarEls.find(x => x.dataset.key === "networks");
+      if(networks){
+        clearActive();
+        networks.classList.add("active");
+        setPanel("networks");
+      }
+    }else{
+      resultBox.className = "result bad";
+      resultBox.textContent = "錯誤。注意：零信任不是單一控制；看到「只要…就完全…」通常是錯的。";
+      explainBox.open = true;
+    }
+  });
+
+  resetBtn.addEventListener("click", () => {
+    document.querySelectorAll('input[name="q1"]').forEach(r => r.checked = false);
+    resultBox.className = "result";
+    resultBox.textContent = "";
+    explainBox.open = false;
+    clearActive();
+    panelK.textContent = "目前選取";
+    panelV.textContent = "請先點擊左側神殿的支柱或底座";
+    panelDesc.innerHTML = `
+      <p>本模板用「神殿」比喻零信任：如果只做其中一根柱子（例如只做白名單），整座神殿仍然不穩，因為攻擊會從其他面向進來。</p>
+      <div class="callout">
+        <strong>考試快速判斷：</strong>看到選項出現「只要…就可以完全符合…」或「單一措施即可達成零信任」通常是錯的。
+      </div>
+    `;
+  });
+</script>
+</body>
+</html>
