@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安短期衝刺班｜題組 1：法規遵循</title>
+    <style>
+        /* --- 全局設定 --- */
+        :root {
+            --primary-color: #2c3e50; /* 沈穩深藍 */
+            --accent-color: #d35400; /* 重點橘紅 */
+            --highlight-bg: #fff9c4; /* 螢光筆黃 */
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #fdfdfd;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* 基準字級 */
+        }
+
+        /* --- 標題字級限制：標題不可比內文大超過 1 個字級 (設定為 18px) --- */
+        h1, h2, h3, .header-title {
+            font-size: 18px; 
+            font-weight: 700;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            color: var(--primary-color);
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .main-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            border-left: none; /* 覆蓋通用設定 */
+        }
+
+        /* --- 容器樣式 --- */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* --- 題組情境區塊 (置頂共用) --- */
+        .scenario-box {
+            background-color: #eef2f3;
+            border: 2px solid #bdc3c7;
+        }
+        
+        .scenario-tag {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 4px 8px;
+            font-size: 14px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .scenario-highlight {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        /* --- 題目區塊 --- */
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9f9f9;
+        }
+
+        .option-input {
+            margin-top: 6px;
+            margin-right: 10px;
+        }
+
+        /* --- 按鈕樣式 --- */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-explain {
+            background-color: var(--accent-color);
+            color: white;
+            display: none; /* 預設隱藏 */
+        }
+
+        /* --- 解析區塊 (預設隱藏) --- */
+        .explanation-section {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+        }
+
+        .step-box {
+            background-color: #fafafa;
+            border-left: 4px solid #7f8c8d;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .highlight-pen {
+            background-color: var(--highlight-bg);
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        /* --- 選項分析 (手風琴效果) --- */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        summary {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            font-weight: 600;
+            list-style: none; /* 隱藏預設三角形 */
+        }
+        
+        summary::after {
+            content: "+"; 
+            float: right;
+            font-weight: bold;
+        }
+        
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 15px;
+            background-color: #fff;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* --- 回饋訊息 --- */
+        #feedback-msg {
+            margin-top: 15px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* --- 自我檢測 --- */
+        .self-check-item {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .answer-reveal {
+            margin-top: 5px;
+            color: var(--accent-color);
+            font-weight: bold;
+            display: none;
+        }
+        
+        .toggle-answer-btn {
+            font-size: 14px;
+            color: #555;
+            text-decoration: underline;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            margin-top: 5px;
+        }
+
+        /* --- 頁尾 --- */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #7f8c8d;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 頁面標題 -->
+    <header class="main-header">
+        <div class="header-title">資安短期衝刺班｜互動式講義</div>
+        <p>單元：公務機關資安法規與治理</p>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- 題組共用情境 (第 5-8 題共用) -->
+    <!-- ========================================== -->
+    <section class="card scenario-box">
+        <span class="scenario-tag">題組 1 情境</span>
+        <p>
+            某資通安全責任等級 <span class="scenario-highlight">A 級</span> 之公務機關，主要業務係辦理 <span class="scenario-highlight">全國有關全民健康保險</span> 之業務活動。<br>
+            為符合國內資通安全相關法規之遵循，該機關已實施一系列資訊安全相關作為。
+        </p>
+        <hr style="border: 0; border-top: 1px dashed #bbb; margin: 15px 0;">
+        <small><strong>[名師畫重點]</strong> 本題組核心考點：公務機關、A 級責任、健保業務、個資保護。</small>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 第 5 題 互動區塊 -->
+    <!-- ========================================== -->
+    <article class="card question-container" id="q5-container">
+        <span class="scenario-tag" style="background-color: #7f8c8d;">題組 1｜第 5 題</span>
+        
+        <div class="question-text">
+            5. 依據該公務機關之業務特性，對於法規遵循事項所應遵循之法律規範，試問下列何項敘述較為合適？
+        </div>
+
+        <div class="options-group" id="q5-options">
+            <label class="option-label">
+                <input type="radio" name="q5" value="A" class="option-input">
+                <span>(A) 應遵循智慧財產權法以及資通安全管理法之規定</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q5" value="B" class="option-input">
+                <span>(B) 應遵循個人資料保護法以及資通安全管理法之規定</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q5" value="C" class="option-input">
+                <span>(C) 應遵循智慧財產權法以及個人資料保護法之規定</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q5" value="D" class="option-input">
+                <span>(D) 應遵循著作權法以及個人資料保護法之規定</span>
+            </label>
+        </div>
+
+        <!-- 回饋訊息顯示區 -->
+        <div id="feedback-msg"></div>
+
+        <div class="btn-group">
+            <button class="btn btn-submit" onclick="submitAnswer()">送出答案</button>
+            <button class="btn btn-explain" id="btn-explain" onclick="toggleExplanation()">一鍵看解析</button>
+            <button class="btn btn-reset" onclick="resetQuiz()">重置</button>
+        </div>
+    </article>
+
+    <!-- ========================================== -->
+    <!-- 解析與教學區塊 (送出後或點擊按鈕顯示) -->
+    <!-- ========================================== -->
+    <section class="card explanation-section" id="explanation-area">
+        <h2>名師解析室</h2>
+
+        <!-- 第一步：找關鍵字 -->
+        <div class="step-box">
+            <h3>第一步：找出題目關鍵字</h3>
+            <p>拿起你的螢光筆，把這幾個詞圈起來：</p>
+            <ul>
+                <li><span class="highlight-pen">資通安全責任等級 A 級</span>：代表這是非常核心的單位。</li>
+                <li><span class="highlight-pen">公務機關</span>：代表它是政府單位，非私人企業。</li>
+                <li><span class="highlight-pen">全民健康保險</span>：代表它手上握有全台灣人的資料。</li>
+                <li><span class="highlight-pen">法規遵循</span>：題目問的是「要守什麼法」。</li>
+            </ul>
+        </div>
+
+        <!-- 第二步：白話翻譯 -->
+        <div class="step-box">
+            <h3>第二步：白話翻譯</h3>
+            <p>這題用白話文說就是：</p>
+            <p><strong>「這是一個等級很高的政府單位，又在管全國人民的健保資料，法律規定它一定要遵守哪些法律？」</strong></p>
+            <p>我們需要找到兩個重點法律：</p>
+            <ol>
+                <li>管政府資安的法律 = <strong>資通安全管理法</strong></li>
+                <li>保護人民資料的法律 = <strong>個人資料保護法</strong></li>
+            </ol>
+        </div>
+
+        <!-- 第三步：解題思路 -->
+        <div class="step-box">
+            <h3>第三步：解題思路</h3>
+            <p>核心考點一句話：<strong>「依『機關身分＋業務內容』判斷必須遵循的法規」</strong></p>
+            <p>邏輯推演：</p>
+            <ol>
+                <li>先確認身分：它是公務機關且是 A 級 &rarr; 必然適用《資通安全管理法》。</li>
+                <li>再確認業務：處理健保業務（大量且敏感個資）&rarr; 必然涉及《個人資料保護法》。</li>
+                <li>結論：要選同時包含這兩部的選項。</li>
+            </ol>
+        </div>
+
+        <!-- 第四步：選項分析 -->
+        <div class="step-box">
+            <h3>第四步：選項詳細分析</h3>
+            
+            <details>
+                <summary>(A) 智慧財產權法 + 資通安全管理法</summary>
+                <div class="details-content">
+                    <span style="color:var(--wrong-color);">[不適合]</span> 雖然有資通安全管理法，但健保業務的核心風險在於「個資外洩」，而非「盜版或專利侵權」。智慧財產權法不是此情境的首要考量。
+                </div>
+            </details>
+
+            <details open>
+                <summary>(B) 個人資料保護法 + 資通安全管理法</summary>
+                <div class="details-content">
+                    <span style="color:var(--correct-color);">[正確]</span> 
+                    1. <strong>資通安全管理法</strong>：規範公務機關的資安治理。<br>
+                    2. <strong>個人資料保護法</strong>：規範健保資料的蒐集、處理與利用。<br>
+                    這兩個是該機關每天運作最不可或缺的法律支柱。
+                </div>
+            </details>
+
+            <details>
+                <summary>(C) 智慧財產權法 + 個人資料保護法</summary>
+                <div class="details-content">
+                    <span style="color:var(--wrong-color);">[不適合]</span> 少了《資通安全管理法》。對於 A 級公務機關來說，資安法的遵循是強制且最優先的義務。
+                </div>
+            </details>
+
+            <details>
+                <summary>(D) 著作權法 + 個人資料保護法</summary>
+                <div class="details-content">
+                    <span style="color:var(--wrong-color);">[不適合]</span> 著作權法屬於智慧財產權的一環，同樣不是健保局處的核心遵循重點。
+                </div>
+            </details>
+        </div>
+
+        <!-- 觀念補充與延伸 -->
+        <div class="step-box" style="border-left-color: var(--accent-color);">
+            <h3>觀念補充與記憶口訣</h3>
+            <p><strong>[記憶口訣]</strong>：政府 A 級先顧資安，健保資料一定顧個資。</p>
+            <p><strong>[常見陷阱]</strong>：看到「法律」兩字就直覺選智慧財產權，忽略了題幹強調的「業務特性（健保）」才是解題關鍵。</p>
+            <hr>
+            <p><strong>[題組延伸思考]</strong>：</p>
+            <ul>
+                <li>如果這個 A 級機關沒有做好資安，會違反什麼？(預告第 6 題概念)</li>
+                <li>如果個資外洩了，要負什麼責任？(預告第 7-8 題概念)</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 自我檢測區 -->
+    <!-- ========================================== -->
+    <section class="card">
+        <h3>課後自我檢測</h3>
+        <p>試著回答下列問題，確認觀念是否吸收：</p>
+        
+        <div class="self-check-item">
+            <div>Q1：只要是公務機關，在資訊安全方面一定要遵循哪一部核心法律？</div>
+            <button class="toggle-answer-btn" onclick="toggleAnswer('ans1')">顯示/隱藏答案</button>
+            <div id="ans1" class="answer-reveal">參考答案：資通安全管理法</div>
+        </div>
+
+        <div class="self-check-item">
+            <div>Q2：全民健康保險資料在法律屬性上，主要屬於哪一類資料？</div>
+            <button class="toggle-answer-btn" onclick="toggleAnswer('ans2')">顯示/隱藏答案</button>
+            <div id="ans2" class="answer-reveal">參考答案：個人資料（且多屬於敏感性特種個資）</div>
+        </div>
+
+        <div class="self-check-item">
+            <div>Q3：若題目將情境改為「軟體開發公司」，則哪部法律的重要性會大幅提升？</div>
+            <button class="toggle-answer-btn" onclick="toggleAnswer('ans3')">顯示/隱藏答案</button>
+            <div id="ans3" class="answer-reveal">參考答案：智慧財產權法（營業秘密、著作權）</div>
+        </div>
+    </section>
+
+    <!-- 預留位置：第 6-8 題擴充區塊 -->
+    <!-- 建議實作方式：複製 article.question-container 結構，修改 ID 與內容，並透過 JS 控制顯示隱藏或分頁 -->
+
+    <footer>
+        <p>資安短期衝刺班教材 © 2025 僅供教學使用</p>
+    </footer>
+
+</div>
+
+<script>
+    // --- JavaScript 邏輯區 ---
+
+    // 正確答案設定
+    const CORRECT_ANSWER = 'B';
+    
+    // DOM 元素快取
+    const feedbackMsg = document.getElementById('feedback-msg');
+    const explainSection = document.getElementById('explanation-area');
+    const explainBtn = document.getElementById('btn-explain');
+    const options = document.getElementsByName('q5');
+
+    // 送出答案功能
+    function submitAnswer() {
+        let selectedValue = null;
+        
+        // 取得使用者選擇
+        for (const radio of options) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        // 判斷是否有作答
+        if (!selectedValue) {
+            feedbackMsg.style.display = 'block';
+            feedbackMsg.className = ''; 
+            feedbackMsg.style.backgroundColor = '#fff3cd';
+            feedbackMsg.style.color = '#856404';
+            feedbackMsg.innerHTML = '[提示] 同學，請先選擇一個答案再送出喔！';
+            return;
+        }
+
+        // 判對對錯
+        feedbackMsg.style.display = 'block';
+        if (selectedValue === CORRECT_ANSWER) {
+            feedbackMsg.className = 'feedback-correct';
+            feedbackMsg.innerHTML = '[正確] 恭喜答對！觀念非常清晰！快點擊下方「一鍵看解析」來複習詳細觀念。';
+            explainBtn.style.display = 'inline-block'; // 答對顯示解析按鈕
+        } else {
+            feedbackMsg.className = 'feedback-wrong';
+            feedbackMsg.innerHTML = '[錯誤] 哎呀，選錯了！正確答案是 (B)。<br>不要氣餒，點擊「一鍵看解析」按鈕，讓老師告訴你為什麼。';
+            explainBtn.style.display = 'inline-block'; // 答錯也顯示解析按鈕
+        }
+    }
+
+    // 顯示/隱藏解析區塊
+    function toggleExplanation() {
+        if (explainSection.style.display === 'block') {
+            explainSection.style.display = 'none';
+            explainBtn.textContent = '一鍵看解析';
+            // 捲動回題目區
+            document.getElementById('q5-container').scrollIntoView({behavior: 'smooth'});
+        } else {
+            explainSection.style.display = 'block';
+            explainBtn.textContent = '隱藏解析';
+            // 平滑捲動到解析區
+            explainSection.scrollIntoView({behavior: 'smooth'});
+        }
+    }
+
+    // 重置功能
+    function resetQuiz() {
+        // 清除選項
+        for (const radio of options) {
+            radio.checked = false;
+        }
+        
+        // 隱藏回饋與解析
+        feedbackMsg.style.display = 'none';
+        explainSection.style.display = 'none';
+        explainBtn.style.display = 'none';
+        
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 自我檢測顯示答案
+    function toggleAnswer(id) {
+        const ansDiv = document.getElementById(id);
+        if (ansDiv.style.display === 'block') {
+            ansDiv.style.display = 'none';
+        } else {
+            ansDiv.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

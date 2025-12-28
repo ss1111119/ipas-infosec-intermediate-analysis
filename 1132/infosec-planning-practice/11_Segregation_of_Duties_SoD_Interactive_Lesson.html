@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安衝刺班：職務區隔 (Q11)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #d35400;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            font-weight: bold;
+        }
+
+        h1 {
+            font-size: 22px; /* 稍微大一點作為主標題 */
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 18px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+            background-color: #fafafa;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            font-size: 17px;
+            color: #555;
+            margin-top: 1em;
+        }
+
+        p, li {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        mark {
+            background-color: #ffff00;
+            color: #000;
+            padding: 0 2px;
+            font-weight: bold;
+        }
+
+        .highlight-text {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* 題目區域樣式 */
+        .question-box {
+            background-color: #fff;
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .options-group {
+            margin-top: 15px;
+        }
+
+        .option-label {
+            display: block;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f1f1f1;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕樣式 */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-explain {
+            background-color: var(--accent-color);
+            color: white;
+            display: none; /* 預設隱藏 */
+        }
+
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* 回饋訊息區域 */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析內容區域 (預設隱藏) */
+        #analysis-content {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+        }
+
+        /* 互動式展開收合 */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: #fff;
+        }
+
+        summary {
+            padding: 10px 15px;
+            background-color: #f1f1f1;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+            position: relative;
+        }
+        
+        /* 自定義箭頭符號 */
+        summary::after {
+            content: "+"; 
+            position: absolute;
+            right: 15px;
+            font-weight: bold;
+        }
+        
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+            background-color: #e9ecef;
+        }
+
+        .details-content {
+            padding: 15px;
+        }
+
+        /* 列表樣式 */
+        ul {
+            padding-left: 20px;
+        }
+
+        .concept-box {
+            background-color: #eef2f5;
+            padding: 15px;
+            border-left: 4px solid var(--primary-color);
+            margin: 10px 0;
+        }
+
+        .mnemonic-box {
+            background-color: #fff3cd;
+            padding: 15px;
+            border: 1px solid #ffeeba;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #856404;
+        }
+
+        .trap-box {
+            border: 1px solid #f5c6cb;
+            background-color: #fff;
+            padding: 15px;
+        }
+        
+        .ans-ref {
+            color: #fff;
+            background-color: var(--primary-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            margin-right: 5px;
+        }
+
+        /* 強制不使用不支援字元 */
+        * {
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安短期衝刺班：觀念特訓</h1>
+    <p>各位同學大家好，我是這裡的資安講師。今天要帶大家看一題「職務區隔」的必考題。這類題目看起來很繞口，但只要抓到邏輯，絕對是送分題。</p>
+
+    <!-- 1) 題目區塊 -->
+    <div class="question-box">
+        <p><strong>【題目】</strong></p>
+        <p>11. 職務區隔及責任範圍區隔，旨在分隔不同個人間相互衝突之職務，以防止一個人獨自執行潛在衝突的職務。下列何者的應用情境較<mark style="background-color: #ffcccc; color: red;">「不」</mark>適當？（單選題）</p>
+        
+        <div class="options-group" id="quiz-options">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                (A) 啟動、核可及執行變更
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                (B) 使用及列印應用程式說明文件
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                (C) 設計、實作及審視程式碼
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                (D) 請求、核可及實作存取權限
+            </label>
+        </div>
+    </div>
+
+    <!-- 按鈕與回饋區 -->
+    <div class="btn-group">
+        <button class="btn-submit" onclick="submitAnswer()">送出作答</button>
+        <button class="btn-explain" id="btn-explain" onclick="toggleAnalysis()">一鍵看解析 (展開)</button>
+        <button class="btn-reset" onclick="resetQuiz()">重置</button>
+    </div>
+
+    <div id="feedback-area"></div>
+
+    <!-- 解析內容 (預設隱藏) -->
+    <div id="analysis-content">
+        
+        <!-- 2) 第一步：找關鍵字 -->
+        <h2>第一步：找關鍵字</h2>
+        <div class="concept-box">
+            <p>拿起你的螢光筆，這題的解題線索在這裡：</p>
+            <ul>
+                <li><mark>職務區隔</mark>：把工作拆開。</li>
+                <li><mark>責任範圍區隔</mark>：劃清界線。</li>
+                <li><mark>相互衝突之職務</mark>：如果是球員兼裁判，就是衝突。</li>
+                <li><mark>防止一個人獨自執行</mark>：這是核心目的。</li>
+            </ul>
+            <p><strong>核心判斷邏輯：</strong><br>
+            只要看到「一個人可以自己決定、自己核准、然後自己執行」的情況，這就是高風險，必須拆開。反之，如果做的事情沒有危險性，就不需要硬拆。</p>
+        </div>
+
+        <!-- 3) 第二步：白話翻譯 -->
+        <h2>第二步：白話翻譯</h2>
+        <div class="concept-box">
+            <p><strong>老師翻譯給你聽：</strong></p>
+            <p>「公司為了避免一個人自己做完所有關鍵事情（例如：自己偷改程式又自己上架、自己轉帳給自己），會把互相牴觸的工作拆給不同人做。下面哪一個情境，其實<span class="highlight-text">沒有必要</span>拆開給不同人？」</p>
+            <p><strong>名詞解釋：</strong></p>
+            <ul>
+                <li><strong>職務區隔 (SoD)：</strong>把重要又可能衝突的工作分給不同人做，避免一人獨大。</li>
+                <li><strong>責任範圍區隔：</strong>每個人只能負責自己被分配的那一段，不可以越界。</li>
+            </ul>
+        </div>
+
+        <!-- 4) 第三步：解題思路 -->
+        <h2>第三步：解題思路</h2>
+        <p><strong>這題在考什麼觀念？</strong><br>
+        一句話說明：「哪些工作組合會產生風險，哪些只是一般使用行為」。</p>
+
+        <p><strong>解題步驟：</strong></p>
+        <ol>
+            <li>判斷選項是否涉及「權限、決策、控制」。</li>
+            <li>看是否存在「自己申請、自己核准、自己執行」的情況。</li>
+            <li>找出與資安或舞弊風險關聯最低的選項。</li>
+        </ol>
+
+        <p><strong>原理與規則（一定要講為什麼）：</strong></p>
+        <ul>
+            <li><strong>目的：</strong>防止權限被濫用、錯誤沒人發現、舞弊無法被制衡。</li>
+            <li><strong>準則：</strong>只有「具控制力與影響力」的職務，才需要被嚴格區隔。如果只是「看文件」，對系統沒有破壞力。</li>
+        </ul>
+
+        <p><strong>生活比喻：</strong></p>
+        <ul>
+            <li><strong>要區隔：</strong>你去銀行轉帳，櫃檯人員幫你「申請」，但最後需要主管「刷卡核准」，這就是職務區隔。</li>
+            <li><strong>不用區隔：</strong>你在銀行大廳「拿簡章」來看，看完決定「影印一份」帶回家。這件事你自己一個人做完，會讓銀行倒閉嗎？不會。</li>
+        </ul>
+
+        <!-- 5) 第四步：選項分析 -->
+        <h2>第四步：選項分析</h2>
+        <p>點擊下方選項查看詳細分析：</p>
+        
+        <details>
+            <summary>(A) 啟動、核可及執行變更</summary>
+            <div class="details-content">
+                <p><strong>判定：適當（需要區隔）</strong></p>
+                <p>如果一個人可以決定要改系統（啟動）、自己批准說沒問題（核可）、然後自己動手改（執行）。那他就可以隨意竄改資料而不被發現。這是最標準需要 SoD 的場景。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>(B) 使用及列印應用程式說明文件</summary>
+            <div class="details-content">
+                <p><strong>判定：不適當（不需要區隔）</strong></p>
+                <p>「說明文件」通常是公開或內部通用的參考資料。閱讀（使用）和列印文件，屬於一般的資訊查詢行為，不涉及修改系統資料、也不涉及金錢流動。即便一個人做完這兩件事，也不會產生「相互衝突」的舞弊風險。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>(C) 設計、實作及審視程式碼</summary>
+            <div class="details-content">
+                <p><strong>判定：適當（需要區隔）</strong></p>
+                <p>這就是所謂的「球員兼裁判」。程式設計師自己寫程式（實作），又自己檢查程式碼（審視）。他很容易故意寫一個後門，然後假裝檢查通過。這在軟體開發流程中是大忌。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>(D) 請求、核可及實作存取權限</summary>
+            <div class="details-content">
+                <p><strong>判定：適當（需要區隔）</strong></p>
+                <p>如果我可以自己申請「管理員權限」（請求），然後自己蓋章同意（核可），最後自己把自己升級成管理員（實作）。那我就可以在系統裡為所欲為了。這絕對要分開。</p>
+            </div>
+        </details>
+
+        <!-- 6) 觀念補充與延伸 -->
+        <h2>觀念補充與延伸</h2>
+        <div class="concept-box">
+            <p><strong>核心觀念定位：</strong></p>
+            <ul>
+                <li>本題屬於「存取控制 / 內部控制 / 資安治理」章節。</li>
+                <li>這是在考試中屬於「觀念理解型」的必考題，不要死背，要懂邏輯。</li>
+            </ul>
+            <p><strong>常見需要職務區隔的三件事（黃金三角）：</strong></p>
+            <ol>
+                <li><strong>申請 (Request/Initiate)</strong></li>
+                <li><strong>核准 (Approve/Authorize)</strong></li>
+                <li><strong>執行 (Execute/Implement)</strong></li>
+            </ol>
+            <p><strong>觸類旁通：</strong></p>
+            <ul>
+                <li>若題目改成「財務轉帳」，哪些一定要區隔？（申請轉帳、核准轉帳、實際出帳）。</li>
+                <li>若公司很小、人力不足怎麼辦？（答案：補強監督與稽核 Log 審查）。</li>
+            </ul>
+        </div>
+
+        <!-- 7) 記憶口訣 -->
+        <h2>記憶口訣</h2>
+        <div class="mnemonic-box">
+            「文件看印沒權力，不用特別拆」
+        </div>
+        <p style="text-align: center; color: #666; font-size: 0.9em;">（唸三次，這題就拿分了）</p>
+
+        <!-- 8) 常見陷阱 -->
+        <h2>常見陷阱</h2>
+        <div class="trap-box">
+            <ul>
+                <li><strong>最容易搞混：</strong>看到選項有「三個動作」（例如 B 的使用、列印、說明），就反射動作以為一定要拆開。</li>
+                <li><strong>心理盲點：</strong>忽略了「有沒有控制力」才是重點。不是動作多就要拆，而是動作「有危險」才要拆。</li>
+                <li><strong>避坑指南：</strong>考試時先問自己一句：「這個人如果自己偷偷做完這些事，會不會把系統弄壞或把錢偷走？」如果不會，那就是答案。</li>
+            </ul>
+        </div>
+
+        <!-- 9) 正確答案 -->
+        <h2>正確答案</h2>
+        <div class="concept-box" style="border-left-color: var(--success-color);">
+            <p><strong>答案：(B)</strong></p>
+            <p>一句話理由：「使用及列印應用程式說明文件不涉及衝突職務，無須進行職務區隔。」</p>
+        </div>
+
+        <!-- 10) 自我檢測 -->
+        <h2>自我檢測</h2>
+        <p>蓋住答案，問問自己懂不懂：</p>
+        
+        <details>
+            <summary>小題 1：為什麼「請求與核可權限」一定要分開？</summary>
+            <div class="details-content">
+                <p><strong>參考答案：</strong>避免權限被自行放大。如果自己能請求又能核准，就能輕易取得不該有的權限。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>小題 2：如果人力不足無法完全區隔，常見補救方式是什麼？</summary>
+            <div class="details-content">
+                <p><strong>參考答案：</strong>加強稽核（Audit）與監督。既然沒辦法事前分工，就要事後嚴格檢查紀錄。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>小題 3：職務區隔主要是為了防止哪一類風險？</summary>
+            <div class="details-content">
+                <p><strong>參考答案：</strong>舞弊（Fraud）與權限濫用風險，以及減少無意間的錯誤（Error）。</p>
+            </div>
+        </details>
+
+    </div>
+</div>
+
+<script>
+    // 定義正確答案
+    const CORRECT_ANSWER = "B";
+
+    function submitAnswer() {
+        // 取得使用者選擇的選項
+        const radios = document.getElementsByName('answer');
+        let selectedValue = null;
+        
+        for (const radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const explainBtn = document.getElementById('btn-explain');
+
+        // 檢查是否有作答
+        if (!selectedValue) {
+            alert("同學，請先選擇一個答案再送出喔！");
+            return;
+        }
+
+        // 顯示解析按鈕
+        explainBtn.style.display = "inline-block";
+
+        // 判斷對錯
+        if (selectedValue === CORRECT_ANSWER) {
+            feedbackArea.className = "feedback-correct";
+            feedbackArea.style.display = "block";
+            feedbackArea.innerHTML = `
+                [答對了！]<br>
+                你選了 (${selectedValue})，正確答案是 (${CORRECT_ANSWER})。<br>
+                觀念很清楚喔！如果想知道為什麼其他選項是錯的，請點擊「一鍵看解析」。
+            `;
+        } else {
+            feedbackArea.className = "feedback-wrong";
+            feedbackArea.style.display = "block";
+            feedbackArea.innerHTML = `
+                [答錯囉！]<br>
+                你選了 (${selectedValue})，但正確答案是 (${CORRECT_ANSWER})。<br>
+                <br>
+                <strong>觀念提示：</strong><br>
+                請思考一下，哪個選項的動作做再多遍，也不會讓公司賠錢或系統壞掉？<br>
+                點擊「一鍵看解析」來聽老師講解。
+            `;
+        }
+    }
+
+    function toggleAnalysis() {
+        const content = document.getElementById('analysis-content');
+        const btn = document.getElementById('btn-explain');
+        
+        if (content.style.display === "none" || content.style.display === "") {
+            content.style.display = "block";
+            btn.textContent = "一鍵看解析 (收合)";
+            // 自動捲動到解析區
+            content.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            content.style.display = "none";
+            btn.textContent = "一鍵看解析 (展開)";
+        }
+    }
+
+    function resetQuiz() {
+        // 清除選項
+        const radios = document.getElementsByName('answer');
+        for (const radio of radios) {
+            radio.checked = false;
+        }
+
+        // 隱藏回饋與解析
+        document.getElementById('feedback-area').style.display = "none";
+        document.getElementById('analysis-content').style.display = "none";
+        document.getElementById('btn-explain').style.display = "none";
+        document.getElementById('btn-explain').textContent = "一鍵看解析 (展開)";
+        
+        // 關閉所有 details
+        const details = document.getElementsByTagName('details');
+        for (const detail of details) {
+            detail.removeAttribute('open');
+        }
+
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

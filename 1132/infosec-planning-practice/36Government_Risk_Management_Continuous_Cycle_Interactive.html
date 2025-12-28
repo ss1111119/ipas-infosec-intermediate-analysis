@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 36 題｜政府機關風險管理持續循環（複選）</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --highlight-bg: #fff3cd;
+            --border-color: #bdc3c7;
+            --bg-color: #f9f9f9;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--primary-color);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        h1 {
+            font-size: 18px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 18px;
+            background-color: #eee;
+            padding: 10px;
+            border-left: 5px solid var(--accent-color);
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            font-size: 17px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .question-box {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f0f0;
+        }
+
+        .option-label input[type="checkbox"] {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-family: inherit;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        #submitBtn {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        #resetBtn {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        #explainBtn {
+            background-color: var(--accent-color);
+            color: white;
+            margin-left: auto;
+        }
+
+        /* Feedback Section */
+        #feedbackArea {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result-detail {
+            margin-top: 10px;
+            font-size: 15px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding-top: 10px;
+        }
+
+        /* Explanation Section */
+        #explanationArea {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .step-block {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .step-block:last-child {
+            border-bottom: none;
+        }
+
+        .highlight-term {
+            background-color: var(--highlight-bg);
+            border-bottom: 2px solid #f1c40f;
+            padding: 0 4px;
+            font-weight: bold;
+        }
+
+        .concept-box {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid var(--accent-color);
+            margin: 15px 0;
+        }
+
+        .alert-box {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+
+        .mnemonic-box {
+            background-color: #e2e6ea;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 17px;
+            border-radius: 8px;
+            color: var(--primary-color);
+        }
+
+        .qa-list dt {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 12px;
+        }
+
+        .qa-list dd {
+            margin-left: 0;
+            padding-left: 15px;
+            border-left: 2px solid #ddd;
+            margin-top: 5px;
+            color: #555;
+        }
+
+        ul {
+            padding-left: 25px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Print styles */
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
+            button { display: none; }
+            #explanationArea { display: block !important; }
+            #feedbackArea { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>第 36 題｜政府機關風險管理持續循環（複選）</h1>
+
+    <div class="question-box">
+        <div class="question-text">
+            36. 依據「行政院及所屬各機關風險管理及危機處理作業原則」，
+            下列何項「不」是風險管理步驟之<strong>持續循環過程</strong>？（複選）
+        </div>
+        
+        <div class="options-group">
+            <label class="option-label">
+                <input type="checkbox" name="q36" value="A">
+                <span>(A) 需建立財務背景資料調查</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q36" value="B">
+                <span>(B) 需完成評估風險</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q36" value="C">
+                <span>(C) 每兩年完成一次監督及檢討</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q36" value="D">
+                <span>(D) 傳遞資訊、溝通及諮詢</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button id="submitBtn">送出作答</button>
+        <button id="resetBtn">重置</button>
+        <button id="explainBtn">顯示/隱藏解析</button>
+    </div>
+
+    <div id="feedbackArea"></div>
+
+    <div id="explanationArea">
+        <h2>【教學解析】</h2>
+
+        <div class="step-block">
+            <h3>【第一步：找關鍵字】</h3>
+            <p>請特別注意以下重點詞彙：</p>
+            <ul>
+                <li><span class="highlight-term">行政院及所屬各機關</span>：適用對象</li>
+                <li><span class="highlight-term">風險管理</span>：核心主題</li>
+                <li><span class="highlight-term">持續循環過程</span>：題目要求的核心條件</li>
+                <li><span class="highlight-term">不屬於</span>：逆向思考，要選「非」的選項</li>
+            </ul>
+            <div class="alert-box">
+                <strong>說明：</strong><br>
+                本題的關鍵不是「風險管理有哪些事情」，而是「<strong>哪些事情不是持續循環的一部分</strong>」。
+            </div>
+        </div>
+
+        <div class="step-block">
+            <h3>【第二步：白話翻譯】</h3>
+            <p>用日常口語重新說明題目：</p>
+            <p>「政府機關做風險管理時，有一套會一直重複進行的流程，下面哪些事情，並不屬於這個會一直跑的流程？」</p>
+        </div>
+
+        <div class="step-block">
+            <h3>【第三步：解題思路】</h3>
+            <p><strong>這題在考什麼觀念？</strong><br>
+            一句話核心考點：「持續循環 ≠ 偶爾做一次或背景資料」</p>
+            
+            <div class="concept-box">
+                <h4>【原理與規則（政府風險管理的循環概念）】</h4>
+                <p>政府機關的風險管理是一個「持續循環」，通常包含：</p>
+                <ul>
+                    <li>建立背景與範疇（不是每次都重做）</li>
+                    <li>風險辨識</li>
+                    <li>風險分析與評估</li>
+                    <li>風險回應</li>
+                    <li>監督與檢討（應持續進行）</li>
+                    <li>資訊傳遞、溝通與諮詢（貫穿全程）</li>
+                </ul>
+                <p><strong>[重點]：</strong><br>
+                1. 循環中的活動要能反覆、持續進行<br>
+                2. 有「固定年限才做一次」的，就不算循環的一部分</p>
+            </div>
+        </div>
+
+        <div class="step-block">
+            <h3>【第四步：選項分析】</h3>
+            
+            <p><strong>(A) 需建立財務背景資料調查</strong></p>
+            <ul>
+                <li>判斷：不屬於（正確選項）</li>
+                <li>理由：背景資料通常在初期建立，不是持續循環反覆進行的步驟。</li>
+            </ul>
+
+            <p><strong>(B) 需完成評估風險</strong></p>
+            <ul>
+                <li>判斷：屬於</li>
+                <li>理由：風險評估是循環中必定反覆執行的核心步驟。</li>
+            </ul>
+
+            <p><strong>(C) 每兩年完成一次監督及檢討</strong></p>
+            <ul>
+                <li>判斷：不屬於（正確選項）</li>
+                <li>理由：「限定兩年一次」不符合「持續循環」精神。監督應是持續性的，而非定期才做。</li>
+            </ul>
+
+            <p><strong>(D) 傳遞資訊、溝通及諮詢</strong></p>
+            <ul>
+                <li>判斷：屬於</li>
+                <li>理由：此活動貫穿整個風險管理循環。</li>
+            </ul>
+        </div>
+
+        <div class="step-block">
+            <h3>【觀念補充與延伸】</h3>
+            <p><strong>核心觀念定位</strong>：本題屬於「政府風險管理流程與精神理解題」，這類題目是考試常客。</p>
+            <p><strong>與 ISO 31000 的對照</strong>：ISO 31000 強調持續溝通與監督；政府作業原則概念一致，但用語略有不同，精神相通。</p>
+        </div>
+
+        <div class="step-block">
+            <h3>【記憶口訣】</h3>
+            <div class="mnemonic-box">
+                「背景一次建，監督不能等；限定週期，就不循環」
+            </div>
+        </div>
+
+        <div class="step-block">
+            <h3>【常見陷阱】</h3>
+            <ul>
+                <li><strong>學生最容易錯：</strong>看到「監督及檢討」就直覺選。</li>
+                <li><strong>心理盲點：</strong>忽略題目強調「持續循環」。</li>
+                <li><strong>避坑指南：</strong>題目出現「每 X 年一次」→ 高機率不是持續循環。</li>
+            </ul>
+        </div>
+
+        <div class="step-block">
+            <h3>【正確答案】</h3>
+            <p><strong>答案：A、C</strong></p>
+            <p>一句話理由：「背景資料屬初期作業，且限定週期之監督不符合持續循環精神，皆不屬於風險管理的持續循環過程。」</p>
+        </div>
+
+        <div class="step-block">
+            <h3>【自我檢測】</h3>
+            <dl class="qa-list">
+                <dt>1. 為何風險監督必須是持續的？</dt>
+                <dd>因風險會隨環境變化。</dd>
+
+                <dt>2. 溝通與諮詢在風險管理中扮演什麼角色？</dt>
+                <dd>貫穿整個流程。</dd>
+
+                <dt>3. 背景資料通常在什麼階段建立？</dt>
+                <dd>初期規劃階段。</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 定義正確答案
+    const correctAnswers = ['A', 'C'];
+
+    // 取得 DOM 元素
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const explainBtn = document.getElementById('explainBtn');
+    const checkboxes = document.querySelectorAll('input[name="q36"]');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const explanationArea = document.getElementById('explanationArea');
+
+    // 送出作答
+    submitBtn.addEventListener('click', function() {
+        // 取得使用者選取的選項
+        const userSelected = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value)
+            .sort();
+
+        // 判斷是否正確
+        // 邏輯：選取的數量必須相同，且所有選取的項目都在正確答案中
+        const isCorrect = userSelected.length === correctAnswers.length && 
+                          userSelected.every(val => correctAnswers.includes(val));
+
+        // 準備回饋訊息
+        let feedbackHtml = '';
+        
+        if (isCorrect) {
+            feedbackArea.className = 'feedback-correct';
+            feedbackHtml = `<strong>作答結果：完全正確！</strong>`;
+        } else {
+            feedbackArea.className = 'feedback-incorrect';
+            feedbackHtml = `<strong>作答結果：錯誤</strong>`;
+            
+            // 分析錯誤原因
+            // 找出漏選的
+            const missing = correctAnswers.filter(ans => !userSelected.includes(ans));
+            // 找出多選的
+            const extra = userSelected.filter(sel => !correctAnswers.includes(sel));
+            
+            let errorDetails = [];
+            if (missing.length > 0) errorDetails.push(`漏選了：${missing.join('、')}`);
+            if (extra.length > 0) errorDetails.push(`多選了：${extra.join('、')}`);
+            if (userSelected.length === 0) errorDetails.push(`您沒有選擇任何選項`);
+
+            if (errorDetails.length > 0) {
+                feedbackHtml += `<div class="result-detail">${errorDetails.join('；')}</div>`;
+            }
+        }
+
+        // 顯示您的選擇與正確答案
+        feedbackHtml += `
+            <div class="result-detail">
+                您的選擇：${userSelected.length > 0 ? userSelected.join('、') : '無'}<br>
+                正確答案：${correctAnswers.join('、')}
+            </div>
+        `;
+
+        feedbackArea.innerHTML = feedbackHtml;
+        feedbackArea.style.display = 'block';
+    });
+
+    // 重置按鈕
+    resetBtn.addEventListener('click', function() {
+        checkboxes.forEach(cb => cb.checked = false);
+        feedbackArea.style.display = 'none';
+        feedbackArea.innerHTML = '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // 顯示/隱藏解析
+    explainBtn.addEventListener('click', function() {
+        if (explanationArea.style.display === 'none' || explanationArea.style.display === '') {
+            explanationArea.style.display = 'block';
+            // 自動捲動到解析區
+            explanationArea.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            explanationArea.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>

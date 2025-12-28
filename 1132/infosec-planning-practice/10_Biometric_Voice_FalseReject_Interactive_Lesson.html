@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安衝刺班：生物辨識誤判類型解析</title>
+    <style>
+        /* 基礎設定 
+           - 依照要求設定字級為 16px
+           - 設定全域字型，確保跨平台閱讀舒適
+        */
+        :root {
+            --primary-color: #2c3e50; /* 深藍灰，專業感 */
+            --accent-color: #d35400;  /* 沉穩橘，用於強調 */
+            --highlight-bg: #fff3cd;  /* 螢光筆黃 */
+            --bg-color: #f8f9fa;      /* 護眼淺灰底 */
+            --border-color: #dee2e6;
+            --success-color: #198754;
+            --error-color: #dc3545;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", "Heiti TC", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        /* 標題樣式 - 限制最大 18px */
+        h1, h2, h3 {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            border-left: 5px solid var(--primary-color);
+            padding-left: 10px;
+        }
+
+        h1 {
+            border-left: none;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            padding-left: 0;
+            text-align: center;
+        }
+
+        /* 重點高亮樣式 (模擬螢光筆) */
+        mark {
+            background-color: var(--highlight-bg);
+            color: #000;
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .keyword-box {
+            background-color: #fcfcfc;
+            border: 1px dashed var(--primary-color);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        /* 題目區域樣式 */
+        .question-box {
+            background-color: #fff;
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f1f1f1;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕樣式 */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .btn-reveal {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        .btn-reset {
+            background-color: #6c757d;
+            color: #fff;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* 回饋訊息區域 */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-correct {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        /* 解析區域 (預設隱藏) */
+        #explanation-section {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+        }
+
+        /* 步驟標籤 */
+        .step-tag {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 2px 8px;
+            font-size: 14px;
+            border-radius: 3px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* 列表樣式 */
+        ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* 互動式折疊區塊 (details/summary) */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+
+        summary {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+        }
+
+        summary::after {
+            content: "+"; 
+            float: right;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 15px;
+            background-color: #fff;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* 強調區塊 */
+        .highlight-box {
+            background-color: #e2e3e5;
+            padding: 15px;
+            border-left: 4px solid var(--accent-color);
+            margin: 15px 0;
+        }
+
+        /* 自我檢測表格樣式 */
+        .quiz-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .quiz-table th, .quiz-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .quiz-table th {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安短期衝刺班 - 隨堂測驗</h1>
+    
+    <!-- 1) 題目區塊 -->
+    <div class="question-box">
+        <div class="question-text">
+            <span class="step-tag">題目</span> 10. 公司採用聲紋辨識器作為門禁控制措施，因員工感冒，導致其<mark style="background-color: yellow; padding: 2px;">被拒絕進入</mark>，這種現象稱為下列何項？
+            <div style="margin-top: 10px; color: #666; font-size: 14px;">（單選題）</div>
+        </div>
+        
+        <form id="quiz-form">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A">
+                    (A) False reject
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B">
+                    (B) False accept
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C">
+                    (C) Type-II error
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D">
+                    (D) CER
+                </label>
+            </div>
+        </form>
+    </div>
+
+    <!-- 按鈕與回饋區 -->
+    <div class="btn-group">
+        <button type="button" class="btn-submit" onclick="checkAnswer()">送出作答</button>
+        <button type="button" class="btn-reveal" onclick="toggleExplanation()">一鍵看解析</button>
+        <button type="button" class="btn-reset" onclick="resetQuiz()">重置</button>
+    </div>
+
+    <div id="feedback-area"></div>
+
+    <!-- 解析內容區 (依序包含 2~10 點) -->
+    <div id="explanation-section">
+        
+        <!-- 2) 第一步：找關鍵字 -->
+        <h2>第一步：找關鍵字</h2>
+        <div class="keyword-box">
+            請拿出你的螢光筆，將以下關鍵字圈起來：
+            <ul>
+                <li><mark>聲紋辨識器</mark>：這題在考身分驗證（Authentication）。</li>
+                <li><mark>門禁控制</mark>：這是應用場景，目的是區分「能進」與「不能進」。</li>
+                <li><mark>員工感冒</mark>：這暗示他是「合法使用者」，只是生理特徵暫時變了。</li>
+                <li><mark>被拒絕進入</mark>：這是系統做出的最終判斷。</li>
+            </ul>
+            <p><strong>核心判斷：</strong>這是一個「合法使用者（員工）」被系統「擋在門外（拒絕）」的故事。</p>
+        </div>
+
+        <!-- 3) 第二步：白話翻譯 -->
+        <h2>第二步：白話翻譯</h2>
+        <div class="highlight-box">
+            <p>如果用我們平常講話的方式來說，這題就是：</p>
+            <p>「公司用聲音來開門，但因為員工感冒，聲音變了，結果系統不讓他進去。這種『該過卻沒過』的情況叫什麼？」</p>
+        </div>
+        <p><strong>名詞解釋：</strong></p>
+        <ul>
+            <li><strong>聲紋辨識：</strong>用每個人獨特的聲音特徵來確認是不是本人。</li>
+            <li><strong>門禁控制：</strong>決定誰能不能進入公司大門的系統。</li>
+        </ul>
+
+        <!-- 4) 第三步：解題思路 -->
+        <h2>第三步：解題思路</h2>
+        <p><strong>這題在考什麼觀念？</strong><br>
+        生物特徵辨識中的「誤判類型」，特別是把正確的人擋在外面。</p>
+
+        <p><strong>解題三步驟：</strong></p>
+        <ol>
+            <li>先判斷身分：這人是不是壞人？不，他是<strong>合法員工</strong>。</li>
+            <li>再判斷結果：系統讓他過了嗎？不，他<strong>被拒絕</strong>了。</li>
+            <li>結論：合法的人卻被拒絕 = <strong>False reject（錯誤拒絕）</strong>。</li>
+        </ol>
+
+        <p><strong>原理與規則：</strong></p>
+        <ul>
+            <li>生物特徵（如聲音、指紋）不像密碼是固定的，會因為感冒、受傷而改變，導致系統認不得你。</li>
+            <li><strong>False reject（錯誤拒絕）：</strong>把「真的本人」當成不是本人。</li>
+            <li><strong>False accept（錯誤接受）：</strong>把「不是本人」當成是本人。</li>
+        </ul>
+
+        <div class="highlight-box">
+            <strong>生活比喻：</strong>
+            <ul>
+                <li><strong>False reject：</strong>就像你本人要刷臉解鎖手機，但因為戴口罩，手機認不出來，把你擋住。</li>
+                <li><strong>False accept：</strong>就像路上的陌生人拿起你的手機，結果手機誤以為是你，竟然解鎖了。</li>
+            </ul>
+        </div>
+
+        <!-- 5) 第四步：選項分析 -->
+        <h2>第四步：選項分析</h2>
+        <p>點擊下方選項查看詳細說明：</p>
+        
+        <details>
+            <summary>(A) False reject (為什麼選這個？)</summary>
+            <div class="details-content">
+                <strong>正確。</strong><br>
+                題目中的員工是「合法使用者」，卻被系統「拒絕」，符合 False reject (錯誤拒絕) 的定義。這也是為什麼感冒會影響聲紋辨識的主要缺點。
+            </div>
+        </details>
+
+        <details>
+            <summary>(B) False accept (為什麼不選？)</summary>
+            <div class="details-content">
+                <strong>錯誤。</strong><br>
+                False accept (錯誤接受) 是指「壞人被當成好人放進去」。如果題目改成「陌生人模仿員工聲音，成功打開門禁」，那就要選這個。
+            </div>
+        </details>
+
+        <details>
+            <summary>(C) Type-II error (為什麼不選？)</summary>
+            <div class="details-content">
+                <strong>不建議選。</strong><br>
+                雖然在統計假設檢定中這可能對應到 Type I 或 Type II 錯誤（取決於假設設定），但在資安與生物辨識的考試中，我們優先使用專有名詞 <strong>False Reject</strong> 作答。
+            </div>
+        </details>
+
+        <details>
+            <summary>(D) CER (為什麼不選？)</summary>
+            <div class="details-content">
+                <strong>錯誤。</strong><br>
+                CER (Crossover Error Rate) 是一個「數值指標」，用來衡量系統好壞的平衡點，而不是指單一次的錯誤事件。
+            </div>
+        </details>
+
+        <!-- 6) 觀念補充與延伸 -->
+        <h2>觀念補充與延伸</h2>
+        <ul>
+            <li><strong>核心觀念定位：</strong>本題屬於「身分驗證 / 生物特徵辨識」章節的必考基本題。</li>
+            <li><strong>重要名詞對照：</strong>
+                <ul>
+                    <li><strong>FRR (False Reject Rate)：</strong>錯誤拒絕率（擋住好人的機率）。</li>
+                    <li><strong>FAR (False Accept Rate)：</strong>錯誤接受率（放進壞人的機率）。</li>
+                    <li><strong>CER：</strong>當 FRR = FAR 時的交叉點，數值越低代表系統越準確。</li>
+                </ul>
+            </li>
+            <li><strong>觸類旁通：</strong>
+                <ul>
+                    <li>指紋辨識因手指受傷無法解鎖 → False reject</li>
+                    <li>臉部辨識被照片騙過而解鎖 → False accept</li>
+                </ul>
+            </li>
+        </ul>
+
+        <!-- 7) 記憶口訣 -->
+        <h2>記憶口訣</h2>
+        <div class="keyword-box" style="text-align: center; font-size: 1.2em;">
+            「<strong>本人</strong>被擋在門外，就是 <strong>False Reject</strong>」
+        </div>
+
+        <!-- 8) 常見陷阱 -->
+        <h2>常見陷阱</h2>
+        <ul>
+            <li><strong>英文搞混：</strong>Reject (拒絕) 與 Accept (接受/放行) 的方向要看清楚。</li>
+            <li><strong>心理盲點：</strong>看到「系統拒絕」就覺得系統好棒棒、很安全？錯！如果它拒絕的是老闆本人，那就是系統故障（誤判）了。</li>
+            <li><strong>避坑指南：</strong>考試時看到這類題目，先問自己一句：「這個人到底是不是本人？」是本人卻被擋，就是 Reject。</li>
+        </ul>
+
+        <!-- 9) 正確答案 -->
+        <h2>正確答案</h2>
+        <div class="highlight-box" style="text-align: center;">
+            <strong>答案：(A)</strong><br>
+            理由：合法使用者因聲音變化被系統拒絕，屬於 False reject。
+        </div>
+
+        <!-- 10) 自我檢測 -->
+        <h2>自我檢測</h2>
+        <p>確認自己是否真的懂了，請嘗試回答下列問題（點擊查看答案）：</p>
+        
+        <details>
+            <summary>Q1：陌生人被誤判為本人並通過門禁，稱為什麼？</summary>
+            <div class="details-content">
+                <strong>參考答案：False accept</strong><br>
+                這是資安上最嚴重的漏洞，因為壞人進來了。
+            </div>
+        </details>
+
+        <details>
+            <summary>Q2：感冒導致聲紋比對失敗，最容易影響哪一類錯誤？</summary>
+            <div class="details-content">
+                <strong>參考答案：False reject</strong><br>
+                生理狀況改變（感冒、受傷、變胖）通常會導致本人無法通過驗證。
+            </div>
+        </details>
+
+        <details>
+            <summary>Q3：生物特徵辨識是否可能做到 0% 錯誤？</summary>
+            <div class="details-content">
+                <strong>參考答案：不可能</strong><br>
+                只能透過調整敏感度來降低錯誤率，但無法完全歸零。
+            </div>
+        </details>
+
+    </div>
+</div>
+
+<script>
+    // 簡單的 JavaScript 用於互動邏輯
+    
+    // 定義正確答案
+    const CORRECT_ANSWER = "A";
+
+    function checkAnswer() {
+        const form = document.getElementById('quiz-form');
+        const feedbackArea = document.getElementById('feedback-area');
+        const explanationSection = document.getElementById('explanation-section');
+        
+        // 取得使用者選取的選項
+        const selectedOption = form.querySelector('input[name="answer"]:checked');
+        
+        if (!selectedOption) {
+            alert("同學，請先選擇一個答案再送出喔！");
+            return;
+        }
+        
+        const userValue = selectedOption.value;
+        feedbackArea.style.display = 'block';
+        
+        if (userValue === CORRECT_ANSWER) {
+            // 答對處理
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = `
+                <h3>恭喜答對！🎉</h3>
+                <p>你選擇了 <strong>(${userValue})</strong>，正確答案正是 <strong>(${CORRECT_ANSWER})</strong>。</p>
+                <p>你的觀念很清楚！下方已為你展開完整解析，可以複習一下細節。</p>
+            `;
+            // 答對時自動展開解析
+            explanationSection.style.display = 'block';
+            
+            // 捲動到解析區
+            setTimeout(() => {
+                explanationSection.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+
+        } else {
+            // 答錯處理 - 只給提示
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.innerHTML = `
+                <h3>再想一下... 🤔</h3>
+                <p>你選擇了 <strong>(${userValue})</strong>，但這不是正確答案。</p>
+                <p><strong>觀念提示：</strong></p>
+                <ul>
+                    <li>先確認這個員工是「好人」還是「壞人」？(他是員工喔)</li>
+                    <li>系統對他做了什麼動作？(讓他進去還是擋住？)</li>
+                    <li>把「正確的人」擋在外面，英文該怎麼說？</li>
+                </ul>
+                <p>試著再選一次，或者點擊「一鍵看解析」直接看答案。</p>
+            `;
+            // 答錯時不自動展開解析，保留思考空間
+        }
+    }
+
+    function toggleExplanation() {
+        const explanationSection = document.getElementById('explanation-section');
+        if (explanationSection.style.display === 'none' || explanationSection.style.display === '') {
+            explanationSection.style.display = 'block';
+            explanationSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            explanationSection.style.display = 'none';
+        }
+    }
+
+    function resetQuiz() {
+        // 清除選項
+        const form = document.getElementById('quiz-form');
+        const radioButtons = form.querySelectorAll('input[type="radio"]');
+        radioButtons.forEach(radio => radio.checked = false);
+
+        // 隱藏回饋與解析
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('explanation-section').style.display = 'none';
+        
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

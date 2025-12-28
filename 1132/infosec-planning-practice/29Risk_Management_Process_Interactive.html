@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安衝刺班：題組4 - 風險管理流程 (Q29)</title>
+    <style>
+        /* 基礎設定 */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f9f9f9;
+            --border-color: #ddd;
+            --text-color: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 標題與情境區 */
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 18px; /* 題目要求標題最多 18px */
+            font-weight: bold;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .context-box {
+            background-color: #e8f4fc;
+            border: 1px solid #b6e0fe;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .highlight {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        /* 導覽列 */
+        .nav-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            background-color: #f1f1f1;
+            margin-right: 5px;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            color: #777;
+        }
+
+        .nav-item.active {
+            background-color: #fff;
+            border-color: var(--border-color);
+            border-bottom-color: #fff;
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-bottom: -1px;
+        }
+
+        .nav-item.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* 題目區 */
+        .question-content {
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            margin: 15px 0;
+        }
+
+        .option-label {
+            display: block;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        /* 按鈕區 */
+        .btn-group {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-family: inherit;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-analysis {
+            background-color: var(--success-color);
+            color: white;
+            display: none; /* 預設隱藏，答題後控制 */
+        }
+
+        .btn-analysis:hover {
+            background-color: #219150;
+        }
+
+        /* 狀態回饋 */
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+            display: block;
+        }
+
+        /* 解析區 */
+        .analysis-section {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #fff8e1; /* 筆記紙顏色 */
+            border: 1px solid #ffe0b2;
+            border-radius: 4px;
+            display: none; /* 預設收合 */
+        }
+
+        .step-title {
+            background-color: var(--primary-color);
+            color: white;
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 14px;
+            margin-bottom: 8px;
+            margin-top: 15px;
+        }
+
+        .mnemonic {
+            border: 2px dashed var(--error-color);
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            color: var(--error-color);
+            background-color: #fff;
+        }
+
+        .qa-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .qa-list li {
+            margin-bottom: 10px;
+            padding-left: 15px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- 共用情境 -->
+    <div class="context-box">
+        <h3>【題組 4：共用情境（29-32 題）】</h3>
+        <p>S 公司為設立於中華民國之消費性電子產品製造商，同時於台灣及歐洲地區架設網站，對一般民眾販售消費性電子產品，且公司網路購物之收益占公司整體利益 90% 以上。</p>
+        <p>公司已通過 <span class="highlight">ISO 27001</span> 驗證，並於 2023 年 12 月依照所訂定之程序完成風險評估作業。目前公司對於對外服務之網站、系統設定最大可中斷時間為 12 小時。</p>
+        <p>（提示：本題組重點在【風險管理流程、風險分析與排序、風險處理、營運衝擊】）</p>
+    </div>
+
+    <!-- 題組導覽 -->
+    <div class="nav-tabs">
+        <div class="nav-item active">第 29 題</div>
+        <div class="nav-item disabled">第 30 題 (預留)</div>
+        <div class="nav-item disabled">第 31 題 (預留)</div>
+        <div class="nav-item disabled">第 32 題 (預留)</div>
+    </div>
+
+    <!-- 題目區域 -->
+    <div id="question-area">
+        <h3>【第 29 題】風險管理作業流程</h3>
+        <div class="question-content">
+            <p>29. 該公司風險管理作業程序之流程包含：</p>
+            <p style="margin-left: 20px;">
+                a. 風險分析<br>
+                b. 風險排序<br>
+                c. 風險識別<br>
+                d. 識別背景資訊<br>
+                e. 風險處理
+            </p>
+            <p>請問下列何項流程較為正確？</p>
+        </div>
+
+        <form id="quiz-form">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A">
+                    (A) a -> b -> c -> d -> e
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B">
+                    (B) e -> d -> c -> b -> a
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C">
+                    (C) d -> c -> a -> b -> e
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D">
+                    (D) c -> d -> b -> a -> e
+                </label>
+            </div>
+        </form>
+
+        <!-- 回饋區 -->
+        <div id="feedback-msg" class="feedback"></div>
+
+        <!-- 按鈕區 -->
+        <div class="btn-group">
+            <button type="button" class="btn-submit" onclick="checkAnswer()">送出作答</button>
+            <button type="button" class="btn-analysis" id="analysisBtn" onclick="toggleAnalysis()">查看名師解析</button>
+            <button type="button" class="btn-reset" onclick="resetQuiz()">重置</button>
+        </div>
+    </div>
+
+    <!-- 解析區域 -->
+    <div id="analysis-area" class="analysis-section">
+        <h3>【名師教學解析】</h3>
+        
+        <div class="step-title">第一步：找關鍵字</div>
+        <ul>
+            <li>風險管理作業程序</li>
+            <li>流程順序</li>
+            <li>識別背景資訊</li>
+            <li>風險識別、分析、排序、處理</li>
+        </ul>
+        <p><strong>老師說明：</strong>本題在考「ISO 27001 風險管理的正確先後邏輯」。這是一道送分題，只要觀念清楚，絕對不能失分！</p>
+
+        <div class="step-title">第二步：白話翻譯</div>
+        <p>「這家公司要做資安風險管理，邏輯就像我們要去打仗一樣：一定要先了解戰場環境（公司背景），再找出敵人是誰（識別風險）、分析敵人強不強（分析嚴重程度）、排出先打誰（優先排序），最後才決定用什麼武器打（風險處理）。」</p>
+
+        <div class="step-title">第三步：解題思路與規則</div>
+        <p>標準 ISO 27005 或一般風險管理流程為：</p>
+        <ol>
+            <li><strong>識別背景資訊 (d)</strong>：確立範圍、組織目標、內部外部環境。</li>
+            <li><strong>風險識別 (c)</strong>：找出資產、威脅、弱點。</li>
+            <li><strong>風險分析 (a)</strong>：計算機率與衝擊，得出風險值。</li>
+            <li><strong>風險排序/評估 (b)</strong>：將風險值與標準比較，排定優先級。</li>
+            <li><strong>風險處理 (e)</strong>：決定降低、轉移、規避或接受風險。</li>
+        </ol>
+
+        <div class="step-title">第四步：選項分析</div>
+        <ul>
+            <li>(A) 還沒識別風險就先分析？邏輯不通。[錯]</li>
+            <li>(B) 從處理開始？還不知道有什麼問題就先處理，這是亂槍打鳥。[錯]</li>
+            <li>(C) <strong>d(背景) -> c(識別) -> a(分析) -> b(排序) -> e(處理)</strong>，完整且邏輯正確。[正確]</li>
+            <li>(D) 先找風險再看背景？雖然實務上有可能混做，但在標準流程考試中，必須先定義範圍與背景。[錯]</li>
+        </ul>
+
+        <div class="step-title">記憶口訣</div>
+        <div class="mnemonic">
+            「背景先、風險出、算大小、排順序、再處理」
+        </div>
+
+        <div class="step-title">常見陷阱</div>
+        <p>考生最容易把「風險識別」和「風險分析」順序搞反，或者看到步驟很多就心慌。請記住，沒有找到東西（識別）之前，是無法計算（分析）的。</p>
+
+        <div class="step-title">自我檢測</div>
+        <ul class="qa-list">
+            <li><strong>Q: 為何風險處理一定是最後？</strong><br>A: 因為需先知道風險大小與優先順序，才能分配有限的資源去處理。</li>
+            <li><strong>Q: 風險分析與風險排序差在哪？</strong><br>A: 分析是算絕對值（算出大小），排序是比較相對值（比誰先做）。</li>
+        </ul>
+    </div>
+
+</div>
+
+<script>
+    // 正確答案設定
+    const CORRECT_ANSWER = 'C';
+
+    function checkAnswer() {
+        // 取得使用者選擇
+        const radios = document.getElementsByName('answer');
+        let selectedValue = null;
+        
+        for (const radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        const feedbackEl = document.getElementById('feedback-msg');
+        const analysisBtn = document.getElementById('analysisBtn');
+
+        // 清除舊樣式
+        feedbackEl.classList.remove('correct', 'incorrect');
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案再送出喔！');
+            return;
+        }
+
+        // 判斷對錯
+        if (selectedValue === CORRECT_ANSWER) {
+            feedbackEl.textContent = '恭喜答對！觀念非常正確！請點擊下方按鈕查看完整解析。';
+            feedbackEl.classList.add('correct');
+        } else {
+            feedbackEl.textContent = '答案選錯囉！提示：做任何管理計畫之前，是不是都要先了解現況背景呢？再試試看，或查看解析。';
+            feedbackEl.classList.add('incorrect');
+        }
+
+        // 無論對錯，都顯示查看解析按鈕
+        analysisBtn.style.display = 'inline-block';
+    }
+
+    function toggleAnalysis() {
+        const analysisArea = document.getElementById('analysis-area');
+        const analysisBtn = document.getElementById('analysisBtn');
+        
+        if (analysisArea.style.display === 'none' || analysisArea.style.display === '') {
+            analysisArea.style.display = 'block';
+            analysisBtn.textContent = '隱藏名師解析';
+            // 平滑捲動到解析區
+            analysisArea.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            analysisArea.style.display = 'none';
+            analysisBtn.textContent = '查看名師解析';
+        }
+    }
+
+    function resetQuiz() {
+        // 清除選擇
+        const radios = document.getElementsByName('answer');
+        for (const radio of radios) {
+            radio.checked = false;
+        }
+
+        // 清除回饋
+        const feedbackEl = document.getElementById('feedback-msg');
+        feedbackEl.textContent = '';
+        feedbackEl.classList.remove('correct', 'incorrect');
+        feedbackEl.style.display = 'none';
+
+        // 隱藏並重置解析區
+        const analysisArea = document.getElementById('analysis-area');
+        analysisArea.style.display = 'none';
+        
+        const analysisBtn = document.getElementById('analysisBtn');
+        analysisBtn.style.display = 'none';
+        analysisBtn.textContent = '查看名師解析';
+        
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

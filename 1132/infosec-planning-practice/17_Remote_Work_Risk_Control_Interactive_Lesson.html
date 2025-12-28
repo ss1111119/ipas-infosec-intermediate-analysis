@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q17 資安風險控制互動教學 - 資安短期衝刺班</title>
+    <style>
+        /* * 基礎樣式設定 
+         * 不依賴外部 CSS，確保離線可用
+         */
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* 題目要求：內文字級 16px */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-top: 1.2em;
+            margin-bottom: 0.8em;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 18px; /* 題目要求：標題最多 18px */
+            background-color: #e8f4f8;
+            padding: 10px;
+            border-left: 5px solid #3498db;
+        }
+
+        h3 {
+            font-size: 17px;
+            color: #2980b9;
+            margin-top: 1em;
+        }
+
+        /* 重點高亮樣式 */
+        .highlight {
+            background-color: #fffacd; /* 螢光筆黃 */
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .highlight-red {
+            background-color: #ffe6e6;
+            color: #c0392b;
+            padding: 2px 4px;
+            font-weight: bold;
+            border-bottom: 2px solid #c0392b;
+        }
+
+        .keyword-box {
+            border: 1px solid #ddd;
+            background-color: #fafafa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        /* 選項與表單樣式 */
+        .question-box {
+            background-color: #fff;
+            border: 2px solid #333;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .options-group li {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .options-group li:hover {
+            background-color: #f0f0f0;
+        }
+
+        .options-group label {
+            cursor: pointer;
+            display: block;
+            width: 100%;
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .btn-submit {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #219150;
+        }
+
+        .btn-reset {
+            background-color: #7f8c8d;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #616b6b;
+        }
+
+        .btn-explain {
+            background-color: #3498db;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-explain:hover {
+            background-color: #2980b9;
+        }
+
+        /* 回饋區塊樣式 */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區塊預設隱藏 */
+        #full-analysis {
+            display: none;
+            margin-top: 20px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+        }
+
+        .analysis-step {
+            margin-bottom: 30px;
+        }
+
+        .mnemonic {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        /* 自我檢測樣式 */
+        .self-test-item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-left: 3px solid #666;
+        }
+        
+        .answer-key {
+            color: #e74c3c;
+            font-weight: bold;
+            display: none; /* 預設隱藏答案 */
+        }
+        
+        .show-answer-btn {
+            font-size: 14px;
+            padding: 4px 8px;
+            margin-left: 10px;
+            background-color: #eee;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安短期衝刺班：單元 17 - 遠距工作風險控制</h1>
+    
+    <p>各位同學好，歡迎來到今天的資安衝刺課程。這題是關於「遠端工作」與「設備安全」的經典題型。請先嘗試作答，我們再來進行詳細解析。</p>
+
+    <!-- 1) 題目區塊 -->
+    <div class="question-box">
+        <p><strong>【題目】單選題</strong></p>
+        <p>17. 某公司新增了一業務型態，員工（20 員，每員配置筆電乙台以及隨身硬碟乙顆）必須至客戶端長期駐點處理有關受託業務，並於客戶端透過網際網路連線回公司內部網路處理公司相關業務。</p>
+        <p>為了降低此一新增業務型態所衍伸出來的資安風險，該公司正評估採取有效的控制措施來降低此風險，請問下列控制措施何項<span class="highlight-red">較無法</span>降低此風險？</p>
+
+        <form id="quiz-form">
+            <ul class="options-group">
+                <li>
+                    <label>
+                        <input type="radio" name="option" value="A">
+                        (A) 網站應用防火牆（Web Application Firewall，WAF）
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="radio" name="option" value="B">
+                        (B) 端點偵測及應變機制（Endpoint Detection and Response，EDR）
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="radio" name="option" value="C">
+                        (C) 虛擬私有網路（Virtual Private Network，VPN）
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="radio" name="option" value="D">
+                        (D) 防毒軟體（Antivirus Software）
+                    </label>
+                </li>
+            </ul>
+
+            <button type="button" class="btn btn-submit" onclick="checkAnswer()">送出作答</button>
+            <button type="button" class="btn btn-reset" onclick="resetQuiz()">重置</button>
+        </form>
+    </div>
+
+    <!-- 互動回饋區 -->
+    <div id="feedback-area"></div>
+
+    <!-- 解析切換按鈕 -->
+    <button type="button" class="btn btn-explain" id="toggle-analysis-btn" onclick="toggleAnalysis()">▼ 一鍵看解析（含詳細觀念與解題技巧）</button>
+
+    <!-- 完整解析區塊 -->
+    <div id="full-analysis">
+        
+        <!-- 2) 第一步：找關鍵字 -->
+        <div class="analysis-step">
+            <h2>第一步：找關鍵字</h2>
+            <div class="keyword-box">
+                <p>請拿起你的螢光筆，標註以下重點：</p>
+                <ul>
+                    <li><span class="highlight">長期駐點</span>：代表員工不在公司受保護的環境內。</li>
+                    <li><span class="highlight">筆電、隨身硬碟</span>：這些是員工帶出去的工具，資安術語稱為「端點設備」。</li>
+                    <li><span class="highlight">透過網際網路連線回公司內部網路</span>：這代表資料要在不安全的網路上傳輸，需要安全的通道。</li>
+                    <li><span class="highlight">降低資安風險</span>：目標是保護上述的人、設備與連線。</li>
+                </ul>
+                <p><strong>判斷重點：</strong> 本題風險主要來自 <strong>端點設備 (筆電/硬碟)</strong> 與 <strong>遠端連線 (回公司內網)</strong>，而非公司對外公開提供的「網站服務」。</p>
+            </div>
+        </div>
+
+        <!-- 3) 第二步：白話翻譯 -->
+        <div class="analysis-step">
+            <h2>第二步：白話翻譯</h2>
+            <p><strong>老師翻譯給你看：</strong></p>
+            <p>「員工要帶公司發的筆電和隨身碟去客戶那邊上班，工作時還要用外面的網路連線回公司。下面哪一個資安防護措施，其實對保護這種『外派工作狀況』幫助最小？」</p>
+            <p><strong>名詞解釋：</strong></p>
+            <ul>
+                <li><strong>端點 (Endpoint)：</strong> 就像是員工的手腳與工具，指筆電、手機、桌機等終端設備。</li>
+                <li><strong>VPN：</strong> 像是網路上的一條專屬加密隧道，讓你在外面連回公司時，資料不會被路人偷看。</li>
+                <li><strong>WAF：</strong> 專門保護「網站伺服器」的保全，防止駭客透過網頁漏洞入侵公司網站。</li>
+            </ul>
+        </div>
+
+        <!-- 4) 第三步：解題思路 -->
+        <div class="analysis-step">
+            <h2>第三步：解題思路</h2>
+            <p><strong>這題在考什麼觀念？</strong></p>
+            <p>一句話說明：「控制措施要選對風險來源，不能用錯保護對象。」</p>
+
+            <h3>解題步驟</h3>
+            <ol>
+                <li><strong>先判斷新增風險在哪裡：</strong> 員工帶著設備在外跑（設備可能遺失、中毒），網路環境不安全（傳輸可能被竊聽）。</li>
+                <li><strong>再檢查選項是保護「端點 / 連線」還是「網站」：</strong> 分類這四個選項的功能。</li>
+                <li><strong>找出與題目情境關聯最低者：</strong> 剔除能保護設備或連線的選項。</li>
+            </ol>
+
+            <h3>原理與規則 (為什麼)</h3>
+            <ul>
+                <li><strong>遠端駐點風險包含：</strong> 筆電中毒、隨身碟插入不明電腦感染惡意程式、公共或客戶端網路被中間人竊聽。</li>
+                <li><strong>有效控制應該針對：</strong>
+                    <ul>
+                        <li>端點：EDR (偵測異常行為)、防毒軟體 (阻擋病毒)。</li>
+                        <li>傳輸通道：VPN (加密通道)。</li>
+                    </ul>
+                </li>
+                <li><strong>WAF 的定位：</strong> 它是保護「公司網站服務」不被 SQL 注入或 XSS 攻擊，跟員工帶著筆電去客戶那邊上班的風險關聯極低。</li>
+            </ul>
+
+            <h3>生活比喻</h3>
+            <ul>
+                <li><strong>VPN、EDR、防毒軟體：</strong> 就像員工去戰場（客戶端），你給他穿防彈背心（防毒/EDR），並給他配一支加密無線電（VPN）。這是保護「你本人與你的裝備」。</li>
+                <li><strong>WAF：</strong> 就像是請保全守在公司大門口，防止有人來砸公司招牌（官網）。這跟員工在外面有沒有受傷，其實沒有直接關係。</li>
+            </ul>
+        </div>
+
+        <!-- 5) 第四步：選項分析 -->
+        <div class="analysis-step">
+            <h2>第四步：選項分析</h2>
+            <ul>
+                <li><strong>(A) 網站應用防火牆 (WAF) [正確答案]：</strong>
+                    <br><strong>為什麼較無法？</strong> WAF 是部署在網站伺服器前方，過濾 HTTP/HTTPS 流量。除非員工是透過「連上公司公開網站」來工作，否則 WAF 保護不到筆電本身或 VPN 連線。題目強調的是「駐點」與「連回內網」，重點在設備與通道安全。
+                </li>
+                <li><strong>(B) 端點偵測及應變機制 (EDR)：</strong>
+                    <br><strong>為什麼可以？</strong> EDR 安裝在筆電上，能記錄並分析筆電的行為。如果員工在客戶端筆電中了新型病毒，EDR 能即時發現並阻斷。
+                </li>
+                <li><strong>(C) 虛擬私有網路 (VPN)：</strong>
+                    <br><strong>為什麼可以？</strong> 員工透過網際網路（不信任網路）連回公司，VPN 建立了加密隧道，防止商業機密在傳輸過程中被竊取。
+                </li>
+                <li><strong>(D) 防毒軟體 (Antivirus)：</strong>
+                    <br><strong>為什麼可以？</strong> 最基礎的保護。防止隨身硬碟或下載檔案帶來已知病毒，直接保護筆電安全。
+                </li>
+            </ul>
+        </div>
+
+        <!-- 6) 觀念補充與延伸 -->
+        <div class="analysis-step">
+            <h2>觀念補充與延伸</h2>
+            <ul>
+                <li><strong>核心觀念定位：</strong> 本題屬於「端點安全 / 遠端存取安全 / 控制措施選擇」常考題。</li>
+                <li><strong>對比概念：</strong>
+                    <ul>
+                        <li>WAF：保護對外網站 (Web Server)。</li>
+                        <li>EDR / 防毒：保護使用者設備 (Endpoint)。</li>
+                        <li>VPN：保護資料傳輸通道 (Tunnel)。</li>
+                    </ul>
+                </li>
+                <li><strong>變化題型：</strong> 若題目改成「公司官網頻繁遭受 SQL Injection 攻擊」，那麼 WAF 就會變成最有效的解決方案。</li>
+            </ul>
+        </div>
+
+        <!-- 7) 記憶口訣 -->
+        <div class="analysis-step">
+            <h2>記憶口訣</h2>
+            <div class="mnemonic">
+                「駐點保電腦，WAF 顧網站」
+            </div>
+            <p>看到「駐點」、「筆電」就要找保護電腦的措施；看到「網站被駭」才找 WAF。</p>
+        </div>
+
+        <!-- 8) 常見陷阱 -->
+        <div class="analysis-step">
+            <h2>常見陷阱</h2>
+            <ul>
+                <li><strong>學生最容易搞混：</strong> 看到所有選項都是「資安名詞」就慌了，沒有冷靜分析保護對象是誰。</li>
+                <li><strong>心理盲點：</strong> 以為防火牆 (Firewall) 一定什麼都能防。事實上 WAF 是特定用途的防火牆，不是萬靈丹。</li>
+                <li><strong>避坑指南：</strong> 做這種題目前先問自己一句：「這個控制措施是在保護誰？是人/電腦，還是伺服器？」</li>
+            </ul>
+        </div>
+
+        <!-- 9) 正確答案 -->
+        <div class="analysis-step">
+            <h2>正確答案</h2>
+            <p><strong>答案：A</strong></p>
+            <p><strong>一句話理由：</strong> WAF 主要保護網站應用程式，無法直接降低遠端駐點員工端點與連線的資安風險。</p>
+        </div>
+
+        <!-- 10) 自我檢測 -->
+        <div class="analysis-step">
+            <h2>自我檢測</h2>
+            <p>遮住答案想一想，確認是否真的懂了：</p>
+            
+            <div class="self-test-item">
+                <p><strong>小題 1：</strong> 哪一項措施最直接保護員工筆電不中毒？ 
+                <button type="button" class="show-answer-btn" onclick="toggleSelfTest('ans1')">看答案</button></p>
+                <span id="ans1" class="answer-key">參考答案：EDR 或防毒軟體</span>
+            </div>
+
+            <div class="self-test-item">
+                <p><strong>小題 2：</strong> 哪一項措施是為了保護遠端連線資料不被竊聽？ 
+                <button type="button" class="show-answer-btn" onclick="toggleSelfTest('ans2')">看答案</button></p>
+                <span id="ans2" class="answer-key">參考答案：VPN</span>
+            </div>
+
+            <div class="self-test-item">
+                <p><strong>小題 3：</strong> 若題目改成「公司對外網站頻繁遭攻擊」，哪一項會變成最重要？ 
+                <button type="button" class="show-answer-btn" onclick="toggleSelfTest('ans3')">看答案</button></p>
+                <span id="ans3" class="answer-key">參考答案：WAF</span>
+            </div>
+        </div>
+
+    </div> <!-- 結束完整解析區塊 -->
+
+</div>
+
+<script>
+    /**
+     * 檢查答案邏輯
+     * 題目正確答案為 A
+     */
+    function checkAnswer() {
+        // 取得使用者選擇的選項
+        const radios = document.getElementsByName('option');
+        let selectedValue = null;
+        
+        for (const radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const explainBtn = document.getElementById('toggle-analysis-btn');
+
+        // 未作答處理
+        if (!selectedValue) {
+            alert("請先選擇一個答案再送出喔！");
+            return;
+        }
+
+        // 判斷對錯
+        if (selectedValue === 'A') {
+            // 答對
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.style.display = 'block';
+            feedbackArea.innerHTML = `
+                <h3>恭喜答對！</h3>
+                <p>你選擇了 <strong>(A)</strong>。</p>
+                <p>正確答案就是 <strong>(A)</strong>。</p>
+                <p>觀念非常正確！WAF 確實不是用來保護使用者端點設備的。請點擊下方「一鍵看解析」來複習詳細原理。</p>
+            `;
+            // 自動展開解析建議，或讓使用者自己點
+            explainBtn.style.display = 'inline-block';
+        } else {
+            // 答錯
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.style.display = 'block';
+            feedbackArea.innerHTML = `
+                <h3>答案錯誤，再想一下！</h3>
+                <p>你選擇了 <strong>(${selectedValue})</strong>，但正確答案是 <strong>(A)</strong>。</p>
+                <p><strong>觀念提示：</strong></p>
+                <p>請思考一下，題目中的風險是來自「員工帶出去的筆電」和「連線過程」。<br>
+                你選的這個選項 (${selectedValue}) 其實是可以有效保護筆電或連線的，所以它是有效的控制措施。</p>
+                <p>反而是 <strong>(A)</strong>，它通常是保護「網站伺服器」的，對於保護這台在外流浪的筆電，幫助比較小喔。</p>
+            `;
+            // 答錯時也顯示按鈕，讓學生看解析學習
+            explainBtn.style.display = 'inline-block';
+        }
+    }
+
+    /**
+     * 重置測驗
+     */
+    function resetQuiz() {
+        // 清空選項
+        const radios = document.getElementsByName('option');
+        for (const radio of radios) {
+            radio.checked = false;
+        }
+
+        // 隱藏回饋區
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'none';
+        feedbackArea.innerHTML = '';
+
+        // 收合解析區（選用，或保持展開）
+        const analysisDiv = document.getElementById('full-analysis');
+        const btn = document.getElementById('toggle-analysis-btn');
+        
+        analysisDiv.style.display = 'none';
+        btn.innerHTML = '▼ 一鍵看解析（含詳細觀念與解題技巧）';
+        
+        // 隱藏自我檢測答案
+        const answers = document.getElementsByClassName('answer-key');
+        for (const ans of answers) {
+            ans.style.display = 'none';
+        }
+    }
+
+    /**
+     * 切換解析顯示狀態
+     */
+    function toggleAnalysis() {
+        const analysisDiv = document.getElementById('full-analysis');
+        const btn = document.getElementById('toggle-analysis-btn');
+
+        if (analysisDiv.style.display === 'none' || analysisDiv.style.display === '') {
+            analysisDiv.style.display = 'block';
+            btn.innerHTML = '▲ 收合解析';
+            // 滾動到解析區
+            setTimeout(() => {
+                analysisDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        } else {
+            analysisDiv.style.display = 'none';
+            btn.innerHTML = '▼ 一鍵看解析（含詳細觀念與解題技巧）';
+        }
+    }
+
+    /**
+     * 顯示自我檢測答案
+     */
+    function toggleSelfTest(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'none' || el.style.display === '') {
+            el.style.display = 'inline';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

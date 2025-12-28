@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安短期衝刺班｜第 26 題：風險分析量化計算</title>
+    <style>
+        /* 全域設定：不依賴外部字型，清晰易讀 */
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* 內文字級要求 16px */
+        }
+
+        /* 容器樣式：模擬講義質感 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 5px solid #2c3e50; /* 穩重的深藍色頂部 */
+        }
+
+        /* 標題樣式：限制最大 18px */
+        h1, h2, h3 {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .header-title {
+            text-align: center;
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 0;
+        }
+
+        /* 題目區塊 */
+        .question-box {
+            background-color: #f9f9f9;
+            border-left: 5px solid #3498db;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        /* 選項樣式 */
+        .options-group {
+            margin-left: 10px;
+        }
+
+        .option-label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #e8f4fc;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕群組 */
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: #e74c3c; /* 紅色，強調作答 */
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-explain {
+            background-color: #3498db; /* 藍色，強調知識 */
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* 結果顯示區 */
+        #result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .result-correct {
+            background-color: #dff0d8;
+            border: 1px solid #d6e9c6;
+            color: #3c763d;
+        }
+
+        .result-wrong {
+            background-color: #f2dede;
+            border: 1px solid #ebccd1;
+            color: #a94442;
+        }
+
+        /* 解析區塊（預設隱藏） */
+        #explanation-area {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+        }
+
+        /* 高亮與強調樣式 */
+        .highlight {
+            background-color: #fffacd; /* 淺黃色底 */
+            color: #d35400;
+            padding: 0 4px;
+            font-weight: bold;
+            border-radius: 2px;
+        }
+
+        .keyword-box {
+            display: inline-block;
+            border: 1px solid #3498db;
+            color: #3498db;
+            padding: 2px 6px;
+            margin: 2px;
+            font-size: 14px;
+            border-radius: 12px;
+        }
+
+        .step-box {
+            background-color: #f0f7fb;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .formula {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            border-radius: 4px;
+            font-family: monospace; /* 等寬字體更有公式感 */
+            letter-spacing: 1px;
+        }
+
+        .trap-alert {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        /* 表格樣式 (用於對照) */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-title">
+        <h1>資安短期衝刺班｜第 26 題：風險分析（量化計算）</h1>
+    </div>
+
+    <!-- 題目顯示區 -->
+    <div class="question-box">
+        <p class="question-text">
+            26. 風險分析其中一個功能是利用量化計算公式估算並詮釋風險程度。<br>
+            身為組織資通安全主管的您，正進行組織官網系統的安全風險評估，<br>
+            現在的情境為估算一個「20 年才會出現一次的地震」，<br>
+            將可能造成之風險值為下列何項？<br><br>
+            （其中曝露因子 E.F = 25%，資通系統價值 = 50 萬元）
+        </p>
+        
+        <form id="quiz-form">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A"> (A) 125000
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B"> (B) 6250
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C"> (C) 2500000
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D"> (D) 0（無風險）
+                </label>
+            </div>
+        </form>
+    </div>
+
+    <!-- 操作按鈕區 -->
+    <div class="btn-group">
+        <button type="button" class="btn-submit" onclick="checkAnswer()">送出作答</button>
+        <button type="button" class="btn-reset" onclick="resetQuiz()">重置作答</button>
+        <button type="button" class="btn-explain" onclick="toggleExplanation()">一鍵看解析</button>
+    </div>
+
+    <!-- 結果回饋區 -->
+    <div id="result-area"></div>
+
+    <!-- 完整解析區 (預設隱藏) -->
+    <div id="explanation-area">
+        <div class="header-title" style="background-color: #7f8c8d; margin-top: 0;">名師詳解區</div>
+
+        <!-- 第一步：找關鍵字 -->
+        <h3>【第一步：找關鍵字】</h3>
+        <p>請同學把題目中的這些字圈起來：</p>
+        <div>
+            <span class="keyword-box">量化計算</span>
+            <span class="keyword-box">20 年才會出現一次</span>
+            <span class="keyword-box">風險值</span>
+            <span class="keyword-box">曝露因子（E.F）</span>
+            <span class="keyword-box">資通系統價值</span>
+        </div>
+        <p><strong>老師點評：</strong>這題是<span class="highlight">標準的資安風險「量化計算題」</span>，一定要動筆算，絕對不能憑感覺選！</p>
+
+        <!-- 第二步：白話翻譯 -->
+        <h3>【第二步：白話翻譯】</h3>
+        <p>用最簡單的話來說，這題在問：</p>
+        <div class="step-box">
+            「公司在算如果發生地震，網站可能會損失多少錢。<br>
+            地震 20 年才發生一次，每次最多影響 25%，<br>
+            系統價值是 50 萬元，平均一年風險值是多少？」
+        </div>
+        <p><strong>名詞解釋：</strong></p>
+        <ul>
+            <li><strong>曝露因子（E.F）：</strong>一次事件發生後，會損失資產價值的多少比例。</li>
+            <li><strong>年發生率（ARO）：</strong>平均一年會發生幾次。</li>
+        </ul>
+
+        <!-- 第三步：解題思路 -->
+        <h3>【第三步：解題思路】</h3>
+        <p><strong>這題在考什麼觀念？</strong></p>
+        <p>一句話核心：<span class="highlight">「風險值 = 年發生率 × 單次損失金額」</span></p>
+
+        <h4>【原理與規則】</h4>
+        <p><strong>一、先寫出標準公式：</strong></p>
+        <div class="formula">
+            風險值（ALE） = 年發生率（ARO） × 單次損失期望值（SLE）
+        </div>
+
+        <p><strong>二、一步一步代入數字：</strong></p>
+        
+        <div class="step-box">
+            <strong>【步驟 1】計算年發生率（ARO）</strong><br>
+            題目說「20 年才會出現一次」<br>
+            → 平均一年發生 = 1 ÷ 20 = <span class="highlight">0.05 次／年</span>
+        </div>
+
+        <div class="step-box">
+            <strong>【步驟 2】計算單次損失期望值（SLE）</strong><br>
+            SLE = 資產價值 × 曝露因子<br>
+            = 500,000 × 25%<br>
+            = 500,000 × 0.25<br>
+            = <span class="highlight">125,000 元</span>
+        </div>
+
+        <div class="step-box">
+            <strong>【步驟 3】計算風險值（ALE）</strong><br>
+            ALE = ARO × SLE<br>
+            = 0.05 × 125,000<br>
+            = <span class="highlight">6,250</span>
+        </div>
+
+        <!-- 第四步：選項分析 -->
+        <h3>【第四步：選項分析】</h3>
+        <ul>
+            <li><strong>(A) 125,000</strong><br>這只是「單次損失金額」，不是風險值（你少乘了發生率）。</li>
+            <li><strong>(B) 6,250</strong><br><span style="color: red; font-weight: bold;">（正確答案）</span>有正確計算「年發生率 × 單次損失」。</li>
+            <li><strong>(C) 2,500,000</strong><br>完全沒有使用曝露因子與年發生率，亂乘一通。</li>
+            <li><strong>(D) 0</strong><br>發生機率低 ≠ 沒有風險（這是考試超常見陷阱）。</li>
+        </ul>
+
+        <!-- 觀念補充與延伸 -->
+        <h3>【觀念補充與延伸】</h3>
+        <p><strong>核心觀念定位：</strong>本題屬於「風險管理」中的「量化風險分析」，是 iPAS、公職、國營考試的必考計算題。</p>
+        <p><strong>對比概念：</strong></p>
+        <table>
+            <tr>
+                <th>分析方法</th>
+                <th>特徵</th>
+            </tr>
+            <tr>
+                <td>量化分析</td>
+                <td>有給具體數字、公式計算（選本題的方法）</td>
+            </tr>
+            <tr>
+                <td>質化分析</td>
+                <td>沒給數字、用高/中/低等級判斷</td>
+            </tr>
+        </table>
+        <p><strong>常見變化題型：</strong></p>
+        <ul>
+            <li>把「10 年一次」改成「5 年一次」（ARO 變 0.2）。</li>
+            <li>改曝露因子成 40%。</li>
+            <li>改資產價值為 100 萬。</li>
+        </ul>
+
+        <!-- 記憶口訣 -->
+        <h3>【記憶口訣】</h3>
+        <div class="step-box" style="text-align: center; font-size: 1.1em; font-weight: bold;">
+            「一年發生率 × 一次損失 = 年風險值」
+        </div>
+
+        <!-- 常見陷阱 -->
+        <h3>【常見陷阱】</h3>
+        <div class="trap-alert">
+            <strong>老師提醒大家注意：</strong>
+            <ul>
+                <li><strong>學生最容易錯：</strong>忘記除以「20 年」，或是把 25% 當成 25 去乘。</li>
+                <li><strong>心理盲點：</strong>覺得「很久才發生」就是沒事，直覺選 0。</li>
+                <li><strong>避坑指南：</strong>只要看到「幾年一次」，一定先算出 ARO（年發生率）再說。</li>
+            </ul>
+        </div>
+
+        <!-- 正確答案 -->
+        <h3>【正確答案】</h3>
+        <p>答案：<strong>B</strong></p>
+        <p>理由：風險值需同時考慮發生頻率與損失金額，正確計算結果為 6,250。</p>
+
+        <!-- 自我檢測 -->
+        <h3>【自我檢測】</h3>
+        <p>遮住答案想一想：</p>
+        <ol>
+            <li>
+                <strong>如果改成 10 年發生一次，風險值會變多少？</strong><br>
+                <span style="color: #666; font-size: 0.9em;">（參考答案：年發生率變 0.1，風險值會加倍變成 12,500）</span>
+            </li>
+            <li>
+                <strong>如果曝露因子變成 50%，風險值會如何變化？</strong><br>
+                <span style="color: #666; font-size: 0.9em;">（參考答案：單次損失加倍，風險值也加倍）</span>
+            </li>
+            <li>
+                <strong>為什麼「很久才發生」不代表「沒有風險」？</strong><br>
+                <span style="color: #666; font-size: 0.9em;">（參考答案：因為風險是用「平均值」來衡量的，只要有機率就有風險）</span>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<script>
+    // 定義正確答案
+    const CORRECT_ANSWER = 'B';
+
+    /**
+     * 檢查作答邏輯
+     */
+    function checkAnswer() {
+        // 取得使用者選擇的選項
+        const options = document.getElementsByName('answer');
+        let userChoice = null;
+
+        for (const option of options) {
+            if (option.checked) {
+                userChoice = option.value;
+                break;
+            }
+        }
+
+        const resultArea = document.getElementById('result-area');
+        
+        // 未作答防呆機制
+        if (!userChoice) {
+            alert('同學，請先選擇一個答案再送出喔！');
+            return;
+        }
+
+        // 顯示結果區塊
+        resultArea.style.display = 'block';
+
+        if (userChoice === CORRECT_ANSWER) {
+            // 答對的處理
+            resultArea.className = 'result-correct';
+            resultArea.innerHTML = `
+                <strong>答對了！太棒了！</strong><br>
+                您的選擇：(${userChoice})<br>
+                正確答案：(${CORRECT_ANSWER})<br>
+                <br>
+                看來觀念很清楚喔！建議還是可以點開「一鍵看解析」確認細節。
+            `;
+        } else {
+            // 答錯的處理
+            resultArea.className = 'result-wrong';
+            resultArea.innerHTML = `
+                <strong>答錯囉，別灰心！</strong><br>
+                您的選擇：(${userChoice})<br>
+                正確答案：(${CORRECT_ANSWER})<br>
+                <br>
+                <strong>【計算提示】：</strong><br>
+                是不是忘記把「20年一次」換算成「一年發生幾次」了呢？<br>
+                記得公式：風險值 = (1 / 頻率) × (價值 × 曝露因子)<br>
+                <br>
+                快點擊下方「一鍵看解析」把這個必考題弄懂！
+            `;
+        }
+    }
+
+    /**
+     * 切換解析顯示狀態
+     */
+    function toggleExplanation() {
+        const explainArea = document.getElementById('explanation-area');
+        const btnExplain = document.querySelector('.btn-explain');
+
+        if (explainArea.style.display === 'none' || explainArea.style.display === '') {
+            explainArea.style.display = 'block';
+            btnExplain.textContent = '收起解析';
+            // 自動捲動到解析區
+            explainArea.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            explainArea.style.display = 'none';
+            btnExplain.textContent = '一鍵看解析';
+        }
+    }
+
+    /**
+     * 重置作答狀態
+     */
+    function resetQuiz() {
+        // 清除選項
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // 隱藏結果區
+        const resultArea = document.getElementById('result-area');
+        resultArea.style.display = 'none';
+        resultArea.innerHTML = '';
+        resultArea.className = ''; // 清除樣式類別
+
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

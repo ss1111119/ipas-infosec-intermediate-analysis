@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安衝刺班｜題組5-Q39｜風險處理時程有效性判斷</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --border-color: #bdc3c7;
+            --highlight-bg: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.6;
+            font-size: 16px; /* 依照要求：內文字級 16px */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--accent-color);
+        }
+
+        /* 標題樣式限制 */
+        h1, h2, h3 {
+            font-size: 18px; /* 依照要求：標題最多 18px */
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .scenario-box {
+            background-color: #e8f6f3;
+            padding: 15px;
+            border: 1px solid #d1f2eb;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .image-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background-color: #fff;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .image-caption {
+            font-size: 14px;
+            color: #666;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .question-block {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f3f4;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .action-area {
+            text-align: center;
+            margin: 25px 0;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed var(--border-color);
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            margin: 0 5px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-explain {
+            background-color: var(--primary-color);
+            color: white;
+            display: none; /* 預設隱藏，答對或點擊後顯示 */
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* 結果回饋區 */
+        #feedback-area {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #d4efdf;
+            color: #145a32;
+            border: 1px solid #a9dfbf;
+        }
+
+        .feedback-wrong {
+            background-color: #fadbd8;
+            color: #7b241c;
+            border: 1px solid #e6b0aa;
+        }
+
+        /* 解析區塊 */
+        #explanation-area {
+            display: none;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-left: 4px solid var(--accent-color);
+            margin-top: 20px;
+        }
+
+        .step-box {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        .concept-tag {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        /* 強制提醒區塊 */
+        .alert-box {
+            border: 2px solid var(--wrong-color);
+            padding: 10px;
+            color: var(--wrong-color);
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 頁面標題 -->
+    <div style="text-align: center; margin-bottom: 20px;">
+        <span class="concept-tag">高中資安初學專用</span>
+        <span class="concept-tag">題組 5：第 39 題</span>
+        <h1 style="margin-top: 10px; border: none;">風險管理時程推算與有效性確認</h1>
+    </div>
+
+    <!-- 共用情境區 -->
+    <div class="scenario-box">
+        <h3>【題組共用情境】</h3>
+        <p>M 公司為國內股票上市公司，從事國內資安軟硬體開發銷售相關業務，已通過 ISO 27001:2013 驗證，並持續維持證照有效。</p>
+        <p>公司於每年 3 月進行年度風險評鑑作業，並規定「<strong>執行風險回應後，最遲須於 2 個月內確認有效</strong>」。</p>
+    </div>
+
+    <!-- 流程圖顯示 -->
+    <div class="image-container">
+        <img src="https://i.meee.com.tw/8qv0lSo.jpg" alt="ISO 31000 風險管理流程圖">
+        <span class="image-caption">圖說：ISO 31000 風險管理流程（包含建立背景、辨識、分析、評估、處理等步驟）</span>
+    </div>
+
+    <!-- 題目區 -->
+    <div class="question-block">
+        <h3>【題目 39】</h3>
+        <p>承上題（註：上題提及 <strong>8 月初正式販售</strong>），M 公司與 A 公司簽訂之合約內容要求 M 公司必須符合資通安全法，同時並規定<strong>產品正式販售前</strong>，M 公司必須符合合約所有規範事項。</p>
+        <p>公司進行所述之風險評鑑辨識出法遵風險，並規劃相關風險回應，請問應何時完成風險回應並確認有效？</p>
+
+        <form id="quiz-form">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="q39" value="A">
+                    (A) 6 月執行風險回應，7 月確認風險回應有效
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q39" value="B">
+                    (B) 6 月執行風險回應，8 月確認風險回應有效
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q39" value="C">
+                    (C) 7 月執行風險回應，9 月確認風險回應有效
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q39" value="D">
+                    (D) 8 月執行風險回應，10 月確認風險回應有效
+                </label>
+            </div>
+        </form>
+    </div>
+
+    <!-- 互動按鈕區 -->
+    <div class="action-area">
+        <button type="button" class="btn-submit" onclick="checkAnswer()">送出作答</button>
+        <button type="button" class="btn-reset" onclick="resetQuiz()">重置</button>
+        <button type="button" class="btn-explain" id="btn-explain" onclick="toggleExplanation()">顯示/隱藏名師解析</button>
+    </div>
+
+    <!-- 即時回饋區 -->
+    <div id="feedback-area"></div>
+    <div id="wrong-hint" class="alert-box">
+        老師提示：注意題目說「正式販售前」要符合。
+        <br>上題情境說「8 月初」要賣，所以最晚幾月要搞定？請用「倒推法」思考！
+    </div>
+
+    <!-- 解析區 -->
+    <div id="explanation-area">
+        <h2>【資安名師：解題詳解】</h2>
+        
+        <div class="step-box">
+            <h3>第一步：找關鍵字</h3>
+            <p>請拿起螢光筆畫下這幾句：</p>
+            <ul>
+                <li><span class="highlight">合約要求符合資通安全法</span></li>
+                <li><span class="highlight">正式販售前必須符合所有規範</span></li>
+                <li><span class="highlight">風險回應後最遲 2 個月內確認有效</span>（公司內規）</li>
+                <li><span class="highlight">今年 8 月初正式販售</span>（這點最關鍵！來自題組前一題的資訊）</li>
+            </ul>
+            <p><strong>老師說明：</strong>這題本質是「時間推算題」，考你能否把公司規則套進合約的時間線裡。</p>
+        </div>
+
+        <div class="step-box">
+            <h3>第二步：白話翻譯</h3>
+            <p>用大家聽得懂的話來說：</p>
+            <p>「公司 <strong>8 月</strong>就要賣產品給政府了，合約說<strong>賣之前</strong>所有資安規定都要做到好。</p>
+            <p>公司內部規定：做完風險處理動作後，還要花時間檢查，<strong>最慢 2 個月內</strong>要驗證它有沒有效。</p>
+            <p>請問，行事曆要怎麼排才來得及？」</p>
+        </div>
+
+        <div class="step-box">
+            <h3>第三步：解題思路（SOP）</h3>
+            <p><strong>核心考點：</strong>合約截止日（販售前）＋ 公司內規（2 個月驗證）＝ 倒推時間</p>
+            <ol>
+                <li><strong>先抓「硬期限」：</strong>正式販售前必須符合。<br>→ 因為 8 月初要賣，所以死線是 <strong>7 月底</strong>（最晚 7 月要確認已符合）。</li>
+                <li><strong>套公司規定：</strong>風險回應後最遲 2 個月內確認有效。<br>→ 如果 7 月要確認有效，往前推算，風險回應動作必須在 <strong>6 月</strong>完成（6 月做，7 月驗證，剛好在 2 個月內，且趕在 8 月前）。</li>
+                <li><strong>對照選項：</strong>找「6 月執行、7 月確認」。<br>→ 答案就是 <strong>(A)</strong>。</li>
+            </ol>
+        </div>
+
+        <div class="step-box">
+            <h3>第四步：選項分析</h3>
+            <ul>
+                <li><strong>(A) 6 月執行，7 月確認（正確）：</strong><br>時間剛好。7 月確認完畢，8 月初開賣時已經符合合約。</li>
+                <li><strong>(B) 6 月執行，8 月確認（錯誤）：</strong><br>太慢了。8 月才確認，如果 8 月 1 號就開賣，你就違約了（因為題目說販售「前」要符合）。</li>
+                <li><strong>(C) 7 月執行，9 月確認（錯誤）：</strong><br>太晚，那時候產品都賣一個月了。</li>
+                <li><strong>(D) 8 月執行，10 月確認（錯誤）：</strong><br>完全來不及。</li>
+            </ul>
+        </div>
+
+        <div class="step-box">
+            <h3>觀念補充與陷阱</h3>
+            <p><strong>記憶口訣：</strong>「先抓截止日，再用規則倒推」。</p>
+            <p><strong>常見陷阱：</strong>很多同學只看到「2 個月內」，就覺得 6 月做、8 月驗證也可以啊？</p>
+            <p><strong>避坑指南：</strong>千萬別忘了這題有「外部合約」壓著你。合約是老大，說 8 月賣，你 7 月就要準備好。題目只要出現「某日前必須符合」，一律用倒推法。</p>
+        </div>
+
+        <div class="step-box" style="border-bottom: none;">
+            <h3>自我檢測</h3>
+            <p><strong>問：</strong>若公司規定改成「1 個月內確認有效」，最晚何時需執行風險回應？</p>
+            <p><strong>答：</strong>還是建議 6 月執行，7 月確認最保險。如果 7 月才執行，很可能壓線甚至來不及在 8 月初販售前完成確認。</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        // 取得使用者選擇
+        const options = document.getElementsByName('q39');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const explainBtn = document.getElementById('btn-explain');
+        const wrongHint = document.getElementById('wrong-hint');
+
+        // 清除舊樣式
+        feedbackArea.className = '';
+        feedbackArea.style.display = 'block';
+        wrongHint.style.display = 'none';
+
+        if (!selectedValue) {
+            feedbackArea.textContent = '請先選擇一個答案！';
+            feedbackArea.className = 'feedback-wrong';
+            return;
+        }
+
+        if (selectedValue === 'A') {
+            // 答對
+            feedbackArea.textContent = '恭喜答對！觀念非常正確！(選項 A)';
+            feedbackArea.className = 'feedback-correct';
+            explainBtn.style.display = 'inline-block'; // 顯示解析按鈕
+            // 自動展開解析（獎勵機制）
+            document.getElementById('explanation-area').style.display = 'block';
+        } else {
+            // 答錯
+            feedbackArea.textContent = '答案錯誤。您的選擇是 (' + selectedValue + ')，正確答案是 (A)。';
+            feedbackArea.className = 'feedback-wrong';
+            wrongHint.style.display = 'block'; // 顯示提示
+            explainBtn.style.display = 'inline-block'; // 還是給看解析，但需手動點
+        }
+    }
+
+    function resetQuiz() {
+        // 重置選項
+        const options = document.getElementsByName('q39');
+        for (const option of options) {
+            option.checked = false;
+        }
+        
+        // 隱藏回饋與解析
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('explanation-area').style.display = 'none';
+        document.getElementById('btn-explain').style.display = 'none';
+        document.getElementById('wrong-hint').style.display = 'none';
+    }
+
+    function toggleExplanation() {
+        const explainArea = document.getElementById('explanation-area');
+        if (explainArea.style.display === 'none' || explainArea.style.display === '') {
+            explainArea.style.display = 'block';
+        } else {
+            explainArea.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

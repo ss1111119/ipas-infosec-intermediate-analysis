@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安短期衝刺班：CIA 機密性概念解析</title>
+    <style>
+        /* * 基礎設定
+         * 字體設定為系統預設無襯線體，確保跨平台清晰度
+         * 禁止使用 Emoji，以顏色和幾何圖形作為視覺引導
+         */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --correct-color: #155724;
+            --correct-bg: #d4edda;
+            --wrong-color: #721c24;
+            --wrong-bg: #f8d7da;
+            --border-color: #dee2e6;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f8f9fa;
+            font-size: 16px; /* 基準字級 */
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* * 標題限制：不可比內文大超過 1 個字級 (16px -> 18px) 
+         */
+        h1, h2, h3 {
+            font-size: 18px; 
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        /* 教師語氣引言區塊 */
+        .intro-banner {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .intro-banner h1 {
+            color: white;
+            border-left: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        /* 題目區塊樣式 */
+        .question-box {
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+
+        .question-label {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            font-size: 14px;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        /* 選項樣式 */
+        .options-group label {
+            display: block;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .options-group label:hover {
+            background-color: #f1f3f5;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        /* 高亮樣式 */
+        mark {
+            background-color: yellow;
+            color: black;
+            padding: 0 2px;
+            font-weight: bold;
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: #f1f3f5;
+        }
+
+        /* 回饋區塊 */
+        .feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-correct {
+            background-color: var(--correct-bg);
+            color: var(--correct-color);
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: var(--wrong-bg);
+            color: var(--wrong-color);
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區塊（預設隱藏） */
+        .analysis-section {
+            display: none;
+            margin-top: 20px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 20px;
+        }
+
+        .step-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* 表格樣式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #e9ecef;
+        }
+
+        /* 自我檢測區塊 */
+        .self-check-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .reveal-answer {
+            cursor: pointer;
+            color: var(--accent-color);
+            text-decoration: underline;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+        .hidden-answer {
+            display: none;
+            font-weight: bold;
+            color: var(--correct-color);
+            margin-left: 10px;
+        }
+
+        /* 細節展開樣式 */
+        details {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="intro-banner">
+        <h1>資安短期衝刺班：名師解題實戰</h1>
+        <p>各位同學好！這是資安入門的第一堂必修課。這題看起來簡單，但包含了 CIA 三要素的核心觀念。請先嘗試作答，我們再來一步步拆解。</p>
+    </div>
+
+    <!-- 1) 題目區塊 -->
+    <div class="question-box">
+        <span class="question-label">單選題</span>
+        <div class="question-text">
+            3. 導入下列何者措施，其主要目的「<mark style="background-color: yellow; color: red;">不</mark>」是提升機密性？
+        </div>
+        <div class="options-group">
+            <label>
+                <input type="radio" name="quiz" value="A"> (A) 在內部重要網段增設防火牆
+            </label>
+            <label>
+                <input type="radio" name="quiz" value="B"> (B) 導入主機負載平衡系統
+            </label>
+            <label>
+                <input type="radio" name="quiz" value="C"> (C) 導入資料加密系統
+            </label>
+            <label>
+                <input type="radio" name="quiz" value="D"> (D) 限制機密資料僅少數人員可以存取
+            </label>
+        </div>
+    </div>
+
+    <!-- 互動控制區 -->
+    <div class="controls">
+        <button class="btn" onclick="submitAnswer()">送出作答</button>
+        <button class="btn btn-outline" onclick="resetQuiz()">重置</button>
+    </div>
+
+    <!-- 回饋顯示區 -->
+    <div id="feedback-area" class="feedback-area"></div>
+
+    <!-- 解析展開按鈕 -->
+    <div id="analysis-toggle-area" style="margin-top: 20px; display: none;">
+        <button class="btn" style="width: 100%; background-color: var(--accent-color);" onclick="toggleAnalysis()">一鍵看解析</button>
+    </div>
+
+    <!-- 完整解析內容 (2~9) -->
+    <div id="full-analysis" class="analysis-section">
+        
+        <!-- 2) 第一步：找關鍵字 -->
+        <div class="step-box">
+            <h2>第一步：找關鍵字</h2>
+            <p>請拿好你的螢光筆，把這些詞圈起來：</p>
+            <ul>
+                <li><mark>不 是</mark>：解題方向，要找反例。</li>
+                <li><mark>提升機密性</mark>：對應 CIA 中的 C (Confidentiality)，意指防止外洩。</li>
+                <li><mark>措施</mark>：這題考的是防禦手段的功能分類。</li>
+                <li><mark>防火牆</mark>：阻擋非法連線 -> 保護存取 -> 機密性 (C)。</li>
+                <li><mark>負載平衡</mark>：分擔流量防止當機 -> 可用性 (A)。</li>
+                <li><mark>資料加密</mark>：防止被看懂 -> 機密性 (C)。</li>
+                <li><mark>存取限制</mark>：防止閒雜人等 -> 機密性 (C)。</li>
+            </ul>
+        </div>
+
+        <!-- 3) 第二步：白話翻譯 -->
+        <div class="step-box">
+            <h2>第二步：白話翻譯</h2>
+            <p><strong>題目白話文：</strong>「下面這些資安做法裡，哪一個不是在保護資料不被偷看？」</p>
+            <p><strong>名詞解釋：</strong></p>
+            <ul>
+                <li><strong>機密性 (Confidentiality)：</strong>只有被允許的人才能看到資料。</li>
+                <li><strong>防火牆 (Firewall)：</strong>像是警衛室，擋住不該進來的網路連線。</li>
+                <li><strong>負載平衡 (Load Balancing)：</strong>把很多人流量分散到多台主機，避免單台主機累死當機。</li>
+                <li><strong>資料加密 (Encryption)：</strong>把資料變成亂碼，就算被拿走，也看不懂內容。</li>
+            </ul>
+        </div>
+
+        <!-- 4) 第三步：解題思路 -->
+        <div class="step-box">
+            <h2>第三步：解題思路</h2>
+            <p><strong>這題在考什麼觀念？</strong><br>
+            是否能正確分辨 CIA 三要素中，哪個措施是在保護「機密性」，哪個不是。</p>
+            
+            <p><strong>解題步驟：</strong></p>
+            <ol>
+                <li>先回想 CIA 三要素：機密性、完整性、可用性。</li>
+                <li>判斷每個選項主要在保護哪一個面向。</li>
+                <li>題目問「不 是提升機密性」，選與機密性無直接關係者。</li>
+            </ol>
+
+            <p><strong>原理與規則：</strong></p>
+            <ul>
+                <li><strong>機密性重點：</strong>防止未授權的人「看到」資料。</li>
+                <li><strong>可用性重點：</strong>確保系統「不中斷、能使用」。</li>
+                <li><strong>負載平衡：</strong>目的在於提升服務穩定與效能，屬於可用性 (Availability)，而非機密性 (Confidentiality)。</li>
+            </ul>
+
+            <p><strong>生活比喻：</strong></p>
+            <ul>
+                <li><strong>防火牆、存取限制、加密：</strong>就像「上鎖、設密碼、用保險箱」，目的是不讓人偷看。</li>
+                <li><strong>負載平衡：</strong>就像「大賣場多開幾個收銀台，讓客人不要排隊」，這跟防止小偷偷東西（機密性）無關，是為了結帳順暢。</li>
+            </ul>
+        </div>
+
+        <!-- 5) 第四步：選項分析 -->
+        <div class="step-box">
+            <h2>第四步：選項分析</h2>
+            <details>
+                <summary>(A) 在內部重要網段增設防火牆 [點擊展開]</summary>
+                <p><strong>為什麼它是對的（它是機密性措施）？</strong><br>
+                防火牆透過規則阻擋未授權的網路封包進入，間接防止了駭客接觸機密資料。</p>
+            </details>
+            <details open>
+                <summary>(B) 導入主機負載平衡系統 [點擊展開]</summary>
+                <p><strong>為什麼它是錯的（它不是機密性措施）？</strong><br>
+                負載平衡器（Load Balancer）主要功能是將流量分發到後端多台伺服器。它的核心價值是避免單點故障、提升處理效能，確保服務不中斷。這是典型的「可用性 (Availability)」控制措施。</p>
+            </details>
+            <details>
+                <summary>(C) 導入資料加密系統 [點擊展開]</summary>
+                <p><strong>為什麼它是對的（它是機密性措施）？</strong><br>
+                加密是保護機密性最強大的手段。即使資料被竊取，沒有金鑰也無法讀取內容。</p>
+            </details>
+            <details>
+                <summary>(D) 限制機密資料僅少數人員可以存取 [點擊展開]</summary>
+                <p><strong>為什麼它是對的（它是機密性措施）？</strong><br>
+                這是存取控制（Access Control）。越少人能接觸資料，資料外洩的風險就越低，直接保護了機密性。</p>
+            </details>
+        </div>
+
+        <!-- 6) 觀念補充與延伸 -->
+        <div class="step-box">
+            <h2>觀念補充與延伸</h2>
+            <p><strong>核心觀念定位：</strong>本題屬於「CIA 三要素」章節，是考試中的「超高頻基本題」。</p>
+            <p><strong>CIA 相關定義：</strong></p>
+            <ul>
+                <li><strong>Confidentiality (機密性)：</strong>不讓不該看的人看到。</li>
+                <li><strong>Integrity (完整性)：</strong>資料不被亂改（例如：轉帳金額 100 元變成 10000 元）。</li>
+                <li><strong>Availability (可用性)：</strong>系統不中斷，隨時可以用。</li>
+            </ul>
+            <p><strong>觸類旁通：</strong></p>
+            <ul>
+                <li>問「哪個不是可用性？」時，通常答案會是加密或權限控管。</li>
+                <li>備援 (Backup) 和 備用電源 (UPS) 也是屬於可用性的範疇。</li>
+            </ul>
+        </div>
+
+        <!-- 7) 記憶口訣 -->
+        <div class="step-box">
+            <h2>記憶口訣</h2>
+            <blockquote style="border-left: 5px solid #FFD700; padding-left: 10px; font-size: 1.1em;">
+                「偷看才叫密，分流是為了不中斷」
+            </blockquote>
+        </div>
+
+        <!-- 8) 常見陷阱 -->
+        <div class="step-box">
+            <h2>常見陷阱</h2>
+            <ul>
+                <li><strong>學生最容易搞混：</strong>看到「資安設備」就以為都在保護機密性，忘記資安也包含讓系統活著。</li>
+                <li><strong>避坑指南：</strong>看到選項先問自己一句：「這個功能是在防偷看，還是在防當機？」如果是防當機，那就是可用性。</li>
+            </ul>
+        </div>
+
+        <!-- 9) 正確答案 -->
+        <div class="step-box">
+            <h2>正確答案</h2>
+            <p style="font-size: 1.2em; color: var(--wrong-color); font-weight: bold;">答案：B</p>
+            <p>一句話理由：主機負載平衡是為了提升系統可用性，而不是機密性。</p>
+        </div>
+    </div>
+
+    <!-- 10) 自我檢測 -->
+    <div class="step-box" style="margin-top: 20px;">
+        <h2>自我檢測</h2>
+        <div class="self-check-item">
+            <span>1. 資料備份主要是保護 CIA 的哪一項？</span>
+            <span class="reveal-answer" onclick="toggleSelfCheck(this)">[看答案]</span>
+            <span class="hidden-answer">可用性 (Availability)</span>
+        </div>
+        <div class="self-check-item">
+            <span>2. 權限控管主要在保護哪一項？</span>
+            <span class="reveal-answer" onclick="toggleSelfCheck(this)">[看答案]</span>
+            <span class="hidden-answer">機密性 (Confidentiality)</span>
+        </div>
+        <div class="self-check-item">
+            <span>3. 雜湊 (Hash) 主要與哪一項最相關？</span>
+            <span class="reveal-answer" onclick="toggleSelfCheck(this)">[看答案]</span>
+            <span class="hidden-answer">完整性 (Integrity)</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitAnswer() {
+        const radios = document.getElementsByName('quiz');
+        let selectedValue = null;
+        
+        for (const radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        const feedbackArea = document.getElementById('feedback-area');
+        const analysisToggleArea = document.getElementById('analysis-toggle-area');
+        const correctAnswer = 'B';
+
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+        
+        if (selectedValue === correctAnswer) {
+            // 答對邏輯
+            feedbackArea.className = 'feedback-area feedback-correct';
+            feedbackArea.innerHTML = `
+                <strong>完全正確！</strong><br>
+                您選擇了 (${selectedValue})。主機負載平衡屬於「可用性」，不屬於機密性。<br>
+                您可以點擊下方按鈕查看完整名師解析。
+            `;
+            // 顯示解析按鈕
+            analysisToggleArea.style.display = 'block';
+        } else {
+            // 答錯邏輯
+            feedbackArea.className = 'feedback-area feedback-wrong';
+            feedbackArea.innerHTML = `
+                <strong>答錯囉！</strong><br>
+                您選擇了 (${selectedValue})。<br>
+                <strong>觀念提示：</strong>請回想一下，題目問的是「不」是機密性。機密性是指「防止資料被偷看」。<br>
+                您選的這個選項，其實是有助於防止資料外洩的。<br>
+                再想一下，哪一個選項是為了「讓系統不塞車、不當機」用的？
+            `;
+            // 答錯時，根據要求不直接顯示完整解析，但可以讓學生重試
+            analysisToggleArea.style.display = 'block'; // 仍然提供解析按鈕，但透過提示引導
+        }
+    }
+
+    function resetQuiz() {
+        // 清空選項
+        const radios = document.getElementsByName('quiz');
+        for (const radio of radios) {
+            radio.checked = false;
+        }
+        
+        // 隱藏回饋與解析
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('analysis-toggle-area').style.display = 'none';
+        
+        const fullAnalysis = document.getElementById('full-analysis');
+        fullAnalysis.style.display = 'none';
+        
+        const btn = document.querySelector('#analysis-toggle-area button');
+        btn.textContent = '一鍵看解析';
+        
+        // 重置自我檢測
+        const hiddenAnswers = document.querySelectorAll('.hidden-answer');
+        const reveals = document.querySelectorAll('.reveal-answer');
+        
+        hiddenAnswers.forEach(el => el.style.display = 'none');
+        reveals.forEach(el => el.style.display = 'inline');
+    }
+
+    function toggleAnalysis() {
+        const analysisDiv = document.getElementById('full-analysis');
+        const btn = document.querySelector('#analysis-toggle-area button');
+        
+        if (analysisDiv.style.display === 'none' || analysisDiv.style.display === '') {
+            analysisDiv.style.display = 'block';
+            btn.textContent = '收合解析';
+            // 自動捲動到解析區
+            analysisDiv.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            analysisDiv.style.display = 'none';
+            btn.textContent = '一鍵看解析';
+        }
+    }
+
+    function toggleSelfCheck(element) {
+        element.style.display = 'none';
+        element.nextElementSibling.style.display = 'inline';
+    }
+</script>
+
+</body>
+</html>

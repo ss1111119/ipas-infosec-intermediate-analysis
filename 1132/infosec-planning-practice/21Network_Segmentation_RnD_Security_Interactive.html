@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安短期衝刺班 | 題組 3：網路區隔與研發安全</title>
+    <style>
+        /* 基礎重置與字型設定 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        /* 版面容器 */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* 共用情境區塊 (置頂) */
+        .scenario-box {
+            background-color: #e8f4fc;
+            border-bottom: 4px solid #0056b3;
+            padding: 20px;
+        }
+
+        .scenario-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0056b3;
+            margin-bottom: 10px;
+            border-left: 5px solid #0056b3;
+            padding-left: 10px;
+        }
+
+        .scenario-content ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .scenario-hint {
+            font-weight: bold;
+            color: #c00;
+            margin-top: 10px;
+        }
+
+        /* 題組導覽頁籤 */
+        .nav-tabs {
+            display: flex;
+            background-color: #ddd;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .nav-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+            transition: background 0.3s;
+            border-right: 1px solid #fff;
+        }
+
+        .nav-tab:last-child {
+            border-right: none;
+        }
+
+        .nav-tab.active {
+            background-color: #fff;
+            color: #000;
+            border-top: 4px solid #28a745;
+        }
+
+        .nav-tab:hover:not(.active) {
+            background-color: #eee;
+        }
+
+        /* 題目內容區 */
+        .question-area {
+            padding: 30px;
+            display: none; /* 預設隱藏，透過 JS 切換 */
+        }
+
+        .question-area.active {
+            display: block;
+        }
+
+        .q-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .q-text {
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* 選項樣式 */
+        .options-group {
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: block;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9f9f9;
+            border-color: #bbb;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+        }
+
+        /* 按鈕區 */
+        .action-bar {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed #ccc;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-submit {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #004494;
+        }
+
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-explain {
+            background-color: #28a745;
+            color: white;
+            display: none; /* 作答後才顯示，或預設顯示但需點擊展開 */
+        }
+
+        /* 答題回饋區 */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 詳細解析區 */
+        .explanation-container {
+            margin-top: 30px;
+            border: 1px solid #b8daff;
+            border-radius: 4px;
+            overflow: hidden;
+            display: none; /* 預設收合 */
+        }
+
+        .explanation-header {
+            background-color: #cce5ff;
+            padding: 10px 15px;
+            font-weight: bold;
+            color: #004085;
+        }
+
+        .explanation-body {
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        .step-block {
+            margin-bottom: 20px;
+            padding-left: 15px;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #17a2b8;
+            margin-bottom: 5px;
+            font-size: 17px;
+        }
+
+        .highlight-text {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .keyword-explanation {
+            font-size: 15px;
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .option-analysis ul {
+            list-style: none;
+        }
+
+        .option-analysis li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            text-indent: -20px;
+        }
+
+        .correct-opt {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .wrong-opt {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .mnemonic-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #856404;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .self-check {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .qa-pair {
+            margin-bottom: 10px;
+        }
+
+        .qa-q {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .qa-a {
+            color: #0056b3;
+            margin-left: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 固定顯示的共用情境 -->
+    <div class="scenario-box">
+        <div class="scenario-title">【題組 3：共用情境（21–24 題）】</div>
+        <div class="scenario-content">
+            <p>某公司為我國一先進技術的開發商，主要據點 A 與 B 分散於國內兩地。<br>
+            該公司十分重視資訊安全及品質管理，已通過 ISO 9001、ISO 14001 等相關標準驗證。</p>
+            <br>
+            <ul>
+                <li>據點 A：業務部門 S、研發部門 R1</li>
+                <li>據點 B：管理部門 A、研發部門 R2</li>
+                <li>資訊相關事務由管理部門 A 負責</li>
+            </ul>
+            <p class="scenario-hint">（提示：本題組重點在【研發資料保護、網路區隔、VPN 架構、集中上網】）</p>
+        </div>
+    </div>
+
+    <!-- 導覽頁籤 -->
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="switchTab('q21', this)">第 21 題</div>
+        <div class="nav-tab" onclick="switchTab('q22', this)">第 22 題 (預留)</div>
+        <div class="nav-tab" onclick="switchTab('q23', this)">第 23 題 (預留)</div>
+        <div class="nav-tab" onclick="switchTab('q24', this)">第 24 題 (預留)</div>
+    </div>
+
+    <!-- 第 21 題 完整區塊 -->
+    <div id="q21" class="question-area active">
+        <div class="q-title">第 21 題｜研發資料存取與網路架構</div>
+        
+        <div class="q-text">
+            <p>21. 假設公司認為研發部門的資料為其重要的營業祕密，因此不允許外部及其他部門存取研發部門的資料，R1 與 R2 部門間亦不允許互相存取。</p>
+            <br>
+            <p>但因研發需求，開放研發部門的員工可以上網，不過所有的上網流量需要【集中由據點 B】對外連線。</p>
+            <br>
+            <p>請問下列何種措施較「不」合適？</p>
+        </div>
+
+        <form id="form-q21">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="q21" value="A">
+                    (A) 各部門切割成獨立的網段
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q21" value="B">
+                    (B) 兩據點間透過 Site-to-Site VPN 連線
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q21" value="C">
+                    (C) 開放所有員工透過 SSL VPN 從外部連回公司讀取研發資料
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q21" value="D">
+                    (D) 將據點 A 的上網流量透過 VPN 通道引導到據點 B
+                </label>
+            </div>
+
+            <!-- 作答回饋區 -->
+            <div id="feedback-q21" class="feedback-box"></div>
+
+            <div class="action-bar">
+                <button type="button" class="btn-submit" onclick="checkAnswer('q21', 'C')">送出作答</button>
+                <button type="button" class="btn-explain" id="btn-explain-q21" onclick="toggleExplanation('q21')">一鍵看解析</button>
+                <button type="button" class="btn-reset" onclick="resetQuiz('q21')">重置</button>
+            </div>
+        </form>
+
+        <!-- 解析區塊 -->
+        <div id="explanation-q21" class="explanation-container">
+            <div class="explanation-header">【名師解析】第 21 題</div>
+            <div class="explanation-body">
+                
+                <div class="step-block">
+                    <div class="step-title">【第一步：找關鍵字】</div>
+                    <p>請注意題目中的紅字重點：</p>
+                    <p>
+                        <span class="highlight-text">營業祕密</span>：代表最高機密，需最高規格保護。<br>
+                        <span class="highlight-text">不允許外部及其他部門存取</span>：這是最重要的存取控制原則。<br>
+                        <span class="highlight-text">R1 與 R2 不可互通</span>：即使都是研發，也要做內部區隔。<br>
+                        <span class="highlight-text">集中由據點 B 上網</span>：流量需要經過管控點。<br>
+                        <span class="highlight-text">「不」合適</span>：選出違反上述原則的選項。
+                    </p>
+                    <div class="keyword-explanation">
+                        <strong>說明：</strong> 本題的核心目標是「研發資料高度隔離 + 集中對外流量控管」。
+                    </div>
+                </div>
+
+                <div class="step-block">
+                    <div class="step-title">【第二步：白話翻譯】</div>
+                    <p>用高中生的語言來說，這題是在問：「公司最機密的資料，絕對不能讓不想干的人看到。下列哪一種做法，會打破這個規則？」</p>
+                    <br>
+                    <p><strong>名詞解釋：</strong></p>
+                    <ul>
+                        <li><strong>網段切割：</strong> 像是在學校裡把班級隔開，A 班不能隨便跑到 B 班。</li>
+                        <li><strong>Site-to-Site VPN：</strong> 像是幫據點 A 和據點 B 之間挖一條專屬地道，讓資料安全傳輸。</li>
+                        <li><strong>SSL VPN：</strong> 讓員工在自家電腦或咖啡廳，透過網路安全連回公司的技術。</li>
+                    </ul>
+                </div>
+
+                <div class="step-block">
+                    <div class="step-title">【第三步：解題思路】</div>
+                    <p><strong>這題在考什麼觀念？</strong><br>研發資料屬於最高機密，原則上【不對外開放遠端存取】。</p>
+                    <br>
+                    <p><strong>解題判斷流程：</strong></p>
+                    <ol>
+                        <li>是否符合研發資料隔離？</li>
+                        <li>是否符合集中上網？</li>
+                        <li>是否引入「不必要的外部存取風險」？</li>
+                    </ol>
+                </div>
+
+                <div class="step-block">
+                    <div class="step-title">【第四步：選項分析】</div>
+                    <div class="option-analysis">
+                        <ul>
+                            <li>(A) <strong>各部門切割成獨立的網段</strong>：<span class="correct-opt">合適</span>。這是基本的隔離手段，能達成題目要求的「不允許其他部門存取」。</li>
+                            <li>(B) <strong>兩據點間透過 Site-to-Site VPN 連線</strong>：<span class="correct-opt">合適</span>。因為據點 A 的研發人員上網流量要送到據點 B，這兩地之間需要安全的通道。</li>
+                            <li>(C) <strong>開放所有員工透過 SSL VPN 從外部連回公司讀取研發資料</strong>：<span class="wrong-opt">不合適（正解）</span>。題目明確說「不允許外部存取」。開放 SSL VPN 等於開了一扇門讓外部連入，極大增加了營業祕密外洩的風險，完全違反題目要求的安全策略。</li>
+                            <li>(D) <strong>將據點 A 的上網流量透過 VPN 通道引導到據點 B</strong>：<span class="correct-opt">合適</span>。這符合題目要求的「集中由據點 B 對外連線」，有利於統一監控與資安防護（如防火牆、過濾器）。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-block">
+                    <div class="step-title">【觀念補充與延伸】</div>
+                    <p>本題屬於：網路區隔 / 營業祕密保護 / 遠端存取控管。</p>
+                    <p>核心原則：</p>
+                    <ul>
+                        <li><strong>最小權限：</strong> 沒必要的人，絕對不給權限。</li>
+                        <li><strong>不對外暴露研發資料：</strong> 越機密的資料，越要限制存取來源（最好只能在公司內網特定區域）。</li>
+                        <li><strong>VPN ≠ 一定安全：</strong> 重點是「給誰用」。Site-to-Site 是給辦公室對辦公室，Client-to-Site (SSL VPN) 是給個人，後者風險較高（因為個人電腦可能中毒）。</li>
+                    </ul>
+                </div>
+
+                <div class="mnemonic-box">
+                    記憶口訣：「研發資料不外放，SSL VPN 最危險」
+                </div>
+
+                <div class="step-block">
+                    <div class="step-title">【常見陷阱】</div>
+                    <ul>
+                        <li>把所有 VPN 當成一樣安全（其實個人遠端連線風險很高）。</li>
+                        <li>以為加密就等於安全（加密只是保證傳輸不被偷看，不代表連線者的身分絕對安全）。</li>
+                    </ul>
+                </div>
+
+                <div class="step-block">
+                    <div class="step-title">【正確答案】</div>
+                    <p>答案：<strong>(C)</strong></p>
+                    <p>一句話理由：「開放外部 SSL VPN 存取研發資料，違反營業祕密高度隔離原則。」</p>
+                </div>
+
+                <div class="step-block">
+                    <div class="step-title">【自我檢測（含參考答案）】</div>
+                    <div class="self-check">
+                        <div class="qa-pair">
+                            <div class="qa-q">1. Site-to-Site VPN 與 SSL VPN 最大差異？</div>
+                            <div class="qa-a">→ 答：是否對外部個人（Client）開放連線。</div>
+                        </div>
+                        <div class="qa-pair">
+                            <div class="qa-q">2. 研發資料最重要保護 CIA 哪一項？</div>
+                            <div class="qa-a">→ 答：機密性 (Confidentiality)。</div>
+                        </div>
+                        <div class="qa-pair">
+                            <div class="qa-q">3. 為何集中由據點 B 上網有助於資安？</div>
+                            <div class="qa-a">→ 答：易於集中監控流量與統一實施資安政策。</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 預留題組區域 (僅供結構參考) -->
+    <div id="q22" class="question-area">
+        <div class="q-title">第 22 題 (預留)</div>
+        <p>此頁面為預留空間。</p>
+    </div>
+    <div id="q23" class="question-area">
+        <div class="q-title">第 23 題 (預留)</div>
+        <p>此頁面為預留空間。</p>
+    </div>
+    <div id="q24" class="question-area">
+        <div class="q-title">第 24 題 (預留)</div>
+        <p>此頁面為預留空間。</p>
+    </div>
+
+</div>
+
+<script>
+    // 切換分頁功能
+    function switchTab(tabId, tabElement) {
+        // 隱藏所有題目區塊
+        var contents = document.getElementsByClassName('question-area');
+        for (var i = 0; i < contents.length; i++) {
+            contents[i].classList.remove('active');
+        }
+        // 移除所有頁籤的 active 狀態
+        var tabs = document.getElementsByClassName('nav-tab');
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove('active');
+        }
+
+        // 顯示目標區塊與啟用頁籤
+        document.getElementById(tabId).classList.add('active');
+        tabElement.classList.add('active');
+    }
+
+    // 檢查答案功能
+    function checkAnswer(questionId, correctAnswer) {
+        var form = document.getElementById('form-' + questionId);
+        var selected = form.querySelector('input[name="' + questionId + '"]:checked');
+        var feedbackBox = document.getElementById('feedback-' + questionId);
+        var explainBtn = document.getElementById('btn-explain-' + questionId);
+
+        if (!selected) {
+            alert('請先選擇一個選項再送出喔！');
+            return;
+        }
+
+        feedbackBox.style.display = 'block';
+        feedbackBox.className = 'feedback-box'; // 重置 class
+
+        // 永遠顯示解析按鈕
+        explainBtn.style.display = 'inline-block';
+
+        if (selected.value === correctAnswer) {
+            // 答對
+            feedbackBox.classList.add('feedback-correct');
+            feedbackBox.innerHTML = '<strong>[正確]</strong> 恭喜你！觀念非常正確。<br>你的選擇：(' + selected.value + ') 正確答案：(' + correctAnswer + ')';
+        } else {
+            // 答錯
+            feedbackBox.classList.add('feedback-wrong');
+            feedbackBox.innerHTML = '<strong>[錯誤]</strong> 別氣餒，再想想看。<br>觀念提示：題目強調「不允許外部存取」，想想看哪個選項會讓外部網路直接連進來？';
+        }
+    }
+
+    // 重置功能
+    function resetQuiz(questionId) {
+        // 清除選項
+        var inputs = document.querySelectorAll('input[name="' + questionId + '"]');
+        for (var i = 0; i < inputs.length; i++) {
+            inputs[i].checked = false;
+        }
+
+        // 隱藏回饋
+        var feedbackBox = document.getElementById('feedback-' + questionId);
+        feedbackBox.style.display = 'none';
+
+        // 隱藏/收合解析
+        var explanation = document.getElementById('explanation-' + questionId);
+        explanation.style.display = 'none';
+        
+        // 隱藏解析按鈕
+        var explainBtn = document.getElementById('btn-explain-' + questionId);
+        explainBtn.style.display = 'none';
+        explainBtn.innerText = '一鍵看解析';
+    }
+
+    // 切換解析顯示功能
+    function toggleExplanation(questionId) {
+        var explanation = document.getElementById('explanation-' + questionId);
+        var btn = document.getElementById('btn-explain-' + questionId);
+        
+        if (explanation.style.display === 'none' || explanation.style.display === '') {
+            explanation.style.display = 'block';
+            btn.innerText = '收合解析';
+            // 平滑捲動到解析區
+            explanation.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            explanation.style.display = 'none';
+            btn.innerText = '一鍵看解析';
+        }
+    }
+</script>
+
+</body>
+</html>

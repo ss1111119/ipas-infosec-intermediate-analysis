@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安衝刺班｜題組 2 (Q14)｜外部人員存取控制</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Navigation */
+        .nav-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background-color: #e9ecef;
+            color: #6c757d;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: default;
+        }
+
+        .nav-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Scenario Box */
+        .scenario-box {
+            background-color: #eef2f5;
+            border-left: 5px solid var(--accent-color);
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: block;
+            font-size: 1.1em;
+        }
+
+        /* Question Section */
+        .question-header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .question-text {
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .highlight-keyword {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 0 4px;
+            border-radius: 3px;
+            font-weight: bold;
+            border: 1px solid #ffeeba;
+        }
+
+        /* Options */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f1f3f5;
+        }
+
+        .option-input {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        /* Action Buttons */
+        .btn-area {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-explain {
+            background-color: var(--accent-color);
+            color: white;
+            display: none; /* Hidden initially */
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Feedback Area */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section */
+        .explanation-container {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--border-color);
+            display: none;
+        }
+
+        .step-block {
+            margin-bottom: 25px;
+        }
+
+        .step-title {
+            font-size: 1.1em;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+            background: linear-gradient(to right, #f8f9fa, transparent);
+        }
+
+        .concept-tag {
+            display: inline-block;
+            background-color: #e2e6ea;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            margin-right: 5px;
+            color: #495057;
+        }
+
+        .analogy-box {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        .trap-box {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #ffeeba;
+        }
+
+        .self-check-item {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .answer-reveal {
+            cursor: pointer;
+            color: var(--accent-color);
+            text-decoration: underline;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .answer-content {
+            display: none;
+            color: var(--success-color);
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .btn {
+                width: 100%;
+            }
+            .nav-btn {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Navigation -->
+    <div class="nav-bar">
+        <span class="nav-btn">第 13 題 (情境)</span>
+        <span class="nav-btn active">第 14 題 (作答中)</span>
+        <span class="nav-btn">第 15 題 (待續)</span>
+        <span class="nav-btn">第 16 題 (待續)</span>
+    </div>
+
+    <!-- Scenario -->
+    <div class="scenario-box">
+        <span class="scenario-title">【題組情境】（第 13–16 題共用）</span>
+        <p>K 公司為總部設立於新竹之汽車零組件製造商，公司股票已於臺灣證券交易所上市交易。此外，公司已在 2023 年初通過 ISO 27001 驗證。</p>
+        <p>目前公司主要系統之目標如下：</p>
+        <ul>
+            <li>可用性目標：可接受中斷時間為 8 小時以內</li>
+            <li>資料完整性目標：資料流失可接受時間為 8 小時以內</li>
+        </ul>
+        <small style="color: #666;">（提示：本題組會同時考 BCP/DR 與「外部人員遠端存取」的資安治理觀念）</small>
+    </div>
+
+    <!-- Question Box -->
+    <div id="quiz-area">
+        <div class="question-header">題組 2｜第 14 題｜單選題</div>
+        
+        <div class="question-text">
+            K 公司終於承接到美國 T 公司的大訂單，但是 T 公司要求可遠端連入 K 公司系統查詢訂單及庫存資訊，請問下列做法何項<span class="highlight-keyword">最「不」適當</span>？
+        </div>
+
+        <form id="quiz-form">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A" class="option-input">
+                    (A) 要求 T 公司以 VPN 方式進入公司
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B" class="option-input">
+                    (B) 限制該帳號查詢權限
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C" class="option-input">
+                    (C) 要求定期更改密碼
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D" class="option-input">
+                    (D) 業務單位於客戶不需使用時，仍應維持半年可用，以避免影響業務運作
+                </label>
+            </div>
+
+            <div class="btn-area">
+                <button type="button" class="btn btn-submit" onclick="checkAnswer()">送出作答</button>
+                <button type="button" class="btn btn-explain" id="btn-explain" onclick="toggleExplanation()">▼ 展開名師解析</button>
+                <button type="button" class="btn btn-reset" onclick="resetQuiz()">重置</button>
+            </div>
+        </form>
+
+        <!-- Feedback Area -->
+        <div id="feedback-msg" class="feedback-area"></div>
+    </div>
+
+    <!-- Explanation Section -->
+    <div id="explanation-content" class="explanation-container">
+        
+        <!-- Step 1 -->
+        <div class="step-block">
+            <div class="step-title">第一步：找關鍵字</div>
+            <p>拿起你的螢光筆，這題有幾個關鍵字決定了生死：</p>
+            <ul>
+                <li><strong style="color:var(--error-color)">「遠端連入」</strong>：代表從不安全的外部網路進入公司內部。</li>
+                <li><strong style="color:var(--error-color)">「外部公司（客戶）」</strong>：非本公司員工，設備與行為不受我們完全管控。</li>
+                <li><strong style="color:var(--error-color)">「查詢訂單及庫存」</strong>：這是具體的業務需求，權限應該只限於此。</li>
+                <li><span class="highlight-keyword">「最不適當」</span>：這是一題反向題，你要找的是會「放大風險」的做法。</li>
+            </ul>
+            <p><strong>考點指引：</strong>本題在考「外部人員遠端存取控制」，核心原則是 <strong>最小權限、必要即用、用完即停</strong>。</p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-block">
+            <div class="step-title">第二步：白話翻譯</div>
+            <p>用我們日常語言來說，這題在問：</p>
+            <p style="font-size: 1.1em; font-weight: bold; color: #555;">「客戶要連進公司系統查資料，下面哪一個做法最不安全、最不合理？」</p>
+            <div style="background-color: #f8f9fa; padding: 10px; border-radius: 4px; font-size: 0.9em;">
+                <strong>名詞解釋：</strong><br>
+                <strong>VPN (虛擬私人網路)：</strong> 就像是幫外部連線建立一條專屬的加密安全隧道，避免資料在半路被偷看。<br>
+                <strong>權限：</strong> 這個帳號登入後能看到什麼畫面、能按什麼按鈕。
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-block">
+            <div class="step-title">第三步：解題思路</div>
+            <p><strong>這題在考什麼觀念？</strong><br>
+            一句話說明：「外部帳號必須『用到才開、用完就關』，不能為了方便而長期保留」。</p>
+
+            <p><strong>解題邏輯：</strong></p>
+            <ol>
+                <li>判斷選項 A、B、C 都是在「降低風險」（加強安全）。</li>
+                <li>找出選項 D 其實是在「增加風險」（方便了業務，卻犧牲了安全）。</li>
+                <li>因為題目問「最不適當」，所以選 D。</li>
+            </ol>
+
+            <div class="analogy-box">
+                <strong>生活比喻：</strong><br>
+                想像你給訪客一張你們家的「臨時門禁卡」。<br>
+                正確做法是：訪客今天離開時，卡片就該失效。<br>
+                選項 D 的做法是：訪客明明已經離開且不需要再來了，你卻讓這張卡片「半年內都還能刷開門」，只因為怕下次他突然要來很麻煩。這是不是超級危險？
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-block">
+            <div class="step-title">第四步：選項分析</div>
+            <ul>
+                <li><strong>(A) 要求 T 公司以 VPN 方式進入公司：</strong> <span style="color:var(--success-color)">[適當]</span> VPN 可以保護跨國傳輸的資料不被竊聽，是標準安全配備。</li>
+                <li><strong>(B) 限制該帳號查詢權限：</strong> <span style="color:var(--success-color)">[適當]</span> 符合「最小權限原則」，只給他看需要的，其他通通不給看。</li>
+                <li><strong>(C) 要求定期更改密碼：</strong> <span style="color:var(--success-color)">[適當]</span> 這是基本的帳號衛生習慣，降低密碼外洩後被長期濫用的風險。</li>
+                <li><strong>(D) 業務單位於客戶不需使用時，仍應維持半年可用...：</strong> <span style="color:var(--error-color); font-weight:bold;">[最不適當]</span> 違反了「必要即用、用完即停」原則。閒置帳號是駭客最愛的後門，保留越久，風險越高。</li>
+            </ul>
+        </div>
+
+        <!-- Concepts -->
+        <div class="step-block">
+            <div class="step-title">觀念補充與延伸</div>
+            <p><strong>核心觀念定位：</strong>本題屬於「存取控制 / 第三方存取管理 / 帳號生命週期管理」的必考題。</p>
+            
+            <p><strong>重要原則：</strong></p>
+            <ul>
+                <li><strong>最小權限 (Least Privilege)：</strong> 只給剛好夠用的權限。</li>
+                <li><strong>需知原則 (Need-to-know)：</strong> 工作上有需要知道才給看。</li>
+                <li><strong>生命週期管理：</strong> 申請 &rarr; 審核 &rarr; 啟用 &rarr; 停用/刪除。重點在最後的「停用」。</li>
+            </ul>
+
+            <div class="trap-box">
+                <strong>常見陷阱與避坑指南：</strong><br>
+                考試時，只要看到理由寫著「為了業務方便」、「避免影響運作」而要犧牲安全性（例如不改密碼、不關帳號），這通常就是那個「最不適當」的答案。別被「業務運作」四個字嚇到了，資安考試中，安全原則優先於單純的便利性。
+            </div>
+        </div>
+
+        <!-- Mnemonic -->
+        <div class="step-block">
+            <div class="step-title">記憶口訣</div>
+            <p style="font-size: 1.2em; text-align: center; color: var(--primary-color); border: 2px solid var(--primary-color); padding: 10px; border-radius: 8px;">
+                「外部帳號用完關，留半年最危險」
+            </p>
+        </div>
+
+        <!-- Correct Answer -->
+        <div class="step-block">
+            <div class="step-title">正確答案</div>
+            <p><strong>答案：(D)</strong></p>
+            <p>一句話理由：外部客戶帳號於不需使用時仍長期保留，會增加帳號被濫用風險，最不適當。</p>
+        </div>
+
+        <!-- Self Check -->
+        <div class="step-block">
+            <div class="step-title">自我檢測</div>
+            
+            <div class="self-check-item">
+                <p>1. 外部帳號管理最重要的四個字精神是什麼？（提示：最...）
+                    <span class="answer-reveal" onclick="toggleAnswer('ans1')">點擊看答案</span>
+                </p>
+                <div id="ans1" class="answer-content">參考答案：最小權限</div>
+            </div>
+
+            <div class="self-check-item">
+                <p>2. 為什麼外部帳號比內部帳號風險高？
+                    <span class="answer-reveal" onclick="toggleAnswer('ans2')">點擊看答案</span>
+                </p>
+                <div id="ans2" class="answer-content">參考答案：因為外部設備與人員不受公司完全控管，環境安全性未定。</div>
+            </div>
+
+            <div class="self-check-item">
+                <p>3. 若帳號半年未用，最好的處理方式是什麼？
+                    <span class="answer-reveal" onclick="toggleAnswer('ans3')">點擊看答案</span>
+                </p>
+                <div id="ans3" class="answer-content">參考答案：停用或刪除。</div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer style="margin-top: 40px; text-align: center; font-size: 0.8em; color: #999;">
+        資安短期衝刺班 © 2024 - 僅供教學練習使用
+    </footer>
+</div>
+
+<script>
+    function checkAnswer() {
+        // Get selected option
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackDiv = document.getElementById('feedback-msg');
+        const explainBtn = document.getElementById('btn-explain');
+
+        // Validation
+        if (!selectedValue) {
+            alert("請先選擇一個選項再送出！");
+            return;
+        }
+
+        // Logic
+        feedbackDiv.style.display = 'block';
+        if (selectedValue === 'D') {
+            // Correct
+            feedbackDiv.className = 'feedback-area feedback-correct';
+            feedbackDiv.innerHTML = `
+                <strong>恭喜答對！</strong> (D) 是最不適當的做法。<br>
+                觀念正確：外部帳號必須嚴格控管，「用完即停」是鐵律。<br>
+                你可以點擊下方「展開名師解析」來複習詳細觀念。
+            `;
+        } else {
+            // Incorrect
+            feedbackDiv.className = 'feedback-area feedback-incorrect';
+            feedbackDiv.innerHTML = `
+                <strong>可惜答錯了。</strong> 你選擇了 (${selectedValue})，但這其實是適當的安全措施。<br>
+                <br>
+                <strong>觀念提示：</strong><br>
+                請回想一下「最小權限」與「帳號生命週期」原則。<br>
+                如果一個鑰匙半年都沒人用，卻還能開鎖，是不是增加了被小偷撿去開門的風險？<br>
+                <br>
+                請點擊「展開名師解析」查看完整詳解。
+            `;
+        }
+
+        // Show Explanation Button
+        explainBtn.style.display = 'inline-block';
+    }
+
+    function toggleExplanation() {
+        const content = document.getElementById('explanation-content');
+        const btn = document.getElementById('btn-explain');
+        
+        if (content.style.display === 'none' || content.style.display === '') {
+            content.style.display = 'block';
+            btn.innerHTML = '▲ 收合名師解析';
+            // Scroll to explanation
+            content.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            content.style.display = 'none';
+            btn.innerHTML = '▼ 展開名師解析';
+        }
+    }
+
+    function resetQuiz() {
+        // Reset radio buttons
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+
+        // Hide feedback and explanation
+        document.getElementById('feedback-msg').style.display = 'none';
+        document.getElementById('explanation-content').style.display = 'none';
+        document.getElementById('btn-explain').style.display = 'none';
+        document.getElementById('btn-explain').innerHTML = '▼ 展開名師解析';
+        
+        // Hide self-check answers
+        const answers = document.getElementsByClassName('answer-content');
+        for (const ans of answers) {
+            ans.style.display = 'none';
+        }
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

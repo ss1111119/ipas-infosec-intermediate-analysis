@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安衝刺班｜題組1｜第7題：ISO標準導入</title>
+    <style>
+        /* * 基礎樣式設定 
+         * 符合要求：內文字級 16px，標題最大 18px，無外部依賴
+         */
+        :root {
+            --primary-color: #2c3e50; /* 深藍灰 */
+            --accent-color: #e74c3c;  /* 重點紅 */
+            --success-color: #27ae60; /* 成功綠 */
+            --highlight-bg: #fff3cd;  /* 高亮底色 */
+            --section-bg: #f9f9f9;    /* 區塊底色 */
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 標題樣式 */
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            font-weight: bold;
+        }
+
+        h1 { font-size: 18px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
+        h2 { font-size: 18px; background-color: var(--section-bg); padding: 8px; border-left: 4px solid var(--primary-color); }
+        h3 { font-size: 17px; color: var(--accent-color); margin-top: 1em; }
+
+        /* 情境區塊 */
+        .scenario-box {
+            background-color: #eef2f5;
+            border: 1px solid #ced4da;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+        }
+
+        /* 題目與選項區塊 */
+        .question-box {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+
+        .options-list li {
+            margin-bottom: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+        }
+
+        input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕樣式 */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit { background-color: var(--primary-color); color: #fff; }
+        .btn-reset { background-color: #95a5a6; color: #fff; }
+        .btn-explain { background-color: var(--accent-color); color: #fff; }
+        
+        button:hover { opacity: 0.9; }
+
+        /* 回饋訊息 */
+        #feedback-msg {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+        }
+        .feedback-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .feedback-wrong { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* 解析區塊（預設隱藏） */
+        #explanation-area {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 重點高亮與標籤 */
+        mark {
+            background-color: var(--highlight-bg);
+            color: #856404;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: var(--primary-color);
+            color: #fff;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .keyword-explanation {
+            background-color: #fff;
+            border-left: 3px solid var(--accent-color);
+            padding: 10px 15px;
+            margin: 10px 0;
+            font-size: 15px;
+        }
+
+        /* 表格樣式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            color: var(--primary-color);
+        }
+
+        /* 自我檢測區 */
+        .self-check-item {
+            background-color: #fff;
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .check-answer {
+            color: var(--success-color);
+            font-weight: bold;
+            display: none;
+            margin-top: 5px;
+        }
+        .toggle-ans-btn {
+            font-size: 14px;
+            color: var(--primary-color);
+            background: none;
+            border: 1px solid var(--primary-color);
+            padding: 2px 8px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 頁面標題 -->
+    <h1>資安短期衝刺班｜互動式解題講義</h1>
+
+    <!-- 共用情境區塊 -->
+    <div class="scenario-box">
+        <span class="tag">題組 1 情境</span>
+        <p>
+            某資通安全責任等級 <strong>A 級</strong> 之公務機關，主要業務係辦理<strong>全國有關全民健康保險</strong>之業務活動。<br>
+            該機關主責資通安全之承辦窗口，需依據業務特性與法規要求，規劃導入合適的 <strong>ISO 國際標準</strong>，以強化資訊安全與個人資料保護。
+        </p>
+    </div>
+
+    <!-- 預留版位說明：第5、6題 (依需求保留結構) -->
+    <!-- 
+    <div id="q5-placeholder" style="display:none;"></div> 
+    <div id="q6-placeholder" style="display:none;"></div> 
+    -->
+
+    <!-- 第 7 題 互動區 -->
+    <div class="question-box" id="q7-area">
+        <span class="tag">第 7 題</span> <span class="tag">單選題</span>
+        <p style="font-weight: bold;">
+            試問該機關主責資通安全有關事項之承辦窗口，所規畫導入與該機關主要業務特性有關之 ISO 國際標準，下列較為適宜？
+        </p>
+
+        <form id="q7-form">
+            <ul class="options-list">
+                <li>
+                    <label class="option-label">
+                        <input type="radio" name="q7" value="A">
+                        (A) 導入 ISO 27001 及 ISO 27701 國際標準
+                    </label>
+                </li>
+                <li>
+                    <label class="option-label">
+                        <input type="radio" name="q7" value="B">
+                        (B) 導入 ISO 27001 及 ISO 45000 國際標準
+                    </label>
+                </li>
+                <li>
+                    <label class="option-label">
+                        <input type="radio" name="q7" value="C">
+                        <span id="opt-c-text">(C) 導入 ISO 27001 及 ISO 17025 國際標準</span>
+                    </label>
+                </li>
+                <li>
+                    <label class="option-label">
+                        <input type="radio" name="q7" value="D">
+                        (D) 導入 ISO 27001 及 ISO 50001 國際標準
+                    </label>
+                </li>
+            </ul>
+
+            <div class="btn-group">
+                <button type="button" class="btn-submit" onclick="checkAnswer()">送出答案</button>
+                <button type="button" class="btn-reset" onclick="resetQuiz()">重置</button>
+                <button type="button" class="btn-explain" onclick="showExplanation()">一鍵看解析</button>
+            </div>
+        </form>
+
+        <div id="feedback-msg"></div>
+    </div>
+
+    <!-- 解析內容區塊 -->
+    <div id="explanation-area">
+        <h2>名師詳解專區</h2>
+
+        <h3>第一步：找關鍵字</h3>
+        <p>拿起你的螢光筆，這題的解題密碼就在題幹裡：</p>
+        <div class="keyword-explanation">
+            <p>1. <mark>資通安全責任等級 A 級</mark> + <mark>公務機關</mark>：<br>
+            這代表該單位必須擁有最高規格的資安防護，<strong>ISO 27001（資訊安全管理制度）</strong>是絕對的基礎標配。</p>
+            
+            <p>2. <mark>全民健康保險</mark> + <mark>主要業務特性</mark>：<br>
+            健保資料包含姓名、身分證號、病歷、用藥紀錄等，這屬於大量的<strong>個人資料（Personal Data）</strong>及<strong>特種個資（敏感性資料）</strong>。這暗示我們除了「資安」之外，必須針對「隱私與個資保護」做加強。</p>
+        </div>
+
+        <h3>第二步：白話翻譯</h3>
+        <p>
+            各位同學，這題用高中生的話來說就是：<br>
+            「這個政府機關不只要顧好電腦不被駭客入侵（資安），還因為天天在處理全國人民最私密的健保資料，那它除了基本的資安制度外，還應該搭配哪一種專門在管<strong>『個資保護』</strong>的國際標準才夠安全？」
+        </p>
+        <ul>
+            <li><strong>ISO 27001</strong>：資訊安全管理制度的國際標準（像房子的地基與圍牆）。</li>
+            <li><strong>ISO 27701</strong>：個人資料保護管理制度（像房子裡專門保管私密日記的保險箱規範，建立在 27001 之上）。</li>
+        </ul>
+
+        <h3>第三步：解題思路</h3>
+        <p><strong>這題在考什麼觀念？</strong><br>
+        是否能依「業務內容（健保/個資）」選出「最適合搭配 ISO 27001 的延伸標準」。</p>
+
+        <p><strong>解題邏輯鏈：</strong></p>
+        <ol>
+            <li>先確認是 A 級機關 &rarr; 必備 <strong>ISO 27001</strong>（四個選項都有，無法刪去）。</li>
+            <li>再看業務性質 &rarr; 健保業務涉及海量<strong>個資</strong>。</li>
+            <li>選擇補強標準 &rarr; 找跟「個資、隱私」有關的標準 &rarr; 鎖定 <strong>ISO 27701</strong>。</li>
+        </ol>
+
+        <p><strong>生活比喻：</strong></p>
+        <ul>
+            <li><strong>ISO 27001</strong> 就像大樓的「門禁與警衛」，防止壞人進來偷東西。</li>
+            <li><strong>ISO 27701</strong> 就像醫院的「病歷櫃管理規範」，規定誰可以看病歷、病歷怎麼存、怎麼銷毀。</li>
+            <li>管健保資料的單位，當然兩個都要有！</li>
+        </ul>
+
+        <h3>第四步：選項分析</h3>
+        <table>
+            <tr>
+                <th width="15%">選項</th>
+                <th width="25%">搭配標準</th>
+                <th width="60%">分析</th>
+            </tr>
+            <tr>
+                <td><strong>(A)</strong></td>
+                <td><strong>ISO 27701</strong></td>
+                <td><span style="color:var(--success-color); font-weight:bold;">正確。</span>隱私資訊管理。專門針對 PIMS（個人資料管理系統），完全符合健保業務需求。</td>
+            </tr>
+            <tr>
+                <td>(B)</td>
+                <td>ISO 45000系列</td>
+                <td><span style="color:var(--accent-color);">錯誤。</span>這是「職業安全衛生」，管員工會不會受傷、工安意外，跟資料保護無關。</td>
+            </tr>
+            <tr>
+                <td>(C)</td>
+                <td>ISO 17025</td>
+                <td><span style="color:var(--accent-color);">錯誤。</span>這是「測試與校正實驗室能力」，通常是檢驗單位（如 SGS）在用的。</td>
+            </tr>
+            <tr>
+                <td>(D)</td>
+                <td>ISO 50001</td>
+                <td><span style="color:var(--accent-color);">錯誤。</span>這是「能源管理」，管怎麼省電、節能減碳，跟資安無關。</td>
+            </tr>
+        </table>
+
+        <h3>觀念補充與延伸</h3>
+        <p><strong>重要對照表（必背）：</strong></p>
+        <ul>
+            <li>ISO 27001 &rarr; 資安 (Security)</li>
+            <li>ISO 27701 &rarr; 個資/隱私 (Privacy) - <strong>本題核心</strong></li>
+            <li>ISO 22301 &rarr; 營運持續 (BCM) - 若題目是電力公司或銀行核心系統常考這個</li>
+            <li>ISO 45001 &rarr; 職安 (Safety)</li>
+            <li>ISO 50001 &rarr; 能源 (Energy)</li>
+        </ul>
+
+        <h3>記憶口訣</h3>
+        <div style="background-color: #e8f8f5; padding: 10px; border-radius: 5px; border-left: 4px solid #1abc9c;">
+            <strong>「資安二七零零一，健保個資七七一」</strong>
+            <br>
+            <small>（記法：771 聽起來像「去記憶」，隱私就是要幫你保護記憶資料）</small>
+        </div>
+
+        <h3>常見陷阱</h3>
+        <p><strong>避坑指南：</strong>看到一堆 ISO 編號不要慌。先問自己：這個 ISO 是不是在管「資訊」或「個人資料」？如果是管電費（能源）、管工安意外的，通常在資安題目裡都是誘答選項。</p>
+
+        <h3>正確答案</h3>
+        <p style="font-size: 1.2em; color: var(--accent-color); font-weight: bold;">答案：(A)</p>
+        <p>理由：健保業務同時重視資訊安全與個人資料保護，最適合導入 ISO 27001 搭配 ISO 27701。</p>
+
+        <h3>自我檢測</h3>
+        <p>遮住答案，測測看你學會了嗎？</p>
+        
+        <div class="self-check-item">
+            <span>Q1：ISO 27701 是建立在 ISO 27001 的哪一個基礎之上？</span>
+            <button class="toggle-ans-btn" onclick="toggleAns(this)">看答案</button>
+            <div class="check-answer">參考答案：資訊安全管理制度（ISMS）</div>
+        </div>
+
+        <div class="self-check-item">
+            <span>Q2：若組織幾乎不處理個人資料，還一定要導入 ISO 27701 嗎？</span>
+            <button class="toggle-ans-btn" onclick="toggleAns(this)">看答案</button>
+            <div class="check-answer">參考答案：不一定（視業務需求而定，沒個資就不強求）。</div>
+        </div>
+
+        <div class="self-check-item">
+            <span>Q3：ISO 45000 主要在管理哪一類風險？</span>
+            <button class="toggle-ans-btn" onclick="toggleAns(this)">看答案</button>
+            <div class="check-answer">參考答案：職業安全與健康風險。</div>
+        </div>
+    </div>
+
+    <!-- 預留版位：第8題 -->
+    <!-- <div id="q8-placeholder" style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px; color: #999;">（第 8 題版位預留區）</div> -->
+
+</div>
+
+<script>
+    /*
+     * 互動邏輯程式碼
+     * 包含：答案檢查、介面重置、顯示解析、自我檢測開關
+     */
+
+    // 定義正確答案
+    const CORRECT_ANSWER = "A";
+
+    function checkAnswer() {
+        // 取得使用者選擇
+        const form = document.getElementById('q7-form');
+        const selected = form.querySelector('input[name="q7"]:checked');
+        const feedback = document.getElementById('feedback-msg');
+
+        if (!selected) {
+            alert("請先選擇一個選項再送出喔！");
+            return;
+        }
+
+        const userAnswer = selected.value;
+
+        // 顯示回饋區域
+        feedback.style.display = "block";
+
+        if (userAnswer === CORRECT_ANSWER) {
+            // 答對處理
+            feedback.className = "feedback-correct";
+            feedback.innerHTML = "恭喜答對！正確答案就是 (A)。<br>馬上往下滑看名師解析，鞏固觀念！";
+            // 自動展開解析
+            showExplanation();
+        } else {
+            // 答錯處理
+            feedback.className = "feedback-wrong";
+            feedback.innerHTML = `可惜答錯囉！您選了 (${userAnswer})。<br>
+                                  <strong>提示：</strong>想想看，「健保」裡面最多的資料是什麼？<br>
+                                  除了保護電腦系統（資安），是不是還要保護人民的隱私？`;
+            // 答錯暫不展開解析，鼓勵思考
+        }
+    }
+
+    function resetQuiz() {
+        // 清除選項
+        const form = document.getElementById('q7-form');
+        const radios = form.querySelectorAll('input[type="radio"]');
+        radios.forEach(radio => radio.checked = false);
+
+        // 隱藏回饋與解析
+        const feedback = document.getElementById('feedback-msg');
+        feedback.style.display = "none";
+        feedback.className = "";
+        feedback.innerHTML = "";
+
+        const explanation = document.getElementById('explanation-area');
+        explanation.style.display = "none";
+
+        // 重置自我檢測的答案顯示
+        const checkAnswers = document.querySelectorAll('.check-answer');
+        checkAnswers.forEach(div => div.style.display = 'none');
+
+        // 捲動回題目區
+        document.getElementById('q7-area').scrollIntoView({behavior: "smooth"});
+    }
+
+    function showExplanation() {
+        const explanation = document.getElementById('explanation-area');
+        if (explanation.style.display !== "block") {
+            explanation.style.display = "block";
+            // 平滑捲動到解析區
+            explanation.scrollIntoView({behavior: "smooth"});
+        }
+    }
+
+    function toggleAns(btn) {
+        // 切換自我檢測答案的顯示狀態
+        const answerDiv = btn.nextElementSibling;
+        if (answerDiv.style.display === "block") {
+            answerDiv.style.display = "none";
+            btn.textContent = "看答案";
+        } else {
+            answerDiv.style.display = "block";
+            btn.textContent = "隱藏";
+        }
+    }
+</script>
+
+</body>
+</html>

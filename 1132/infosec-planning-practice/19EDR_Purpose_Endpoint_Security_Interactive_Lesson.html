@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安衝刺班：Q19 EDR 端點偵測</title>
+    <style>
+        /* 基礎設定 */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* 指定內文字級 */
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+        }
+
+        h1 { font-size: 18px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
+        h2 { font-size: 18px; background-color: #e9ecef; padding: 8px; border-left: 5px solid var(--accent-color); }
+        h3 { font-size: 17px; margin-top: 1em; color: var(--accent-color); }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* 題目區塊 */
+        .question-box {
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+        .options label {
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .options label:hover {
+            background-color: #f1f3f5;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕樣式 */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        #submitBtn { background-color: var(--primary-color); color: white; }
+        #submitBtn:hover { background-color: #1a252f; }
+        
+        #resetBtn { background-color: #95a5a6; color: white; }
+        #resetBtn:hover { background-color: #7f8c8d; }
+
+        #toggleExplainBtn { 
+            background-color: var(--accent-color); 
+            color: white; 
+            display: none; /* 預設隱藏，作答後顯示 */
+        }
+        #toggleExplainBtn:hover { background-color: #2980b9; }
+
+        /* 回饋區塊 */
+        #feedbackArea {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區塊 */
+        #explanationArea {
+            display: none; /* 預設收合 */
+            margin-top: 30px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .step-box {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #fff;
+            border-left: 3px solid #ccc;
+        }
+
+        .step-box:hover {
+            border-left-color: var(--accent-color);
+            background-color: #fafafa;
+        }
+
+        .keyword-tag {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .concept-note {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        /* 自我檢測 */
+        .self-check-item {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 10px;
+        }
+        
+        details summary {
+            cursor: pointer;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        
+        details p {
+            margin-top: 5px;
+            color: var(--primary-color);
+            padding-left: 15px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>資安短期衝刺班：端點安全架構解析</h1>
+    </header>
+
+    <!-- 1) 題目區塊 -->
+    <section class="question-box">
+        <p><strong>19. 規劃端點安全架構時，納入端點偵測及應變機制（Endpoint Detection and Response，EDR）的<span class="highlight">最主要目的</span>之敘述，下列何者正確？</strong></p>
+        <p style="font-size: 0.9em; color: #666;">（單選題）</p>
+
+        <div class="options" id="quizForm">
+            <label>
+                <input type="radio" name="answer" value="A">
+                (A) 防禦網路入侵行為
+            </label>
+            <label>
+                <input type="radio" name="answer" value="B">
+                (B) 監控端點入侵行為
+            </label>
+            <label>
+                <input type="radio" name="answer" value="C">
+                (C) 管理端點網路流量
+            </label>
+            <label>
+                <input type="radio" name="answer" value="D">
+                (D) 管理端點資料傳輸
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button id="submitBtn" onclick="checkAnswer()">送出作答</button>
+            <button id="toggleExplainBtn" onclick="toggleExplanation()">▼ 顯示完整解析</button>
+            <button id="resetBtn" onclick="resetQuiz()">重置</button>
+        </div>
+
+        <!-- 作答回饋區 -->
+        <div id="feedbackArea"></div>
+    </section>
+
+    <!-- 解析區塊（預設隱藏） -->
+    <div id="explanationArea">
+
+        <!-- 2) 第一步：找關鍵字 -->
+        <h2>第一步：找關鍵字</h2>
+        <div class="step-box">
+            <p>使用螢光筆標示並解釋以下關鍵字為何是解題線索：</p>
+            <ul>
+                <li><span class="keyword-tag">端點安全架構</span>：題目限定範圍在「端點」（Endpoint），而非整個網路環境。</li>
+                <li><span class="keyword-tag">EDR</span>：主角是「偵測與應變」系統。</li>
+                <li><span class="keyword-tag">最主要目的</span>：可能會有多個功能看似相關，但要選出最核心的那一個。</li>
+            </ul>
+            <p><strong>明確指出：</strong>本題不是在問「網路防禦」，而是在問「端點層級要做什麼事」。</p>
+        </div>
+
+        <!-- 3) 第二步：白話翻譯 -->
+        <h2>第二步：白話翻譯</h2>
+        <div class="step-box">
+            <p>用高中生日常口語重新說明題目：</p>
+            <p style="font-size: 1.1em; font-weight: bold; color: var(--primary-color);">「公司在保護員工電腦時，為什麼要裝 EDR？它最重要是在做哪一件事？」</p>
+            <hr style="border: 0; border-top: 1px dashed #ccc; margin: 10px 0;">
+            <p><strong>專有名詞白話解釋：</strong></p>
+            <ul>
+                <li><strong>端點</strong>：就是員工使用的電腦、筆電或伺服器。</li>
+                <li><strong>EDR</strong>：即時監看電腦有沒有被入侵，並能快速處理的系統。</li>
+            </ul>
+        </div>
+
+        <!-- 4) 第三步：解題思路 -->
+        <h2>第三步：解題思路</h2>
+        <div class="step-box">
+            <h3>這題在考什麼觀念？</h3>
+            <p class="concept-note">一句話說明：EDR 的核心價值在「偵測與回應端點入侵行為」。</p>
+
+            <h3>解題步驟</h3>
+            <ol>
+                <li>先確認 EDR 是部署在哪一層（端點）。</li>
+                <li>再確認它的主要功能是「看見、記錄、回應」。</li>
+                <li>排除屬於網路設備或資料管理的選項。</li>
+            </ol>
+
+            <h3>原理與規則（為什麼？）</h3>
+            <ul>
+                <li><strong>EDR 的功能重點包括：</strong>
+                    <ul>
+                        <li>持續監控端點行為。</li>
+                        <li>偵測異常或入侵跡象。</li>
+                        <li>提供即時回應（隔離、阻斷、分析）。</li>
+                    </ul>
+                </li>
+                <li><strong>因此分類如下：</strong>
+                    <ul>
+                        <li>防禦網路入侵 → 偏向防火牆、IPS（入侵防禦系統）。</li>
+                        <li>管理流量或資料 → 偏向網管或 DLP（資料外洩防護）。</li>
+                        <li>監控端點入侵 → 正是 EDR 的核心。</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>生活比喻</h3>
+            <p style="background: #fdf2ce; padding: 10px; border-left: 4px solid #f1c40f;">
+                EDR 就像電腦裡的<strong>「保全＋監視器」</strong>。<br>
+                它不是在守大門（那是防火牆的工作），而是在看屋內（端點）有沒有人偷偷闖入或是有異常行為。
+            </p>
+        </div>
+
+        <!-- 5) 第四步：選項分析 -->
+        <h2>第四步：選項分析</h2>
+        <div class="step-box">
+            <ul>
+                <li><strong>(A) 防禦網路入侵行為：</strong><br>
+                    <span style="color: var(--wrong-color);">不對。</span>這是防火牆或 NIDS/NIPS（網路入侵偵測/防禦系統）的工作範圍。
+                </li>
+                <li><strong>(B) 監控端點入侵行為：</strong><br>
+                    <span style="color: var(--correct-color); font-weight: bold;">正確。</span>EDR 的核心就是監控並回應端點上的入侵與異常行為。
+                </li>
+                <li><strong>(C) 管理端點網路流量：</strong><br>
+                    <span style="color: var(--wrong-color);">不對。</span>這通常屬於網路流量控制設備或軟體的功能。
+                </li>
+                <li><strong>(D) 管理端點資料傳輸：</strong><br>
+                    <span style="color: var(--wrong-color);">不對。</span>這主要是 DLP（資料外洩防護）或存取控制的功能。
+                </li>
+            </ul>
+        </div>
+
+        <!-- 6) 觀念補充與延伸 -->
+        <h2>觀念補充與延伸</h2>
+        <div class="step-box">
+            <h3>核心觀念定位</h3>
+            <p>本題屬於「端點安全 / EDR 與傳統防毒差異」基礎必考題。</p>
+
+            <h3>重要對照</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <tr style="background: #eee;">
+                    <th style="border: 1px solid #ddd; padding: 8px;">工具</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">主要機制</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">重點</th>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px;">傳統防毒軟體</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">比對已知特徵碼</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">阻擋已知的病毒</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px;">EDR</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">監控行為、異常分析</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">偵測未知威脅、即時回應</td>
+                </tr>
+            </table>
+
+            <h3>變化題型</h3>
+            <ul>
+                <li>若問「即時回應端點威脅」→ 選 <strong>EDR</strong></li>
+                <li>若問「阻擋外部攻擊流量」→ 選 <strong>防火牆 / IPS</strong></li>
+            </ul>
+        </div>
+
+        <!-- 7) 記憶口訣 -->
+        <h2>記憶口訣</h2>
+        <div class="step-box" style="text-align: center; font-size: 1.2em;">
+            <p>幫助記住答案 B</p>
+            <strong style="color: var(--accent-color); border: 2px dashed var(--accent-color); padding: 10px; display: inline-block;">
+                「EDR 顧端點，看行為」
+            </strong>
+        </div>
+
+        <!-- 8) 常見陷阱 -->
+        <h2>常見陷阱</h2>
+        <div class="step-box">
+            <ul>
+                <li><strong>學生最容易搞混：</strong>把所有資安設備都當成「防禦入侵」，分不清楚是用來擋網路的還是擋端點的。</li>
+                <li><strong>心理盲點：</strong>忽略題目強調的是「端點」而非「網路」。</li>
+                <li><strong>避坑指南：</strong>看到 EDR，先在腦中對應兩個字：<strong>「偵測、回應」</strong>。</li>
+            </ul>
+        </div>
+
+        <!-- 9) 正確答案 -->
+        <h2>正確答案</h2>
+        <div class="step-box">
+            <p style="font-size: 1.2em;"><strong>答案：B</strong></p>
+            <p>一句話理由：<strong>「EDR 的主要目的在於持續監控並回應端點上的入侵與異常行為。」</strong></p>
+        </div>
+
+        <!-- 10) 自我檢測 -->
+        <h2>自我檢測</h2>
+        <div class="step-box">
+            <p>點擊問題查看參考答案：</p>
+
+            <div class="self-check-item">
+                <details>
+                    <summary>小題 1：EDR 與傳統防毒最大的差別是什麼？</summary>
+                    <p>參考答案：是否能即時監控行為並回應（防毒主要靠特徵碼比對，EDR 靠行為分析）。</p>
+                </details>
+            </div>
+
+            <div class="self-check-item">
+                <details>
+                    <summary>小題 2：如果要管控資料外洩，應該考慮哪一類技術？</summary>
+                    <p>參考答案：DLP（Data Loss Prevention，資料外洩防護）。</p>
+                </details>
+            </div>
+
+            <div class="self-check-item">
+                <details>
+                    <summary>小題 3：如果重點在阻擋外部攻擊流量，應優先部署哪一類設備？</summary>
+                    <p>參考答案：防火牆或 IPS（入侵防禦系統）。</p>
+                </details>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        const selectedOption = document.querySelector('input[name="answer"]:checked');
+        const feedbackArea = document.getElementById('feedbackArea');
+        const explainBtn = document.getElementById('toggleExplainBtn');
+        const explanationArea = document.getElementById('explanationArea');
+        const correctAnswer = 'B';
+
+        if (!selectedOption) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        const userAnswer = selectedOption.value;
+        feedbackArea.style.display = 'block';
+
+        if (userAnswer === correctAnswer) {
+            // 答對邏輯
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = `
+                恭喜答對！<br>
+                您的選擇：${userAnswer} <br>
+                正確答案：${correctAnswer} <br>
+                <span style="font-weight:normal; font-size:0.9em;">(請點擊下方按鈕查看詳細解析)</span>
+            `;
+            // 顯示解析按鈕
+            explainBtn.style.display = 'inline-block';
+        } else {
+            // 答錯邏輯
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.innerHTML = `
+                答錯了，再想一下！<br>
+                您的選擇：${userAnswer} <br>
+                <div style="margin-top:10px; padding:10px; background:rgba(255,255,255,0.5); border-radius:4px;">
+                    <strong>觀念提示：</strong><br>
+                    請注意題目問的是「端點」還是「網路」？<br>
+                    EDR 的 "D" 和 "R" 代表什麼意思？
+                </div>
+            `;
+            // 答錯時，可以選擇顯示解析按鈕，讓學生真的解不出來時可以看
+            explainBtn.style.display = 'inline-block';
+            // 答錯時預設不自動展開解析，讓學生思考
+            explanationArea.style.display = 'none';
+            explainBtn.innerText = '▼ 顯示完整解析';
+        }
+    }
+
+    function toggleExplanation() {
+        const explanationArea = document.getElementById('explanationArea');
+        const btn = document.getElementById('toggleExplainBtn');
+        
+        if (explanationArea.style.display === 'none' || explanationArea.style.display === '') {
+            explanationArea.style.display = 'block';
+            btn.innerText = '▲ 收合完整解析';
+            // 平滑捲動到解析區
+            explanationArea.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            explanationArea.style.display = 'none';
+            btn.innerText = '▼ 顯示完整解析';
+        }
+    }
+
+    function resetQuiz() {
+        // 清除選項
+        const options = document.querySelectorAll('input[name="answer"]');
+        options.forEach(opt => opt.checked = false);
+
+        // 隱藏與重置區域
+        document.getElementById('feedbackArea').style.display = 'none';
+        document.getElementById('explanationArea').style.display = 'none';
+        document.getElementById('toggleExplainBtn').style.display = 'none';
+        document.getElementById('toggleExplainBtn').innerText = '▼ 顯示完整解析';
+        
+        // 關閉自我檢測的答案
+        const details = document.querySelectorAll('details');
+        details.forEach(d => d.removeAttribute('open'));
+
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

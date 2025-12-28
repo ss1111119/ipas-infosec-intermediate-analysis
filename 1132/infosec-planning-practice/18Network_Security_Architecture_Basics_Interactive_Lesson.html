@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安短期衝刺班 | 網路安全架構基礎 Q18</title>
+    <style>
+        /* 基礎設定 */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #d35400; /* 重點色 */
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        /* 標題樣式 */
+        h1 {
+            font-size: 24px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: var(--primary-color);
+            background-color: #eee;
+            padding: 10px;
+            border-left: 5px solid var(--primary-color);
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            font-size: 17px;
+            color: var(--accent-color);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        /* 重點強調樣式 */
+        .highlight {
+            background-color: #fff9c4; /* 螢光筆黃 */
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .keyword-highlight {
+            color: var(--wrong-color);
+            font-weight: bold;
+            border-bottom: 2px solid var(--wrong-color);
+        }
+
+        .important-text {
+            color: var(--wrong-color);
+            font-weight: bold;
+        }
+
+        /* 題目區域樣式 */
+        .question-box {
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .question-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f0f0;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕樣式 */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-toggle {
+            background-color: var(--accent-color);
+            color: white;
+            display: none; /* 預設隱藏，作答後顯示或手動開啟 */
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* 反饋區域 */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+
+        .feedback-wrong {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+
+        /* 解析區域 (預設隱藏) */
+        #explanation-section {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed #bbb;
+            padding-top: 20px;
+        }
+
+        /* 清單樣式 */
+        ul, ol {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* 表格樣式 (用於自測) */
+        .qa-box {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .answer-text {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-top: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安短期衝刺班 | 觀念導讀</h1>
+
+    <!-- 1) 題目區塊 -->
+    <div class="question-box">
+        <div class="question-title">
+            18. 關於網路安全架構中的基本要素，下列何項敘述<span class="keyword-highlight">「有誤」</span>？<br>
+            <span style="font-size: 14px; color: #666; font-weight: normal;">(單選題)</span>
+        </div>
+        <div class="options-group" id="quiz-options">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                (A) 包含雲端儲存設備
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                (B) 包含防火牆設備
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                (C) 包含惡意軟體偵測設備
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                (D) 包含虛擬私人網路（VPN）設備
+            </label>
+        </div>
+
+        <!-- 互動按鈕 -->
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">送出作答</button>
+            <button class="btn-reset" onclick="resetQuiz()">重置</button>
+            <button id="btn-explanation" class="btn-toggle" onclick="toggleExplanation()">一鍵看解析</button>
+        </div>
+
+        <!-- 反饋訊息 -->
+        <div id="feedback-area"></div>
+    </div>
+
+    <!-- 解析內容區塊 -->
+    <div id="explanation-section">
+        
+        <!-- 2) 第一步：找關鍵字 -->
+        <h2>第一步：找關鍵字</h2>
+        <ul>
+            <li><span class="highlight">網路安全架構</span>：這是本題的主題，指的是保護系統的一整套設計。</li>
+            <li><span class="highlight">基本要素</span>：表示題目在問「一定會有」、「核心功能」的元件。</li>
+            <li><span class="keyword-highlight">有誤</span>：這題是反向題！要選出「不是」安全核心元件的那一個。</li>
+        </ul>
+        <p><strong>判斷方向：</strong>本題在問「安全架構一定會包含哪些防護元件」，而不是在問「IT 環境可能有哪些設備」。</p>
+
+        <!-- 3) 第二步：白話翻譯 -->
+        <h2>第二步：白話翻譯</h2>
+        <p>這題如果翻譯成高中生日常對話，就是：</p>
+        <p class="important-text">「一個公司在設計網路防護時，下面哪些東西一定是資安防護的一部分？哪一個其實不是資安架構的基本成員？」</p>
+        <p><strong>名詞解釋：</strong></p>
+        <ul>
+            <li><strong>網路安全架構</strong>：用來保護網路不被入侵的一整套設計。</li>
+            <li><strong>防火牆</strong>：管誰可以進出網路的門。</li>
+            <li><strong>VPN</strong>：讓遠端連線變成安全通道。</li>
+        </ul>
+
+        <!-- 4) 第三步：解題思路 -->
+        <h2>第三步：解題思路</h2>
+        <h3>這題在考什麼觀念？</h3>
+        <p>一句話說明：「網路安全架構的基本要素是『防護與控制』，不是『資料存放位置』」。</p>
+
+        <h3>解題步驟</h3>
+        <ol>
+            <li>先找出「典型的安全防護設備」（用來擋人的）。</li>
+            <li>再找出只是「IT 資源或服務」（用來存資料或跑程式的），但不等於安全元件者。</li>
+            <li>將兩者做區分，找出不屬於安全架構基本要素的選項。</li>
+        </ol>
+
+        <h3>原理與規則</h3>
+        <p>網路安全架構通常包含以下功能，但「雲端儲存」只是資料放在哪裡的問題：</p>
+        <ul>
+            <li><strong>邊界防護</strong>：例如防火牆。</li>
+            <li><strong>存取安全</strong>：例如 VPN。</li>
+            <li><strong>威脅偵測</strong>：例如惡意軟體偵測。</li>
+            <li><strong>雲端儲存</strong>：這是「倉庫」，可以放在雲端也可以放在地端，但它本身不是「防盜鎖」。</li>
+        </ul>
+
+        <h3>生活比喻</h3>
+        <p>把網路安全架構想成<strong>房子的防盜設計</strong>：</p>
+        <ul>
+            <li><strong>防火牆</strong> ＝ 大門警衛（檢查誰能進來）。</li>
+            <li><strong>惡意軟體偵測</strong> ＝ 監視器與紅外線感應（看有沒有壞人混進來）。</li>
+            <li><strong>VPN</strong> ＝ 安全專屬通道（避免在路上被搶劫）。</li>
+            <li><strong>雲端儲存</strong> ＝ <span class="highlight">東西放在家裡或倉庫</span>。這是「空間」，不是防盜設備本身。</li>
+        </ul>
+
+        <!-- 5) 第四步：選項分析 -->
+        <h2>第四步：選項分析</h2>
+        <ul>
+            <li><strong>(A) 包含雲端儲存設備</strong> <span class="important-text">[正確答案]</span>：為什麼這句話有誤？因為雲端儲存是「儲存服務」，它是被保護的對象，而不是「安全防護元件」本身。</li>
+            <li><strong>(B) 包含防火牆設備</strong>：防火牆是過濾流量的核心設備，屬於安全架構。</li>
+            <li><strong>(C) 包含惡意軟體偵測設備</strong>：用來抓病毒或攻擊，屬於威脅防護的重要組成。</li>
+            <li><strong>(D) 包含虛擬私人網路（VPN）設備</strong>：用於建立加密的安全連線，屬於安全架構的一環。</li>
+        </ul>
+
+        <!-- 6) 觀念補充與延伸 -->
+        <h2>觀念補充與延伸</h2>
+        <p><strong>核心觀念定位：</strong>本題屬於「網路安全架構 / 防禦機制分類」的基礎必考題。</p>
+        <p><strong>對比概念：</strong></p>
+        <ul>
+            <li><strong>IT 架構</strong>：伺服器、儲存設備、雲端服務（目的是「能用」）。</li>
+            <li><strong>資安架構</strong>：防火牆、偵測系統、身分驗證（目的是「安全」）。</li>
+        </ul>
+        <p><strong>變化題型：</strong>若題目改成「雲端環境的安全控制」，那麼雲端服務就會搭配其他安全機制（如加密、權限控管）一起考，但單純的「儲存設備」依然不等同於「安全要素」。</p>
+
+        <!-- 7) 記憶口訣 -->
+        <h2>記憶口訣</h2>
+        <div style="background-color: #e8f8f5; padding: 15px; border-left: 5px solid #1abc9c;">
+            <p style="margin: 0; font-size: 18px; font-weight: bold;">「雲端是放資料，不是顧安全」</p>
+        </div>
+
+        <!-- 8) 常見陷阱 -->
+        <h2>常見陷阱</h2>
+        <ul>
+            <li><strong>容易搞混：</strong>學生看到「雲端」這兩個字很潮，就以為一定跟先進的資安架構有關。</li>
+            <li><strong>心理盲點：</strong>把「IT 基礎設備」與「安全防護設備」混為一談。</li>
+            <li><strong>避坑指南：</strong>考試時指著選項問一句：「這個東西是在『防守』，還是在『使用』？」如果是單純的使用空間，就不是安全要素。</li>
+        </ul>
+
+        <!-- 9) 正確答案 -->
+        <h2>正確答案</h2>
+        <p>答案：<strong>(A)</strong></p>
+        <p>一句話理由：「雲端儲存屬於資料存放方式，並非網路安全架構的基本防護要素。」</p>
+
+        <!-- 10) 自我檢測 -->
+        <h2>自我檢測</h2>
+        <div class="qa-box">
+            <p><strong>小題 1：</strong>防火牆主要負責哪一類安全？</p>
+            <span class="answer-text">參考答案：網路邊界與流量控管</span>
+        </div>
+        <div class="qa-box">
+            <p><strong>小題 2：</strong>VPN 解決的是哪一種風險？</p>
+            <span class="answer-text">參考答案：遠端連線資料被竊聽</span>
+        </div>
+        <div class="qa-box">
+            <p><strong>小題 3：</strong>雲端環境要安全，還需要搭配哪些資安措施？</p>
+            <span class="answer-text">參考答案：存取控制、防火牆、加密、偵測機制</span>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    /**
+     * 檢查作答函式
+     */
+    function checkAnswer() {
+        const options = document.getElementsByName('answer');
+        const feedbackArea = document.getElementById('feedback-area');
+        const explanationSection = document.getElementById('explanation-section');
+        const explanationBtn = document.getElementById('btn-explanation');
+        let selectedValue = null;
+
+        // 取得使用者選擇
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        // 若未作答
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // 顯示解析按鈕 (作答後才允許看解析)
+        explanationBtn.style.display = 'inline-block';
+
+        // 判斷對錯 (正確答案為 A)
+        const correctAnswer = 'A';
+        feedbackArea.style.display = 'block';
+
+        if (selectedValue === correctAnswer) {
+            // 答對
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = `
+                <strong>答對了！</strong><br>
+                你的選擇：${selectedValue}。<br>
+                正確答案就是 (A)。<br>
+                <small>（請往下捲動查看詳細解析與觀念補充）</small>
+            `;
+            // 答對時自動展開解析
+            explanationSection.style.display = 'block';
+            explanationBtn.textContent = '收合解析';
+        } else {
+            // 答錯
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.innerHTML = `
+                <strong>答錯囉！</strong><br>
+                你的選擇：${selectedValue}。<br>
+                這題要選「有誤」的敘述。<br>
+                <br>
+                <span style="background-color: #fff; padding: 5px; border-radius: 4px; display: inline-block;">
+                <strong>觀念提示：</strong><br>
+                想想看，「防火牆」、「VPN」和「偵測軟體」都是用來「防禦」的。<br>
+                但選項 (A) 的功能是「存放資料」，這算是防護機制嗎？
+                </span>
+                <br><br>
+                <small>再試一次，或點擊「一鍵看解析」。</small>
+            `;
+            // 答錯時不自動展開，給予思考空間
+        }
+    }
+
+    /**
+     * 重置函式
+     */
+    function resetQuiz() {
+        const options = document.getElementsByName('answer');
+        for (const option of options) {
+            option.checked = false;
+        }
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'none';
+        feedbackArea.innerHTML = '';
+        feedbackArea.className = '';
+
+        const explanationSection = document.getElementById('explanation-section');
+        explanationSection.style.display = 'none';
+
+        const explanationBtn = document.getElementById('btn-explanation');
+        explanationBtn.style.display = 'none'; // 重置後隱藏解析按鈕
+        explanationBtn.textContent = '一鍵看解析';
+        
+        // 捲動回頂端
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /**
+     * 解析開關函式
+     */
+    function toggleExplanation() {
+        const explanationSection = document.getElementById('explanation-section');
+        const btn = document.getElementById('btn-explanation');
+
+        if (explanationSection.style.display === 'none' || explanationSection.style.display === '') {
+            explanationSection.style.display = 'block';
+            btn.textContent = '收合解析';
+            // 平滑捲動到解析區
+            explanationSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            explanationSection.style.display = 'none';
+            btn.textContent = '一鍵看解析';
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q12 資安觀念解析：職務區隔 (SoD)</title>
+    <style>
+        /* * CSS 設定區
+         * 遵循要求：乾淨版面、不使用 Emoji、不依賴外部資源
+         */
+        
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 40px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        /* 標題樣式限制：最大 18px */
+        h1, h2, h3 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            border-bottom: 4px solid #2c3e50;
+            text-align: center;
+            margin-top: 0;
+        }
+
+        p, li {
+            margin-bottom: 10px;
+        }
+
+        /* 高亮樣式 */
+        mark {
+            background-color: #fff176; /* 柔和黃色 */
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .highlight-text {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        /* 題目區域樣式 */
+        .question-box {
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .options-list li {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .options-list li:hover {
+            background-color: #f5f5f5;
+        }
+
+        .options-list label {
+            display: block;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #757575;
+            color: white;
+        }
+
+        .btn-explain {
+            background-color: #388e3c;
+            color: white;
+            display: none; /* 預設隱藏 */
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* 作答回饋區 */
+        #feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-success {
+            background-color: #dcedc8;
+            color: #33691e;
+            border: 1px solid #c5e1a5;
+        }
+
+        .feedback-error {
+            background-color: #ffcdd2;
+            color: #b71c1c;
+            border: 1px solid #ef9a9a;
+        }
+
+        /* 解析區域 (預設隱藏) */
+        #explanation-area {
+            display: none;
+            border-top: 2px dashed #ccc;
+            margin-top: 30px;
+            padding-top: 20px;
+        }
+
+        /* 步驟標籤 */
+        .step-label {
+            display: inline-block;
+            background-color: #546e7a;
+            color: white;
+            padding: 4px 8px;
+            font-size: 14px;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+
+        /* 互動式折疊區塊 (Details/Summary) */
+        details {
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: #f0f0f0;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            float: right;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 15px;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+        }
+
+        /* 自我檢測區 */
+        .self-check-item {
+            background-color: #fff3e0;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .answer-reveal {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dotted #aaa;
+            color: #00695c;
+            display: none;
+        }
+
+        .show-ans-btn {
+            background: none;
+            border: none;
+            color: #1976d2;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 0;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安短期衝刺班：觀念解析教室</h1>
+    <p>各位同學好，這裡不教死背，我們教觀念。這是一題關於「內部控制」與「職務區隔」的經典考題。請先試著自行作答。</p>
+
+    <!-- 1. 題目區 -->
+    <div class="question-box">
+        <p><strong>題目 12 (複選題)</strong></p>
+        <p>下列哪些措施的採用<mark>「有助於」</mark>職務區隔（Separation of Duties，SOD）控制措施有效的施行？（複選）</p>
+        
+        <form id="quiz-form">
+            <ul class="options-list">
+                <li>
+                    <label>
+                        <input type="checkbox" name="option" value="A">
+                        (A) 職務定期輪調
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="checkbox" name="option" value="B">
+                        (B) 多因素驗證（MFA）
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="checkbox" name="option" value="C">
+                        (C) 以角色為基礎的存取控制（RBAC）
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="checkbox" name="option" value="D">
+                        (D) 定期實施權限審查
+                    </label>
+                </li>
+            </ul>
+            
+            <button type="button" class="btn btn-submit" onclick="checkAnswer()">送出作答</button>
+            <button type="button" class="btn btn-reset" onclick="resetQuiz()">重置</button>
+            <button type="button" class="btn btn-explain" id="btn-explain" onclick="toggleExplanation()">一鍵看解析</button>
+        </form>
+
+        <div id="feedback"></div>
+    </div>
+
+    <!-- 解析區域 (初始隱藏) -->
+    <div id="explanation-area">
+        
+        <!-- 2. 第一步：找關鍵字 -->
+        <section>
+            <h2><span class="step-label">第一步</span>找出解題關鍵字</h2>
+            <p>請拿起你的螢光筆，這題的解題線索在於以下詞彙：</p>
+            <ul>
+                <li><mark>職務區隔（SOD）</mark>：這是核心目標。</li>
+                <li><mark>有助於</mark>：表示我們找的是「輔助」、「支援」或「強化」該機制的手段。</li>
+                <li><mark>控制措施</mark>：指具體的管理或技術手段。</li>
+                <li><mark>角色</mark>與<mark>權限</mark>：這是 SOD 運作的基礎單位。</li>
+            </ul>
+            <p class="highlight-text">注意：題目問的是「哪些制度或管理措施能幫助 SOD 落實」，而不是問「哪一個身分驗證最強」。</p>
+        </section>
+
+        <!-- 3. 第二步：白話翻譯 -->
+        <section>
+            <h2><span class="step-label">第二步</span>老師幫你翻譯成白話文</h2>
+            <p><strong>題目翻譯：</strong></p>
+            <blockquote>
+                「公司想要避免一個人把重要事情從頭到尾全部包起來做（球員兼裁判），下面哪些做法可以幫助這種『分工制衡』真的落實？」
+            </blockquote>
+            <p><strong>名詞解釋：</strong></p>
+            <ul>
+                <li><strong>職務區隔 (SoD)：</strong>把會互相衝突的工作分給不同人。例如：開立支票的人，不能同時擁有核准支票的權限。</li>
+                <li><strong>角色 (RBAC)：</strong>工作身分。例如：你在系統裡的身分是「管理者」還是「一般使用者」。</li>
+                <li><strong>權限審查：</strong>定期檢查誰身上掛了哪些權限，有沒有人離職了卻還能登入？或者換了部門卻還留著舊權限？</li>
+            </ul>
+        </section>
+
+        <!-- 4. 第三步：解題思路 -->
+        <section>
+            <h2><span class="step-label">第三步</span>解題思路與邏輯</h2>
+            <p><strong>這題在考什麼？</strong></p>
+            <p>SOD 不只靠「規定」，還需要「制度」與「管理措施」來維持有效。</p>
+            
+            <p><strong>思考邏輯：</strong></p>
+            <ol>
+                <li>找出「能避免長期權力集中」的措施。</li>
+                <li>找出「能用制度限制誰能做什麼」的措施。</li>
+                <li>排除只是在加強「登入安全」、但不影響職務分工的選項。</li>
+            </ol>
+
+            <p><strong>生活比喻：</strong></p>
+            <ul>
+                <li><strong>SOD (職務區隔)：</strong>就像會計不能自己記帳又自己審帳，一定要分開兩個人。</li>
+                <li><strong>MFA (多因素驗證)：</strong>就像進門要「刷卡」加上「按密碼」。這只能證明「進門的是不是本人」，但進門後這個人「能不能同時做記帳又審帳」，MFA 管不到。</li>
+            </ul>
+        </section>
+
+        <!-- 5. 第四步：選項分析 -->
+        <section>
+            <h2><span class="step-label">第四步</span>選項逐一分析</h2>
+            <p>點擊下方展開詳細說明：</p>
+            
+            <details>
+                <summary>(A) 職務定期輪調 (正確)</summary>
+                <div class="details-content">
+                    <p><strong>為什麼對？</strong></p>
+                    <p>如果一個人長期做同一個敏感職位，很容易掩蓋舞弊行為。定期輪調（Job Rotation）強迫人員換手，這時候接手的新人很容易發現前手留下的問題。因此，輪調是打破權力長期壟斷、落實職務區隔的重要管理手段。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>(B) 多因素驗證 (MFA) (錯誤)</summary>
+                <div class="details-content">
+                    <p><strong>為什麼不對？</strong></p>
+                    <p>MFA 是用來確認「使用者身分真偽」的技術（Authentication）。它能防止帳號被盜用，但無法防止「一個合法的管理者濫用過大的權限」。即便用了 MFA，如果該使用者同時擁有「申請」與「核准」的權限，SOD 依然失效。所以 MFA 與職務區隔無直接因果關係。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>(C) 以角色為基礎的存取控制 (RBAC) (正確)</summary>
+                <div class="details-content">
+                    <p><strong>為什麼對？</strong></p>
+                    <p>RBAC 是實現 SOD 最強的技術手段。我們不直接給「人」權限，而是給「角色」權限。例如設定一個「會計」角色、一個「出納」角色，並系統性地規定這兩個角色互斥（不能同時賦予給同一人）。這直接從技術面強迫落實職務區隔。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>(D) 定期實施權限審查 (正確)</summary>
+                <div class="details-content">
+                    <p><strong>為什麼對？</strong></p>
+                    <p>隨著時間過去，員工可能會因為職務調整而累積過多不必要的權限（權限蔓延）。定期審查（Access Review）就像「大掃除」，可以發現並移除違背 SOD 原則的權限配置，確保分工機制持續有效。</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- 6, 7, 8, 9 觀念補充、口訣、陷阱、答案 -->
+        <section>
+            <h2><span class="step-label">總結</span>觀念與重點</h2>
+            
+            <h3>核心觀念定位</h3>
+            <ul>
+                <li><strong>SOD：</strong>管「誰能做哪些事」（授權與制衡）。</li>
+                <li><strong>MFA：</strong>管「你是不是本人」（認證）。</li>
+            </ul>
+
+            <h3>記憶口訣</h3>
+            <div style="background-color: #e8f5e9; padding: 10px; border-left: 5px solid #4caf50;">
+                <p><strong>「輪角色、查權限，才能真分工」</strong></p>
+                <ul>
+                    <li>輪：職務輪調 (A)</li>
+                    <li>角色：RBAC (C)</li>
+                    <li>查權限：權限審查 (D)</li>
+                </ul>
+            </div>
+
+            <h3>常見陷阱</h3>
+            <p>學生最容易因為看到「資安名詞」覺得很專業就選下去（例如看到 MFA）。請記得避坑指南：考試時先問一句<strong>「這個措施有沒有在幫忙『分權』？」</strong> MFA 只是加強門鎖，沒有幫忙分權。</p>
+
+            <h3>正確答案</h3>
+            <p style="font-size: 1.2em; font-weight: bold; color: #d32f2f;">本題答案：A、C、D</p>
+            <p>理由：輪調、角色控管與權限審查都能避免權力集中，協助職務區隔有效運作。</p>
+        </section>
+
+        <!-- 10. 自我檢測 -->
+        <section>
+            <h2><span class="step-label">測驗</span>自我檢測</h2>
+            
+            <div class="self-check-item">
+                <p><strong>Q1：為什麼 RBAC 有助於職務區隔？</strong></p>
+                <button class="show-ans-btn" onclick="toggleAnswer('ans1')">看參考答案</button>
+                <div id="ans1" class="answer-reveal">參考答案：因為可以用「角色」來定義工作範圍，並限制一個人不能同時擁有多個衝突的角色。</div>
+            </div>
+
+            <div class="self-check-item">
+                <p><strong>Q2：MFA 能不能防止一個人同時申請又核准權限？</strong></p>
+                <button class="show-ans-btn" onclick="toggleAnswer('ans2')">看參考答案</button>
+                <div id="ans2" class="answer-reveal">參考答案：不能。MFA 只能確認登入者身分，無法限制他登入後擁有的權限範圍。</div>
+            </div>
+
+            <div class="self-check-item">
+                <p><strong>Q3：職務輪調最主要防止哪一種風險？</strong></p>
+                <button class="show-ans-btn" onclick="toggleAnswer('ans3')">看參考答案</button>
+                <div id="ans3" class="answer-reveal">參考答案：防止長期舞弊、掩蓋錯誤或權力壟斷的風險。</div>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<script>
+    /* * JavaScript 邏輯區
+     * 負責處理作答判斷與介面互動
+     */
+
+    // 正確答案陣列
+    const CORRECT_ANSWERS = ['A', 'C', 'D'];
+
+    function checkAnswer() {
+        // 1. 取得使用者勾選的項目
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        const userSelection = Array.from(checkboxes).map(cb => cb.value).sort();
+        const feedbackDiv = document.getElementById('feedback');
+        const explainBtn = document.getElementById('btn-explain');
+
+        // 2. 判斷是否作答
+        if (userSelection.length === 0) {
+            alert("請至少選擇一個選項！");
+            return;
+        }
+
+        // 3. 比對答案
+        // 檢查使用者選的數量是否正確，且內容完全一致
+        const isCorrect = userSelection.length === CORRECT_ANSWERS.length && 
+                          userSelection.every((val, index) => val === CORRECT_ANSWERS[index]);
+
+        // 4. 分析錯誤 (找出多選與少選)
+        const missing = CORRECT_ANSWERS.filter(x => !userSelection.includes(x));
+        const extra = userSelection.filter(x => !CORRECT_ANSWERS.includes(x));
+
+        // 5. 顯示回饋
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.className = isCorrect ? 'feedback-success' : 'feedback-error';
+
+        let message = "";
+        
+        if (isCorrect) {
+            message = `恭喜全對！<br>
+                       你選擇了：${userSelection.join('、')}<br>
+                       正確答案：${CORRECT_ANSWERS.join('、')}`;
+            // 答對才顯示看解析按鈕 (或答錯也顯示，依教學策略，此處設為作答後顯示)
+            explainBtn.style.display = 'inline-block';
+        } else {
+            message = `答錯了！<br>
+                       你選擇了：${userSelection.join('、')}<br>
+                       正確答案：${CORRECT_ANSWERS.join('、')}<br><br>`;
+            
+            // 錯誤提示
+            if (missing.length > 0) {
+                message += `提示：你漏選了 ${missing.join('、')}。<br>`;
+            }
+            if (extra.length > 0) {
+                message += `提示：你多選了 ${extra.join('、')}。<br>`;
+            }
+            
+            // 鼓勵語
+            message += `<br>別氣餒，點擊「一鍵看解析」來釐清觀念！`;
+            explainBtn.style.display = 'inline-block';
+        }
+
+        feedbackDiv.innerHTML = message;
+    }
+
+    function resetQuiz() {
+        // 清空選項
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => cb.checked = false);
+
+        // 隱藏回饋與按鈕
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('btn-explain').style.display = 'none';
+        
+        // 隱藏解析區
+        document.getElementById('explanation-area').style.display = 'none';
+        document.getElementById('btn-explain').innerText = "一鍵看解析";
+        
+        // 隱藏自我檢測答案
+        const answers = document.querySelectorAll('.answer-reveal');
+        answers.forEach(ans => ans.style.display = 'none');
+    }
+
+    function toggleExplanation() {
+        const area = document.getElementById('explanation-area');
+        const btn = document.getElementById('btn-explain');
+        
+        if (area.style.display === 'none' || area.style.display === '') {
+            area.style.display = 'block';
+            btn.innerText = "收合解析";
+            // 自動捲動到解析區
+            area.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            area.style.display = 'none';
+            btn.innerText = "一鍵看解析";
+        }
+    }
+
+    function toggleAnswer(id) {
+        const ans = document.getElementById(id);
+        if (ans.style.display === 'none' || ans.style.display === '') {
+            ans.style.display = 'block';
+        } else {
+            ans.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

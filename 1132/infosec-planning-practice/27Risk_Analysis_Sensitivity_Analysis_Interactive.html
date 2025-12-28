@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 27 題｜風險分析類型判斷 - 資安短期衝刺班</title>
+    <style>
+        /* 基礎設定：重置與字型 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            font-size: 16px; /* 題目要求：內文字級 16px */
+            padding: 20px;
+        }
+
+        /* 版面容器 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-top: 5px solid #2c3e50; /* 補習班講義風格配色 */
+        }
+
+        /* 標題樣式 */
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        h1 {
+            font-size: 18px; /* 題目要求：標題最多 18px */
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-top: 25px;
+            background-color: #ecf0f1;
+            padding: 8px;
+            border-left: 5px solid #3498db;
+        }
+
+        h3 {
+            font-size: 17px;
+            margin-top: 20px;
+            color: #e67e22;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        /* 題目區塊樣式 */
+        .question-box {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .scenario-text {
+            background-color: #f9f9f9;
+            border: 1px dashed #999;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-family: "Courier New", monospace; /* 模擬題目文字 */
+            color: #444;
+        }
+
+        /* 選項樣式 */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕樣式 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-submit {
+            background-color: #27ae60;
+        }
+
+        .btn-submit:hover {
+            background-color: #219150;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+        }
+
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-explain {
+            background-color: #3498db;
+            display: none; /* 預設隱藏 */
+        }
+
+        .btn-explain:hover {
+            background-color: #2980b9;
+        }
+
+        /* 結果與提示區域 */
+        #result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .correct-msg {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-msg {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hint-text {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        /* 解析內容樣式 */
+        .explanation-content {
+            display: none; /* 預設收合 */
+            margin-top: 30px;
+            border-top: 2px dashed #bbb;
+            padding-top: 20px;
+        }
+
+        .highlight {
+            background-color: #fff3cd; /* 黃色螢光筆效果 */
+            font-weight: bold;
+            padding: 0 4px;
+            border-radius: 2px;
+            color: #d35400;
+        }
+
+        .keyword-box {
+            background-color: #fcf8e3;
+            padding: 15px;
+            border-left: 4px solid #f0ad4e;
+            margin-bottom: 15px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background-color: #fff;
+        }
+
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .comparison-table th {
+            background-color: #f2f2f2;
+            width: 30%;
+        }
+
+        /* 自我檢測樣式 */
+        .self-check-item {
+            background-color: #e8f6f3;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .answer-reveal {
+            color: #2c3e50;
+            font-weight: bold;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* RWD 適應 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安短期衝刺班｜第 27 題｜風險分析類型判斷</h1>
+
+    <div class="question-box">
+        <p><strong>27. 如附圖所示的內容，比較類似下列何種的風險分析類型？</strong></p>
+        
+        <!-- 模擬題目附圖文字內容 -->
+        <div class="scenario-text">
+            <strong>【題目背景說明】</strong><br>
+            您是組織的資通安全主管，發現有一些資通安全風險正在對組織構成威脅，因此完成這些風險因子的「揭露程度之衡量」，認為風險因子具有很大的影響潛力。<br><br>
+            <span style="border-bottom: 2px solid #e74c3c;">當所有其他不確定因子保持在基準線時，逐一觀察「每個因子的變動」對「所量測的風險影響程度」之變化。</span>
+        </div>
+
+        <div class="options-group" id="options-container">
+            <label class="option-label">
+                <input type="radio" name="quiz" value="A">
+                (A) 敏感度分析（Sensitivity Analysis）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="quiz" value="B">
+                (B) 故障樹分析（Fault Tree Analysis）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="quiz" value="C">
+                (C) 因果分析（Cause-Consequence Analysis）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="quiz" value="D">
+                (D) 情境分析（Scenario Analysis）
+            </label>
+        </div>
+    </div>
+
+    <!-- 按鈕與互動區 -->
+    <div class="btn-group">
+        <button class="btn btn-submit" onclick="checkAnswer()">送出作答</button>
+        <button class="btn btn-explain" id="btn-explain" onclick="toggleExplanation()">一鍵看解析 ▼</button>
+        <button class="btn btn-reset" onclick="resetQuiz()">重置作答</button>
+    </div>
+
+    <!-- 結果顯示區 -->
+    <div id="result-area"></div>
+
+    <!-- 詳細解析內容 (預設隱藏) -->
+    <div id="explanation-area" class="explanation-content">
+        <h2>【名師解析】風險分析類型判斷</h2>
+
+        <h3>【第一步：找關鍵字】</h3>
+        <div class="keyword-box">
+            <p>請注意題目中的這些描述：</p>
+            <ul>
+                <li><span class="highlight">風險因子</span></li>
+                <li><span class="highlight">其他不確定因子保持在基準線</span></li>
+                <li><span class="highlight">每個因子的變動</span></li>
+                <li>對<span class="highlight">所量測風險的影響程度</span></li>
+            </ul>
+            <p style="margin-top: 10px;"><strong>說明：</strong><br>本題的關鍵不是「事件怎麼發生」，而是「<strong>改變一個變數，看風險怎麼變</strong>」。</p>
+        </div>
+
+        <h3>【第二步：白話翻譯】</h3>
+        <p>用高中生日常口語重新說明題目：</p>
+        <p style="background-color: #eef; padding: 10px; border-radius: 4px;">
+            「你一次只動一個變數，其他條件都不變，看這個變數對整體風險影響有多大，這種分析方法叫什麼？」
+        </p>
+
+        <h3>【第三步：解題思路與原理】</h3>
+        <p><strong>這題在考什麼觀念？</strong><br>一句話核心考點：「一次只調整一個因子，觀察結果變化」。</p>
+        
+        <p><strong>敏感度分析（Sensitivity Analysis）原理：</strong></p>
+        <ul>
+            <li><strong>定義：</strong>在其他條件固定的情況下，改變單一輸入變數，觀察結果（風險值）變化的程度。</li>
+            <li><strong>白話比喻：</strong>像是在調收音機音量時，只轉「音量旋鈕」，不動頻道、不動音效，看聲音會變多大。</li>
+        </ul>
+
+        <h3>【第四步：選項分析】</h3>
+        <table class="comparison-table">
+            <tr>
+                <th>選項</th>
+                <th>分析</th>
+            </tr>
+            <tr>
+                <td><strong>(A) 敏感度分析</strong></td>
+                <td><span style="color: green; font-weight: bold;">正確</span>。完全符合「其他因子不變，只調整單一因子看影響」的定義。</td>
+            </tr>
+            <tr>
+                <td>(B) 故障樹分析</td>
+                <td>錯誤。這是從「結果往回找原因」，用邏輯樹分析故障來源。</td>
+            </tr>
+            <tr>
+                <td>(C) 因果分析</td>
+                <td>錯誤。這是同時分析事件原因與後果，並非針對單一變數變動的量測。</td>
+            </tr>
+            <tr>
+                <td>(D) 情境分析</td>
+                <td>錯誤。這是假設「整個情境改變」（多個變數同時變），例如最好狀況或最壞狀況。</td>
+            </tr>
+        </table>
+
+        <h3>【觀念補充與延伸】</h3>
+        <p><strong>對比速記：</strong></p>
+        <ul>
+            <li>只動一個變數 → <strong>敏感度分析</strong></li>
+            <li>整組假設一起換 → <strong>情境分析</strong></li>
+            <li>從事故結果往回推 → <strong>故障樹分析</strong></li>
+        </ul>
+        <p style="margin-top: 10px; font-weight: bold; color: #d35400;">記憶口訣：「一個變數動一動，看風險變多重」</p>
+
+        <h3>【常見陷阱與避坑指南】</h3>
+        <ul>
+            <li><strong>學生最容易錯：</strong>看到「不確定性」就選情境分析。</li>
+            <li><strong>避坑指南：</strong>題目只要出現「其他因子不變」或「保持在基準線」，直接聯想到敏感度分析。</li>
+        </ul>
+
+        <h3>【正確答案】</h3>
+        <p><strong>答案：A</strong></p>
+        <p>理由：「在其他因子固定下，觀察單一因子變動對風險影響的分析方式，即為敏感度分析。」</p>
+
+        <h3>【自我檢測】</h3>
+        <div class="self-check-item">
+            <p>1. 若一次同時改變多個假設條件（例如：經濟衰退且天災同時發生），會是哪一種分析？</p>
+            <span class="answer-reveal">參考答案：情境分析</span>
+        </div>
+        <div class="self-check-item">
+            <p>2. 故障樹分析主要用途是什麼？</p>
+            <span class="answer-reveal">參考答案：找出事故發生的根本原因</span>
+        </div>
+        <div class="self-check-item">
+            <p>3. 為何敏感度分析常用於風險決策？</p>
+            <span class="answer-reveal">參考答案：可找出影響風險最大的關鍵因子</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 定義正確答案
+    const CORRECT_ANSWER = 'A';
+
+    // 取得 DOM 元素
+    const options = document.getElementsByName('quiz');
+    const resultArea = document.getElementById('result-area');
+    const explainBtn = document.getElementById('btn-explain');
+    const explanationArea = document.getElementById('explanation-area');
+
+    // 檢查答案函式
+    function checkAnswer() {
+        let selectedValue = null;
+        
+        // 找出使用者選了哪個
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        // 未作答處理
+        if (!selectedValue) {
+            alert('請先選擇一個答案再送出喔！');
+            return;
+        }
+
+        // 清空並顯示結果區
+        resultArea.style.display = 'block';
+        resultArea.className = ''; // 重置 class
+        
+        if (selectedValue === CORRECT_ANSWER) {
+            // 答對處理
+            resultArea.className = 'correct-msg';
+            resultArea.innerHTML = `
+                <h3>恭喜答對！</h3>
+                <p>您的選擇：(${selectedValue})</p>
+                <p>這題的核心觀念就是「控制變因」，您掌握得很精準！</p>
+            `;
+            // 顯示解析按鈕
+            explainBtn.style.display = 'inline-block';
+        } else {
+            // 答錯處理
+            resultArea.className = 'error-msg';
+            resultArea.innerHTML = `
+                <h3>可惜答錯了</h3>
+                <p>您的選擇：(${selectedValue})</p>
+                <p class="hint-text">【觀念提示】題目提到「當其他因子保持在基準線時，逐一觀察每個因子的變動」。<br>這很像科學實驗中的「控制變因法」，一次只動一個變數。</p>
+            `;
+            // 答錯也要顯示解析按鈕，讓學生學習
+            explainBtn.style.display = 'inline-block';
+        }
+    }
+
+    // 切換解析顯示函式
+    function toggleExplanation() {
+        if (explanationArea.style.display === 'block') {
+            explanationArea.style.display = 'none';
+            explainBtn.textContent = '一鍵看解析 ▼';
+        } else {
+            explanationArea.style.display = 'block';
+            explainBtn.textContent = '收合解析 ▲';
+            // 自動捲動到解析區
+            explanationArea.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // 重置函式
+    function resetQuiz() {
+        // 清除選項
+        for (const option of options) {
+            option.checked = false;
+        }
+        // 隱藏結果區
+        resultArea.style.display = 'none';
+        resultArea.innerHTML = '';
+        // 隱藏解析區與按鈕
+        explanationArea.style.display = 'none';
+        explainBtn.style.display = 'none';
+        explainBtn.textContent = '一鍵看解析 ▼';
+        // 捲動回頂端
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

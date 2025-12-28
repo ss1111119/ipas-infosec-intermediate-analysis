@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安衝刺班｜題組三：第 23 題解析</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 深藍色：專業、穩重 */
+            --accent-color: #d35400;  /* 深橘色：重點強調 */
+            --highlight-bg: #f1c40f;  /* 螢光黃：關鍵字 */
+            --bg-color: #ecf0f1;      /* 淺灰色背景 */
+            --text-color: #333;
+            --white: #ffffff;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Header Section */
+        header {
+            border-bottom: 3px solid var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin: 0 0 10px 0;
+        }
+
+        .scenario-box {
+            background-color: #f8f9fa;
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #7f8c8d;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-color);
+            background-color: #f1f1f1;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        /* Question Section */
+        .question-block {
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .question-title {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 5px 15px;
+            display: inline-block;
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .option-list {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+
+        .option-list li {
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: default;
+        }
+
+        .option-list li:hover {
+            background-color: #f9f9f9;
+        }
+
+        /* Teaching Analysis Sections */
+        .section-title {
+            font-size: 20px;
+            color: var(--accent-color);
+            border-bottom: 2px dashed #ddd;
+            padding-bottom: 5px;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .highlight-text {
+            background-color: var(--highlight-bg);
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .explanation-card {
+            background-color: #fff;
+            border: 1px solid #eee;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .term-definition {
+            font-size: 0.9em;
+            color: #555;
+            background-color: #f4f4f4;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 4px;
+        }
+
+        .term-title {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Interactive Elements */
+        details {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+
+        summary {
+            font-weight: bold;
+            color: var(--primary-color);
+            outline: none;
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+        }
+
+        /* Mnemonic Box */
+        .mnemonic-box {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            letter-spacing: 2px;
+        }
+
+        .correct-answer-reveal {
+            text-align: center;
+            font-size: 1.5em;
+            color: var(--success-color);
+            font-weight: bold;
+            padding: 20px;
+            border: 2px solid var(--success-color);
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            background-color: #eafaf1;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.8em;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+
+        /* Option Analysis Grid */
+        .analysis-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .analysis-item {
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        .analysis-item.correct {
+            border-color: var(--success-color);
+            background-color: #eafaf1;
+        }
+
+        .analysis-item.wrong {
+            border-color: #eee;
+            background-color: #fff;
+            opacity: 0.8;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 0.8em;
+            color: white;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+        .badge-correct { background-color: var(--success-color); }
+        .badge-wrong { background-color: #95a5a6; }
+
+        /* Hidden content for other tabs */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .tabs { flex-wrap: wrap; }
+            .tab-btn { flex: 1 1 50%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>資安短期衝刺班｜題組三解析</h1>
+        <div class="scenario-box">
+            <span class="scenario-title">【共用情境】</span>
+            <p>某公司為我國一先進技術的開發商，主要據點 A 與 B 分散於國內兩地。該公司十分重視資訊安全及品質管理，已通過 ISO 9001、ISO 14001 等相關標準驗證。</p>
+            <ul>
+                <li><strong>據點 A</strong>：業務部門 S、研發部門 R1</li>
+                <li><strong>據點 B</strong>：管理部門 A、研發部門 R2</li>
+                <li><strong>資訊相關事務</strong>：由管理部門 A 負責</li>
+            </ul>
+            <p style="color: var(--accent-color); font-weight: bold; margin-top: 10px;">本題組重點：端點安全、資料外洩防護、裝置遺失風險</p>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <button class="tab-btn" onclick="switchTab('q21')">第 21 題 (已完成)</button>
+        <button class="tab-btn" onclick="switchTab('q22')">第 22 題 (已完成)</button>
+        <button class="tab-btn active" onclick="switchTab('q23')">第 23 題 (本題)</button>
+        <button class="tab-btn" onclick="switchTab('q24')">第 24 題 (預留)</button>
+    </nav>
+
+    <!-- Content for Q21 (Placeholder) -->
+    <div id="q21" class="tab-content">
+        <div class="explanation-card" style="text-align: center; padding: 50px;">
+            <h3>第 21 題課程已結束</h3>
+            <p>請點選上方標籤切換至「第 23 題」繼續課程。</p>
+        </div>
+    </div>
+
+    <!-- Content for Q22 (Placeholder) -->
+    <div id="q22" class="tab-content">
+        <div class="explanation-card" style="text-align: center; padding: 50px;">
+            <h3>第 22 題課程已結束</h3>
+            <p>請點選上方標籤切換至「第 23 題」繼續課程。</p>
+        </div>
+    </div>
+
+    <!-- Content for Q24 (Placeholder) -->
+    <div id="q24" class="tab-content">
+        <div class="explanation-card" style="text-align: center; padding: 50px;">
+            <h3>第 24 題為預留課程</h3>
+            <p>請先完成「第 23 題」的學習。</p>
+        </div>
+    </div>
+
+    <!-- Content for Q23 (Active) -->
+    <div id="q23" class="tab-content active">
+        
+        <article class="question-block">
+            <span class="question-title">題目 23</span>
+            <p>由於業務部門員工常需透過公司配發的筆記型電腦，在公司外進行工作，為避免因設備遺失導致資料外流，試問下列何種措施最為合適？</p>
+            <ul class="option-list">
+                <li>(A) 於筆記型電腦的 BIOS 設定並啟用開機密碼</li>
+                <li>(B) 於筆記型電腦設定並啟用 BitLocker 與使用者密碼登入</li>
+                <li>(C) 於筆記型電腦的作業系統設定並啟用 PIN 碼登入</li>
+                <li>(D) 於筆記型電腦的作業系統設定並啟用 Windows Hello 登入</li>
+            </ul>
+        </article>
+
+        <!-- Step 1 -->
+        <div class="section-title">【第一步：找關鍵字】</div>
+        <p>同學們請拿起螢光筆，把題目裡的這幾個詞畫起來：</p>
+        <div class="explanation-card">
+            <p><span class="highlight-text">公司外工作</span>：代表環境不可控，沒有公司防火牆或門禁保護。</p>
+            <p><span class="highlight-text">筆記型電腦</span>：體積小，容易遺失或被偷竊。</p>
+            <p><span class="highlight-text">設備遺失</span>：這是最壞的情況，電腦已經不在我們手上了。</p>
+            <p><span class="highlight-text">資料外流</span>：我們怕的不是損失硬體（筆電），而是裡面的機密文件被看光光。</p>
+            <p><span class="highlight-text">最為合適</span>：每個選項可能都有點用，但我們要選「最有效」的那個。</p>
+        </div>
+        <p><strong>老師點評</strong>：這題的核心不是「登入方不方便」，而是當設備落入壞人手中時，<strong>資料本身是否還能被讀取</strong>。</p>
+
+        <!-- Step 2 -->
+        <div class="section-title">【第二步：白話翻譯】</div>
+        <p>如果用高中生聽得懂的話來說，這題其實在問：</p>
+        <blockquote style="font-size: 1.1em; border-left: 4px solid var(--primary-color); padding-left: 15px; margin: 20px 0; color: var(--primary-color); font-weight: bold;">
+            「如果公司的筆電不小心掉在捷運上或是被偷了，哪一種設定可以確保撿到的人，就算把電腦拆開，也完全看不到裡面的資料？」
+        </blockquote>
+        
+        <p><strong>專有名詞大補帖：</strong></p>
+        <div class="term-definition">
+            <span class="term-title">BitLocker：</span><br>
+            這是一種「全磁碟加密」技術。就像把整個硬碟鎖進一個保險箱，如果沒有鑰匙（金鑰），硬碟裡的檔案就是一堆亂碼，完全無法閱讀。
+        </div>
+        <div class="term-definition">
+            <span class="term-title">BIOS 密碼：</span><br>
+            這是在電腦開機進入 Windows 之前的一道鎖。但它只鎖住「這台機器無法開機」，並不保護硬碟裡的資料。
+        </div>
+        <div class="term-definition">
+            <span class="term-title">PIN / Windows Hello：</span><br>
+            這些是「登入方式」。PIN 是短密碼，Hello 是刷臉或指紋。它們是為了方便你登入，不等於資料有被加密。
+        </div>
+
+        <!-- Step 3 -->
+        <div class="section-title">【第三步：解題思路】</div>
+        <p>面對這種「裝置遺失」的題目，請依照這個邏輯流程來判斷：</p>
+        <ol>
+            <li><strong>思考風險</strong>：電腦被偷了，小偷可以做什麼？
+                <ul>
+                    <li>小偷可以把硬碟拆下來，裝到另一台電腦上讀取。</li>
+                </ul>
+            </li>
+            <li><strong>判斷防禦</strong>：
+                <ul>
+                    <li>如果不讓登入（PIN/Hello/BIOS）：小偷只要拆硬碟，資料就被看光了。</li>
+                    <li>如果資料加密（BitLocker）：小偷拆了硬碟，看到的也是亂碼。</li>
+                </ul>
+            </li>
+            <li><strong>結論</strong>：唯一能防止硬碟被拆下讀取的，只有「加密」。</li>
+        </ol>
+
+        <!-- Step 4 -->
+        <div class="section-title">【第四步：選項分析】</div>
+        <div class="analysis-grid">
+            <div class="analysis-item wrong">
+                <strong><span class="badge badge-wrong">(A)</span> BIOS 開機密碼</strong><br>
+                <small>原因：</small> 這只能擋住「開機程序」。駭客只要把筆電拆開，拿出硬碟，透過轉接線接到另一台電腦，就能直接讀取所有檔案，完全無防護力。
+            </div>
+            <div class="analysis-item correct">
+                <strong><span class="badge badge-correct">(B)</span> BitLocker + 密碼</strong><br>
+                <small>原因：</small> BitLocker 是「整碟加密」。即使駭客拆下硬碟，因為沒有修復金鑰，硬碟內容對他來說只是無意義的亂碼。這是最有效的防護。
+            </div>
+            <div class="analysis-item wrong">
+                <strong><span class="badge badge-wrong">(C)</span> PIN 碼登入</strong><br>
+                <small>原因：</small> PIN 碼只是取代長密碼的登入手段。如果沒有搭配 BitLocker，硬碟裡的檔案本身是未加密的明文，拆硬碟一樣會外洩。
+            </div>
+            <div class="analysis-item wrong">
+                <strong><span class="badge badge-wrong">(D)</span> Windows Hello</strong><br>
+                <small>原因：</small> 指紋或人臉辨識（生物特徵）是為了便利性。同樣的道理，如果不加密硬碟，繞過作業系統直接讀硬碟資料是輕而易舉的。
+            </div>
+        </div>
+
+        <!-- Extra Concepts -->
+        <div class="section-title">【觀念補充與延伸】</div>
+        <p>本題屬於資安領域中的：<strong>端點安全 (Endpoint Security)</strong> 與 <strong>資料外洩防護 (DLP)</strong>。</p>
+        <p>核心原則是：</p>
+        <ul>
+            <li>移動裝置（筆電、隨身碟）視為「必然會遺失」。</li>
+            <li>防護底線是「遺失後，確保資料不可讀」。</li>
+            <li>關鍵技術：全磁碟加密 (Full Disk Encryption, FDE)。</li>
+        </ul>
+
+        <!-- Mnemonic -->
+        <div class="mnemonic-box">
+            口訣：「筆電會不見，資料要加密」
+        </div>
+
+        <!-- Pitfalls -->
+        <div class="explanation-card" style="border-left-color: var(--error-color);">
+            <div class="term-title" style="color: var(--error-color);">常見陷阱區（同學請注意！）</div>
+            <p>1. <strong>不要把「登入驗證」當成「資料加密」</strong>：有設密碼不代表檔案被加密，拆硬碟是資安攻擊的基本招式。</p>
+            <p>2. <strong>BIOS 密碼不是萬靈丹</strong>：很多同學以為電腦打不開就安全了，卻忘了硬體是可以拆卸的。</p>
+        </div>
+
+        <!-- Correct Answer -->
+        <div class="correct-answer-reveal">
+            正確答案：(B)
+            <div style="font-size: 0.6em; margin-top: 10px; color: #555; font-weight: normal;">
+                理由：BitLocker 提供整顆硬碟加密，即使設備遺失也能防止資料被讀取。
+            </div>
+        </div>
+
+        <!-- Self Check -->
+        <div class="section-title">【自我檢測】</div>
+        <p>遮住答案，試著回答下列問題，確認你是否真的懂了：</p>
+
+        <details>
+            <summary>Q1. 為什麼 BIOS 密碼不能防止資料外洩？（點擊查看答案）</summary>
+            <p>答：因為 BIOS 密碼只限制電腦的啟動過程。攻擊者可以物理性地拆下筆電硬碟，將其作為外接硬碟連接到另一台電腦，繞過 BIOS 檢查直接讀取檔案。</p>
+        </details>
+
+        <details>
+            <summary>Q2. 如果我有設 Windows 登入密碼，還需要 BitLocker 嗎？（點擊查看答案）</summary>
+            <p>答：需要。Windows 登入密碼只是作業系統層級的門禁。如果硬碟沒有加密（如 BitLocker），攻擊者不需要登入 Windows，直接讀取硬碟磁區就能獲取資料。</p>
+        </details>
+
+        <details>
+            <summary>Q3. 手機遺失通常比較不用擔心資料被拆出來讀，為什麼？（點擊查看答案）</summary>
+            <p>答：因為現代智慧型手機（iOS 和 Android）預設都已經啟用了全機加密，且儲存晶片通常焊死在主機板上，不像傳統筆電硬碟容易拆卸讀取。</p>
+        </details>
+
+    </div> <!-- End of Q23 content -->
+</div>
+
+<footer>
+    <p>資安短期衝刺班教材 © 2025 | 僅供教學用途</p>
+</footer>
+
+<script>
+    function switchTab(tabId) {
+        // 1. 隱藏所有內容
+        var contents = document.getElementsByClassName('tab-content');
+        for (var i = 0; i < contents.length; i++) {
+            contents[i].classList.remove('active');
+        }
+
+        // 2. 移除所有按鈕的 active 狀態
+        var buttons = document.getElementsByClassName('tab-btn');
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].classList.remove('active');
+        }
+
+        // 3. 顯示目標內容並啟用按鈕
+        document.getElementById(tabId).classList.add('active');
+        
+        // 找到對應的按鈕並設為 active (透過遍歷比對 onclick 屬性或簡單的索引)
+        // 這裡採用簡單遍歷確認
+        for (var i = 0; i < buttons.length; i++) {
+            if (buttons[i].getAttribute('onclick').includes(tabId)) {
+                buttons[i].classList.add('active');
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set3_Q21-24_Network_Segmentation_RnD_Security_Interactive</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #eff0f1;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3, h4 {
+            margin-top: 0;
+            font-size: 18px; /* 限制標題最大字級 */
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* 共用情境區塊 */
+        .context-box {
+            background-color: #e8f4f8;
+            border-left: 5px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .context-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        /* 導覽列 */
+        .nav-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #eee;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+            color: #777;
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+
+        .nav-tab.active {
+            background: #fff;
+            border: 2px solid var(--border-color);
+            border-bottom: 2px solid #fff;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: -2px;
+        }
+
+        .nav-tab.completed {
+            color: var(--success-color);
+        }
+
+        /* 題目區塊 */
+        .question-section {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+        }
+
+        .option-input {
+            margin-right: 12px;
+            margin-top: 5px;
+        }
+
+        /* 按鈕區 */
+        .action-bar {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: #fff;
+        }
+
+        .btn-explain {
+            background-color: var(--accent-color);
+            color: #fff;
+            display: none; /* 預設隱藏，作答後顯示或手動開啟 */
+        }
+
+        /* 結果顯示 */
+        .result-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .result-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區塊 */
+        .explanation-section {
+            margin-top: 30px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 20px;
+            display: none;
+        }
+
+        .step-box {
+            background: #fff;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .highlight-text {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            font-weight: bold;
+        }
+
+        .concept-tag {
+            display: inline-block;
+            background: var(--primary-color);
+            color: #fff;
+            padding: 2px 8px;
+            font-size: 14px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+
+        .answer-reveal {
+            font-weight: bold;
+            color: var(--error-color);
+        }
+
+        .qa-list dt {
+            font-weight: bold;
+            margin-top: 10px;
+            color: var(--accent-color);
+        }
+        .qa-list dd {
+            margin-left: 0;
+            margin-bottom: 10px;
+            padding-left: 15px;
+            border-left: 2px solid #ddd;
+        }
+
+        /* 響應式 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .nav-tab {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 固定情境區 -->
+    <div class="context-box">
+        <div class="context-title">【題組 3：共用情境（21–24 題）】</div>
+        <p>
+            某公司為我國一先進技術的開發商，主要據點 A 與 B 分散於國內兩地。<br>
+            該公司十分重視資訊安全及品質管理，已通過 ISO 9001、ISO 14001 等相關標準驗證。
+        </p>
+        <ul>
+            <li>據點 A：業務部門 S、研發部門 R1</li>
+            <li>據點 B：管理部門 A、研發部門 R2</li>
+            <li><strong>資訊相關事務由管理部門 A 負責</strong></li>
+        </ul>
+    </div>
+
+    <!-- 導覽列 -->
+    <div class="nav-tabs">
+        <div class="nav-tab completed">第 21 題 (完)</div>
+        <div class="nav-tab completed">第 22 題 (完)</div>
+        <div class="nav-tab completed">第 23 題 (完)</div>
+        <div class="nav-tab active">第 24 題</div>
+    </div>
+
+    <!-- 第 24 題主內容 -->
+    <div id="q24-content">
+        <div class="question-section">
+            <div class="question-header">
+                <h3>【第 24 題｜複選題】</h3>
+            </div>
+            <div class="question-text">
+                由於目前公司仍缺乏資訊安全管理相關的驗證，最高管理階層希望採取相關措施，試問下列何種措施較為合適？（請選擇所有正確答案）
+            </div>
+
+            <form id="quiz-form">
+                <div class="options-group">
+                    <label class="option-label">
+                        <input type="checkbox" name="option" value="A" class="option-input">
+                        <span>(A) 由於資訊相關的事務由管理部門 A 負責，故優先考慮由其導入 ISO 27001:2022 的驗證</span>
+                    </label>
+
+                    <label class="option-label">
+                        <input type="checkbox" name="option" value="B" class="option-input">
+                        <span>(B) 考慮公司中相關人員對 ISO 27001:2013 較為熟悉，先導入 2013 版，日後再進行改版驗證</span>
+                    </label>
+
+                    <label class="option-label">
+                        <input type="checkbox" name="option" value="C" class="option-input">
+                        <span>(C) 由於公司也有個資保護管理制度驗證的需求，故直接導入全公司 ISO 27701:2019 的驗證</span>
+                    </label>
+
+                    <label class="option-label">
+                        <input type="checkbox" name="option" value="D" class="option-input">
+                        <span>(D) 由於公司也有個資保護管理制度驗證的需求，故直接導入全公司 ISO 27001:2022 的驗證，再導入 ISO 27701:2019 的驗證</span>
+                    </label>
+                </div>
+
+                <div class="result-box" id="result-message"></div>
+
+                <div class="action-bar">
+                    <button type="button" class="btn btn-submit" onclick="checkAnswer()">送出作答</button>
+                    <button type="button" class="btn btn-explain" id="btn-explain" onclick="toggleExplanation()">查看名師解析</button>
+                    <button type="button" class="btn btn-reset" onclick="resetQuiz()">重置</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 解析區塊 -->
+        <div class="explanation-section" id="explanation-area">
+            <h3>【名師教學解析】</h3>
+
+            <div class="step-box">
+                <h4>第一步：找關鍵字</h4>
+                <p>請注意題目中的這些重點：</p>
+                <ul>
+                    <li><span class="highlight-text">尚缺乏資訊安全管理驗證</span>：代表現在是從零開始。</li>
+                    <li><span class="highlight-text">最高管理階層</span>：涉及公司治理策略。</li>
+                    <li><span class="highlight-text">較為合適</span>：要選最佳解，而非「勉強可行」的解。</li>
+                    <li><span class="highlight-text">ISO 27001 / ISO 27701</span>：核心考點。</li>
+                    <li><span class="highlight-text">2013 與 2022 版本</span>：考版本更新觀念。</li>
+                </ul>
+                <p><strong>說明：</strong>本題重點在考「公司層級的資安治理策略與驗證導入順序」，不是單純考條文背誦。</p>
+            </div>
+
+            <div class="step-box">
+                <h4>第二步：白話翻譯</h4>
+                <p>老師幫你翻譯成白話文：</p>
+                <p>「這家公司現在還沒有資安證照，老闆想要導入制度。針對『資安管理(ISMS)』和『個資保護(PIMS)』這兩件事，怎麼安排順序、找哪個部門負責、用哪個版本才是最正確、最符合國際標準邏輯的？」</p>
+                <p><strong>專有名詞小百科：</strong></p>
+                <ul>
+                    <li><strong>ISO 27001</strong>：資訊安全管理系統 (ISMS)，是地基。</li>
+                    <li><strong>ISO 27701</strong>：隱私資訊管理系統 (PIMS)，是蓋在地基上的房子。</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <h4>第三步：解題思路</h4>
+                <p>這題的核心觀念只有一句話：<strong>「ISMS 一定要先建立，再談個資管理；治理要由核心單位與最新版開始。」</strong></p>
+                <ol>
+                    <li>順序邏輯：先有 ISO 27001，才有 ISO 27701。</li>
+                    <li>版本邏輯：新導入一律採用「現行有效版本」(2022)，絕不走回頭路。</li>
+                    <li>治理邏輯：資訊事務在管理部門 A，由其主導最合適。</li>
+                </ol>
+            </div>
+
+            <div class="step-box">
+                <h4>第四步：選項分析</h4>
+                
+                <p><strong>(A) 正確：</strong><br>
+                資訊相關事務集中於「管理部門 A」，由該單位主導導入 ISO 27001 符合治理實務；且採用最新 2022 版，符合現行要求。</p>
+
+                <p><strong>(B) 不合適：</strong><br>
+                雖然舊版大家可能比較熟，但 2013 版已非最新版本。明知要升級卻先導入舊版，會增加無謂的轉換成本，不符合管理效益。</p>
+
+                <p><strong>(C) 不合適：</strong><br>
+                觀念大陷阱！ISO 27701 (PIMS) 是一個「延伸標準」，它必須建立在 ISO 27001 (ISMS) 的架構之上。沒有導 ISO 27001 就不能直接導 ISO 27701。</p>
+
+                <p><strong>(D) 正確：</strong><br>
+                這就是標準答案的完美流程。先導入 ISO 27001:2022 建立資安管理基礎，再導入 ISO 27701:2019 滿足個資保護需求。循序漸進，合乎邏輯。</p>
+            </div>
+
+            <div class="step-box">
+                <h4>【記憶口訣與觀念延伸】</h4>
+                <p><span class="concept-tag">記憶口訣</span> <strong>「資安先打底，個資再加上」</strong></p>
+                <p><strong>常見陷阱：</strong></p>
+                <ul>
+                    <li>以為熟悉舊版就可以先導（錯！考試選最新版）。</li>
+                    <li>以為個資驗證可以獨立存在（錯！它是附屬在資安驗證之上的）。</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <h4>【自我檢測】</h4>
+                <dl class="qa-list">
+                    <dt>Q1. 為什麼 ISO 27701 不能單獨導入？</dt>
+                    <dd>因為它是建立在 ISO 27001 之上的延伸標準，就像擴充套件一樣。</dd>
+                    
+                    <dt>Q2. 考試中遇到舊版與新版，原則上怎麼選？</dt>
+                    <dd>選最新版。實務上新導入一定是用新版。</dd>
+                    
+                    <dt>Q3. 正確答案總結？</dt>
+                    <dd><span class="answer-reveal">答案：A、D</span></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 正確答案設定
+    const CORRECT_ANSWERS = ['A', 'D'];
+
+    function checkAnswer() {
+        // 取得所有被勾選的選項
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        const userAnswers = Array.from(checkboxes).map(cb => cb.value).sort();
+        
+        const resultBox = document.getElementById('result-message');
+        const explainBtn = document.getElementById('btn-explain');
+        
+        // 判斷邏輯
+        // 1. 檢查數量是否一致
+        // 2. 檢查內容是否完全匹配
+        const isCorrect = userAnswers.length === CORRECT_ANSWERS.length && 
+                          userAnswers.every((val, index) => val === CORRECT_ANSWERS[index]);
+
+        resultBox.style.display = 'block';
+        explainBtn.style.display = 'inline-block'; // 作答後顯示解析按鈕
+
+        if (isCorrect) {
+            resultBox.className = 'result-box result-correct';
+            resultBox.innerHTML = `<strong>完全正確！</strong><br>您的作答：${userAnswers.join('、')} <br>恭喜你掌握了資安治理的導入策略！`;
+        } else {
+            resultBox.className = 'result-box result-incorrect';
+            
+            // 找出漏選與多選
+            const missed = CORRECT_ANSWERS.filter(x => !userAnswers.includes(x));
+            const wrong = userAnswers.filter(x => !CORRECT_ANSWERS.includes(x));
+            
+            let msg = `<strong>答錯了，請再試試！</strong><br>`;
+            if (userAnswers.length === 0) {
+                msg += `您尚未選擇任何選項。<br>`;
+            } else {
+                msg += `您的作答：${userAnswers.join('、')}<br>`;
+            }
+            
+            if (missed.length > 0) msg += `漏選了：${missed.join('、')}<br>`;
+            if (wrong.length > 0) msg += `多選了（或選錯）：${wrong.join('、')}`;
+            
+            resultBox.innerHTML = msg;
+        }
+    }
+
+    function toggleExplanation() {
+        const explainSection = document.getElementById('explanation-area');
+        const btn = document.getElementById('btn-explain');
+        
+        if (explainSection.style.display === 'block') {
+            explainSection.style.display = 'none';
+            btn.textContent = '查看名師解析';
+        } else {
+            explainSection.style.display = 'block';
+            btn.textContent = '收合名師解析';
+            // 平滑捲動到解析區
+            explainSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    function resetQuiz() {
+        // 清空 checkbox
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        // 隱藏結果與解析
+        document.getElementById('result-message').style.display = 'none';
+        document.getElementById('explanation-area').style.display = 'none';
+        document.getElementById('btn-explain').style.display = 'none';
+        document.getElementById('btn-explain').textContent = '查看名師解析';
+    }
+</script>
+
+</body>
+</html>

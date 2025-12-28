@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安短期衝刺班｜第28題｜風險評鑑流程判斷</title>
+    <style>
+        /* =========================================
+           基礎設定 (Base Styles)
+           ========================================= */
+        :root {
+            --primary-color: #2c3e50;    /* 深藍色：專業感 */
+            --accent-color: #e74c3c;     /* 紅色：重點強調 */
+            --success-color: #27ae60;    /* 綠色：正確 */
+            --highlight-bg: #fff3cd;     /* 淺黃：高亮背景 */
+            --bg-color: #f4f7f6;         /* 淺灰：整體背景 */
+            --card-bg: #ffffff;          /* 白色：卡片背景 */
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* 內文要求 16px */
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-top: 1.2em;
+            margin-bottom: 0.8em;
+        }
+
+        h1 { font-size: 24px; text-align: center; border-bottom: 3px solid var(--primary-color); padding-bottom: 10px; }
+        h2 { font-size: 18px; border-left: 5px solid var(--primary-color); padding-left: 10px; background-color: #e9ecef; padding-top: 5px; padding-bottom: 5px;} /* 標題限制最多 18px */
+        h3 { font-size: 17px; color: #555; border-bottom: 1px dashed #ccc; padding-bottom: 5px;}
+
+        /* =========================================
+           容器與卡片 (Container & Cards)
+           ========================================= */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* =========================================
+           題目區塊 (Question Section)
+           ========================================= */
+        .question-box {
+            background-color: #fff;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start; /* 讓文字對齊頂部 */
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+            border-color: var(--primary-color);
+        }
+
+        .option-label input[type="checkbox"] {
+            margin-right: 12px;
+            margin-top: 5px; /* 微調核取方塊位置 */
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        /* =========================================
+           控制按鈕 (Buttons)
+           ========================================= */
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-submit { background-color: var(--primary-color); color: white; }
+        .btn-submit:hover { background-color: #1a252f; }
+
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-explain { background-color: var(--accent-color); color: white; display: none; } /* 預設隱藏 */
+        .btn-explain:hover { background-color: #c0392b; }
+
+        /* =========================================
+           回饋與解析區 (Feedback & Explanation)
+           ========================================= */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-weight: bold;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .feedback-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .explanation-section {
+            display: none; /* 預設隱藏 */
+            margin-top: 30px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+        }
+
+        /* =========================================
+           解析樣式細節 (Explanation Styles)
+           ========================================= */
+        .highlight {
+            background-color: var(--highlight-bg);
+            color: #d35400;
+            font-weight: bold;
+            padding: 0 4px;
+            border-radius: 3px;
+        }
+
+        .speech-bubble {
+            background-color: #e8f6f3;
+            border-left: 5px solid #1abc9c;
+            padding: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #2c3e50;
+        }
+
+        .concept-box {
+            border: 1px solid #bce8f1;
+            background-color: #d9edf7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .mnemonic-box {
+            background-color: #fcf8e3;
+            border: 2px solid #faebcc;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #8a6d3b;
+            margin: 20px 0;
+        }
+
+        .trap-list li {
+            margin-bottom: 8px;
+            color: #c0392b;
+        }
+
+        .correct-answer-display {
+            font-weight: bold;
+            color: var(--success-color);
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+        
+        /* 列表樣式優化 */
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .btn-group { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>資安短期衝刺班：觀念特訓</h1>
+        <p style="text-align: center; color: #666;">講師：資安補教名師｜單元：風險評鑑流程</p>
+    </header>
+
+    <!-- 題目區塊 -->
+    <div class="question-box">
+        <div class="question-text">
+            28. 一般常見風險評鑑流程包括：「識別背景、風險辨識、風險評估與分析、風險回應、風險監督」。<br>
+            下列敘述哪些屬於「風險評估與分析」階段？（複選）
+        </div>
+        
+        <div class="options-group">
+            <label class="option-label">
+                <input type="checkbox" name="q28" value="A">
+                <span>(A) 執行風險評鑑作業發現 68 個風險項目</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q28" value="B">
+                <span>(B) 已確認 55 個低風險項目，屬風險可接受範圍，決定維持現狀不做改變</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q28" value="C">
+                <span>(C) 將風險項目區分為 3 個高風險項目、10 個中風險項目、55 個低風險項目</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q28" value="D">
+                <span>(D) 使用定量的方法，將風險進行排序</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 按鈕區 -->
+    <div class="btn-group">
+        <button class="btn-submit" onclick="checkAnswer()">送出作答</button>
+        <button class="btn-explain" id="btnExplain" onclick="toggleExplanation()">一鍵看解析</button>
+        <button class="btn-reset" onclick="resetQuiz()">重置作答</button>
+    </div>
+
+    <!-- 作答回饋區 -->
+    <div id="feedbackArea" class="feedback-area"></div>
+
+    <!-- 解析區 (初始隱藏) -->
+    <div id="explanationArea" class="explanation-section">
+        <h2>【教學解析】</h2>
+        <p>正確答案：<span class="correct-answer-display">C、D</span></p>
+
+        <!-- 第一步 -->
+        <h3>【第一步：找關鍵字】</h3>
+        <p>請特別注意題幹中的：<span class="highlight">風險評鑑流程</span>、<span class="highlight">風險評估與分析</span>。</p>
+        <p>選項中的關鍵字：<span class="highlight">區分高、中、低風險</span>、<span class="highlight">定量方法</span>、<span class="highlight">排序</span>。</p>
+        <p><strong>說明：</strong>本題的關鍵在於判斷這個動作是在<strong>「分析風險」</strong>，還是在<strong>「做決策」</strong>。</p>
+
+        <!-- 第二步 -->
+        <h3>【第二步：白話翻譯】</h3>
+        <div class="speech-bubble">
+            「各位同學，試著把公司的風險管理想成這樣：<br>
+            有些步驟是在<strong>『算風險有多大』</strong>，有些步驟是在<strong>『決定要不要處理』</strong>。<br>
+            題目就是在問你：下面哪些動作，還停留在<strong>『算與分』</strong>的階段？」
+        </div>
+
+        <!-- 第三步 -->
+        <h3>【第三步：解題思路】</h3>
+        <div class="concept-box">
+            <p><strong>一句話核心考點：</strong></p>
+            <p>「風險評估與分析 ＝ 量化、分類、排序，但還沒做決策」</p>
+        </div>
+
+        <!-- 原理與規則 -->
+        <h3>【原理與規則：建立完整流程觀】</h3>
+        <p>一般風險評鑑流程可簡化理解為：</p>
+        <ol>
+            <li><strong>風險辨識：</strong>找出「有哪些風險」（列清單）。</li>
+            <li><strong>風險評估與分析：</strong>分析「哪些風險比較大、比較小」，進行分類、排序、量化。</li>
+            <li><strong>風險回應：</strong>決定「要不要處理、怎麼處理」。</li>
+        </ol>
+
+        <!-- 第四步：選項分析 -->
+        <h3>【第四步：選項分析】</h3>
+        <ul>
+            <li><strong>(A) 執行風險評鑑作業發現 68 個風險項目</strong>
+                <br>→ 這是 <strong>風險辨識</strong>，只是列出清單，尚未分析大小。</li>
+            <li><strong>(B) 決定維持現狀不做改變</strong>
+                <br>→ 關鍵字「決定」、「維持現狀」，表示已經進入 <strong>風險回應（接受風險）</strong>。</li>
+            <li><strong>(C) 將風險項目區分為高、中、低</strong> <span style="color:var(--success-color); font-weight:bold;">(正確)</span>
+                <br>→ 這是典型的 <strong>風險評估與分析</strong>。</li>
+            <li><strong>(D) 使用定量的方法，將風險進行排序</strong> <span style="color:var(--success-color); font-weight:bold;">(正確)</span>
+                <br>→ 明確屬於 <strong>分析風險嚴重程度</strong>。</li>
+        </ul>
+
+        <!-- 觀念補充 -->
+        <h3>【觀念補充與延伸】</h3>
+        <p><strong>快速對照表（考前必記）：</strong></p>
+        <ul>
+            <li>找出有幾個風險 → <strong>風險辨識</strong></li>
+            <li>分高、中、低／排序 → <strong>風險評估與分析</strong></li>
+            <li>決定不處理／轉移／降低 → <strong>風險回應</strong></li>
+        </ul>
+
+        <!-- 記憶口訣 -->
+        <div class="mnemonic-box">
+            口訣：「先算再決定，算的是分析，決定才是回應」
+        </div>
+
+        <!-- 常見陷阱 -->
+        <h3>【常見陷阱與避坑指南】</h3>
+        <ul class="trap-list">
+            <li><strong>學生最容易錯：</strong>看到「可接受」就以為還在分析，其實「確認可接受」往往是為了做決策的前奏或結果。</li>
+            <li><strong>避坑指南：</strong>題目只要出現「決定」、「維持現狀」，一定已經不是分析階段。</li>
+        </ul>
+
+        <!-- 自我檢測 -->
+        <h3>【自我檢測】</h3>
+        <ol>
+            <li>「決定風險是否可接受」屬於哪一階段？（答：風險回應）</li>
+            <li>「將風險依數值大小排序」屬於哪一階段？（答：風險評估與分析）</li>
+        </ol>
+    </div>
+</div>
+
+<script>
+    /* =========================================
+       程式邏輯區
+       ========================================= */
+    
+    // 定義正確答案
+    const correctAnswers = ['C', 'D'];
+
+    function checkAnswer() {
+        // 取得所有被勾選的選項
+        const checkboxes = document.querySelectorAll('input[name="q28"]:checked');
+        const selectedValues = Array.from(checkboxes).map(cb => cb.value);
+
+        // 取得回饋與解析按鈕元素
+        const feedbackArea = document.getElementById('feedbackArea');
+        const btnExplain = document.getElementById('btnExplain');
+
+        // 判斷邏輯
+        let isAllCorrect = true;
+        let missed = []; // 漏選的
+        let wrong = [];  // 多選錯的
+
+        // 檢查漏選
+        correctAnswers.forEach(ans => {
+            if (!selectedValues.includes(ans)) {
+                missed.push(ans);
+                isAllCorrect = false;
+            }
+        });
+
+        // 檢查多選(選錯)
+        selectedValues.forEach(val => {
+            if (!correctAnswers.includes(val)) {
+                wrong.push(val);
+                isAllCorrect = false;
+            }
+        });
+
+        // 顯示回饋
+        feedbackArea.style.display = 'block';
+        feedbackArea.className = 'feedback-area'; // 重置 class
+
+        if (isAllCorrect && selectedValues.length === correctAnswers.length) {
+            // 全對
+            feedbackArea.classList.add('feedback-success');
+            feedbackArea.innerHTML = '恭喜答對！觀念非常清晰！';
+        } else {
+            // 有錯
+            feedbackArea.classList.add('feedback-error');
+            let msg = '作答結果有誤：<br>';
+            if (missed.length > 0) msg += `漏選了正確選項：${missed.join('、')}<br>`;
+            if (wrong.length > 0) msg += `誤選了錯誤選項：${wrong.join('、')}`;
+            if (selectedValues.length === 0) msg = '您尚未選擇任何選項。';
+            
+            feedbackArea.innerHTML = msg;
+        }
+
+        // 顯示解析按鈕
+        btnExplain.style.display = 'block';
+    }
+
+    function toggleExplanation() {
+        const explanationArea = document.getElementById('explanationArea');
+        const btn = document.getElementById('btnExplain');
+        
+        if (explanationArea.style.display === 'none' || explanationArea.style.display === '') {
+            explanationArea.style.display = 'block';
+            btn.textContent = '收起解析';
+            // 自動捲動到解析區
+            explanationArea.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            explanationArea.style.display = 'none';
+            btn.textContent = '一鍵看解析';
+        }
+    }
+
+    function resetQuiz() {
+        // 清空 checkbox
+        const checkboxes = document.querySelectorAll('input[name="q28"]');
+        checkboxes.forEach(cb => cb.checked = false);
+
+        // 隱藏回饋區
+        const feedbackArea = document.getElementById('feedbackArea');
+        feedbackArea.style.display = 'none';
+        feedbackArea.innerHTML = '';
+
+        // 隱藏解析區
+        document.getElementById('explanationArea').style.display = 'none';
+        
+        // 隱藏解析按鈕 (恢復原始狀態)
+        const btnExplain = document.getElementById('btnExplain');
+        btnExplain.style.display = 'none';
+        btnExplain.textContent = '一鍵看解析';
+
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

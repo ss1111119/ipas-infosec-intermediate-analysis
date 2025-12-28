@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安短期衝刺班 | 題組 4：風險管理流程 (第 31 題)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --text-color: #333333;
+            --border-color: #dcdcdc;
+            --highlight-bg: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 標題與情境區 */
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        h1 {
+            font-size: 18px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            background-color: #e8f6f3;
+            padding: 10px;
+            border-left: 5px solid var(--success-color);
+        }
+
+        h3 {
+            font-size: 17px;
+            margin-top: 25px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .context-box {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            font-size: 16px;
+        }
+
+        .highlight-text {
+            font-weight: bold;
+            color: var(--error-color);
+        }
+
+        /* 導覽列 */
+        .nav-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+
+        .nav-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text-color);
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+            background-color: #f8f9fa;
+        }
+
+        .nav-item:hover {
+            background-color: #e2e6ea;
+        }
+
+        .nav-item.active {
+            background-color: #ffffff;
+            border-color: var(--border-color);
+            border-bottom-color: #ffffff;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: -1px;
+        }
+
+        /* 題目與選項 */
+        .question-content {
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            list-style: none;
+            padding: 0;
+        }
+
+        .option-item {
+            margin-bottom: 12px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-item:hover {
+            background-color: #f1faff;
+        }
+
+        .option-item input[type="radio"] {
+            margin-top: 5px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .option-item label {
+            cursor: pointer;
+            width: 100%;
+        }
+
+        /* 按鈕區 */
+        .action-area {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-color);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-explain {
+            background-color: var(--success-color);
+            color: white;
+            display: none; /* 預設隱藏 */
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* 結果與解析 */
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .result-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .explanation-section {
+            margin-top: 30px;
+            border-top: 2px solid var(--primary-color);
+            padding-top: 20px;
+            display: none;
+        }
+
+        .step-box {
+            background-color: #fff;
+            border-left: 4px solid var(--accent-color);
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .keyword-highlight {
+            background-color: var(--highlight-bg);
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .concept-tag {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .mnemonic {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent-color);
+            text-align: center;
+            padding: 15px;
+            border: 2px dashed var(--accent-color);
+            margin: 20px 0;
+            background-color: #f9fbfd;
+        }
+
+        /* 自我檢測列表 */
+        .self-check-list {
+            padding-left: 20px;
+        }
+        
+        .self-check-list li {
+            margin-bottom: 15px;
+        }
+
+        .answer-reveal {
+            color: var(--success-color);
+            font-weight: bold;
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 頁面標題 -->
+    <h1>資安短期衝刺班 | 題組 4：風險管理實務</h1>
+
+    <!-- 共用情境 -->
+    <div class="context-box">
+        <strong>【題組共用情境】</strong><br>
+        S 公司為設立於中華民國之消費性電子產品製造商，同時於台灣及歐洲地區架設網站，對一般民眾販售消費性電子產品，且公司網路購物之收益占公司整體利益 90% 以上。<br><br>
+        公司已通過 ISO 27001 驗證，並於 2023 年 12 月依照所訂定之程序完成風險評估作業。目前公司對於對外服務之網站、系統設定最大可中斷時間為 12 小時。
+    </div>
+
+    <!-- 題組導覽 -->
+    <div class="nav-tabs">
+        <div class="nav-item" onclick="alert('本頁面專注於教學第 31 題')">第 29 題</div>
+        <div class="nav-item" onclick="alert('本頁面專注於教學第 31 題')">第 30 題</div>
+        <div class="nav-item active">第 31 題 (本題)</div>
+        <div class="nav-item" onclick="alert('本頁面專注於教學第 31 題')">第 32 題</div>
+    </div>
+
+    <!-- 題目區域 -->
+    <div class="question-content">
+        <h2>第 31 題｜重大風險事件處置</h2>
+        <p>若於 S 公司網購網站上架產品之重要客戶於 2024 年 2 月要求，其網購網站服務中斷不得超過 8 小時。若公司判斷此為重大風險事件，請問下列何者作法較正確？</p>
+        
+        <form id="quizForm">
+            <ul class="options-group">
+                <li class="option-item">
+                    <label>
+                        <input type="radio" name="answer" value="A">
+                        (A) 資訊單位自行決定，直接調配資源改善網購網站之不可中斷時間至 8 小時以內
+                    </label>
+                </li>
+                <li class="option-item">
+                    <label>
+                        <input type="radio" name="answer" value="B">
+                        (B) 立即進行風險評估，依風險評估結果辦理相關事宜
+                    </label>
+                </li>
+                <li class="option-item">
+                    <label>
+                        <input type="radio" name="answer" value="C">
+                        (C) 直接告知客戶本公司網購網站最大可中斷時間為 12 小時，請其接受
+                    </label>
+                </li>
+                <li class="option-item">
+                    <label>
+                        <input type="radio" name="answer" value="D">
+                        (D) 暫時擱置，於年底風險評估後，再依風險評估結果辦理相關事宜
+                    </label>
+                </li>
+            </ul>
+        </form>
+    </div>
+
+    <!-- 結果回饋區 -->
+    <div id="resultBox" class="result-box"></div>
+
+    <!-- 操作按鈕 -->
+    <div class="action-area">
+        <button type="button" class="btn btn-submit" onclick="submitAnswer()">送出作答</button>
+        <button type="button" class="btn btn-explain" id="btnExplain" onclick="toggleExplanation()">顯示名師解析</button>
+        <button type="button" class="btn btn-reset" onclick="resetQuiz()">重置</button>
+    </div>
+
+    <!-- 解析區域 -->
+    <div id="explanationSection" class="explanation-section">
+        <h3>【補教名師教學解析】</h3>
+
+        <div class="step-box">
+            <h4>第一步：找關鍵字</h4>
+            <p>請各位同學圈起來看：</p>
+            <ul>
+                <li><span class="keyword-highlight">重要客戶</span>：代表不可忽視的需求方。</li>
+                <li><span class="keyword-highlight">服務中斷不得超過 8 小時</span>：新的要求比原本的 12 小時更嚴格。</li>
+                <li><span class="keyword-highlight">判斷為重大風險事件</span>：這句話是關鍵，已經定調為「重大」了。</li>
+                <li><span class="keyword-highlight">作法較正確</span>：要選符合標準流程（SOP）的選項。</li>
+            </ul>
+            <p><strong>名師點評：</strong>本題關鍵在於「<strong>風險條件改變時，組織應啟動什麼程序</strong>」。</p>
+        </div>
+
+        <div class="step-box">
+            <h4>第二步：白話翻譯</h4>
+            <p>「大客戶突然要求網站不能停超過 8 小時，但公司原本設定是 12 小時。這件事已經被認定是『重大風險』了，公司第一步應該做什麼？」</p>
+        </div>
+
+        <div class="step-box">
+            <h4>第三步：解題思路</h4>
+            <span class="concept-tag">核心考點</span>
+            <p><strong>「風險條件一旦改變，必須重新進行風險評估」</strong></p>
+            <p><strong>原理與規則（ISO 27001 的基本精神）：</strong></p>
+            <ul>
+                <li>風險評估不是一年只做一次（那只是最低要求）。</li>
+                <li>當發生以下情況，應<strong>立即</strong>啟動風險評估：
+                    <ul>
+                        <li>法規或客戶要求改變。</li>
+                        <li>風險等級上升。</li>
+                        <li>被判定為重大風險事件。</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="step-box">
+            <h4>第四步：選項分析</h4>
+            <ul>
+                <li><strong>(A) 為什麼不正確？</strong><br>資訊單位無權單方面調整重大營運風險參數，且缺乏正式評估，可能導致資源浪費或方向錯誤。</li>
+                <li><strong>(B) 為什麼正確？</strong><br>立即啟動風險評估 → 依評估結果再決定是否調整 RTO 與投入資源。這是完全符合 ISMS（資訊安全管理系統）的標準作法。</li>
+                <li><strong>(C) 為什麼不正確？</strong><br>無視風險變化與客戶要求，可能造成商譽損失或違反合約風險。</li>
+                <li><strong>(D) 為什麼不正確？</strong><br>既然已是「重大風險」，就不能等到年底。風險管理講求即時性。</li>
+            </ul>
+        </div>
+
+        <div class="mnemonic">
+            記憶口訣：「條件一變，先評估，不是馬上改」
+        </div>
+
+        <div class="step-box">
+            <h4>常見陷阱與避坑指南</h4>
+            <p><strong>學生最容易錯：</strong>看到「客戶要求」就急著選 (A) 立刻改善。</p>
+            <p><strong>心理盲點：</strong>以為技術能解決（直接調參數），就不用走管理流程。</p>
+            <p><strong>避坑指南：</strong>題目只要出現「重大風險事件」→ 第一動作一定是「風險評估」。</p>
+        </div>
+
+        <div class="step-box">
+            <h4>正確答案</h4>
+            <p style="font-size: 1.2em; color: var(--success-color); font-weight: bold;">答案：(B)</p>
+            <p>一句話理由：「當重大風險事件發生時，應立即重新進行風險評估，並依評估結果決定後續處理方式。」</p>
+        </div>
+
+        <div class="step-box" style="background-color: #f8f9fa; border-color: #6c757d;">
+            <h4>自我檢測（遮住答案想一想）</h4>
+            <ol class="self-check-list">
+                <li>
+                    風險評估一定要等到年度盤點才做嗎？
+                    <span class="answer-reveal">→ 不用，重大變更應即時進行</span>
+                </li>
+                <li>
+                    誰有權決定是否調整 RTO（最大可中斷時間）？
+                    <span class="answer-reveal">→ 管理階層，依風險評估結果決定</span>
+                </li>
+                <li>
+                    若未重新評估直接調整系統，可能產生什麼問題？
+                    <span class="answer-reveal">→ 資源錯置與治理風險</span>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitAnswer() {
+        const form = document.getElementById('quizForm');
+        const selected = form.querySelector('input[name="answer"]:checked');
+        const resultBox = document.getElementById('resultBox');
+        const explainBtn = document.getElementById('btnExplain');
+
+        if (!selected) {
+            alert('請先選擇一個答案再送出喔！');
+            return;
+        }
+
+        resultBox.style.display = 'block';
+        explainBtn.style.display = 'inline-block';
+
+        if (selected.value === 'B') {
+            // 答對
+            resultBox.className = 'result-box result-correct';
+            resultBox.innerHTML = `
+                <strong>🎉 答對了！太棒了！</strong><br>
+                您的選擇：(${selected.value})<br>
+                觀念非常正確！面對重大風險變更，首要任務就是「評估」。<br>
+                趕快點擊下方「顯示名師解析」來鞏固觀念吧！
+            `;
+        } else {
+            // 答錯
+            resultBox.className = 'result-box result-wrong';
+            resultBox.innerHTML = `
+                <strong>⚠️ 哎呀，答錯囉！</strong><br>
+                您的選擇：(${selected.value})<br>
+                正確答案：(B)<br><br>
+                <strong>處置提示：</strong><br>
+                想想看，如果還沒評估風險造成的影響和成本，就直接動手改系統，
+                萬一成本過高或是方向錯誤怎麼辦？<br>
+                請點擊下方「顯示名師解析」查看詳細說明。
+            `;
+        }
+    }
+
+    function toggleExplanation() {
+        const section = document.getElementById('explanationSection');
+        const btn = document.getElementById('btnExplain');
+        
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
+            btn.textContent = '隱藏名師解析';
+            // 捲動到解析區
+            section.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            section.style.display = 'none';
+            btn.textContent = '顯示名師解析';
+        }
+    }
+
+    function resetQuiz() {
+        document.getElementById('quizForm').reset();
+        document.getElementById('resultBox').style.display = 'none';
+        document.getElementById('explanationSection').style.display = 'none';
+        document.getElementById('btnExplain').style.display = 'none';
+        document.getElementById('btnExplain').textContent = '顯示名師解析';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

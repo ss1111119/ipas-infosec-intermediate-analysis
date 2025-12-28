@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>題組 2｜第 13–16 題共用情境互動教學</title>
+<style>
+    /* ========================================
+    全域設定 (Reset & Typography)
+    ========================================
+    */
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+
+    /* 限制標題大小不超過 18px */
+    h1, h2, h3, h4 {
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 1.5em;
+        margin-bottom: 0.8em;
+        color: #2c3e50;
+        border-left: 4px solid #3498db;
+        padding-left: 10px;
+    }
+
+    p {
+        margin-bottom: 1em;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #fff;
+        min-height: 100vh;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    /* ========================================
+    導覽列 (Navigation)
+    ========================================
+    */
+    .nav-tabs {
+        display: flex;
+        background-color: #ecf0f1;
+        border-bottom: 1px solid #bdc3c7;
+    }
+
+    .nav-item {
+        flex: 1;
+        padding: 15px 10px;
+        text-align: center;
+        text-decoration: none;
+        color: #7f8c8d;
+        font-size: 16px;
+        border-right: 1px solid #bdc3c7;
+        cursor: pointer;
+    }
+
+    .nav-item:last-child {
+        border-right: none;
+    }
+
+    .nav-item.active {
+        background-color: #fff;
+        color: #2c3e50;
+        font-weight: bold;
+        border-bottom: 3px solid #3498db;
+    }
+
+    .nav-item.disabled {
+        cursor: not-allowed;
+        background-color: #e0e0e0;
+        color: #aaa;
+    }
+
+    /* ========================================
+    情境區塊 (Context)
+    ========================================
+    */
+    .context-box {
+        background-color: #eaf2f8;
+        padding: 20px;
+        border-bottom: 1px solid #d5dbdb;
+    }
+
+    .context-label {
+        font-weight: bold;
+        color: #2980b9;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    /* ========================================
+    題目區塊 (Question)
+    ========================================
+    */
+    .question-area {
+        padding: 20px;
+    }
+
+    .question-header {
+        background-color: #2c3e50;
+        color: #fff;
+        padding: 5px 10px;
+        display: inline-block;
+        margin-bottom: 15px;
+        font-size: 14px;
+        border-radius: 4px;
+    }
+
+    .question-text {
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    /* 選項樣式 */
+    .options-group {
+        margin-bottom: 20px;
+    }
+
+    .option-label {
+        display: block;
+        margin-bottom: 12px;
+        cursor: pointer;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+
+    .option-label:hover {
+        background-color: #f9f9f9;
+    }
+
+    .option-label input {
+        margin-right: 10px;
+        transform: scale(1.2);
+    }
+
+    /* 高亮關鍵字 */
+    .highlight {
+        background-color: #fffde7; /* 淺黃 */
+        border-bottom: 2px solid #f1c40f;
+        padding: 0 2px;
+    }
+
+    .highlight-blue {
+        color: #2980b9;
+        font-weight: bold;
+    }
+
+    /* ========================================
+    按鈕區 (Buttons)
+    ========================================
+    */
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    .btn-submit {
+        background-color: #27ae60;
+        color: white;
+    }
+
+    .btn-reset {
+        background-color: #95a5a6;
+        color: white;
+    }
+
+    .btn-explain {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+    }
+
+    /* ========================================
+    回饋區 (Feedback)
+    ========================================
+    */
+    .feedback-box {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 4px;
+        display: none; /* 預設隱藏 */
+    }
+
+    .feedback-correct {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+
+    .feedback-wrong {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+
+    /* ========================================
+    解析區塊 (Analysis)
+    ========================================
+    */
+    .analysis-container {
+        display: none; /* 預設隱藏，點擊按鈕開啟 */
+        margin-top: 30px;
+        border-top: 2px dashed #bdc3c7;
+        padding-top: 20px;
+        background-color: #fff;
+    }
+
+    .step-box {
+        background-color: #fcfcfc;
+        border-left: 4px solid #f39c12;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .option-analysis-item {
+        margin-bottom: 10px;
+        padding-left: 10px;
+        border-left: 2px solid #bdc3c7;
+    }
+
+    .concept-tag {
+        display: inline-block;
+        background-color: #e8f6f3;
+        color: #16a085;
+        padding: 2px 6px;
+        font-size: 14px;
+        border-radius: 3px;
+        margin-right: 5px;
+    }
+
+    /* ========================================
+    情境小互動 (Mini Interaction)
+    ========================================
+    */
+    .mini-scenario {
+        background-color: #fff8e1;
+        border: 1px solid #ffe082;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+    }
+    
+    .mini-q-row {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+
+    .correct-mark { color: green; font-weight: bold; }
+    .wrong-mark { color: red; font-weight: bold; }
+
+    /* ========================================
+    自我檢測 (Self Check)
+    ========================================
+    */
+    .self-check-item {
+        background-color: #fdfefe;
+        border: 1px solid #ecf0f1;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    .check-answer-btn {
+        font-size: 14px;
+        padding: 4px 8px;
+        margin-top: 5px;
+        background-color: #7f8c8d;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    .hidden-answer {
+        display: none;
+        margin-top: 5px;
+        color: #27ae60;
+        font-weight: bold;
+    }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 導覽列 -->
+    <nav class="nav-tabs">
+        <div class="nav-item" onclick="alert('已提供（請參考題組 Set 2 第 13 題檔案）')">第 13 題</div>
+        <div class="nav-item" onclick="alert('尚未提供題目')">第 14 題</div>
+        <div class="nav-item" onclick="alert('已提供（請參考題組 Set 2 第 15 題檔案）')">第 15 題</div>
+        <div class="nav-item active">第 16 題 (互動)</div>
+    </nav>
+
+    <!-- 共用情境區 -->
+    <div class="context-box">
+        <span class="context-label">【題組 2：第 13–16 題共用情境】</span>
+        <p>K 公司為總部設立於新竹之汽車零組件製造商，公司股票已於臺灣證券交易所上市交易。此外，公司已在 2023 年初通過 ISO 27001 驗證。</p>
+        <p>目前公司主要系統之目標如下：</p>
+        <ul>
+            <li>可用性目標：可接受中斷時間為 8 小時以內</li>
+            <li>資料完整性目標：資料流失可接受時間為 8 小時以內</li>
+        </ul>
+        <small style="color: #7f8c8d;">（提示：本題組會考 BCP/DR 指標與 ISMS（資訊安全管理系統）治理與法規遵循）</small>
+    </div>
+
+    <!-- 第 16 題 主內容 -->
+    <div class="question-area" id="q16-area">
+        <div class="question-header">複選題</div>
+        
+        <div class="question-text">
+            16. K 公司於 2023 年底進行 ISO 27001 資訊安全管理系統年度管理審查，考量<span class="highlight">法規遵循</span>時，下列哪些為<span class="highlight">必要考量</span>項目？(複選)
+        </div>
+
+        <div class="options-group">
+            <label class="option-label">
+                <input type="checkbox" name="q16" value="A"> (A) 個人資料保護法
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q16" value="B"> (B) 資通安全管理法
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q16" value="C"> (C) 客戶合約之資安要求
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q16" value="D"> (D) 上市上櫃公司資通安全管控指引
+            </label>
+        </div>
+
+        <!-- 動作按鈕 -->
+        <div class="btn-group">
+            <button class="btn btn-submit" onclick="checkAnswer()">送出作答</button>
+            <button class="btn btn-explain" id="btn-toggle-analysis" onclick="toggleAnalysis()">顯示/隱藏 詳細解析</button>
+            <button class="btn btn-reset" onclick="resetAll()">重置</button>
+        </div>
+
+        <!-- 作答回饋區 -->
+        <div id="feedback-area" class="feedback-box">
+            <!-- 這裡會由 JS 插入回饋文字 -->
+        </div>
+
+        <!-- 完整解析內容 (預設隱藏) -->
+        <div id="analysis-section" class="analysis-container">
+            
+            <!-- 情境小互動 -->
+            <div class="mini-scenario">
+                <h3>情境小互動：快問快答</h3>
+                <p>假設 K 公司法務只檢查了法律條文，完全沒檢查跟客戶簽的合約。</p>
+                <div class="mini-q-row">
+                    <p>Q1：合約裡的資安條款，屬不屬於管理審查要看的「遵循義務」？</p>
+                    <button class="btn btn-reset" style="padding:5px 10px; font-size:14px;" onclick="checkMini(1, true, this)">屬於</button>
+                    <button class="btn btn-reset" style="padding:5px 10px; font-size:14px;" onclick="checkMini(1, false, this)">不屬於</button>
+                    <span id="mini-ans-1" style="margin-left: 10px;"></span>
+                </div>
+                <div class="mini-q-row">
+                    <p>Q2：K 公司是上市公司，是否需要參考金管會發布的資安管控指引？</p>
+                    <button class="btn btn-reset" style="padding:5px 10px; font-size:14px;" onclick="checkMini(2, true, this)">需要</button>
+                    <button class="btn btn-reset" style="padding:5px 10px; font-size:14px;" onclick="checkMini(2, false, this)">不需要</button>
+                    <span id="mini-ans-2" style="margin-left: 10px;"></span>
+                </div>
+            </div>
+
+            <h2>【第一步：找關鍵字】</h2>
+            <div class="step-box">
+                <ul>
+                    <li><span class="highlight-blue">ISO 27001</span>：解題範圍是資訊安全管理系統標準。</li>
+                    <li><span class="highlight-blue">年度管理審查</span>：這是管理階層定期做的「總體檢」。</li>
+                    <li><span class="highlight-blue">法規遵循</span>：這不只看「國家法律」，範圍比你想的大。</li>
+                    <li><span class="highlight-blue">上市交易</span>：這決定了該公司受到證交所與金管會的規範（關鍵線索）。</li>
+                    <li><span class="highlight-blue">必要考量</span>：一定要看的才算，不適用該公司身分的不算。</li>
+                </ul>
+            </div>
+
+            <h2>【第二步：白話翻譯】</h2>
+            <div class="step-box">
+                <p>簡單來說，題目是在問：</p>
+                <p><strong>「K 公司年底要檢查 ISO 27001 有沒有做對，其中一項是要確認自己有沒有遵守該遵守的規定。那哪些規定是一定要納入檢查清單的？」</strong></p>
+                <p>專有名詞翻譯：</p>
+                <ul>
+                    <li><strong>管理審查</strong>：主管定期檢查整套資安制度有沒有有效運作。</li>
+                    <li><strong>法規遵循</strong>：該遵守的法律、規定、要求有沒有做到。</li>
+                    <li><strong>合約要求</strong>：跟客戶簽約時承諾的資安條款（例如承諾不外洩資料）。</li>
+                    <li><strong>指引</strong>：主管機關或產業給的管理建議與要求（雖然不是法律，但對上市公司有強制力）。</li>
+                </ul>
+            </div>
+
+            <h2>【第三步：解題思路】</h2>
+            <div class="step-box">
+                <p><strong>這題在考什麼？</strong><br>
+                一句話：ISO 27001 管理審查中的遵循義務包含：適用法律、合約義務、以及與公司身分相關的指引要求。</p>
+
+                <p><strong>解題邏輯：</strong></p>
+                <ol>
+                    <li>先找<strong>「公司身分」</strong>：題目說是「上市公司」，所以一定涉及「上市櫃公司資安管控指引」。</li>
+                    <li>再找<strong>「資料型態」</strong>：公司有客戶、有員工，一定涉及個資，所以「個資法」是重點。</li>
+                    <li>再找<strong>「外部義務」</strong>：除了法律，跟人簽的「合約」也是必須遵守的。</li>
+                    <li>排除<strong>「不適用者」</strong>：資通安全管理法主要管「公務機關」與「關鍵基礎設施」。題目沒說 K 公司是關鍵基礎設施（如水電油），所以這條法律不是「必要」。</li>
+                </ol>
+
+                <p><strong>生活比喻：</strong></p>
+                <ul>
+                    <li>法規（如個資法）像<strong>「校規」</strong>，全校都要守。</li>
+                    <li>合約（如客戶要求）像<strong>「你跟同學約定的小組分工」</strong>，答應了就要做。</li>
+                    <li>指引（如上市指引）像<strong>「資優班特別規定」</strong>，因為你是上市公司（資優班），所以要多守這一條。</li>
+                    <li>年底檢查就是看你這三種有沒有違規。</li>
+                </ul>
+            </div>
+
+            <h2>【第四步：選項分析】</h2>
+            <div class="step-box">
+                <div class="option-analysis-item">
+                    <strong>(A) 個人資料保護法 [正確]</strong><br>
+                    原因：公司營運勢必處理員工與客戶資料，這是台灣企業的基本必查法規。
+                </div>
+                <div class="option-analysis-item">
+                    <strong>(B) 資通安全管理法 [不選]</strong><br>
+                    原因：這部法主要規範「公務機關」與特定「非公務機關」（如關鍵基礎設施）。題幹只說它是汽車零組件製造商，未提及是被指定的納管對象，因此不能視為「必要」。
+                </div>
+                <div class="option-analysis-item">
+                    <strong>(C) 客戶合約之資安要求 [正確]</strong><br>
+                    原因：在 ISO 27001 中，「遵循義務」明確包含「契約要求」。違約會賠錢、損商譽，當然要審查。
+                </div>
+                <div class="option-analysis-item">
+                    <strong>(D) 上市上櫃公司資通安全管控指引 [正確]</strong><br>
+                    原因：題目強調該公司「已上市」，因此必須遵循證交所針對上市公司發布的資安指引。
+                </div>
+            </div>
+
+            <h2>【觀念補充與延伸】</h2>
+            <div class="step-box">
+                <span class="concept-tag">核心觀念</span> <strong>遵循義務 (Compliance Obligations)</strong><br>
+                公式：遵循義務 ＝ 法律 ＋ 監理規定 ＋ 契約義務 ＋ 組織自願採納的要求。<br>
+                <br>
+                <strong>變化題型思考：</strong>
+                <ul>
+                    <li>如果題目把公司改成「台電」或「公立醫院」，那 (B) 資通安全管理法 就會變成正確答案。</li>
+                    <li>如果公司完全不處理個資（極少見），(A) 才可能不選，但在通用考試情境中，(A) 幾乎都是必選。</li>
+                </ul>
+            </div>
+
+            <h2>【記憶口訣】</h2>
+            <div class="step-box" style="background-color: #e8f8f5; border-color: #1abc9c;">
+                <h3>記住答案 A、C、D</h3>
+                <p style="font-size: 1.2em; font-weight: bold; color: #16a085;">
+                    「個資要顧、合約要守、上市要依指引」
+                </p>
+            </div>
+
+            <h2>【常見陷阱】</h2>
+            <div class="step-box" style="background-color: #fdedec; border-color: #e74c3c;">
+                <ul>
+                    <li><strong>心理盲點</strong>：看到「資通安全...法」覺得名字很像資安考題就想選。要先確認「身分」符不符合。</li>
+                    <li><strong>漏選陷阱</strong>：只想到「法律」，忘了「合約」也是一定要遵守的義務。</li>
+                </ul>
+            </div>
+
+            <h2>【自我檢測】</h2>
+            <div class="step-box">
+                <div class="self-check-item">
+                    <p><strong>小題 1：</strong>如果題幹改成「政府機關」而非上市公司，(D) 還一定必選嗎？</p>
+                    <button class="check-answer-btn" onclick="toggleAnswer('ans1')">看答案</button>
+                    <div id="ans1" class="hidden-answer">參考答案：不一定（政府機關主要看資通安全管理法，不適用上市公司指引）。</div>
+                </div>
+                <div class="self-check-item">
+                    <p><strong>小題 2：</strong>為什麼「客戶合約資安要求」算遵循義務？</p>
+                    <button class="check-answer-btn" onclick="toggleAnswer('ans2')">看答案</button>
+                    <div id="ans2" class="hidden-answer">參考答案：因為簽約承諾就是外部要求，違反會有法律與賠償責任。</div>
+                </div>
+                <div class="self-check-item">
+                    <p><strong>小題 3：</strong>若公司完全不處理任何可識別個人資料，(A) 還是必選嗎？</p>
+                    <button class="check-answer-btn" onclick="toggleAnswer('ans3')">看答案</button>
+                    <div id="ans3" class="hidden-answer">參考答案：視實際狀況而定，若無個資則不適用個資法，但一般企業極難避免員工資料處理。</div>
+                </div>
+            </div>
+
+        </div> <!-- End of analysis-section -->
+    </div> <!-- End of q16-area -->
+
+</div> <!-- End of container -->
+
+<!-- JavaScript 邏輯 -->
+<script>
+    // 正確答案設定
+    const CORRECT_ANSWERS = ['A', 'C', 'D'];
+
+    // 檢查主要題目 (Q16)
+    function checkAnswer() {
+        // 取得所有勾選的選項
+        const checkboxes = document.querySelectorAll('input[name="q16"]:checked');
+        let userAnswers = [];
+        checkboxes.forEach((checkbox) => {
+            userAnswers.push(checkbox.value);
+        });
+
+        const feedbackArea = document.getElementById('feedback-area');
+        
+        // 排序以便比較
+        userAnswers.sort();
+        
+        // 判斷邏輯
+        let isFullyCorrect = false;
+        let isWrong = false;
+        
+        // 檢查是否完全吻合
+        if (JSON.stringify(userAnswers) === JSON.stringify(CORRECT_ANSWERS)) {
+            isFullyCorrect = true;
+        } else {
+            isWrong = true;
+        }
+
+        // 產生回饋文字
+        let htmlContent = '';
+
+        if (isFullyCorrect) {
+            feedbackArea.className = 'feedback-box feedback-correct';
+            feedbackArea.style.display = 'block';
+            htmlContent = `
+                <strong>完全正確！</strong><br>
+                你的答案：${userAnswers.join('、')}<br>
+                觀念很清楚喔！請點擊「顯示詳細解析」來鞏固記憶。
+            `;
+        } else {
+            feedbackArea.className = 'feedback-box feedback-wrong';
+            feedbackArea.style.display = 'block';
+            
+            // 分析錯誤類型
+            let missing = CORRECT_ANSWERS.filter(x => !userAnswers.includes(x));
+            let extra = userAnswers.filter(x => !CORRECT_ANSWERS.includes(x));
+            
+            htmlContent = `<strong>答錯囉！</strong><br>`;
+            if (userAnswers.length === 0) {
+                htmlContent += `你還沒選擇任何選項。<br>`;
+            } else {
+                htmlContent += `你選擇了：${userAnswers.join('、')}<br>`;
+            }
+            
+            // 提示（只給代號）
+            if (missing.length > 0) htmlContent += `提示：你漏選了 ${missing.join('、')}。<br>`;
+            if (extra.length > 0) htmlContent += `提示：你多選了 ${extra.join('、')} (這項不適用)。<br>`;
+            
+            htmlContent += `<br>請再試試看，或直接點擊「顯示詳細解析」找原因。`;
+        }
+
+        feedbackArea.innerHTML = htmlContent;
+    }
+
+    // 切換解析顯示/隱藏
+    function toggleAnalysis() {
+        const analysisSection = document.getElementById('analysis-section');
+        const btn = document.getElementById('btn-toggle-analysis');
+        
+        if (analysisSection.style.display === 'none' || analysisSection.style.display === '') {
+            analysisSection.style.display = 'block';
+            btn.textContent = '隱藏 詳細解析';
+            // 自動捲動到解析區
+            analysisSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            analysisSection.style.display = 'none';
+            btn.textContent = '顯示 詳細解析';
+        }
+    }
+
+    // 重置所有狀態
+    function resetAll() {
+        // 清空 Checkbox
+        const checkboxes = document.querySelectorAll('input[name="q16"]');
+        checkboxes.forEach(cb => cb.checked = false);
+
+        // 隱藏與清空回饋
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'none';
+        feedbackArea.innerHTML = '';
+
+        // 隱藏解析
+        const analysisSection = document.getElementById('analysis-section');
+        analysisSection.style.display = 'none';
+        document.getElementById('btn-toggle-analysis').textContent = '顯示/隱藏 詳細解析';
+
+        // 重置情境小互動
+        document.getElementById('mini-ans-1').innerHTML = '';
+        document.getElementById('mini-ans-2').innerHTML = '';
+        
+        // 隱藏自我檢測答案
+        const hiddenAnswers = document.querySelectorAll('.hidden-answer');
+        hiddenAnswers.forEach(el => el.style.display = 'none');
+    }
+
+    // 情境小互動邏輯
+    function checkMini(qId, isYes, btnElement) {
+        const resultSpan = document.getElementById(`mini-ans-${qId}`);
+        let isCorrect = false;
+
+        // Q1: 合約屬於遵循義務嗎？ (是)
+        if (qId === 1 && isYes) isCorrect = true;
+        // Q2: 上市公司要看指引嗎？ (是)
+        if (qId === 2 && isYes) isCorrect = true;
+
+        if (isCorrect) {
+            resultSpan.innerHTML = '<span class="correct-mark">答對了！</span>';
+        } else {
+            resultSpan.innerHTML = '<span class="wrong-mark">答錯了！</span>';
+        }
+    }
+
+    // 自我檢測顯示答案
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

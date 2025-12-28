@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安短期衝刺班｜題組 2：BCP/DR 實戰解析</title>
+    <style>
+        /* 基礎設定 */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --highlight-color: #f1c40f;
+            --danger-color: #e74c3c;
+            --success-color: #27ae60;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* 題目要求內文 16px */
+        }
+
+        /* 容器設定 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* 標題樣式 */
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin-top: 25px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        h3 {
+            font-size: 18px; /* 題目要求標題最多 18px */
+            color: var(--primary-color);
+            background-color: #eef2f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        /* 情境區塊 */
+        .scenario-box {
+            background-color: #fff8e1;
+            border: 1px solid #ffe082;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: #d35400;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* 導覽列 */
+        .nav-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #e0e0e0;
+            border-radius: 5px 5px 0 0;
+            border: 1px solid transparent;
+            font-weight: bold;
+        }
+
+        .nav-tab.active {
+            background-color: var(--card-bg);
+            border-color: #ddd;
+            border-bottom-color: var(--card-bg);
+            color: var(--accent-color);
+            margin-bottom: -1px;
+        }
+
+        /* 題目與選項 */
+        .question-block {
+            margin-bottom: 20px;
+        }
+
+        .highlight-text {
+            background-color: var(--highlight-color);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+        }
+
+        .btn-explain {
+            background-color: #27ae60;
+            display: none; /* 預設隱藏 */
+        }
+
+        /* 回饋區塊 */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區塊詳細設定 */
+        .explanation-content {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed #ddd;
+            padding-top: 20px;
+        }
+
+        .step-block {
+            margin-bottom: 25px;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            background-color: #e1f5fe;
+            color: #0277bd;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .concept-note {
+            background-color: #f3e5f5;
+            padding: 10px;
+            border-left: 4px solid #9c27b0;
+            margin: 10px 0;
+        }
+
+        .trap-alert {
+            background-color: #ffebee;
+            padding: 10px;
+            border-left: 4px solid #f44336;
+        }
+
+        .mnemonic-box {
+            background-color: #e8f5e9;
+            border: 2px solid #a5d6a7;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #2e7d32;
+            border-radius: 8px;
+        }
+
+        .self-test-item {
+            background-color: #fafafa;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+        }
+
+        .toggle-answer-btn {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+        }
+
+        .hidden-answer {
+            display: none;
+            color: #d35400;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        /* RWD 適應 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .nav-tab {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安短期衝刺班｜高中生專屬講座</h1>
+
+    <!-- 共用情境區塊 -->
+    <div class="scenario-box">
+        <span class="scenario-title">【題組情境說明】題組 2（第 13–16 題共用）</span>
+        <p>K 公司為總部設立於新竹之汽車零組件製造商，公司股票已於臺灣證券交易所上市交易。此外，公司已在 2023 年初通過 ISO 27001 驗證。</p>
+        <p>目前公司主要系統之目標如下：</p>
+        <ul>
+            <li><strong>可用性目標</strong>：可接受中斷時間為 <span class="highlight-text">8 小時以內</span></li>
+            <li><strong>資料完整性目標</strong>：資料流失可接受時間為 <span class="highlight-text">8 小時以內</span></li>
+        </ul>
+        <p style="font-size: 14px; color: #666;">（提示：本題組核心在考 <strong>營運持續（BCP）/ 災難復原（DR）/ RTO / RPO</strong>）</p>
+    </div>
+
+    <!-- 題目導覽 -->
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="switchTab(13)">第 13 題</div>
+        <div class="nav-tab" onclick="switchTab(14)">第 14 題</div>
+        <div class="nav-tab" onclick="switchTab(15)">第 15 題</div>
+        <div class="nav-tab" onclick="switchTab(16)">第 16 題</div>
+    </div>
+
+    <!-- 主要內容區 -->
+    <div id="content-area">
+        <!-- 第 13 題內容 -->
+        <div id="q13" class="question-block">
+            <div style="margin-bottom: 15px; color: #555; font-size: 14px;">題組 2｜第 13 題｜單選題</div>
+            <p style="font-weight: bold; font-size: 18px;">
+                13. 公司規畫於台南工廠設立備援機房，以便於新竹主機房失效時，即時自動啟動備援，請問備援資料庫<span class="highlight-text">最長可以設定多久</span>與主要資料庫同步一次？
+            </p>
+
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="q13" value="A"> (A) 5 小時
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q13" value="B"> (B) 7 小時
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q13" value="C"> (C) 9 小時
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q13" value="D"> (D) 11 小時
+                </label>
+            </div>
+
+            <!-- 按鈕區 -->
+            <div style="margin-top: 20px;">
+                <button class="btn" onclick="checkAnswer()">送出作答</button>
+                <button class="btn btn-reset" onclick="resetQuiz()">重置</button>
+                <button id="btn-explain" class="btn btn-explain" onclick="toggleExplanation()">一鍵看解析</button>
+            </div>
+
+            <!-- 回饋顯示區 -->
+            <div id="feedback" class="feedback-box"></div>
+
+            <!-- 解析區 -->
+            <div id="explanation" class="explanation-content">
+                <h2>【名師詳解】</h2>
+                
+                <div class="step-block">
+                    <span class="step-title">第一步：找關鍵字（快狠準）</span>
+                    <p>拿起你的螢光筆，這題的靈魂在這裡：</p>
+                    <div>
+                        <span class="keyword-tag">備援機房</span>
+                        <span class="keyword-tag">即時自動啟動備援</span>
+                        <span class="keyword-tag">資料庫同步</span>
+                        <span class="keyword-tag">最長</span>
+                        <span class="keyword-tag">8 小時以內（來自題組）</span>
+                    </div>
+                    <p><strong>老師點評：</strong> 看到「資料庫同步」和「資料流失」，馬上要知道這題在考 <strong>RPO（可接受資料流失時間）</strong>，千萬不要跟 RTO 搞混！</p>
+                </div>
+
+                <div class="step-block">
+                    <span class="step-title">第二步：白話翻譯（說人話）</span>
+                    <p>把題目翻譯成我們聽得懂的語言：</p>
+                    <p>「K 公司老闆說：如果不幸發生災難，我們的資料<strong>最多只能不見 8 小時份的量</strong>。請問，備份動作最慢要多久做一次，才不會超過這個限制？」</p>
+                    <ul>
+                        <li><strong>備援機房</strong>：主機房掛掉時，可以馬上接手運作的地方。</li>
+                        <li><strong>RPO</strong>：資料最多可以「消失」多久。</li>
+                        <li><strong>同步</strong>：把主系統的資料複製到備用系統，讓兩邊一樣。</li>
+                    </ul>
+                </div>
+
+                <div class="step-block">
+                    <span class="step-title">第三步：解題思路（邏輯拆解）</span>
+                    <div class="concept-note">
+                        <strong>核心觀念：RPO 決定「資料多久至少要備份一次」</strong>
+                    </div>
+                    <ol>
+                        <li>題目給的條件：資料流失可接受時間（RPO）= <strong>8 小時</strong>。</li>
+                        <li>規則：為了保證資料流失不超過 8 小時，你的備份（同步）間隔時間必須 <strong>小於</strong> 8 小時。</li>
+                        <li>目標：題目問「最長」可以多久，所以我們要找一個<strong>小於 8 小時，但數字最大</strong>的選項。</li>
+                    </ol>
+                    <p><strong>生活比喻：</strong><br>
+                    想像你在打報告，老師規定「電腦當機沒關係，但你的進度最多只能少 8 小時」。<br>
+                    如果你每 10 小時存檔一次，當機時你可能損失 9.9 小時的進度（被當掉）。<br>
+                    所以你設定的自動存檔時間，一定要在 8 小時以內（例如 7 小時存一次）。</p>
+                </div>
+
+                <div class="step-block">
+                    <span class="step-title">第四步：選項分析</span>
+                    <ul>
+                        <li>(A) <strong>5 小時</strong>：小於 8 小時，符合安全標準。但題目問「最長」，這不是最大值。</li>
+                        <li>(B) <strong>7 小時</strong>：小於 8 小時，且比 5 小時更長，最接近上限 8 小時。<strong>（正確答案）</strong></li>
+                        <li>(C) <strong>9 小時</strong>：大於 8 小時。萬一在第 8.9 小時發生災難，你就丟了 8.9 小時的資料，老闆會生氣（違反目標）。</li>
+                        <li>(D) <strong>11 小時</strong>：遠大於 8 小時，完全不合格。</li>
+                    </ul>
+                </div>
+
+                <div class="step-block">
+                    <span class="step-title">觀念補充與延伸</span>
+                    <p><strong>重要名詞對照：</strong></p>
+                    <ul>
+                        <li><strong>RTO (Recovery Time Objective)</strong>：復原時間目標。指「系統多久要修好重新上線」。本題情境雖然有給 RTO (8小時)，但這題問的是「資料」，所以跟 RTO 無關。</li>
+                        <li><strong>RPO (Recovery Point Objective)</strong>：復原點目標。指「資料可以遺失多少」。</li>
+                    </ul>
+                </div>
+
+                <div class="step-block">
+                    <span class="step-title">記憶口訣</span>
+                    <div class="mnemonic-box">
+                        「RPO 八小時，同步不能到八」<br>
+                        (找小於 8 的最大數 → 7)
+                    </div>
+                </div>
+
+                <div class="step-block">
+                    <span class="step-title">常見陷阱</span>
+                    <div class="trap-alert">
+                        <strong>小心！</strong> 很多同學看到情境裡有兩個「8 小時」，就搞混了。<br>
+                        1. 問「備援啟動時間」→ 看 RTO。<br>
+                        2. 問「資料同步/備份頻率」→ 看 RPO。<br>
+                        本題關鍵字是「資料庫同步」，所以請鎖定 RPO。
+                    </div>
+                </div>
+
+                <div class="step-block">
+                    <span class="step-title">正確答案</span>
+                    <p><strong>答案：(B)</strong></p>
+                    <p>理由：因資料流失可接受時間為 8 小時，資料庫同步間隔必須小於 8 小時，故選項中符合條件且最長時間者為 7 小時。</p>
+                </div>
+
+                <div class="step-block">
+                    <span class="step-title">自我檢測</span>
+                    <div class="self-test-item">
+                        Q1：如果 RPO 改為 2 小時，最大同步間隔是多少？
+                        <button class="toggle-answer-btn" onclick="toggleAnswer(this)">點擊看答案</button>
+                        <span class="hidden-answer">小於 2 小時</span>
+                    </div>
+                    <div class="self-test-item">
+                        Q2：RTO 是在管什麼？
+                        <button class="toggle-answer-btn" onclick="toggleAnswer(this)">點擊看答案</button>
+                        <span class="hidden-answer">系統多久要恢復運作</span>
+                    </div>
+                    <div class="self-test-item">
+                        Q3：同步間隔設太長，主要違反哪個目標？
+                        <button class="toggle-answer-btn" onclick="toggleAnswer(this)">點擊看答案</button>
+                        <span class="hidden-answer">資料完整性目標</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 尚未提供題目佔位符 -->
+        <div id="q14" class="question-block" style="display: none;">
+            <h3>第 14 題</h3>
+            <p>（此題目尚未開放，請先完成第 13 題的學習。）</p>
+        </div>
+        <div id="q15" class="question-block" style="display: none;">
+            <h3>第 15 題</h3>
+            <p>（此題目尚未開放，請先完成第 13 題的學習。）</p>
+        </div>
+        <div id="q16" class="question-block" style="display: none;">
+            <h3>第 16 題</h3>
+            <p>（此題目尚未開放，請先完成第 13 題的學習。）</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 狀態變數
+    const CORRECT_ANSWER = 'B';
+    
+    // 切換題號分頁
+    function switchTab(questionNum) {
+        // 隱藏所有題目區塊
+        document.querySelectorAll('.question-block').forEach(el => el.style.display = 'none');
+        // 移除所有 tab 的 active 樣式
+        document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+        
+        // 顯示選中的題目
+        document.getElementById('q' + questionNum).style.display = 'block';
+        // 標記選中的 tab (根據 index)
+        const tabIndex = questionNum - 13; // 13->0, 14->1, ...
+        document.querySelectorAll('.nav-tab')[tabIndex].classList.add('active');
+    }
+
+    // 檢查答案
+    function checkAnswer() {
+        const radios = document.getElementsByName('q13');
+        let selectedValue = null;
+        
+        for (const radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        const feedbackBox = document.getElementById('feedback');
+        const explainBtn = document.getElementById('btn-explain');
+
+        if (!selectedValue) {
+            alert('同學，請先選擇一個答案再送出喔！');
+            return;
+        }
+
+        feedbackBox.style.display = 'block';
+        explainBtn.style.display = 'inline-block'; // 顯示解析按鈕
+
+        if (selectedValue === CORRECT_ANSWER) {
+            // 答對
+            feedbackBox.className = 'feedback-box feedback-correct';
+            feedbackBox.innerHTML = `
+                <strong>恭喜答對！</strong> <br>
+                你的選擇：${selectedValue} <br>
+                正確答案：${CORRECT_ANSWER} <br>
+                觀念正確！RPO 是 8 小時，所以同步時間必須小於 8 小時，7 小時是最適合的選項。
+            `;
+        } else {
+            // 答錯
+            feedbackBox.className = 'feedback-box feedback-wrong';
+            feedbackBox.innerHTML = `
+                <strong>答錯囉，別灰心！</strong> <br>
+                你的選擇：${selectedValue} <br>
+                <br>
+                <strong>觀念提示：</strong><br>
+                題目問的是「資料庫同步」，這跟 RPO（資料完整性）有關。<br>
+                如果只能忍受資料不見 8 小時，那你多久要備份一次才安全？<br>
+                <br>
+                點擊下方的<strong>「一鍵看解析」</strong>來搞懂它吧！
+            `;
+        }
+    }
+
+    // 重置功能
+    function resetQuiz() {
+        // 清除選取
+        const radios = document.getElementsByName('q13');
+        for (const radio of radios) {
+            radio.checked = false;
+        }
+        
+        // 隱藏回饋與解析
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('explanation').style.display = 'none';
+        document.getElementById('btn-explain').style.display = 'none';
+        
+        // 重置自我檢測答案
+        document.querySelectorAll('.hidden-answer').forEach(el => el.style.display = 'none');
+        
+        // 滾動回頂部
+        document.querySelector('.question-block').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 切換解析顯示
+    function toggleExplanation() {
+        const explanationDiv = document.getElementById('explanation');
+        if (explanationDiv.style.display === 'none' || explanationDiv.style.display === '') {
+            explanationDiv.style.display = 'block';
+            // 平滑滾動到解析區
+            explanationDiv.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            explanationDiv.style.display = 'none';
+        }
+    }
+
+    // 自我檢測顯示答案
+    function toggleAnswer(btn) {
+        const answerSpan = btn.nextElementSibling;
+        if (answerSpan.style.display === 'none' || answerSpan.style.display === '') {
+            answerSpan.style.display = 'inline';
+            btn.innerText = '隱藏答案';
+        } else {
+            answerSpan.style.display = 'none';
+            btn.innerText = '點擊看答案';
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 33 題｜風險回應後再評估原因判斷（單選）</title>
+    <style>
+        /* * 全域設定
+         * 字級要求：內文 16px，標題最多 18px
+         */
+        :root {
+            --primary-color: #2c3e50; /* 深藍色：專業感 */
+            --accent-color: #c0392b;  /* 深紅色：重點強調 */
+            --success-color: #27ae60; /* 綠色：正確 */
+            --warning-color: #d35400; /* 橘色：提示 */
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --border-color: #bdc3c7;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--primary-color);
+        }
+
+        /* 標題區域 */
+        header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .teacher-intro {
+            background-color: #ecf0f1;
+            padding: 10px;
+            margin-top: 10px;
+            border-left: 4px solid var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* 題目區域 */
+        .question-box {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .chart-box {
+            border: 2px dashed var(--border-color);
+            padding: 15px;
+            margin: 15px 0;
+            background-color: #fcfcfc;
+        }
+
+        .chart-title {
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* 選項區域 */
+        .options-group {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .option-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .option-item input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        /* 按鈕區域 */
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-family: inherit;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* 初始隱藏 */
+        }
+
+        .btn-explain {
+            background-color: var(--accent-color);
+            color: white;
+            display: none; /* 初始隱藏 */
+        }
+
+        /* 結果顯示 */
+        #result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .result-correct {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+
+        .result-wrong {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+
+        /* 解析區域 */
+        .analysis-container {
+            margin-top: 30px;
+            display: none; /* 預設隱藏 */
+            border-top: 2px dashed var(--border-color);
+            padding-top: 20px;
+        }
+
+        .step-block {
+            margin-bottom: 25px;
+        }
+
+        .step-title {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            display: inline-block;
+            margin-bottom: 10px;
+            font-size: 16px;
+            border-radius: 2px;
+        }
+
+        .highlight-text {
+            color: var(--accent-color);
+            font-weight: bold;
+            background-color: #fff3cd;
+            padding: 0 4px;
+        }
+
+        .concept-box {
+            background-color: #e8f6f3;
+            border-left: 5px solid var(--success-color);
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .mnemonic-box {
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            margin: 15px 0;
+            background-color: #fff9f9;
+        }
+
+        .trap-box {
+            background-color: #fcf8e3;
+            border-left: 5px solid var(--warning-color);
+            padding: 15px;
+        }
+
+        /* 自我檢測 */
+        .self-test-box {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+        }
+
+        details {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        summary:hover {
+            color: var(--accent-color);
+        }
+
+        .answer-reveal {
+            margin-top: 5px;
+            padding-left: 20px;
+            color: var(--accent-color);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>資安短期衝刺班 - 第 33 題｜風險回應後再評估原因判斷</h1>
+        <div class="teacher-intro">
+            名師開講：各位同學好！風險管理不是做完就算了，做不好要找原因。這題是「PDCA」觀念的經典題，請仔細作答！
+        </div>
+    </header>
+
+    <!-- 題目區 -->
+    <div class="question-box">
+        <div class="question-text">
+            33. 公司規定於風險回應後 3 個月，須對該項風險進行風險再評估。
+            當風險再評估時，發現該風險並未如預期降至「風險胃納（Risk appetite）」之內。
+            <br><br>
+            如附圖所示的項目之中，哪些是可能的原因？
+        </div>
+
+        <div class="chart-box">
+            <span class="chart-title">附圖文字內容：</span>
+            <ol>
+                <li>風險回應規劃不當</li>
+                <li>風險回應尚未執行完成</li>
+                <li>風險回應未落實執行</li>
+            </ol>
+        </div>
+
+        <form id="quiz-form">
+            <ul class="options-group">
+                <li class="option-item">
+                    <label>
+                        <input type="radio" name="answer" value="A">
+                        (A) 1、2
+                    </label>
+                </li>
+                <li class="option-item">
+                    <label>
+                        <input type="radio" name="answer" value="B">
+                        (B) 2、3
+                    </label>
+                </li>
+                <li class="option-item">
+                    <label>
+                        <input type="radio" name="answer" value="C">
+                        (C) 1、3
+                    </label>
+                </li>
+                <li class="option-item">
+                    <label>
+                        <input type="radio" name="answer" value="D">
+                        (D) 1、2、3
+                    </label>
+                </li>
+            </ul>
+        </form>
+    </div>
+
+    <!-- 結果區 -->
+    <div id="result-area"></div>
+
+    <!-- 操作按鈕 -->
+    <div class="action-area">
+        <button type="button" class="btn-submit" onclick="submitAnswer()">送出作答</button>
+        <button type="button" class="btn-explain" id="btn-explain" onclick="toggleExplanation()">一鍵看解析</button>
+        <button type="button" class="btn-reset" id="btn-reset" onclick="resetQuiz()">重置作答</button>
+    </div>
+
+    <!-- 解析區 (初始隱藏) -->
+    <div class="analysis-container" id="analysis">
+        
+        <div class="step-block">
+            <div class="step-title">第一步：找關鍵字</div>
+            <p>請注意題目中的紅字重點：</p>
+            <ul>
+                <li><span class="highlight-text">風險回應後 3 個月</span>：時間點是事後。</li>
+                <li><span class="highlight-text">風險再評估</span>：動作是 Check (檢查)。</li>
+                <li><span class="highlight-text">未降至風險胃納</span>：結果是不合格 (風險還是太高)。</li>
+                <li><span class="highlight-text">可能的原因</span>：請找出所有可能性。</li>
+            </ul>
+            <p><strong>說明：</strong>本題重點在於「為什麼做了風險回應，風險還是沒降下來」。</p>
+        </div>
+
+        <div class="step-block">
+            <div class="step-title">第二步：白話翻譯</div>
+            <p>用白話文來說就是：</p>
+            <div class="concept-box">
+                「公司已經針對風險做了處理，三個月後再檢查，結果發現風險還是太高，那下面哪些情況，可能造成這種結果？」
+            </div>
+            <p><strong>專有名詞解釋：</strong></p>
+            <ul>
+                <li><strong>風險胃納（Risk appetite）：</strong>組織可以接受的最大風險範圍（肚子能吃多少風險）。</li>
+                <li><strong>風險再評估：</strong>確認風險處理是否真的有效。</li>
+            </ul>
+        </div>
+
+        <div class="step-block">
+            <div class="step-title">第三步：解題思路與原理</div>
+            <p><strong>這題在考什麼？</strong><br>
+            一句話核心考點：「風險沒降下來，一定跟『規劃或執行』有問題。」</p>
+            
+            <p>從管理邏輯來看，只有三大類原因：</p>
+            <ol>
+                <li><strong>規劃問題 (Plan 出錯)：</strong>一開始設計的風險回應方式就不對（例如：想用防火牆擋病毒，但選錯型號）。</li>
+                <li><strong>執行進度問題 (Do 沒做完)：</strong>回應措施還沒做完（例如：防火牆買了但還沒裝好）。</li>
+                <li><strong>落實問題 (Do 沒落實)：</strong>有寫計畫，但實際沒照做（例如：裝了防火牆，但沒開電源）。</li>
+            </ol>
+        </div>
+
+        <div class="step-block">
+            <div class="step-title">第四步：選項分析</div>
+            <ul>
+                <li>(A) 1、2 &rarr; 少了「未落實執行」，不完整。</li>
+                <li>(B) 2、3 &rarr; 少了「規劃本身就錯」，不完整。</li>
+                <li>(C) 1、3 &rarr; 少了「尚未執行完成」，不完整。</li>
+                <li><span class="highlight-text">(D) 1、2、3（正確答案）</span> &rarr; 三種情況都可能造成風險未降至可接受範圍。</li>
+            </ul>
+        </div>
+
+        <div class="mnemonic-box">
+            記憶口訣：「沒降風險，三件事：計畫錯、沒做完、沒照做」
+        </div>
+
+        <div class="step-block">
+            <div class="step-title">常見陷阱與避坑指南</div>
+            <div class="trap-box">
+                <ul>
+                    <li><strong>學生最容易錯：</strong>以為只能選「一種」最主要的原因。</li>
+                    <li><strong>心理盲點：</strong>忽略「管理落實度」也會造成風險控制失效。</li>
+                    <li><strong>避坑指南：</strong>題目問「可能的原因」，只要邏輯上能導致失敗的都要選！</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="self-test-box">
+            <div class="step-title" style="background-color: #555;">自我檢測（點擊展開答案）</div>
+            
+            <details>
+                <summary>1. 若風險回應規劃本身正確，但人員懶惰未執行，屬於哪一類問題？</summary>
+                <div class="answer-reveal">答：風險回應未落實執行</div>
+            </details>
+
+            <details>
+                <summary>2. 風險再評估的主要目的為何？</summary>
+                <div class="answer-reveal">答：檢視風險回應是否有效</div>
+            </details>
+
+            <details>
+                <summary>3. 風險降至風險胃納內代表什麼？</summary>
+                <div class="answer-reveal">答：風險已降到組織可接受範圍</div>
+            </details>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // 這裡放置互動邏輯
+    
+    const CORRECT_ANSWER = 'D';
+    
+    function submitAnswer() {
+        const form = document.getElementById('quiz-form');
+        const selectedOption = form.querySelector('input[name="answer"]:checked');
+        const resultArea = document.getElementById('result-area');
+        const btnExplain = document.getElementById('btn-explain');
+        const btnReset = document.getElementById('btn-reset');
+        const submitBtn = document.querySelector('.btn-submit');
+
+        if (!selectedOption) {
+            alert('同學，請先選擇一個答案再送出喔！');
+            return;
+        }
+
+        const userAnswer = selectedOption.value;
+        let isCorrect = (userAnswer === CORRECT_ANSWER);
+
+        // 顯示按鈕
+        btnExplain.style.display = 'inline-block';
+        btnReset.style.display = 'inline-block';
+        submitBtn.style.display = 'none'; // 隱藏送出按鈕避免重複提交
+
+        // 顯示結果
+        resultArea.style.display = 'block';
+        if (isCorrect) {
+            resultArea.className = 'result-correct';
+            resultArea.innerHTML = `
+                [ 正確 ] 恭喜答對！觀念非常清楚！<br>
+                您選擇的答案：${userAnswer}<br>
+                正確答案：${CORRECT_ANSWER}<br>
+                趕快點擊「一鍵看解析」來複習一下核心觀念吧！
+            `;
+            // 若答對，自動展開解析給予獎勵感
+            document.getElementById('analysis').style.display = 'block';
+            btnExplain.textContent = '收合解析';
+        } else {
+            resultArea.className = 'result-wrong';
+            resultArea.innerHTML = `
+                [ 加油 ] 答錯囉，別灰心！<br>
+                您選擇的答案：${userAnswer}<br>
+                正確答案：${CORRECT_ANSWER}<br>
+                <br>
+                <strong>名師提示：</strong>想一下 PDCA 管理循環。如果事情沒做好，是因為計畫錯了？還是沒做完？還是沒照做？這三者是不是都有可能？
+            `;
+        }
+        
+        // 鎖定選項
+        const radios = form.querySelectorAll('input[type="radio"]');
+        radios.forEach(radio => radio.disabled = true);
+    }
+
+    function toggleExplanation() {
+        const analysis = document.getElementById('analysis');
+        const btnExplain = document.getElementById('btn-explain');
+        
+        if (analysis.style.display === 'none' || analysis.style.display === '') {
+            analysis.style.display = 'block';
+            btnExplain.textContent = '收合解析';
+            // 滾動到解析區
+            analysis.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            analysis.style.display = 'none';
+            btnExplain.textContent = '一鍵看解析';
+        }
+    }
+
+    function resetQuiz() {
+        // 重置表單
+        const form = document.getElementById('quiz-form');
+        form.reset();
+        
+        // 解鎖選項
+        const radios = form.querySelectorAll('input[type="radio"]');
+        radios.forEach(radio => radio.disabled = false);
+
+        // 隱藏結果與解析
+        document.getElementById('result-area').style.display = 'none';
+        document.getElementById('analysis').style.display = 'none';
+        
+        // 重置按鈕狀態
+        document.getElementById('btn-explain').style.display = 'none';
+        document.getElementById('btn-reset').style.display = 'none';
+        document.querySelector('.btn-submit').style.display = 'inline-block';
+        document.getElementById('btn-explain').textContent = '一鍵看解析';
+
+        // 關閉自我檢測詳情
+        const details = document.querySelectorAll('details');
+        details.forEach(detail => detail.removeAttribute('open'));
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題組 2｜第 13–16 題整合教學頁</title>
+    <style>
+        /* 基礎重置與字體設定 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        
+        /* 容器樣式 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* 標題樣式 (限制最大 18px) */
+        h1, h2, h3 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-left: 5px solid #3498db;
+            padding-left: 10px;
+        }
+        
+        /* 導覽列樣式 */
+        .nav-tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .nav-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #eee;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+            font-size: 16px;
+            color: #666;
+        }
+        .nav-item.active {
+            background-color: #3498db;
+            color: #fff;
+            font-weight: bold;
+        }
+        .nav-item.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* 題組情境區塊 */
+        .scenario-box {
+            background-color: #e8f4fc;
+            border: 1px solid #b6e0fe;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+        .scenario-title {
+            font-weight: bold;
+            color: #0366d6;
+            margin-bottom: 5px;
+            font-size: 17px;
+        }
+
+        /* 題目區塊 */
+        .question-block {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .question-text {
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .highlight-trap {
+            background-color: #ffeb3b;
+            color: #d32f2f;
+            padding: 0 4px;
+            font-weight: 900;
+            border-radius: 3px;
+        }
+
+        /* 選項樣式 */
+        .options-group label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .options-group label:hover {
+            background-color: #f9f9f9;
+        }
+        .options-group input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        /* 按鈕樣式 */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn-submit { background-color: #2ecc71; color: white; }
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-analysis { background-color: #3498db; color: white; }
+        
+        /* 回饋區塊 */
+        .feedback-area {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none; /* 預設隱藏 */
+        }
+        .feedback-correct {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        .feedback-wrong {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+
+        /* 解析區塊樣式 */
+        .analysis-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed #ccc;
+            display: none; /* 預設隱藏 */
+        }
+        .step-box {
+            background-color: #fff;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .step-title {
+            font-weight: bold;
+            color: #e67e22;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        /* 螢光筆與強調樣式 */
+        .marker {
+            background-color: #fff3cd;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        .concept-tag {
+            display: inline-block;
+            background-color: #e1ecf4;
+            color: #39739d;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+        .explanation-text {
+            margin-left: 20px;
+            font-size: 15px;
+            color: #555;
+        }
+
+        /* 自我檢測開關 */
+        .toggle-answer {
+            cursor: pointer;
+            color: #3498db;
+            text-decoration: underline;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .hidden-answer {
+            display: none;
+            color: #27ae60;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        /* 占位頁面樣式 */
+        .placeholder-page {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+            background-color: #f9f9f9;
+            border: 1px dashed #ccc;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 導覽列 -->
+    <div class="nav-tabs">
+        <div class="nav-item" onclick="switchTab('q13')">第 13 題</div>
+        <div class="nav-item" onclick="switchTab('q14')">第 14 題</div>
+        <div class="nav-item active" onclick="switchTab('q15')">第 15 題</div>
+        <div class="nav-item" onclick="switchTab('q16')">第 16 題</div>
+    </div>
+
+    <!-- 共用情境區 -->
+    <div class="scenario-box">
+        <div class="scenario-title">【題組 2｜第 13–16 題共用情境】</div>
+        <p>K 公司為總部設立於新竹之汽車零組件製造商，公司股票已於臺灣證券交易所上市交易。此外，公司已在 2023 年初通過 ISO 27001 驗證。</p>
+        <p>目前公司主要系統之目標如下：</p>
+        <ul>
+            <li>可用性目標：可接受中斷時間為 8 小時以內</li>
+            <li>資料完整性目標：資料流失可接受時間為 8 小時以內</li>
+        </ul>
+        <p style="margin-top: 10px; font-size: 14px; color: #666;">（提示：本題組會同時考 BCP/DR 指標與資安控制措施選型）</p>
+    </div>
+
+    <!-- 第 13 題 占位區 -->
+    <div id="q13" style="display: none;">
+        <div class="placeholder-page">
+            <h3>第 13 題</h3>
+            <p>（此題內容已提供或保留占位，請點選上方「第 15 題」進行本次課程。）</p>
+        </div>
+    </div>
+
+    <!-- 第 14 題 占位區 -->
+    <div id="q14" style="display: none;">
+        <div class="placeholder-page">
+            <h3>第 14 題</h3>
+            <p>（題目尚未提供，敬請期待。）</p>
+        </div>
+    </div>
+
+    <!-- 第 15 題 主內容區 -->
+    <div id="q15">
+        <!-- 題目區 -->
+        <div class="question-block">
+            <div class="concept-tag">題組 2｜第 15 題｜單選題</div>
+            <p class="question-text" style="margin-top: 10px;">
+                15. K 公司為保護客戶重要機密資料，擬導入加密管理系統，請問於選擇加密管理系統時，下列何者為此階段<span class="highlight-trap">「非」</span>必要評估項目？
+            </p>
+            
+            <div class="options-group">
+                <label><input type="radio" name="q15_option" value="A"> (A) 系統功能需求評估</label>
+                <label><input type="radio" name="q15_option" value="B"> (B) 導入方式評估</label>
+                <label><input type="radio" name="q15_option" value="C"> (C) 備份機制評估</label>
+                <label><input type="radio" name="q15_option" value="D"> (D) 安全要求評估</label>
+            </div>
+
+            <!-- 回饋訊息區 -->
+            <div id="q15-feedback" class="feedback-area"></div>
+
+            <!-- 按鈕區 -->
+            <div class="btn-group">
+                <button class="btn btn-submit" onclick="checkAnswer('q15')">送出作答</button>
+                <button class="btn btn-reset" onclick="resetQuestion('q15')">重置</button>
+                <button class="btn btn-analysis" onclick="toggleAnalysis('q15')" id="q15-analysis-btn">一鍵看解析</button>
+            </div>
+        </div>
+
+        <!-- 解析區 -->
+        <div id="q15-analysis" class="analysis-section">
+            <h3>詳細解析</h3>
+
+            <!-- 第一步 -->
+            <div class="step-box">
+                <span class="step-title">第一步：找關鍵字</span>
+                <p>請拿出你的螢光筆，圈出以下重點：</p>
+                <ul style="list-style-type: circle; margin-left: 20px; margin-top: 10px;">
+                    <li><span class="marker">機密資料</span>：這是要保護的對象。</li>
+                    <li><span class="marker">加密管理系統</span>：這是要買的工具。</li>
+                    <li><span class="marker">選擇 ... 此階段</span>：這是時間點，還在「挑選」系統，不是在「維修」或「災難復原」。</li>
+                    <li><span class="highlight-trap">非必要</span>：題目在問哪一個「最不急迫」或「不是選型的核心條件」。</li>
+                </ul>
+                <p style="margin-top: 10px;"><strong>破題關鍵：</strong>題目問的是「選型階段」要先評估什麼。「備份」雖然重要，但它通常屬於營運持續與復原（BCP/DR）的整體規劃，而不是挑選這套加密軟體本身功能的必要核心。</p>
+            </div>
+
+            <!-- 第二步 -->
+            <div class="step-box">
+                <span class="step-title">第二步：白話翻譯</span>
+                <p>把題目翻譯成高中生聽得懂的話：</p>
+                <div style="background-color: #f9f9f9; padding: 10px; border-radius: 5px; margin-top: 5px; font-style: italic;">
+                    「公司要買一套專門用來管理『加密』與『鑰匙（金鑰）』的系統，在挑選要買哪一家的時候，哪一件事情反而不是這個階段一定要先看的？」
+                </div>
+                <p style="margin-top: 10px; font-size: 14px;">
+                    <strong>名詞解釋：</strong><br>
+                    ● <strong>機密資料</strong>：不希望被外人看到的重要資料。<br>
+                    ● <strong>加密管理系統</strong>：負責產生、保管、發放與控管加密金鑰（解鎖資料的鑰匙）的系統。<br>
+                </p>
+            </div>
+
+            <!-- 第三步 -->
+            <div class="step-box">
+                <span class="step-title">第三步：解題思路</span>
+                <p><strong>這題在考什麼觀念？</strong></p>
+                <p>一句話：「加密管理系統選型的核心在功能、導入方式與安全要求；備份機制不是此階段的必要主項。」</p>
+                
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                
+                <p><strong>原理與規則（為什麼？）：</strong></p>
+                <ul>
+                    <li><strong>加密管理系統（如 KMS/HSM）最怕的是：</strong>
+                        <ol>
+                            <li>金鑰被偷走（機密性崩壞）。</li>
+                            <li>權限亂開或無法追查（無法稽核）。</li>
+                            <li>系統買來跟現有環境不合（無法導入）。</li>
+                        </ol>
+                    </li>
+                    <li><strong>備份機制的位置：</strong>備份非常重要，但它通常屬於「企業整體的備援/復原設計（BCP/DR）」或「後續建置與維運規劃」。</li>
+                    <li><strong>結論：</strong>在「選擇要買哪套系統」時，我們會先看它安不安全、能不能用、好不好裝。至於「備份檔案要存哪裡」，通常是產品買來之後，配合公司備份政策去設定的。</li>
+                </ul>
+
+                <p style="margin-top: 15px;"><strong>生活比喻：</strong></p>
+                <p>想像你要買一個<strong>「保險箱」</strong>（加密系統）來放家裡的黃金。</p>
+                <ul>
+                    <li><strong>(A) 功能需求：</strong>能不能放得進金條？密碼鎖還是指紋鎖？（這是選購重點）</li>
+                    <li><strong>(B) 導入方式：</strong>保險箱是要鑲在牆壁裡，還是直接放地上？家裡裝潢能配合嗎？（這是選購重點）</li>
+                    <li><strong>(D) 安全要求：</strong>鋼板厚不厚？防不防鑽？（這是選購重點）</li>
+                    <li><strong>(C) 備份機制：</strong>「萬一房子倒了，我在哪裡還有備用倉庫？」這當然重要，但這不是你在賣場挑選這個特定保險箱時的「產品規格」首要考量。</li>
+                </ul>
+            </div>
+
+            <!-- 第四步 -->
+            <div class="step-box">
+                <span class="step-title">第四步：選項分析</span>
+                <ul>
+                    <li>
+                        <strong>(A) 系統功能需求評估（必要）：</strong><br>
+                        <span class="explanation-text">如果連系統支援什麼加密演算法（AES? RSA?）、金鑰怎麼產生都不知道，根本沒辦法買。</span>
+                    </li>
+                    <li style="margin-top: 10px;">
+                        <strong>(B) 導入方式評估（必要）：</strong><br>
+                        <span class="explanation-text">要確認這套系統是純軟體、硬體設備（HSM），還是雲端服務？這直接影響能不能裝在 K 公司的環境裡。</span>
+                    </li>
+                    <li style="margin-top: 10px;">
+                        <strong>(C) 備份機制評估（非必要 / 正確答案）：</strong><br>
+                        <span class="explanation-text">這是「維運與復原」層級的事。雖然系統最好支援備份，但在選型階段，它不如功能性與安全性來得關鍵。備份可以透過外部機制（如磁碟快照）來達成。</span>
+                    </li>
+                    <li style="margin-top: 10px;">
+                        <strong>(D) 安全要求評估（必要）：</strong><br>
+                        <span class="explanation-text">這是資安產品的靈魂。權限控管嚴不嚴謹？管理員能不能隨便匯出金鑰？這是必須評估的。</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 第六步 (合併觀念補充) -->
+            <div class="step-box">
+                <span class="step-title">觀念補充與記憶口訣</span>
+                <p><strong>核心觀念定位：</strong>本題屬於「資料保護 / 加密與金鑰管理 / 控制措施選型」章節。</p>
+                <p><strong>觸類旁通：</strong></p>
+                <ul>
+                    <li><strong>KMS (Key Management Service)：</strong>集中管理金鑰的服務。</li>
+                    <li><strong>HSM (Hardware Security Module)：</strong>硬體安全模組，把金鑰放在專用硬體裡保護，這類設備選型時最看重物理安全與演算法支援。</li>
+                </ul>
+                <hr style="margin: 10px 0;">
+                <p><strong>記憶口訣（幫你記答案 C）：</strong></p>
+                <p style="font-size: 18px; color: #d35400; font-weight: bold; text-align: center;">
+                    「選加密先看功、導、安；備份多在後面談」
+                </p>
+            </div>
+
+            <!-- 常見陷阱 -->
+            <div class="step-box">
+                <span class="step-title">常見陷阱</span>
+                <p><strong>迷思：</strong>很多同學覺得「只要是資訊系統，備份一定最重要啊！」</p>
+                <p><strong>破解：</strong>沒錯，維運時備份最重要。但題目問的是<span class="marker">「選擇系統的階段」</span>。如果一個系統功能超強、超安全，但本身內建備份功能稍弱（可依賴外部備份），我們還是會選它；但如果它備份功能超強，卻不支援你需要的加密演算法（功能不符），你根本不會買。</p>
+            </div>
+
+            <!-- 自我檢測 -->
+            <div class="step-box">
+                <span class="step-title">自我檢測</span>
+                <p>遮住答案想一想：</p>
+                <div style="margin-top: 10px;">
+                    1. 加密管理系統最核心在管理什麼？ 
+                    <span class="toggle-answer" onclick="toggleAnswer(this)">看答案</span>
+                    <span class="hidden-answer">金鑰（Key）</span>
+                </div>
+                <div style="margin-top: 10px;">
+                    2. 若題目改成「系統維運階段」，備份機制還算非必要嗎？
+                    <span class="toggle-answer" onclick="toggleAnswer(this)">看答案</span>
+                    <span class="hidden-answer">不算（維運階段備份非常重要）</span>
+                </div>
+                <div style="margin-top: 10px;">
+                    3. 功能需求評估至少要包含哪兩類？
+                    <span class="toggle-answer" onclick="toggleAnswer(this)">看答案</span>
+                    <span class="hidden-answer">支援的加密演算法、金鑰生命週期管理</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 第 16 題 占位區 -->
+    <div id="q16" style="display: none;">
+        <div class="placeholder-page">
+            <h3>第 16 題</h3>
+            <p>（題目尚未提供，敬請期待。）</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // 頁籤切換邏輯
+    function switchTab(tabId) {
+        // 隱藏所有內容區塊
+        document.getElementById('q13').style.display = 'none';
+        document.getElementById('q14').style.display = 'none';
+        document.getElementById('q15').style.display = 'none';
+        document.getElementById('q16').style.display = 'none';
+
+        // 移除所有 nav-item 的 active 樣式
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => item.classList.remove('active'));
+
+        // 顯示選中的區塊
+        document.getElementById(tabId).style.display = 'block';
+
+        // 加上 active 樣式 (簡單遍歷處理)
+        const tabs = ['q13', 'q14', 'q15', 'q16'];
+        navItems[tabs.indexOf(tabId)].classList.add('active');
+    }
+
+    // 第 15 題 檢查答案邏輯
+    function checkAnswer(questionId) {
+        const options = document.getElementsByName(questionId + '_option');
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackDiv = document.getElementById(questionId + '-feedback');
+        feedbackDiv.style.display = 'block';
+
+        if (!selectedValue) {
+            feedbackDiv.className = 'feedback-area feedback-wrong';
+            feedbackDiv.innerHTML = '<strong>請先選擇一個答案！</strong>';
+            return;
+        }
+
+        if (selectedValue === 'C') {
+            feedbackDiv.className = 'feedback-area feedback-correct';
+            feedbackDiv.innerHTML = '<strong>答對了！(C) 是正確答案。</strong><br>你選了 (C)，這在「選型階段」確實非最優先的核心必要項目。<br>請點選下方「一鍵看解析」來了解完整觀念。';
+            // 自動展開解析（可選，這裡依照需求讓使用者手動點擊較佳）
+        } else {
+            feedbackDiv.className = 'feedback-area feedback-wrong';
+            let hint = '';
+            if (selectedValue === 'A') hint = '觀念提示：如果連系統有什麼功能都不知道，要怎麼買？這是必要的喔。';
+            if (selectedValue === 'B') hint = '觀念提示：如果買來發現無法安裝在公司的環境裡，那就浪費錢了，所以導入方式一定要評估。';
+            if (selectedValue === 'D') hint = '觀念提示：資安產品最講究安全性，如果權限控管不好，金鑰被偷走就完了，所以這是絕對必要的。';
+            
+            feedbackDiv.innerHTML = `<strong>答錯了。</strong><br>你選了 (${selectedValue})，正確答案是 (C)。<br>${hint}<br>試著點開「一鍵看解析」釐清觀念吧！`;
+        }
+    }
+
+    // 重置按鈕邏輯
+    function resetQuestion(questionId) {
+        // 清空選項
+        const options = document.getElementsByName(questionId + '_option');
+        for (const option of options) {
+            option.checked = false;
+        }
+        
+        // 隱藏回饋
+        const feedbackDiv = document.getElementById(questionId + '-feedback');
+        feedbackDiv.style.display = 'none';
+        feedbackDiv.innerHTML = '';
+
+        // 收合解析（如果原本有展開）
+        const analysisDiv = document.getElementById(questionId + '-analysis');
+        analysisDiv.style.display = 'none';
+        const btn = document.getElementById(questionId + '-analysis-btn');
+        btn.innerText = '一鍵看解析';
+    }
+
+    // 切換解析顯示/隱藏
+    function toggleAnalysis(questionId) {
+        const analysisDiv = document.getElementById(questionId + '-analysis');
+        const btn = document.getElementById(questionId + '-analysis-btn');
+        
+        if (analysisDiv.style.display === 'none' || analysisDiv.style.display === '') {
+            analysisDiv.style.display = 'block';
+            btn.innerText = '隱藏解析';
+            // 平滑捲動到解析區
+            analysisDiv.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            analysisDiv.style.display = 'none';
+            btn.innerText = '一鍵看解析';
+        }
+    }
+
+    // 自我檢測顯示答案功能
+    function toggleAnswer(element) {
+        const nextSpan = element.nextElementSibling;
+        if (nextSpan.style.display === 'inline') {
+            nextSpan.style.display = 'none';
+            element.innerText = '看答案';
+        } else {
+            nextSpan.style.display = 'inline';
+            element.innerText = '隱藏';
+        }
+    }
+</script>
+
+</body>
+</html>

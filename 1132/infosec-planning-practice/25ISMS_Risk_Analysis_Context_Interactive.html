@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安短期衝刺班｜第 25 題｜資訊安全風險分析</title>
+    <style>
+        /* * 全域設定
+         * 字級與字型設定，確保閱讀清晰
+         */
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+            font-size: 16px; /* 內文基本字級 */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-top: 5px solid #2c3e50; /* 補習班講義風格配色 */
+        }
+
+        /* 標題設定，限制最大字級 */
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        h1 { font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h2 { font-size: 18px; margin-top: 25px; background-color: #f8f9fa; padding: 10px; border-left: 4px solid #2c3e50; }
+        h3 { font-size: 17px; margin-top: 20px; color: #d35400; }
+
+        /* 試題區塊樣式 */
+        .question-box {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+
+        .options-list li {
+            margin-bottom: 12px;
+            padding: 8px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .options-list li:hover {
+            background-color: #f0f8ff;
+        }
+
+        .options-list label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .options-list input[type="radio"] {
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #3498db;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover { background-color: #2980b9; }
+        .btn-reset { background-color: #95a5a6; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+        .btn-toggle { background-color: #d35400; }
+        .btn-toggle:hover { background-color: #e67e22; }
+
+        /* 回饋區塊樣式 */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區塊樣式 */
+        #analysis-area {
+            display: none; /* 預設隱藏 */
+            margin-top: 20px;
+            border-top: 2px dashed #ccc;
+            padding-top: 10px;
+        }
+
+        /* 關鍵字高亮樣式 */
+        .highlight {
+            background-color: #fff3cd;
+            font-weight: bold;
+            padding: 0 4px;
+            color: #856404;
+            border-radius: 2px;
+        }
+
+        /* 強調文字 */
+        .emphasis {
+            font-weight: bold;
+            color: #c0392b;
+        }
+
+        /* 表格模擬樣式 (用於對齊) */
+        .step-box {
+            margin-bottom: 20px;
+        }
+
+        .concept-tag {
+            display: inline-block;
+            background-color: #e8f4f8;
+            color: #2980b9;
+            padding: 2px 8px;
+            font-size: 14px;
+            border-radius: 4px;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        
+        /* 自我檢測樣式 */
+        .quiz-item {
+            background-color: #fafafa;
+            padding: 10px;
+            border-left: 3px solid #27ae60;
+            margin-bottom: 10px;
+        }
+        .quiz-answer {
+            color: #27ae60;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安短期衝刺班｜第 25 題｜資訊安全風險分析</h1>
+
+    <div class="question-box">
+        <p><strong>題目：</strong>與資訊安全風險分析相關議題的敘述，下列何者<span class="emphasis">錯誤</span>？</p>
+        <form id="quiz-form">
+            <ul class="options-list">
+                <li>
+                    <label>
+                        <input type="radio" name="answer" value="A">
+                        (A) 主管機關公文來函要求事項，可納入風險分析的參考
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="radio" name="answer" value="B">
+                        (B) 法律法規適用的要求事項，可納入風險分析的參考
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="radio" name="answer" value="C">
+                        (C) 客戶合約的要求，可以不用納入風險分析的參考
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="radio" name="answer" value="D">
+                        (D) 組織本身內部與外部的議題，可納入風險分析的參考
+                    </label>
+                </li>
+            </ul>
+        </form>
+    </div>
+
+    <!-- 按鈕區 -->
+    <div>
+        <button type="button" class="btn" onclick="submitAnswer()">送出作答</button>
+        <button type="button" class="btn btn-reset" onclick="resetQuiz()">重置作答</button>
+        <button type="button" class="btn btn-toggle" id="btn-analysis" onclick="toggleAnalysis()" style="display:none;">一鍵看解析</button>
+    </div>
+
+    <!-- 作答回饋區 -->
+    <div id="feedback-area"></div>
+
+    <!-- 詳細解析區 -->
+    <div id="analysis-area">
+        <h2>教學解析</h2>
+        
+        <div class="step-box">
+            <h3>【第一步：找關鍵字】</h3>
+            <p>請注意題目中的這些詞彙，這就是解題的線索：</p>
+            <ul>
+                <li><span class="highlight">資訊安全風險分析</span>：題目的核心主題。</li>
+                <li><span class="highlight">主管機關</span>、<span class="highlight">法律法規</span>、<span class="highlight">客戶合約</span>、<span class="highlight">內部與外部議題</span>：這些都是我們需要判斷「要不要納入」的對象。</li>
+                <li><span class="highlight">錯誤</span>：題目要找的是「不正確」的敘述，也就是選出那個觀念偏差的選項。</li>
+            </ul>
+            <p><strong>說明：</strong>本題關鍵在於<strong>「哪些要求必須納入風險分析的輸入來源」</strong>。</p>
+        </div>
+
+        <div class="step-box">
+            <h3>【第二步：白話翻譯】</h3>
+            <p>用大家聽得懂的話來說：</p>
+            <p>「公司在做資安風險分析時，下面哪些東西一定要考慮進去？哪一個選項說『不用考慮』反而是講錯的？」</p>
+            <p><strong>名詞解釋：</strong></p>
+            <ul>
+                <li><strong>風險分析：</strong>就是把公司可能出事的地方、可能會賠錢的原因全部找出來的過程。</li>
+                <li><strong>合約要求：</strong>公司跟客戶簽約時，答應客戶要保護資料、要做到某些資安標準，這就是責任。</li>
+            </ul>
+        </div>
+
+        <div class="step-box">
+            <h3>【第三步：解題思路】</h3>
+            <p><strong>這題在考什麼觀念？</strong></p>
+            <p>風險分析的依據來源必須「全面」，不能只看政府規定的法律，卻不看跟客戶簽的合約。</p>
+            <p><strong>判斷流程：</strong></p>
+            <ol>
+                <li>這個項目是不是「外部對我們的要求」？</li>
+                <li>如果沒做好，會不會讓我們被告或賠錢（風險）？</li>
+                <li>如果答案是 YES，那就必須納入風險分析。</li>
+            </ol>
+        </div>
+
+        <div class="step-box">
+            <h3>【第四步：選項分析】</h3>
+            <ul>
+                <li><strong>(A) 主管機關公文來函：</strong><span style="color:green;">正確</span>。這是政府的要求，不遵守會有罰則，當然要納入分析。</li>
+                <li><strong>(B) 法律法規適用：</strong><span style="color:green;">正確</span>。法律是資安合規的最基本底線，一定要納入。</li>
+                <li><strong>(C) 客戶合約的要求：</strong><span class="emphasis">錯誤（本題答案）</span>。客戶合約具有法律效力。如果忽略合約要求，可能會導致違約賠償，這是重大的營運風險。所以「可以不用納入」這句話是大錯特錯。</li>
+                <li><strong>(D) 組織本身內外部議題：</strong><span style="color:green;">正確</span>。ISO 27001 特別強調要看組織的「全貌」，包含內部文化、外部市場環境等，都要納入分析。</li>
+            </ul>
+        </div>
+
+        <div class="step-box">
+            <h3>【觀念補充與延伸】</h3>
+            <p><span class="concept-tag">ISMS 風險管理</span> <span class="concept-tag">組織情境</span></p>
+            <p>在 ISO 27001 標準中，強調組織環境（Context of the Organization）的分析。我們不能閉門造車，必須看以下三點：</p>
+            <ol>
+                <li><strong>法規要求</strong>（政府規定的）</li>
+                <li><strong>合約義務</strong>（答應客戶的）</li>
+                <li><strong>利害關係人期待</strong>（股東、員工、合作夥伴在意的）</li>
+            </ol>
+        </div>
+
+        <div class="step-box">
+            <h3>【記憶口訣】</h3>
+            <div style="background-color: #fff9c4; padding: 10px; border-left: 4px solid #f1c40f; font-weight: bold;">
+                「法規、合約、內外部，風險分析不能漏」
+            </div>
+        </div>
+
+        <div class="step-box">
+            <h3>【常見陷阱】</h3>
+            <ul>
+                <li>陷阱：只想到「法律」才算強制，誤以為「合約」只是業務部門的事。</li>
+                <li>修正觀念：資安不只是防駭客，還包含「履行承諾」。違反合約造成的損失，往往不輸給被駭客攻擊。</li>
+            </ul>
+        </div>
+
+        <div class="step-box">
+            <h3>【自我檢測】</h3>
+            <div class="quiz-item">
+                1. 為什麼客戶合約一定要納入風險分析？<br>
+                <div class="quiz-answer">答：因為違反合約會產生法律與營運風險。</div>
+            </div>
+            <div class="quiz-item">
+                2. ISO 27001 中，風險分析的輸入來源有哪些？<br>
+                <div class="quiz-answer">答：法規、合約、主管機關要求、內外部議題。</div>
+            </div>
+            <div class="quiz-item">
+                3. 若忽略合約要求，最可能造成哪類風險？<br>
+                <div class="quiz-answer">答：違約賠償與商譽損失。</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 這裡處理互動邏輯
+    
+    // 正確答案設定
+    const CORRECT_ANSWER = 'C';
+    
+    // 取得 DOM 元素
+    const form = document.getElementById('quiz-form');
+    const feedbackArea = document.getElementById('feedback-area');
+    const analysisArea = document.getElementById('analysis-area');
+    const btnAnalysis = document.getElementById('btn-analysis');
+
+    function submitAnswer() {
+        // 取得使用者選擇的答案
+        const selectedOption = document.querySelector('input[name="answer"]:checked');
+        
+        // 清空並隱藏回饋區，準備顯示新結果
+        feedbackArea.style.display = 'none';
+        feedbackArea.className = '';
+        
+        if (!selectedOption) {
+            alert('請先選擇一個答案再送出喔！');
+            return;
+        }
+
+        const userAnswer = selectedOption.value;
+        let feedbackHTML = '';
+
+        // 判斷對錯
+        if (userAnswer === CORRECT_ANSWER) {
+            // 答對邏輯
+            feedbackArea.className = 'feedback-correct';
+            feedbackHTML = `
+                <h3>恭喜答對！</h3>
+                <p>您的選擇：<strong>(${userAnswer})</strong></p>
+                <p>觀念非常正確！客戶合約是重要的外部要求，絕對不能忽略。</p>
+            `;
+            // 答對時，自動顯示解析按鈕（鼓勵查看更多細節）
+            btnAnalysis.style.display = 'inline-block';
+            
+            // 自動展開解析區塊讓學生複習
+            analysisArea.style.display = 'block';
+            btnAnalysis.textContent = '收合解析';
+        } else {
+            // 答錯邏輯
+            feedbackArea.className = 'feedback-wrong';
+            feedbackHTML = `
+                <h3>答錯了，別氣餒！</h3>
+                <p>您的選擇：<strong>(${userAnswer})</strong></p>
+                <p>正確答案是：<strong>(${CORRECT_ANSWER})</strong></p>
+                <hr style="border: 0; border-top: 1px solid #e0a8b1; margin: 10px 0;">
+                <p><strong>【觀念提示】</strong></p>
+                <p>題目問的是「錯誤」的敘述。請思考一下，如果公司跟客戶簽了合約卻不遵守，會不會有風險？如果會，那是不是應該要納入分析呢？</p>
+                <p>選項 (C) 說「可以不用納入」，這句話是不是怪怪的？</p>
+            `;
+            // 答錯時，顯示解析按鈕讓學生學習
+            btnAnalysis.style.display = 'inline-block';
+        }
+
+        feedbackArea.innerHTML = feedbackHTML;
+        feedbackArea.style.display = 'block';
+    }
+
+    function resetQuiz() {
+        // 重置表單選取狀態
+        const radioButtons = document.querySelectorAll('input[type="radio"]');
+        radioButtons.forEach(radio => radio.checked = false);
+
+        // 隱藏回饋區與解析區
+        feedbackArea.style.display = 'none';
+        analysisArea.style.display = 'none';
+        
+        // 隱藏解析按鈕
+        btnAnalysis.style.display = 'none';
+        btnAnalysis.textContent = '一鍵看解析';
+        
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleAnalysis() {
+        if (analysisArea.style.display === 'none' || analysisArea.style.display === '') {
+            analysisArea.style.display = 'block';
+            btnAnalysis.textContent = '收合解析';
+            // 捲動到解析區
+            analysisArea.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            analysisArea.style.display = 'none';
+            btnAnalysis.textContent = '一鍵看解析';
+        }
+    }
+</script>
+
+</body>
+</html>

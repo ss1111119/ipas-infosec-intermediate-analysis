@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安衝刺班：日誌保存與跡證規劃 (Q4)</title>
+    <style>
+        :root {
+            --primary-color: #003366; /* 補習班專業藍 */
+            --accent-color: #d32f2f; /* 重點紅 */
+            --highlight-bg: #fff59d; /* 螢光筆黃 */
+            --light-bg: #f5f5f5;
+            --border-color: #ddd;
+            --success-color: #2e7d32;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #eef2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        /* 標題樣式控制 - 嚴格限制字級差距 */
+        h1 { font-size: 24px; color: var(--primary-color); border-bottom: 3px solid var(--primary-color); padding-bottom: 10px; margin-bottom: 20px; }
+        h2 { font-size: 20px; color: var(--text-color); background-color: #e0e0e0; padding: 10px; border-left: 5px solid var(--primary-color); margin-top: 30px; }
+        h3 { font-size: 18px; color: var(--primary-color); margin-top: 20px; border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; }
+        p, li { font-size: 16px; }
+
+        /* 題目區域 */
+        .question-box {
+            background-color: #fff9c4;
+            padding: 20px;
+            border: 1px solid #fbc02d;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .question-type {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            font-size: 14px;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+
+        .options label {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .options label:hover {
+            background-color: #f0f8ff;
+        }
+
+        /* 互動控制區 */
+        .interaction-area {
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--light-bg);
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 0 5px;
+        }
+        button:hover { opacity: 0.9; }
+        button.reset-btn { background-color: #757575; }
+        button.toggle-btn { background-color: var(--accent-color); display: none; margin-top: 15px; width: 100%; }
+
+        .feedback-msg {
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 24px;
+        }
+        .feedback-error { color: var(--accent-color); }
+        .feedback-success { color: var(--success-color); }
+
+        /* 解析區塊 (預設隱藏) */
+        #explanation-section {
+            display: none;
+            border-top: 2px solid var(--border-color);
+            margin-top: 30px;
+        }
+
+        /* 重點標示 */
+        mark {
+            background-color: var(--highlight-bg);
+            padding: 0 2px;
+            color: var(--text-color);
+        }
+        .keyword-explanation {
+            background: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid var(--accent-color);
+            margin: 10px 0;
+        }
+
+        /* 選項分析展開收合 */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        summary {
+            background-color: #f0f0f0;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+        }
+        summary::after {
+            content: "+"; 
+            float: right;
+            font-weight: bold;
+        }
+        details[open] summary::after {
+            content: "-";
+        }
+        .details-content {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* 情境小互動 */
+        .scenario-box {
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .scenario-quiz {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #90caf9;
+        }
+        .quiz-feedback {
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        /* 表格與列表 */
+        .concept-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .concept-table th, .concept-table td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+        }
+        .concept-table th { background-color: #f0f0f0; }
+
+        .tip-box {
+            background-color: #fff3e0;
+            border-left: 5px solid #ff9800;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安衝刺班：Q4 事件日誌與跡證保存</h1>
+    <p>各位同學好，歡迎來到資安衝刺班。這堂課我們要透過一個韓國發生的真實案例，來學習在資安事件中，「日誌（Log）」到底該怎麼存，才能變成破案的關鍵證據。</p>
+
+    <!-- 1) 題目區塊 -->
+    <div class="question-box">
+        <div class="question-type">複選題</div>
+        <p><strong>題目：</strong></p>
+        <p>2024/05/13 韓國警察廳國家搜查本部發出聲明，韓國法院近 1TB 資料遭竊，是該國司法單位首度遭到敵對駭客攻擊。攻擊者至少從 2021 年 1 月 7 日就入侵該國法院，但因<strong>記錄過期遭到清除</strong>，無法確認是否早已滲透，亦無從得知事故原因。借鑒此案例，若依據我國「資通安全責任等級分級辦法」與「各機關資通安全事件通報及應變處理作業程序」等所規定，資安事件跡證保存之規劃下列那些最正確？(複選)</p>
+        
+        <div class="options" id="quiz-options">
+            <label><input type="checkbox" name="option" value="A"> (A) 日誌留存依機關等級而異，等級「普」至少六個月而等級「高」為兩年</label>
+            <label><input type="checkbox" name="option" value="B"> (B) 日誌保存範圍涵蓋各項資通系統，與資通及防護設備日誌紀錄</label>
+            <label><input type="checkbox" name="option" value="C"> (C) 日誌宜保存項目為作業系統日誌、網站日誌、應用程式日誌與登入日誌</label>
+            <label><input type="checkbox" name="option" value="D"> (D) 日誌內容宜應含事件類型、發生時間與位置，及事件相關之使用者身分識別等資訊</label>
+        </div>
+    </div>
+
+    <!-- 互動區 -->
+    <div class="interaction-area">
+        <button onclick="checkAnswer()">送出作答</button>
+        <button class="reset-btn" onclick="resetQuiz()">重置</button>
+        <div id="main-feedback" class="feedback-msg"></div>
+        <button id="show-explain-btn" class="toggle-btn" onclick="showExplanation()">一鍵看解析 (解鎖完整教學)</button>
+    </div>
+
+    <!-- 解析區 (預設隱藏) -->
+    <div id="explanation-section">
+        
+        <!-- 2) 第一步：找關鍵字 -->
+        <h2>第一步：找關鍵字</h2>
+        <p>請拿出你的螢光筆，這題的解題線索都在這裡：</p>
+        <div class="keyword-explanation">
+            <ul>
+                <li><mark>記錄過期遭到清除</mark>：這是本案最大的痛點。因為舊資料被刪了，導致查不下去。</li>
+                <li><mark>無法確認是否早已滲透</mark>、<mark>事故原因</mark>：說明了日誌保存失敗的後果——變成了「無頭公案」。</li>
+                <li><mark>跡證保存</mark>、<mark>日誌（log）</mark>：這是本題的核心考點。不是考怎麼攻擊，而是考怎麼「留證據」。</li>
+                <li><mark>資通安全責任等級...</mark>：這是法規依據，但我國法規重點在於「有效性」。</li>
+            </ul>
+            <p><strong>老師點評：</strong> 題目雖然講韓國案例，但考的是「如果你是資安官，你要怎麼規劃日誌，才不會像他們一樣找不到兇手？」。</p>
+        </div>
+
+        <!-- 3) 第二步：白話翻譯 -->
+        <h2>第二步：白話翻譯</h2>
+        <p>如果不講專業術語，這題其實是在問：</p>
+        <div class="tip-box">
+            「韓國法院因為紀錄被刪掉，抓不到駭客什麼時候來的。為了避免這種慘劇，我們平常在存電腦日記（日誌）的時候，應該要怎麼規定才對？」
+        </div>
+        <p><strong>名詞解釋：</strong></p>
+        <ul style="list-style-type: square;">
+            <li><strong>日誌 (Log)：</strong> 系統自動寫下的日記。例如：「誰在幾點幾分登入了系統」、「誰刪除了檔案」。</li>
+            <li><strong>跡證保存 (Forensics Preservation)：</strong> 發生壞事時，要把相關證據（日誌、硬碟映像檔）完整留下來，不能讓它消失或被改掉。</li>
+            <li><strong>資通系統：</strong> 機關用來處理公務的電腦系統（例如：公文系統、網站）。</li>
+            <li><strong>防護設備：</strong> 保護網路的守衛設備（例如：防火牆、防毒軟體主機）。</li>
+        </ul>
+
+        <!-- 4) 第三步：解題思路 -->
+        <h2>第三步：解題思路</h2>
+        <h3>本題核心觀念</h3>
+        <p>資安事件能不能追查，關鍵在「日誌保存」是否做對（廣度夠不夠、內容齊不齊）。</p>
+        
+        <h3>解題三步驟</h3>
+        <ol>
+            <li><strong>看選項分類：</strong> 
+                <ul>
+                    <li>(A) 講「保存時間長短」。</li>
+                    <li>(B) 講「保存範圍」（哪些機器要存）。</li>
+                    <li>(C) 講「保存項目」（哪些軟體要存）。</li>
+                    <li>(D) 講「日誌內容」（每一筆紀錄要有什麼欄位）。</li>
+                </ul>
+            </li>
+            <li><strong>找符合邏輯的選項：</strong> 為了避免韓國那種「找不到原因」的狀況，我們必須讓範圍越廣越好 (B)、項目越完整越好 (C)、內容要有時間與人名 (D)。</li>
+            <li><strong>抓出錯誤/不精確的選項：</strong> (A) 選項把保存年限寫死了。雖然法規有規定年限，但重點不在於硬背「高=兩年」，且法規依系統重要性有不同規定，不如 B、C、D 描述的「核心原則」來得正確與通用。</li>
+        </ol>
+
+        <h3>生活比喻</h3>
+        <p>想像家裡遭小偷：</p>
+        <ul>
+            <li>如果監視器只拍客廳，沒拍大門（範圍不夠，對應選項 B）。</li>
+            <li>如果監視器只錄影像沒錄時間（內容不全，對應選項 D）。</li>
+            <li>如果監視器影片只留 1 天就被覆蓋（保存期限不足，對應選項 A 的概念，但 A 的數字敘述有誤導性）。</li>
+        </ul>
+
+        <!-- 5) 第四步：選項分析 -->
+        <h2>第四步：選項分析 (點擊展開)</h2>
+        
+        <details>
+            <summary>(A) 日誌留存依機關等級而異... (為什麼不選？)</summary>
+            <div class="details-content">
+                <p><strong>解析：</strong> 這個選項有誤導性。</p>
+                <p>雖然法規確實依據責任等級有不同要求，但「等級普=6個月、等級高=2年」這種硬性的對應並非此題探討「跡證保存規劃」的最正確核心。某些核心系統的日誌依規定可能需要保存更久，或者依據個資法有不同規定。且題幹強調的是「因過期被清除導致無法追查」，重點應放在如何建立完整的保存架構（B, C, D），單純背誦年限數字（且數字對應不盡然完全正確涵蓋所有情況）不是本題的最佳解答。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>(B) 日誌保存範圍涵蓋各項資通系統... (為什麼是正確的？)</summary>
+            <div class="details-content">
+                <p><strong>解析：</strong> <strong>範圍要全。</strong></p>
+                <p>駭客攻擊通常是從外部網路 -> 防火牆 -> 內部伺服器 -> 資料庫。如果你只存資料庫日誌，卻沒存防火牆日誌，你就不知道駭客是從哪個 IP 打進來的。所以系統與防護設備都要涵蓋。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>(C) 日誌宜保存項目為作業系統... (為什麼是正確的？)</summary>
+            <div class="details-content">
+                <p><strong>解析：</strong> <strong>種類要齊。</strong></p>
+                <p>標準的日誌保存建議包含四大類：</p>
+                <ol>
+                    <li>作業系統日誌 (OS Log)：看誰開機、關機、執行指令。</li>
+                    <li>網站日誌 (Web Log)：看誰存取了網頁、SQL 注入攻擊紀錄。</li>
+                    <li>應用程式日誌 (App Log)：看業務邏輯操作（如：查詢戶籍資料）。</li>
+                    <li>登入日誌 (Login Log)：看帳號登入成功或失敗。</li>
+                </ol>
+            </div>
+        </details>
+
+        <details>
+            <summary>(D) 日誌內容宜應含事件類型... (為什麼是正確的？)</summary>
+            <div class="details-content">
+                <p><strong>解析：</strong> <strong>內容要細。</strong></p>
+                <p>一筆合格的 Log 必須能回答 5W1H。選項中提到的：</p>
+                <ul>
+                    <li>事件類型 (What)</li>
+                    <li>發生時間 (When)</li>
+                    <li>發生位置 (Where)</li>
+                    <li>使用者身分識別 (Who)</li>
+                </ul>
+                <p>缺了其中一項（例如缺了時間），這筆 Log 就變成廢紙，無法當作呈堂證供。</p>
+            </div>
+        </details>
+
+        <!-- 情境小互動 -->
+        <div class="scenario-box">
+            <h3>🛡️ 實戰情境演練</h3>
+            <p><strong>情境：</strong> 假設你是韓國法院的 IT 管理員。駭客在 1 月 7 日入侵，但直到 5 月 13 日才被發現。如果你設定的日誌保存期限只有 30 天...</p>
+            
+            <div class="scenario-quiz">
+                <p><strong>Q1. 當你在 5 月要調查 1 月的入侵紀錄時，你會看到什麼？</strong></p>
+                <button onclick="checkScenario(1, 'A')">A. 空白，檔案已被覆蓋</button>
+                <button onclick="checkScenario(1, 'B')">B. 駭客的 IP 位址</button>
+                <span id="sc-feedback-1" class="quiz-feedback"></span>
+            </div>
+
+            <div class="scenario-quiz">
+                <p><strong>Q2. 為了避免這種情況，除了延長保存時間，我們還可以把 Log 即時傳送到哪裡備份？</strong></p>
+                <button onclick="checkScenario(2, 'A')">A. 放在原機硬碟的 D 槽</button>
+                <button onclick="checkScenario(2, 'B')">B. 獨立的日誌伺服器 (Log Server)</button>
+                <span id="sc-feedback-2" class="quiz-feedback"></span>
+            </div>
+        </div>
+
+        <!-- 6) 觀念補充與延伸 -->
+        <h2>第六步：觀念補充與延伸</h2>
+        <table class="concept-table">
+            <tr>
+                <th>核心觀念</th>
+                <th>說明</th>
+            </tr>
+            <tr>
+                <td><strong>可歸責性 (Accountability)</strong></td>
+                <td>這是資安屬性之一。意指系統必須能明確指出「是誰」做了這件事，讓他無法抵賴。這依賴於詳細的日誌（選項 D）。</td>
+            </tr>
+            <tr>
+                <td><strong>日誌完整性 (Integrity)</strong></td>
+                <td>除了保存，還要注意日誌不能被駭客刪改。通常會搭配「雜湊碼 (Hash)」或「數位簽章」來確保日誌可信。</td>
+            </tr>
+        </table>
+
+        <!-- 7) 記憶口訣 -->
+        <h2>第七步：記憶口訣</h2>
+        <div class="tip-box">
+            <p><strong>「範圍廣、四類留、內容細」</strong></p>
+            <ul>
+                <li><strong>範圍廣 (B)：</strong> 系統 + 設備都要有。</li>
+                <li><strong>四類留 (C)：</strong> OS、Web、App、Login。</li>
+                <li><strong>內容細 (D)：</strong> 人、事、時、地、物。</li>
+            </ul>
+        </div>
+
+        <!-- 8) 常見陷阱 -->
+        <h2>第八步：常見陷阱</h2>
+        <ul>
+            <li>❌ <strong>陷阱一：</strong> 以為只要有裝防火牆就會自動有紀錄。 (錯！要確認 Log 功能有開啟，且空間足夠)</li>
+            <li>❌ <strong>陷阱二：</strong> 只背「保存 6 個月」。 (錯！如果內容不對，存 100 年也沒用)</li>
+            <li>❌ <strong>陷阱三：</strong> 忽略「失敗」的紀錄。 (錯！登入失敗常常是暴力破解的前兆，一定要存)</li>
+        </ul>
+
+        <!-- 9) 正確答案 -->
+        <h2>第九步：正確答案</h2>
+        <p style="font-size: 20px; font-weight: bold; color: var(--success-color);">答案：B、C、D</p>
+        <p><strong>一句話理由：</strong> 要能追查入侵與歸責，必須「範圍全 (B)、項目齊 (C)、內容可追溯 (D)」。</p>
+
+        <!-- 10) 自我檢測 -->
+        <h2>第十步：自我檢測</h2>
+        <p>遮住答案，試著回答以下問題：</p>
+        
+        <details>
+            <summary>Q1. 如果只有保存網站日誌，缺少防火牆日誌，會少掉哪種線索？</summary>
+            <div class="details-content">
+                <p><strong>參考答案：</strong> 攻擊來源 IP 與網路路徑線索。</p>
+                <p><strong>理由：</strong> 網站日誌只看得到 HTTP 請求，看不到底層網路連線被阻擋或掃描的行為。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>Q2. 日誌內容一定要有「時間」的原因是什麼？</summary>
+            <div class="details-content">
+                <p><strong>參考答案：</strong> 要拼出事件時間線。</p>
+                <p><strong>理由：</strong> 沒有時間戳記，就無法還原攻擊發生的先後順序（Timeline），也無法跟其他系統比對。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>Q3. 登入日誌在調查中最常用來回答哪一件事？</summary>
+            <div class="details-content">
+                <p><strong>參考答案：</strong> 誰在何時登入（帳號濫用追查）。</p>
+                <p><strong>理由：</strong> 這是確認「身分」最直接的證據。</p>
+            </div>
+        </details>
+    </div>
+
+</div>
+
+<script>
+    // 正確答案設定
+    const correctAnswers = ["B", "C", "D"];
+
+    function checkAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        const userAnswers = Array.from(checkboxes).map(cb => cb.value).sort();
+        const feedbackDiv = document.getElementById("main-feedback");
+        const showExplainBtn = document.getElementById("show-explain-btn");
+
+        // 檢查是否完全相等
+        const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctAnswers);
+
+        // 分析漏選或多選
+        let missing = correctAnswers.filter(x => !userAnswers.includes(x));
+        let extra = userAnswers.filter(x => !correctAnswers.includes(x));
+
+        if (userAnswers.length === 0) {
+            feedbackDiv.innerHTML = "<span class='feedback-error'>請先勾選選項再送出！</span>";
+            return;
+        }
+
+        if (isCorrect) {
+            feedbackDiv.innerHTML = "<span class='feedback-success'>完全正確！太棒了！(答案：B、C、D)</span>";
+            showExplainBtn.style.display = "block";
+            // 自動滾動到按鈕
+            showExplainBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            let msg = "<span class='feedback-error'>答案不完全正確喔。</span><br>";
+            if (missing.length > 0) msg += `你漏選了：${missing.join("、")}<br>`;
+            if (extra.length > 0) msg += `你多選了：${extra.join("、")}<br>`;
+            msg += "再思考一下題目問的「跡證保存規劃」重點是什麼？";
+            feedbackDiv.innerHTML = msg;
+            showExplainBtn.style.display = "block"; // 答錯也給看解析，但鼓勵重試
+        }
+    }
+
+    function resetQuiz() {
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        document.getElementById("main-feedback").innerHTML = "";
+        document.getElementById("show-explain-btn").style.display = "none";
+        document.getElementById("explanation-section").style.display = "none";
+        
+        // 重置情境題
+        document.getElementById("sc-feedback-1").innerHTML = "";
+        document.getElementById("sc-feedback-2").innerHTML = "";
+    }
+
+    function showExplanation() {
+        const explainSection = document.getElementById("explanation-section");
+        explainSection.style.display = "block";
+        explainSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 情境題邏輯
+    function checkScenario(qNum, answer) {
+        const feedbackEl = document.getElementById(`sc-feedback-${qNum}`);
+        if (qNum === 1) {
+            if (answer === 'A') {
+                feedbackEl.innerHTML = "<span style='color:green'>答對了！過期就被覆蓋了，什麼都查不到。</span>";
+            } else {
+                feedbackEl.innerHTML = "<span style='color:red'>答錯囉。日誌只留30天，1月的資料早就沒了。</span>";
+            }
+        } else if (qNum === 2) {
+            if (answer === 'B') {
+                feedbackEl.innerHTML = "<span style='color:green'>沒錯！集中到 Log Server 比較安全，也能避免被駭客刪除本地紀錄。</span>";
+            } else {
+                feedbackEl.innerHTML = "<span style='color:red'>不建議。如果原機被駭客加密或刪除，備份在 D 槽也一起死掉了。</span>";
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 34 題｜ISO 31000 風險管理原理（互動教學）</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --highlight-bg: #fff3cd;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* 依照要求設定內文字級 */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            font-size: 18px; /* 依照要求設定標題上限 */
+            font-weight: bold;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+        }
+
+        h1 {
+            margin-top: 0;
+            text-align: center;
+            border-bottom: none;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        /* 題目區域 */
+        .question-box {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 17px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f1f3f5;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+        }
+
+        /* 按鈕區域 */
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        #submitBtn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #resetBtn {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        #explainBtn {
+            background-color: var(--accent-color);
+            color: white;
+            display: none; /* 預設隱藏，作答後顯示或手動開啟 */
+        }
+
+        /* 結果顯示 */
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .result-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區域 */
+        .explanation-container {
+            display: none; /* 預設收合 */
+            margin-top: 30px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 20px;
+        }
+
+        .step-title {
+            background-color: var(--primary-color);
+            color: white;
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+        .keyword-explanation {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-left: 4px solid var(--accent-color);
+            margin: 10px 0;
+        }
+
+        .concept-box {
+            border: 2px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            background-color: #fff;
+        }
+
+        .trap-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .mnemonic-box {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .analysis-item {
+            margin-bottom: 10px;
+            padding-left: 10px;
+            border-left: 3px solid #ddd;
+        }
+
+        .analysis-correct {
+            border-left-color: var(--correct-color);
+        }
+
+        .analysis-wrong {
+            border-left-color: var(--wrong-color);
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .action-area {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安衝刺班｜第 34 題解析</h1>
+
+    <!-- 題目區塊 -->
+    <div class="question-box">
+        <div class="question-text">
+            34. 關於 ISO 31000 風險管理原理及指導綱要之敘述，下列何項錯誤？
+        </div>
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="q34" value="A">
+                (A) 可做為任何組織尋求風險管理的明確指南
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q34" value="B">
+                (B) 提供風險管理的原則與通用的實施指導準則
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q34" value="C">
+                (C) 是風險管理的國際標準，可提供企業組織進行驗證
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q34" value="D">
+                (D) 可幫助企業組織進行風險分析和風險評估
+            </label>
+        </div>
+    </div>
+
+    <!-- 結果回饋 -->
+    <div id="resultBox" class="result-box"></div>
+
+    <!-- 操作按鈕 -->
+    <div class="action-area">
+        <button id="submitBtn" onclick="checkAnswer()">送出作答</button>
+        <button id="explainBtn" onclick="toggleExplanation()">顯示完整解析</button>
+        <button id="resetBtn" onclick="resetQuiz()">重新作答</button>
+    </div>
+
+    <!-- 解析區塊 -->
+    <div id="explanationArea" class="explanation-container">
+        
+        <!-- 第一步：找關鍵字 -->
+        <div class="step-title">第一步：找關鍵字</div>
+        <div class="keyword-explanation">
+            <p>請將目光鎖定在這些詞彙：<br>
+            <span class="highlight">ISO 31000</span>、
+            <span class="highlight">風險管理原理</span>、
+            <span class="highlight">指導綱要</span>、
+            <span class="highlight">錯誤</span>
+            </p>
+            <p><strong>老師的話：</strong>這題不是要你背誦風險管理的步驟，而是在考你對「ISO 31000 這個標準本身的定位」清不清楚。</p>
+        </div>
+
+        <!-- 第二步：白話翻譯 -->
+        <div class="step-title">第二步：白話翻譯</div>
+        <div class="concept-box">
+            <p>如果不講專業術語，這題目用高中生的話來說就是：</p>
+            <p style="font-weight: bold; color: var(--primary-color);">
+                「ISO 31000 是在教大家怎麼做風險管理，那下面哪一個說法，是對 ISO 31000 的誤解？」
+            </p>
+        </div>
+
+        <!-- 第三步：解題思路 -->
+        <div class="step-title">第三步：解題思路</div>
+        <p><strong>這一題的核心考點只有一句話：</strong><br>「不是所有的 ISO 標準都可以拿來驗證（拿證書）。」</p>
+
+        <h3>原理與規則（一定要知道的重點）</h3>
+        <p>ISO 標準大致可以分為這兩大類，請各位同學務必分清楚：</p>
+        
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div style="flex: 1; background: #f1f8ff; padding: 15px; border-radius: 5px;">
+                <strong>1. 可驗證的管理系統標準</strong>
+                <ul style="margin-top: 5px;">
+                    <li>例如：ISO 27001（資安）、ISO 9001（品質）。</li>
+                    <li>這類標準有「應符合」的嚴格條文。</li>
+                    <li>企業可以找第三方機構來稽核，通過後會發證書。</li>
+                </ul>
+            </div>
+            <div style="flex: 1; background: #fff5f5; padding: 15px; border-radius: 5px;">
+                <strong>2. 指導性標準 (Guidelines)</strong>
+                <ul style="margin-top: 5px;">
+                    <li>例如：<span class="highlight">ISO 31000</span>。</li>
+                    <li>這類標準是提供原則、架構與方法。</li>
+                    <li><strong>[重點] 不提供驗證</strong>，也就是沒有證書可以拿。</li>
+                </ul>
+            </div>
+        </div>
+        <p style="margin-top: 10px;">ISO 31000 正是屬於第二類，它是來「教你怎麼做」，而不是來「考試發證書」的。</p>
+
+        <!-- 第四步：選項分析 -->
+        <div class="step-title">第四步：選項分析</div>
+        
+        <div class="analysis-item analysis-correct">
+            <strong>(A) 可做為任何組織尋求風險管理的明確指南</strong><br>
+            <span style="color: var(--correct-color);">[正確描述]</span> 因為 ISO 31000 的設計初衷就是通用於各種產業與規模。
+        </div>
+
+        <div class="analysis-item analysis-correct">
+            <strong>(B) 提供風險管理的原則與通用的實施指導準則</strong><br>
+            <span style="color: var(--correct-color);">[正確描述]</span> 這就是它的標題與核心內容。
+        </div>
+
+        <div class="analysis-item analysis-wrong">
+            <strong>(C) 是風險管理的國際標準，可提供企業組織進行驗證</strong><br>
+            <span style="color: var(--wrong-color); font-weight: bold;">[錯誤描述 - 本題答案]</span> 
+            ISO 31000 不能驗證，它沒有稽核條文，純粹是指導性質。
+        </div>
+
+        <div class="analysis-item analysis-correct">
+            <strong>(D) 可幫助企業組織進行風險分析和風險評估</strong><br>
+            <span style="color: var(--correct-color);">[正確描述]</span> 它提供了方法論來協助企業分析風險。
+        </div>
+
+        <!-- 記憶口訣 -->
+        <h3>記憶口訣</h3>
+        <div class="mnemonic-box">
+            「三一零零零，只指路，不驗證」
+        </div>
+
+        <!-- 常見陷阱 -->
+        <h3>老師提醒：常見陷阱</h3>
+        <div class="trap-box">
+            <ul>
+                <li><strong>學生最容易錯的地方：</strong>看到 ISO 開頭，就直覺以為可以申請證書。</li>
+                <li><strong>避坑指南：</strong>只要題目出現「ISO 31000」加上「驗證」兩個字，幾乎百分之百是錯誤的選項。</li>
+                <li><strong>對照組：</strong>ISO 27001 才是可以驗證的資安管理標準。</li>
+            </ul>
+        </div>
+
+        <!-- 自我檢測 -->
+        <h3>自我檢測（遮住答案想一想）</h3>
+        <ol>
+            <li>ISO 31000 能不能拿來申請驗證？<br><span style="color: #666; font-size: 0.9em;">(答案：不能)</span></li>
+            <li>哪一個標準常與 ISO 27001 的風險管理搭配使用？<br><span style="color: #666; font-size: 0.9em;">(答案：ISO 31000)</span></li>
+            <li>ISO 31000 的主要功能是什麼？<br><span style="color: #666; font-size: 0.9em;">(答案：提供風險管理的原則與指引)</span></li>
+        </ol>
+
+    </div>
+</div>
+
+<script>
+    // 定義正確答案
+    const CORRECT_ANSWER = 'C';
+
+    function checkAnswer() {
+        // 取得使用者選擇的選項
+        const radios = document.getElementsByName('q34');
+        let selectedValue = null;
+        
+        for (const radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        const resultBox = document.getElementById('resultBox');
+        const explainBtn = document.getElementById('explainBtn');
+        const explanationArea = document.getElementById('explanationArea');
+
+        // 未作答檢核
+        if (!selectedValue) {
+            alert('同學，請先選一個答案再送出喔！');
+            return;
+        }
+
+        resultBox.style.display = 'block';
+        explainBtn.style.display = 'inline-block'; // 作答後允許看解析
+
+        if (selectedValue === CORRECT_ANSWER) {
+            // 答對處理
+            resultBox.className = 'result-box result-correct';
+            resultBox.innerHTML = `
+                恭喜答對！<br>
+                您的選擇：(${selectedValue})<br>
+                這是一個非常重要的觀念，ISO 31000 是不提供驗證的。<br>
+                點擊下方「顯示完整解析」來複習一下細節。
+            `;
+            // 答對時自動展開解析（選擇性，這裡設為手動點擊較不干擾）
+        } else {
+            // 答錯處理
+            resultBox.className = 'result-box result-wrong';
+            resultBox.innerHTML = `
+                答錯囉，再想一想！<br>
+                您的選擇：(${selectedValue})<br>
+                <br>
+                <strong>[老師提示]</strong><br>
+                注意這題是選「錯誤」的。<br>
+                想一想，是不是所有的 ISO 標準都可以拿來「發證書」？<br>
+                ISO 31000 的性質是「規範」還是「指引」？
+            `;
+            // 答錯時保持解析收合，讓學生先看提示思考
+        }
+    }
+
+    function toggleExplanation() {
+        const area = document.getElementById('explanationArea');
+        const btn = document.getElementById('explainBtn');
+        
+        if (area.style.display === 'none' || area.style.display === '') {
+            area.style.display = 'block';
+            btn.textContent = '收合完整解析';
+            // 捲動到解析區
+            area.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            area.style.display = 'none';
+            btn.textContent = '顯示完整解析';
+        }
+    }
+
+    function resetQuiz() {
+        // 清除選項
+        const radios = document.getElementsByName('q34');
+        for (const radio of radios) {
+            radio.checked = false;
+        }
+
+        // 隱藏結果與解析
+        document.getElementById('resultBox').style.display = 'none';
+        document.getElementById('explanationArea').style.display = 'none';
+        document.getElementById('explainBtn').style.display = 'none';
+        document.getElementById('explainBtn').textContent = '顯示完整解析';
+        
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

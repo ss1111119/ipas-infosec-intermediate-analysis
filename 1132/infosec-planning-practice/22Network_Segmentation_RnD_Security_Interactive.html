@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安短期衝刺班｜題組 3：遠端存取與網段隔離</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --border-color: #bdc3c7;
+            --highlight-color: #fff3cd;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* 題目要求：內文字級 16px */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 共用情境區塊 */
+        .scenario-box {
+            background-color: #e8f6f3;
+            border-left: 5px solid #1abc9c;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: #16a085;
+            margin-bottom: 10px;
+            font-size: 18px; /* 題目要求：標題最多 18px */
+            border-bottom: 1px solid #a2d9ce;
+            padding-bottom: 5px;
+        }
+
+        /* 導覽列 */
+        .nav-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            background-color: #ecf0f1;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+
+        .nav-tab.active {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            border-bottom-color: var(--card-bg); /* 蓋過底線 */
+            color: var(--primary-color);
+            margin-bottom: -2px;
+        }
+
+        /* 主要內容區 */
+        .main-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 0 5px 5px 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 18px; /* 題目要求：標題最多 18px */
+        }
+
+        .question-text {
+            font-size: 16px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        /* 選項樣式 */
+        .options-group {
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: block;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+        }
+
+        /* 按鈕群組 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-analysis {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        /* 回饋區塊 */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析區塊 */
+        .analysis-section {
+            margin-top: 30px;
+            border-top: 2px dashed #ddd;
+            padding-top: 20px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .step-box {
+            background-color: #fcfcfc;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .highlight-text {
+            background-color: var(--highlight-color);
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-right: 5px;
+            color: #495057;
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 600px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- 置頂共用情境 -->
+    <div class="scenario-box">
+        <div class="scenario-title">【題組 3：共用情境（21–24 題）】</div>
+        <p>某公司為我國一先進技術的開發商，主要據點 A 與 B 分散於國內兩地。<br>
+        該公司十分重視資訊安全及品質管理，已通過 ISO 9001、ISO 14001 等相關標準驗證。</p>
+        <ul>
+            <li>據點 A：業務部門 S、研發部門 R1</li>
+            <li>據點 B：管理部門 A、研發部門 R2</li>
+            <li>資訊相關事務由管理部門 A 負責</li>
+        </ul>
+        <small>（提示：本題組重點在【遠端存取控管、存取記錄、VPN 架構、網段隔離】）</small>
+    </div>
+
+    <!-- 題組導覽 -->
+    <div class="nav-tabs">
+        <div class="nav-tab" onclick="alert('第 21 題：已完成（本頁面僅展示第 22 題）')">第 21 題 (已完成)</div>
+        <div class="nav-tab active">第 22 題 (實作中)</div>
+        <div class="nav-tab" onclick="alert('第 23 題：預留位置')">第 23 題 (預留)</div>
+        <div class="nav-tab" onclick="alert('第 24 題：預留位置')">第 24 題 (預留)</div>
+    </div>
+
+    <!-- 主內容卡片 -->
+    <div class="main-card">
+        
+        <h2>【第 22 題】題目</h2>
+        
+        <div class="question-text">
+            業務部門員工因為工作需求，常需於公司外存取員工個人在部門辦公室內桌上型電腦的資料。<br>
+            為求慎重，公司希望能留下相關的存取記錄，並盡量強化安全，<br>
+            試問下列何種措施最為合適？
+        </div>
+
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="q22" value="A">
+                (A) 開放員工使用 RDP 連回自己的桌上型電腦
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q22" value="B">
+                (B) 開放員工使用 TeamViewer 連回自己的桌上型電腦
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q22" value="C">
+                (C) 建置 VPN Server，讓員工連回其在部門辦公室內桌上型電腦
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q22" value="D">
+                (D) 建置 VPN Server，讓員工透過 VPN 連回公司，再於公司內隔離的 VPN 網段中，透過 RDP 連回自己的桌上型電腦
+            </label>
+        </div>
+
+        <!-- 按鈕區 -->
+        <div class="btn-group">
+            <button class="btn btn-submit" onclick="submitAnswer()">送出作答</button>
+            <button class="btn btn-analysis" onclick="toggleAnalysis()">一鍵看解析</button>
+            <button class="btn btn-reset" onclick="resetQuiz()">重置</button>
+        </div>
+
+        <!-- 作答回饋區 -->
+        <div id="feedback" class="feedback-box">
+            <!-- 這裡會由 JS 動態填入內容 -->
+        </div>
+
+        <!-- 教學解析區 -->
+        <div id="analysis" class="analysis-section">
+            <h2>【補教名師．教學解析】</h2>
+
+            <div class="step-box">
+                <h3>【第一步：找關鍵字】</h3>
+                <p>請注意題目中的紅字重點：</p>
+                <ul>
+                    <li><span class="highlight-text">公司外存取</span>：代表資料將經過不安全的網際網路。</li>
+                    <li><span class="highlight-text">桌上型電腦</span>：存取目標是端點設備，而非伺服器。</li>
+                    <li><span class="highlight-text">留下存取記錄</span>：需要稽核（Audit），知道誰（Who）、何時（When）連線。</li>
+                    <li><span class="highlight-text">強化安全 / 最為合適</span>：要求最高等級的防護措施（多層防禦）。</li>
+                </ul>
+                <p><strong>老師小結：</strong>本題同時要求「遠端存取」＋「可稽核」＋「高安全性」。</p>
+            </div>
+
+            <div class="step-box">
+                <h3>【第二步：白話翻譯】</h3>
+                <p>用白話文說，這題在問：「員工在外面要連回公司電腦，公司希望知道誰、什麼時候連進來，而且越安全越好，哪一種做法最好？」</p>
+                <p><strong>專有名詞解釋：</strong></p>
+                <ul>
+                    <li><strong>RDP (Remote Desktop Protocol)</strong>：微軟內建的遠端桌面連線，直接開放風險很高。</li>
+                    <li><strong>VPN (虛擬私人網路)</strong>：像是一條加密的安全隧道，可以安全地連回公司內網。</li>
+                    <li><strong>隔離網段</strong>：將「外來連線區」與「內部核心區」分開，就像進家門有個玄關，不會直接衝進臥室。</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <h3>【第三步：解題思路】</h3>
+                <p><strong>核心觀念：</strong>遠端存取必須「先進公司、再進電腦」，而不是直接暴露端點。</p>
+                <p><strong>判斷流程：</strong></p>
+                <ol>
+                    <li>是否能集中控管與紀錄？(踢除 TeamViewer)</li>
+                    <li>是否避免直接對外暴露內部電腦？(踢除 直接 RDP)</li>
+                    <li>是否符合分層防禦（Defense in Depth）？(比較 C 與 D)</li>
+                </ol>
+            </div>
+
+            <div class="step-box">
+                <h3>【第四步：選項分析】</h3>
+                <ul>
+                    <li><strong>(A) 開放 RDP：</strong><span style="color:var(--error-color);">[極度危險]</span> 直接在防火牆開洞讓外部連線，駭客最愛掃描 RDP Port (3389) 進行暴力破解。</li>
+                    <li><strong>(B) TeamViewer：</strong><span style="color:var(--error-color);">[控管不足]</span> 這是第三方軟體，雖然方便，但企業難以集中管理帳號權限與詳細連線紀錄（Shadow IT 風險）。</li>
+                    <li><strong>(C) VPN 直連：</strong><span style="color:#e67e22;">[尚可但不夠好]</span> 雖然有加密通道，但一旦 VPN 連上就像「直接插線在辦公室」，若員工電腦中毒，病毒可能直接擴散到內網。</li>
+                    <li><strong>(D) VPN + 隔離網段 + RDP：</strong><span style="color:var(--success-color);">[最合適]</span> 
+                        <br>1. 先過 VPN 驗證身分（第一道鎖）。
+                        <br>2. 進入隔離區（緩衝區）。
+                        <br>3. 再開啟 RDP 連線（第二道鎖）。
+                        <br>這樣即使 VPN 帳號被盜，駭客也還被擋在隔離區，且所有 RDP 連線行為都能被 Gateway 紀錄。
+                    </li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <h3>【名師總結】</h3>
+                <p><strong>記憶口訣：</strong>「外面先進 VPN，裡面再用 RDP」</p>
+                <p><strong>常見陷阱：</strong>不要以為「能連線」就等於「安全」，也不要誤把便利性（如 TeamViewer）當成企業級解決方案。</p>
+                <p><strong>正確答案：D</strong></p>
+            </div>
+
+            <div class="step-box">
+                <h3>【自我檢測】</h3>
+                <ol>
+                    <li>為何不建議直接對外開放 RDP？ (答：易被掃描與暴力破解)</li>
+                    <li>本題最重要的安全設計概念是什麼？ (答：分層防禦與集中控管)</li>
+                </ol>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function submitAnswer() {
+        const options = document.getElementsByName('q22');
+        let selectedValue = null;
+        
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackBox = document.getElementById('feedback');
+        
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        feedbackBox.style.display = 'block';
+        feedbackBox.className = 'feedback-box'; // 重置 class
+
+        if (selectedValue === 'D') {
+            // 答對
+            feedbackBox.classList.add('feedback-correct');
+            feedbackBox.innerHTML = `
+                <strong>恭喜答對！</strong><br>
+                你的選擇：(D)<br>
+                正確答案：(D)<br>
+                <br>
+                觀念正確！多層防禦（Defense in Depth）是資安設計的核心。<br>
+                請點擊下方「一鍵看解析」按鈕，複習完整觀念。
+            `;
+            // 自動展開解析
+            document.getElementById('analysis').style.display = 'block';
+        } else {
+            // 答錯
+            feedbackBox.classList.add('feedback-wrong');
+            feedbackBox.innerHTML = `
+                <strong>答案有誤，再想一下！</strong><br>
+                你的選擇：(${selectedValue})<br>
+                <br>
+                <strong>【觀念提示】</strong><br>
+                1. 直接對外開放 RDP 很危險。<br>
+                2. 企業需要完整的「存取紀錄」。<br>
+                3. 想想看，如果有兩道門（VPN + 隔離區）是不是比一道門更安全？<br>
+                <br>
+                請重新作答，或點擊「一鍵看解析」觀看詳解。
+            `;
+        }
+    }
+
+    function toggleAnalysis() {
+        const analysisSection = document.getElementById('analysis');
+        if (analysisSection.style.display === 'none' || analysisSection.style.display === '') {
+            analysisSection.style.display = 'block';
+            // 捲動到解析區
+            analysisSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            analysisSection.style.display = 'none';
+        }
+    }
+
+    function resetQuiz() {
+        // 清除選項
+        const options = document.getElementsByName('q22');
+        for (const option of options) {
+            option.checked = false;
+        }
+        
+        // 隱藏回饋
+        const feedbackBox = document.getElementById('feedback');
+        feedbackBox.style.display = 'none';
+        feedbackBox.innerHTML = '';
+        
+        // 隱藏解析
+        document.getElementById('analysis').style.display = 'none';
+        
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

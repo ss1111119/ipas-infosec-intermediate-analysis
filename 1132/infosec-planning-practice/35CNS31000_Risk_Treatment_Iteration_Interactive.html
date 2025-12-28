@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 35 題｜CNS 31000：2021 風險處理之迭代過程</title>
+    <style>
+        /* 基礎設定：無外部字型，使用系統預設黑體 */
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+            font-size: 16px; /* 內文字級 16px */
+        }
+
+        /* 容器設定 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-top: 5px solid #2c3e50; /* 補習班專業感配色 */
+        }
+
+        /* 標題設定：最大 18px */
+        h1, h2, h3, .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-left: 5px solid #3498db;
+            padding-left: 10px;
+        }
+
+        h1 {
+            border-left: none;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        /* 題目區塊 */
+        .question-box {
+            background-color: #e8f6f3;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #d1f2eb;
+            margin-bottom: 20px;
+        }
+
+        /* 選項樣式 */
+        .options-group {
+            margin: 20px 0;
+        }
+
+        .option-label {
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #eee;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid #3498db;
+            color: #3498db;
+        }
+
+        .btn-outline:hover {
+            background-color: #f0f8ff;
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            border-color: #ccc;
+            color: #666;
+        }
+
+        /* 回饋區塊 */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 提示區塊 */
+        .hint-box {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            border-radius: 4px;
+            display: none;
+        }
+
+        /* 解析區塊 */
+        .analysis-container {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed #ccc;
+            display: none; /* 預設隱藏 */
+        }
+
+        /* 重點高亮 */
+        .highlight {
+            background-color: #fffacd;
+            padding: 0 4px;
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 14px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        /* 列表樣式 */
+        ul {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* 強調文字 */
+        .text-red {
+            color: #c0392b;
+            font-weight: bold;
+        }
+        
+        .text-blue {
+            color: #2980b9;
+            font-weight: bold;
+        }
+
+        /* 說明方塊 */
+        .info-block {
+            background-color: #f8f9fa;
+            border-left: 4px solid #95a5a6;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+
+        /* 自我檢測區 */
+        .self-check-item {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .check-answer {
+            color: #27ae60;
+            font-weight: bold;
+            display: block;
+            margin-top: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安短期衝刺班：觀念解析教學</h1>
+
+    <div class="question-box">
+        <div style="margin-bottom: 10px; font-weight: bold; color: #555;">【第 35 題｜CNS 31000：2021 風險處理之迭代過程】</div>
+        <p>35. 依據 CNS 31000:2021 有關「風險處理（Risk Treatment）」所涉及之迭代（Iteration）過程，下列何項敘述「有誤」？</p>
+    </div>
+
+    <div class="options-group" id="optionsForm">
+        <label class="option-label">
+            <input type="radio" name="answer" value="A">
+            (A) 選擇風險處理之選項
+        </label>
+        <label class="option-label">
+            <input type="radio" name="answer" value="B">
+            (B) 規劃與實施風險處理
+        </label>
+        <label class="option-label">
+            <input type="radio" name="answer" value="C">
+            (C) 評鑑風險處理之大小
+        </label>
+        <label class="option-label">
+            <input type="radio" name="answer" value="D">
+            (D) 決定殘餘風險是否可接受
+        </label>
+    </div>
+
+    <div class="action-area">
+        <button id="submitBtn" class="btn" onclick="checkAnswer()">送出作答</button>
+        <button id="resetBtn" class="btn btn-outline" onclick="resetQuiz()">重置作答</button>
+    </div>
+
+    <!-- 結果回饋 -->
+    <div id="feedback" class="feedback-box"></div>
+
+    <!-- 答錯提示 -->
+    <div id="hint" class="hint-box">
+        <strong>【流程提示】</strong>
+        <p>請回想一下標準流程：我們先算風險有多大（評估），然後才決定怎麼處理（處理）。<br>
+        題目問的是「處理階段」不做什麼？也就是問哪件事其實是「評估階段」就做完了？</p>
+    </div>
+
+    <!-- 按鈕：顯示解析 -->
+    <div style="margin-top: 20px;">
+        <button id="showAnalysisBtn" class="btn btn-outline" style="width: 100%; display: none;" onclick="toggleAnalysis()">▼ 一鍵看名師解析</button>
+    </div>
+
+    <!-- 詳細解析內容 -->
+    <div id="analysis" class="analysis-container">
+        
+        <div class="section-title">【第一步：找關鍵字】</div>
+        <p>請注意以下考點詞彙：</p>
+        <div>
+            <span class="keyword-tag">CNS 31000:2021</span>
+            <span class="keyword-tag">風險處理（Risk Treatment）</span>
+            <span class="keyword-tag">迭代（Iteration）</span>
+            <span class="keyword-tag">有誤</span>
+        </div>
+        <div class="info-block">
+            <strong>名師點評：</strong><br>
+            本題重點不在「風險評估」，而是在考「<span class="highlight">風險處理階段實際在做哪些事</span>」。看到「有誤」兩個字要特別警覺，這是選錯的。
+        </div>
+
+        <div class="section-title">【第二步：白話翻譯】</div>
+        <p>用大家聽得懂的話來說：</p>
+        <p>「在 CNS 31000 標準裡，風險處理不是做一次就結束，而是會反覆檢查、調整（這就是迭代）。那下面哪一件事，其實<span class="text-red">不是</span>風險處理階段在做的？」</p>
+
+        <div class="section-title">【第三步：解題思路】</div>
+        <p><strong>這題在考什麼觀念？</strong></p>
+        <p>一句話核心考點：「<span class="text-red">風險『大小』是在評估階段，不是在處理階段</span>」。</p>
+        
+        <p><strong>【原理與規則：CNS 31000 的正確流程】</strong></p>
+        <p><span class="text-blue">🔹 風險評估階段做的事：</span></p>
+        <ul>
+            <li>分析風險大小</li>
+            <li>判斷風險等級</li>
+        </ul>
+        <p><span class="text-blue">🔹 風險處理階段做的事（會反覆進行）：</span></p>
+        <ul>
+            <li>1. 選擇處理選項</li>
+            <li>2. 規劃並實施處理措施</li>
+            <li>3. 評估處理後的「殘餘風險」</li>
+            <li>4. 判斷殘餘風險是否可接受</li>
+        </ul>
+        <div class="info-block">
+            <strong>注意：</strong>我們是看「處理後還剩多少風險」，而不是重新去算最原始的風險大小。
+        </div>
+
+        <div class="section-title">【第四步：選項分析】</div>
+        <ul>
+            <li><strong>(A) 選擇風險處理之選項：</strong><span class="text-blue">正確</span>。風險處理一定要先選擇策略（降低、轉移、避免、保留）。</li>
+            <li><strong>(B) 規劃與實施風險處理：</strong><span class="text-blue">正確</span>。選完策略後，必須實際規劃並執行。</li>
+            <li><strong>(C) 評鑑風險處理之大小：</strong><span class="text-red">錯誤（本題答案）</span>。這是陷阱！「評鑑風險大小」屬於<span class="highlight">風險評估（Risk Assessment）</span>階段，不是處理階段的工作。</li>
+            <li><strong>(D) 決定殘餘風險是否可接受：</strong><span class="text-blue">正確</span>。處理完後，必須判斷剩下來的風險（殘餘風險）是否在可接受範圍。</li>
+        </ul>
+
+        <div class="section-title">【觀念補充與延伸】</div>
+        <p><strong>核心觀念定位：</strong>本題屬於「風險管理流程分工辨識題」，是考試常客。</p>
+        <p><strong>常見混淆點：</strong>容易搞混「風險評估 vs 風險處理」以及「風險大小 vs 殘餘風險」。</p>
+
+        <div class="section-title">【記憶口訣】</div>
+        <div style="background-color: #2c3e50; color: white; padding: 15px; text-align: center; font-size: 18px; border-radius: 5px;">
+            「大小在評估，接受在處理」
+        </div>
+
+        <div class="section-title">【常見陷阱】</div>
+        <ul>
+            <li><strong>學生最容易錯：</strong>看到「評鑑」兩個字就以為是風險處理的一部分，其實評鑑大小是在更前面的階段。</li>
+            <li><strong>心理盲點：</strong>把風險評估與風險處理混在一起。</li>
+            <li><strong>避坑指南：</strong>題目出現「風險大小」→ 先想到「評估階段」。</li>
+        </ul>
+
+        <div class="section-title">【正確答案】</div>
+        <p>答案：<strong>C</strong></p>
+        <p>理由：風險大小的評鑑屬於風險評估階段，非風險處理迭代流程的一部分。</p>
+
+        <div class="section-title">【自我檢測】</div>
+        <div class="self-check-item">
+            <p>1. 風險處理後還需要做哪一件關鍵判斷？</p>
+            <span class="check-answer">參考答案：判斷殘餘風險是否可接受</span>
+        </div>
+        <div class="self-check-item">
+            <p>2. 風險處理會不會只做一次？</p>
+            <span class="check-answer">參考答案：不會，需反覆迭代</span>
+        </div>
+        <div class="self-check-item">
+            <p>3. 風險大小通常在哪個階段決定？</p>
+            <span class="check-answer">參考答案：風險評估階段</span>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // 定義正確答案
+    const CORRECT_ANSWER = 'C';
+
+    function checkAnswer() {
+        // 取得所有選項
+        const radios = document.getElementsByName('answer');
+        let selectedValue = null;
+
+        // 檢查是否有選取
+        for (const radio of radios) {
+            if (radio.checked) {
+                selectedValue = radio.value;
+                break;
+            }
+        }
+
+        // 若未選取則提示
+        if (!selectedValue) {
+            alert('同學，請先選擇一個答案再送出喔！');
+            return;
+        }
+
+        // 鎖定選項與送出按鈕
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        for (const radio of radios) {
+            radio.disabled = true;
+        }
+
+        // 顯示解析按鈕
+        document.getElementById('showAnalysisBtn').style.display = 'block';
+
+        // 判斷對錯
+        const feedbackDiv = document.getElementById('feedback');
+        const hintDiv = document.getElementById('hint');
+        feedbackDiv.style.display = 'block';
+
+        if (selectedValue === CORRECT_ANSWER) {
+            // 答對處理
+            feedbackDiv.className = 'feedback-box feedback-correct';
+            feedbackDiv.innerHTML = `<strong>答對了！太棒了！</strong><br>您的選擇：(${selectedValue})<br>正確答案：(${CORRECT_ANSWER})`;
+            hintDiv.style.display = 'none';
+        } else {
+            // 答錯處理
+            feedbackDiv.className = 'feedback-box feedback-wrong';
+            feedbackDiv.innerHTML = `<strong>答錯囉，沒關係，我們來學觀念。</strong><br>您的選擇：(${selectedValue})<br>正確答案：(${CORRECT_ANSWER})`;
+            hintDiv.style.display = 'block';
+        }
+    }
+
+    function toggleAnalysis() {
+        const analysisDiv = document.getElementById('analysis');
+        const btn = document.getElementById('showAnalysisBtn');
+        
+        if (analysisDiv.style.display === 'none' || analysisDiv.style.display === '') {
+            analysisDiv.style.display = 'block';
+            btn.innerHTML = '▲ 收合名師解析';
+            // 自動捲動到解析區
+            analysisDiv.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            analysisDiv.style.display = 'none';
+            btn.innerHTML = '▼ 一鍵看名師解析';
+        }
+    }
+
+    function resetQuiz() {
+        // 重置選項
+        const radios = document.getElementsByName('answer');
+        for (const radio of radios) {
+            radio.checked = false;
+            radio.disabled = false;
+        }
+
+        // 重置按鈕
+        document.getElementById('submitBtn').disabled = false;
+        
+        // 隱藏回饋、提示、解析按鈕與解析內容
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('hint').style.display = 'none';
+        document.getElementById('showAnalysisBtn').style.display = 'none';
+        document.getElementById('showAnalysisBtn').innerHTML = '▼ 一鍵看名師解析';
+        document.getElementById('analysis').style.display = 'none';
+
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

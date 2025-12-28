@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安衝刺班：題組 5 - 風險胃納與回應 (Q37)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #ecf0f1;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .scenario-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Image Styles */
+        .image-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #eee;
+        }
+
+        .image-caption {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        /* Question Styles */
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .highlight-red {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #bdc3c7;
+            padding: 15px;
+            text-align: left;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent-color);
+            background-color: #f4faff;
+        }
+
+        .option-btn.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .option-btn.correct {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .option-btn.wrong {
+            background-color: var(--error-color);
+            color: white;
+            border-color: var(--error-color);
+            opacity: 0.8;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Feedback Section */
+        .feedback-section {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .feedback-correct {
+            background-color: #d5f5e3;
+            border: 1px solid #2ecc71;
+            color: #145a32;
+        }
+
+        .feedback-wrong {
+            background-color: #fadbd8;
+            border: 1px solid #e74c3c;
+            color: #7b241c;
+        }
+
+        /* Explanation Content */
+        .explanation-content {
+            margin-top: 20px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding-top: 20px;
+        }
+
+        .teacher-badge {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .concept-box {
+            background-color: #e8f6f3;
+            border-left: 4px solid var(--success-color);
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .key-point {
+            font-weight: bold;
+            color: var(--error-color);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Icons */
+        .icon {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>資安短期衝刺班</h1>
+        <p>題組 5：風險管理實務 (37-40題)</p>
+    </header>
+
+    <!-- Context Card -->
+    <div class="card">
+        <span class="scenario-title">共用情境背景</span>
+        <div class="scenario-box">
+            <p>M 公司為國內股票上市公司，從事國內資安軟硬體開發銷售相關業務，已通過 ISO 27001:2013 驗證，並持續維持證照有效。</p>
+            <p>公司於每年 3 月進行年度風險評鑑作業，並規定執行風險回應後，最遲須於 2 個月內確認回應是否有效，本次亦依既定時程完成相關作業。</p>
+        </div>
+
+        <div class="image-container">
+            <img src="https://i.meee.com.tw/8qv0lSo.jpg" alt="ISO 31000 風險管理流程圖">
+            <div class="image-caption">
+                ISO 31000 風險管理流程：建立背景、風險辨識、風險分析、風險評估、風險處理，並由溝通與諮商及監督與審核貫穿全程
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Card -->
+    <div class="card">
+        <div class="question-header">
+            <span class="teacher-badge">第 37 題</span>
+        </div>
+        
+        <p class="question-text">
+            若公司規定「超出風險胃納（Risk appetite）才須進行風險處理」，請問依規定須進行處理之風險項目，<span class="highlight-red">不可能</span>出現下列何項風險回應方式？
+        </p>
+
+        <div class="options-grid" id="options-area">
+            <button class="option-btn" onclick="checkAnswer('A', this)">
+                (A) 風險緩解（Risk mitigation）
+            </button>
+            <button class="option-btn" onclick="checkAnswer('B', this)">
+                (B) 風險規避（Risk avoidance）
+            </button>
+            <button class="option-btn" onclick="checkAnswer('C', this)">
+                (C) 風險保留（Risk retention）
+            </button>
+            <button class="option-btn" onclick="checkAnswer('D', this)">
+                (D) 風險分擔（Risk sharing）
+            </button>
+        </div>
+
+        <!-- Feedback & Explanation -->
+        <div id="feedback-area" class="feedback-section">
+            <div id="feedback-title" style="font-weight: bold; font-size: 1.2rem; margin-bottom: 10px;"></div>
+            <div id="feedback-message"></div>
+            
+            <div class="explanation-content">
+                <span class="teacher-badge">名師解析</span>
+                
+                <div class="concept-box">
+                    <strong>觀念重點：風險胃納 (Risk Appetite)</strong><br>
+                    可以想像成公司「能吃多少辣」。如果一碗麵的辣度（風險值）在公司能接受的範圍內，公司可以直接吃下去（保留風險）；但如果太辣，超過了胃納，就必須做點什麼來處理它。
+                </div>
+
+                <p><strong>邏輯推演：</strong></p>
+                <ol>
+                    <li>題目設定條件：<strong>「超出風險胃納才須進行風險處理」</strong>。意思就是，這個風險已經大到公司「無法接受」了。</li>
+                    <li>既然無法接受，我們的目標就是要降低它、轉移它、或避開它。</li>
+                    <li><strong>(A) 風險緩解</strong>：加水稀釋辣度（降低風險發生的機率或衝擊），這是合理的處理方式。</li>
+                    <li><strong>(B) 風險規避</strong>：太辣了我不吃了（停止相關業務活動），這也是一種處理方式。</li>
+                    <li><strong>(D) 風險分擔</strong>：找朋友幫忙吃（買保險或外包），這也是處理方式。</li>
+                    <li><strong>(C) 風險保留</strong>：意思是「我就這樣吞下去，不做任何改變」。但前提是風險已經<strong>「超出」</strong>胃納了，公司規定不能接受，所以你不能選擇「不做事直接吞下去」。</li>
+                </ol>
+
+                <p style="margin-top: 15px;">
+                    <strong>結論：</strong><br>
+                    風險保留（Risk Retention）通常適用於風險值<strong>低於</strong>風險胃納，或是處理成本過高且後果可容忍的情況。既然題目強調「超出胃納且必須處理」，選擇「保留（不做處理）」即違反了公司的規定。
+                </p>
+                <p>故正確答案為 <strong style="color: var(--success-color);">(C)</strong>。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function checkAnswer(selectedOption, btnElement) {
+        // Disable all buttons to prevent re-answering
+        const buttons = document.querySelectorAll('.option-btn');
+        buttons.forEach(btn => btn.disabled = true);
+
+        const correctOption = 'C';
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackMessage = document.getElementById('feedback-message');
+
+        // Logic for styling
+        if (selectedOption === correctOption) {
+            btnElement.classList.add('correct');
+            feedbackArea.classList.add('feedback-correct');
+            feedbackTitle.innerHTML = `
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                回答正確！
+            `;
+            feedbackMessage.textContent = "太棒了！您的觀念非常清晰。既然風險已經「超出」胃納，當然不能選擇「保留」不做事。";
+        } else {
+            btnElement.classList.add('wrong');
+            
+            // Highlight the correct answer
+            buttons.forEach(btn => {
+                if (btn.innerText.includes('(C)')) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            feedbackArea.classList.add('feedback-wrong');
+            feedbackTitle.innerHTML = `
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                答案選錯囉，正確答案是 (C)。
+            `;
+            feedbackMessage.textContent = "別灰心，這題考的是邏輯。如果風險已經大到公司規定「必須處理」，那我們就不能選擇「什麼都不做（保留）」。";
+        }
+
+        // Show feedback area
+        feedbackArea.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

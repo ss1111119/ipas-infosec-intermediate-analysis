@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安短期衝刺班：零信任架構 (ZTA) 解析</title>
+    <style>
+        /* --- 基礎設定 --- */
+        :root {
+            --bg-color: #f9f9f9;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --primary-color: #2c3e50; /* 深藍色，沈穩專業 */
+            --accent-color: #e74c3c;  /* 重點強調色 */
+            --highlight-bg: #fff3cd;  /* 高亮背景色 */
+            --highlight-text: #856404;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* 題目要求：內文字級 16px */
+        }
+
+        /* --- 版面容器 --- */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--container-bg);
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- 標題樣式 --- */
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        /* 題目要求：標題最多 18px */
+        h1 { font-size: 18px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
+        h2 { font-size: 17px; background-color: #f0f4f8; padding: 8px; border-left: 4px solid var(--primary-color); }
+        h3 { font-size: 16px; font-weight: bold; margin-top: 1em; }
+
+        p, li {
+            margin-bottom: 0.8em;
+        }
+
+        ul, ol {
+            padding-left: 20px;
+        }
+
+        /* --- 強調與高亮 --- */
+        .highlight {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 0 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .keyword-box {
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #fafafa;
+        }
+
+        .concept-tag {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 2px 8px;
+            font-size: 14px;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        /* --- 題目區域樣式 --- */
+        .question-box {
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+        }
+
+        .question-meta {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .options-list li {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .options-list li:hover {
+            background-color: #f9f9f9;
+        }
+
+        .options-list label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .options-list input[type="checkbox"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* --- 按鈕樣式 --- */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-reset {
+            background-color: #7f8c8d;
+        }
+
+        /* --- 結果與解析區域 --- */
+        #result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .result-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        #explanation-area {
+            display: none; /* 預設隱藏 */
+            margin-top: 30px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+
+        /* --- 自我檢測區 --- */
+        .self-check {
+            background-color: #f1f8ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .toggle-answer {
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .answer-hidden {
+            display: none;
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>資安短期衝刺班：互動式解題 (Q20 零信任架構)</h1>
+
+    <!-- 1) 題目區塊 -->
+    <div class="question-box">
+        <div class="question-meta">題目資訊：複選題</div>
+        <p>20. 關於<span class="highlight">零信任架構</span>（Zero Trust Architecture，ZTA）的敘述，下列哪些<span class="highlight">正確</span>？（複選）</p>
+        
+        <ul class="options-list" id="quiz-options">
+            <li>
+                <label>
+                    <input type="checkbox" name="option" value="A">
+                    (A) 對於資源的存取要求，以每次連線為基礎去許可
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input type="checkbox" name="option" value="B">
+                    (B) 對於存取的要求，每次是以最小權限為原則去執行
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input type="checkbox" name="option" value="C">
+                    (C) 允許存取之前，所有的資源的身分鑑別與授權機制，是依監控結果動態決定
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input type="checkbox" name="option" value="D">
+                    (D) 是一種以邊界為基礎的資安架構，一旦連線通過了認證就值得信任
+                </label>
+            </li>
+        </ul>
+
+        <div style="margin-top: 20px;">
+            <button class="btn" onclick="checkAnswer()">送出作答</button>
+            <button class="btn btn-outline" onclick="toggleExplanation()" id="btn-explain" style="display:none;">顯示完整解析</button>
+            <button class="btn btn-reset" onclick="resetQuiz()">重置</button>
+        </div>
+
+        <!-- 作答結果顯示區 -->
+        <div id="result-area"></div>
+    </div>
+
+    <!-- 解析內容區塊 (預設隱藏) -->
+    <div id="explanation-area">
+        
+        <!-- 2) 第一步：找關鍵字 -->
+        <h2>第一步：找關鍵字</h2>
+        <div class="keyword-box">
+            <p>這題的解題線索都在這些詞彙裡，請拿出螢光筆畫下來：</p>
+            <ul>
+                <li><strong>「零信任」</strong>：核心概念。</li>
+                <li><strong>「每次連線」</strong>：驗證的頻率，這是零信任的重點。</li>
+                <li><strong>「最小權限」</strong>：給予權限的原則。</li>
+                <li><strong>「動態決定」</strong>：授權的方式不是死的。</li>
+                <li><strong>「邊界為基礎」</strong>：看到這個詞要警鈴大作，這是傳統做法！</li>
+            </ul>
+            <p><strong>判斷方向：</strong>只要出現「通過一次就信任」、「邊界內就安全」的敘述，<strong>一定不是</strong>零信任。</p>
+        </div>
+
+        <!-- 3) 第二步：白話翻譯 -->
+        <h2>第二步：白話翻譯</h2>
+        <p>用我們日常生活的話來說，這題題目是在問：</p>
+        <p style="background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
+            「零信任就是不管你是誰、也不管你是不是在公司內網，每一次要使用系統功能都要重新檢查證件。下面四個選項，哪些說法真的符合這種『龜毛』的想法？」
+        </p>
+        <p><strong>專有名詞解釋：</strong></p>
+        <ul>
+            <li><span class="highlight">零信任</span>：預設任何人、任何設備都不可信，必須持續驗證。</li>
+            <li><span class="highlight">最小權限</span>：你要做這件事只給你剛好夠用的權限，不多給。</li>
+            <li><span class="highlight">動態決定</span>：不會因為你早上登入過，下午就不用檢查。會依照你當下的行為、地點、裝置狀態，隨時調整要不要讓你過。</li>
+        </ul>
+
+        <!-- 4) 第三步：解題思路 -->
+        <h2>第三步：解題思路</h2>
+        
+        <h3>這題在考什麼觀念？</h3>
+        <p>一句話說明：「零信任的核心是『永不預設信任、每次都驗證、持續監控』」。</p>
+
+        <h3>解題步驟</h3>
+        <ol>
+            <li>看是否強調「每一次存取都要重新判斷」。</li>
+            <li>看是否符合「最小權限」原則。</li>
+            <li>排除仍以「網路邊界」（如內網、外網之分）為信任基礎的描述。</li>
+        </ol>
+
+        <h3>原理與規則（一定要講為什麼）</h3>
+        <ul>
+            <li><strong>零信任假設：</strong>內部網路不一定安全（可能已經有駭客潛伏），且已登入不代表永遠可信（帳號可能剛被盜）。</li>
+            <li><strong>因此零信任會：</strong>每次存取都驗證、權限只給最低需求、依行為與風險動態調整授權。</li>
+            <li>「通過一次就信任」正是零信任要否定的觀念。</li>
+        </ul>
+
+        <h3>生活比喻</h3>
+        <div style="border-left: 4px solid var(--accent-color); padding-left: 10px; background-color: #fff5f5;">
+            <p><strong>零信任像是進高機密實驗室：</strong></p>
+            <ul>
+                <li>每一道門都要刷卡（每次連線都驗證）。</li>
+                <li>你是指揮官也只能進指揮室，不能進生化室（最小權限）。</li>
+                <li>如果你半夜三點突然刷卡，警衛會立刻擋下你（動態決定）。</li>
+                <li>而不是大門刷一次卡，整棟大樓隨你跑（這是傳統架構）。</li>
+            </ul>
+        </div>
+
+        <!-- 5) 第四步：選項分析 -->
+        <h2>第四步：選項分析</h2>
+        <ul>
+            <li><strong>(A) 正確。</strong>為什麼？因為零信任要求「每一次」存取資源時，都要重新判斷是否許可，不能因為剛剛通過就放行。</li>
+            <li><strong>(B) 正確。</strong>為什麼？「最小權限原則」是零信任的三大支柱之一，只給予執行當下任務所需的最低限度權限。</li>
+            <li><strong>(C) 正確。</strong>為什麼？零信任強調依據使用者的行為、裝置健康度、位置等數據，由策略引擎「動態」決定是否放行。</li>
+            <li><strong>(D) 錯誤。</strong>為什麼？「以邊界為基礎」、「通過一次就信任」正是傳統資安架構（Perimeter-based）的特徵，完全違反零信任原則。</li>
+        </ul>
+
+        <!-- 6) 觀念補充與延伸 -->
+        <h2>觀念補充與延伸</h2>
+        <ul>
+            <li><strong>核心觀念定位：</strong>本題屬於「零信任架構（ZTA）」基礎必考觀念題，參考 NIST SP 800-207 標準。</li>
+            <li><strong>重要對照：</strong>
+                <ul>
+                    <li>傳統架構：分內外網，像城堡，進城牆就安全。</li>
+                    <li>零信任架構：不分內外，像充滿監視器的機場，隨時檢查護照。</li>
+                </ul>
+            </li>
+            <li><strong>變化題型：</strong>
+                <ul>
+                    <li>若選項出現「Once authenticated, always trusted」（一次認證，永久信任）→ <strong>一定錯</strong>。</li>
+                    <li>若出現「Continuous verification」（持續驗證）→ <strong>符合零信任</strong>。</li>
+                </ul>
+            </li>
+        </ul>
+
+        <!-- 7) 記憶口訣 -->
+        <h2>記憶口訣</h2>
+        <p>幫助記住答案 A、B、C：</p>
+        <p style="font-size: 1.2em; font-weight: bold; color: var(--primary-color);">「每次驗、權限小、動態給」</p>
+
+        <!-- 8) 常見陷阱 -->
+        <h2>常見陷阱</h2>
+        <ul>
+            <li><strong>最容易搞混：</strong>以為用了 VPN 或在公司內網就是零信任。錯！零信任是不管在哪裡都不信任。</li>
+            <li><strong>心理盲點：</strong>習慣認為「登入成功」=「安全」。零信任告訴我們，登入只是第一步，後面每一步都要看著。</li>
+            <li><strong>避坑指南：</strong>題目看到「邊界」、「一旦通過」這些字眼，要立刻警覺，通常是陷阱。</li>
+        </ul>
+
+        <!-- 9) 正確答案 -->
+        <h2>正確答案</h2>
+        <p>答案：<strong>A、B、C</strong></p>
+        <p>一句話理由：「零信任強調每次存取都重新驗證、最小權限與動態授權，而非邊界內即可信。」</p>
+
+        <!-- 10) 自我檢測 -->
+        <h2>自我檢測</h2>
+        <div class="self-check">
+            <p><strong>小題 1：</strong>零信任為什麼不信任內部網路？
+                <span class="toggle-answer" onclick="toggleSelfCheck('ans1')">看答案</span>
+            </p>
+            <div id="ans1" class="answer-hidden">參考答案：因為內部也可能已被駭客入侵，或有內賊。</div>
+
+            <p><strong>小題 2：</strong>零信任中，權限是一次給完還是持續調整？
+                <span class="toggle-answer" onclick="toggleSelfCheck('ans2')">看答案</span>
+            </p>
+            <div id="ans2" class="answer-hidden">參考答案：持續動態調整。</div>
+
+            <p><strong>小題 3：</strong>哪一種描述最不像零信任？
+                <span class="toggle-answer" onclick="toggleSelfCheck('ans3')">看答案</span>
+            </p>
+            <div id="ans3" class="answer-hidden">參考答案：通過一次認證後即完全信任。</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 正確答案設定
+    const CORRECT_ANSWERS = ['A', 'B', 'C'];
+
+    function checkAnswer() {
+        // 取得使用者勾選的選項
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        let userAnswers = [];
+        checkboxes.forEach((checkbox) => {
+            userAnswers.push(checkbox.value);
+        });
+        
+        // 排序以便比對
+        userAnswers.sort();
+        
+        const resultArea = document.getElementById('result-area');
+        const explainBtn = document.getElementById('btn-explain');
+        
+        // 判斷邏輯
+        let isCorrect = false;
+        if (userAnswers.length === CORRECT_ANSWERS.length) {
+            isCorrect = userAnswers.every((val, index) => val === CORRECT_ANSWERS[index]);
+        }
+
+        // 產生結果訊息
+        if (isCorrect) {
+            resultArea.className = 'result-correct';
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = `
+                <strong>完全正確！太棒了！</strong><br>
+                你勾選了：${userAnswers.join('、')}<br>
+                零信任的觀念你已經掌握了。請點擊「顯示完整解析」來複習細節。
+            `;
+            // 答對自動顯示解析按鈕
+            explainBtn.style.display = 'inline-block';
+        } else {
+            // 計算漏選或多選
+            let missed = CORRECT_ANSWERS.filter(x => !userAnswers.includes(x));
+            let extra = userAnswers.filter(x => !CORRECT_ANSWERS.includes(x));
+            
+            let feedbackMsg = "<strong>答案有誤，請再試試！</strong><br>";
+            
+            if (userAnswers.length === 0) {
+                feedbackMsg += "你還沒有勾選任何選項喔。";
+            } else {
+                if (missed.length > 0) feedbackMsg += `漏選了：${missed.join('、')}<br>`;
+                if (extra.length > 0) feedbackMsg += `多選了：${extra.join('、')}<br>`;
+            }
+
+            resultArea.className = 'result-wrong';
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = feedbackMsg;
+            
+            // 答錯也顯示解析按鈕，讓學生可以選擇直接看答案
+            explainBtn.style.display = 'inline-block';
+        }
+    }
+
+    function toggleExplanation() {
+        const area = document.getElementById('explanation-area');
+        const btn = document.getElementById('btn-explain');
+        
+        if (area.style.display === 'none' || area.style.display === '') {
+            area.style.display = 'block';
+            btn.innerText = '隱藏解析';
+            // 滾動到解析區
+            area.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            area.style.display = 'none';
+            btn.innerText = '顯示完整解析';
+        }
+    }
+
+    function resetQuiz() {
+        // 清空勾選
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        // 隱藏結果與解析
+        document.getElementById('result-area').style.display = 'none';
+        document.getElementById('explanation-area').style.display = 'none';
+        document.getElementById('btn-explain').style.display = 'none';
+        document.getElementById('btn-explain').innerText = '顯示完整解析';
+        
+        // 隱藏自我檢測答案
+        const hiddenAnswers = document.querySelectorAll('.answer-hidden');
+        hiddenAnswers.forEach(ans => ans.style.display = 'none');
+    }
+
+    function toggleSelfCheck(id) {
+        const ans = document.getElementById(id);
+        if (ans.style.display === 'none' || ans.style.display === '') {
+            ans.style.display = 'block';
+        } else {
+            ans.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
