@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iPAS 資訊安全（規劃／防護）題組式互動教學 - 題組 1</title>
+<style>
+    :root {
+        --main-color: #2c3e50;
+        --accent-color: #e74c3c;
+        --bg-color: #f9f9f9;
+        --box-border: #bdc3c7;
+        --highlight: #fff3cd;
+        --text-color: #333;
+        --hover-color: #f0f8ff;
+    }
+    body {
+        font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        background-color: var(--bg-color);
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    /* 排版風格設定：補教講義風 */
+    h1 {
+        font-size: 1.5rem;
+        color: var(--main-color);
+        border-bottom: 3px solid var(--main-color);
+        padding-bottom: 10px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    h2 {
+        font-size: 1.25rem;
+        color: var(--main-color);
+        border-left: 5px solid var(--accent-color);
+        padding-left: 10px;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        background-color: #ecf0f1;
+        padding: 10px;
+    }
+    h3 {
+        font-size: 1.1rem;
+        color: #555;
+        margin-top: 20px;
+        font-weight: bold;
+        text-decoration: underline;
+    }
+    .scenario-box {
+        border: 2px solid var(--main-color);
+        padding: 20px;
+        background-color: #fff;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    .question-box {
+        border: 1px solid var(--box-border);
+        padding: 15px;
+        margin-bottom: 15px;
+        background-color: #fff;
+        border-radius: 4px;
+    }
+    
+    /* 新增：互動選項樣式 */
+    .option-label {
+        display: block;
+        padding: 8px 10px;
+        margin: 5px 0;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .option-label:hover {
+        background-color: var(--hover-color);
+        border-color: #b0c4de;
+    }
+    .option-label input {
+        margin-right: 10px;
+        transform: scale(1.2); /* 放大選項按鈕 */
+    }
+    
+    /* 新增：按鈕與回饋樣式 */
+    .check-btn {
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 6px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+        font-size: 0.95rem;
+        font-weight: bold;
+    }
+    .check-btn:hover {
+        background-color: #c0392b;
+    }
+    .feedback-msg {
+        margin-top: 10px;
+        font-weight: bold;
+        padding: 8px;
+        border-radius: 4px;
+        display: none; /* 預設隱藏 */
+    }
+    .correct-msg {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .wrong-msg {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    /* 螢光筆重點 */
+    .highlight {
+        background-color: yellow;
+        font-weight: bold;
+        padding: 0 4px;
+    }
+    /* 互動元件設定 */
+    details {
+        background-color: #fff;
+        border: 1px solid var(--box-border);
+        border-radius: 4px;
+        padding: 10px;
+        margin-bottom: 10px;
+        transition: all 0.2s ease;
+    }
+    details[open] {
+        border-color: var(--main-color);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    summary {
+        font-weight: bold;
+        cursor: pointer;
+        color: var(--main-color);
+        padding: 5px;
+        list-style: none; /* 隱藏預設箭頭 */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    summary::-webkit-details-marker {
+        display: none;
+    }
+    summary::after {
+        content: '+';
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    details[open] summary::after {
+        content: '-';
+    }
+    /* 自我檢測答案隱藏 */
+    .answer-hidden {
+        display: none;
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #e8f6f3;
+        border-left: 4px solid #1abc9c;
+    }
+    .show-ans-btn {
+        background-color: var(--main-color);
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        border-radius: 3px;
+        margin-top: 5px;
+    }
+    .show-ans-btn:hover {
+        background-color: #34495e;
+    }
+    /* 頂部控制列 */
+    .controls {
+        text-align: right;
+        margin-bottom: 20px;
+        position: sticky;
+        top: 0;
+        background: var(--bg-color);
+        padding: 10px 0;
+        z-index: 100;
+        border-bottom: 1px solid #ddd;
+    }
+    .control-btn {
+        background-color: #fff;
+        border: 1px solid var(--main-color);
+        color: var(--main-color);
+        padding: 5px 15px;
+        cursor: pointer;
+        margin-left: 5px;
+        font-weight: bold;
+    }
+    .control-btn:hover {
+        background-color: var(--main-color);
+        color: white;
+    }
+    /* 專有名詞解釋樣式 */
+    .term-def {
+        color: #7f8c8d;
+        font-size: 0.9em;
+        font-weight: normal;
+    }
+    /* 表格樣式 */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+    }
+    th, td {
+        border: 1px solid #bdc3c7;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #ecf0f1;
+        color: var(--main-color);
+    }
+</style>
+</head>
+<body>
+
+<h1>iPAS 資訊安全（規劃／防護）：題組 1 互動講義</h1>
+
+<div class="controls">
+    <button class="control-btn" onclick="toggleDetails(true)">全部展開</button>
+    <button class="control-btn" onclick="toggleDetails(false)">全部收合</button>
+</div>
+
+<!-- 題組情境 -->
+<section>
+    <h2>【題組情境】</h2>
+    <div class="scenario-box">
+        <p><strong>【題組 1】</strong></p>
+        <p>有一個在我國立案的公司，以下簡稱廠商 A，其主要營業範圍為生產某零組件，銷售下游廠商，經其加工形成產品，銷售最終使用者。</p>
+        <p>廠商 A 非常重視環境及生產品質，本身已具備 ISO 9001、ISO 14001 及 ISO 27001 等認證。</p>
+        <p>廠商 A 主要的客戶（下游廠商 B）因其主要產品銷往歐洲，故其在<strong>供應商合約</strong>中要求，除 ISO 生產品質及環保的相關認證外，供應商亦需符合 <strong>GDPR</strong> 的法律規定及通過 <strong>BS 10012</strong> 的驗證。</p>
+    </div>
+
+    <h2>【題目 5～8】</h2>
+    <!-- 增加互動功能：將列表改為 Radio/Checkbox -->
+    
+    <div class="question-box" id="q5-box">
+        <p><strong>【第 5 題｜單選題】</strong></p>
+        <p>請問廠商 A 在要符合廠商 B 合約要求的前提下，下列相關認證「不」是其需優先考慮具備的項目？</p>
+        <div class="options-group">
+            <label class="option-label"><input type="radio" name="q5" value="A"> (A) ISO 9001</label>
+            <label class="option-label"><input type="radio" name="q5" value="B"> (B) ISO 14001</label>
+            <label class="option-label"><input type="radio" name="q5" value="C"> (C) ISO 27017</label>
+            <label class="option-label"><input type="radio" name="q5" value="D"> (D) BS 10012</label>
+        </div>
+        <button class="check-btn" onclick="checkSingle('q5', 'C')">送出答案</button>
+        <div id="q5-feedback" class="feedback-msg"></div>
+    </div>
+
+    <div class="question-box" id="q6-box">
+        <p><strong>【第 6 題｜單選題】</strong></p>
+        <p>廠商 A 已於 2 年前取得 ISO 27001:2013 的認證，在保持認證資格的前提下，下列措施何者「不」合適？</p>
+        <div class="options-group">
+            <label class="option-label"><input type="radio" name="q6" value="A"> (A) 定期實施內部稽核</label>
+            <label class="option-label"><input type="radio" name="q6" value="B"> (B) 每 3 年更新證照</label>
+            <label class="option-label"><input type="radio" name="q6" value="C"> (C) 因應新版本 ISO 27001:2022 推出，規劃相關升級（轉版）事宜</label>
+            <label class="option-label"><input type="radio" name="q6" value="D"> (D) 於明年認證期滿後，再重新驗證</label>
+        </div>
+        <button class="check-btn" onclick="checkSingle('q6', 'D')">送出答案</button>
+        <div id="q6-feedback" class="feedback-msg"></div>
+    </div>
+
+    <div class="question-box" id="q7-box">
+        <p><strong>【第 7 題｜單選題】</strong></p>
+        <p>廠商 A 於例行 ISO 27001 內部稽核時，發現員工缺乏對社交攻擊的認知，下列措施何者「不」合適？</p>
+        <div class="options-group">
+            <label class="option-label"><input type="radio" name="q7" value="A"> (A) 將其視為可接受之風險</label>
+            <label class="option-label"><input type="radio" name="q7" value="B"> (B) 進行員工教育訓練</label>
+            <label class="option-label"><input type="radio" name="q7" value="C"> (C) 以模擬釣魚郵件進行點擊測試評估訓練成效</label>
+            <label class="option-label"><input type="radio" name="q7" value="D"> (D) 重新評估該風險可能造成的影響</label>
+        </div>
+        <button class="check-btn" onclick="checkSingle('q7', 'A')">送出答案</button>
+        <div id="q7-feedback" class="feedback-msg"></div>
+    </div>
+
+    <div class="question-box" id="q8-box">
+        <p><strong>【第 8 題｜複選題】</strong> <span style="font-size:0.8em; color:gray;">(全對才給分)</span></p>
+        <p>廠商 A 在規畫新的客戶資料系統時，基於資安及個資法規、認證之要求，應採取下列哪些措施？</p>
+        <div class="options-group">
+            <label class="option-label"><input type="checkbox" name="q8" value="A"> (A) 儘可能蒐集所有資料作為行銷使用</label>
+            <label class="option-label"><input type="checkbox" name="q8" value="B"> (B) 納入取得當事人同意的流程</label>
+            <label class="option-label"><input type="checkbox" name="q8" value="C"> (C) 僅蒐集必要的最小資料集合</label>
+            <label class="option-label"><input type="checkbox" name="q8" value="D"> (D) 提供當事人資料修正的管道</label>
+        </div>
+        <button class="check-btn" onclick="checkMultiple('q8', ['B','C','D'])">送出答案</button>
+        <div id="q8-feedback" class="feedback-msg"></div>
+    </div>
+</section>
+
+<!-- 教學內容 -->
+<section>
+    <h2>【互動式解析教學】</h2>
+
+    <!-- 1. 重點說明 -->
+    <details open>
+        <summary>1) 題組重點說明</summary>
+        <p>本題組的核心在於整合 <strong>供應鏈資安管理</strong>、<strong>國際標準認證</strong> 以及 <strong>隱私法規遵從</strong>。考試重點包含：</p>
+        <ul>
+            <li>企業如何因應客戶（供應鏈）的合約要求。</li>
+            <li>ISO 管理制度的「持續改善」與「有效性維持」（不能斷掉）。</li>
+            <li>風險評估的基本邏輯（高風險不能隨便接受）。</li>
+            <li>個資保護的基本原則（GDPR 精神）。</li>
+        </ul>
+    </details>
+
+    <!-- 2. 找關鍵字 -->
+    <details>
+        <summary>2) 第一步：找關鍵字</summary>
+        <ul>
+            <li><span class="highlight">歐洲</span>：連結到全球最嚴格的個資法規 GDPR。</li>
+            <li><span class="highlight">供應商合約</span> <span class="term-def">（客戶要求你一定要遵守的條件）</span>：這是法律與商業上的強制力，客戶說要什麼證書，為了做生意就得有。</li>
+            <li><span class="highlight">GDPR</span> <span class="term-def">（歐盟對個人資料保護的最高標準法律，通用資料保護規則）</span>：關鍵字是「個資」、「歐洲」。</li>
+            <li><span class="highlight">BS 10012</span> <span class="term-def">（專門針對個資管理的英國標準）</span>：驗證企業是否符合 GDPR 的重要標準。</li>
+            <li><span class="highlight">ISO 27001</span> <span class="term-def">（資訊安全管理系統）</span>：資安的基本盤，題目提到廠商 A 已具備。</li>
+            <li><span class="highlight">不／不合適</span>：解題時請務必圈起來，這是「選錯的」題目。</li>
+        </ul>
+    </details>
+
+    <!-- 3. 白話翻譯 -->
+    <details>
+        <summary>3) 第二步：白話翻譯（整組）</summary>
+        <p>用最直白的話來說，這個題組的故事是這樣的：</p>
+        <div style="background-color: #eef; padding: 10px; border-radius: 5px;">
+            <p>「廠商 A 想賣東西給廠商 B，但廠商 B 的貨要賣去歐洲。歐洲很重視隱私，所以 B 跟 A 說：『你要跟我做生意可以，但除了原本的品質(9001)、環保(14001)證照要留著之外，你必須遵守歐洲個資法(GDPR)並且考到英國的個資證照(BS 10012)。』」</p>
+            <p><strong>接下來四題就是在問：</strong></p>
+            <ol>
+                <li>這張合約清單裡，哪一張證照是「多餘」沒被提到的？</li>
+                <li>ISO 27001 證照要怎麼養才不會死掉？</li>
+                <li>員工太容易被騙（社交工程），公司可以擺爛不理嗎？</li>
+                <li>要蓋新系統處理個資，該遵守哪些規矩？</li>
+            </ol>
+        </div>
+    </details>
+
+    <!-- 4. 核心解題思路 -->
+    <details>
+        <summary>4) 第三步：核心解題思路</summary>
+        <ul>
+            <li><strong>供應鏈法遵</strong>：客戶要求 > 法律要求 > 自我要求。題目說要有 BS 10012，那就是必要條件。</li>
+            <li><strong>ISO 認證生命週期</strong>：證書通常效期 3 年，每年要複評（Surveillance），第 3 年要重審（Recertification）。重點是<strong>「不能有空窗期」</strong>，一旦過期失效，要重新申請會很麻煩且會有風險。</li>
+            <li><strong>風險管理</strong>：
+                <ul>
+                    <li>風險處置四招：規避、降低、轉移、接受 <span class="term-def">（可接受風險：評估後決定暫時承擔的風險）</span>。</li>
+                    <li><strong>原則</strong>：只有「低風險」或「處理成本遠高於損失」才選擇接受。員工缺乏資安意識是「高風險」，絕對不能直接接受。</li>
+                </ul>
+            </li>
+            <li><strong>GDPR 個資原則</strong>：最小化（只拿需要的）、目的限制（不能亂用）、當事人權利（同意、更正、刪除）。</li>
+        </ul>
+    </details>
+
+    <!-- 5. 逐題解析 -->
+    <details>
+        <summary>5) 第四步：逐題解析（5～8）</summary>
+        
+        <!-- 第 5 題 -->
+        <div style="margin-bottom: 20px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+            <h3>第 5 題解析</h3>
+            <p><strong>考點：</strong> 閱讀理解與規格比對。</p>
+            <ul>
+                <li>(A) ISO 9001：題目說「廠商 A 本身已具備...」，且合約要求「除...相關認證外」，暗示原有認證需維持。保留。</li>
+                <li>(B) ISO 14001：同上，這是基本門檻。保留。</li>
+                <li>(C) <strong>ISO 27017</strong>：這是「雲端服務資訊安全」的標準。題目從頭到尾沒提到雲端，合約也沒要求。<strong>這是多餘的選項。</strong></li>
+                <li>(D) BS 10012：題目明確提到「供應商亦需...通過 BS 10012 的驗證」。这是必要的。</li>
+            </ul>
+            <p><strong>結論：</strong> 選 <strong>(C)</strong>。</p>
+        </div>
+
+        <!-- 第 6 題 -->
+        <div style="margin-bottom: 20px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+            <h3>第 6 題解析</h3>
+            <p><strong>考點：</strong> ISO 管理制度的持續有效性（Business Continuity）。</p>
+            <ul>
+                <li>(A) 定期實施內部稽核 <span class="term-def">（自己檢查制度有沒有真的在做）</span>：這是 ISO 條款要求的標準動作。合適。</li>
+                <li>(B) 每 3 年更新證照：ISO 證書效期通常為 3 年，需進行重審換證。合適。</li>
+                <li>(C) 規劃轉版：舊版失效前必須轉到新版 (2013 -> 2022)，否則證書會無效。合適。</li>
+                <li>(D) <strong>期滿後，再重新驗證</strong>：這會造成證書「中斷」。在空窗期內，廠商 A 就不符合廠商 B 的合約要求，可能導致違約或掉單。<strong>這是不合適的。</strong></li>
+            </ul>
+            <p><strong>結論：</strong> 選 <strong>(D)</strong>。</p>
+        </div>
+
+        <!-- 第 7 題 -->
+        <div style="margin-bottom: 20px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+            <h3>第 7 題解析</h3>
+            <p><strong>考點：</strong> 風險處理判定。</p>
+            <ul>
+                <li>(A) <strong>視為可接受之風險</strong>：員工缺乏認知意味著容易遭受 <span class="term-def">社交攻擊（利用人性弱點的詐騙或誘騙，如釣魚郵件）</span>。這是導致資料外洩的主因之一，衝擊大、發生率高，不能視為「可接受」。<strong>這是不合適的。</strong></li>
+                <li>(B) 教育訓練：降低風險的標準作法。合適。</li>
+                <li>(C) 模擬釣魚郵件：驗證訓練成效的標準作法。合適。</li>
+                <li>(D) 重新評估：如果不確定嚴重性，重新分析是合理的管理手段。合適。</li>
+            </ul>
+            <p><strong>結論：</strong> 選 <strong>(A)</strong>。</p>
+        </div>
+
+        <!-- 第 8 題 -->
+        <div>
+            <h3>第 8 題解析</h3>
+            <p><strong>考點：</strong> GDPR 與個資保護設計（Privacy by Design）。</p>
+            <ul>
+                <li>(A) <strong>儘可能蒐集所有資料</strong>：違反 GDPR 的「資料最小化原則」。不能因為想行銷就狂收資料。<strong>這是錯的。</strong></li>
+                <li>(B) 取得當事人同意：GDPR 的合法基礎之一 (Consent)。<strong>正確。</strong></li>
+                <li>(C) 僅蒐集必要的最小資料：符合「資料最小化原則」 (Data Minimization)。<strong>正確。</strong></li>
+                <li>(D) 提供資料修正管道：符合「當事人權利」中的「更正權」 (Right to rectification)。<strong>正確。</strong></li>
+            </ul>
+            <p><strong>結論：</strong> 選 <strong>(B)、(C)、(D)</strong>。</p>
+        </div>
+    </details>
+
+    <!-- 6. 觀念補充 -->
+    <details>
+        <summary>6) 觀念補充與延伸</summary>
+        <h4>常見認證代號對照表</h4>
+        <table>
+            <tr>
+                <th>代號</th>
+                <th>領域</th>
+                <th>重點口語</th>
+            </tr>
+            <tr>
+                <td>ISO 9001</td>
+                <td>品質管理</td>
+                <td>產品做出來品質要穩定</td>
+            </tr>
+            <tr>
+                <td>ISO 14001</td>
+                <td>環境管理</td>
+                <td>不要亂排廢水廢氣</td>
+            </tr>
+            <tr>
+                <td>ISO 27001</td>
+                <td>資訊安全</td>
+                <td>資安管理制度 (ISMS)</td>
+            </tr>
+            <tr>
+                <td>ISO 27017</td>
+                <td>雲端資安</td>
+                <td>針對雲服務提供者/使用者</td>
+            </tr>
+            <tr>
+                <td>BS 10012</td>
+                <td>個人資料</td>
+                <td>英國標準，對應 GDPR</td>
+            </tr>
+            <tr>
+                <td>ISO 27701</td>
+                <td>隱私資訊</td>
+                <td>ISO 版的個資管理 (PIMS)</td>
+            </tr>
+        </table>
+        <h4>ISO 27001 PDCA 循環</h4>
+        <ul>
+            <li><strong>Plan</strong>：建立制度、評估風險。</li>
+            <li><strong>Do</strong>：實作控制措施（如：教育訓練）。</li>
+            <li><strong>Check</strong>：內部稽核、管理審查。</li>
+            <li><strong>Act</strong>：矯正預防、持續改善（修正缺失）。</li>
+        </ul>
+    </details>
+
+    <!-- 7. 記憶口訣 -->
+    <details>
+        <summary>7) 記憶口訣（整組）</summary>
+        <div style="background-color: #fff3cd; padding: 15px; border-left: 5px solid #f1c40f;">
+            <ul>
+                <li><strong>「歐洲客戶找上門 → GDPR + BS 10012 要備妥」</strong></li>
+                <li><strong>「資安認證不能斷 → 內稽、外稽、不要放到過期」</strong></li>
+                <li><strong>「個資三原則 → 少拿 (最小化)、要同意 (合法性)、能修改 (當事人權利)」</strong></li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 8. 常見陷阱 -->
+    <details>
+        <summary>8) 常見陷阱</summary>
+        <ul>
+            <li><strong>陷阱一：看到 270XX 就想選</strong><br>第 5 題的 ISO 27017 是雲端資安，雖然長得很像 ISO 27001，但題目沒提雲端，千萬別手滑。</li>
+            <li><strong>陷阱二：誤以為「重新驗證」等於「更新」</strong><br>第 6 題的「期滿後再重新驗證」指的是「斷開鎖鏈」後的重來，這中間的空窗期會導致違約。必須在期滿「前」完成更新。</li>
+            <li><strong>陷阱三：把「教育訓練不足」當作「可接受風險」</strong><br>可接受風險通常指「發生機率極低」或「損失極小」的事（例如隕石砸到機房）。人為疏失是資安最大漏洞，必須處理（降低風險），不能接受。</li>
+        </ul>
+    </details>
+
+    <!-- 9. 題組總結 -->
+    <details>
+        <summary>9) 題組總結</summary>
+        <p>本題組由「供應鏈合約」發起，串聯了 ISO 27001 的維運（不能中斷、要內稽）與 GDPR/BS 10012 的個資要求（最小化、當事人權利）。記住：<strong>做生意要看法規與合約，風險管理要主動處理，個資蒐集要越少越好。</strong></p>
+    </details>
+
+    <!-- 10. 自我檢測 -->
+    <details>
+        <summary>10) 自我檢測（題組延伸）</summary>
+        <p>試著回答以下延伸問題，測試你是否真的懂了：</p>
+
+        <div class="question-box">
+            <p><strong>Q1. 如果廠商 B 是台灣的公務機關（非歐洲客戶），在個資法規上最優先要遵循的是？</strong></p>
+            <button class="show-ans-btn" onclick="toggleAnswer('ans1')">查看答案</button>
+            <div id="ans1" class="answer-hidden">
+                <strong>答案：我國的《個人資料保護法》與《資通安全管理法》。</strong><br>
+                補充：雖然 GDPR 是國際高標，但國內機關首重國內法規。
+            </div>
+        </div>
+
+        <div class="question-box">
+            <p><strong>Q2. 承第 6 題，若廠商 A 決定將部分業務搬上 AWS 或 Azure 雲端平台，此時客戶最可能要求增加哪項認證？</strong></p>
+            <button class="show-ans-btn" onclick="toggleAnswer('ans2')">查看答案</button>
+            <div id="ans2" class="answer-hidden">
+                <strong>答案：ISO 27017。</strong><br>
+                補充：這就是專門針對雲端服務的資安控制標準。
+            </div>
+        </div>
+
+        <div class="question-box">
+            <p><strong>Q3. 廠商 A 發現某項資安改善措施成本為 1000 萬，但該風險發生預期損失僅 1 萬元，此時採取「風險接受」是否合適？</strong></p>
+            <button class="show-ans-btn" onclick="toggleAnswer('ans3')">查看答案</button>
+            <div id="ans3" class="answer-hidden">
+                <strong>答案：合適。</strong><br>
+                補充：這符合「成本效益分析」，當處置成本遠高於潛在損失時，管理層可簽核接受該風險。
+            </div>
+        </div>
+    </details>
+
+</section>
+
+<script>
+    // 全部展開 / 全部收合 功能
+    function toggleDetails(shouldOpen) {
+        const details = document.querySelectorAll('details');
+        details.forEach(detail => {
+            if (shouldOpen) {
+                detail.setAttribute('open', '');
+            } else {
+                detail.removeAttribute('open');
+            }
+        });
+    }
+
+    // 顯示/隱藏答案 功能
+    function toggleAnswer(id) {
+        const ansDiv = document.getElementById(id);
+        if (ansDiv.style.display === 'block') {
+            ansDiv.style.display = 'none';
+        } else {
+            ansDiv.style.display = 'block';
+        }
+    }
+
+    // 單選題檢查功能
+    function checkSingle(name, correctVal) {
+        const options = document.getElementsByName(name);
+        const feedbackDiv = document.getElementById(name + '-feedback');
+        let selectedVal = null;
+
+        for (const opt of options) {
+            if (opt.checked) {
+                selectedVal = opt.value;
+                break;
+            }
+        }
+
+        feedbackDiv.style.display = 'block';
+        if (selectedVal === correctVal) {
+            feedbackDiv.className = 'feedback-msg correct-msg';
+            feedbackDiv.innerText = '⭕ 答對了！觀念正確！';
+        } else if (selectedVal === null) {
+            feedbackDiv.className = 'feedback-msg';
+            feedbackDiv.style.backgroundColor = '#eee';
+            feedbackDiv.innerText = '⚠️ 請先選擇一個答案';
+        } else {
+            feedbackDiv.className = 'feedback-msg wrong-msg';
+            feedbackDiv.innerText = '❌ 答錯囉，請看下方解析！';
+        }
+    }
+
+    // 複選題檢查功能
+    function checkMultiple(name, correctArr) {
+        const options = document.getElementsByName(name);
+        const feedbackDiv = document.getElementById(name + '-feedback');
+        let selectedArr = [];
+
+        for (const opt of options) {
+            if (opt.checked) {
+                selectedArr.push(opt.value);
+            }
+        }
+
+        // 排序以便比對
+        selectedArr.sort();
+        correctArr.sort();
+        
+        // 陣列比對
+        const isCorrect = JSON.stringify(selectedArr) === JSON.stringify(correctArr);
+
+        feedbackDiv.style.display = 'block';
+        if (isCorrect) {
+            feedbackDiv.className = 'feedback-msg correct-msg';
+            feedbackDiv.innerText = '⭕ 完全正確！';
+        } else if (selectedArr.length === 0) {
+            feedbackDiv.className = 'feedback-msg';
+            feedbackDiv.style.backgroundColor = '#eee';
+            feedbackDiv.innerText = '⚠️ 請先選擇答案';
+        } else {
+            feedbackDiv.className = 'feedback-msg wrong-msg';
+            feedbackDiv.innerText = '❌ 答案不完整或有誤，請再試試！(提示：正確答案有 ' + correctArr.length + ' 個)';
+        }
+    }
+</script>
+
+</body>
+</html>

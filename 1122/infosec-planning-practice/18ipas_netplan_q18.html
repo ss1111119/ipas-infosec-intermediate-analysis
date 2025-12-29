@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_netplan_q18.html - iPAS 資安工程師教學</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --hover-bg: #f1f1f1;
+            --mark-bg: #fff3cd;
+            --mark-text: #856404;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --border-color: #444444;
+            --primary-color: #ecf0f1;
+            --accent-color: #5dade2;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --hover-bg: #3d3d3d;
+            --mark-bg: #5a4e21;
+            --mark-text: #ffeeba;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .file-info {
+            font-size: 0.9em;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--hover-bg);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+            }
+            .analysis-full-width {
+                grid-column: 1 / -1;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            height: 100%; /* Ensure equal height in grid */
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        h1 { font-size: 1.2rem; }
+        h2 { font-size: 1.15rem; border-left: 4px solid var(--accent-color); padding-left: 10px; }
+        h3 { font-size: 1.1rem; margin-top: 15px; }
+
+        /* Question & Options */
+        .question-text {
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .option-label input {
+            margin-right: 10px;
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--hover-bg);
+        }
+
+        [data-theme="dark"] .btn-outline {
+            color: var(--text-color);
+            border-color: var(--text-color);
+        }
+
+        /* Result Area */
+        #result-area {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: var(--hover-bg);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .result-correct {
+            border-color: var(--success-color) !important;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .result-incorrect {
+            border-color: var(--error-color) !important;
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        /* Accordion Analysis */
+        .accordion {
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-header {
+            background-color: var(--hover-bg);
+            padding: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-weight: bold;
+        }
+
+        .accordion-item.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion-item.active .accordion-content {
+            display: block;
+        }
+
+        /* Highlight & Utility */
+        mark {
+            background-color: var(--mark-bg);
+            color: var(--mark-text);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+        
+        /* Self Test Details */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px;
+        }
+        
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+        
+        .answer-reveal {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: var(--hover-bg);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <div class="file-info">ipas_netplan_q18.html</div>
+            <div style="font-size: 0.9em; margin-top: 4px;">iPAS 資安工程師 - 網路規劃與防禦</div>
+        </div>
+        <button id="theme-btn" class="theme-toggle" onclick="toggleTheme()">夜間模式</button>
+    </header>
+
+    <div class="container">
+        <!-- Question Section (Left) -->
+        <div class="card" id="question-panel">
+            <h1>題目 18</h1>
+            <div class="question-text">
+                關於網路規劃的敘述，下列何項較「不」安全？
+            </div>
+        </div>
+
+        <!-- Answer Section (Right) -->
+        <div class="card" id="interaction-panel">
+            <h2 style="font-size: 1rem; border:none; padding:0; margin-bottom: 15px; color: var(--text-color);">請作答：</h2>
+            <form id="quiz-form">
+                <div class="options-group">
+                    <label class="option-label">
+                        <input type="radio" name="option" value="A">
+                        <span>(A) 對外服務的伺服器，設置於防火牆的 DMZ 區</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="option" value="B">
+                        <span>(B) 外部分支機構須以 VPN 連入公司內網</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="option" value="C">
+                        <span>(C) 將所有使用者與伺服器置於同一網段</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="option" value="D">
+                        <span>(D) 使用入侵防護系統（IPS）協助維護內部網路安全</span>
+                    </label>
+                </div>
+                <button type="button" class="btn" onclick="submitAnswer()">送出作答</button>
+            </form>
+
+            <div id="result-area">
+                <div id="result-text"></div>
+                <div id="correct-answer-display" style="margin-top: 10px;">正確答案：(C)</div>
+                <button class="btn btn-outline" style="margin-top: 15px;" onclick="resetQuiz()">重做一次</button>
+            </div>
+        </div>
+
+        <!-- Analysis Section (Full Width, Initially Hidden) -->
+        <div class="card analysis-full-width hidden" id="analysis-card">
+            <h2>本題完整解析</h2>
+            
+            <div class="accordion">
+                <!-- 1. 題目 -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">1. 【題目】</div>
+                    <div class="accordion-content">
+                        <p>關於網路規劃的敘述，下列何項較「不」安全？</p>
+                    </div>
+                </div>
+
+                <!-- 2. 第一步：找關鍵字 -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">2. 【第一步：找關鍵字】</div>
+                    <div class="accordion-content">
+                        <ul>
+                            <li><mark>網路規劃</mark>：指企業內網、外網、伺服器如何擺放與連接的架構設計。</li>
+                            <li><mark>不安全</mark>：題目要求選出風險最高、最容易被攻擊或造成擴散的做法。</li>
+                            <li><mark>DMZ</mark>（非軍事區）：放置公開服務（如 Web Server）的區域，避免直接接觸內網。</li>
+                            <li><mark>VPN</mark>（虛擬私人網路）：提供加密通道，讓外部連線安全進入。</li>
+                            <li><mark>同一網段</mark>：指沒有進行網路分段（Segmentation），所有設備都在同一個廣播域（Broadcast Domain）。</li>
+                            <li><mark>IPS</mark>（入侵防護系統）：負責偵測並阻擋攻擊流量的設備。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 3. 第二步：白話翻譯 -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">3. 【第二步：白話翻譯】</div>
+                    <div class="accordion-content">
+                        <p>這一題在問：下面這四種網路架設的方法，哪一種是「最危險、最容易讓駭客一打進來就全拿」的爛設計？</p>
+                    </div>
+                </div>
+
+                <!-- 4. 第三步：解題思路 -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">4. 【第三步：解題思路】</div>
+                    <div class="accordion-content">
+                        <p><strong>這題在考什麼觀念？</strong> 網路分段（Segmentation）與縱深防禦（Defense in Depth）的重要性。</p>
+                        
+                        <h3>解題步驟：</h3>
+                        <ol>
+                            <li><strong>檢視架構原則</strong>：資安的基本原則是「不要把雞蛋放在同一個籃子裡」。不同重要性的設備（如使用者電腦 vs. 資料庫伺服器）應該要隔離。</li>
+                            <li><strong>分析風險傳播</strong>：如果某一台機器中毒了，它能多容易感染其他機器？</li>
+                            <li><strong>對照選項工具</strong>：確認 DMZ、VPN、IPS 都是標準的資安防護措施，只有「混在一起」是風險來源。</li>
+                        </ol>
+
+                        <h3>原理與規則：</h3>
+                        <p>網路規劃的核心目的是降低「攻擊面」與防止「橫向移動」。</p>
+                        <ul>
+                            <li><strong>網路分段</strong>（把不同角色的設備分開到不同網段，像把不同班級分教室）：這是最基礎的防護。如果沒有分段，駭客只要攻破一台總機小妹的電腦，就能直接掃描並攻擊核心資料庫伺服器。</li>
+                            <li><strong>DMZ</strong>（放對外服務主機的「緩衝區」，介於外網與內網之間）：如果 Web 伺服器被駭，駭客也只能困在 DMZ，進不了內網。</li>
+                            <li><strong>VPN</strong>（把外部連線包進加密隧道，像走一條有鎖的專用通道）：確保遠端工作者不會在公共網路被竊聽，且進內網前要驗證身分。</li>
+                            <li><strong>IPS</strong>（入侵防護系統，會偵測並「直接阻擋」可疑流量的設備/功能）：這是主動防禦層。</li>
+                            <li><strong>橫向移動</strong>（攻擊者入侵一台後，再往同網段其他機器擴散）：同一網段內通常防火牆不會介入，防禦力最弱。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 5. 第四步：選項分析 -->
+                <div class="accordion-item" id="accordion-step4">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">5. 【第四步：選項分析】</div>
+                    <div class="accordion-content">
+                        <ul>
+                            <li>
+                                <strong>(A) 對外服務的伺服器，設置於防火牆的 DMZ 區</strong><br>
+                                <span style="color:var(--success-color)">[安全]</span> 這是標準做法。對外服務（如網頁主機）必須面對公眾網路，風險高。放在 DMZ 可以隔離它與公司內部核心資料區。萬一網頁主機被攻破，內網還是安全的。
+                            </li>
+                            <li>
+                                <strong>(B) 外部分支機構須以 VPN 連入公司內網</strong><br>
+                                <span style="color:var(--success-color)">[安全]</span> 分支機構透過網際網路連回總公司，若沒加密會被竊聽。強制用 VPN 建立了加密隧道，是正確的遠端存取規範。
+                            </li>
+                            <li>
+                                <strong>(C) 將所有使用者與伺服器置於同一網段</strong><br>
+                                <span style="color:var(--error-color)">[不安全]</span> <mark>這是極高風險的架構。</mark>
+                                <br>理由：使用者（User）經常上網、收信，最容易中毒。伺服器（Server）存放重要資料。若兩者在同一網段（扁平化網路），中毒的使用者電腦可以直接掃描、攻擊伺服器，完全沒有防火牆阻隔。這使得「橫向移動」變得極其容易。
+                            </li>
+                            <li>
+                                <strong>(D) 使用入侵防護系統（IPS）協助維護內部網路安全</strong><br>
+                                <span style="color:var(--success-color)">[安全]</span> IPS 可以分析封包內容，偵測並阻擋已知的攻擊特徵（Signature），是加強防禦的一環。
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 6. 觀念補充與延伸 -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">6. 【觀念補充與延伸】</div>
+                    <div class="accordion-content">
+                        <p><strong>核心觀念定位：</strong>本題屬於「網路架構與防禦分區（Network Segmentation / Defense-in-Depth）」章節。</p>
+                        
+                        <p><strong>定義：</strong></p>
+                        <ul>
+                            <li><strong>Defense in Depth（縱深防禦）：</strong> 像洋蔥一樣多層保護。即使外層（如防火牆）失效，內層（如分段、主機防護）仍能提供保護。</li>
+                            <li><strong>Least Privilege（最小權限原則）：</strong> 網路層級也要遵守，只有業務需要的流量才放行（Deny All by Default）。</li>
+                        </ul>
+
+                        <p><strong>觸類旁通：</strong></p>
+                        <ul>
+                            <li><strong>對比概念：</strong>
+                                <br>扁平化網路（Flat Network）= 所有人住大通鋪，一人感冒全家得病。
+                                <br>分區分段（VLAN/Subnet）= 像是醫院有分一般病房、隔離病房，互不相通。
+                            </li>
+                            <li><strong>變化題型：</strong>
+                                <br>問：防火牆規則應設為？答：預設拒絕（Default Deny）。
+                                <br>問：VLAN 的主要資安功能？答：隔離廣播域，限制存取範圍。
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 7. 記憶口訣 -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">7. 【記憶口訣】</div>
+                    <div class="accordion-content">
+                        <p style="font-size: 1.1em; font-weight: bold; color: var(--accent-color);">
+                            外服務放 DMZ<br>
+                            遠端連線走 VPN<br>
+                            內網切開要分段<br>
+                            偵測阻擋靠 IPS
+                        </p>
+                        <p>記住：全部混在一起（同網段）就是大忌！</p>
+                    </div>
+                </div>
+
+                <!-- 8. 常見陷阱 -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">8. 【常見陷阱】</div>
+                    <div class="accordion-content">
+                        <ul>
+                            <li><strong>心理盲點：</strong> 很多網管人員為了「方便管理」或「方便檔案分享」，喜歡把伺服器跟使用者放在一起，這在資安上是大忌。考試時不要選「方便」的選項，要選「安全」的。</li>
+                            <li><strong>名詞混淆：</strong> 有些同學會誤以為 IPS 可以取代網路分段。其實 IPS 是「警察」，網路分段是「圍牆」。有警察很好，但如果沒有圍牆，小偷還是能隨意穿梭。</li>
+                            <li><strong>避坑指南：</strong> 看到「同一網段」、「全開」、「預設允許」這類關鍵字，通常就是不安全的選項。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 9. 正確答案 -->
+                <div class="accordion-item" id="accordion-answer">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">9. 【正確答案】</div>
+                    <div class="accordion-content">
+                        <p><strong>答案：(C)</strong></p>
+                        <p><strong>一句話理由：</strong>將高風險的使用者與高價值的伺服器放在同一網段，會讓駭客輕易進行橫向移動攻擊。</p>
+                    </div>
+                </div>
+
+                <!-- 10. 自我檢測 -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">10. 【自我檢測】</div>
+                    <div class="accordion-content">
+                        <p>試著回答以下問題，檢測是否真正理解：</p>
+                        
+                        <details>
+                            <summary>Q1. 公司有一台只給內部員工使用的「薪資系統伺服器」，應該放在 DMZ 還是內網伺服器區？</summary>
+                            <div class="answer-reveal">
+                                <strong>答案：內網伺服器區（Server Farm）。</strong><br>
+                                理由：DMZ 是放「對外」服務的。薪資系統若不需對外開放，應放在內網深處並嚴格控管存取，放 DMZ 反而增加暴露風險。
+                            </div>
+                        </details>
+
+                        <details>
+                            <summary>Q2. 為了防止不同部門（如業務部與研發部）互相窺探資料，在交換器（Switch）上可以使用什麼技術來隔離？</summary>
+                            <div class="answer-reveal">
+                                <strong>答案：VLAN（虛擬區域網路）。</strong><br>
+                                理由：VLAN 可以在邏輯上將實體網路切分成不同網段，達到隔離效果。
+                            </div>
+                        </details>
+
+                        <details>
+                            <summary>Q3. 使用者電腦如果不慎感染勒索軟體，在「同一網段」與「不同網段」的傳播速度有何差異？</summary>
+                            <div class="answer-reveal">
+                                <strong>答案：同一網段傳播極快；不同網段會被防火牆阻擋。</strong><br>
+                                理由：同一網段通常不過防火牆（Layer 2 轉發），病毒可利用 SMB 等協定直接感染鄰近電腦；不同網段間的流量需經過路由器或防火牆（Layer 3+），可被 ACL 規則阻擋。
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-btn').textContent = '切換亮色';
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('theme-btn').textContent = '夜間模式';
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('theme-btn').textContent = '切換亮色';
+            }
+        }
+
+        // Accordion Logic
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            item.classList.toggle('active');
+        }
+
+        // Quiz Logic
+        function submitAnswer() {
+            const options = document.getElementsByName('option');
+            let selectedValue = null;
+            
+            for (const option of options) {
+                if (option.checked) {
+                    selectedValue = option.value;
+                    break;
+                }
+            }
+
+            if (!selectedValue) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            const correctAnswer = 'C';
+            const resultArea = document.getElementById('result-area');
+            const resultText = document.getElementById('result-text');
+            const analysisCard = document.getElementById('analysis-card');
+
+            // Show Result
+            resultArea.style.display = 'block';
+            if (selectedValue === correctAnswer) {
+                resultText.innerHTML = '<span class="result-correct">答對了！觀念正確。</span>';
+            } else {
+                resultText.innerHTML = `<span class="result-incorrect">答錯了。您選擇了 (${selectedValue})。</span>`;
+            }
+
+            // Show Analysis
+            analysisCard.classList.remove('hidden');
+
+            // Auto-expand specific sections (Correct Answer & Step 4)
+            document.getElementById('accordion-answer').classList.add('active');
+            document.getElementById('accordion-step4').classList.add('active');
+
+            // Scroll to result on mobile if needed
+            if (window.innerWidth < 768) {
+                resultArea.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Disable inputs
+            for (const option of options) {
+                option.disabled = true;
+            }
+            document.querySelector('.btn').disabled = true;
+        }
+
+        function resetQuiz() {
+            // Reset form
+            const form = document.getElementById('quiz-form');
+            form.reset();
+            
+            // Enable inputs
+            const options = document.getElementsByName('option');
+            for (const option of options) {
+                option.disabled = false;
+            }
+            document.querySelector('.btn').disabled = false;
+
+            // Hide result and analysis
+            document.getElementById('result-area').style.display = 'none';
+            document.getElementById('analysis-card').classList.add('hidden');
+
+            // Collapse all accordions
+            const activeItems = document.querySelectorAll('.accordion-item.active');
+            activeItems.forEach(item => item.classList.remove('active'));
+            
+            // Close details
+            const details = document.querySelectorAll('details');
+            details.forEach(d => d.removeAttribute('open'));
+        }
+
+        // Initialize
+        initTheme();
+    </script>
+</body>
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_risk_q25.html</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --primary-color: #2c5282;
+            --primary-hover: #1a365d;
+            --accent-color: #e53e3e;
+            --highlight-bg: #fff7cd;
+            --highlight-text: #5c4b00;
+            --correct-color: #2f855a;
+            --wrong-color: #c53030;
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a202c;
+            --card-bg: #2d3748;
+            --text-color: #e2e8f0;
+            --border-color: #4a5568;
+            --primary-color: #63b3ed;
+            --primary-hover: #4299e1;
+            --accent-color: #fc8181;
+            --highlight-bg: #4a4a28;
+            --highlight-text: #fefcbf;
+            --correct-color: #68d391;
+            --wrong-color: #fc8181;
+            --input-bg: #2d3748;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* 基礎字級 */
+        }
+
+        /* 標題與內文字體大小差距微小化 */
+        h1, h2, h3 {
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        h1 { font-size: 18px; margin-bottom: 0.5rem; }
+        h2 { font-size: 17px; border-left: 4px solid var(--primary-color); padding-left: 10px; margin-top: 1.5rem; }
+        h3 { font-size: 16.5px; font-weight: bold; margin-top: 1rem; }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 題目與作答區配置 */
+        .question-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .question-area {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            .q-content { flex: 2; }
+            .a-interaction { flex: 1; }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .option-item {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-item input[type="radio"] {
+            margin-top: 6px;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .option-item label {
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        /* 切換按鈕 */
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* 結果顯示區 */
+        .result-box {
+            display: none; /* 預設隱藏 */
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+        }
+
+        .result-status {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .status-correct { color: var(--correct-color); }
+        .status-wrong { color: var(--wrong-color); }
+
+        /* 折疊面板 */
+        details {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: var(--card-bg);
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: 600;
+            background-color: rgba(0,0,0,0.02);
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::after {
+            content: "+";
+            font-weight: normal;
+            font-size: 18px;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .details-content {
+            padding: 15px;
+        }
+
+        /* 螢光筆效果 */
+        mark {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* 自我檢測隱藏區 */
+        .self-test-answer {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: rgba(0,0,0,0.03);
+            border-left: 3px solid var(--primary-color);
+            display: none;
+        }
+
+        .show-answer-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 0;
+            font-size: 15px;
+        }
+
+        .hidden { display: none !important; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <div>ipas_risk_q25.html</div>
+        <div>
+            科目：資訊安全規劃實務 | 題號：25
+            <button class="theme-toggle" id="themeToggle">切換夜間模式</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 題目與作答區 -->
+        <div class="question-area">
+            <!-- 左側：題目 -->
+            <div class="card q-content">
+                <h1>題目</h1>
+                <div class="question-text">
+                    與資訊安全風險評估相關議題的敘述，下列何者較為正確？
+                </div>
+                <div class="options-display">
+                    <p>(A) 需先進行風險評估，再將風險評鑑適用的準則予以建立</p>
+                    <p>(B) 風險評估會依照風險分析的結果，安排其風險處理的優先順序</p>
+                    <p>(C) 風險評鑑的順序，是先執行風險識別、再進行風險評估、風險分析</p>
+                    <p>(D) 在風險評估的過程中，無需識別風險的擁有者</p>
+                </div>
+            </div>
+
+            <!-- 右側：互動區 -->
+            <div class="card a-interaction">
+                <h1>作答區</h1>
+                <form id="quizForm">
+                    <div class="options-list">
+                        <div class="option-item">
+                            <input type="radio" name="answer" id="optA" value="A">
+                            <label for="optA">(A)</label>
+                        </div>
+                        <div class="option-item">
+                            <input type="radio" name="answer" id="optB" value="B">
+                            <label for="optB">(B)</label>
+                        </div>
+                        <div class="option-item">
+                            <input type="radio" name="answer" id="optC" value="C">
+                            <label for="optC">(C)</label>
+                        </div>
+                        <div class="option-item">
+                            <input type="radio" name="answer" id="optD" value="D">
+                            <label for="optD">(D)</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" id="submitBtn">送出</button>
+                    <button type="button" class="btn btn-secondary hidden" id="resetBtn">重做一次</button>
+                </form>
+
+                <!-- 結果顯示小卡 -->
+                <div id="resultBox" class="result-box">
+                    <div id="resultStatus" class="result-status"></div>
+                    <div>正確答案：B</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 解析區 (初始隱藏，送出後顯示) -->
+        <div id="explanationArea" class="hidden">
+            
+            <!-- 1. 題目 -->
+            <details>
+                <summary>1. 【題目】</summary>
+                <div class="details-content">
+                    <p>與資訊安全風險評估相關議題的敘述，下列何者較為正確？</p>
+                    <ul>
+                        <li>(A) 需先進行風險評估，再將風險評鑑適用的準則予以建立</li>
+                        <li>(B) 風險評估會依照風險分析的結果，安排其風險處理的優先順序</li>
+                        <li>(C) 風險評鑑的順序，是先執行風險識別、再進行風險評估、風險分析</li>
+                        <li>(D) 在風險評估的過程中，無需識別風險的擁有者</li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- 2. 第一步：找關鍵字 -->
+            <details>
+                <summary>2. 【第一步：找關鍵字】</summary>
+                <div class="details-content">
+                    <p>請注意以下解題線索：</p>
+                    <ul>
+                        <li><mark>風險評估</mark>：題目的核心主題，包含識別、分析、評鑑三個子過程。</li>
+                        <li><mark>風險分析</mark>：計算風險大小的步驟。</li>
+                        <li><mark>風險識別</mark>：找出有哪些風險的步驟。</li>
+                        <li><mark>風險評鑑</mark>：將分析結果與準則比較的步驟。</li>
+                        <li><mark>準則</mark>：判斷風險是否可接受的尺規，必須先有尺才能量測。</li>
+                        <li><mark>風險處理</mark>：評估完後決定如何應對（如降低、轉移）。</li>
+                        <li><mark>優先順序</mark>：資源有限，需依據分析出的風險高低決定處理順序。</li>
+                        <li><mark>風險擁有者</mark>：對資產或風險負責的人，沒找到人就無法落實處理。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- 3. 第二步：白話翻譯 -->
+            <details>
+                <summary>3. 【第二步：白話翻譯】</summary>
+                <div class="details-content">
+                    <p>這題用高中生日常口語來說就是：</p>
+                    <p>「在做資安風險檢查的整個流程裡，下面哪一句話講的順序和邏輯是對的？」</p>
+                </div>
+            </details>
+
+            <!-- 4. 第三步：解題思路 -->
+            <details>
+                <summary>4. 【第三步：解題思路】</summary>
+                <div class="details-content">
+                    <p><strong>這題在考什麼觀念？</strong> 考「風險管理流程」的正確先後順序。</p>
+                    
+                    <h3>解題步驟：</h3>
+                    <ol>
+                        <li>回想標準流程：全景建立(訂準則) &rarr; 評估(識別&rarr;分析&rarr;評鑑) &rarr; 處理。</li>
+                        <li>檢查選項邏輯：是否違反「先有標準、再做檢查、最後排順序」的邏輯。</li>
+                        <li>剔除順序顛倒或觀念錯誤的選項。</li>
+                    </ol>
+
+                    <h3>原理與規則：</h3>
+                    <p>先建立完整流程概念：先訂準則 &rarr; 識別 &rarr; 分析 &rarr; 評估(評鑑) &rarr; 排序與處理。</p>
+                    <p><strong>專有名詞解釋：</strong></p>
+                    <ul>
+                        <li><strong>風險</strong>（可能發生的壞事，會造成損失的機率與影響）</li>
+                        <li><strong>風險評估</strong>（把風險「找出來、算清楚、判斷要不要處理」的一整套流程，英文常稱為 Risk Assessment）</li>
+                        <li><strong>風險識別</strong>（先把有哪些風險列出清單，Risk Identification）</li>
+                        <li><strong>風險分析</strong>（估算每個風險的可能性與影響程度，Risk Analysis）</li>
+                        <li><strong>風險評鑑</strong>（把分析結果拿去和準則比對，判斷能不能接受，Risk Evaluation）</li>
+                        <li><strong>準則</strong>（判斷標準，例如：多大影響算嚴重、多高機率算高風險，Criteria）</li>
+                        <li><strong>風險處理</strong>（降低、移轉、避免、接受等作法，Risk Treatment）</li>
+                        <li><strong>風險擁有者</strong>（對該風險負責、能決定資源與處置的人，Risk Owner）</li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- 5. 第四步：選項分析 -->
+            <details id="details-step4">
+                <summary>5. 【第四步：選項分析】</summary>
+                <div class="details-content">
+                    <h3>(A) 需先進行風險評估，再將風險評鑑適用的準則予以建立</h3>
+                    <p><span class="status-wrong">錯誤。</span></p>
+                    <p><strong>為什麼：</strong>順序反了。就像考試前要先訂好「60分及格」這個準則，考完試（評估）才能知道有沒有及格。如果評估完才訂準則，就失去客觀性了。準則應在「全景建立」階段就定義好。</p>
+                    <hr>
+
+                    <h3>(B) 風險評估會依照風險分析的結果，安排其風險處理的優先順序</h3>
+                    <p><span class="status-correct">正確。</span></p>
+                    <p><strong>為什麼：</strong>風險分析會算出風險值（例如：可能性 x 影響程度 = 風險值）。算出分數後，分數高的通常要優先處理，所以這句話完全符合邏輯。</p>
+                    <hr>
+
+                    <h3>(C) 風險評鑑的順序，是先執行風險識別、再進行風險評估、風險分析</h3>
+                    <p><span class="status-wrong">錯誤。</span></p>
+                    <p><strong>為什麼：</strong>名詞層級和順序都亂了。正規順序是：(1)識別 &rarr; (2)分析 &rarr; (3)評鑑（Evaluation）。這三個合起來才統稱為「風險評估（Assessment）」。選項把大集合名稱混在步驟裡，且順序錯誤。</p>
+                    <hr>
+
+                    <h3>(D) 在風險評估的過程中，無需識別風險的擁有者</h3>
+                    <p><span class="status-wrong">錯誤。</span></p>
+                    <p><strong>為什麼：</strong>一定要找擁有者。如果沒有定義誰是「風險擁有者」，最後發現風險很高時，誰負責出錢改善？誰負責簽字承擔？沒有擁有者的風險管理只是紙上談兵。</p>
+                </div>
+            </details>
+
+            <!-- 6. 觀念補充與延伸 -->
+            <details>
+                <summary>6. 【觀念補充與延伸】</summary>
+                <div class="details-content">
+                    <p><strong>核心觀念定位：</strong>本題屬於「資安治理/風險管理（Risk Management）」章節，屬於常考基本流程題。</p>
+                    
+                    <h3>法條或定義：</h3>
+                    <p>依據 ISO 27005 或 NIST RMF 的概念：風險評估（Risk Assessment）是一個包含「識別」、「分析」與「評鑑」的整體過程。</p>
+
+                    <h3>觸類旁通（舉一反三）：</h3>
+                    <ul>
+                        <li><strong>對比概念：</strong>風險分析 vs 風險評鑑。簡單記：分析是「算分數」（計算機率與衝擊），評鑑是「和標準比」（判斷是否可接受、是否需處理）。</li>
+                        <li><strong>變化題型：</strong>
+                            <ul>
+                                <li>問法一：給你一個矩陣（機率高、衝擊高），問你該優先處理哪一個？（答：找分數最高的）。</li>
+                                <li>問法二：問「全景建立（Context Establishment）」階段要做什麼？（答：定義評估的範圍與準則）。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- 7. 記憶口訣 -->
+            <details>
+                <summary>7. 【記憶口訣】</summary>
+                <div class="details-content">
+                    <p><strong>短期好記口訣：</strong></p>
+                    <p>「準則先訂好，識分評順跑」</p>
+                    <ul>
+                        <li>準則先訂好：一開始先要有標準。</li>
+                        <li>識：識別風險。</li>
+                        <li>分：分析風險（算大小）。</li>
+                        <li>評：評鑑風險（比大小）。</li>
+                        <li>順跑：最後排出優先順序去處理。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- 8. 常見陷阱 -->
+            <details>
+                <summary>8. 【常見陷阱】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>學生最容易搞混的地方：</strong>把「分析」、「評鑑」、「評估」當成同義詞混用。請記得：評估是那個「大圈圈」，裡面包著識別、分析、評鑑三個步驟。</li>
+                        <li><strong>心理盲點：</strong>直覺以為「先做完評估再訂標準」。這是錯的，就像比賽規則要先訂好才能比賽。</li>
+                        <li><strong>避坑指南：</strong>
+                            <ul>
+                                <li>看到「準則」出現在後面 &rarr; 錯，它要在前面。</li>
+                                <li>看到「優先順序」 &rarr; 這通常是最後輸出的結果，邏輯是對的。</li>
+                                <li>看到「無需...擁有者」 &rarr; 絕對錯，資安最講究當責（Accountability）。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </details>
+
+            <!-- 9. 正確答案 -->
+            <details id="details-answer">
+                <summary>9. 【正確答案】</summary>
+                <div class="details-content">
+                    <p><strong>答案：(B)</strong></p>
+                    <p><strong>一句話理由：</strong>因為要把風險算清楚（分析），才能知道哪個比較嚴重，進而決定誰先救、誰後救（優先順序）。</p>
+                </div>
+            </details>
+
+            <!-- 10. 自我檢測 -->
+            <details>
+                <summary>10. 【自我檢測】</summary>
+                <div class="details-content">
+                    <p>試試看，回答下列延伸問題：</p>
+                    
+                    <div class="quiz-item">
+                        <p><strong>Q1：在風險評估的三個子流程中，哪一個步驟負責「計算風險值（例如 R = P x I）」？</strong></p>
+                        <button class="show-answer-btn" onclick="toggleAnswer('ans1')">點我看答案</button>
+                        <div id="ans1" class="self-test-answer">
+                            答案：風險分析（Risk Analysis）。識別只是找出來，分析才是計算量化。
+                        </div>
+                    </div>
+                    <hr>
+
+                    <div class="quiz-item">
+                        <p><strong>Q2：如果風險擁有者決定「不採取任何行動，自行承擔損失」，這屬於哪種風險處理策略？</strong></p>
+                        <button class="show-answer-btn" onclick="toggleAnswer('ans2')">點我看答案</button>
+                        <div id="ans2" class="self-test-answer">
+                            答案：風險接受（Risk Acceptance）或風險保留。
+                        </div>
+                    </div>
+                    <hr>
+
+                    <div class="quiz-item">
+                        <p><strong>Q3：風險評鑑（Risk Evaluation）的主要產出是什麼？</strong></p>
+                        <button class="show-answer-btn" onclick="toggleAnswer('ans3')">點我看答案</button>
+                        <div id="ans3" class="self-test-answer">
+                            答案：風險處理的決策依據（也就是確認哪些風險需要處理、哪些可以接受）。
+                        </div>
+                    </div>
+
+                </div>
+            </details>
+
+        </div>
+    </div>
+
+    <script>
+        // 變數宣告
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultBox = document.getElementById('resultBox');
+        const resultStatus = document.getElementById('resultStatus');
+        const explanationArea = document.getElementById('explanationArea');
+        const radioButtons = document.getElementsByName('answer');
+        const themeToggle = document.getElementById('themeToggle');
+        
+        // 正確答案設定
+        const CORRECT_ANSWER = 'B';
+
+        // 初始化：讀取主題設定
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        // 主題切換邏輯
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // 送出按鈕邏輯
+        submitBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // 檢查是否選擇
+            let selectedValue = null;
+            for (const radio of radioButtons) {
+                if (radio.checked) {
+                    selectedValue = radio.value;
+                    break;
+                }
+            }
+
+            if (!selectedValue) {
+                alert('請先選擇一個選項再送出！');
+                return;
+            }
+
+            // 鎖定選項
+            for (const radio of radioButtons) {
+                radio.disabled = true;
+            }
+
+            // 顯示結果區
+            resultBox.style.display = 'block';
+            
+            if (selectedValue === CORRECT_ANSWER) {
+                resultStatus.textContent = '回答正確';
+                resultStatus.className = 'result-status status-correct';
+            } else {
+                resultStatus.textContent = '回答錯誤';
+                resultStatus.className = 'result-status status-wrong';
+            }
+
+            // 顯示解析區
+            explanationArea.classList.remove('hidden');
+
+            // 自動展開特定章節：正確答案(9) 與 選項分析(5)
+            // 對應 id: details-answer 和 details-step4
+            document.getElementById('details-answer').open = true;
+            document.getElementById('details-step4').open = true;
+
+            // 切換按鈕顯示
+            submitBtn.classList.add('hidden');
+            resetBtn.classList.remove('hidden');
+
+            // 捲動到結果區
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        // 重做按鈕邏輯
+        resetBtn.addEventListener('click', () => {
+            // 清除選擇
+            for (const radio of radioButtons) {
+                radio.checked = false;
+                radio.disabled = false;
+            }
+
+            // 隱藏結果與解析
+            resultBox.style.display = 'none';
+            explanationArea.classList.add('hidden');
+
+            // 收合所有詳情
+            const details = document.querySelectorAll('details');
+            details.forEach(d => d.open = false);
+
+            // 切換按鈕顯示
+            submitBtn.classList.remove('hidden');
+            resetBtn.classList.add('hidden');
+
+            // 隱藏自我檢測答案
+            const selfTestAnswers = document.querySelectorAll('.self-test-answer');
+            selfTestAnswers.forEach(el => el.style.display = 'none');
+            
+            // 捲動回頂部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // 自我檢測答案切換
+        function toggleAnswer(id) {
+            const el = document.getElementById(id);
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+            } else {
+                el.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

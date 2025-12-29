@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_asset_value_q27.html</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --accent-color: #2c5282; /* 深藍色 */
+            --accent-hover: #1a365d;
+            --light-accent: #ebf8ff;
+            --correct-color: #2f855a;
+            --wrong-color: #c53030;
+            --highlight-bg: #fefcbf;
+            --highlight-text: #744210;
+            --panel-bg: #f7fafc;
+        }
+
+        body.dark-mode {
+            --bg-color: #1a202c;
+            --text-color: #e2e8f0;
+            --border-color: #4a5568;
+            --accent-color: #63b3ed;
+            --accent-hover: #4299e1;
+            --light-accent: #2d3748;
+            --correct-color: #48bb78;
+            --wrong-color: #f56565;
+            --highlight-bg: #744210;
+            --highlight-text: #fefcbf;
+            --panel-bg: #2d3748;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* 版面配置 */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .file-name {
+            font-family: monospace;
+            font-size: 14px;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .mode-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+
+        .mode-toggle:hover {
+            background-color: var(--light-accent);
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            .question-section {
+                flex: 1;
+                padding-right: 20px;
+                border-right: 1px solid var(--border-color);
+            }
+            .interaction-section {
+                flex: 1;
+                padding-left: 20px;
+            }
+        }
+
+        /* 題目區塊 */
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+
+        h1 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+        h2 { font-size: 18px; font-weight: 600; margin-bottom: 15px; border-left: 4px solid var(--accent-color); padding-left: 10px; }
+        h3 { font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        /* 選項樣式 */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .option-label:hover {
+            background-color: var(--light-accent);
+            border-color: var(--accent-color);
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            accent-color: var(--accent-color);
+            transform: scale(1.2);
+        }
+
+        /* 按鈕樣式 */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: #ffffff;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-retry {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            display: none; /* 預設隱藏 */
+        }
+
+        .btn-retry:hover {
+            background-color: var(--light-accent);
+        }
+
+        /* 結果回饋 */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-correct {
+            background-color: var(--light-accent);
+            border: 1px solid var(--correct-color);
+            color: var(--correct-color);
+        }
+
+        .feedback-wrong {
+            background-color: var(--light-accent);
+            border: 1px solid var(--wrong-color);
+            color: var(--wrong-color);
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        /* 解析區塊 (Accordion) */
+        .explanation-container {
+            margin-top: 30px;
+            border-top: 2px solid var(--border-color);
+            padding-top: 20px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background-color: var(--panel-bg);
+            padding: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: var(--light-accent);
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s;
+        }
+
+        .accordion-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            background-color: var(--bg-color);
+        }
+
+        .accordion-item.active .accordion-content {
+            padding: 20px;
+            max-height: 2000px; /* 足夠大的值以容納內容 */
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion-item.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 內容樣式 */
+        mark {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background-color: var(--light-accent);
+            font-size: 14px;
+            margin-right: 5px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* 自我檢測隱藏答案 */
+        .spoiler {
+            background-color: var(--text-color);
+            color: var(--text-color);
+            padding: 2px 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            user-select: none;
+        }
+
+        .spoiler:hover, .spoiler.revealed {
+            background-color: var(--light-accent);
+            color: var(--text-color);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>iPAS 資安工程師 | 資訊安全規劃實務</h1>
+            <div class="file-name">ipas_asset_value_q27.html</div>
+        </div>
+        <button id="modeToggle" class="mode-toggle">切換夜間模式</button>
+    </header>
+
+    <div class="main-content">
+        <!-- 左側：題目區 -->
+        <div class="question-section">
+            <h2>第 27 題</h2>
+            <div class="question-text">
+                關於資訊資產價值計算之因子，下列敘述何者錯誤？
+            </div>
+            
+            <div class="options-group" id="optionsGroup">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A">
+                    <span>(A) 包含該資產之機密性因子在內</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B">
+                    <span>(B) 包含該資產之完整性因子在內</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C">
+                    <span>(C) 包含該資產之可用性因子在內</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D">
+                    <span>(D) 包含該資產之購買金額因子在內</span>
+                </label>
+            </div>
+
+            <div class="btn-group">
+                <button id="submitBtn" class="btn btn-submit">送出答案</button>
+                <button id="retryBtn" class="btn btn-retry">重做一次</button>
+            </div>
+
+            <div id="feedbackBox" class="feedback-box">
+                <div id="feedbackTitle" class="feedback-title"></div>
+                <div id="feedbackContent"></div>
+            </div>
+        </div>
+
+        <!-- 右側/下方：解析區 -->
+        <div class="interaction-section">
+            <div id="explanationContainer" class="explanation-container">
+                <h2>試題解析</h2>
+                
+                <!-- 1. 題目 -->
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        1. 【題目】
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>關於資訊資產價值計算之因子，下列敘述何者錯誤？</p>
+                    </div>
+                </div>
+
+                <!-- 2. 第一步：找關鍵字 -->
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        2. 【第一步：找關鍵字】
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>請注意以下影響解題的關鍵字：</p>
+                        <ul>
+                            <li><mark>資訊資產</mark>：題目的主體，指組織內具價值的資訊或設備。</li>
+                            <li><mark>價值計算</mark>：題目的核心動作，要判斷如何衡量資產的輕重。</li>
+                            <li><mark>因子</mark>：影響計算結果的要素。</li>
+                            <li><mark>機密性</mark>、<mark>完整性</mark>、<mark>可用性</mark>：這是資安三大核心屬性（CIA）。</li>
+                            <li><mark>購買金額</mark>：會計或採購屬性。</li>
+                            <li><mark>錯誤</mark>：這是否定題，要選出不合理的選項。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 3. 第二步：白話翻譯 -->
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        3. 【第二步：白話翻譯】
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>題目在問：「當我們要算一個東西對公司的資安有多重要（價值）時，通常是用哪些角度來評分？下面這四個，哪一個角度是不對的？」</p>
+                    </div>
+                </div>
+
+                <!-- 4. 第三步：解題思路 -->
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        4. 【第三步：解題思路】
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p><strong>這題在考什麼觀念？</strong>：資訊資產價值的評估標準（CIA vs 成本）。</p>
+                        <h3>解題步驟：</h3>
+                        <ol>
+                            <li>回想資安定義：資安的目的是保護資產的 CIA（機密性、完整性、可用性）。</li>
+                            <li>理解「價值」定義：在風險評估中，資產價值代表「如果這個資產出事了，對公司營運衝擊有多大」，而不是「當初買它花了多少錢」。</li>
+                            <li>比對選項：A、B、C 都是資安屬性；D 是財務成本。</li>
+                        </ol>
+                        <h3>原理與規則：</h3>
+                        <p>專有名詞解釋：</p>
+                        <ul>
+                            <li><strong>資訊資產</strong>（Information Asset）：公司需要保護的東西，例如系統、資料、設備、帳號。</li>
+                            <li><strong>資產價值</strong>（Asset Value）：這個資產出問題會讓公司損失多大、影響多深。</li>
+                            <li><strong>CIA 三性</strong>：
+                                <ul>
+                                    <li><strong>機密性</strong>（Confidentiality）：不該看到的人看不到。</li>
+                                    <li><strong>完整性</strong>（Integrity）：資料不被亂改、保持正確。</li>
+                                    <li><strong>可用性</strong>（Availability）：需要用的時候用得到。</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 5. 第四步：選項分析 -->
+                <div class="accordion-item" id="analysisSection">
+                    <div class="accordion-header">
+                        5. 【第四步：選項分析】
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <ul>
+                            <li><strong>(A) 包含該資產之機密性因子在內</strong>：<span style="color:var(--correct-color)">正確敘述</span>。若資產含有商業機密，機密性價值就高。</li>
+                            <li><strong>(B) 包含該資產之完整性因子在內</strong>：<span style="color:var(--correct-color)">正確敘述</span>。若資產（如帳務資料）不能有錯，完整性價值就高。</li>
+                            <li><strong>(C) 包含該資產之可用性因子在內</strong>：<span style="color:var(--correct-color)">正確敘述</span>。若系統停機一分鐘就損失百萬，可用性價值就高。</li>
+                            <li><strong>(D) 包含該資產之購買金額因子在內</strong>：<span style="color:var(--wrong-color)">錯誤敘述（本題答案）</span>。購買金額是「成本」，不等於資安風險下的價值。例如：一張存有總經理私鑰的智慧卡可能只買 100 元，但遺失的風險價值極高；一台十年前買的百萬伺服器，現在可能已無用途，價值極低。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 6. 觀念補充與延伸 -->
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        6. 【觀念補充與延伸】
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <h3>核心觀念定位</h3>
+                        <p>本題屬於「資產管理與風險評估」章節。入門必考：CIA 與資產重要性評估。</p>
+                        <h3>定義補充</h3>
+                        <p>資產鑑價（Asset Valuation）通常以「對業務的衝擊程度」來衡量，常用的公式權重多為：資產價值 = f(機密性, 完整性, 可用性)。</p>
+                        <h3>觸類旁通</h3>
+                        <ul>
+                            <li><strong>對比概念</strong>：資產成本（Historical Cost）vs 資產價值（Business Value）。資安看的是後者。</li>
+                            <li><strong>變化題型</strong>：題目可能會給一個情境，例如「憑證伺服器」，問你它的哪個屬性（C/I/A）權重最高？通常憑證強調機密性與完整性。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 7. 記憶口訣 -->
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        7. 【記憶口訣】
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p style="font-size: 1.1em; font-weight: bold; color: var(--accent-color);">
+                            「資安看 CIA，不看發票價」
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 8. 常見陷阱 -->
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        8. 【常見陷阱】
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <ul>
+                            <li>直覺以為「越貴越重要」，忽略了便宜的關鍵組件（如備份硬碟、金鑰隨身碟）。</li>
+                            <li>混淆會計折舊與資安價值。會計上可能已折舊為零，但資安上可能存有大量個資，價值極高。</li>
+                            <li><strong>避坑指南</strong>：看到「資產價值」先想 CIA/業務衝擊；看到「購買金額」先懷疑它是不是在混淆視聽。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 9. 正確答案 -->
+                <div class="accordion-item" id="correctAnswerSection">
+                    <div class="accordion-header">
+                        9. 【正確答案】
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p><strong>答案：D</strong></p>
+                        <p>理由：資產價值通常以 CIA (機密/完整/可用) 與對組織的業務衝擊來衡量，不以當初購買的金額作為主要因子。</p>
+                    </div>
+                </div>
+
+                <!-- 10. 自我檢測 -->
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        10. 【自我檢測】
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <p>點擊黑色區塊查看答案：</p>
+                        <ol>
+                            <li>
+                                為了保護個資不外洩，是在強調 CIA 中的哪一項？<br>
+                                答：<span class="spoiler" onclick="this.classList.add('revealed')">機密性 (Confidentiality)</span>
+                            </li>
+                            <li>
+                                一台老舊伺服器已經不值錢，但上面跑著核心帳務系統，請問它的資產價值高還是低？<br>
+                                答：<span class="spoiler" onclick="this.classList.add('revealed')">高 (因為可用性與完整性需求高)</span>
+                            </li>
+                            <li>
+                                ISO 27001 資訊安全管理系統中，第一步通常是什麼？<br>
+                                答：<span class="spoiler" onclick="this.classList.add('revealed')">資產盤點與風險評估</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 變數設定
+    const CORRECT_ANSWER = 'D';
+    const submitBtn = document.getElementById('submitBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const feedbackBox = document.getElementById('feedbackBox');
+    const feedbackTitle = document.getElementById('feedbackTitle');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const explanationContainer = document.getElementById('explanationContainer');
+    const options = document.querySelectorAll('input[name="answer"]');
+    const modeToggle = document.getElementById('modeToggle');
+    const accordions = document.querySelectorAll('.accordion-header');
+
+    // 1. 送出答案邏輯
+    submitBtn.addEventListener('click', () => {
+        let selectedValue = null;
+        options.forEach(option => {
+            if (option.checked) selectedValue = option.value;
+        });
+
+        if (!selectedValue) {
+            alert('請先選擇一個選項！');
+            return;
+        }
+
+        // 鎖定選項
+        options.forEach(option => option.disabled = true);
+        submitBtn.style.display = 'none';
+        retryBtn.style.display = 'block';
+
+        // 顯示結果
+        feedbackBox.style.display = 'block';
+        if (selectedValue === CORRECT_ANSWER) {
+            feedbackBox.className = 'feedback-box feedback-correct';
+            feedbackTitle.textContent = '答對了！';
+            feedbackContent.textContent = `正確答案是 (${CORRECT_ANSWER})。觀念正確！`;
+        } else {
+            feedbackBox.className = 'feedback-box feedback-wrong';
+            feedbackTitle.textContent = '答錯了';
+            feedbackContent.textContent = `正確答案是 (${CORRECT_ANSWER})。請參考下方解析。`;
+        }
+
+        // 顯示解析區塊
+        explanationContainer.style.display = 'block';
+        
+        // 自動展開特定區塊 (正確答案 & 選項分析)
+        document.getElementById('correctAnswerSection').classList.add('active');
+        document.getElementById('analysisSection').classList.add('active');
+        
+        // 滾動到解析區
+        if (window.innerWidth < 768) {
+             explanationContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    // 2. 重做一次邏輯
+    retryBtn.addEventListener('click', () => {
+        options.forEach(option => {
+            option.checked = false;
+            option.disabled = false;
+        });
+        
+        submitBtn.style.display = 'block';
+        retryBtn.style.display = 'none';
+        feedbackBox.style.display = 'none';
+        explanationContainer.style.display = 'none';
+
+        // 收合所有 accordion
+        document.querySelectorAll('.accordion-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // 隱藏自我檢測答案
+        document.querySelectorAll('.spoiler').forEach(sp => {
+            sp.classList.remove('revealed');
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // 3. Accordion 切換邏輯
+    accordions.forEach(header => {
+        header.addEventListener('click', () => {
+            const item = header.parentElement;
+            item.classList.toggle('active');
+        });
+    });
+
+    // 4. 夜間模式邏輯
+    const savedMode = localStorage.getItem('ipas_theme');
+    if (savedMode === 'dark') {
+        document.body.classList.add('dark-mode');
+        modeToggle.textContent = '切換日間模式';
+    }
+
+    modeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        modeToggle.textContent = isDark ? '切換日間模式' : '切換夜間模式';
+        localStorage.setItem('ipas_theme', isDark ? 'dark' : 'light');
+    });
+
+</script>
+
+</body>
+</html>

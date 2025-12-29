@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_drp_q19.html - iPAS 資安工程師教學</title>
+    <style>
+        :root {
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --error-color: #e74c3c;
+            --success-color: #27ae60;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --header-bg: #eaeaea;
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #333333;
+            --primary-color: #ecf0f1;
+            --accent-color: #5dade2;
+            --error-color: #c0392b;
+            --success-color: #2ecc71;
+            --highlight-bg: #4a4a2a;
+            --highlight-text: #f0e68c;
+            --header-bg: #2c2c2c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            font-size: 16px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 {
+            font-size: 18px; /* 題目字體差距限制 */
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .filename {
+            font-size: 14px;
+            color: var(--accent-color);
+            font-family: monospace;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        /* Layout for Question and Interaction */
+        .qa-layout {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .question-panel, .interaction-panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .question-panel {
+            flex: 6;
+        }
+
+        .interaction-panel {
+            flex: 4;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 768px) {
+            .qa-layout {
+                flex-direction: column;
+            }
+        }
+
+        h2 {
+            font-size: 17px; /* 標題字級差距微小 */
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        .question-text {
+            font-size: 16px;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: var(--header-bg);
+        }
+
+        .option-label input {
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-reset {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-toggle-dark {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        /* Result Area */
+        #result-area {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .result-correct {
+            background-color: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .result-wrong {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        /* Accordion Styles */
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: var(--header-bg);
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: 600;
+            list-style: none; /* Hide default triangle */
+            position: relative;
+            padding-right: 30px;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            position: absolute;
+            right: 15px;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .details-content {
+            padding: 15px;
+            line-height: 1.7;
+        }
+
+        /* Highlight Logic */
+        mark {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .keyword-explanation {
+            font-size: 15px;
+            margin-top: 10px;
+            border-left: 3px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        /* Self Test */
+        .self-test-item {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .show-answer-btn {
+            background-color: var(--primary-color);
+            color: var(--card-bg);
+            font-size: 14px;
+            padding: 4px 8px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        .hidden-answer {
+            display: none;
+            margin-top: 8px;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <span class="filename">ipas_drp_q19.html</span>
+        <h1 style="display:inline-block; margin-left: 10px;">iPAS 資安工程師 - 考題解析</h1>
+    </div>
+    <button class="btn-toggle-dark" id="darkModeBtn">夜間模式</button>
+</header>
+
+<div class="container">
+
+    <div class="qa-layout">
+        <!-- Left: Question -->
+        <div class="question-panel">
+            <h2>題目</h2>
+            <div class="question-text">
+                <p><strong>題號：19</strong></p>
+                <p>關於系統災害復原規劃的敘述，下列何項錯誤？</p>
+            </div>
+        </div>
+
+        <!-- Right: Interaction -->
+        <div class="interaction-panel">
+            <h2>作答區</h2>
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A">
+                    <span>(A) 恢復點目標（RPO）的設定應考量資料備份頻率</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B">
+                    <span>(B) 最大可中斷時間（MTD）的設定，應符合組織所訂定之可用性的資安目標</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C">
+                    <span>(C) 恢復時間目標（RTO）之設定與最大可中斷時間（MTD）無關</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D">
+                    <span>(D) 營運衝擊分析（BIA）可協助評估各個系統的重要性</span>
+                </label>
+            </div>
+            <div class="btn-group">
+                <button class="btn-submit" id="submitBtn">送出</button>
+                <button class="btn-reset" id="resetBtn">重做一次</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Explanation Area -->
+    <div id="result-area">
+        <div id="result-banner" class="result-card"></div>
+
+        <!-- 1. 題目 (已在上方顯示，此處為解析結構) -->
+
+        <!-- 2. 第一步：找關鍵字 -->
+        <details id="step-2">
+            <summary>解析第一步：找關鍵字</summary>
+            <div class="details-content">
+                <p>請圈出以下關鍵字：<mark>災害復原規劃</mark>、<mark>RPO</mark>、<mark>RTO</mark>、<mark>MTD</mark>、<mark>BIA</mark>、<mark>錯誤</mark>。</p>
+                <div class="keyword-explanation">
+                    <ul>
+                        <li><strong>災害復原規劃：</strong> 本題的主題範疇，指系統掛掉後怎麼救回來的計畫。</li>
+                        <li><strong>RPO / RTO / MTD：</strong> 三個最核心的時間指標，解題一定要懂它們的順序跟定義。</li>
+                        <li><strong>BIA：</strong> 規劃災害復原的前置作業。</li>
+                        <li><strong>錯誤：</strong> 題目要找敘述「不正確」的選項，這是否定題。</li>
+                    </ul>
+                </div>
+            </div>
+        </details>
+
+        <!-- 3. 第二步：白話翻譯 -->
+        <details id="step-3">
+            <summary>解析第二步：白話翻譯</summary>
+            <div class="details-content">
+                <p>這題用白話文說就是：</p>
+                <p>「關於我們怎麼計畫把當機的系統救回來，下面哪一句話是在亂講？」</p>
+            </div>
+        </details>
+
+        <!-- 4. 第三步：解題思路 -->
+        <details id="step-3-logic">
+            <summary>解析第三步：解題思路</summary>
+            <div class="details-content">
+                <p><strong>這題在考什麼觀念？</strong> 災害復原的三大時間指標（RPO、RTO、MTD）之間的邏輯關係。</p>
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>先理解「時間軸」：事故發生前備份資料（RPO）→ 事故發生 → 搶修時間（RTO）→ 忍耐極限（MTD）。</li>
+                    <li>定義各名詞：
+                        <ul>
+                            <li><strong>災害復原（Disaster Recovery）：</strong> 系統遇到大故障後，把服務恢復回來的整套計畫。</li>
+                            <li><strong>RPO（Recovery Point Objective，恢復點目標）：</strong> 最多能容忍「資料倒退」到多久以前；像是最多只能丟失 1 小時的資料。</li>
+                            <li><strong>RTO（Recovery Time Objective，恢復時間目標）：</strong> 最多能容忍「服務停多久」；像是必須在 2 小時內修好系統。</li>
+                            <li><strong>MTD（Maximum Tolerable Downtime，最大可中斷時間）：</strong> 業務最久能忍受的總停機時間上限；超過這個時間，公司可能就會倒閉或損失慘重。</li>
+                            <li><strong>BIA（Business Impact Analysis，營運衝擊分析）：</strong> 評估哪個系統停了會造成多大損失，幫你排優先順序的分析工作。</li>
+                        </ul>
+                    </li>
+                    <li>檢查邏輯：修復系統的目標時間（RTO）當然不能超過公司忍耐的極限（MTD）。如果 RTO > MTD，代表「修好的時候公司已經倒了」，這樣規劃沒有意義。</li>
+                </ol>
+            </div>
+        </details>
+
+        <!-- 5. 第四步：選項分析 -->
+        <details id="step-4">
+            <summary>解析第四步：選項分析</summary>
+            <div class="details-content">
+                <p>我們逐一檢查選項：</p>
+                <ul>
+                    <li>
+                        <strong>(A) 恢復點目標（RPO）的設定應考量資料備份頻率 —— <span style="color:var(--success-color)">[正確]</span></strong>
+                        <br>說明：RPO 決定了我們能容忍丟失多少資料。如果你設定 RPO = 1 小時（最多丟失 1 小時資料），那你至少每小時就要備份一次。所以 RPO 跟備份頻率是直接綁定的。
+                    </li>
+                    <br>
+                    <li>
+                        <strong>(B) 最大可中斷時間（MTD）的設定，應符合組織所訂定之可用性的資安目標 —— <span style="color:var(--success-color)">[正確]</span></strong>
+                        <br>說明：MTD 是業務單位的底線。例如銀行的資安目標是「不可中斷超過 4 小時」，那 MTD 就會依據這個目標來設定。
+                    </li>
+                    <br>
+                    <li>
+                        <strong>(C) 恢復時間目標（RTO）之設定與最大可中斷時間（MTD）無關 —— <span style="color:var(--error-color)">[錯誤]</span></strong>
+                        <br>說明：這句是大錯特錯。<strong>RTO 必須小於或等於 MTD</strong>。
+                        <br>理由：MTD 是「死線」（忍耐極限），RTO 是「計畫修復時間」。你計畫修好的時間，一定要在死線之前，否則救回來也沒用了。兩者高度相關。
+                    </li>
+                    <br>
+                    <li>
+                        <strong>(D) 營運衝擊分析（BIA）可協助評估各個系統的重要性 —— <span style="color:var(--success-color)">[正確]</span></strong>
+                        <br>說明：BIA 的目的就是分析每個業務如果不見了會賠多少錢、有多痛。越痛的系統越重要，要優先復原。
+                    </li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- 6. 觀念補充與延伸 -->
+        <details id="step-6">
+            <summary>觀念補充與延伸</summary>
+            <div class="details-content">
+                <p><strong>核心觀念定位：</strong> 本題屬於「營運持續管理/災害復原（BCP/DRP）」章節。</p>
+                <p><strong>法條或定義：</strong></p>
+                <ul>
+                    <li><strong>RPO (資料面)：</strong> 災害發生時，系統與數據必須恢復到的時間點（白話：資料可以有多舊）。</li>
+                    <li><strong>RTO (服務面)：</strong> 災害發生後，系統或流程必須恢復運作的時間長度（白話：要修多久）。</li>
+                </ul>
+                <p><strong>觸類旁通：</strong></p>
+                <ul>
+                    <li><strong>對比概念：</strong>
+                        <ul>
+                            <li>備份 (Backup)：把資料拷貝一份（手段）。</li>
+                            <li>災害復原 (DR)：系統掛掉後救回來（IT 系統層次）。</li>
+                            <li>營運持續 (BC)：公司遭遇災難還能持續做生意（包含人員、辦公室、流程、IT）。</li>
+                        </ul>
+                    </li>
+                    <li><strong>變化題型：</strong>
+                        <ul>
+                            <li>問：如果每天晚上 12 點備份一次，RPO 最小是多少？答：24 小時（最慘會丟失一整天資料）。</li>
+                            <li>問：決定優先復原哪個系統是誰的工作？答：BIA（營運衝擊分析）。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- 7. 記憶口訣 -->
+        <details id="step-7">
+            <summary>記憶口訣</summary>
+            <div class="details-content">
+                <p>為了不搞混 RPO 和 RTO，請記住以下口訣：</p>
+                <blockquote style="border-left: 4px solid var(--accent-color); padding-left: 10px; margin: 10px 0;">
+                    <p><strong>P 是 Point (點) → 時間點 → 資料回到過去哪個點 (資料丟多少)</strong></p>
+                    <p><strong>T 是 Time (時間) → 時間長 → 服務要停多長時間 (修復要多久)</strong></p>
+                    <p><strong>MTD 是 Boss → 老闆能忍受的極限，RTO 不能超過它！</strong></p>
+                </blockquote>
+            </div>
+        </details>
+
+        <!-- 8. 常見陷阱 -->
+        <details id="step-8">
+            <summary>常見陷阱</summary>
+            <div class="details-content">
+                <p><strong>學生最容易搞混的地方：</strong></p>
+                <ul>
+                    <li>把 RPO 當成「修復時間」：RPO 只管「資料新舊」，不管修多久。</li>
+                    <li>以為 RTO 越短越好且無代價：RTO 要越短，成本（錢）就越高（如熱備援），所以要依據 MTD 找平衡點，不是越短越好。</li>
+                </ul>
+                <p><strong>避坑指南：</strong></p>
+                <p>看到題目問「要花多久修好」，直接找有 T (Time) 的 RTO。</p>
+                <p>看到題目問「資料遺失量」、「備份間隔」，直接找有 P (Point) 的 RPO。</p>
+            </div>
+        </details>
+
+        <!-- 9. 正確答案 -->
+        <details id="step-9">
+            <summary>正確答案</summary>
+            <div class="details-content">
+                <p><strong>答案：(C)</strong></p>
+                <p><strong>一句話理由：</strong> RTO (預計修復時間) 必須小於或等於 MTD (最大可容忍中斷時間)，兩者有絕對的相依關係，絕非無關。</p>
+            </div>
+        </details>
+
+        <!-- 10. 自我檢測 -->
+        <details id="step-10">
+            <summary>自我檢測</summary>
+            <div class="details-content">
+                <div class="self-test-item">
+                    <p>1. 如果公司要求資料完全不能遺失（Zero Data Loss），請問 RPO 應該設為多少？</p>
+                    <button class="show-answer-btn" onclick="toggleAnswer(this)">點我看答案</button>
+                    <div class="hidden-answer">答：0 (需要同步鏡像備份)</div>
+                </div>
+                <div class="self-test-item">
+                    <p>2. 某系統 MTD 為 8 小時，RTO 設定為 10 小時，這樣的規劃合理嗎？</p>
+                    <button class="show-answer-btn" onclick="toggleAnswer(this)">點我看答案</button>
+                    <div class="hidden-answer">答：不合理 (RTO 必須 <= MTD，否則公司會先因中斷過久而受損)</div>
+                </div>
+                <div class="self-test-item">
+                    <p>3. 哪一個分析過程可以產出 MTD 數值？</p>
+                    <button class="show-answer-btn" onclick="toggleAnswer(this)">點我看答案</button>
+                    <div class="hidden-answer">答：BIA (營運衝擊分析)</div>
+                </div>
+            </div>
+        </details>
+
+    </div>
+</div>
+
+<script>
+    // Elements
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const darkModeBtn = document.getElementById('darkModeBtn');
+    const resultArea = document.getElementById('result-area');
+    const resultBanner = document.getElementById('result-banner');
+    const options = document.getElementsByName('answer');
+    
+    // Correct Answer Definition
+    const CORRECT_ANSWER = 'C';
+
+    // Dark Mode Logic
+    function initDarkMode() {
+        const isDark = localStorage.getItem('darkMode') === 'true';
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            darkModeBtn.innerText = '日間模式';
+        }
+    }
+
+    darkModeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDark);
+        darkModeBtn.innerText = isDark ? '日間模式' : '夜間模式';
+    });
+
+    // Interaction Logic
+    submitBtn.addEventListener('click', () => {
+        let selected = null;
+        for (let opt of options) {
+            if (opt.checked) {
+                selected = opt.value;
+                break;
+            }
+        }
+
+        if (!selected) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // Show Result Area
+        resultArea.style.display = 'block';
+
+        // Set Banner Text and Style
+        if (selected === CORRECT_ANSWER) {
+            resultBanner.innerText = `答對了！正確答案是 (${CORRECT_ANSWER})`;
+            resultBanner.className = 'result-card result-correct';
+        } else {
+            resultBanner.innerText = `答錯了。正確答案是 (${CORRECT_ANSWER})，您選擇了 (${selected})`;
+            resultBanner.className = 'result-card result-wrong';
+        }
+
+        // Auto-expand specific sections (Step 9 and Step 4)
+        document.getElementById('step-4').open = true;
+        document.getElementById('step-9').open = true;
+
+        // Scroll to result
+        resultArea.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    resetBtn.addEventListener('click', () => {
+        // Clear radio buttons
+        for (let opt of options) {
+            opt.checked = false;
+        }
+
+        // Hide result area
+        resultArea.style.display = 'none';
+
+        // Collapse all details
+        const details = document.querySelectorAll('details');
+        details.forEach(d => d.open = false);
+
+        // Reset self-test answers
+        const hiddenAnswers = document.querySelectorAll('.hidden-answer');
+        hiddenAnswers.forEach(h => h.style.display = 'none');
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Self Test Toggle Logic
+    window.toggleAnswer = function(btn) {
+        const answerDiv = btn.nextElementSibling;
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+            btn.innerText = '點我看答案';
+        } else {
+            answerDiv.style.display = 'block';
+            btn.innerText = '隱藏答案';
+        }
+    };
+
+    // Initialize
+    initDarkMode();
+
+</script>
+
+</body>
+</html>

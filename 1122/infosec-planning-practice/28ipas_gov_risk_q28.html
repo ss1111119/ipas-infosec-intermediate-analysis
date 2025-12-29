@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ipas_gov_risk_q28.html</title>
+<style>
+    :root {
+        --bg-color: #f9f9f9;
+        --card-bg: #ffffff;
+        --text-color: #333333;
+        --border-color: #dddddd;
+        --primary-color: #2c3e50;
+        --accent-color: #0056b3;
+        --highlight-bg: #fff3cd;
+        --highlight-text: #856404;
+        --success-color: #28a745;
+        --error-color: #dc3545;
+        --accordion-header-bg: #f1f1f1;
+        --btn-hover: #e2e6ea;
+    }
+
+    [data-theme="dark"] {
+        --bg-color: #1a1a1a;
+        --card-bg: #2d2d2d;
+        --text-color: #e0e0e0;
+        --border-color: #444444;
+        --primary-color: #e0e0e0;
+        --accent-color: #66b2ff;
+        --highlight-bg: #4a4a2a;
+        --highlight-text: #ffeeba;
+        --success-color: #5cb85c;
+        --error-color: #d9534f;
+        --accordion-header-bg: #3d3d3d;
+        --btn-hover: #444444;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        line-height: 1.6;
+        font-size: 18px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* Header */
+    .header-bar {
+        background-color: var(--card-bg);
+        border-bottom: 1px solid var(--border-color);
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 16px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .file-name {
+        font-family: monospace;
+        color: var(--accent-color);
+        font-weight: bold;
+    }
+
+    .theme-toggle {
+        background: none;
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 4px;
+    }
+
+    /* Layout */
+    .container {
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 0 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Cards */
+    .card {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    h1, h2, h3 {
+        margin-top: 0;
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+    
+    h1 { font-size: 22px; margin-bottom: 15px; }
+    h2 { font-size: 20px; margin-bottom: 12px; }
+    h3 { font-size: 19px; margin-bottom: 10px; }
+
+    /* Question Styles */
+    .question-meta {
+        font-size: 16px;
+        color: var(--accent-color);
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+
+    .question-text {
+        font-size: 19px;
+        margin-bottom: 20px;
+    }
+
+    /* Interaction Styles */
+    .options-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .option-label {
+        display: flex;
+        align-items: flex-start;
+        padding: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .option-label:hover {
+        background-color: var(--btn-hover);
+    }
+
+    .option-label input[type="checkbox"] {
+        margin-top: 5px;
+        margin-right: 12px;
+        transform: scale(1.3);
+    }
+
+    .action-area {
+        margin-top: 25px;
+        display: flex;
+        gap: 15px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 18px;
+        cursor: pointer;
+        flex: 1;
+        transition: opacity 0.2s;
+    }
+
+    .btn-submit {
+        background-color: var(--accent-color);
+        color: white;
+    }
+
+    .btn-reset {
+        background-color: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+    }
+
+    .btn:hover {
+        opacity: 0.9;
+    }
+
+    /* Result Display */
+    #result-card {
+        display: none;
+        margin-top: 20px;
+        padding: 15px;
+        background-color: var(--accordion-header-bg);
+        border-left: 5px solid var(--accent-color);
+    }
+
+    .result-status {
+        font-weight: bold;
+        font-size: 20px;
+        margin-bottom: 5px;
+    }
+
+    .result-status.correct { color: var(--success-color); }
+    .result-status.partial { color: #d39e00; }
+    .result-status.wrong { color: var(--error-color); }
+
+    /* Analysis Accordion */
+    .analysis-section {
+        grid-column: 1 / -1;
+        display: none; /* Hidden by default */
+        margin-top: 20px;
+    }
+
+    .accordion-item {
+        border: 1px solid var(--border-color);
+        margin-bottom: 10px;
+        border-radius: 6px;
+        overflow: hidden;
+        background-color: var(--card-bg);
+    }
+
+    .accordion-header {
+        width: 100%;
+        background-color: var(--accordion-header-bg);
+        padding: 15px 20px;
+        text-align: left;
+        border: none;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-color);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .accordion-header::after {
+        content: '+';
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .accordion-header.active::after {
+        content: '-';
+    }
+
+    .accordion-content {
+        display: none;
+        padding: 20px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .accordion-content.show {
+        display: block;
+    }
+
+    /* Special text styles */
+    mark {
+        background-color: var(--highlight-bg);
+        color: var(--highlight-text);
+        padding: 0 4px;
+        border-radius: 2px;
+    }
+
+    .keyword-explanation {
+        font-size: 0.95em;
+        color: var(--text-color);
+        margin-left: 20px;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    ul {
+        margin: 10px 0 10px 20px;
+        padding: 0;
+    }
+
+    li {
+        margin-bottom: 8px;
+    }
+
+    .hidden-answer {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: var(--bg-color);
+        border: 1px dashed var(--border-color);
+        display: none;
+    }
+    
+    .toggle-answer-btn {
+        background: none;
+        border: none;
+        color: var(--accent-color);
+        text-decoration: underline;
+        cursor: pointer;
+        padding: 0;
+        font-size: 16px;
+        margin-top: 5px;
+    }
+
+</style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <div>
+            <span class="file-name">ipas_gov_risk_q28.html</span> | iPAS 資訊安全規劃實務
+        </div>
+        <button class="theme-toggle" id="themeToggle">夜間模式</button>
+    </div>
+
+    <div class="container">
+        <!-- Left Column: Question -->
+        <div class="card">
+            <div class="question-meta">題號：28（複選題）</div>
+            <div class="question-text">
+                依照我國《行政院及所屬各機關風險管理及危機處理作業原則》之規定，下列哪些作業事項屬於風險辨識（Identification）及評估（Evaluation）階段？（複選）
+            </div>
+        </div>
+
+        <!-- Right Column: Interaction -->
+        <div class="card">
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="A">
+                    <span>(A) 建立、審視風險圖像（Profile）</span>
+                </label>
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="B">
+                    <span>(B) 發掘相關風險資料</span>
+                </label>
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="C">
+                    <span>(C) 分析風險</span>
+                </label>
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="D">
+                    <span>(D) 布建控制措施（Controls）</span>
+                </label>
+            </div>
+
+            <div id="result-card">
+                <div class="result-status" id="resultStatus"></div>
+                <div id="resultCorrectAnswer"></div>
+            </div>
+
+            <div class="action-area">
+                <button class="btn btn-submit" id="submitBtn">送出答案</button>
+                <button class="btn btn-reset" id="resetBtn">重做一次</button>
+            </div>
+        </div>
+
+        <!-- Full Width: Analysis (Accordion) -->
+        <div class="analysis-section" id="analysisSection">
+            
+            <!-- 1. 題目 -->
+            <div class="accordion-item">
+                <button class="accordion-header">1. 【題目】</button>
+                <div class="accordion-content">
+                    <p>依照我國《行政院及所屬各機關風險管理及危機處理作業原則》之規定，下列哪些作業事項屬於風險辨識（Identification）及評估（Evaluation）階段？（複選）</p>
+                </div>
+            </div>
+
+            <!-- 2. 第一步：找關鍵字 -->
+            <div class="accordion-item">
+                <button class="accordion-header">2. 【第一步：找關鍵字】</button>
+                <div class="accordion-content">
+                    <p>
+                        <mark>作業原則</mark>、<mark>風險辨識</mark>、<mark>評估</mark>、<mark>風險圖像</mark>、<mark>風險資料</mark>、<mark>分析風險</mark>、<mark>控制措施</mark>、<mark>複選</mark>
+                    </p>
+                    <span class="keyword-explanation">● 作業原則：本題依據的法規基礎，定義了政府機關的風險管理流程。</span>
+                    <span class="keyword-explanation">● 風險辨識：找出潛在風險的步驟。</span>
+                    <span class="keyword-explanation">● 評估：判斷風險嚴重程度的步驟。</span>
+                    <span class="keyword-explanation">● 風險圖像：將風險整理成視覺化或列表的全貌。</span>
+                    <span class="keyword-explanation">● 風險資料：作為判斷依據的資訊。</span>
+                    <span class="keyword-explanation">● 分析風險：研究風險發生的可能性與影響。</span>
+                    <span class="keyword-explanation">● 控制措施：用來降低或處理風險的具體手段（本題的干擾項）。</span>
+                    <span class="keyword-explanation">● 複選：提示正確答案不只一個。</span>
+                </div>
+            </div>
+
+            <!-- 3. 第二步：白話翻譯 -->
+            <div class="accordion-item">
+                <button class="accordion-header">3. 【第二步：白話翻譯】</button>
+                <div class="accordion-content">
+                    <p>這題用高中生日常口語來說，就是在問：</p>
+                    <p>「在政府規定的風險管理流程裡，哪些工作算是在『找風險』、『把風險搞清楚』和『排出嚴重程度』的階段？」</p>
+                </div>
+            </div>
+
+            <!-- 4. 第三步：解題思路 -->
+            <div class="accordion-item">
+                <button class="accordion-header">4. 【第三步：解題思路】</button>
+                <div class="accordion-content">
+                    <p><strong>這題在考什麼觀念？</strong> 考你是否分得清楚「發現問題（辨識/評估）」與「解決問題（處理/控制）」的區別。</p>
+                    <p><strong>解題步驟：</strong></p>
+                    <ol>
+                        <li>先區分「階段」：題目問的是前段的「辨識與評估」。</li>
+                        <li>再看「動作」：選項中屬於「蒐集」、「分析」、「整理」的通常是評估階段；屬於「執行」、「實施」、「布建」的通常是處理階段。</li>
+                        <li>刪去法：把屬於「動手解決」的選項剔除。</li>
+                    </ol>
+                    <p><strong>原理與規則：</strong></p>
+                    <p>先講階段分工：辨識/評估是「找出來＋看多嚴重」，控制措施是「開始做事處理」。</p>
+                    <ul>
+                        <li><strong>作業原則</strong>（政府機關做風險管理時的流程規範）</li>
+                        <li><strong>風險辨識</strong>（把可能出事的地方找出來、列清單）</li>
+                        <li><strong>風險評估</strong>（把每個風險的可能性與影響程度評出高低）</li>
+                        <li><strong>風險圖像 Profile</strong>（把風險用圖表/清單整理成「全貌」，像風險地圖，讓管理者一眼看懂現況，這屬於評估後的產出）</li>
+                        <li><strong>控制措施 Controls</strong>（用來降低風險的做法，例如制度、技術、流程，這是評估完之後才要做的）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 5. 第四步：選項分析 -->
+            <div class="accordion-item" id="accordion-step4">
+                <button class="accordion-header">5. 【第四步：選項分析】</button>
+                <div class="accordion-content">
+                    <ul>
+                        <li><strong>(A) 建立、審視風險圖像（Profile）：正確。</strong><br>
+                            風險圖像（Risk Profile）是對已識別風險的綜合描述與整理。它是在辨識與分析之後，將風險全貌呈現出來的過程，屬於「評估」階段的總結產出，目的是讓決策者看清現狀。
+                        </li>
+                        <li><strong>(B) 發掘相關風險資料：正確。</strong><br>
+                            這就是「風險辨識」的核心工作，要找出風險在哪裡，必須先蒐集與發掘資料。
+                        </li>
+                        <li><strong>(C) 分析風險：正確。</strong><br>
+                            分析風險發生的機率與影響程度，這正是「風險評估」的核心定義。
+                        </li>
+                        <li><strong>(D) 布建控制措施（Controls）：錯誤。</strong><br>
+                            「布建」意味著開始執行對策。控制措施屬於後續的「風險處理（Risk Treatment）」或「風險回應」階段，不是前面的辨識與評估階段。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 6. 觀念補充與延伸 -->
+            <div class="accordion-item">
+                <button class="accordion-header">6. 【觀念補充與延伸】</button>
+                <div class="accordion-content">
+                    <p><strong>核心觀念定位：</strong>本題屬於「資安治理/風險管理流程（政府機關作業原則）」常考題。</p>
+                    <p><strong>法條或定義：</strong></p>
+                    <p>風險管理流程通常分為：</p>
+                    <ol>
+                        <li><strong>辨識（Identification）：</strong>找出風險源。</li>
+                        <li><strong>分析與評估（Analysis & Evaluation）：</strong>決定風險等級，產出風險圖像。</li>
+                        <li><strong>處理（Treatment）/ 控制（Controls）：</strong>選擇並執行對策（如降低、規避、轉移）。</li>
+                        <li><strong>監督與審查（Monitoring）：</strong>持續觀察。</li>
+                    </ol>
+                    <p><strong>觸類旁通（舉一反三）：</strong></p>
+                    <ul>
+                        <li><strong>對比概念：</strong>辨識/評估（找+評） vs 控制措施（做+降）。</li>
+                        <li><strong>變化題型：</strong>如果題目把題幹改成「風險回應/處理階段」，那麼 (D) 就會變成正確答案，而 A、B、C 則變錯。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 7. 記憶口訣 -->
+            <div class="accordion-item">
+                <button class="accordion-header">7. 【記憶口訣】</button>
+                <div class="accordion-content">
+                    <p>「先找（辨識）再評（評估），最後才做（控制）」</p>
+                    <p>或是：蒐集分析畫圖像，都是評估在幫忙；布建實施做控制，那是處理在最後。</p>
+                </div>
+            </div>
+
+            <!-- 8. 常見陷阱 -->
+            <div class="accordion-item">
+                <button class="accordion-header">8. 【常見陷阱】</button>
+                <div class="accordion-content">
+                    <ul>
+                        <li>把「分析」誤以為是控制措施：分析只是在大腦或紙上作業，還沒實際動手改系統，所以不算控制。</li>
+                        <li>看到 Controls 就以為是評估的一部分：這是英文名詞的混淆，Evaluation (評估) 與 Controls (控制) 是完全不同的階段。</li>
+                        <li><strong>避坑指南：</strong>看到「布建、導入、實施、執行」通常是處理階段；看到「蒐集、整理、分析、審視、圖像」多半是辨識與評估。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 9. 正確答案 -->
+            <div class="accordion-item" id="accordion-correct">
+                <button class="accordion-header">9. 【正確答案】</button>
+                <div class="accordion-content">
+                    <p><strong>答案：A、B、C</strong></p>
+                    <p><strong>一句話理由：</strong>辨識與評估做的是蒐集、整理、分析風險；控制措施屬於後續風險處理。</p>
+                </div>
+            </div>
+
+            <!-- 10. 自我檢測 -->
+            <div class="accordion-item">
+                <button class="accordion-header">10. 【自我檢測】</button>
+                <div class="accordion-content">
+                    <p>試試看，回答下列延伸小問題：</p>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <p><strong>Q1. 如果選項出現「決定風險等級（Risk Level）」，這屬於辨識評估還是風險處理？</strong></p>
+                        <button class="toggle-answer-btn" onclick="toggleAnswer('ans1')">點我看答案</button>
+                        <div id="ans1" class="hidden-answer">
+                            屬於「評估」。決定等級是分析後的結果，用來排定優先順序，還沒開始處理。
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <p><strong>Q2. 「購買防火牆設備」屬於哪一個階段？</strong></p>
+                        <button class="toggle-answer-btn" onclick="toggleAnswer('ans2')">點我看答案</button>
+                        <div id="ans2" class="hidden-answer">
+                            屬於「風險處理（控制措施）」。這是實際降低風險的行動。
+                        </div>
+                    </div>
+
+                    <div>
+                        <p><strong>Q3. 風險圖像（Risk Profile）通常是在風險處理完畢後才第一次建立嗎？</strong></p>
+                        <button class="toggle-answer-btn" onclick="toggleAnswer('ans3')">點我看答案</button>
+                        <div id="ans3" class="hidden-answer">
+                            不是。通常在「評估」階段就會建立，這樣管理者才知道要優先處理誰；處理後會再更新圖像以檢視成效。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<script>
+    // Theme Toggle Logic
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const htmlElement = document.documentElement;
+    
+    // Check localStorage for theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        htmlElement.setAttribute('data-theme', 'dark');
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+        if (htmlElement.getAttribute('data-theme') === 'dark') {
+            htmlElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+        } else {
+            htmlElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        }
+    });
+
+    // Accordion Logic
+    const accordions = document.querySelectorAll('.accordion-header');
+    accordions.forEach(header => {
+        header.addEventListener('click', () => {
+            header.classList.toggle('active');
+            const content = header.nextElementSibling;
+            content.classList.toggle('show');
+        });
+    });
+
+    // Quiz Logic
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const resultCard = document.getElementById('result-card');
+    const resultStatus = document.getElementById('resultStatus');
+    const resultCorrectAnswer = document.getElementById('resultCorrectAnswer');
+    const analysisSection = document.getElementById('analysisSection');
+    const options = document.querySelectorAll('input[name="option"]');
+    
+    // Correct answers for this specific question
+    const correctAnswers = ['A', 'B', 'C'];
+
+    submitBtn.addEventListener('click', () => {
+        // Get user selected values
+        const selected = Array.from(options)
+            .filter(opt => opt.checked)
+            .map(opt => opt.value);
+
+        // Logic check
+        const isExactMatch = selected.length === correctAnswers.length && 
+                             selected.every(val => correctAnswers.includes(val));
+        
+        const hasWrongSelection = selected.some(val => !correctAnswers.includes(val));
+        const hasCorrectSelection = selected.some(val => correctAnswers.includes(val));
+
+        // Display Result Status
+        resultCard.style.display = 'block';
+        
+        if (selected.length === 0) {
+            resultStatus.textContent = '未作答';
+            resultStatus.className = 'result-status wrong';
+        } else if (isExactMatch) {
+            resultStatus.textContent = '完全正確';
+            resultStatus.className = 'result-status correct';
+        } else if (!hasWrongSelection && hasCorrectSelection) {
+            resultStatus.textContent = '部分正確（少選）';
+            resultStatus.className = 'result-status partial';
+        } else {
+            resultStatus.textContent = '錯誤';
+            resultStatus.className = 'result-status wrong';
+        }
+
+        resultCorrectAnswer.innerHTML = `正確答案：<strong>${correctAnswers.join('、')}</strong>`;
+
+        // Show Analysis
+        analysisSection.style.display = 'block';
+
+        // Auto expand specific sections
+        // Close all first to reset state
+        document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('show'));
+        document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
+
+        // Open "Option Analysis" (Step 4) - ID: accordion-step4
+        const step4Header = document.querySelector('#accordion-step4 .accordion-header');
+        const step4Content = document.querySelector('#accordion-step4 .accordion-content');
+        if(step4Header && step4Content) {
+            step4Header.classList.add('active');
+            step4Content.classList.add('show');
+        }
+
+        // Open "Correct Answer" (Section 9) - ID: accordion-correct
+        const correctHeader = document.querySelector('#accordion-correct .accordion-header');
+        const correctContent = document.querySelector('#accordion-correct .accordion-content');
+        if(correctHeader && correctContent) {
+            correctHeader.classList.add('active');
+            correctContent.classList.add('show');
+        }
+
+        // Scroll to analysis
+        analysisSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    resetBtn.addEventListener('click', () => {
+        // Clear checkboxes
+        options.forEach(opt => opt.checked = false);
+        
+        // Hide results and analysis
+        resultCard.style.display = 'none';
+        analysisSection.style.display = 'none';
+        
+        // Collapse all accordions
+        document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('show'));
+        document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
+
+        // Hide self-test answers
+        document.querySelectorAll('.hidden-answer').forEach(el => el.style.display = 'none');
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Helper for self-test answers
+    window.toggleAnswer = function(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    };
+
+</script>
+</body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_zta_q17.html - iPAS 資安工程師題目教學</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --accent-color: #2c3e50;
+            --hover-bg: #f8f9fa;
+            --correct-color: #2e7d32;
+            --error-color: #c62828;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --card-bg: #ffffff;
+            --btn-bg: #e0e0e0;
+            --btn-text: #000000;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --border-color: #444444;
+            --accent-color: #81d4fa;
+            --hover-bg: #2d2d2d;
+            --correct-color: #66bb6a;
+            --error-color: #ef5350;
+            --highlight-bg: #4a3b18;
+            --highlight-text: #ffd54f;
+            --card-bg: #262626;
+            --btn-bg: #444444;
+            --btn-text: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            font-size: 16px; /* 基準字體 */
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* 標題字級控制：與內文差距極小 */
+        h1 { font-size: 18px; font-weight: bold; margin: 0; }
+        h2 { font-size: 17px; font-weight: bold; margin: 10px 0; border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; }
+        h3 { font-size: 16.5px; font-weight: bold; margin: 15px 0 5px 0; color: var(--accent-color); }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-info span {
+            margin-right: 15px;
+            font-size: 14px;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .left-panel, .right-panel {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* 圖片樣式 */
+        .q-image-container {
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .q-image {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            cursor: zoom-in;
+            border-radius: 4px;
+        }
+
+        /* 選項樣式 */
+        .options-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .option-item {
+            margin-bottom: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .option-input {
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button.primary-btn {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button.secondary-btn {
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* 結果顯示 */
+        #result-area {
+            display: none;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .result-correct {
+            background-color: rgba(46, 125, 50, 0.1);
+            color: var(--correct-color);
+            border: 1px solid var(--correct-color);
+        }
+
+        .result-wrong {
+            background-color: rgba(198, 40, 40, 0.1);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        /* 手風琴 (Accordion) */
+        .accordion {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-header {
+            background-color: var(--hover-bg);
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        /* 特殊標記 */
+        mark {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* 圖片模態框 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 4px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* 自我檢測隱藏區 */
+        details {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        summary:hover {
+            text-decoration: underline;
+        }
+
+        /* 手機版調整 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .header-info {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            h1 {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-info">
+        <span>檔名：ipas_zta_q17.html</span>
+        <span>科目：資安工程師 (iPAS)</span>
+        <span>題號：17</span>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">切換夜間模式</button>
+</header>
+
+<div class="container">
+    <!-- 左側：題目與圖片 -->
+    <div class="left-panel">
+        <div class="card">
+            <h2>題目內容</h2>
+            <p>17. 如附圖所示，關於 NIST SP 800-207 零信任架構（Zero Trust Architecture）的抽象模型敘述，下列何項錯誤？</p>
+            
+            <div class="q-image-container">
+                <img src="https://i.meee.com.tw/z61mYUR.jpg" alt="NIST SP 800-207 零信任抽象模型示意圖" class="q-image" onclick="openModal(this.src)">
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">（點擊圖片可放大）</div>
+            </div>
+
+            <p><strong>選項：</strong></p>
+            <div class="options-list">
+                <div style="padding: 8px;">(A) 政策決策點（Policy Decision Point，PDP）/政策落實點（Policy Enforcement Point，PEP）須適當判斷主體是否可存取資源</div>
+                <div style="padding: 8px;">(B) 零信任（Zero Trust）提供準則與概念，可使 PDP/PEP 移動並貼近資源</div>
+                <div style="padding: 8px;">(C) PDP/PEP 已提供一系列控制，因此通過 PEP 的流量便能取得最高層級信任</div>
+                <div style="padding: 8px;">(D) 隱式信任區（Implicit Trust Zone）：區域中實體至少達到最後 PDP/PEP 的信任等級</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右側：作答與解析 -->
+    <div class="right-panel">
+        <div class="card">
+            <h2>作答區</h2>
+            <form id="quiz-form">
+                <div class="options-list">
+                    <div class="option-item">
+                        <label class="option-label">
+                            <input type="radio" name="answer" value="A" class="option-input">
+                            <span>(A)</span>
+                        </label>
+                    </div>
+                    <div class="option-item">
+                        <label class="option-label">
+                            <input type="radio" name="answer" value="B" class="option-input">
+                            <span>(B)</span>
+                        </label>
+                    </div>
+                    <div class="option-item">
+                        <label class="option-label">
+                            <input type="radio" name="answer" value="C" class="option-input">
+                            <span>(C)</span>
+                        </label>
+                    </div>
+                    <div class="option-item">
+                        <label class="option-label">
+                            <input type="radio" name="answer" value="D" class="option-input">
+                            <span>(D)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="action-area">
+                    <button type="button" class="primary-btn" onclick="submitAnswer()">送出答案</button>
+                    <button type="button" class="secondary-btn" onclick="resetQuiz()">重做一次</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 結果顯示區 -->
+        <div id="result-area"></div>
+
+        <!-- 解析區 (Accordion) -->
+        <div id="explanation-area" class="accordion" style="display: none;">
+            
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">1. 【題目】</div>
+                <div class="accordion-content">
+                    <p>如附圖所示，關於 NIST SP 800-207 零信任架構（Zero Trust Architecture）的抽象模型敘述，下列何項錯誤？</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">2. 【第一步：找關鍵字】</div>
+                <div class="accordion-content">
+                    <ul>
+                        <li><mark>NIST SP 800-207</mark>：這是美國國家標準技術研究所發布的「零信任架構」標準文件，是解題的權威依據。</li>
+                        <li><mark>零信任架構 (ZTA)</mark>：核心精神是「永不信任，始終驗證」。</li>
+                        <li><mark>抽象模型</mark>：指圖中包含 PDP（大腦）、PEP（手腳）與資源互動的邏輯關係。</li>
+                        <li><mark>PDP/PEP</mark>：控制存取的關鍵元件。</li>
+                        <li><mark>Implicit Trust Zone</mark>：隱式信任區，這是一個容易被誤解的技術名詞。</li>
+                        <li><mark>錯誤</mark>：這題要選敘述不正確的選項。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">3. 【第二步：白話翻譯】</div>
+                <div class="accordion-content">
+                    <p>這題在問：「看著這張零信任的架構圖，根據 NIST 的標準定義，下面哪一句話是『鬼扯』的？」</p>
+                    <p>重點在於找出違背零信任「不輕易信任」原則的敘述。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">4. 【第三步：解題思路】</div>
+                <div class="accordion-content">
+                    <p><strong>這題在考什麼觀念？</strong> 考你是否理解零信任架構中「信任是動態且最小化的」，而非一次通過就永久信任。</p>
+                    <p><strong>解題步驟：</strong></p>
+                    <ol>
+                        <li>回想零信任核心定義：沒有邊界、不預設信任、持續評估。</li>
+                        <li>理解元件定義：
+                            <ul>
+                                <li><strong>NIST SP 800-207</strong>：(美國 NIST 發布的零信任架構指引文件)</li>
+                                <li><strong>Zero Trust Architecture</strong>：(把「不預設信任」當成設計原則的架構)</li>
+                                <li><strong>Policy Decision Point, PDP</strong>：(負責做是否放行決策的「大腦」，分為策略引擎與策略管理者)</li>
+                                <li><strong>Policy Enforcement Point, PEP</strong>：(負責把決策「真的擋下來/放行」的「門禁」，位於主體與資源之間)</li>
+                                <li><strong>Implicit Trust Zone</strong>：(在某段網路/系統範圍內，彼此被當成「相對可信」的區域；零信任要把它縮到最小)</li>
+                            </ul>
+                        </li>
+                        <li>檢視選項：尋找是否有「過度信任」或「一次性驗證」的描述。</li>
+                    </ol>
+                    <p><strong>原理與規則：</strong> 零信任強調「持續驗證」。即使你通過了 PEP（門禁），只代表你獲准進行「這一次」的操作，並不代表你獲得了「最高層級信任」。如果你的行為突然異常，下一次請求可能就會被擋下。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item" id="accordion-step4">
+                <div class="accordion-header" onclick="toggleAccordion(this)">5. 【第四步：選項分析】</div>
+                <div class="accordion-content">
+                    <ul>
+                        <li>
+                            <strong>(A) PDP/PEP 須適當判斷主體是否可存取資源</strong><br>
+                            <span style="color: var(--correct-color); font-weight: bold;">[正確]</span><br>
+                            白話說明：這就是它們的工作。PDP（大腦）下指令，PEP（門禁）執行，來決定要不要讓你過。
+                        </li>
+                        <li style="margin-top: 10px;">
+                            <strong>(B) 零信任提供準則與概念，可使 PDP/PEP 移動並貼近資源</strong><br>
+                            <span style="color: var(--correct-color); font-weight: bold;">[正確]</span><br>
+                            白話說明：傳統防火牆只擋在最外圈。零信任架構允許我們把檢查點（PEP）直接放在應用程式或資料庫前面（微分割 Micro-segmentation），保護得更緊密。
+                        </li>
+                        <li style="margin-top: 10px;">
+                            <strong>(C) PDP/PEP 已提供一系列控制，因此通過 PEP 的流量便能取得最高層級信任</strong><br>
+                            <span style="color: var(--error-color); font-weight: bold;">[錯誤]</span><br>
+                            白話說明：錯在「最高層級信任」。零信任原則是「最小權限」和「持續驗證」。通過檢查只代表「允許這次存取」，絕不會給你一張「無敵通行證」讓你以後隨便進出。
+                        </li>
+                        <li style="margin-top: 10px;">
+                            <strong>(D) 隱式信任區（Implicit Trust Zone）：區域中實體至少達到最後 PDP/PEP 的信任等級</strong><br>
+                            <span style="color: var(--correct-color); font-weight: bold;">[正確]</span><br>
+                            白話說明：這是 NIST 800-207 的定義。意思是，在這個小圈圈（Zone）裡面的東西，被視為擁有相同的信任等級。但零信任的目標是要把這個圈圈縮到越小越好，才不會讓駭客進來後到處亂跑。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">6. 【觀念補充與延伸】</div>
+                <div class="accordion-content">
+                    <p><strong>核心觀念定位：</strong> 本題屬於「零信任/ZTA 架構」章節。常見考法還包含：PDP 與 PEP 的分工、動態策略如何制定、以及「信任演算法（Trust Algorithm）」。</p>
+                    <p><strong>法條或定義：</strong></p>
+                    <blockquote>
+                        "Zero Trust assumes there is no implicit trust granted to assets or user accounts based solely on their physical or network location."
+                    </blockquote>
+                    <p>白話解釋：零信任假設沒有任何東西是天生可信的，不管你在公司內網還是坐在老闆辦公室裡，都要驗證。</p>
+                    <p><strong>觸類旁通（舉一反三）：</strong></p>
+                    <ul>
+                        <li><strong>對比概念：</strong> 傳統「邊界式防禦」（城堡護城河模式）是「進了城門就是好人」；零信任是「進了城門，每進一個房間都要再查一次證件」。</li>
+                        <li><strong>變化題型：</strong> 可能會問你 PDP 包含哪兩個組件？答案是：策略引擎（PE）與策略管理員（PA）。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">7. 【記憶口訣】</div>
+                <div class="accordion-content">
+                    <p><strong>「零信任，無特權，過了門禁還要驗。」</strong></p>
+                    <p>說明：不管通過幾次檢查（PEP），都不會自動獲得最高信任。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">8. 【常見陷阱】</div>
+                <div class="accordion-content">
+                    <ul>
+                        <li><strong>陷阱一：看到「隱式信任區 (Implicit Trust Zone)」就覺得是錯的。</strong><br>
+                        心理盲點：考生會覺得零信任就是「完全沒有信任」，所以不該有「信任區」。<br>
+                        避坑指南：現實技術無法做到 100% 零信任，總會有一個極小的範圍（例如同一台伺服器內的兩個 Process）是彼此信任的。ZTA 的目標是縮小它，而不是消滅它。選項 (D) 是對定義的描述。</li>
+                        <li><strong>陷阱二：誤以為 PDP/PEP 很強大，過了就沒事。</strong><br>
+                        避坑指南：看到「最高層級信任」、「永久信任」、「一次驗證」這些絕對詞彙，通常在零信任題目中都是錯的。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion-item" id="accordion-correct">
+                <div class="accordion-header" onclick="toggleAccordion(this)">9. 【正確答案】</div>
+                <div class="accordion-content">
+                    <p><strong>答案：(C)</strong></p>
+                    <p><strong>一句話理由：</strong> 通過 PEP 只代表獲得「當下、最小權限」的存取許可，絕非「最高層級信任」。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">10. 【自我檢測】</div>
+                <div class="accordion-content">
+                    <p>試試看，確認你真的懂了：</p>
+                    
+                    <details>
+                        <summary>問題 1：PDP 可以細分為哪兩個主要邏輯元件？（點我看答案）</summary>
+                        <p>答案：策略引擎 (Policy Engine, PE) 與 策略管理員 (Policy Administrator, PA)。</p>
+                    </details>
+
+                    <details>
+                        <summary>問題 2：零信任架構是為了取代 VPN 嗎？（點我看答案）</summary>
+                        <p>答案：不完全是，但它是為了取代傳統 VPN「一連上就全網通」的模式。ZTA 是一種架構概念，不是單一產品。</p>
+                    </details>
+
+                    <details>
+                        <summary>問題 3：NIST 800-207 提到信任的評估應該是靜態的還是動態的？（點我看答案）</summary>
+                        <p>答案：動態的 (Dynamic)。必須根據使用者行為、裝置狀態、環境變數持續調整。</p>
+                    </details>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 圖片放大模態框 -->
+<div id="imageModal" class="modal" onclick="closeModal()">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <img class="modal-content" id="modalImg">
+</div>
+
+<script>
+    // 答案定義
+    const CORRECT_ANSWER = 'C';
+    
+    // 初始化主題
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+        }
+    });
+
+    // 切換夜間模式
+    function toggleTheme() {
+        const body = document.body;
+        const currentTheme = body.getAttribute('data-theme');
+        if (currentTheme === 'dark') {
+            body.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+        } else {
+            body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+
+    // 提交答案
+    function submitAnswer() {
+        const selectedOption = document.querySelector('input[name="answer"]:checked');
+        const resultArea = document.getElementById('result-area');
+        const explanationArea = document.getElementById('explanation-area');
+        
+        if (!selectedOption) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        const userAnswer = selectedOption.value;
+        let resultHTML = '';
+
+        if (userAnswer === CORRECT_ANSWER) {
+            resultHTML = `<div class="result-correct">恭喜答對！正確答案是 (${CORRECT_ANSWER})</div>`;
+        } else {
+            resultHTML = `<div class="result-wrong">答錯了。正確答案是 (${CORRECT_ANSWER})，請看下方解析。</div>`;
+        }
+
+        resultArea.innerHTML = resultHTML;
+        resultArea.style.display = 'block';
+        explanationArea.style.display = 'block';
+
+        // 自動展開特定解析區塊
+        expandSpecificAccordions();
+        
+        // 滾動到結果處
+        resultArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // 重置測驗
+    function resetQuiz() {
+        // 清除選取
+        const options = document.querySelectorAll('input[name="answer"]');
+        options.forEach(opt => opt.checked = false);
+
+        // 隱藏結果與解析
+        document.getElementById('result-area').style.display = 'none';
+        document.getElementById('explanation-area').style.display = 'none';
+
+        // 收合所有折疊面板
+        const contents = document.querySelectorAll('.accordion-content');
+        contents.forEach(content => content.classList.remove('active'));
+        
+        // 滾動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 手風琴切換邏輯
+    function toggleAccordion(header) {
+        const content = header.nextElementSibling;
+        content.classList.toggle('active');
+    }
+
+    // 自動展開「正確答案」與「第四步：選項分析」
+    function expandSpecificAccordions() {
+        // 先全部收合
+        const contents = document.querySelectorAll('.accordion-content');
+        contents.forEach(content => content.classList.remove('active'));
+
+        // 展開指定區塊
+        document.querySelector('#accordion-step4 .accordion-content').classList.add('active');
+        document.querySelector('#accordion-correct .accordion-content').classList.add('active');
+    }
+
+    // 圖片模態框
+    function openModal(src) {
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImg');
+        modal.style.display = "flex";
+        modalImg.src = src;
+    }
+
+    function closeModal() {
+        document.getElementById('imageModal').style.display = "none";
+    }
+</script>
+
+</body>
+</html>

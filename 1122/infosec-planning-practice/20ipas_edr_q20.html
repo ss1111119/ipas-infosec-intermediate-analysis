@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安工程師 - EDR 互動教學</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --header-bg: #e9ecef;
+            --btn-hover: #eaeaea;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #444444;
+            --primary-color: #bb86fc;
+            --accent-color: #64b5f6;
+            --success-color: #81c784;
+            --error-color: #e57373;
+            --highlight-bg: #3e3e3e;
+            --highlight-text: #ffd54f;
+            --header-bg: #2d2d2d;
+            --btn-hover: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* 版面配置 */
+        .header-bar {
+            background-color: var(--header-bg);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 16px; 
+            font-weight: bold;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .main-container {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            .question-panel {
+                flex: 1;
+                position: sticky;
+                top: 20px;
+            }
+            .analysis-panel {
+                flex: 1.5;
+            }
+        }
+
+        /* 區塊通用樣式 */
+        .card {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--text-color);
+            font-size: 1.125rem; /* 18px */
+            font-weight: bold;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* 表單樣式 */
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .option-item {
+            margin-bottom: 12px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-item:hover {
+            background-color: var(--header-bg);
+        }
+
+        .option-item input[type="checkbox"] {
+            margin-top: 5px;
+            margin-right: 10px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .btn-reset {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-toggle {
+            background: none;
+            border: 1px solid var(--text-color);
+            color: var(--text-color);
+            padding: 4px 10px;
+            font-size: 0.9rem;
+        }
+
+        /* 結果顯示 */
+        #result-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .result-correct {
+            background-color: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .result-wrong {
+            background-color: rgba(192, 57, 43, 0.1);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        /* Accordion (可收合區塊) */
+        .accordion {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: var(--container-bg);
+        }
+
+        .accordion-header {
+            padding: 12px 15px;
+            background-color: var(--header-bg);
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid transparent;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .accordion-content {
+            padding: 0 15px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            opacity: 0;
+        }
+
+        .accordion.active .accordion-header {
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--highlight-bg); /* 展開時標題變色 */
+        }
+
+        .accordion.active .accordion-content {
+            padding: 15px;
+            max-height: 1000px; /* 足夠大的值 */
+            opacity: 1;
+        }
+
+        .accordion-icon::after {
+            content: '+';
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        .accordion.active .accordion-icon::after {
+            content: '-';
+        }
+
+        /* 特殊文字樣式 */
+        .highlight {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .ref-tag {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 2px 6px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        .answer-reveal-btn {
+            background-color: var(--header-bg);
+            border: 1px dashed var(--border-color);
+            width: 100%;
+            text-align: left;
+            margin-top: 5px;
+            padding: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .answer-hidden-content {
+            display: none;
+            padding: 10px;
+            border-left: 3px solid var(--accent-color);
+            background-color: rgba(52, 152, 219, 0.05);
+            margin-top: 5px;
+        }
+
+        /* 題目選項標籤 */
+        .opt-label {
+            font-weight: bold;
+            margin-right: 5px;
+            min-width: 25px;
+        }
+
+        /* 無圖片提示 */
+        .no-img {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header-bar">
+        <div>ipas_edr_q20.html | 資訊安全防護實務</div>
+        <button class="btn-toggle" id="themeToggle" onclick="toggleTheme()">切換夜間模式</button>
+    </div>
+
+    <div class="main-container">
+        <!-- 左側：題目區 -->
+        <div class="question-panel card">
+            <h2>題目：20（複選題）</h2>
+            <div class="question-text">
+                端點偵測與回應（Endpoint Detection and Response，EDR）係指可偵測並調查主機以及端點上的一些可疑活動，並透過自動化方式通知資安團隊進行快速回應的資安措施，關於 EDR 所提供的主要功能的敘述，下列哪些正確？
+            </div>
+
+            <form id="quizForm">
+                <ul class="options-list">
+                    <li class="option-item">
+                        <label style="display:flex; width:100%; cursor:pointer;">
+                            <input type="checkbox" name="option" value="A">
+                            <div><span class="opt-label">(A)</span> 主動監控端點，並針對具有威脅跡象的活動收集資料</div>
+                        </label>
+                    </li>
+                    <li class="option-item">
+                        <label style="display:flex; width:100%; cursor:pointer;">
+                            <input type="checkbox" name="option" value="B">
+                            <div><span class="opt-label">(B)</span> 對蒐集的主機弱點執行分析，以識別是否有任何未知的威脅模式</div>
+                        </label>
+                    </li>
+                    <li class="option-item">
+                        <label style="display:flex; width:100%; cursor:pointer;">
+                            <input type="checkbox" name="option" value="C">
+                            <div><span class="opt-label">(C)</span> 針對所有已識別威脅產生自動回應，以移除或遏止威脅</div>
+                        </label>
+                    </li>
+                    <li class="option-item">
+                        <label style="display:flex; width:100%; cursor:pointer;">
+                            <input type="checkbox" name="option" value="D">
+                            <div><span class="opt-label">(D)</span> 利用分析和鑑識工具，針對可能導致其他可疑活動的已識別威脅執行研究</div>
+                        </label>
+                    </li>
+                </ul>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-submit" onclick="checkAnswer()">送出答案</button>
+                    <button type="button" class="btn-reset" onclick="resetQuiz()">重做一次</button>
+                </div>
+            </form>
+
+            <div id="result-message"></div>
+        </div>
+
+        <!-- 右側：解析區 -->
+        <div class="analysis-panel" id="analysisArea" style="opacity: 0.5; pointer-events: none;">
+            
+            <!-- 1. 題目重述 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    1. 【題目】
+                    <span class="accordion-icon"></span>
+                </div>
+                <div class="accordion-content">
+                    <p>端點偵測與回應（Endpoint Detection and Response，EDR）係指可偵測並調查主機以及端點上的一些可疑活動，並透過自動化方式通知資安團隊進行快速回應的資安措施，關於 EDR 所提供的主要功能的敘述，下列哪些正確？</p>
+                </div>
+            </div>
+
+            <!-- 2. 第一步：找關鍵字 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    2. 【第一步：找關鍵字】
+                    <span class="accordion-icon"></span>
+                </div>
+                <div class="accordion-content">
+                    <ul>
+                        <li><span class="highlight">EDR</span>：題目核心主角。</li>
+                        <li><span class="highlight">端點</span>：發生的位置在主機（PC/Server）上。</li>
+                        <li><span class="highlight">偵測</span>：必須能發現異常。</li>
+                        <li><span class="highlight">回應</span>：發現後要能處理（擋下來）。</li>
+                        <li><span class="highlight">自動化</span>：機器自動做，不用等人。</li>
+                        <li><span class="highlight">鑑識</span>：事後調查證據。</li>
+                        <li><span class="highlight">複選</span>：提示這題答案可能不止一個。</li>
+                    </ul>
+                    <p><strong>解題線索：</strong>只要看到「弱點掃描」、「資產盤點」這些偏向「預防與管理」的詞，通常就不是 EDR 的主要動態功能。</p>
+                </div>
+            </div>
+
+            <!-- 3. 第二步：白話翻譯 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    3. 【第二步：白話翻譯】
+                    <span class="accordion-icon"></span>
+                </div>
+                <div class="accordion-content">
+                    <p><strong>高中生白話版：</strong></p>
+                    <p>EDR 就像是安裝在你電腦裡的「私人保全兼偵探」。</p>
+                    <p>以前的防毒軟體像是「通緝名單比對」，名單上有才抓。EDR 則是觀察「行為」，如果你突然半夜把所有檔案加密（勒索軟體行為），就算你不在通緝名單上，保全（EDR）也會覺得奇怪，直接把你壓制（回應），然後調閱監視器畫面（鑑識）看你從哪裡跑進來的。</p>
+                </div>
+            </div>
+
+            <!-- 4. 第三步：解題思路 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    4. 【第三步：解題思路】
+                    <span class="accordion-icon"></span>
+                </div>
+                <div class="accordion-content">
+                    <p><strong>這題在考什麼觀念？</strong> 辨識 EDR 的核心功能與非核心功能。</p>
+                    <p><strong>解題步驟：</strong></p>
+                    <ol>
+                        <li>定義 EDR 三大支柱：<strong>偵測（Detect）、調查（Investigate）、回應（Respond）</strong>。</li>
+                        <li>檢查選項是否符合上述行為。</li>
+                        <li>排除屬於「弱點管理（Vulnerability Management）」的選項。</li>
+                    </ol>
+                    <p><strong>原理與規則：</strong></p>
+                    <ul>
+                        <li><span class="ref-tag">EDR</span>：安裝在端點上的監控與回應系統。</li>
+                        <li><span class="ref-tag">端點</span>：使用者電腦、伺服器等實際使用的主機。</li>
+                        <li><span class="ref-tag">自動回應</span>：系統自動隔離網路、終止程序、刪除檔案等。</li>
+                        <li><span class="ref-tag">鑑識</span>：保留 Log 與軌跡，分析攻擊路徑（Root Cause Analysis）。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 5. 第四步：選項分析 -->
+            <div class="accordion" id="acc-step4">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    5. 【第四步：選項分析】
+                    <span class="accordion-icon"></span>
+                </div>
+                <div class="accordion-content">
+                    <ul>
+                        <li>
+                            <span class="opt-label">(A) 正確。</span>
+                            <strong>主動監控與收集資料</strong>是 EDR 的「偵測」基礎，它必須隨時錄影（收集 Log）。
+                        </li>
+                        <li>
+                            <span class="opt-label">(B) 錯誤。</span>
+                            這是在講<strong>「弱點掃描（Vulnerability Scan）」</strong>或弱點管理。EDR 關注的是「當下的行為（Activity）」是否有威脅，而不是檢查軟體是不是舊版本（弱點）。雖然部分現代 EDR 附加此功能，但非題目定義的「偵測回應」核心。
+                        </li>
+                        <li>
+                            <span class="opt-label">(C) 正確。</span>
+                            <strong>自動回應</strong>是 EDR 的價值所在（Response），例如自動隔離中毒電腦，防止擴散。
+                        </li>
+                        <li>
+                            <span class="opt-label">(D) 正確。</span>
+                            <strong>分析與鑑識</strong>是 EDR 的後端功能，用來找出攻擊源頭（Patient Zero）與擴散範圍。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 6. 觀念補充與延伸 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    6. 【觀念補充與延伸】
+                    <span class="accordion-icon"></span>
+                </div>
+                <div class="accordion-content">
+                    <p><strong>核心觀念定位：</strong>本題屬於「端點安全 / SOC / 偵測與回應」必考題。</p>
+                    <p><strong>EDR vs 防毒軟體 (EPP)：</strong></p>
+                    <ul>
+                        <li><strong>防毒軟體 (EPP)：</strong> 比較被動，主要靠特徵碼（Signature）擋已知病毒。重點在「預防」。</li>
+                        <li><strong>EDR：</strong> 主動監控，靠行為分析（Behavior）抓未知威脅，且具備事後調查能力。重點在「偵測與處理」。</li>
+                    </ul>
+                    <p><strong>變化題型：</strong> EDR、NDR（網路層）、XDR（跨平台整合）的差異常一起考。</p>
+                </div>
+            </div>
+
+            <!-- 7. 記憶口訣 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    7. 【記憶口訣】
+                    <span class="accordion-icon"></span>
+                </div>
+                <div class="accordion-content">
+                    <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent-color); text-align: center;">
+                        「EDR 三件事：看、擋、查」
+                    </p>
+                    <p style="text-align: center;">
+                        看（監控偵測）<br>
+                        擋（自動回應）<br>
+                        查（鑑識分析）
+                    </p>
+                </div>
+            </div>
+
+            <!-- 8. 常見陷阱 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    8. 【常見陷阱】
+                    <span class="accordion-icon"></span>
+                </div>
+                <div class="accordion-content">
+                    <ul>
+                        <li><strong>混淆弱點掃描：</strong> 常把 EDR 和弱點掃描、Patch Management 混在一起。掃描靜態漏洞是弱掃的事。</li>
+                        <li><strong>萬能迷思：</strong> 認為 EDR 一定能「百分之百自動處理所有威脅」。實際上許多複雜攻擊仍需人工介入（MDR）。</li>
+                        <li><strong>避坑指南：</strong> 題目若出現「資產盤點」、「修補更新」、「弱點資料庫比對」，通常選弱點掃描系統，而非 EDR。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 9. 正確答案 -->
+            <div class="accordion" id="acc-answer">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    9. 【正確答案】
+                    <span class="accordion-icon"></span>
+                </div>
+                <div class="accordion-content">
+                    <p><strong>答案：A、C、D</strong></p>
+                    <p>理由：EDR 負責監控行為（A）、自動阻擋（C）與事後鑑識（D），不負責分析軟體弱點（B）。</p>
+                </div>
+            </div>
+
+            <!-- 10. 自我檢測 -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    10. 【自我檢測】
+                    <span class="accordion-icon"></span>
+                </div>
+                <div class="accordion-content">
+                    <p>試著回答以下延伸小問題：</p>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>Q1. 如果駭客利用一個「從未見過」的攻擊手法（Zero-day）入侵，傳統防毒軟體可能抓不到，但 EDR 可能可以，為什麼？</strong>
+                        <button class="answer-reveal-btn" onclick="toggleSelfTest(this)">點我看答案</button>
+                        <div class="answer-hidden-content">
+                            因為 EDR 監控的是「異常行為」（例如：Word 軟體突然呼叫 PowerShell 下載檔案），而非單純比對病毒特徵碼。
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <strong>Q2. 選項 (B) 敘述的功能，通常是由哪種資安系統負責？</strong>
+                        <button class="answer-reveal-btn" onclick="toggleSelfTest(this)">點我看答案</button>
+                        <div class="answer-hidden-content">
+                            弱點掃描系統（Vulnerability Scanner）或弱點管理平台。
+                        </div>
+                    </div>
+
+                    <div>
+                        <strong>Q3. EDR 收集資料後，通常會傳送到哪裡進行統一分析與關聯？（進階觀念）</strong>
+                        <button class="answer-reveal-btn" onclick="toggleSelfTest(this)">點我看答案</button>
+                        <div class="answer-hidden-content">
+                            通常會傳回中控台（Console），若結合其他設備日誌則會傳送到 SIEM 或 XDR 平台。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 初始化與設定
+        const CORRECT_ANSWERS = ['A', 'C', 'D'];
+        const analysisArea = document.getElementById('analysisArea');
+        const themeToggle = document.getElementById('themeToggle');
+        
+        // 頁面載入時讀取主題
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                themeToggle.textContent = "切換日間模式";
+            }
+        });
+
+        // 切換夜間模式
+        function toggleTheme() {
+            if (document.body.getAttribute('data-theme') === 'dark') {
+                document.body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeToggle.textContent = "切換夜間模式";
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.textContent = "切換日間模式";
+            }
+        }
+
+        // Accordion 開關邏輯
+        function toggleAccordion(header) {
+            const parent = header.parentElement;
+            parent.classList.toggle('active');
+        }
+
+        // 自我檢測答案開關
+        function toggleSelfTest(btn) {
+            const content = btn.nextElementSibling;
+            if (content.style.display === "block") {
+                content.style.display = "none";
+                btn.textContent = "點我看答案";
+            } else {
+                content.style.display = "block";
+                btn.textContent = "隱藏答案";
+            }
+        }
+
+        // 檢查答案
+        function checkAnswer() {
+            const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+            const selected = Array.from(checkboxes).map(cb => cb.value).sort();
+            const resultDiv = document.getElementById('result-message');
+            
+            // 解鎖右側解析區
+            analysisArea.style.opacity = "1";
+            analysisArea.style.pointerEvents = "auto";
+
+            // 判斷對錯
+            const isExactMatch = JSON.stringify(selected) === JSON.stringify(CORRECT_ANSWERS);
+            
+            resultDiv.style.display = "block";
+            resultDiv.className = ""; // 清除舊 class
+
+            if (isExactMatch) {
+                resultDiv.textContent = "恭喜！答案完全正確！";
+                resultDiv.classList.add("result-correct");
+            } else if (selected.length === 0) {
+                resultDiv.textContent = "請至少選擇一個選項。";
+                resultDiv.classList.add("result-wrong");
+                return; // 不展開解析
+            } else {
+                // 檢查是否包含錯誤選項，或漏選
+                // 只要選了 B 就是錯，或者漏選 A, C, D 也是錯
+                // 這裡簡化顯示：只要不完全一樣就顯示錯誤並給正確答案
+                resultDiv.innerHTML = "回答錯誤或不完整。<br>正確答案是：A、C、D";
+                resultDiv.classList.add("result-wrong");
+            }
+
+            // 自動展開特定區塊
+            const accStep4 = document.getElementById('acc-step4');
+            const accAnswer = document.getElementById('acc-answer');
+            
+            if (!accStep4.classList.contains('active')) accStep4.classList.add('active');
+            if (!accAnswer.classList.contains('active')) accAnswer.classList.add('active');
+            
+            // 捲動到解析區頂部 (手機版較需要)
+            if (window.innerWidth < 768) {
+                analysisArea.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // 重置
+        function resetQuiz() {
+            // 清除勾選
+            const checkboxes = document.querySelectorAll('input[name="option"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            
+            // 隱藏結果
+            const resultDiv = document.getElementById('result-message');
+            resultDiv.style.display = "none";
+            
+            // 鎖定解析區並收合所有 Accordion
+            analysisArea.style.opacity = "0.5";
+            analysisArea.style.pointerEvents = "none";
+            
+            const accordions = document.querySelectorAll('.accordion');
+            accordions.forEach(acc => acc.classList.remove('active'));
+
+            // 收合自我檢測
+            const selfTestContents = document.querySelectorAll('.answer-hidden-content');
+            selfTestContents.forEach(div => div.style.display = "none");
+            const selfTestBtns = document.querySelectorAll('.answer-reveal-btn');
+            selfTestBtns.forEach(btn => btn.textContent = "點我看答案");
+        }
+    </script>
+</body>
+</html>

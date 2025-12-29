@@ -1,0 +1,579 @@
+<!-- filename: ipas_risk_treatment_q33_interactive.html -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 風險處理（Risk Treatment）— 第33題互動教學</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+            margin-top: 30px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        /* Question Area */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .keyword {
+            cursor: pointer;
+            border-bottom: 2px dashed #aaa;
+            transition: background-color 0.2s;
+            padding: 0 2px;
+        }
+
+        .keyword:hover {
+            background-color: #e8f4fd;
+        }
+
+        .keyword.highlight {
+            background-color: #f1c40f; /* Yellow highlight */
+            color: #000;
+            border-bottom: none;
+        }
+
+        .instruction {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        /* Options */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9f9f9;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input {
+            margin-top: 5px;
+            margin-right: 10px;
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Feedback Area */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Explanation Section */
+        #explanation-section {
+            display: none; /* Initially hidden */
+        }
+
+        .step-box {
+            background-color: #fff;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .concept-tag {
+            background-color: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .trap-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            color: #856404;
+        }
+
+        /* Spoiler */
+        .spoiler {
+            background-color: #2c3e50;
+            color: #2c3e50;
+            cursor: pointer;
+            padding: 0 5px;
+            border-radius: 3px;
+            user-select: none;
+        }
+
+        .spoiler.revealed {
+            background-color: transparent;
+            color: var(--correct-color);
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        /* Footer Dictionary */
+        footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #ddd;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .dict-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .dict-item strong {
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        /* Utility */
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #95a5a6;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            visibility: hidden;
+        }
+
+        .status-badge.visible {
+            visibility: visible;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 風險處理（Risk Treatment）<br>第33題互動教學</h1>
+        <p>適用對象：資安初學者、iPAS 考照衝刺</p>
+    </header>
+
+    <!-- Question Card -->
+    <div class="card" id="question-card">
+        <div class="instruction">💡 提示：點擊題目中的文字可標記關鍵字，再點一次可取消。</div>
+        
+        <div class="question-text" id="question-text">
+            <!-- Content injected by JS -->
+        </div>
+
+        <div class="options-group" id="options-container">
+            <!-- Options injected by JS -->
+        </div>
+
+        <div style="display: flex; align-items: center;">
+            <button class="btn" onclick="submitAnswer()">送出答案</button>
+            <span id="answer-status" class="status-badge">已作答</span>
+        </div>
+
+        <div id="feedback-area"></div>
+    </div>
+
+    <!-- Toggle Explanation Button -->
+    <div style="text-align: center; margin-bottom: 20px;">
+        <button class="btn btn-outline" id="toggle-exp-btn" onclick="toggleExplanation()" style="display:none;">顯示完整解析</button>
+    </div>
+
+    <!-- Explanation Section -->
+    <div id="explanation-section">
+        
+        <!-- Step 1 -->
+        <div class="card">
+            <h2>第一步：找關鍵字</h2>
+            <p>這題的題幹很短，重點在於每個選項內部的邏輯檢核。請注意以下詞彙：</p>
+            <ul>
+                <li><strong>風險處理</strong>（Risk Treatment，針對識別出的風險採取行動的過程）</li>
+                <li><strong>風險可接受準則</strong>（Risk Acceptance Criteria，組織訂定的門檻，低於此門檻可暫不處理）</li>
+                <li><strong>控制措施</strong>（Control Measures，用來降低或管理風險的具體手段）</li>
+                <li><strong>ISO 27001 附錄 A</strong>（資安標準中列出的常見 93 項控制措施參考表）</li>
+                <li><strong>風險擁有者</strong>（Risk Owner，有權力與責任承擔風險的人）</li>
+                <li><strong>殘餘風險</strong>（Residual Risk，做完處理後仍留下的風險）</li>
+            </ul>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="card">
+            <h2>第二步：白話翻譯</h2>
+            <div class="step-box">
+                <p>簡單來說，這題在問：「當我們發現有資安風險要處理時，遊戲規則是什麼？」</p>
+                <p>我們用<strong>「下雨天出門」</strong>來比喻：</p>
+                <ul>
+                    <li><strong>風險可接受準則</strong>：你能接受被雨淋濕的程度（例如：毛毛雨可以不撐傘，大雨一定要撐傘）。</li>
+                    <li><strong>風險評鑑</strong>（Risk Assessment，評估風險大小的過程）：看看窗外現在雨有多大。</li>
+                    <li><strong>風險處理</strong>：決定帶傘、穿雨衣，或是乾脆不出門。</li>
+                    <li><strong>殘餘風險</strong>：就算撐了傘，鞋子還是可能會濕掉的那部分風險。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="card">
+            <h2>第三步：解題思路</h2>
+            <p>正確的資安管理邏輯如下：</p>
+            <ol>
+                <li>老闆（高層）先畫出一條紅線（<strong>風險可接受準則</strong>）。</li>
+                <li>檢查所有資產，計算風險值（<strong>風險評鑑</strong>）。</li>
+                <li>如果風險值「超過」那條紅線，就必須做事（<strong>風險處理</strong>）。</li>
+                <li>如果風險值「低於」紅線，就可以選擇接受，暫時不做大動作。</li>
+            </ol>
+            <p>因此，(A) 的敘述完全符合這個標準流程。</p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="card">
+            <h2>第四步：選項分析</h2>
+            <div id="option-analysis-content">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- Concepts & Mnemonic -->
+        <div class="card">
+            <h2>觀念補充與延伸</h2>
+            <p><strong>關於控制措施的來源：</strong></p>
+            <p>ISO 27001 雖然有附錄 A 提供參考，但企業可以依據法規（如個資法）、合約要求（客戶要求）、或其他最佳實務（如 NIST）來設計控制措施，並不侷限於附錄 A。</p>
+
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <h2>記憶口訣</h2>
+            <div class="step-box" style="background-color: #e8f8f5; border-left-color: #1abc9c;">
+                <p><strong>「準則先訂好，超過才要搞；附錄僅參考，零風險找不到。」</strong></p>
+            </div>
+        </div>
+
+        <!-- Traps -->
+        <div class="card">
+            <h2>常見陷阱</h2>
+            <div class="trap-box">
+                <ul>
+                    <li>❌ <strong>陷阱 1：看到 ISO 27001 就覺得必須完全照做。</strong><br>修正：標準是框架，附錄 A 是參考，企業應依自身需求選擇。</li>
+                    <li>❌ <strong>陷阱 2：搞混「資產擁有者」與「風險擁有者」。</strong><br>修正：資產擁有者（Asset Owner，負責保管資產的人）不一定有權力承擔賠償責任；簽名確認風險處理計畫的通常是「風險擁有者」。</li>
+                    <li>❌ <strong>陷阱 3：追求完美資安（零風險）。</strong><br>修正：資源有限，目標是將風險降至「可接受」而非「零」。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Correct Answer -->
+        <div class="card" style="text-align: center;">
+            <h2>正確答案</h2>
+            <p style="font-size: 2rem; color: var(--correct-color); font-weight: bold;">(A)</p>
+        </div>
+
+        <!-- Self Assessment -->
+        <div class="card">
+            <h2>自我檢測</h2>
+            <p class="instruction">點擊黑色區塊查看答案</p>
+            
+            <div style="margin-bottom: 15px;">
+                <p><strong>Q1. 如果風險評鑑結果「低於」可接受準則，還需要強制進行風險處理嗎？</strong></p>
+                <p>答：<span class="spoiler" onclick="this.classList.add('revealed')">通常不需要強制處理，可以選擇「接受」該風險，但仍需持續監控。</span></p>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <p><strong>Q2. 風險處理的四種常見策略是哪些？（請用白話說明）</strong></p>
+                <p>答：<span class="spoiler" onclick="this.classList.add('revealed')">降低（做防護）、轉移（買保險/外包）、避免（不做了/改流程）、接受（承擔後果）。</span></p>
+            </div>
+
+            <div>
+                <p><strong>Q3. 風險擁有者與資產擁有者差在哪？什麼情況下可能是同一個人？</strong></p>
+                <p>答：<span class="spoiler" onclick="this.classList.add('revealed')">資產擁有者負責日常保管維護；風險擁有者負責承擔盈虧責任。如果是小公司老闆自己管伺服器，就可能是同一人。</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <h3>📚 名詞小字典</h3>
+        <div class="dict-grid">
+            <div class="dict-item">
+                <strong>風險 (Risk)</strong>
+                不確定性對目標的影響，通常指發生壞事的機率與後果。
+            </div>
+            <div class="dict-item">
+                <strong>風險評鑑 (Risk Assessment)</strong>
+                識別、分析並評估風險大小的完整過程。
+            </div>
+            <div class="dict-item">
+                <strong>風險處理 (Risk Treatment)</strong>
+                選擇並執行措施來修正風險的過程。
+            </div>
+            <div class="dict-item">
+                <strong>風險可接受準則 (Risk Acceptance Criteria)</strong>
+                組織設定的標準，用來決定風險是否需要處理。
+            </div>
+            <div class="dict-item">
+                <strong>控制措施 (Control Measures)</strong>
+                用來管理風險的手段，包含政策、程序、技術工具等。
+            </div>
+            <div class="dict-item">
+                <strong>殘餘風險 (Residual Risk)</strong>
+                實施風險處理後，仍然剩下來的風險。
+            </div>
+            <div class="dict-item">
+                <strong>風險擁有者 (Risk Owner)</strong>
+                有權力及責任去管理風險，並承擔風險後果的人或實體。
+            </div>
+            <div class="dict-item">
+                <strong>資產擁有者 (Asset Owner)</strong>
+                負責資產（如伺服器、資料）日常運作與維護的負責人。
+            </div>
+            <div class="dict-item">
+                <strong>ISO 27001</strong>
+                國際通用的資訊安全管理系統（ISMS）標準。
+            </div>
+            <div class="dict-item">
+                <strong>附錄 A (Annex A)</strong>
+                ISO 27001 中的參考附錄，列出了 93 項常見的資安控制措施參考清單。
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script>
+    // Data Structure
+    const questionData = {
+        id: 33,
+        text: "關於<span class='keyword'>風險處理</span>的敘述，下列何者正確？",
+        options: [
+            { id: 'A', text: "<span class='keyword'>風險可接受準則</span>需先定義清楚，<span class='keyword'>風險評鑑</span>結果超過此準則就必須進行風險處理，以降低風險" },
+            { id: 'B', text: "風險處理須實施的<span class='keyword'>控制措施</span>，皆必須參考 <span class='keyword'>ISO 27001</span> 的<span class='keyword'>附錄Ａ</span>" },
+            { id: 'C', text: "風險處理計畫及<span class='keyword'>殘餘風險</span>的結果，須由<span class='keyword'>資產擁有者</span>確認" },
+            { id: 'D', text: "風險處理後所剩餘的風險必須為零" }
+        ],
+        correctOptionId: 'A',
+        analysis: [
+            { 
+                option: 'A', 
+                correct: true, 
+                content: "<strong>正確。</strong>這就是標準流程：先訂規則（準則），評估後若超標，就必須處理（降低風險）。" 
+            },
+            { 
+                option: 'B', 
+                correct: false, 
+                content: "<strong>錯誤。</strong>「皆必須」太絕對。控制措施可以來自法規、合約或其他標準，附錄 A 只是「參考」，並非唯一來源。" 
+            },
+            { 
+                option: 'C', 
+                correct: false, 
+                content: "<strong>錯誤。</strong>這是一個細節考點。風險處理計畫與殘餘風險的接受，最終權責在於<strong>「風險擁有者」</strong>（Risk Owner，負責賠錢/負責營運成敗的人），而非僅是「資產擁有者」（保管設備的人）。" 
+            },
+            { 
+                option: 'D', 
+                correct: false, 
+                content: "<strong>錯誤。</strong>實務上<strong>「風險不可能為零」</strong>。我們只能將風險降低到可接受的程度，並持續監控殘餘風險。" 
+            }
+        ]
+    };
+
+    // Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+        renderQuestion();
+        renderAnalysis();
+        setupKeywordInteraction();
+    });
+
+    function renderQuestion() {
+        const textContainer = document.getElementById('question-text');
+        textContainer.innerHTML = questionData.text;
+
+        const optionsContainer = document.getElementById('options-container');
+        questionData.options.forEach(opt => {
+            const label = document.createElement('label');
+            label.className = 'option-label';
+            label.innerHTML = `
+                <input type="radio" name="q33" value="${opt.id}">
+                <span>(${opt.id}) ${opt.text}</span>
+            `;
+            optionsContainer.appendChild(label);
+        });
+    }
+
+    function renderAnalysis() {
+        const container = document.getElementById('option-analysis-content');
+        questionData.analysis.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'step-box';
+            div.style.borderLeftColor = item.correct ? 'var(--correct-color)' : 'var(--wrong-color)';
+            div.innerHTML = `
+                <p><strong>(${item.option})</strong> ${item.content}</p>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function setupKeywordInteraction() {
+        // Find all keywords injected in text and options
+        const keywords = document.querySelectorAll('.keyword');
+        keywords.forEach(k => {
+            k.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent triggering radio label
+                this.classList.toggle('highlight');
+            });
+            k.title = "點擊以標記重點";
+        });
+    }
+
+    function submitAnswer() {
+        const selected = document.querySelector('input[name="q33"]:checked');
+        const feedbackArea = document.getElementById('feedback-area');
+        const statusBadge = document.getElementById('answer-status');
+        const toggleBtn = document.getElementById('toggle-exp-btn');
+
+        if (!selected) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        const userVal = selected.value;
+        const isCorrect = userVal === questionData.correctOptionId;
+
+        statusBadge.classList.add('visible');
+        feedbackArea.style.display = 'block';
+        toggleBtn.style.display = 'inline-block';
+
+        if (isCorrect) {
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = `
+                <h3>🎉 答對了！</h3>
+                <p>正確答案就是 <strong>(${questionData.correctOptionId})</strong>。</p>
+                <p>觀念正確！風險管理的核心就是「依據準則」來決定是否處理。</p>
+            `;
+        } else {
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.innerHTML = `
+                <h3>⚠️ 答錯囉！</h3>
+                <p>你選擇了 (${userVal})，但正確答案是 <strong>(${questionData.correctOptionId})</strong>。</p>
+                <p>別氣餒，點擊下方「顯示完整解析」來看看為什麼。</p>
+            `;
+        }
+    }
+
+    function toggleExplanation() {
+        const section = document.getElementById('explanation-section');
+        const btn = document.getElementById('toggle-exp-btn');
+        
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
+            btn.textContent = '隱藏解析';
+            // Scroll to explanation
+            section.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            section.style.display = 'none';
+            btn.textContent = '顯示完整解析';
+        }
+    }
+</script>
+
+</body>
+</html>

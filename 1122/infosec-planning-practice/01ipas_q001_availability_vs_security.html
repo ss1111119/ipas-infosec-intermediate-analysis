@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資訊安全考題解析 - 題號 1</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --highlight-bg: #fff3a3;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --section-bg: #f9f9f9;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+
+        button:hover {
+            background-color: #1a252f;
+        }
+
+        button.show-answer-btn {
+            background-color: var(--accent-color);
+            margin-top: 10px;
+        }
+
+        button.show-answer-btn:hover {
+            background-color: #2980b9;
+        }
+
+        details {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        summary {
+            background-color: var(--section-bg);
+            padding: 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            list-style: none; /* Hide default arrow */
+            border-bottom: 1px solid transparent;
+            transition: background-color 0.2s;
+        }
+
+        summary:hover {
+            background-color: #eaeaea;
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+            color: var(--primary-color);
+        }
+
+        /* Custom arrow indicator */
+        summary::after {
+            content: '+'; 
+            float: right;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 2px 5px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .question-box {
+            background-color: #fff;
+            padding: 15px;
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            display: block;
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--section-bg);
+            font-weight: bold;
+        }
+
+        .answer-block {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f8ff;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .term {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            summary { font-size: 1em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資訊安全考題互動式教學</h1>
+    
+    <div class="controls">
+        <button onclick="toggleAll(true)">全部展開</button>
+        <button onclick="toggleAll(false)">全部收合</button>
+    </div>
+
+    <!-- 1. 題目 -->
+    <details open>
+        <summary>【題目】</summary>
+        <div class="content">
+            <div class="question-box">
+                <p><strong>題號：1</strong></p>
+                <p><strong>題目：</strong><br>
+                「下列何項系統建置規劃並『不』是以可用性作為主要之考量基準？」</p>
+                <div class="option">(A) 建置伺服器負載平衡系統</div>
+                <div class="option">(B) 重要資料導入高可用性（High Availability）系統</div>
+                <div class="option">(C) 建置資料加密管理系統</div>
+                <div class="option">(D) 使用針對重要系統建置即時備援機制</div>
+            </div>
+        </div>
+    </details>
+
+    <!-- 2. 第一步：找關鍵字 -->
+    <details>
+        <summary>【第一步：找關鍵字】</summary>
+        <div class="content">
+            <p>請注意題目中的以下線索：</p>
+            <ul>
+                <li><span class="highlight">不</span>：這是否定題，要找「錯誤」或「無關」的選項，這是最大的陷阱。</li>
+                <li><span class="highlight">可用性</span>：這是本題的核心考點。要先理解什麼是「可用性（系統要能一直用、不中斷）」。</li>
+                <li><span class="highlight">主要之考量基準</span>：雖然資安措施通常環環相扣，但每個措施都有它「最優先」解決的問題。</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 3. 第二步：白話翻譯 -->
+    <details>
+        <summary>【第二步：白話翻譯】</summary>
+        <div class="content">
+            <p><strong>高中生白話版：</strong></p>
+            <p>「下面這四個選項，哪一個做的目的，<span class="highlight">不是</span>為了讓電腦系統『不會當機』、『不會斷線』、『隨時都能連得上』？」</p>
+        </div>
+    </details>
+
+    <!-- 4. 第三步：解題思路 -->
+    <details>
+        <summary>【第三步：解題思路】</summary>
+        <div class="content">
+            <h3>這題在考什麼觀念？</h3>
+            <p>這題在考資訊安全最基礎的 <strong>CIA 三元組（資安三大目標：機密性/完整性/可用性）</strong> 中的分類能力。</p>
+            
+            <h3>解題步驟</h3>
+            <ol>
+                <li><strong>定義目標：</strong>題目問「可用性」，所以目標是「確保系統服務不中斷」。</li>
+                <li><strong>檢查選項：</strong>看哪個選項是為了「保護秘密」或「防止資料被改」，而不是為了「不中斷」。</li>
+                <li><strong>抓出異類：</strong>因為題目問「不」，所以要選那個「不是為了不斷線」的選項。</li>
+            </ol>
+
+            <h3>原理與規則（生活比喻）</h3>
+            <p>想像你在經營一家 24 小時便利商店：</p>
+            <ul>
+                <li><strong>可用性 (Availability)：</strong>就像店裡要有備用發電機，店員要輪班，確保「隨時都有人能買東西」。</li>
+                <li><strong>機密性 (Confidentiality)：</strong>就像收銀機要有鑰匙，金庫要有密碼，確保「只有店長能拿錢」。</li>
+            </ul>
+            <p>題目問的是：哪一個措施<strong>不是</strong>為了「讓店一直開著」？</p>
+        </div>
+    </details>
+
+    <!-- 5. 第四步：選項分析 -->
+    <details>
+        <summary>【第四步：選項分析】</summary>
+        <div class="content">
+            <ul>
+                <li>
+                    <strong>(A) 建置伺服器負載平衡系統</strong>
+                    <br>
+                    <span class="term">負載平衡（把流量分散到多台機器，避免單點塞車）</span>。這就像超商開了很多結帳櫃檯，人多就分散排隊，不會讓整間店卡死。目的是讓服務順暢。
+                    <br>→ 屬於<strong>可用性</strong>。
+                </li>
+                <li>
+                    <strong>(B) 重要資料導入高可用性（High Availability）系統</strong>
+                    <br>
+                    <span class="term">高可用性（用多台與自動切換，讓服務不容易掛）</span>。名字裡就已經寫了「High Availability」，目的是確保服務一直存在。
+                    <br>→ 屬於<strong>可用性</strong>。
+                </li>
+                <li>
+                    <strong>(C) 建置資料加密管理系統</strong>
+                    <br>
+                    <span class="term">加密（把資料變成看不懂的密文，防止未授權的人看到）</span>。這就像把信件寫成密碼，只有收信人看得懂。就算郵差（系統）弄丟了信，別人也看不懂內容。這是在保護秘密，跟「系統會不會當機」無關。
+                    <br>→ 屬於<strong>機密性</strong>（非可用性，是本題答案）。
+                </li>
+                <li>
+                    <strong>(D) 使用針對重要系統建置即時備援機制</strong>
+                    <br>
+                    <span class="term">即時備援（主系統出事可立刻切到備用系統）</span>。這就像演講者有準備備用麥克風，一支壞了馬上換另一支，演講不會中斷。
+                    <br>→ 屬於<strong>可用性</strong>。
+                </li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 6. 觀念補充與延伸 -->
+    <details>
+        <summary>【觀念補充與延伸】</summary>
+        <div class="content">
+            <h3>核心觀念定位</h3>
+            <p>此題屬於資訊安全三大要素 (CIA Triad) 的辨析，是 iPAS 考試必考的基礎題型。</p>
+            
+            <h3>定義比較</h3>
+            <table>
+                <tr>
+                    <th width="20%">要素</th>
+                    <th width="35%">可用性 (Availability)</th>
+                    <th width="45%">機密性 (Confidentiality)</th>
+                </tr>
+                <tr>
+                    <td><strong>定義</strong></td>
+                    <td>確保授權的使用者在需要時，可以存取資訊或資源。</td>
+                    <td>確保資訊不被未授權的人員、實體或程序存取或揭露。</td>
+                </tr>
+                <tr>
+                    <td><strong>白話</strong></td>
+                    <td>系統活著、網路通著、資料拿得到。</td>
+                    <td>只有該看的人才能看，閒雜人等看不到。</td>
+                </tr>
+                <tr>
+                    <td><strong>常見措施<br>(重點)</strong></td>
+                    <td>
+                        <ul>
+                            <li>負載平衡 (Load Balance)</li>
+                            <li>高可用性 (HA)</li>
+                            <li>備援 (Redundancy)</li>
+                            <li>異地備援 (Disaster Recovery)</li>
+                            <li>備份 (Backup)</li>
+                            <li>不斷電系統 (UPS)</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>資料加密 (Encryption)</li>
+                            <li>存取控制 (Access Control)</li>
+                            <li>身份驗證 (Authentication)</li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+
+            <h3>觸類旁通</h3>
+            <p>如果題目改成問「下列何者是為了確保資料不被篡改？」，那就是在問「完整性 (Integrity)」，答案就會是數位簽章或雜湊函數 (Hash)。</p>
+        </div>
+    </details>
+
+    <!-- 7. 記憶口訣 -->
+    <details>
+        <summary>【記憶口訣】</summary>
+        <div class="content">
+            <p>為了快速分辨 CIA，請記住以下口訣：</p>
+            <div style="background-color: #e8f6f3; padding: 15px; border-radius: 5px; border-left: 5px solid #1abc9c;">
+                <p style="font-size: 1.2em; margin: 0;"><strong>分身備份不斷線（可用性）</strong></p>
+                <p style="font-size: 1.2em; margin: 0;"><strong>加密上鎖不給看（機密性）</strong></p>
+            </div>
+            <p>解釋：</p>
+            <ul>
+                <li><strong>分身備份不斷線</strong>：(A)分散流量、(B)(D)備援分身，都是為了不斷線 → 可用性。</li>
+                <li><strong>加密上鎖不給看</strong>：(C)加密是為了不給看 → 機密性。</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 8. 常見陷阱 -->
+    <details>
+        <summary>【常見陷阱】</summary>
+        <div class="content">
+            <ol>
+                <li><strong>眼快漏看「不」字：</strong>很多人看到「可用性」就直接選了 (A) 或 (B)，忘了題目是問「不是」。</li>
+                <li><strong>混淆「安全」與「可用」：</strong>新手常覺得「加密」也是為了讓系統安全運作啊？沒錯，它是為了安全，但不是為了「可用性（不斷線）」。加密甚至有時會增加運算負擔，稍微降低效能，但為了保密是必須的。</li>
+                <li><strong>避坑檢查步驟：</strong>作答前，先把題目中的否定詞（不、非、錯誤）圈起來。選定答案後，反問自己：「這個選項真的跟題目要的方向相反嗎？」</li>
+            </ol>
+        </div>
+    </details>
+
+    <!-- 9. 正確答案 -->
+    <details>
+        <summary>【正確答案】</summary>
+        <div class="content">
+            <p style="font-size: 1.5em; color: red; font-weight: bold;">答案：(C)</p>
+            <p><strong>一句話理由：</strong>因為資料加密是為了保護資料不外洩（機密性），而不是為了確保系統不斷線（可用性）。</p>
+        </div>
+    </details>
+
+    <!-- 10. 自我檢測 -->
+    <details>
+        <summary>【自我檢測】</summary>
+        <div class="content">
+            <p>遮住答案試試看，確認你真的懂了！</p>
+            
+            <div class="question-box">
+                <p><strong>Q1. 某公司為了防止駭客勒索軟體加密檔案導致無法工作，因此每天進行「資料備份」。請問「備份」主要是為了維護哪一種資安目標？</strong></p>
+                <button class="show-answer-btn" onclick="toggleAnswer('ans1')">查看答案</button>
+                <div id="ans1" class="answer-block">
+                    <strong>答案：可用性 (Availability)</strong>
+                    <br>理由：備份是為了在資料遺失或壞掉時能救回來，讓業務能繼續運作（回復可用狀態）。
+                    <br>*(註：若強調備份資料不能被改，則涉及完整性，但備份的主要目的通常是為了災難復原)*
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p><strong>Q2. 小明在傳送電子郵件時使用 PGP 軟體進行加密，這是為了確保 CIA 中的哪一項？</strong></p>
+                <button class="show-answer-btn" onclick="toggleAnswer('ans2')">查看答案</button>
+                <div id="ans2" class="answer-block">
+                    <strong>答案：機密性 (Confidentiality)</strong>
+                    <br>理由：加密的目的是為了防止傳輸過程中被別人偷看。
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p><strong>Q3. 機房建置了 UPS（不斷電系統），當台電停電時能撐 30 分鐘讓系統正常關機或切換發電機。這是為了什麼？</strong></p>
+                <button class="show-answer-btn" onclick="toggleAnswer('ans3')">查看答案</button>
+                <div id="ans3" class="answer-block">
+                    <strong>答案：可用性 (Availability)</strong>
+                    <br>理由：確保電力中斷時，系統服務或硬體不會立即掛掉。
+                </div>
+            </div>
+
+        </div>
+    </details>
+
+</div>
+
+<script>
+    // 展開/收合所有區塊
+    function toggleAll(shouldOpen) {
+        const details = document.querySelectorAll('details');
+        details.forEach(detail => {
+            if (shouldOpen) {
+                detail.setAttribute('open', '');
+            } else {
+                detail.removeAttribute('open');
+            }
+        });
+    }
+
+    // 顯示/隱藏單題答案
+    function toggleAnswer(id) {
+        const answerBlock = document.getElementById(id);
+        const btn = answerBlock.previousElementSibling;
+        
+        if (answerBlock.style.display === 'block') {
+            answerBlock.style.display = 'none';
+            btn.textContent = '查看答案';
+        } else {
+            answerBlock.style.display = 'block';
+            btn.textContent = '隱藏答案';
+        }
+    }
+</script>
+
+</body>
+</html>

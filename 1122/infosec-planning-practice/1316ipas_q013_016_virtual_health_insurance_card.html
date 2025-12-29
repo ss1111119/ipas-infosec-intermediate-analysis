@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題組解析：虛擬健保卡 (Q13-16)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --border-color: #ddd;
+            --highlight-bg: #fff3cd;
+            --correct-bg: #d4edda;
+            --correct-text: #155724;
+            --wrong-bg: #f8d7da;
+            --wrong-text: #721c24;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Heiti TC", "Microsoft JhengHei", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            font-size: 1.25em; /* 限制標題大小 */
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.15em; /* 限制標題大小 */
+            color: var(--primary-color);
+            background-color: #ecf0f1;
+            padding: 8px 12px;
+            border-left: 5px solid var(--accent-color);
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            font-size: 1.1em;
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-bottom: 15px;
+            padding-left: 25px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .term-def {
+            color: #555;
+            font-size: 0.9em;
+            font-weight: normal;
+        }
+
+        /* Question Box Style */
+        .question-box {
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        .option-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        /* Interactive Options Styling */
+        .option-item {
+            padding: 10px;
+            margin-bottom: 5px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: #f1f2f6;
+            border-color: #ccc;
+        }
+
+        .option-item.correct {
+            background-color: var(--correct-bg);
+            color: var(--correct-text);
+            border-color: #c3e6cb;
+            font-weight: bold;
+        }
+        
+        .option-item.correct::after {
+            content: ' ✅';
+        }
+
+        .option-item.wrong {
+            background-color: var(--wrong-bg);
+            color: var(--wrong-text);
+            border-color: #f5c6cb;
+            opacity: 0.8;
+        }
+
+        .option-item.wrong::after {
+            content: ' ❌';
+        }
+
+        .correct-answer {
+            color: #d32f2f;
+            font-weight: bold;
+            display: none; /* 預設隱藏 */
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ccc;
+        }
+
+        /* Details & Summary Style */
+        details {
+            border: 1px solid var(--border-color);
+            background-color: #fff;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: #f1f2f6;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 1.2em;
+            color: #7f8c8d;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .details-content {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Control Panel */
+        .controls {
+            margin-bottom: 20px;
+            text-align: right;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 5px;
+            box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button.outline {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        button.outline:hover {
+            background-color: #ebf5fb;
+        }
+
+        /* Image Styling */
+        .scenario-img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 15px auto;
+            border: 1px solid #ddd;
+            padding: 5px;
+            background: #fff;
+        }
+
+        .self-test-answer {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="controls">
+        <button class="outline" onclick="toggleAll(true)">全部展開</button>
+        <button class="outline" onclick="toggleAll(false)">全部收合</button>
+    </div>
+
+    <h1>iPAS 資訊安全 (規劃/防護) 考題解析：題組 2 (虛擬健保卡)</h1>
+
+    <details open>
+        <summary>題組情境與題目 (13-16)</summary>
+        <div class="details-content">
+            <p><strong>【題組 2】</strong></p>
+            <p>健保署自民國 93 年全面換發健保晶片卡取代原先健保紙卡，配合行政院推動行動生活、智慧醫療政策推動規劃<span class="highlight">虛擬健保卡（用手機取代實體卡的健保身分機制）</span>（架構與流程如下圖），推動「居家醫療」、「遠距醫療」、「視訊診療」三大場域全面展開虛擬健保卡就醫。</p>
+            <p>民眾虛擬健保卡手機端 QR 碼的有效時間為 5 分鐘，軟體讀取完成 QR 碼後可保存 1 小時。</p>
+            <p>若有以下狀況，該虛擬健保卡 <span class="highlight">QR 碼（用來快速傳遞資訊的條碼）</span>將於該電腦失效：</p>
+            <ol>
+                <li>該電腦虛擬健保卡控制軟體重新啟動</li>
+                <li>同台電腦讀取不同人虛擬健保卡 QR Code</li>
+                <li>同台電腦讀取同一人不同虛擬健保卡 QR Code</li>
+                <li>該民眾虛擬健保卡 QR Code 由其他電腦或裝置讀取成功</li>
+            </ol>
+            <p>然而擴大的虛擬健保卡仍可能有安全的風險需要加以謹慎考量。</p>
+            
+            <img src="https://i.meee.com.tw/rqBK1mE.jpg" alt="虛擬健保卡架構與流程圖" class="scenario-img">
+
+            <hr>
+
+            <div class="question-box">
+                <p><strong>【第 13 題】</strong> 請問醫事人員經過讀取虛擬健保卡 QR 碼，再由醫事人員在 <span class="highlight">HIS 系統（醫院資訊系統）</span>透過虛擬健保卡系統至健保署系統查詢資料，主要在強化下列何項程序？</p>
+                <ul class="option-list">
+                    <li class="option-item" onclick="checkAnswer(this, false)">(A) 識別（Identification）</li>
+                    <li class="option-item" onclick="checkAnswer(this, false)">(B) 驗證（Authentication）</li>
+                    <li class="option-item" onclick="checkAnswer(this, true)">(C) <span class="highlight">授權（Authorization，系統判斷你能不能做某件事）</span></li>
+                    <li class="option-item" onclick="checkAnswer(this, false)">(D) 稽核（Audit）</li>
+                </ul>
+                <button onclick="toggleAnswer('ans13')">顯示解析</button>
+                <div id="ans13" class="correct-answer">正確答案：(C)</div>
+            </div>
+
+            <div class="question-box">
+                <p><strong>【第 14 題】</strong> 請問下列何者「不」是採用虛擬健康保卡的優點？</p>
+                <ul class="option-list">
+                    <li class="option-item" onclick="checkAnswer(this, false)">(A) 強化遠距醫療的安全與認證機制</li>
+                    <li class="option-item" onclick="checkAnswer(this, false)">(B) 避免未經授權的資料存取</li>
+                    <li class="option-item" onclick="checkAnswer(this, true)">(C) 強化實體健保卡的安全</li>
+                    <li class="option-item" onclick="checkAnswer(this, false)">(D) 落實健保資料使用的<span class="highlight">可歸責性（能追查是誰在什麼時候做了什麼事）</span></li>
+                </ul>
+                <button onclick="toggleAnswer('ans14')">顯示解析</button>
+                <div id="ans14" class="correct-answer">正確答案：(C)</div>
+            </div>
+
+            <div class="question-box">
+                <p><strong>【第 15 題】</strong> 請問虛擬健保卡手機端 QR 碼的內容可能包含下列何項？</p>
+                <ul class="option-list">
+                    <li class="option-item" onclick="checkAnswer(this, true)">(A) 存取資料的<span class="highlight">符記（Token，短時間有效的通行證）</span></li>
+                    <li class="option-item" onclick="checkAnswer(this, false)">(B) 持卡人的照片</li>
+                    <li class="option-item" onclick="checkAnswer(this, false)">(C) 持卡人的帳號及密碼</li>
+                    <li class="option-item" onclick="checkAnswer(this, false)">(D) 持卡人的生日</li>
+                </ul>
+                <button onclick="toggleAnswer('ans15')">顯示解析</button>
+                <div id="ans15" class="correct-answer">正確答案：(A)</div>
+            </div>
+
+            <div class="question-box">
+                <p><strong>【第 16 題】(複選)</strong> 請問透過虛擬健保卡機制的建置與運用，可能有的風險或問題有下列哪些？</p>
+                <ul class="option-list">
+                    <li class="option-item" onclick="checkAnswer(this, true, true)">(A) 增加<span class="highlight">攻擊向量（Attack Vector，駭客可以下手的入口）</span></li>
+                    <li class="option-item" onclick="checkAnswer(this, true, true)">(B) 與實體卡片資料同步的問題</li>
+                    <li class="option-item" onclick="checkAnswer(this, false, true)">(C) 帳號密碼的濫用</li>
+                    <li class="option-item" onclick="checkAnswer(this, false, true)">(D) 使實體健保卡的安全機制更容易被破解</li>
+                </ul>
+                <button onclick="toggleAnswer('ans16')">顯示解析</button>
+                <div id="ans16" class="correct-answer">正確答案：(A)、(B)</div>
+            </div>
+        </div>
+    </details>
+
+    <!-- 教學內容開始 -->
+
+    <details>
+        <summary>1. 題組重點說明</summary>
+        <div class="details-content">
+            <p>本題組的核心考點在於理解現代化身分識別系統（IAM）的運作流程，特別是「行動裝置」結合「醫療資訊」的應用場景。</p>
+            <ul>
+                <li><strong>IAM 流程：</strong>識別、驗證、授權、稽核的區別。</li>
+                <li><strong>Token 機制：</strong>為什麼 QR Code 不直接放個資，而是放 Token。</li>
+                <li><strong>風險評估：</strong>新技術帶來的便利與伴隨的資安風險（攻擊面擴大）。</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>2. 第一步：找關鍵字</summary>
+        <div class="details-content">
+            <p>在題目與情境中，請將目光鎖定在以下關鍵字：</p>
+            <ul>
+                <li><span class="highlight">QR 碼</span>：這是傳遞資訊的載體，是有時效性的（5分鐘）。</li>
+                <li><span class="highlight">HIS 系統 / 查詢資料</span>：這是最終的目的（存取資源）。</li>
+                <li><span class="highlight">授權 (Authorization)</span>：這是在問流程屬性。</li>
+                <li><span class="highlight">Token (符記)</span>：這是技術實作的核心。</li>
+                <li><span class="highlight">風險 / 攻擊向量</span>：這是資安檢視的角度。</li>
+            </ul>
+            <p><strong>關鍵思考：</strong>為什麼第 13 題答案不是「驗證」而是「授權」？因為題目問的是「讀取 QR 碼後...至系統查詢資料」這個動作，重點在於「允許醫生看到你的資料」，這是一個許可（Permission）的過程。</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>3. 第二步：白話翻譯 (整組)</summary>
+        <div class="details-content">
+            <p>用最簡單的高中生語言來理解這整套系統：</p>
+            <blockquote>
+                「你在手機上登入健保 APP（這是驗證你是誰），APP 給你一個 QR Code，這個 QR Code 就像是一張『臨時通行證』（Token）。
+                醫生掃描這張通行證，系統檢查這張證還有沒有效、是不是真的（Token 驗證），確認沒問題後，系統『允許』醫生看到你的病歷資料（這就是授權）。」
+            </blockquote>
+        </div>
+    </details>
+
+    <details>
+        <summary>4. 第三步：核心解題思路</summary>
+        <div class="details-content">
+            <h3>IAM 四大流程對照</h3>
+            <ol>
+                <li><strong>識別 (Identification)：</strong>告訴系統「我是誰」（例如：輸入帳號）。</li>
+                <li><strong>驗證 (Authentication)：</strong>證明「我真的是我」（例如：輸入密碼、生物辨識）。民眾在手機產出 QR Code 前，已經完成這一步。</li>
+                <li><strong>授權 (Authorization)：</strong>系統判斷「你能做什麼」（例如：醫生可以讀取病歷，但不能隨意刪改）。QR Code 交換 Token 的過程，主要是為了取得這個存取權限。</li>
+                <li><strong>稽核 (Audit)：</strong>紀錄「誰在什麼時候做了什麼」（例如：Log 紀錄某醫生查過你的資料）。</li>
+            </ol>
+            <h3>QR Code 在流程中的角色</h3>
+            <p>QR Code 本身不包含你的個資（如身分證號、照片），它只包著一串亂碼（Token）。這串亂碼是後端系統發給你的「暫時信物」。</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>5. 第四步：逐題解析 (13~16)</summary>
+        <div class="details-content">
+            <h3>第 13 題 (答案：C)</h3>
+            <p><strong>考點：</strong>IAM 流程區分。</p>
+            <ul>
+                <li><strong>解析：</strong>題目描述「讀取 QR...查詢資料」。查詢資料是一種「資源存取」。決定是否允許存取資源的過程稱為「授權」。</li>
+                <li>(A) 識別：只是宣稱身分。</li>
+                <li>(B) 驗證：通常指登入當下驗證帳密。雖然掃 QR 有驗證 Token 真偽的成分，但最終目的是「強化查詢資料的權限控管」，故選授權更為精確。</li>
+                <li>(C) 授權：正確。控制誰可以讀取什麼資料。</li>
+                <li>(D) 稽核：是事後追蹤紀錄。</li>
+            </ul>
+
+            <hr>
+
+            <h3>第 14 題 (答案：C)</h3>
+            <p><strong>考點：</strong>邏輯判斷。</p>
+            <ul>
+                <li><strong>解析：</strong>虛擬卡是「額外」的機制，並不會神奇地讓你的「實體塑膠卡片」變硬或變難偷。</li>
+                <li>(A) 是優點，透過 PKI 或 Token 機制比純粹看卡片安全。</li>
+                <li>(B) 是優點，Token 時效性可避免長期未授權存取。</li>
+                <li>(C) 錯誤。虛擬機制的建立與實體卡本身的物理安全無關。</li>
+                <li>(D) 是優點，數位軌跡更容易追蹤責任。</li>
+            </ul>
+
+            <hr>
+
+            <h3>第 15 題 (答案：A)</h3>
+            <p><strong>考點：</strong>Token 化觀念 (Tokenization)。</p>
+            <ul>
+                <li><strong>解析：</strong>QR Code 容易被翻拍或截圖，如果裡面直接放身分證、生日、照片，一旦洩漏就永久洩漏。</li>
+                <li>(A) Token：正確。只放一串暫時、無意義的亂碼，後端系統認得就好。過期就無效，安全性高。</li>
+                <li>(B)(C)(D) 都是靜態個資或機敏資料，絕對不能直接放在 QR Code 這種明文中。</li>
+            </ul>
+
+            <hr>
+
+            <h3>第 16 題 (答案：A、B)</h3>
+            <p><strong>考點：</strong>新技術導入的風險。</p>
+            <ul>
+                <li>(A) 正確。多了一個 APP、多了一個 API 接口，駭客就多了一個可以攻擊的地方（這叫攻擊向量增加）。</li>
+                <li>(B) 正確。實體卡換發與虛擬卡資料庫如果沒有即時同步，可能導致資料不一致（例如實體卡已掛失，虛擬卡卻還能用，或反之）。</li>
+                <li>(C) 帳號密碼濫用：雖然是風險，但這是使用者層面的通用風險，並非虛擬健保卡「機制」特有的核心結構風險。且題目標準答案未選此項，聚焦於系統架構面。</li>
+                <li>(D) 錯誤。虛擬卡的存在不會讓實體卡的晶片加密演算法變弱。</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>6. 觀念補充與延伸</summary>
+        <div class="details-content">
+            <h4>QR Code ≠ 個資</h4>
+            <p>在安全的系統設計中，QR Code 只是載體。就像網址一樣，它應該指向一個資源，而不是把資源內容全寫在臉上。使用 Token 的好處是：<strong>就算被偷拍，5 分鐘後就失效了，駭客拿了也沒用。</strong></p>
+
+            <h4>Token vs 帳密</h4>
+            <ul>
+                <li><strong>帳密：</strong>像印章，可以無限次使用，丟了很嚴重。</li>
+                <li><strong>Token：</strong>像電影票，只能用一次或要在特定時間內使用，過期作廢。</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>7. 記憶口訣 (整組)</summary>
+        <div class="details-content">
+            <ul>
+                <li>「掃碼不等於登入，是<strong>授權</strong>在放行」</li>
+                <li>「QR 放 <strong>Token</strong>，不放個資」</li>
+                <li>「虛擬無法保護實體」</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>8. 常見陷阱</summary>
+        <div class="details-content">
+            <ul>
+                <li><strong>誤選「驗證」：</strong> 很多人覺得掃 QR Code 是在確認身分，所以選驗證。但考題強調的是「查詢資料」這個動作的合法性，這是 Permission（許可），屬於授權層次。</li>
+                <li><strong>誤以為 QR 放個資：</strong> 直覺認為 QR 掃出來就是名字照片。這是舊式思維，現在資安規範要求最小化揭露，通常只放 Token ID。</li>
+                <li><strong>誤認風險：</strong> 覺得多一種卡，舊的卡就會變危險。其實兩者是平行運作的，風險在於「管理」與「同步」，而非舊卡本身的加密被破解。</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>9. 題組總結</summary>
+        <div class="details-content">
+            <p>本題組必記重點：</p>
+            <ol>
+                <li>醫療人員掃 QR Code 查詢資料 = <strong>授權 (Authorization)</strong>。</li>
+                <li>虛擬健保卡 QR Code 內容 = <strong>Token (符記)</strong>，非個資。</li>
+                <li>導入新系統必然增加<strong>攻擊向量</strong>。</li>
+                <li>虛擬與實體並存需注意<strong>資料同步</strong>問題。</li>
+            </ol>
+        </div>
+    </details>
+
+    <details>
+        <summary>10. 自我檢測 (題組延伸)</summary>
+        <div class="details-content">
+            <p>請嘗試回答以下延伸題，測試觀念是否釐清。</p>
+            
+            <div class="question-box">
+                <p><strong>Q1. 若駭客截圖了民眾的虛擬健保卡 QR Code，但過了 10 分鐘才拿去掃描，請問結果為何？</strong></p>
+                <button onclick="toggleAnswer('self1')">查看答案</button>
+                <div id="self1" class="self-test-answer">
+                    <strong>無效。</strong><br>
+                    因為題目情境提到「民眾手機端 QR 碼有效時間為 5 分鐘」，Token 具有時效性，過期即失效，這就是 Token 機制的安全防護。
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p><strong>Q2. 醫生在 HIS 系統操作查詢時，系統除了檢查 Token 是否有效，通常還會記錄該次查詢的時間與操作人員，這屬於 IAM 的哪一個流程？</strong></p>
+                <button onclick="toggleAnswer('self2')">查看答案</button>
+                <div id="self2" class="self-test-answer">
+                    <strong>稽核 (Audit)。</strong><br>
+                    凡是涉及「紀錄」、「追蹤」、「Log」、「責任歸屬」的行為，都屬於稽核。
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p><strong>Q3. 假設設計不良，QR Code 直接包含身分證字號與姓名，這違反了什麼資安原則？</strong></p>
+                <button onclick="toggleAnswer('self3')">查看答案</button>
+                <div id="self3" class="self-test-answer">
+                    <strong>機密性 (Confidentiality) 與 最小權限原則。</strong><br>
+                    敏感資料不應以明文暴露，應透過 Token 化處理，避免未經授權的讀取（如旁人偷拍）。
+                </div>
+            </div>
+        </div>
+    </details>
+
+</div>
+
+<script>
+    // 展開/收合所有 details
+    function toggleAll(shouldOpen) {
+        const details = document.querySelectorAll('details');
+        details.forEach(detail => {
+            if (shouldOpen) {
+                detail.setAttribute('open', '');
+            } else {
+                detail.removeAttribute('open');
+            }
+        });
+    }
+
+    // 切換答案顯示
+    function toggleAnswer(id) {
+        const answerDiv = document.getElementById(id);
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+        } else {
+            answerDiv.style.display = 'block';
+        }
+    }
+
+    // 選項檢查邏輯
+    function checkAnswer(liElement, isCorrect, isMulti) {
+        // 如果是單選題，先清除同一題其他選項的樣式
+        if (!isMulti) {
+            const siblings = liElement.parentElement.children;
+            for (let sibling of siblings) {
+                sibling.classList.remove('correct', 'wrong');
+            }
+        }
+
+        // 加上正確或錯誤樣式
+        if (isCorrect) {
+            liElement.classList.add('correct');
+        } else {
+            liElement.classList.add('wrong');
+        }
+    }
+</script>
+
+</body>
+</html>

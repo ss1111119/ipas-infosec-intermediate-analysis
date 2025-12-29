@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安考題解析 - Q12 權限管理與RBAC</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --border-color: #ddd;
+            --highlight-color: #fff3a3;
+            --box-bg: #ffffff;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--box-bg);
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.2em;
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+            background-color: #f0f4f8;
+            padding: 10px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        p, li {
+            margin-bottom: 10px;
+        }
+
+        ul, ol {
+            padding-left: 25px;
+        }
+
+        /* 關鍵字螢光筆效果 */
+        .marker {
+            background-color: var(--highlight-color);
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        /* 互動區塊樣式 */
+        details {
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        details[open] {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-color: var(--accent-color);
+        }
+
+        summary {
+            background-color: #f1f1f1;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設三角形 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        details[open] summary {
+            background-color: #e8f4fc;
+            color: var(--accent-color);
+        }
+
+        .content {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* 按鈕樣式 */
+        .btn-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 5px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button.toggle-answer {
+            background-color: #27ae60;
+            margin-top: 5px;
+        }
+
+        button.toggle-answer:hover {
+            background-color: #219150;
+        }
+
+        /* 表格樣式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: var(--primary-color);
+        }
+
+        /* 流程圖樣式 (純CSS) */
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .flowchart-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .flow-box {
+            border: 2px solid var(--primary-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            background: white;
+            font-weight: bold;
+            min-width: 100px;
+            text-align: center;
+            margin: 5px;
+        }
+
+        .arrow {
+            margin: 0 10px;
+            font-size: 1.5em;
+            color: var(--accent-color);
+        }
+
+        /* 自我檢測隱藏答案 */
+        .hidden-answer {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f8f5;
+            border-left: 4px solid #27ae60;
+            color: #2c3e50;
+        }
+
+        /* 題目區塊 */
+        .question-block {
+            background-color: #fff;
+            padding: 20px;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+
+        /* RWD 調整 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .flowchart-row {
+                flex-direction: column;
+            }
+            .arrow {
+                transform: rotate(90deg);
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="btn-group">
+        <button onclick="expandAll()">全部展開</button>
+        <button onclick="collapseAll()">全部收合</button>
+    </div>
+
+    <h1>iPAS 資訊安全規劃/防護 - 考題互動式教學</h1>
+
+    <div class="question-block">
+        <strong>題號：12</strong><br>
+        <strong>題型：複選題</strong>
+        <p>題目：「關於權限管理的說明，下列哪些正確？（複選）」</p>
+        <div class="option">(A) 一旦使用者通過身份驗證後，系統會根據其授權層級與角色來分配相應的權限</div>
+        <div class="option">(B) 可以確保每個使用者僅能存取其需要的資源或功能</div>
+        <div class="option">(C) 能夠防止越權存取</div>
+        <div class="option">(D) 可以透過以角色為基礎的存取控制（Role-based access control，RBAC）實作</div>
+    </div>
+
+    <!-- 1. 關鍵字分析 -->
+    <details open>
+        <summary>【第一步：找關鍵字】</summary>
+        <div class="content">
+            <p>請注意題目中的以下字詞，它們是解題的核心線索：</p>
+            <ul>
+                <li><span class="marker">權限管理</span>（Privilege Management）：本題的主題，即決定誰能做什麼的機制。</li>
+                <li><span class="marker">身份驗證後</span>：這是時間點的關鍵，先確認身份，再給予權限。</li>
+                <li><span class="marker">授權層級/角色</span>：這是分配權限的依據。</li>
+                <li><span class="marker">RBAC</span>（Role-Based Access Control）：這是目前業界最主流的權限管理方法。</li>
+                <li><span class="marker">越權</span>（Unauthorized Access）：權限管理主要想防範的風險。</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 2. 白話翻譯 -->
+    <details>
+        <summary>【第二步：白話翻譯】</summary>
+        <div class="content">
+            <p><strong>題目其實在問：</strong></p>
+            <p>「當一個人登入電腦系統後，系統是怎麼決定他可以開哪些檔案、不能開哪些檔案的？這個機制有什麼好處？常見的做法是什麼？」</p>
+            <p>簡單來說，就是在考你懂不懂「系統怎麼管鑰匙」。</p>
+        </div>
+    </details>
+
+    <!-- 3. 解題思路 -->
+    <details>
+        <summary>【第三步：解題思路】</summary>
+        <div class="content">
+            <h3>這題在考什麼觀念？</h3>
+            <p>主要考核：<strong>身份驗證 (Authentication) 與 授權 (Authorization) 的區別</strong>，以及 <strong>最小權限原則</strong> 和 <strong>RBAC 機制</strong> 的應用。</p>
+
+            <h3>原理與規則（生活比喻）</h3>
+            <p>想像你要進入一間有很多管制區域的大公司：</p>
+            <ol>
+                <li><strong>身份驗證 (Authentication)：</strong>你在大門口刷門禁卡，警衛確認「你是誰」（例如：你是員工王小明）。</li>
+                <li><strong>授權 (Authorization)：</strong>確認你是誰之後，系統查表發現你的職位是「會計」。</li>
+                <li><strong>權限管理/RBAC：</strong>因為你是「會計」（角色），所以你的卡片可以刷開「財務室」的門，但刷不開「IT機房」的門。</li>
+            </ol>
+
+            <h3>簡易流程圖</h3>
+            <div class="flowchart">
+                <div class="flowchart-row">
+                    <div class="flow-box">登入請求</div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box" style="background:#e8f4fc;">身份驗證<br><small>(Authentication)</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box" style="background:#fff3a3;">授權決策<br><small>(Authorization)</small></div>
+                    <div class="arrow">→</div>
+                    <div class="flow-box">放行 或 拒絕</div>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                    (授權決策依據：角色、層級、屬性等)
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- 4. 選項分析 -->
+    <details>
+        <summary>【第四步：選項分析】</summary>
+        <div class="content">
+            <p>本題四個選項皆正確，分析如下：</p>
+
+            <h4>(A) 一旦使用者通過身份驗證後，系統會根據其授權層級與角色來分配相應的權限 [正確]</h4>
+            <p>這是標準流程。必須先確認「你是誰」（<span class="marker">身份驗證 Authentication</span>，確認你是誰，例如密碼/OTP），才能決定「你能做什麼」（<span class="marker">授權 Authorization</span>，確認你能做什麼）。權限通常綁定在你的職位或角色上。</p>
+
+            <h4>(B) 可以確保每個使用者僅能存取其需要的資源或功能 [正確]</h4>
+            <p>這描述了資安核心原則之一：<span class="marker">最小權限</span>（Least Privilege，只給完成工作需要的最少權限）。良好的權限管理就是要做到這一點，不給多餘的權限。</p>
+
+            <h4>(C) 能夠防止越權存取 [正確]</h4>
+            <p><span class="marker">越權存取</span>（Unauthorized Access，做了不該做、看了不該看的）是權限管理要解決的主要問題。例如，防止一般員工看到經理的薪資表。透過嚴格的權限控管，可以阻擋這種行為。</p>
+
+            <h4>(D) 可以透過以角色為基礎的存取控制（Role-based access control，RBAC）實作 [正確]</h4>
+            <p><span class="marker">RBAC</span>（以角色為基礎的存取控制）是目前實作權限管理最常見、最有效率的方法。它避免了直接針對「每個人」設權限，而是針對「角色」設權限，管理起來更方便。</p>
+        </div>
+    </details>
+
+    <!-- 5. 觀念補充與延伸 -->
+    <details>
+        <summary>【觀念補充與延伸】</summary>
+        <div class="content">
+            <h3>1. 核心觀念定位</h3>
+            <p>這題屬於 IAM（Identity and Access Management，身分識別與存取管理）的範疇，是資安考試的高頻考點。</p>
+
+            <h3>2. 重要定義</h3>
+            <ul>
+                <li><strong>權限管理 (Privilege Management)：</strong>管理使用者對系統資源（如檔案、資料庫、應用程式）的存取能力（讀、寫、執行、刪除）。</li>
+                <li><strong>角色 (Role)：</strong><span class="marker">角色</span>（把工作性質分組，例如「會計」、「人資」、「一般員工」）。在 RBAC 中，權限是給「角色」的，使用者再被分配到「角色」。</li>
+            </ul>
+
+            <h3>3. 驗證 vs 授權 對照表</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th width="15%">項目</th>
+                        <th width="40%">身份驗證 (Authentication)</th>
+                        <th width="45%">授權 (Authorization)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>目的</strong></td>
+                        <td>確認使用者是誰 (Who you are)</td>
+                        <td>決定使用者能做什麼 (What you can do)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>時間點</strong></td>
+                        <td>先發生</td>
+                        <td>驗證成功後發生</td>
+                    </tr>
+                    <tr>
+                        <td><strong>例子</strong></td>
+                        <td>輸入密碼、指紋辨識、OTP</td>
+                        <td>讀取檔案、修改資料、進入管理後台</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>4. RBAC 角色映射示例</h3>
+            <p>RBAC 的邏輯是：使用者 &rarr; 角色 &rarr; 權限。</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>使用者 (User)</th>
+                        <th>角色 (Role)</th>
+                        <th>權限 (Permissions)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Alice</td>
+                        <td>管理員 (Admin)</td>
+                        <td>新增用戶、刪除資料、讀取所有文件</td>
+                    </tr>
+                    <tr>
+                        <td>Bob</td>
+                        <td>工讀生 (Intern)</td>
+                        <td>讀取公開文件 (不可刪除，不可新增)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>5. 觸類旁通</h3>
+            <ul>
+                <li><strong>對比概念：ABAC (Attribute-Based Access Control)：</strong>以「屬性」為基礎。例如：「只有在『上班時間』且『在公司IP』才能存取」。比 RBAC 更靈活但更複雜。</li>
+                <li><strong>變化題型：</strong>題目若提到「員工離職或轉調部門，權限未移除」，這是在考權限回收與生命週期管理。</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 6. 記憶口訣 -->
+    <details>
+        <summary>【記憶口訣】</summary>
+        <div class="content">
+            <p style="font-size: 1.2em; color: var(--primary-color); font-weight: bold; text-align: center; border: 2px dashed var(--accent-color); padding: 15px;">
+                「先驗身分再授權，<br>
+                角色管權最安全，<br>
+                最小權限防越權。」
+            </p>
+        </div>
+    </details>
+
+    <!-- 7. 常見陷阱 -->
+    <details>
+        <summary>【常見陷阱】</summary>
+        <div class="content">
+            <ul>
+                <li><strong>陷阱一：混淆驗證與授權。</strong><br>記住：驗證是「進門卡」，授權是「房間鑰匙」。</li>
+                <li><strong>陷阱二：以為 RBAC 自動等於最小權限。</strong><br>RBAC 只是工具，如果管理員把「超級管理員」的角色隨便給所有人，那依然違反了最小權限原則。RBAC 必須配合正確的設定才有效。</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 8. 正確答案 -->
+    <details open>
+        <summary>【正確答案】</summary>
+        <div class="content">
+            <p style="font-size: 1.5em; font-weight: bold; color: #27ae60;">
+                正確答案：A、B、C、D
+            </p>
+            <p><strong>一句話理由：</strong>四個選項分別描述了權限管理的流程(A)、原則(B)、目的(C)與實作方法(D)，皆為正確敘述。</p>
+        </div>
+    </details>
+
+    <!-- 9. 自我檢測 -->
+    <details>
+        <summary>【自我檢測】</summary>
+        <div class="content">
+            <p>透過以下題目測試你是否真的理解了：</p>
+
+            <div style="background: #fdfdfd; padding: 15px; border: 1px solid #eee; margin-bottom: 15px;">
+                <p><strong>Q1. 小明輸入帳號密碼登入系統，這個動作屬於資訊安全的哪一個階段？</strong></p>
+                <button class="toggle-answer" onclick="toggleAnswer('ans1')">查看答案</button>
+                <div id="ans1" class="hidden-answer">
+                    <strong>答案：身份驗證 (Authentication)</strong><br>
+                    解析：輸入帳密是為了證明「我是小明」，這是驗證身分的過程。
+                </div>
+            </div>
+
+            <div style="background: #fdfdfd; padding: 15px; border: 1px solid #eee; margin-bottom: 15px;">
+                <p><strong>Q2. 關於 RBAC (Role-Based Access Control)，下列敘述何者錯誤？</strong><br>
+                (A) 權限是直接分配給每一個使用者的<br>
+                (B) 權限是分配給角色的<br>
+                (C) 使用者被分配到角色中<br>
+                (D) 可以簡化權限管理</p>
+                <button class="toggle-answer" onclick="toggleAnswer('ans2')">查看答案</button>
+                <div id="ans2" class="hidden-answer">
+                    <strong>答案：(A)</strong><br>
+                    解析：RBAC 的核心就是「不」直接把權限給人，而是給「角色」。若直接給人，那是 DAC 或 ACL 的概念，管理會很混亂。
+                </div>
+            </div>
+
+            <div style="background: #fdfdfd; padding: 15px; border: 1px solid #eee;">
+                <p><strong>Q3. 「只給予員工完成工作所需的最低限度權限」，這是什麼原則？</strong></p>
+                <button class="toggle-answer" onclick="toggleAnswer('ans3')">查看答案</button>
+                <div id="ans3" class="hidden-answer">
+                    <strong>答案：最小權限原則 (Least Privilege)</strong><br>
+                    解析：這是防止越權存取與減少資安災害範圍最重要的原則。
+                </div>
+            </div>
+        </div>
+    </details>
+
+</div>
+
+<script>
+    // 展開所有 details 標籤
+    function expandAll() {
+        const details = document.querySelectorAll('details');
+        details.forEach(detail => {
+            detail.open = true;
+        });
+    }
+
+    // 收合所有 details 標籤
+    function collapseAll() {
+        const details = document.querySelectorAll('details');
+        details.forEach(detail => {
+            detail.open = false;
+        });
+    }
+
+    // 切換顯示/隱藏答案
+    function toggleAnswer(id) {
+        const answerDiv = document.getElementById(id);
+        const btn = answerDiv.previousElementSibling;
+        
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+            btn.textContent = '查看答案';
+        } else {
+            answerDiv.style.display = 'block';
+            btn.textContent = '隱藏答案';
+        }
+    }
+</script>
+
+</body>
+</html>

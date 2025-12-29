@@ -1,0 +1,656 @@
+<!-- filename: ipas_risk_acceptance_q35_interactive.html -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 風險可接受水準與後續作為 — 第 35 題互動教學</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #666;
+        }
+
+        /* 題目卡片 */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 1px solid #eee;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .badge {
+            background: var(--accent-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            background: #95a5a6;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            display: none; /* 預設隱藏 */
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+
+        /* 關鍵字互動 */
+        .interactive-keyword {
+            border-bottom: 2px dashed #999;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0 2px;
+        }
+
+        .interactive-keyword:hover {
+            background-color: #e8f4fd;
+            color: var(--accent-color);
+        }
+
+        .interactive-keyword.active {
+            background-color: #f1c40f;
+            color: #000;
+            border-bottom: 2px solid #f39c12;
+        }
+
+        .instruction {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        /* 選項樣式 */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            background: white;
+            text-align: left;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-btn:hover:not(.disabled) {
+            border-color: var(--accent-color);
+            background-color: #f7fbff;
+        }
+
+        .option-btn.selected {
+            border-color: var(--primary-color);
+            background-color: #edf2f7;
+            font-weight: bold;
+        }
+
+        .option-btn.correct-answer {
+            border-color: var(--success-color);
+            background-color: #eafaf1;
+            color: #155724;
+        }
+
+        .option-btn.wrong-answer {
+            border-color: var(--error-color);
+            background-color: #fdeaea;
+            color: #721c24;
+        }
+
+        .submit-area {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            background-color: #bdc3c7;
+            border-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* 解析區塊 */
+        .analysis-container {
+            display: none; /* 預設隱藏 */
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-block {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        .section-block:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .content-text {
+            color: #444;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .highlight-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin: 10px 0;
+        }
+
+        .step-label {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            margin-bottom: 5px;
+        }
+
+        .option-analysis-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .option-analysis-item.correct {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .option-analysis-item.wrong {
+             border-left: 4px solid var(--error-color);
+        }
+
+        /* 字典與自我檢測 */
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .glossary-item {
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+        }
+
+        .glossary-term {
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .spoiler {
+            background-color: #333;
+            color: #333;
+            padding: 2px 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s;
+        }
+
+        .spoiler:hover {
+            background-color: #555;
+        }
+
+        .spoiler.revealed {
+            background-color: transparent;
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        /* 結果回饋 */
+        .result-feedback {
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: none;
+        }
+        .result-correct { color: var(--success-color); }
+        .result-wrong { color: var(--error-color); }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 風險可接受水準與後續作為</h1>
+        <p>資訊安全規劃實務 / 防護實務 — 第 35 題互動教學</p>
+    </header>
+
+    <!-- 題目區 -->
+    <div class="card" id="question-card">
+        <div class="question-header">
+            <span class="badge">第 35 題</span>
+            <span class="status-badge" id="status-badge">已作答</span>
+        </div>
+        
+        <p class="instruction">💡 點擊題目中的文字，試著找出解題「關鍵字」</p>
+        <div class="question-text" id="question-text">
+            <!-- JS 動態填入 -->
+        </div>
+
+        <div class="options-container" id="options-container">
+            <!-- JS 動態填入選項 -->
+        </div>
+
+        <div class="submit-area">
+            <button class="btn btn-primary" id="submit-btn" onclick="submitAnswer()">送出答案</button>
+            <span id="result-feedback" class="result-feedback"></span>
+            <button class="btn btn-outline" id="toggle-analysis-btn" onclick="toggleAnalysis()" style="display:none; margin-left: auto;">顯示 / 隱藏解析</button>
+        </div>
+    </div>
+
+    <!-- 解析區 -->
+    <div class="card analysis-container" id="analysis-section">
+        
+        <!-- 第一步 -->
+        <div class="section-block">
+            <div class="section-title">【第一步：找關鍵字】</div>
+            <div class="content-text">
+                請注意題目中的這幾個詞：<br>
+                1. <strong>固有風險</strong>（原始的風險值）<br>
+                2. <strong>遠低於</strong>（非常安全）<br>
+                3. <strong>可接受風險水準</strong>（及格線）<br>
+                4. <strong>不適當</strong>（選錯的、多餘的、反邏輯的）
+            </div>
+        </div>
+
+        <!-- 第二步 -->
+        <div class="section-block">
+            <div class="section-title">【第二步：白話翻譯】</div>
+            <div class="highlight-box">
+                「我們評估了一個作業流程，發現它天生就超級安全（風險很低），比我們規定的安全標準還要安全很多。這時候，下面哪一件事是『做太多』或『沒必要』的？」
+            </div>
+        </div>
+
+        <!-- 第三步 -->
+        <div class="section-block">
+            <div class="section-title">【第三步：解題思路】</div>
+            <div class="content-text">
+                <ul>
+                    <li><strong>核心觀念：</strong>當風險已經「遠低於」可接受水準時，資安策略通常是採取<strong>「風險接受（Risk Acceptance）」</strong>。</li>
+                    <li><strong>生活比喻：</strong>就像你在很寬敞、沒車、平坦的人行道上走路（固有風險低）。
+                        <ul>
+                            <li>(A) 檢查鞋帶有沒有綁好（檢視剩餘風險）→ 合理。</li>
+                            <li>(B) 跟爸媽報平安說我很安全（向管理階層報告）→ 合理。</li>
+                            <li>(C) <strong>堅持要穿全身防護衣、戴安全帽才肯走（實施控制措施）→ 不合理，浪費錢又難行動（過度控制）。</strong></li>
+                            <li>(D) 邊走邊看路況有沒有變（持續監控）→ 合理。</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 第四步 -->
+        <div class="section-block">
+            <div class="section-title">【第四步：選項分析】</div>
+            <div id="options-analysis-content">
+                <!-- JS 動態填入 -->
+            </div>
+        </div>
+
+        <!-- 觀念補充 -->
+        <div class="section-block">
+            <div class="section-title">【觀念補充與延伸】</div>
+            <div class="content-text">
+                <strong>為什麼 (C) 不適當？</strong><br>
+                資安不是追求「零風險」，而是追求「成本效益」。如果風險已經很低，再投入資源去降低它（例如買昂貴的防火牆防護一台不重要的離線電腦），這叫做<strong>過度控制（Over-control）</strong>，會造成組織資源的浪費與效率降低。
+            </div>
+        </div>
+
+        <!-- 記憶口訣 -->
+        <div class="section-block">
+            <div class="section-title">【記憶口訣】</div>
+            <div class="highlight-box" style="background-color: #e8f4fd; border-color: #b3d7ff; color: #004085; text-align: center; font-weight: bold;">
+                「風險低就接受，監控報告不可少；<br>沒事別亂加控制，省錢省力剛剛好。」
+            </div>
+        </div>
+
+        <!-- 常見陷阱 -->
+        <div class="section-block">
+            <div class="section-title">【常見陷阱】</div>
+            <div class="content-text" style="color: #c0392b;">
+                ⚠️ 陷阱：看到「不適當」以為要選壞事。<br>
+                題目問的是「下一步行動」，(A)(B)(D) 都是標準的風險管理程序（即使風險低也要做）。(C) 雖然「降低風險」聽起來是好事，但在「已經很低」的前提下，它變成了「浪費」。
+            </div>
+        </div>
+
+        <!-- 正確答案 -->
+        <div class="section-block">
+            <div class="section-title">【正確答案】</div>
+            <div class="content-text">
+                本題正確答案為 <strong style="color: var(--success-color); font-size: 1.2rem;">(C)</strong>
+            </div>
+        </div>
+
+        <!-- 自我檢測 -->
+        <div class="section-block">
+            <div class="section-title">【自我檢測】(點擊黑條看答案)</div>
+            <ol class="content-text" style="padding-left: 20px;">
+                <li style="margin-bottom: 10px;">
+                    如果固有風險「高於」可接受水準，下一步最可能要做哪些事？<br>
+                    👉 <span class="spoiler" onclick="toggleSpoiler(this)">實施風險處置（如降低、轉移、或是避免），直到風險降至可接受水準。</span>
+                </li>
+                <li style="margin-bottom: 10px;">
+                    「固有風險」與「殘餘風險」差在哪？<br>
+                    👉 <span class="spoiler" onclick="toggleSpoiler(this)">固有風險是「天生沒保護時的風險」；殘餘風險是「做完保護後剩下的風險」。</span>
+                </li>
+                <li>
+                    什麼情況下「本來很低的風險」會突然變高？<br>
+                    👉 <span class="spoiler" onclick="toggleSpoiler(this)">1. 業務流程改變（如開始處理個資）。 2. 技術環境改變（如系統上雲端）。 3. 出現新漏洞（零時差攻擊）。</span>
+                </li>
+            </ol>
+        </div>
+
+    </div>
+
+    <!-- 名詞小字典 -->
+    <div class="card">
+        <div class="section-title" style="margin-bottom: 20px;">📚 名詞小字典</div>
+        <div class="glossary-grid">
+            <div class="glossary-item">
+                <span class="glossary-term">風險評估 (Assessment)</span>
+                找出資產有哪些威脅與弱點，並計算風險值大小的過程。
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">固有風險 (Inherent Risk)</span>
+                在還沒做任何控制措施前，該事物天生就存在的風險。
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">可接受風險水準 (Acceptable Level)</span>
+                組織（老闆）覺得「這個風險程度我可以忍受，不用再花錢處理」的那條及格線。
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">殘餘風險 (Residual Risk)</span>
+                實施控制措施後，仍然消除不掉、剩下來的風險。
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">風險接受 (Risk Acceptance)</span>
+                一種風險處置策略，決定不採取額外行動，直接承擔風險（通常附帶監控）。
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">控制措施 (Control)</span>
+                用來降低風險的手段，例如防火牆、防毒軟體、門禁卡、SOP。
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">過度控制 (Over-control)</span>
+                花費的成本高於風險可能造成的損失，或是在極低風險下仍投入大量資源。
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">持續監控 (Continuous Monitoring)</span>
+                因為環境會變，所以要一直盯著看風險有沒有升高，而不是做完評估就不管了。
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // 題目資料物件
+    const questionData = {
+        question: "某作業流程經過<span class='interactive-keyword' onclick='toggleKeyword(this)'>風險評估</span>（Assessment，評估風險有多大）後的<span class='interactive-keyword' onclick='toggleKeyword(this)'>固有風險</span>值，<span class='interactive-keyword' onclick='toggleKeyword(this)'>遠低於</span>所設定的<span class='interactive-keyword' onclick='toggleKeyword(this)'>可接受風險水準</span>時，下一步行動方案，下列何者較「<span class='interactive-keyword' onclick='toggleKeyword(this)'>不</span>」適當？",
+        options: [
+            { id: "A", text: "檢視剩餘風險的水準", correct: false },
+            { id: "B", text: "向管理階層報告合規結果", correct: false },
+            { id: "C", text: "實施控制措施再降低風險", correct: true }, // 題目問「不適當」，所以這是正確選項
+            { id: "D", text: "持續監控作業流程的變化", correct: false }
+        ],
+        correctOptionId: "C",
+        analysis: [
+            { id: "A", valid: true, text: "<strong>(A) 檢視剩餘風險的水準：</strong>適當。即使固有風險低，仍需確認現有環境下的殘餘風險（Residual Risk，做完現有控制後留下的風險）是否真的符合預期，並留下紀錄。" },
+            { id: "B", valid: true, text: "<strong>(B) 向管理階層報告合規結果：</strong>適當。風險接受是管理階層的責任，必須回報評估結果，讓老闆知道「這裡很安全，我們決定不花錢做額外控制」。" },
+            { id: "C", valid: false, text: "<strong>(C) 實施控制措施再降低風險：</strong>不適當。風險已經「遠低於」標準，再花錢加裝控制措施屬於「過度控制（Over-control）」，不符合成本效益原則。" },
+            { id: "D", valid: true, text: "<strong>(D) 持續監控作業流程的變化：</strong>適當。現在風險低不代表永遠低，必須持續監控（Continuous Monitoring）環境與流程變化。" }
+        ]
+    };
+
+    let selectedOption = null;
+    let isSubmitted = false;
+
+    // 初始化頁面
+    function init() {
+        const questionTextEl = document.getElementById('question-text');
+        questionTextEl.innerHTML = questionData.question;
+
+        const optionsContainer = document.getElementById('options-container');
+        questionData.options.forEach(opt => {
+            const btn = document.createElement('div');
+            btn.className = 'option-btn';
+            btn.id = `opt-${opt.id}`;
+            btn.innerText = `(${opt.id}) ${opt.text}`;
+            btn.onclick = () => selectOption(opt.id);
+            optionsContainer.appendChild(btn);
+        });
+
+        // 預先填入解析內容（但保持隱藏）
+        const analysisContent = document.getElementById('options-analysis-content');
+        questionData.analysis.forEach(item => {
+            const div = document.createElement('div');
+            // C 是題目要選的答案（不適當的行為），但在解析邏輯上它是 "Wrong Action"
+            // 為了教學清楚，這裡標示顏色依據「邏輯是否正確」
+            // 題目問不適當，所以 C 是本題正解，但在邏輯上 C 是錯誤行為。
+            // 為了避免混淆，我們標示 Correct Answer 的選項為綠色框，其他為普通或紅色。
+            
+            // 這裡調整顯示邏輯：標示出哪個選項是題目要選的答案
+            let className = "option-analysis-item";
+            if(item.id === questionData.correctOptionId) {
+                className += " wrong"; // 視覺上用紅色強調這是「不適當」的行為
+            } else {
+                className += " correct"; // 其他行為是正確的資安觀念
+            }
+            
+            div.className = className;
+            div.innerHTML = item.text;
+            analysisContent.appendChild(div);
+        });
+    }
+
+    // 關鍵字高亮切換
+    function toggleKeyword(element) {
+        element.classList.toggle('active');
+    }
+
+    // 選擇選項
+    function selectOption(id) {
+        if (isSubmitted) return;
+
+        // 清除舊選擇
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+
+        // 設定新選擇
+        selectedOption = id;
+        document.getElementById(`opt-${id}`).classList.add('selected');
+    }
+
+    // 送出答案
+    function submitAnswer() {
+        if (selectedOption === null) {
+            alert("請先選擇一個選項！");
+            return;
+        }
+        if (isSubmitted) return;
+
+        isSubmitted = true;
+        document.getElementById('status-badge').style.display = 'inline-block';
+        document.getElementById('submit-btn').disabled = true;
+        document.getElementById('submit-btn').innerText = "已送出";
+
+        const feedbackEl = document.getElementById('result-feedback');
+        const correctId = questionData.correctOptionId;
+
+        // 標示對錯
+        const selectedBtn = document.getElementById(`opt-${selectedOption}`);
+        const correctBtn = document.getElementById(`opt-${correctId}`);
+
+        if (selectedOption === correctId) {
+            selectedBtn.classList.add('correct-answer');
+            feedbackEl.innerText = "🎉 答對了！觀念正確！";
+            feedbackEl.className = "result-feedback result-correct";
+        } else {
+            selectedBtn.classList.add('wrong-answer');
+            correctBtn.classList.add('correct-answer'); // 顯示正解
+            feedbackEl.innerText = `😅 答錯了，正確答案是 (${correctId})`;
+            feedbackEl.className = "result-feedback result-wrong";
+        }
+        
+        feedbackEl.style.display = 'block';
+
+        // 顯示解析按鈕並自動展開
+        const toggleBtn = document.getElementById('toggle-analysis-btn');
+        toggleBtn.style.display = 'block';
+        
+        // 自動展開解析
+        const analysisSection = document.getElementById('analysis-section');
+        analysisSection.style.display = 'block';
+        toggleBtn.innerText = "隱藏解析";
+        
+        // 鎖定所有選項
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.add('disabled');
+            btn.style.cursor = 'default';
+        });
+    }
+
+    // 切換解析顯示
+    function toggleAnalysis() {
+        const section = document.getElementById('analysis-section');
+        const btn = document.getElementById('toggle-analysis-btn');
+        
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            btn.innerText = "隱藏解析";
+        } else {
+            section.style.display = 'none';
+            btn.innerText = "顯示解析";
+        }
+    }
+
+    // 自我檢測遮罩切換
+    function toggleSpoiler(element) {
+        element.classList.toggle('revealed');
+    }
+
+    // 啟動
+    window.onload = init;
+</script>
+
+</body>
+</html>

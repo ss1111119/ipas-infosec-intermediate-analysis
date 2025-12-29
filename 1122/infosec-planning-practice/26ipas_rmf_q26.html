@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ipas_rmf_q26.html - iPAS 資安工程師題目教學</title>
+    <style>
+        :root {
+            --bg-color: #f9f9f9;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --accordion-header-bg: #f1f1f1;
+            --btn-text: #ffffff;
+            --mark-bg: #fff176;
+            --code-bg: #f5f5f5;
+        }
+
+        body.dark-mode {
+            --bg-color: #1a1a1a;
+            --container-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --border-color: #444444;
+            --primary-color: #ecf0f1;
+            --accent-color: #5dade2;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --highlight-bg: #3e3c30;
+            --highlight-text: #e0c060;
+            --accordion-header-bg: #3a3a3a;
+            --btn-text: #1a1a1a;
+            --mark-bg: #b7950b;
+            --code-bg: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* 標題大小控制：標題與內文差異不超過 1 個字級 */
+        h1, h2, h3, h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        h1 { font-size: 20px; }
+        h2 { font-size: 19px; margin-bottom: 10px; }
+        h3 { font-size: 18px; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; display: inline-block; }
+        p, li, label { font-size: 17px; }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: var(--container-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        /* 兩欄佈局 */
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .layout-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .container {
+                padding: 15px;
+            }
+            body {
+                padding: 10px;
+            }
+        }
+
+        .question-section {
+            border-right: 1px solid var(--border-color);
+            padding-right: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .question-section {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding-right: 0;
+                padding-bottom: 20px;
+            }
+        }
+
+        /* 選項樣式 */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: var(--accordion-header-bg);
+            border-color: var(--accent-color);
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕樣式 */
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reset {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-reset:hover {
+            background-color: var(--accordion-header-bg);
+        }
+
+        .btn-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* 結果顯示 */
+        .result-card {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none; /* 預設隱藏 */
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .result-correct {
+            background-color: rgba(39, 174, 96, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .result-wrong {
+            background-color: rgba(192, 57, 43, 0.1);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+        }
+
+        /* 解析區塊 */
+        .analysis-container {
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+            display: none; /* 預設隱藏，送出後顯示 */
+        }
+
+        .accordion {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .accordion-header {
+            background-color: var(--accordion-header-bg);
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .accordion.active .accordion-header::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            background-color: var(--container-bg);
+            transition: max-height 0.3s ease-out;
+            border-top: 1px solid transparent;
+        }
+
+        .accordion.active .accordion-content {
+            max-height: 1000px; /* 足夠大的值 */
+            border-top-color: var(--border-color);
+            padding: 15px;
+        }
+
+        mark {
+            background-color: var(--mark-bg);
+            color: var(--text-color);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* 自我檢測隱藏區 */
+        .self-check-item {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .toggle-answer-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: none;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 0;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        .hidden-answer {
+            display: none;
+            margin-top: 5px;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        /* 關鍵字樣式 */
+        .keyword-box {
+            display: inline-block;
+            background-color: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 2px;
+            font-family: monospace;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-bar">
+    <div>
+        <strong>ipas_rmf_q26.html</strong> | 資訊安全規劃實務
+    </div>
+    <button class="btn-toggle" id="themeToggle" onclick="toggleTheme()">夜間模式</button>
+</div>
+
+<div class="container">
+    <div class="layout-grid">
+        <!-- 左側：題目區 -->
+        <div class="question-section">
+            <h1>題號：26</h1>
+            <p><strong>題目：</strong>下列何者「不」屬風險管理架構的參考指引？</p>
+            
+            <p><strong>選項：</strong></p>
+            <div style="padding-left: 10px;">
+                <p>(A) NIST Cybersecurity Framework（CSF）</p>
+                <p>(B) ISO/IEC 27035</p>
+                <p>(C) ISO/IEC 31000</p>
+                <p>(D) NIST SP 800-37</p>
+            </div>
+        </div>
+
+        <!-- 右側：互動區 -->
+        <div class="interaction-section">
+            <h2>請作答</h2>
+            <form id="quizForm">
+                <div class="options-group">
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="A">
+                        (A) NIST CSF
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="B">
+                        (B) ISO/IEC 27035
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="C">
+                        (C) ISO/IEC 31000
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="D">
+                        (D) NIST SP 800-37
+                    </label>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-submit" onclick="submitAnswer()">送出答案</button>
+                    <button type="button" class="btn btn-reset" onclick="resetQuiz()">重做一次</button>
+                </div>
+            </form>
+
+            <div id="resultCard" class="result-card">
+                <!-- 結果顯示於此 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 解析區 -->
+    <div id="analysisSection" class="analysis-container">
+        <h2>完整解析</h2>
+
+        <!-- 1. 題目 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">1. 【題目】</div>
+            <div class="accordion-content">
+                <p>下列何者「不」屬風險管理架構的參考指引？</p>
+            </div>
+        </div>
+
+        <!-- 2. 第一步：找關鍵字 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">2. 【第一步：找關鍵字】</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><mark>風險管理架構</mark>：這是題目的核心主題，我們要找的是「關於風險管理」的標準。</li>
+                    <li><mark>參考指引</mark>：指標準文件或 Guideline。</li>
+                    <li><mark>不屬</mark>：這是否定題，要找出「例外」的那一個。</li>
+                    <li><mark>NIST</mark> / <mark>ISO</mark>：國際通用的兩大標準制定組織。</li>
+                    <li><mark>CSF</mark>、<mark>RMF</mark>：常見的風險管理專有名詞縮寫。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 3. 第二步：白話翻譯 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">3. 【第二步：白話翻譯】</div>
+            <div class="accordion-content">
+                <p>簡單來說，題目在問：「下面四個文件中，哪一個文件<strong>不是</strong>用來教我們怎麼做『風險管理架構』的？」</p>
+                <p>暗示：這四個裡面，有一個是講別的事情（例如發生事情怎麼修、怎麼調查），而不是講平常怎麼管理風險。</p>
+            </div>
+        </div>
+
+        <!-- 4. 第三步：解題思路 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">4. 【第三步：解題思路】</div>
+            <div class="accordion-content">
+                <p><strong>這題在考什麼觀念？</strong> 區分「風險管理（事前預防與治理）」與「事件處理（事發應變）」的標準文件。</p>
+                <p><strong>解題步驟：</strong></p>
+                <ol>
+                    <li>先看懂題目要找「非」風險管理架構。</li>
+                    <li>逐一檢視選項的標準代號用途。</li>
+                    <li>找出那個是用來處理「資安事件（Incident）」的標準。</li>
+                </ol>
+                <p><strong>原理與規則（專有名詞解釋）：</strong></p>
+                <ul>
+                    <li><span class="keyword-box">風險管理架構</span>（Risk Management Framework）：一套用來系統化管理、評估與處理風險的指引，重點在「治理」與「預防」。</li>
+                    <li><span class="keyword-box">NIST CSF</span>（Cybersecurity Framework）：美國 NIST 提出的資安風險管理與防護框架，包含識別、保護、偵測、回應、復原五大功能。</li>
+                    <li><span class="keyword-box">ISO/IEC 31000</span>：國際標準組織的通用型風險管理原則與架構標準，不限於資安，適用於各類風險。</li>
+                    <li><span class="keyword-box">NIST SP 800-37</span>：NIST 的風險管理框架（RMF），專門講述資訊系統風險管理流程。</li>
+                    <li><span class="keyword-box">ISO/IEC 27035</span>：資訊安全事件管理與應變流程標準，重點在當資安事故發生時的「偵測、通報、評估、回應」。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 5. 第四步：選項分析 -->
+        <div class="accordion" id="accordion-step4">
+            <div class="accordion-header" onclick="toggleAccordion(this)">5. 【第四步：選項分析】</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>(A) NIST Cybersecurity Framework（CSF）：</strong><br>這是美國廣泛使用的風險管理框架，協助組織管理資安風險。所以它是風險管理架構。<span style="color:var(--text-color); opacity:0.6;">（不選，因為題目找「不屬」）</span></li>
+                    
+                    <li><strong>(B) ISO/IEC 27035：</strong><br>這個標準的全名是《Information security incident management》。它是專門講「資安事件管理」與「應變」的，不是講整體的風險治理架構。它是在風險發生後（變成事件）的處理指引。<span style="color:var(--success-color); font-weight:bold;">（正確答案，選它）</span></li>
+                    
+                    <li><strong>(C) ISO/IEC 31000：</strong><br>這是最標準的「風險管理」指引文件，定義了風險管理的原則、架構與流程。所以它是風險管理架構。<span style="color:var(--text-color); opacity:0.6;">（不選）</span></li>
+                    
+                    <li><strong>(D) NIST SP 800-37：</strong><br>標題就是《Risk Management Framework for Information Systems and Organizations》。它詳細定義了 RMF 的六（或七）大步驟。所以它是風險管理架構。<span style="color:var(--text-color); opacity:0.6;">（不選）</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 6. 觀念補充與延伸 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">6. 【觀念補充與延伸】</div>
+            <div class="accordion-content">
+                <p><strong>核心觀念定位：</strong>本題屬於「資安治理與風險管理框架」必考基本觀念題。</p>
+                <p><strong>對比概念：</strong></p>
+                <ul>
+                    <li><strong>風險管理（Risk Management）：</strong>在事情發生前，評估可能性與衝擊，決定要接受、移轉或降低風險。（代表：ISO 31000, NIST RMF, ISO 27005）</li>
+                    <li><strong>資安事件管理（Incident Management）：</strong>在事情發生當下與之後，如何快速反應、止血、調查與復原。（代表：ISO 27035, NIST SP 800-61）</li>
+                </ul>
+                <p><strong>變化題型：</strong>考試常問哪個標準是偏向事件處理？答案通常找 ISO 27035 或 NIST SP 800-61。</p>
+            </div>
+        </div>
+
+        <!-- 7. 記憶口訣 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">7. 【記憶口訣】</div>
+            <div class="accordion-content">
+                <p>為了快速記憶這些數字，請記住以下口訣：</p>
+                <div style="background-color: var(--code-bg); padding: 10px; border-radius: 4px; border-left: 4px solid var(--accent-color);">
+                    <p style="margin: 0; font-weight: bold;">「31000 管風險、800-37 管流程、27035 管事件」</p>
+                </div>
+                <ul style="margin-top: 10px;">
+                    <li>31000 = Risk Management (萬用風險)</li>
+                    <li>800-37 = RMF (NIST 的風險流程)</li>
+                    <li>27035 = Incident (事故/事件)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 8. 常見陷阱 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">8. 【常見陷阱】</div>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>把所有 ISO 270xx 都當成風險管理：</strong> ISO 27000 系列有很多不同主題，27001 是驗證，27005 是資安風險管理，但 27035 是事件管理。不要看到 270 開頭就覺得都一樣。</li>
+                    <li><strong>看到 NIST 就直覺選：</strong> 有些考生會誤以為 NIST 只做技術標準，其實 NIST 的 CSF 和 SP 800-37 都是非常主流的管理框架。</li>
+                    <li><strong>避坑指南：</strong> 看到「Incident / 事件 / 事故」關鍵字，就不是風險管理架構（Risk Management Framework）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 9. 正確答案 -->
+        <div class="accordion" id="accordion-correct-answer">
+            <div class="accordion-header" onclick="toggleAccordion(this)">9. 【正確答案】</div>
+            <div class="accordion-content">
+                <p><strong>答案：(B)</strong></p>
+                <p><strong>一句話理由：</strong>ISO/IEC 27035 是事件應變標準（Incident Management），不是風險管理架構。</p>
+            </div>
+        </div>
+
+        <!-- 10. 自我檢測 -->
+        <div class="accordion">
+            <div class="accordion-header" onclick="toggleAccordion(this)">10. 【自我檢測】</div>
+            <div class="accordion-content">
+                <p>試試看這 3 題延伸問題：</p>
+                
+                <div class="self-check-item">
+                    <p>Q1. 若我想找一份關於「資安風險管理實作指引」的 ISO 標準，最直接相關的是 ISO 27000 系列中的哪一個？</p>
+                    <button class="toggle-answer-btn" onclick="toggleAnswer('ans1')">點我看答案</button>
+                    <span id="ans1" class="hidden-answer">ISO/IEC 27005</span>
+                </div>
+
+                <div class="self-check-item">
+                    <p>Q2. 美國 NIST 提出的「電腦安全事件處理指引」（Computer Security Incident Handling Guide）編號是多少？</p>
+                    <button class="toggle-answer-btn" onclick="toggleAnswer('ans2')">點我看答案</button>
+                    <span id="ans2" class="hidden-answer">NIST SP 800-61</span>
+                </div>
+
+                <div class="self-check-item">
+                    <p>Q3. NIST CSF（Cybersecurity Framework）的核心五大功能，除了保護、偵測、回應、復原外，還有哪一個？</p>
+                    <button class="toggle-answer-btn" onclick="toggleAnswer('ans3')">點我看答案</button>
+                    <span id="ans3" class="hidden-answer">識別 (Identify)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 夜間模式邏輯
+    function initTheme() {
+        const isDarkMode = localStorage.getItem('theme') === 'dark';
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+        }
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
+    // 頁面載入時初始化
+    window.onload = function() {
+        initTheme();
+    };
+
+    // Accordion 展開/收合
+    function toggleAccordion(header) {
+        const accordion = header.parentElement;
+        accordion.classList.toggle('active');
+    }
+
+    // 自我檢測答案顯示
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'inline') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'inline';
+        }
+    }
+
+    // 提交答案邏輯
+    function submitAnswer() {
+        const form = document.getElementById('quizForm');
+        const selected = form.querySelector('input[name="answer"]:checked');
+        const resultCard = document.getElementById('resultCard');
+        const analysisSection = document.getElementById('analysisSection');
+        
+        if (!selected) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        const answer = selected.value;
+        const correctAnswer = 'B';
+        const isCorrect = answer === correctAnswer;
+
+        // 顯示結果卡片
+        resultCard.style.display = 'block';
+        if (isCorrect) {
+            resultCard.className = 'result-card result-correct';
+            resultCard.innerHTML = `答對了！正確答案是 (${correctAnswer})`;
+        } else {
+            resultCard.className = 'result-card result-wrong';
+            resultCard.innerHTML = `答錯了。您的選擇是 (${answer})，正確答案是 (${correctAnswer})`;
+        }
+
+        // 顯示解析區塊
+        analysisSection.style.display = 'block';
+
+        // 自動展開特定解析區塊
+        document.getElementById('accordion-correct-answer').classList.add('active');
+        document.getElementById('accordion-step4').classList.add('active');
+
+        // 滾動到結果區
+        resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // 重置邏輯
+    function resetQuiz() {
+        // 清除選擇
+        const form = document.getElementById('quizForm');
+        const radios = form.querySelectorAll('input[type="radio"]');
+        radios.forEach(r => r.checked = false);
+
+        // 隱藏結果與解析
+        document.getElementById('resultCard').style.display = 'none';
+        document.getElementById('analysisSection').style.display = 'none';
+
+        // 收合所有 Accordion
+        const accordions = document.querySelectorAll('.accordion');
+        accordions.forEach(acc => acc.classList.remove('active'));
+
+        // 隱藏自我檢測答案
+        const hiddenAnswers = document.querySelectorAll('.hidden-answer');
+        hiddenAnswers.forEach(ans => ans.style.display = 'none');
+        
+        // 滾動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資訊安全考題解析：多層次防禦 (題號 9)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --highlight-bg: #fff3a3;
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .controls {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #1a252f;
+        }
+
+        details {
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: #f1f1f1;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            list-style: none; /* Remove default arrow */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary:hover {
+            background-color: #e8e8e8;
+        }
+
+        summary::after {
+            content: "+";
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .content {
+            padding: 15px;
+            background-color: #fff;
+        }
+
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .question-box {
+            background-color: #eef7fa;
+            border-left: 5px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .option-list li {
+            padding: 5px 0;
+        }
+
+        .concept-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.95rem;
+        }
+
+        .concept-table th, .concept-table td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+        }
+
+        .concept-table th {
+            background-color: #f1f1f1;
+            color: var(--primary-color);
+        }
+
+        .quiz-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        .answer-box {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9fff9;
+            border: 1px solid #d4edda;
+            color: #155724;
+            display: none;
+        }
+
+        .show-answer-btn {
+            background-color: var(--accent-color);
+            margin-top: 5px;
+            font-size: 0.85rem;
+            padding: 5px 10px;
+        }
+
+        .show-answer-btn:hover {
+            background-color: #2980b9;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資訊安全考題解析：多層次防禦</h1>
+    
+    <div class="controls">
+        <button id="toggleAllBtn" onclick="toggleAll()">全部展開 / 全部收合</button>
+    </div>
+
+    <!-- 1) 題目 -->
+    <details open>
+        <summary>【題目】</summary>
+        <div class="content">
+            <div class="question-box">
+                <p><strong>題號：9</strong></p>
+                <p><strong>題型：單選題</strong></p>
+                <p><strong>題目：</strong><br>
+                「如要實施多層次防禦，下列何種措施最為合適？」</p>
+                <ul class="option-list">
+                    <li>(A) 在個人電腦安裝防毒軟體</li>
+                    <li>(B) 運用不同網路區段，隔離不同用途的設備，並分別進行相關流量過濾措施</li>
+                    <li>(C) 依照各別使用者，建立各自的電腦帳號</li>
+                    <li>(D) 於作業系統中啟用檔案存取記錄，保留資料存取的相關記錄</li>
+                </ul>
+            </div>
+        </div>
+    </details>
+
+    <!-- 2) 第一步：找關鍵字 -->
+    <details>
+        <summary>【第一步：找關鍵字】</summary>
+        <div class="content">
+            <p>請注意題目中的以下字詞：</p>
+            <ul>
+                <li><span class="highlight">多層次防禦</span>（縱深防禦）：這是核心考點，暗示答案不能只是一個單點的保護。</li>
+                <li><span class="highlight">最為合適</span>：代表其他選項可能也是資安措施，但要選出最符合「架構性、層次性」的做法。</li>
+                <li>選項 (B) 中的<span class="highlight">網路區段</span>、<span class="highlight">隔離</span>、<span class="highlight">流量過濾</span>：這些詞彙組合起來，代表建立了一道新的「關卡」。</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 3) 第二步：白話翻譯 -->
+    <details>
+        <summary>【第二步：白話翻譯】</summary>
+        <div class="content">
+            <p>這題用高中生的話來說就是：</p>
+            <p>「如果要把你的系統保護得像『剝洋蔥』一樣，讓壞人突破一層還有一層，下面哪一種做法最有這種『設下重重關卡』的感覺？」</p>
+            <p>你要找的不是「修好某個窗戶」（單點），而是「把房子分成內外好幾個區域，每個區域之間都有檢查站」（架構）。</p>
+        </div>
+    </details>
+
+    <!-- 4) 第三步：解題思路 -->
+    <details>
+        <summary>【第三步：解題思路】</summary>
+        <div class="content">
+            <h3>這題在考什麼觀念？</h3>
+            <p>考的是<strong>多層次防禦 (Defense in Depth)</strong> 的實踐方式，特別是網路架構層面的應用。</p>
+            
+            <h3>解題步驟</h3>
+            <ol>
+                <li><strong>理解「多層次」：</strong>意思是不能只靠一道牆。如果只有防毒，防毒掛了就沒了。必須要有網路層、主機層、應用層等多重保護。</li>
+                <li><strong>檢視選項層級：</strong>
+                    <ul>
+                        <li>(A) 是電腦端點的單一軟體。</li>
+                        <li>(B) 是網路架構的重新劃分與過濾。</li>
+                        <li>(C) 是身分驗證管理。</li>
+                        <li>(D) 是事後的紀錄。</li>
+                    </ul>
+                </li>
+                <li><strong>選擇最具架構性的措施：</strong>選項 (B) 透過切割網路，創造了「受信任區」與「非受信任區」的界線，這是多層次防禦中最基礎也最重要的骨幹。</li>
+            </ol>
+
+            <h3>原理與規則（生活比喻）</h3>
+            <p>想像校園安全的<strong>多層次防禦</strong>：</p>
+            <ul>
+                <li><strong>第一層（大門）：</strong>警衛室與圍牆（類似防火牆與網路分段）。</li>
+                <li><strong>第二層（大樓）：</strong>教學大樓的門禁卡（類似存取控制）。</li>
+                <li><strong>第三層（教室）：</strong>教室門鎖（類似主機權限）。</li>
+                <li><strong>第四層（個人）：</strong>你的置物櫃鎖（類似資料加密）。</li>
+            </ul>
+            <p>選項 (B) 就像是「把行政大樓和教學大樓隔開，中間設警衛站檢查」，這是一個很強的結構性防禦。</p>
+        </div>
+    </details>
+
+    <!-- 5) 第四步：選項分析 -->
+    <details>
+        <summary>【第四步：選項分析】</summary>
+        <div class="content">
+            <ul>
+                <li><strong>(A) 在個人電腦安裝防毒軟體</strong>
+                    <br>分析：這是<strong>端點防護 (Endpoint Protection)</strong>（在電腦上做保護，例如防毒）。雖然重要，但它只保護了單一設備的單一層面。如果駭客繞過防毒，就沒有其他防線了，不具備結構性的分層意義。
+                </li>
+                <br>
+                <li><strong>(B) 運用不同網路區段，隔離不同用途的設備，並分別進行相關流量過濾措施</strong>
+                    <br>分析：<strong>正確</strong>。
+                    <br>這裡提到了：
+                    <br>1. <strong>網路區段 (Network Segmentation)</strong>（把網路切成不同區域，像把大樓分不同樓層或房間）。
+                    <br>2. <strong>隔離 (Isolation)</strong>（讓不同用途的設備不要互相隨便連）。
+                    <br>3. <strong>流量過濾 (Traffic Filtering)</strong>（把不該通過的網路封包擋下來）。
+                    <br>這是在內部網路中建立「防火區劃」，即使駭客攻破一台電腦，也因為網路被切開並過濾，無法輕易橫向移動攻擊其他電腦，完美體現「多層次」的精神。
+                </li>
+                <br>
+                <li><strong>(C) 依照各別使用者，建立各自的電腦帳號</strong>
+                    <br>分析：這是身分鑑別與存取控制。雖然能區分使用者，但如果大家都連在同一個沒有分隔的網路裡，一台中毒可能全體遭殃，防禦層次不足。
+                </li>
+                <br>
+                <li><strong>(D) 於作業系統中啟用檔案存取記錄，保留資料存取的相關記錄</strong>
+                    <br>分析：這是<strong>稽核記錄/日誌 (Audit Logs)</strong>（把做過什麼事記下來以便追查）。紀錄是為了事後追蹤或偵測，它本身不能「阻擋」攻擊，無法構成一道主動的防禦牆。
+                </li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 6) 觀念補充與延伸 -->
+    <details>
+        <summary>【觀念補充與延伸】</summary>
+        <div class="content">
+            <h3>核心觀念：多層次防禦 (Defense in Depth)</h3>
+            <p><strong>定義：</strong>一種資安策略，利用多種安全控制措施（技術、管理、實體）來保護資產。核心概念是<strong>「好幾道不同類型的防線，讓攻擊不容易一次突破」</strong>。</p>
+            
+            <h3>多層次防禦分層表</h3>
+            <table class="concept-table">
+                <thead>
+                    <tr>
+                        <th>分層</th>
+                        <th>常見控制措施</th>
+                        <th>本題相關選項</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>人員/流程層</strong></td>
+                        <td>資安意識培訓、SOP、政策</td>
+                        <td>無</td>
+                    </tr>
+                    <tr>
+                        <td><strong>網路層</strong></td>
+                        <td>防火牆、VPN、<strong>網路區段 (VLAN)</strong>、IDS/IPS</td>
+                        <td><strong>選項 (B)</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>端點/主機層</strong></td>
+                        <td><strong>防毒軟體</strong>、修補程式、主機硬化</td>
+                        <td>選項 (A)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>應用程式層</strong></td>
+                        <td>輸入驗證、網頁防火牆 (WAF)</td>
+                        <td>無</td>
+                    </tr>
+                    <tr>
+                        <td><strong>資料層</strong></td>
+                        <td>加密、備份、存取權限</td>
+                        <td>選項 (C)、(D)</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>觸類旁通</h3>
+            <p>如果題目改成「針對資料層的多層次防禦」，答案可能就會變為「資料加密」或「異地備份」。這題選 (B) 是因為網路分段是架構安全中最基礎的「分層」手段。</p>
+        </div>
+    </details>
+
+    <!-- 7) 記憶口訣 -->
+    <details>
+        <summary>【記憶口訣】</summary>
+        <div class="content">
+            <p>為了記住多層次防禦的精髓，請記住這句話：</p>
+            <blockquote style="border-left: 4px solid var(--accent-color); padding-left: 10px; background: #f0f0f0; margin: 10px 0;">
+                <strong>「分層隔離加過濾，一層破了還有一層。」</strong>
+            </blockquote>
+            <p>看到「多層次」，先找有沒有把東西「分開（隔離）」並「檢查（過濾）」的選項。</p>
+        </div>
+    </details>
+
+    <!-- 8) 常見陷阱 -->
+    <details>
+        <summary>【常見陷阱】</summary>
+        <div class="content">
+            <ul>
+                <li><strong>陷阱一：以為防毒萬能 (選 A)</strong>
+                    <br>許多人直覺想到資安就是裝防毒。但防毒只是單一軟體，如果病毒是新的（零時差攻擊），防毒可能無效，這時若沒有網路隔離，病毒就會擴散全公司。
+                </li>
+                <li><strong>陷阱二：以為紀錄就是防禦 (選 D)</strong>
+                    <br>啟用 Log (日誌) 很重要，但它就像監視器，只能錄下小偷進來的過程，沒辦法把門鎖起來擋住小偷。多層次防禦強調的是「阻擋」與「減緩」。
+                </li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 9) 正確答案 -->
+    <details>
+        <summary>【正確答案】</summary>
+        <div class="content">
+            <p><strong>正確答案：(B)</strong></p>
+            <p><strong>一句話理由：</strong>因為網路區段與隔離過濾，在架構上建立了實質的防禦層次，能有效限制攻擊擴散，最符合多層次防禦的精神。</p>
+        </div>
+    </details>
+
+    <!-- 10) 自我檢測 -->
+    <details>
+        <summary>【自我檢測】</summary>
+        <div class="content">
+            <p>試試看，遮住答案自己回答：</p>
+
+            <div class="quiz-item">
+                <p><strong>問題 1：</strong>防火牆 (Firewall) 主要屬於多層次防禦中的哪一層？</p>
+                <button class="show-answer-btn" onclick="toggleAnswer('ans1')">查看答案</button>
+                <div id="ans1" class="answer-box">
+                    <strong>答案：網路層</strong><br>
+                    解釋：防火牆負責過濾進出網路的封包，是網路層的第一道防線。
+                </div>
+            </div>
+
+            <div class="quiz-item">
+                <p><strong>問題 2：</strong>如果公司只做了嚴格的門禁管制（實體安全），但內部網路完全互通且沒有設密碼，這符合縱深防禦嗎？</p>
+                <button class="show-answer-btn" onclick="toggleAnswer('ans2')">查看答案</button>
+                <div id="ans2" class="answer-box">
+                    <strong>答案：不符合</strong><br>
+                    解釋：這叫做「雞蛋殼防禦」（外硬內軟）。多層次防禦要求內部也要有分層保護，不能只有外殼。
+                </div>
+            </div>
+
+            <div class="quiz-item">
+                <p><strong>問題 3：</strong>Web 應用程式防火牆 (WAF) 是用來保護哪一層的安全？</p>
+                <button class="show-answer-btn" onclick="toggleAnswer('ans3')">查看答案</button>
+                <div id="ans3" class="answer-box">
+                    <strong>答案：應用程式層 (Application Layer)</strong><br>
+                    解釋：WAF 專門用來過濾 HTTP/HTTPS 流量，阻擋 SQL Injection 或 XSS 等針對應用程式的攻擊。
+                </div>
+            </div>
+        </div>
+    </details>
+
+</div>
+
+<script>
+    function toggleAll() {
+        const details = document.querySelectorAll('details');
+        const btn = document.getElementById('toggleAllBtn');
+        
+        // 檢查第一個 details 是否開啟，來決定是全部展開還是收合
+        const isClosed = !details[0].open;
+        
+        details.forEach(detail => {
+            detail.open = isClosed;
+        });
+
+        // 更新按鈕文字
+        // 這裡不一定需要更新文字，因為狀態會切換，保留 "全部展開 / 全部收合" 也是通用的
+        // 但為了體驗，可以微調
+    }
+
+    function toggleAnswer(id) {
+        const box = document.getElementById(id);
+        if (box.style.display === 'block') {
+            box.style.display = 'none';
+        } else {
+            box.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

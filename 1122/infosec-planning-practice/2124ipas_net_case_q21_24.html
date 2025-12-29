@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安工程師題組互動教學 - 題組3</title>
+    <style>
+        :root {
+            --bg-color: #fdfdfd;
+            --text-color: #333333;
+            --card-bg: #ffffff;
+            --border-color: #dddddd;
+            --primary-color: #0056b3;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --btn-bg: #f0f0f0;
+            --btn-hover: #e0e0e0;
+            --answer-block-bg: #f9f9f9;
+        }
+
+        body.night-mode {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --card-bg: #2d2d2d;
+            --border-color: #444444;
+            --primary-color: #66b0ff;
+            --success-color: #4cd964;
+            --error-color: #ff5f5f;
+            --highlight-bg: #4a4a2a;
+            --highlight-text: #ffd700;
+            --btn-bg: #3d3d3d;
+            --btn-hover: #505050;
+            --answer-block-bg: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 16px;
+        }
+
+        /* 版面配置 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 標題與 Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.125rem; /* 18px */
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .file-name {
+            font-size: 0.875rem; /* 14px */
+            color: var(--primary-color);
+            font-family: monospace;
+        }
+
+        button.mode-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        /* 題組情境區 */
+        .scenario-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.05rem;
+            color: var(--primary-color);
+        }
+
+        .scenario-img-container {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .scenario-img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            cursor: zoom-in;
+            transition: transform 0.2s;
+        }
+
+        .scenario-img:hover {
+            opacity: 0.9;
+        }
+
+        /* 題目卡片 */
+        .question-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .q-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 10px;
+        }
+
+        .options-group {
+            margin-bottom: 15px;
+        }
+
+        .option-label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: var(--btn-bg);
+        }
+
+        input[type="radio"], input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕群組 */
+        .action-bar {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background-color: var(--btn-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+            background-color: var(--primary-color);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 結果與解析區 */
+        .result-area {
+            margin-top: 20px;
+            display: none; /* 預設隱藏 */
+            border-top: 1px dashed var(--border-color);
+            padding-top: 15px;
+        }
+
+        .feedback-msg {
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .correct-msg {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .wrong-msg {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        /* 解析手風琴樣式 */
+        details {
+            margin-bottom: 10px;
+            background-color: var(--answer-block-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        summary {
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+            position: relative;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            position: absolute;
+            right: 15px;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .details-content {
+            padding: 15px;
+            font-size: 0.95rem;
+        }
+
+        mark {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* 圖片燈箱 */
+        #img-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+            cursor: zoom-out;
+        }
+
+        #modal-img {
+            margin: auto;
+            display: block;
+            max-width: 95%;
+            max-height: 95vh;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* 題組重點整理區 */
+        .summary-block {
+            margin-top: 40px;
+            border: 2px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        /* 自我檢測隱藏區 */
+        .self-test-answer {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: var(--card-bg);
+            border-left: 3px solid var(--primary-color);
+            display: none;
+        }
+
+        .show-answer-btn {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            margin-top: 5px;
+        }
+
+        /* RWD */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            .question-card {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1rem;
+            }
+            .scenario-title {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>iPAS 資安工程師 - 資訊安全防護實務</h1>
+            <div class="file-name">ipas_net_case_q21_24.html</div>
+        </div>
+        <button class="mode-toggle" id="modeToggle">夜間模式</button>
+    </header>
+
+    <!-- 題組情境 -->
+    <section class="scenario-section">
+        <div class="scenario-title">【題組 3】情境敘述</div>
+        <p>某公司高層要求內部資訊人員重新調整公司內部資訊系統、網路架構以及資安管理架構與程序等相關事宜之規劃。為避免因 ISP 業者之網路可用性遭受破壞，造成該公司對外業務運作遭受影響，故資訊人員所規劃出之網路架構如下所示。</p>
+        <div class="scenario-img-container">
+            <img src="https://i.meee.com.tw/qSCiYJm.jpg" alt="網路架構圖" class="scenario-img" id="scenarioImg" title="點擊放大">
+            <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">（點擊圖片可放大檢視）</div>
+        </div>
+    </section>
+
+    <!-- 第 21 題 -->
+    <div class="question-card" id="q21-card">
+        <div class="q-title">第21題（單選）：情境如附圖所示，請問避免因 ISP 業者之網路可用性遭受破壞，造成該公司對外業務運作遭受影響，下列改善方式何者正確？</div>
+        <div class="options-group">
+            <label class="option-label"><input type="radio" name="q21" value="A"> (A) 總公司網路架構已區分為內部網路與 DMZ 區，甚為妥適亦無任何改善空間</label>
+            <label class="option-label"><input type="radio" name="q21" value="B"> (B) 可增購另一路由器當做備援設備</label>
+            <label class="option-label"><input type="radio" name="q21" value="C"> (C) 可增購另一 ISP 業者之備援網路</label>
+            <label class="option-label"><input type="radio" name="q21" value="D"> (D) 可增購另一網路交換器當作備援設備</label>
+        </div>
+        <div class="action-bar">
+            <button class="btn btn-submit" onclick="submitAnswer(21, 'C', 'radio')">送出本題</button>
+            <button class="btn" onclick="resetQuestion(21)">重做本題</button>
+        </div>
+        
+        <!-- 解析區 21 -->
+        <div class="result-area" id="result-21">
+            <div id="feedback-21" class="feedback-msg"></div>
+            
+            <details>
+                <summary>1.【題目】完整重述</summary>
+                <div class="details-content">
+                    情境如附圖所示，請問避免因 ISP 業者之網路可用性遭受破壞，造成該公司對外業務運作遭受影響，下列改善方式何者正確？
+                </div>
+            </details>
+
+            <details>
+                <summary>2.【第一步：找關鍵字】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><mark>ISP 業者</mark>：提供連網服務的公司（如中華電信、遠傳等）。</li>
+                        <li><mark>可用性</mark>：系統需保持運作，不能斷線。</li>
+                        <li><mark>遭受破壞</mark>：若該 ISP 線路斷了或機房掛了。</li>
+                    </ul>
+                    <p>線索：題目問的是針對「ISP 業者出問題」的解決方案，而不是問內部設備壞掉怎麼辦。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>3.【第二步：白話翻譯】</summary>
+                <div class="details-content">
+                    如果提供網路的公司（ISP）斷線了，導致我們公司不能上網、外面的客戶也連不進來，請問該怎麼辦才能預防這種情況？
+                </div>
+            </details>
+
+            <details>
+                <summary>4.【第三步：解題思路】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li>這題考的是<mark>可用性（Availability）</mark>與<mark>單點失效（Single Point of Failure）</mark>的概念。</li>
+                        <li>名詞解釋：
+                            <ul>
+                                <li><strong>ISP（Internet Service Provider）</strong>：網際網路服務供應商。</li>
+                                <li><strong>備援（Redundancy）</strong>：準備一套備用的，當主線壞掉時可以馬上接手。</li>
+                            </ul>
+                        </li>
+                        <li>解題邏輯：題目明確指出風險源頭是「ISP 業者」。如果這家 ISP 斷線，你買再多自家的路由器、交換器都沒有用，因為路是斷在外面。唯一的解法就是找「另一家」ISP 拉一條備用線路。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details id="ans-analysis-21">
+                <summary>5.【第四步：選項分析】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>(A) 不正確</strong>。雖然有分 DMZ 和內網是好的架構，但這無法解決 ISP 斷線的問題。若只有一條線路，斷了就是斷了。</li>
+                        <li><strong>(B) 不正確</strong>。增加路由器是解決「自家設備故障」的問題，若 ISP 端斷線，即便路由器是好的也連不出去。</li>
+                        <li><strong>(C) 正確</strong>。申請第二家不同 ISP 的線路（例如：原本用中華，加辦一條遠傳），當第一家斷線時，流量可以走第二家，這叫「ISP 備援」。</li>
+                        <li><strong>(D) 不正確</strong>。增加交換器是解決「內部網路連接」的備援，與對外 ISP 連線無關。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>6.【觀念補充與延伸】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>觀念定位</strong>：網路架構設計 > 高可用性（High Availability, HA）。</li>
+                        <li><strong>雙 ISP 架構</strong>：通常會設定為「負載平衡（Load Balance）」或「主動/備援（Active/Standby）」。</li>
+                        <li><strong>舉一反三</strong>：如果是問「避免內部路由器故障」，那答案就會變成 (B)。看清楚題目問的是「誰」壞掉。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>7.【記憶口訣】</summary>
+                <div class="details-content">
+                    怕斷網找兩家，一家斷了還有一家。（雙 ISP）
+                </div>
+            </details>
+
+            <details>
+                <summary>8.【常見陷阱】</summary>
+                <div class="details-content">
+                    考生常看到「備援」就選設備（路由器、交換器），忽略了題目限定的故障點是「ISP 業者」。設備備援救不了線路中斷。
+                </div>
+            </details>
+
+            <details id="correct-ans-21">
+                <summary>9.【正確答案】</summary>
+                <div class="details-content">
+                    <p><strong>答案：(C)</strong></p>
+                    <p>理由：針對 ISP 故障的風險，唯有引入第二家 ISP 建立備援線路才能解決。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>10.【自我檢測】</summary>
+                <div class="details-content">
+                    <p>Q1: 如果題目改成「避免防火牆單點失效」，該怎麼做？</p>
+                    <button class="btn show-answer-btn" onclick="toggleAnswer(this)">點我看答案</button>
+                    <div class="self-test-answer">配置兩台防火牆做 HA（高可用性）叢集。</div>
+                    
+                    <p style="margin-top:10px;">Q2: 雙 ISP 線路最好走相同的實體管道進大樓嗎？</p>
+                    <button class="btn show-answer-btn" onclick="toggleAnswer(this)">點我看答案</button>
+                    <div class="self-test-answer">不好。最好走不同管道（異路徑），避免挖馬路時一次挖斷兩條。</div>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <!-- 第 22 題 -->
+    <div class="question-card" id="q22-card">
+        <div class="q-title">第22題（單選）：情境如附圖所示，請問若要避免遭受勒索軟體病毒大規模攻擊的事件發生在公司內部網路的資訊設備上，下列何項控制措施錯誤？</div>
+        <div class="options-group">
+            <label class="option-label"><input type="radio" name="q22" value="A"> (A) 內部網路增購 L3 交換器</label>
+            <label class="option-label"><input type="radio" name="q22" value="B"> (B) 安裝防毒軟體</label>
+            <label class="option-label"><input type="radio" name="q22" value="C"> (C) 定期更新病毒碼</label>
+            <label class="option-label"><input type="radio" name="q22" value="D"> (D) 實施內部網路之網路區隔，例如依據內部組織別或功能別切分 VLAN</label>
+        </div>
+        <div class="action-bar">
+            <button class="btn btn-submit" onclick="submitAnswer(22, 'A', 'radio')">送出本題</button>
+            <button class="btn" onclick="resetQuestion(22)">重做本題</button>
+        </div>
+
+        <!-- 解析區 22 -->
+        <div class="result-area" id="result-22">
+            <div id="feedback-22" class="feedback-msg"></div>
+            
+            <details>
+                <summary>1.【題目】完整重述</summary>
+                <div class="details-content">
+                    情境如附圖所示，請問若要避免遭受勒索軟體病毒大規模攻擊的事件發生在公司內部網路的資訊設備上，下列何項控制措施錯誤？
+                </div>
+            </details>
+
+            <details>
+                <summary>2.【第一步：找關鍵字】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><mark>勒索軟體</mark>：一種加密檔案並要求贖金的惡意程式。</li>
+                        <li><mark>大規模攻擊</mark>：指病毒在內網橫向擴散（感染一台傳給全部）。</li>
+                        <li><mark>控制措施錯誤</mark>：選一個對「防範勒索軟體」最沒有直接幫助或無關的選項。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>3.【第二步：白話翻譯】</summary>
+                <div class="details-content">
+                    為了不讓勒索病毒在公司內網到處傳染，下面哪一招是「沒用的」或是「搞錯方向的」？
+                </div>
+            </details>
+
+            <details>
+                <summary>4.【第三步：解題思路】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li>這題考的是<mark>縱深防禦（Defense in Depth）</mark>與<mark>網路設備功能</mark>的區別。</li>
+                        <li>勒索軟體防護核心：
+                            1. 端點防護（防毒、更新）。
+                            2. 網路限縮（切割 VLAN，讓病毒傳不過去）。
+                            3. 備份（最後手段）。
+                        </li>
+                        <li>名詞解釋：
+                            <ul>
+                                <li><strong>L3 交換器</strong>：主要功能是「快速路由」，讓封包跑得快，本身並沒有檢測病毒的功能。</li>
+                                <li><strong>VLAN（虛擬區域網路）</strong>：把網路切成小塊，隔離廣播風暴和病毒擴散。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </details>
+
+            <details id="ans-analysis-22">
+                <summary>5.【第四步：選項分析】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>(A) 錯誤（應選此項）</strong>。L3 交換器是負責封包轉送與路由的，雖然它效能好，但它「不會掃毒」，也不能阻擋惡意程式內容。單純買一個 L3 交換器插上去，病毒照樣通過。</li>
+                        <li><strong>(B) 正確措施</strong>。安裝防毒軟體是端點防護的基本功，能偵測已知病毒。</li>
+                        <li><strong>(C) 正確措施</strong>。病毒碼要更新才能抓到最新的勒索軟體。</li>
+                        <li><strong>(D) 正確措施</strong>。網路區隔（VLAN）非常重要。若沒切 VLAN，一台中毒全公司中毒；有切 VLAN，中毒只會影響該部門，能阻止「大規模」擴散。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>6.【觀念補充與延伸】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>觀念定位</strong>：惡意程式防護、網路隔離技術。</li>
+                        <li><strong>橫向移動（Lateral Movement）</strong>：駭客或病毒進來後，嘗試連線到其他電腦。VLAN + 防火牆規則（ACL）是阻擋橫向移動的關鍵。</li>
+                        <li><strong>L3 Switch 誤解</strong>：有些人以為 L3 Switch 就是防火牆，這是錯的。L3 Switch 預設通常是全通的路由。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>7.【記憶口訣】</summary>
+                <div class="details-content">
+                    交換器只管路通不通，不管毒有沒有毒。（L3 Switch 無法防毒）
+                </div>
+            </details>
+
+            <details>
+                <summary>8.【常見陷阱】</summary>
+                <div class="details-content">
+                    看到「L3 交換器」這種高級硬體就覺得它一定很安全。其實它只是讓網路變快，對內容安全（Content Security）沒有幫助。
+                </div>
+            </details>
+
+            <details id="correct-ans-22">
+                <summary>9.【正確答案】</summary>
+                <div class="details-content">
+                    <p><strong>答案：(A)</strong></p>
+                    <p>理由：L3 交換器屬於網路傳輸設備，不具備過濾病毒的功能，無法直接防範勒索軟體。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>10.【自我檢測】</summary>
+                <div class="details-content">
+                    <p>Q1: 防範勒索軟體最有效的「事後」復原手段是什麼？</p>
+                    <button class="btn show-answer-btn" onclick="toggleAnswer(this)">點我看答案</button>
+                    <div class="self-test-answer">離線備份（3-2-1 備份原則）。</div>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <!-- 第 23 題 -->
+    <div class="question-card" id="q23-card">
+        <div class="q-title">第23題（單選）：情境如附圖所示，公司因某業務委外作業，必須允許委外駐點人員可以攜帶資訊設備至總公司內部進行作業。請問資訊人員對於此委外廠商主機攜入總公司內部之風險控管，下列敘述何者較為「不妥」？</div>
+        <div class="options-group">
+            <label class="option-label"><input type="radio" name="q23" value="A"> (A) 要求僅能於總公司 DMZ 區作業</label>
+            <label class="option-label"><input type="radio" name="q23" value="B"> (B) 要求僅能於分公司內部網路作業</label>
+            <label class="option-label"><input type="radio" name="q23" value="C"> (C) 要求該委外廠商主機應安裝防毒軟體並更新病毒碼至最新</label>
+            <label class="option-label"><input type="radio" name="q23" value="D"> (D) 要求該委外廠商主機應將系統修補更新至最新狀態</label>
+        </div>
+        <div class="action-bar">
+            <button class="btn btn-submit" onclick="submitAnswer(23, 'B', 'radio')">送出本題</button>
+            <button class="btn" onclick="resetQuestion(23)">重做本題</button>
+        </div>
+
+        <!-- 解析區 23 -->
+        <div class="result-area" id="result-23">
+            <div id="feedback-23" class="feedback-msg"></div>
+            
+            <details>
+                <summary>1.【題目】完整重述</summary>
+                <div class="details-content">
+                    情境如附圖所示，公司因某業務委外作業，必須允許委外駐點人員可以攜帶資訊設備至總公司內部進行作業。請問資訊人員對於此委外廠商主機攜入總公司內部之風險控管，下列敘述何者較為「不妥」？
+                </div>
+            </details>
+
+            <details>
+                <summary>2.【第一步：找關鍵字】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><mark>委外駐點人員</mark>：外部廠商，雖然坐在你公司，但他們是外人。</li>
+                        <li><mark>攜帶資訊設備</mark>：自帶電腦（BYOD），這種設備通常不受公司內部嚴格管控，風險極高。</li>
+                        <li><mark>不妥</mark>：選出一個危險或錯誤的做法。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>3.【第二步：白話翻譯】</summary>
+                <div class="details-content">
+                    外包廠商帶自己的電腦來公司工作，因為他們的電腦可能不乾淨（有毒），我們應該怎麼管？請選出「最危險、最不應該做」的選項。
+                </div>
+            </details>
+
+            <details>
+                <summary>4.【第三步：解題思路】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li>觀念核心：<mark>零信任（Zero Trust）</mark>與<mark>網路邊界防護</mark>。</li>
+                        <li>外部設備視為「不可信任（Untrusted）」。</li>
+                        <li>原則：
+                            1. 不可直接接入內網（Internal Network）。
+                            2. 應隔離在特定區域（如 Guest VLAN 或 DMZ 特定區）。
+                            3. 接入前需檢查健康狀態（防毒、Patch）。
+                        </li>
+                    </ul>
+                </div>
+            </details>
+
+            <details id="ans-analysis-23">
+                <summary>5.【第四步：選項分析】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>(A) 妥當</strong>。DMZ（非軍事區）本來就是設計給半信任或對外服務的區域，風險隔離較好，不直接接觸核心內網資料。</li>
+                        <li><strong>(B) 不妥（應選此項）</strong>。分公司內部網路也是「內網」。如果讓不可信的外部電腦直接插入內網，若該電腦有病毒，會直接感染公司內部伺服器與電腦，這是引狼入室。</li>
+                        <li><strong>(C) 妥當</strong>。這是基本的端點檢查（NAC 的一部分），確保進來的設備有基本防護。</li>
+                        <li><strong>(D) 妥當</strong>。系統修補（Patch）能防止利用漏洞的攻擊，是必要要求。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>6.【觀念補充與延伸】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>觀念定位</strong>：供應鏈安全、委外管理。</li>
+                        <li><strong>NAC (Network Access Control)</strong>：一種技術，當電腦插上網路線時，會先檢查有沒有裝防毒、更新 OS，通過才准入網。</li>
+                        <li><strong>變形題</strong>：有時候會問「廠商電腦應連接哪個 SSID？」答案通常是 Guest Wi-Fi 而不是 Employee Wi-Fi。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>7.【記憶口訣】</summary>
+                <div class="details-content">
+                    外人別進內房，要在客廳（DMZ/Guest）接待。（外網設備不可直入內網）
+                </div>
+            </details>
+
+            <details>
+                <summary>8.【常見陷阱】</summary>
+                <div class="details-content">
+                    考生可能以為「分公司」比較不重要，所以可以隨便接。其實分公司通常透過 VPN 與總公司內網互通，分公司中毒等於總公司中毒。
+                </div>
+            </details>
+
+            <details id="correct-ans-23">
+                <summary>9.【正確答案】</summary>
+                <div class="details-content">
+                    <p><strong>答案：(B)</strong></p>
+                    <p>理由：外部設備直接接入內部網路（無論總公司或分公司）會繞過邊界防護，帶來極大資安風險。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>10.【自我檢測】</summary>
+                <div class="details-content">
+                    <p>Q1: 如果廠商一定要連內網維護伺服器，最好的做法是？</p>
+                    <button class="btn show-answer-btn" onclick="toggleAnswer(this)">點我看答案</button>
+                    <div class="self-test-answer">透過跳板機（Bastion Host/Jumphost）連線，並全程錄影稽核。</div>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <!-- 第 24 題 (複選) -->
+    <div class="question-card" id="q24-card">
+        <div class="q-title">第24題（複選）：情境如附圖所示，有關存取控制面向之風險，下列敘述哪些正確？（請勾選所有正確選項）</div>
+        <div class="options-group">
+            <label class="option-label"><input type="checkbox" name="q24" value="A"> (A) AD Server 配置於 DMZ 區，容易導致公司重要網域資訊遭受來自外部之攻擊</label>
+            <label class="option-label"><input type="checkbox" name="q24" value="B"> (B) 分公司內部網路 User 電腦連接未納管的無線 AP 使用，容易導致外部未經授權存取內部網路資源之風險</label>
+            <label class="option-label"><input type="checkbox" name="q24" value="C"> (C) 總公司內部網路 User 電腦連接 DMZ 區 Switch 使用，可能遭受來自於 DMZ 區未經授權存取內部網路資源之風險</label>
+            <label class="option-label"><input type="checkbox" name="q24" value="D"> (D) 總公司內部網路之 Server 以及 User 端並未進行網路切割，容易導致因 User 端所產生之風險直接影響 Server 端</label>
+        </div>
+        <div class="action-bar">
+            <button class="btn btn-submit" onclick="submitAnswer(24, ['A','B','C','D'], 'checkbox')">送出本題</button>
+            <button class="btn" onclick="resetQuestion(24)">重做本題</button>
+        </div>
+
+        <!-- 解析區 24 -->
+        <div class="result-area" id="result-24">
+            <div id="feedback-24" class="feedback-msg"></div>
+            
+            <details>
+                <summary>1.【題目】完整重述</summary>
+                <div class="details-content">
+                    情境如附圖所示，有關存取控制面向之風險，下列敘述哪些正確？（複選）
+                </div>
+            </details>
+
+            <details>
+                <summary>2.【第一步：找關鍵字】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><mark>AD Server (Active Directory)</mark>：存有全公司帳號密碼的核心主機。</li>
+                        <li><mark>未納管無線 AP</mark>：員工私自架設的 Wi-Fi（私架熱點）。</li>
+                        <li><mark>DMZ 區 Switch</mark>：對外服務區，風險較高。</li>
+                        <li><mark>網路切割</mark>：將伺服器與一般員工電腦分開。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>3.【第二步：白話翻譯】</summary>
+                <div class="details-content">
+                    請看這張圖，找出架構上有哪些「設計不良」或「危險」的地方。
+                </div>
+            </details>
+
+            <details>
+                <summary>4.【第三步：解題思路】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li>這題是<strong>綜合診斷題</strong>，要對照圖片找出弱點。</li>
+                        <li><strong>AD 原則</strong>：AD 是皇冠上的寶石，絕對不能放在 DMZ（會被外網攻擊），要放在最深層的內網。</li>
+                        <li><strong>AP 原則</strong>：私接 AP 會繞過防火牆，讓駭客停在停車場就能連進內網。</li>
+                        <li><strong>混接風險</strong>：內網電腦不該接在 DMZ 的交換器上，這打破了隔離邊界。</li>
+                        <li><strong>扁平網路（Flat Network）</strong>：Server 與 User 在同一層（圖中中間那一塊），User 中毒，Server 旁邊就是鄰居，直接遭殃。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details id="ans-analysis-24">
+                <summary>5.【第四步：選項分析】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>(A) 正確</strong>。圖中 AD Server 畫在左邊的 DMZ 區。AD 含有所有帳密，放在 DMZ 等於讓駭客可以直接從 Internet 嘗試攻擊 AD，風險極高。</li>
+                        <li><strong>(B) 正確</strong>。圖中右下角分公司有個「未納管無線 AP」。這代表公司管不到它，密碼可能設很爛（如 12345678），駭客破解 Wi-Fi 就等於進入內網。</li>
+                        <li><strong>(C) 正確</strong>。圖中中間下方有 User 電腦拉線連到左邊 DMZ 的 Switch。這導致內網電腦暴露在 DMZ 高風險區，且可能成為駭客從 DMZ 跳板進內網的破口。</li>
+                        <li><strong>(D) 正確</strong>。圖中中間總公司區域，File Server、ERP Server 和 User PC 接在同一個 Switch/網段下，沒有防火牆區隔。PC 中勒索病毒，Server 馬上被加密。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>6.【觀念補充與延伸】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>觀念定位</strong>：網路架構安全檢視、存取控制、分層防禦。</li>
+                        <li><strong>RODC</strong>：若分公司需要 AD 驗證，通常會放 Read-Only Domain Controller (RODC)，避免整台 AD 被幹走資料。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details>
+                <summary>7.【記憶口訣】</summary>
+                <div class="details-content">
+                    AD 藏深處，Wi-Fi 要納管，內外不混插，Server 要隔離。
+                </div>
+            </details>
+
+            <details>
+                <summary>8.【常見陷阱】</summary>
+                <div class="details-content">
+                    考生可能會漏選 (D)，覺得「接在一起很方便啊」。資安原則是「方便通常代表不安全」。Server 農場（Server Farm）應該要有獨立 VLAN 和防火牆保護。
+                </div>
+            </details>
+
+            <details id="correct-ans-24">
+                <summary>9.【正確答案】</summary>
+                <div class="details-content">
+                    <p><strong>答案：(A)、(B)、(C)、(D)</strong></p>
+                    <p>理由：圖中呈現了 AD 位置錯誤、私接 AP、網段混用、內網未隔離四大常見架構缺失。</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>10.【自我檢測】</summary>
+                <div class="details-content">
+                    <p>Q1: 如何偵測公司內有沒有私接的「未納管 AP」？</p>
+                    <button class="btn show-answer-btn" onclick="toggleAnswer(this)">點我看答案</button>
+                    <div class="self-test-answer">使用無線網路偵測器（Wireless Sniffer）或 WIPS（無線入侵防禦系統）進行掃描。</div>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <!-- 題組重點整理 (Accordion Style) -->
+    <details class="summary-block">
+        <summary style="color: var(--primary-color); font-size: 1.1rem;">📝 題組重點整理與考前複習</summary>
+        <div class="details-content">
+            <ol>
+                <li><strong>可用性備援</strong>：
+                    <ul>
+                        <li>設備備援（HA）：解決設備故障（如 Router/Firewall）。</li>
+                        <li>線路備援（Multi-Homing）：解決 ISP 斷線，必須申請「不同 ISP」。</li>
+                    </ul>
+                </li>
+                <li><strong>勒索軟體防護</strong>：
+                    <ul>
+                        <li>不只是防毒，更重要的是「網路區隔（VLAN）」防止擴散。</li>
+                        <li>L3 Switch 只是路標，不是警衛。</li>
+                    </ul>
+                </li>
+                <li><strong>委外設備攜入控管</strong>：
+                    <ul>
+                        <li>視為 Untrusted（不可信）。</li>
+                        <li>禁止直連內網，應隔離於 DMZ 或 Guest 區。</li>
+                        <li>NAC 檢查：防毒、修補、OS 版本。</li>
+                    </ul>
+                </li>
+                <li><strong>存取控制風險（架構圖檢視重點）</strong>：
+                    <ul>
+                        <li>AD Server 絕不可放 DMZ。</li>
+                        <li>禁止未納管 AP（Rogue AP）。</li>
+                        <li>DMZ 與 Internal 線路不可混插。</li>
+                        <li>User 與 Server 網段應切割（避免橫向移動）。</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </details>
+
+    <div style="text-align: center; margin-top: 30px; margin-bottom: 50px;">
+        <button class="btn" style="border-color: var(--error-color); color: var(--error-color);" onclick="resetAll()">全部重置（清空所有作答）</button>
+    </div>
+
+</div>
+
+<!-- 圖片放大 Modal -->
+<div id="img-modal">
+    <img class="scenario-img" id="modal-img">
+</div>
+
+<script>
+    // 夜間模式邏輯
+    const modeToggleBtn = document.getElementById('modeToggle');
+    const body = document.body;
+
+    // 初始化：檢查 localStorage
+    if (localStorage.getItem('nightMode') === 'enabled') {
+        body.classList.add('night-mode');
+    }
+
+    modeToggleBtn.addEventListener('click', () => {
+        body.classList.toggle('night-mode');
+        if (body.classList.contains('night-mode')) {
+            localStorage.setItem('nightMode', 'enabled');
+        } else {
+            localStorage.setItem('nightMode', 'disabled');
+        }
+    });
+
+    // 圖片放大功能
+    const scenarioImg = document.getElementById('scenarioImg');
+    const modal = document.getElementById('img-modal');
+    const modalImg = document.getElementById('modal-img');
+
+    scenarioImg.onclick = function(){
+        modal.style.display = "block";
+        modalImg.src = this.src;
+    }
+
+    modal.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // 答題邏輯
+    function submitAnswer(qId, correctAns, type) {
+        const resultArea = document.getElementById(`result-${qId}`);
+        const feedbackMsg = document.getElementById(`feedback-${qId}`);
+        const inputs = document.querySelectorAll(`input[name="q${qId}"]`);
+        const ansAnalysis = document.getElementById(`ans-analysis-${qId}`);
+        const correctAnsDetails = document.getElementById(`correct-ans-${qId}`);
+        
+        let userAns = [];
+        let isCorrect = false;
+
+        // 取得使用者選擇
+        inputs.forEach(input => {
+            if (input.checked) {
+                userAns.push(input.value);
+            }
+            input.disabled = true; // 鎖定選項
+        });
+
+        // 檢查是否有作答
+        if (userAns.length === 0) {
+            alert("請先選擇一個答案！");
+            inputs.forEach(input => input.disabled = false); // 解鎖
+            return;
+        }
+
+        // 比對答案
+        if (type === 'radio') {
+            isCorrect = (userAns[0] === correctAns);
+            // 顯示結果
+            if (isCorrect) {
+                feedbackMsg.innerHTML = "✅ 答對了！";
+                feedbackMsg.className = "feedback-msg correct-msg";
+            } else {
+                feedbackMsg.innerHTML = `❌ 答錯了！正確答案是 (${correctAns})`;
+                feedbackMsg.className = "feedback-msg wrong-msg";
+            }
+        } else if (type === 'checkbox') {
+            // 陣列比對
+            // correctAns 必須是陣列 ['A','B']
+            const sortedUser = userAns.sort().toString();
+            const sortedCorrect = correctAns.sort().toString();
+            
+            isCorrect = (sortedUser === sortedCorrect);
+
+            if (isCorrect) {
+                feedbackMsg.innerHTML = "✅ 答對了！";
+                feedbackMsg.className = "feedback-msg correct-msg";
+            } else {
+                feedbackMsg.innerHTML = `❌ 答錯了！正確答案是 (${correctAns.join('、')})`;
+                feedbackMsg.className = "feedback-msg wrong-msg";
+            }
+        }
+
+        // 顯示解析區
+        resultArea.style.display = "block";
+
+        // 自動展開「正確答案」與「選項分析」
+        ansAnalysis.open = true;
+        correctAnsDetails.open = true;
+
+        // 鎖定送出按鈕
+        document.querySelector(`#q${qId}-card .btn-submit`).disabled = true;
+    }
+
+    // 重做單題邏輯
+    function resetQuestion(qId) {
+        const inputs = document.querySelectorAll(`input[name="q${qId}"]`);
+        inputs.forEach(input => {
+            input.checked = false;
+            input.disabled = false;
+        });
+
+        const resultArea = document.getElementById(`result-${qId}`);
+        resultArea.style.display = "none";
+        
+        // 收合所有 details
+        const details = resultArea.querySelectorAll('details');
+        details.forEach(d => d.open = false);
+
+        // 隱藏自我檢測答案
+        const selfTests = resultArea.querySelectorAll('.self-test-answer');
+        selfTests.forEach(s => s.style.display = 'none');
+
+        // 解鎖送出按鈕
+        document.querySelector(`#q${qId}-card .btn-submit`).disabled = false;
+    }
+
+    // 全部重置邏輯
+    function resetAll() {
+        if(confirm('確定要清除所有作答紀錄並重置嗎？')) {
+            [21, 22, 23, 24].forEach(id => resetQuestion(id));
+            window.scrollTo(0, 0);
+        }
+    }
+
+    // 自我檢測顯示答案開關
+    function toggleAnswer(btn) {
+        const answerDiv = btn.nextElementSibling;
+        if (answerDiv.style.display === "block") {
+            answerDiv.style.display = "none";
+            btn.textContent = "點我看答案";
+        } else {
+            answerDiv.style.display = "block";
+            btn.textContent = "隱藏答案";
+        }
+    }
+</script>
+
+</body>
+</html>

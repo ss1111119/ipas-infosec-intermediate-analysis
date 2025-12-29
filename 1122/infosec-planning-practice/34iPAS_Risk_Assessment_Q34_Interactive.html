@@ -1,0 +1,674 @@
+<!-- filename: ipas_risk_assessment_q34_interactive.html -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 風險評估啟動時機 — 第 34 題互動教學</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --highlight-color: #f1c40f;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #ecf0f1;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-radius: 8px;
+            --spacing-unit: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+            color: var(--primary-color);
+        }
+
+        /* Question Interaction */
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .keyword-span {
+            cursor: pointer;
+            border-bottom: 2px dashed #bdc3c7;
+            transition: all 0.2s;
+            padding: 0 2px;
+        }
+
+        .keyword-span:hover {
+            background-color: rgba(241, 196, 15, 0.2);
+        }
+
+        .keyword-span.active {
+            background-color: var(--highlight-color);
+            color: #000;
+            border-bottom: 2px solid #f39c12;
+            font-weight: bold;
+        }
+
+        .instruction-hint {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        /* Options */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            background: white;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-btn:hover:not(.disabled) {
+            border-color: var(--accent-color);
+            background-color: #f7fbff;
+        }
+
+        .option-btn.selected {
+            border-color: var(--primary-color);
+            background-color: #e8f0fe;
+            font-weight: bold;
+        }
+
+        .option-btn.correct {
+            border-color: var(--success-color);
+            background-color: #eafaf1;
+            color: var(--success-color);
+        }
+
+        .option-btn.wrong {
+            border-color: var(--error-color);
+            background-color: #fdedec;
+            color: var(--error-color);
+        }
+
+        .option-btn.disabled {
+            cursor: default;
+            opacity: 0.8;
+        }
+
+        /* Action Buttons */
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn:disabled {
+            background-color: #bdc3c7;
+            border-color: #bdc3c7;
+            cursor: not-allowed;
+            color: white;
+        }
+
+        /* Feedback Section */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .feedback-box.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        .feedback-correct {
+            background-color: #d5f5e3;
+            border: 1px solid #abebc6;
+            color: #186a3b;
+        }
+
+        .feedback-wrong {
+            background-color: #fadbd8;
+            border: 1px solid #f5b7b1;
+            color: #7b241c;
+        }
+
+        /* Detailed Analysis Section */
+        #analysis-section {
+            display: none;
+        }
+
+        .analysis-block {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .analysis-block:last-child {
+            border-bottom: none;
+        }
+
+        .analysis-block h3 {
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            background-color: #f2f6f8;
+            padding: 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .analysis-content p, .analysis-content li {
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        .highlight-text {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        /* Spoiler / Self Check */
+        .spoiler {
+            background-color: #95a5a6;
+            color: #95a5a6;
+            cursor: pointer;
+            padding: 0 5px;
+            border-radius: 3px;
+            user-select: none;
+            transition: all 0.3s;
+        }
+
+        .spoiler.revealed {
+            background-color: transparent;
+            color: var(--text-color);
+            cursor: default;
+            background-color: #f1c40f33;
+        }
+
+        /* Glossary */
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .glossary-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .glossary-term {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .glossary-def {
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+            visibility: hidden;
+        }
+        
+        .status-badge.answered {
+            visibility: visible;
+            background-color: #95a5a6;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 風險評估啟動時機</h1>
+        <p>第 34 題互動教學 — 專為高中生設計的資安入門</p>
+    </header>
+
+    <!-- Question Card -->
+    <div class="card" id="question-card">
+        <div class="card-title">
+            題目練習
+            <span class="status-badge" id="status-badge">已作答</span>
+        </div>
+        
+        <p class="instruction-hint">提示：點擊題目中的文字可標記「關鍵字」。</p>
+        
+        <div class="question-text" id="question-text">
+            <!-- Text injected by JS -->
+        </div>
+
+        <div class="options-container" id="options-container">
+            <!-- Options injected by JS -->
+        </div>
+
+        <div class="action-area">
+            <button class="btn btn-primary" id="submit-btn" disabled>送出答案</button>
+            <button class="btn btn-outline" id="toggle-analysis-btn" style="display:none;">顯示完整解析</button>
+        </div>
+
+        <div class="feedback-box" id="feedback-box">
+            <!-- Feedback injected by JS -->
+        </div>
+    </div>
+
+    <!-- Analysis Section (Hidden by default) -->
+    <div id="analysis-section">
+        
+        <div class="card">
+            <div class="card-title">題目深度解析</div>
+
+            <div class="analysis-block">
+                <h3>第一步：找關鍵字</h3>
+                <div class="analysis-content">
+                    <p>在題目中，最重要的三個訊號是：</p>
+                    <ul>
+                        <li><strong>必須</strong>：代表是強制性的，沒有模糊空間。</li>
+                        <li><strong>風險評估</strong>：先找出可能出事的地方，再評估嚴重程度。</li>
+                        <li><strong>錯誤</strong>：這題是選「不需要」做的那個選項（反向題）。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="analysis-block">
+                <h3>第二步：白話翻譯</h3>
+                <div class="analysis-content">
+                    <p>這題其實在問：<strong>「下面哪一種情況，公司的資安狀況不太會改變，所以不用大費周章重新檢查？」</strong></p>
+                </div>
+            </div>
+
+            <div class="analysis-block">
+                <h3>第三步：解題思路</h3>
+                <div class="analysis-content">
+                    <p>核心觀念：只有當<strong>「環境、技術、業務、法律」</strong>發生重大改變（就像搬家或換工作），原本的防護措施可能失效時，才需要重新評估。</p>
+                    <p>生活比喻：</p>
+                    <ul>
+                        <li><strong>搬新家（重大變更）：</strong>你要重新檢查門鎖好不好、社區安不安全。 -> <strong>要評估</strong></li>
+                        <li><strong>週末去朋友家玩（個人旅遊）：</strong>你家的門鎖不會因此壞掉，你家還是安全的。 -> <strong>不用評估</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="analysis-block">
+                <h3>第四步：選項分析</h3>
+                <div class="analysis-content" id="detailed-options-analysis">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <div class="analysis-block">
+                <h3>觀念補充與延伸</h3>
+                <div class="analysis-content">
+                    <p><strong>什麼時候一定要做風險評估？（依據 ISMS 標準）</strong></p>
+                    <ol>
+                        <li><strong>定期執行：</strong>通常是一年一次，當作例行健康檢查。</li>
+                        <li><strong>發生重大變更時（Trigger-based）：</strong>
+                            <ul>
+                                <li><strong>組織面：</strong>裁撤部門、與其他公司合併。</li>
+                                <li><strong>技術面：</strong>更換核心系統、遷移到雲端（如 Azure、AWS）。</li>
+                                <li><strong>環境面：</strong>搬辦公室、遷移機房到國外。</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="analysis-block">
+                <h3>記憶口訣</h3>
+                <div class="analysis-content">
+                    <p style="font-size: 1.1em; color: var(--accent-color); font-weight: bold;">
+                        「人、事、時、地、物，變了就要顧；私人去旅遊，公司不用顧。」
+                    </p>
+                </div>
+            </div>
+
+            <div class="analysis-block">
+                <h3>常見陷阱</h3>
+                <div class="analysis-content">
+                    <p>同學常混淆<strong>「一般員工旅遊」</strong>與<strong>「公務出差」</strong>。</p>
+                    <ul>
+                        <li>如果是<strong>帶著公司電腦去國外工作（出差）</strong>，連線環境變了，資料外洩風險增加，這<strong>需要</strong>評估移動裝置風險。</li>
+                        <li>題目說是<strong>「一般員工旅遊」</strong>，通常指私人行程，未攜帶公務設備或處理公務，因此不影響公司資安。</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="analysis-block">
+                <h3>正確答案</h3>
+                <div class="analysis-content">
+                    <p>本題選 <strong>(C)</strong>，因為這是唯一不涉及組織營運變更的選項。</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Self Check Section -->
+        <div class="card">
+            <div class="card-title">自我檢測 (點擊灰底查看答案)</div>
+            <div class="analysis-content">
+                <p><strong>Q1. 若員工是「公務出差並攜帶公司筆電」，是否需要進行風險評估？</strong></p>
+                <p>答：<span class="spoiler" onclick="toggleSpoiler(this)">需要。因為工作環境改變（使用公共 Wi-Fi、設備可能遺失），會帶來新的資料外洩風險。</span></p>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                
+                <p><strong>Q2. 除了雲端遷移，還有哪些常見情境會觸發重新風險評估？</strong></p>
+                <p>答：<span class="spoiler" onclick="toggleSpoiler(this)">例如：導入新技術（如 AI 系統）、發現重大資安漏洞、發生資安事件後、相關法律法規修改時。</span></p>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+
+                <p><strong>Q3. 「定期」與「必要時」進行風險評估，差別在哪？</strong></p>
+                <p>答：<span class="spoiler" onclick="toggleSpoiler(this)">「定期」是時間到了就做（如每年一次）；「必要時」是當有重大變化發生時，不用等時間到，立刻就要做。</span></p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Glossary Footer -->
+    <div class="card" style="margin-top: 30px; background-color: #f0f4f8;">
+        <div class="card-title">名詞小字典</div>
+        <div class="glossary-grid">
+            <div class="glossary-item">
+                <span class="glossary-term">風險評估 (Risk Assessment)</span>
+                <span class="glossary-def">檢查哪裡可能會出事，以及出事後會有多嚴重。就像出門前檢查瓦斯有沒有關。</span>
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">ISMS (資訊安全管理系統)</span>
+                <span class="glossary-def">一套國際標準（如 ISO 27001），教公司怎麼有系統地保護資料，而不是想到什麼做什麼。</span>
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">重大變更</span>
+                <span class="glossary-def">會大幅改變公司運作方式的事情，例如搬家、換系統、換老闆。</span>
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">組織與營運環境</span>
+                <span class="glossary-def">公司所在的「地點」以及「做生意的方式」。去美國設廠就是地點與環境都變了。</span>
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">雲端遷移 (Cloud Migration)</span>
+                <span class="glossary-def">把公司原本放在自己機房的資料和程式，搬到網路上別人的機房（如微軟或 Google）去運作。</span>
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">Azure</span>
+                <span class="glossary-def">微軟（Microsoft）提供的公有雲服務平台，跟 Google Cloud、AWS 是類似的東西。</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Question Data Object
+    const question = {
+        id: 34,
+        textParts: [
+            { text: "關於", type: "normal" },
+            { text: "必須", type: "keyword" }, // Keyword candidates
+            { text: "進行", type: "normal" },
+            { text: "風險評估", type: "keyword" },
+            { text: "的狀況，下列敘述何者", type: "normal" },
+            { text: "錯誤", type: "keyword" },
+            { text: "？", type: "normal" }
+        ],
+        options: [
+            { id: "A", text: "依據 ISMS（資訊安全管理系統）要求，必須定期施行風險評估", isCorrect: false, analysis: "正確觀念。ISMS 標準（ISO 27001）明文規定要「定期」做評估。" },
+            { id: "B", text: "決定到美國設立新的工廠，將公司研發團隊遷往美國", isCorrect: false, analysis: "正確觀念。這屬於「組織與營運環境」的重大改變，法律和地理風險都變了，必須評估。" },
+            { id: "C", text: "一般員工國外旅遊", isCorrect: true, analysis: "錯誤敘述（即本題答案）。員工私人旅遊不涉及公司業務變更或系統改變，不需要啟動公司的風險評估。" },
+            { id: "D", text: "將本地端所有資訊系統遷移到 Azure 雲端服務", isCorrect: false, analysis: "正確觀念。這是「技術架構」的重大變更，資料儲存位置變了，責任歸屬也變了，絕對要評估。" }
+        ],
+        correctAnswerId: "C"
+    };
+
+    // State Management
+    let selectedOptionId = null;
+    let isSubmitted = false;
+    let isAnalysisVisible = false;
+
+    // DOM Elements
+    const questionTextEl = document.getElementById('question-text');
+    const optionsContainerEl = document.getElementById('options-container');
+    const submitBtn = document.getElementById('submit-btn');
+    const toggleAnalysisBtn = document.getElementById('toggle-analysis-btn');
+    const feedbackBox = document.getElementById('feedback-box');
+    const analysisSection = document.getElementById('analysis-section');
+    const detailedOptionsAnalysis = document.getElementById('detailed-options-analysis');
+    const statusBadge = document.getElementById('status-badge');
+
+    // Initialize
+    function init() {
+        renderQuestionText();
+        renderOptions();
+        renderDetailedAnalysis();
+    }
+
+    // Render Question with clickable keywords
+    function renderQuestionText() {
+        questionTextEl.innerHTML = '';
+        question.textParts.forEach(part => {
+            const span = document.createElement('span');
+            span.textContent = part.text;
+            if (part.type === 'keyword') {
+                span.className = 'keyword-span';
+                span.title = '點擊標記重點';
+                span.onclick = function() {
+                    this.classList.toggle('active');
+                };
+            }
+            questionTextEl.appendChild(span);
+        });
+    }
+
+    // Render Options
+    function renderOptions() {
+        optionsContainerEl.innerHTML = '';
+        question.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.id = `opt-${opt.id}`;
+            btn.textContent = `(${opt.id}) ${opt.text}`;
+            btn.onclick = () => selectOption(opt.id);
+            optionsContainerEl.appendChild(btn);
+        });
+    }
+
+    // Render Detailed Analysis Content
+    function renderDetailedAnalysis() {
+        const ul = document.createElement('ul');
+        question.options.forEach(opt => {
+            const li = document.createElement('li');
+            li.style.marginBottom = '10px';
+            const status = opt.id === question.correctAnswerId ? 
+                '<span style="color:var(--error-color); font-weight:bold;">[本題答案]</span>' : 
+                '<span style="color:var(--success-color); font-weight:bold;">[觀念正確]</span>';
+            
+            li.innerHTML = `<strong>(${opt.id})</strong> ${status} ${opt.analysis}`;
+            ul.appendChild(li);
+        });
+        detailedOptionsAnalysis.appendChild(ul);
+    }
+
+    // Interaction Functions
+    function selectOption(id) {
+        if (isSubmitted) return;
+        
+        selectedOptionId = id;
+        
+        // Visual update
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        document.getElementById(`opt-${id}`).classList.add('selected');
+        
+        submitBtn.disabled = false;
+    }
+
+    submitBtn.onclick = () => {
+        if (!selectedOptionId) return;
+        
+        isSubmitted = true;
+        statusBadge.classList.add('answered');
+        submitBtn.style.display = 'none'; // Hide submit button
+        toggleAnalysisBtn.style.display = 'block'; // Show analysis button
+
+        // Evaluate Answer
+        const isCorrect = selectedOptionId === question.correctAnswerId;
+        const selectedOptData = question.options.find(o => o.id === selectedOptionId);
+        const correctOptData = question.options.find(o => o.id === question.correctAnswerId);
+
+        // Styling Options
+        document.getElementById(`opt-${selectedOptionId}`).classList.add(isCorrect ? 'correct' : 'wrong');
+        if (!isCorrect) {
+            document.getElementById(`opt-${question.correctAnswerId}`).classList.add('correct');
+        }
+        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.add('disabled'));
+
+        // Show Feedback
+        feedbackBox.className = `feedback-box show ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`;
+        
+        let feedbackHTML = `<h3>${isCorrect ? '🎉 答對了！' : '⚠️ 答錯了！'}</h3>`;
+        feedbackHTML += `<p><strong>正確答案是：(${question.correctAnswerId})</strong></p>`;
+        feedbackHTML += `<p style="margin-top:10px;">${correctOptData.analysis}</p>`;
+        
+        if (!isCorrect) {
+             feedbackHTML += `<p style="margin-top:10px; font-size:0.9rem; opacity:0.8;">你選擇的 (${selectedOptionId})：${selectedOptData.analysis}</p>`;
+        }
+        
+        feedbackBox.innerHTML = feedbackHTML;
+    };
+
+    toggleAnalysisBtn.onclick = () => {
+        isAnalysisVisible = !isAnalysisVisible;
+        if (isAnalysisVisible) {
+            analysisSection.style.display = 'block';
+            toggleAnalysisBtn.textContent = '隱藏解析';
+            // Smooth scroll to analysis
+            analysisSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            analysisSection.style.display = 'none';
+            toggleAnalysisBtn.textContent = '顯示完整解析';
+        }
+    };
+
+    // Global spoiler toggle function
+    window.toggleSpoiler = function(element) {
+        element.classList.add('revealed');
+    }
+
+    // Run
+    init();
+
+</script>
+
+</body>
+</html>

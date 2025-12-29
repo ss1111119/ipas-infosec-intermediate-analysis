@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iPAS 資訊安全考題解析 - 題號 11</title>
+<style>
+    :root {
+        --highlight-color: #fff3a3;
+        --border-color: #ddd;
+        --bg-color: #f9f9f9;
+        --text-color: #333;
+        --correct-color: #2e7d32;
+        --wrong-color: #c62828;
+    }
+
+    body {
+        font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        margin: 0;
+        padding: 20px;
+        background-color: #fff;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    h1 {
+        text-align: center;
+        border-bottom: 2px solid var(--text-color);
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+    }
+
+    h2 {
+        font-size: 1.2em;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        color: #0056b3;
+    }
+
+    .controls {
+        text-align: right;
+        margin-bottom: 15px;
+    }
+
+    button {
+        padding: 8px 16px;
+        cursor: pointer;
+        background-color: #eee;
+        border: 1px solid #999;
+        border-radius: 4px;
+        font-size: 14px;
+        margin-left: 5px;
+        transition: background-color 0.2s;
+    }
+
+    button:hover {
+        background-color: #ddd;
+    }
+
+    details {
+        border: 1px solid var(--border-color);
+        margin-bottom: 10px;
+        border-radius: 5px;
+        background-color: var(--bg-color);
+        overflow: hidden;
+    }
+
+    summary {
+        padding: 12px;
+        background-color: #eef;
+        cursor: pointer;
+        font-weight: bold;
+        list-style: none; /* Hide default arrow in some browsers */
+        position: relative;
+    }
+
+    summary::-webkit-details-marker {
+        display: none;
+    }
+
+    summary::after {
+        content: "+";
+        position: absolute;
+        right: 15px;
+        font-weight: bold;
+    }
+
+    details[open] summary::after {
+        content: "-";
+    }
+
+    .content {
+        padding: 15px;
+        background-color: #fff;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .highlight {
+        background-color: var(--highlight-color);
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-weight: bold;
+    }
+
+    .term {
+        font-weight: bold;
+        color: #d84315;
+    }
+
+    .correct {
+        color: var(--correct-color);
+        font-weight: bold;
+    }
+
+    .wrong {
+        color: var(--wrong-color);
+    }
+
+    .table-container {
+        margin: 15px 0;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f0f0f0;
+    }
+
+    .quiz-box {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-top: 10px;
+        border-radius: 5px;
+        background-color: #fafafa;
+    }
+
+    .answer-hidden {
+        display: none;
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #e8f5e9;
+        border: 1px solid #c8e6c9;
+        border-radius: 4px;
+    }
+
+    ul {
+        padding-left: 20px;
+        margin-top: 5px;
+    }
+
+    li {
+        margin-bottom: 5px;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資訊安全（規劃/防護）考題互動教學</h1>
+
+    <div class="controls">
+        <button onclick="toggleAll(true)">全部展開</button>
+        <button onclick="toggleAll(false)">全部收合</button>
+    </div>
+
+    <!-- 1. 題目 -->
+    <details open>
+        <summary>【題目】題號 11</summary>
+        <div class="content">
+            <p><strong>題目：</strong>「關於職務區隔（Segregation of Duties，SOD）的說明，下列何者正確？」</p>
+            <ul>
+                <li>(A) 可以促進內部員工合作和溝通</li>
+                <li>(B) 可以確保資訊系統的可用性</li>
+                <li>(C) 可以減少內部詐欺行為或誤用之風險</li>
+                <li>(D) 可以簡化組織的工作流程</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 2. 第一步：找關鍵字 -->
+    <details>
+        <summary>【第一步：找關鍵字】</summary>
+        <div class="content">
+            <p>請圈出題目中的核心概念：</p>
+            <p>「關於<span class="highlight">職務區隔（Segregation of Duties，SOD）</span>的說明，下列何者正確？」</p>
+            <p><strong>為什麼這是線索？</strong></p>
+            <ul>
+                <li><strong><span class="term">職務區隔 SOD</span>（把關鍵工作拆開給不同人做，避免一個人從頭到尾都能操控）：</strong>這是本題的主角。看到 SOD 就要想到「權力分散」與「互相制衡」。</li>
+                <li><strong>選項中的關鍵連結：</strong>SOD 的天敵是「球員兼裁判」，其主要目的是防止單一人員權力過大造成的壞事，這直接指向了選項 (C) 的<span class="highlight">內部詐欺</span>（有人故意做假帳或偷改資料）與<span class="highlight">誤用</span>（不是故意，但操作不當造成損害）。</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 3. 第二步：白話翻譯 -->
+    <details>
+        <summary>【第二步：白話翻譯】</summary>
+        <div class="content">
+            <p><strong>題目白話文：</strong></p>
+            <p>「為什麼老闆要把一件重要的事情，拆成兩半給兩個不同的人做？這樣做最大的好處是什麼？」</p>
+        </div>
+    </details>
+
+    <!-- 4. 第三步：解題思路 -->
+    <details>
+        <summary>【第三步：解題思路】</summary>
+        <div class="content">
+            <h3>這題在考什麼觀念？</h3>
+            <p>考的是資訊安全管理中的核心原則：<strong>不要讓單一員工擁有足以破壞系統或盜取資產的完整權限。</strong></p>
+            
+            <h3>原理與規則（生活比喻）：</h3>
+            <p>想像一間電影院：</p>
+            <ul>
+                <li>如果你讓同一個人「賣票」又同時負責「收票入場」，他就可以私下收朋友的錢，直接放人進去，老闆永遠不會發現帳目不對。</li>
+                <li><strong>SOD 的做法：</strong>甲負責賣票（管錢），乙負責收票（管入場）。乙收到票根，甲的帳目才對得起來。這兩人必須串通（共謀）才能作弊，難度變高了。</li>
+            </ul>
+
+            <h3>解題步驟：</h3>
+            <ol>
+                <li>看到 SOD，腦中浮現「互相監督」、「防止一人獨大」。</li>
+                <li>檢視選項，哪一個是「防止壞事發生」的？</li>
+                <li>排除那些關於「效率」、「方便」、「硬體不壞掉」的選項。</li>
+            </ol>
+        </div>
+    </details>
+
+    <!-- 5. 第四步：選項分析 -->
+    <details>
+        <summary>【第四步：選項分析】</summary>
+        <div class="content">
+            <ul>
+                <li>
+                    <strong>(A) 可以促進內部員工合作和溝通</strong> <span class="wrong">（錯誤）</span><br>
+                    雖然不同人負責不同階段需要交接，但 SOD 的本質是「制衡」與「檢查」。有時候因為多了審核關卡，反而會讓溝通成本增加，甚至產生部門摩擦。合作是可能的副作用，但不是設計 SOD 的「目的」。
+                </li>
+                <li>
+                    <strong>(B) 可以確保資訊系統的可用性</strong> <span class="wrong">（錯誤）</span><br>
+                    可用性（Availability）通常是指系統不當機、不斷線。這需要靠備份、備援機制、不斷電系統來達成。SOD 主要是針對資料的「正確性」與「防弊」，跟伺服器會不會當機沒有直接關係。
+                </li>
+                <li>
+                    <strong>(C) 可以減少內部詐欺行為或誤用之風險</strong> <span class="correct">（正確）</span><br>
+                    這是 SOD 的核心價值。透過將關鍵任務拆解（例如：開發者不能直接部署程式到正式環境、申請權限者不能核准自己的權限），可以大幅降低單一人員因為惡意（<span class="term">舞弊/詐欺</span>）或不小心（<span class="term">誤用</span>）而對組織造成的傷害。
+                </li>
+                <li>
+                    <strong>(D) 可以簡化組織的工作流程</strong> <span class="wrong">（錯誤）</span><br>
+                    剛好相反！SOD 通常會「增加」工作流程的複雜度。原本一個人只要 1 分鐘做完的事，現在需要甲做完、傳給乙審核、再由丙執行，流程變長了，但安全性提高了。
+                </li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 6. 觀念補充與延伸 -->
+    <details>
+        <summary>【觀念補充與延伸】</summary>
+        <div class="content">
+            <h3>核心觀念定位</h3>
+            <p>這是<span class="term">內部控制</span>（用制度防止內部人為錯誤或舞弊）與存取控制（Access Control）的高頻考點。</p>
+
+            <h3>重要名詞定義</h3>
+            <ul>
+                <li><strong>職務區隔 (SOD)：</strong>將一項交易或作業流程中的關鍵步驟（授權、記錄、保管、執行）分派給不同人負責。</li>
+                <li><strong><span class="term">最小權限 (Least Privilege)</span>（只給完成工作所需的最少權限）：</strong>這與 SOD 常一起考。最小權限是指「我不給你看你不該看的」，SOD 是指「我不讓你一個人做完所有事」。</li>
+                <li><strong><span class="term">內部稽核</span>（由組織內部人員定期檢查流程是否合規）：</strong>SOD 落實後，還需要稽核人員定期檢查這些規則有沒有被遵守。</li>
+            </ul>
+
+            <h3>SOD 典型拆分例子表</h3>
+            <p>這三種衝突職務類型絕對不能由同一人兼任：</p>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>情境</th>
+                            <th>角色 A (發起/執行)</th>
+                            <th>角色 B (核准/監督)</th>
+                            <th>目的</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>系統開發</td>
+                            <td>程式開發人員 (寫 Code)</td>
+                            <td>系統管理人員 (部署上線)</td>
+                            <td>防止工程師植入後門直接上線</td>
+                        </tr>
+                        <tr>
+                            <td>帳號管理</td>
+                            <td>申請帳號者</td>
+                            <td>核准授權者</td>
+                            <td>防止私自建立幽靈帳號</td>
+                        </tr>
+                        <tr>
+                            <td>財務會計</td>
+                            <td>負責管錢 (出納)</td>
+                            <td>負責記帳 (會計)</td>
+                            <td>防止挪用公款並竄改帳目</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <!-- 7. 記憶口訣 -->
+    <details>
+        <summary>【記憶口訣】</summary>
+        <div class="content">
+            <p style="font-size: 1.2em; text-align: center; background-color: #e3f2fd; padding: 10px; border-radius: 5px;">
+                <strong>「球員裁判分開做，一人獨大必有錯。」</strong><br>
+                <span style="font-size: 0.8em; color: #555;">(關鍵流程要分人：做、批、查不要同一人)</span>
+            </p>
+        </div>
+    </details>
+
+    <!-- 8. 常見陷阱 -->
+    <details>
+        <summary>【常見陷阱】</summary>
+        <div class="content">
+            <ul>
+                <li><strong>陷阱 1：以為 SOD 能提高效率。</strong><br>
+                    <strong>避坑：</strong>安全與方便通常成反比。SOD 是為了「安全」，通常會犧牲一點「效率」（流程變繁瑣）。</li>
+                <li><strong>陷阱 2：以為 SOD 能防止所有詐欺。</strong><br>
+                    <strong>避坑：</strong>SOD 只能防「單人」作案。如果甲和乙講好一起做壞事（這叫「共謀 Collusion」），SOD 就會失效。</li>
+                <li><strong>陷阱 3：混淆「備援」與「區隔」。</strong><br>
+                    <strong>避坑：</strong>看到「可用性」、「不斷線」是備援的事；看到「防弊」、「防錯」才是 SOD 的事。</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 9. 正確答案 -->
+    <details>
+        <summary>【正確答案】</summary>
+        <div class="content">
+            <p style="font-size: 1.5em; color: var(--correct-color);"><strong>(C)</strong></p>
+            <p><strong>一句話理由：</strong>職務區隔的唯一目的就是打破權力集中，降低一個人就能隻手遮天（詐欺或誤操作）的風險。</p>
+        </div>
+    </details>
+
+    <!-- 10. 自我檢測 -->
+    <details>
+        <summary>【自我檢測】</summary>
+        <div class="content">
+            <p>試著回答以下 3 題，確認觀念是否清晰：</p>
+
+            <div class="quiz-box">
+                <p><strong>Q1. 當兩個擁有互補權限的員工（例如：一個負責管庫存，一個負責盤點），私下約好一起偷竊公司資產並掩蓋紀錄，這種行為稱為什麼？這會導致 SOD 失效嗎？</strong></p>
+                <button onclick="showAnswer('ans1')">查看答案</button>
+                <div id="ans1" class="answer-hidden">
+                    <strong>答案：</strong>稱為<strong>共謀（Collusion）</strong>。<br>
+                    是的，共謀是 SOD 最大的弱點，因為 SOD 的設計假設是員工之間會互相監督，一旦串通，防線就會被突破。
+                </div>
+            </div>
+
+            <div class="quiz-box">
+                <p><strong>Q2. 在軟體開發生命週期中，哪兩個角色最需要進行職務區隔，以避免未經測試或惡意的程式碼直接進入正式環境？</strong></p>
+                <button onclick="showAnswer('ans2')">查看答案</button>
+                <div id="ans2" class="answer-hidden">
+                    <strong>答案：</strong><strong>開發人員（Development）</strong>與<strong>維運/系統管理人員（Operations/Admin）</strong>。<br>
+                    口訣：寫 Code 的人不能擁有將 Code 放到正式主機的權限。
+                </div>
+            </div>
+
+            <div class="quiz-box">
+                <p><strong>Q3. 小明說：「為了方便工作，我把公司所有資料夾的權限都開給新人小美，這樣她才不會一直來問我。」請問這違反了什麼資安原則（非 SOD）？</strong></p>
+                <button onclick="showAnswer('ans3')">查看答案</button>
+                <div id="ans3" class="answer-hidden">
+                    <strong>答案：</strong>違反了<strong>最小權限原則（Least Privilege）</strong>。<br>
+                    雖然這不是 SOD（因為沒有拆分流程），但這是權限管理的基本大忌。只給完成工作「必需」的最小權限，而不是給予全部方便的權限。
+                </div>
+            </div>
+
+        </div>
+    </details>
+
+</div>
+
+<script>
+    function toggleAll(shouldExpand) {
+        const details = document.querySelectorAll('details');
+        details.forEach(detail => {
+            if (shouldExpand) {
+                detail.setAttribute('open', '');
+            } else {
+                detail.removeAttribute('open');
+            }
+        });
+    }
+
+    function showAnswer(id) {
+        const element = document.getElementById(id);
+        if (element.style.display === 'block') {
+            element.style.display = 'none';
+        } else {
+            element.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資訊安全（規劃/防護）考題互動式教學 - Q002</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --highlight-bg: #fff3a3;
+            --text-color: #333;
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 10px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .controls {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button.outline {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        button.outline:hover {
+            background-color: #ebf5fb;
+        }
+
+        details {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: #f1f1f1;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Hide default arrow */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 1.2em;
+            color: var(--accent-color);
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        /* Webkit specific to hide marker */
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .content {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .term {
+            color: #d35400;
+            font-weight: bold;
+        }
+
+        .explanation {
+            color: #7f8c8d;
+            font-size: 0.95em;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Flowchart Styles */
+        .flowchart-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            padding: 10px;
+            background: #fdfdfd;
+            border: 1px dashed #ccc;
+        }
+
+        .flow-step {
+            background: white;
+            border: 2px solid var(--primary-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+            margin: 10px;
+            min-width: 120px;
+        }
+
+        .flow-step.treatment {
+            border-color: #e74c3c;
+            color: #e74c3c;
+            border-style: dashed;
+        }
+
+        .arrow {
+            font-size: 1.5rem;
+            color: #999;
+            margin: 0 5px;
+        }
+
+        .flow-annotation {
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        /* Self Check Styles */
+        .quiz-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .quiz-item:last-child {
+            border-bottom: none;
+        }
+
+        .answer-box {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f6f3;
+            border-left: 4px solid #2ecc71;
+            display: none;
+        }
+
+        .show-answer-btn {
+            font-size: 0.85rem;
+            padding: 5px 10px;
+            margin-left: 0;
+            margin-top: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資訊安全考題詳解：Q002</h1>
+
+    <div class="controls">
+        <button class="outline" onclick="toggleAll(true)">全部展開</button>
+        <button class="outline" onclick="toggleAll(false)">全部收合</button>
+    </div>
+
+    <!-- 1. 題目 -->
+    <details open>
+        <summary>【題目】</summary>
+        <div class="content">
+            <p><strong>題號：2</strong><br>
+            <strong>題型：單選題</strong></p>
+            <p><strong>題目：</strong><br>
+            「下列何者『不』是 <span class="term">ISO/IEC 27001:2013</span>（資訊安全管理系統的國際標準版本）標準中『<span class="term">資訊安全風險評鑑</span>（找出風險並判斷有多嚴重）』所要求組織應進行的事項？」</p>
+            <ul>
+                <li>(A) 建立風險接受準則</li>
+                <li>(B) 識別資訊安全風險</li>
+                <li>(C) 評估資訊安全風險</li>
+                <li>(D) 以最高標準處理資訊安全風險</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 2. 第一步：找關鍵字 -->
+    <details>
+        <summary>【第一步：找關鍵字】</summary>
+        <div class="content">
+            <p>請注意題目中的以下線索：</p>
+            <ul>
+                <li><span class="highlight">「不」</span>：這是負面表列題，要選出錯誤的、不屬於該範疇的選項。</li>
+                <li><span class="highlight">「資訊安全風險評鑑」</span>：這是解題核心。題目問的是「評鑑（Assessment）」階段做什麼，而不是問後續的「<span class="term">風險處理</span>（決定要怎麼處理：降低/避免/移轉/接受）」。</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 3. 第二步：白話翻譯 -->
+    <details>
+        <summary>【第二步：白話翻譯】</summary>
+        <div class="content">
+            <p>如果用高中生的話來說，這題就是在問：</p>
+            <p>「在做『資安健康檢查（風險評鑑）』的時候，下面哪一件事<strong>不是</strong>檢查階段該做的，而是檢查完之後才要想辦法解決的？」</p>
+        </div>
+    </details>
+
+    <!-- 4. 第三步：解題思路 -->
+    <details>
+        <summary>【第三步：解題思路】</summary>
+        <div class="content">
+            <h3>這題在考什麼觀念？</h3>
+            <p>這題考的是 <span class="term">ISMS</span>（資訊安全管理系統：用制度把資安管起來）中，關於「風險管理」的標準流程步驟。必須區分清楚「評鑑（檢查）」和「處理（治療）」是兩個不同的階段。</p>
+
+            <h3>解題步驟</h3>
+            <ol>
+                <li><strong>界定範圍：</strong>題目限定在 ISO 27001 的「風險評鑑」條款（第 6.1.2 條）。</li>
+                <li><strong>檢查流程：</strong>回想風險評鑑的三部曲：定標準 -> 找風險 -> 算大小。</li>
+                <li><strong>排除法：</strong>把屬於「評鑑」的選項剔除，剩下的就是答案。</li>
+            </ol>
+
+            <h3>原理與規則（生活比喻）</h3>
+            <p>想像你要進行一次「期末考成績評估」：</p>
+            <ul>
+                <li><strong>建立風險接受準則</strong> = 先訂好及格分數是 60 分（低於這個就要處理）。</li>
+                <li><strong>識別資訊安全風險</strong> = 找出哪些科目可能會被當（數學？英文？）。</li>
+                <li><strong>評估資訊安全風險</strong> = 算一下如果不讀書會考幾分，會不會留級（嚴重程度排序）。</li>
+                <li><strong>處理風險</strong> = 決定怎麼辦（補習？重修？還是直接放棄）。<strong>這不是評估，這是行動。</strong></li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 5. 第四步：選項分析 -->
+    <details>
+        <summary>【第四步：選項分析】</summary>
+        <div class="content">
+            <ul>
+                <li><strong>(A) 建立<span class="term">風險接受準則</span>（什麼程度的風險算可接受的門檻）</strong><br>
+                <span class="explanation">⭕ 這是評鑑的第一步。你必須先有一把尺（準則），才能去衡量風險。標準要求組織必須建立並維護風險接受準則。</span></li>
+                
+                <li><strong>(B) <span class="term">識別</span>（把風險清單列出來）資訊安全風險</strong><br>
+                <span class="explanation">⭕ 這是評鑑的核心動作。要找出資產、威脅、弱點，這屬於風險評鑑過程。</span></li>
+                
+                <li><strong>(C) <span class="term">評估</span>（比較大小與排序，決定優先順序）資訊安全風險</strong><br>
+                <span class="explanation">⭕ 英文是 Analyze/Evaluate。識別完風險後，要分析發生的可能性與衝擊，並與準則比較，決定優先順序。這也是評鑑的一部分。</span></li>
+                
+                <li><strong>(D) 以最高標準處理資訊安全風險</strong><br>
+                <span class="explanation">❌ <strong>錯誤原因一（階段不同）：</strong>「處理」風險屬於評鑑之後的下一個階段（Risk Treatment）。<br>
+                ❌ <strong>錯誤原因二（觀念錯誤）：</strong>ISO 27001 並沒有要求「以最高標準」處理。標準強調的是「風險處理計畫」要選擇適當的控制措施，並考慮成本效益，將風險降低到「可接受水準」，而非盲目追求最高標準。</span></li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 6. 觀念補充與延伸 -->
+    <details>
+        <summary>【觀念補充與延伸】</summary>
+        <div class="content">
+            <h3>核心觀念定位</h3>
+            <p>本題屬於 ISO 27001 第 6 章「規劃（Planning）」中的 6.1.2 資訊安全風險評鑑。這是考試中非常高頻的基礎題型。</p>
+
+            <h3>ISO 27001 風險評鑑標準流程（條文式整理）</h3>
+            <p>根據標準，組織在進行風險評鑑時，應執行以下動作：</p>
+            <div class="flowchart-container">
+                <div class="flow-step">(A) 建立/維護<br>風險接受準則</div>
+                <div class="arrow">→</div>
+                <div class="flow-step">(B) 識別<br>資安風險</div>
+                <div class="arrow">→</div>
+                <div class="flow-step">(C) 分析與評估<br>資安風險</div>
+                <div class="arrow">⇢</div>
+                <div class="flow-step treatment">(D) 選項<br>風險處理</div>
+            </div>
+            <div class="flow-annotation">▲ 本題在考：前三步是「評鑑」範疇；(D) 是下一步「處理」</div>
+
+            <h3>觸類旁通：變化題型</h3>
+            <p><strong>對比概念：</strong></p>
+            <ul>
+                <li><strong>Risk Assessment（評鑑）：</strong>診斷病情。重點在「發現」與「判斷」。</li>
+                <li><strong>Risk Treatment（處理）：</strong>開藥治療。重點在「選擇對策」（規避、降低、移轉、接受）。</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 7. 記憶口訣 -->
+    <details>
+        <summary>【記憶口訣】</summary>
+        <div class="content">
+            <p>為了記住風險評鑑包含哪三件事，請記住以下口訣：</p>
+            <p style="font-size: 1.2em; text-align: center; color: var(--primary-color); background: #eee; padding: 10px; border-radius: 5px;">
+                <strong>「準識評，不處理」</strong>
+            </p>
+            <ul>
+                <li><strong>準</strong>：建立<strong>準</strong>則（Criteria）</li>
+                <li><strong>識</strong>：<strong>識</strong>別風險（Identify）</li>
+                <li><strong>評</strong>：<strong>評</strong>估/分析風險（Evaluate/Analyze）</li>
+                <li><strong>不處理</strong>：<strong>處理</strong>（Treatment）是下一階段的事，不在評鑑裡！</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 8. 常見陷阱 -->
+    <details>
+        <summary>【常見陷阱】</summary>
+        <div class="content">
+            <ol>
+                <li><strong>字詞混淆：</strong>學生常將「評估（Evaluate）」與「處理（Treat）」搞混。評估只是打分數，處理才是動手改。</li>
+                <li><strong>過度理想化：</strong>看到選項 (D) 寫「最高標準」覺得聽起來很棒就選它當正確行為。但在資安管理中，講求的是「適當」與「成本效益」，過高的標準可能導致資源浪費，並非標準所求。</li>
+                <li><strong>忽略題目範圍：</strong>題目問的是「評鑑階段」，不要回答整個風險管理的流程。</li>
+            </ol>
+            <p><strong>避坑檢查步驟：</strong> 看到「最高標準」、「絕對安全」、「完全排除」這類極端字眼，通常在 ISO 考題中都是錯誤的敘述。</p>
+        </div>
+    </details>
+
+    <!-- 9. 正確答案 -->
+    <details open>
+        <summary>【正確答案】</summary>
+        <div class="content">
+            <p style="font-size: 1.2em;"><strong>正確答案：(D)</strong></p>
+            <p><strong>一句話理由：</strong>「風險處理」屬於評鑑完成後的下一階段，且 ISO 標準並不要求以「最高標準」處理，而是要求將風險降低至「可接受水準」。</p>
+        </div>
+    </details>
+
+    <!-- 10. 自我檢測 -->
+    <details>
+        <summary>【自我檢測】</summary>
+        <div class="content">
+            <p>請嘗試回答以下延伸問題，測試觀念是否釐清：</p>
+
+            <div class="quiz-item">
+                <p><strong>Q1. 在 ISO 27001 風險評鑑過程中，我們需要將識別出的風險結果與什麼東西進行比較，以決定優先順序？</strong></p>
+                <button class="show-answer-btn" onclick="toggleAnswer('ans1')">查看答案</button>
+                <div id="ans1" class="answer-box">
+                    <strong>答案：風險接受準則</strong><br>
+                    解析：評鑑的最後一步就是拿風險分析的結果去跟一開始訂好的「風險接受準則」比對，超過準則的就要優先處理。
+                </div>
+            </div>
+
+            <div class="quiz-item">
+                <p><strong>Q2. 下列哪一項活動屬於「風險處理（Risk Treatment）」階段而非「風險評鑑」？</strong><br>
+                (A) 計算風險發生的機率<br>
+                (B) 購買防火牆來降低被駭客入侵的風險<br>
+                (C) 找出伺服器的弱點<br>
+                (D) 設定風險可接受的等級</p>
+                <button class="show-answer-btn" onclick="toggleAnswer('ans2')">查看答案</button>
+                <div id="ans2" class="answer-box">
+                    <strong>答案：(B)</strong><br>
+                    解析：購買防火牆是一種「降低風險」的控制措施，這屬於實際行動的「處理」階段。(A)(C)(D) 都是評鑑階段的分析與定義工作。
+                </div>
+            </div>
+
+            <div class="quiz-item">
+                <p><strong>Q3. ISO 27001 對於風險處理的目標，是要求將風險降到什麼程度？</strong><br>
+                (A) 零風險<br>
+                (B) 最高安全標準<br>
+                (C) 可接受水準<br>
+                (D) 無法計算的水準</p>
+                <button class="show-answer-btn" onclick="toggleAnswer('ans3')">查看答案</button>
+                <div id="ans3" class="answer-box">
+                    <strong>答案：(C) 可接受水準</strong><br>
+                    解析：資安沒有絕對的零風險，也不一定需要最高標準。重點是將風險控制在組織定義的「可接受風險接受準則」之內。
+                </div>
+            </div>
+
+        </div>
+    </details>
+
+</div>
+
+<script>
+    // 展開/收合所有區塊的功能
+    function toggleAll(shouldOpen) {
+        const details = document.querySelectorAll('details');
+        details.forEach(detail => {
+            detail.open = shouldOpen;
+        });
+    }
+
+    // 顯示/隱藏答案的功能
+    function toggleAnswer(id) {
+        const answerBox = document.getElementById(id);
+        const btn = answerBox.previousElementSibling;
+        
+        if (answerBox.style.display === 'block') {
+            answerBox.style.display = 'none';
+            btn.textContent = '查看答案';
+        } else {
+            answerBox.style.display = 'block';
+            btn.textContent = '隱藏答案';
+        }
+    }
+</script>
+
+</body>
+</html>
