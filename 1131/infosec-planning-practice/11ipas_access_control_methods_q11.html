@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安考題教學 - 第 11 題</title>
+    <style>
+        /* 基礎重置與字體設定 */
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* 版面容器 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 標題與內文層級控制 (字級差距小) */
+        h1, h2, h3, h4 {
+            margin-top: 0;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        /* 頁首區域 */
+        header {
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+        h1 {
+            font-size: 1.2rem; /* 標題不大於內文太多 */
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            font-size: 1rem;
+            color: #c0392b; /* 警示色 */
+            font-weight: bold;
+        }
+        .topic-tag {
+            background-color: #ecf0f1;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        /* 題目與選項區域 */
+        .question-box {
+            background-color: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .option-label:hover {
+            background-color: #f9f9f9;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕區域 */
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-submit {
+            background-color: #2980b9;
+            color: white;
+        }
+        .btn-submit:hover {
+            background-color: #2471a3;
+        }
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .btn-reset:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* 回饋訊息區域 */
+        #feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none; /* 預設隱藏 */
+        }
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 教學解析區 (摺疊面板) */
+        details {
+            margin-top: 30px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            overflow: hidden;
+        }
+        summary {
+            background-color: #eef2f5;
+            padding: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1rem;
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        summary::-webkit-details-marker {
+            display: none;
+        }
+        summary::after {
+            content: "+";
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        details[open] summary::after {
+            content: "-";
+        }
+        .explanation-content {
+            padding: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        /* 自我檢測的小型折疊樣式 (覆蓋上方通用設定) */
+        details.qa-details {
+            margin-top: 10px;
+            border: 1px solid #eee;
+            background-color: #fafafa;
+            border-radius: 4px;
+        }
+        details.qa-details summary {
+            background-color: #fff;
+            padding: 10px;
+            font-size: 1rem;
+            font-weight: normal;
+            color: #2c3e50;
+            border-bottom: 1px solid transparent;
+        }
+        details.qa-details[open] summary {
+            border-bottom: 1px solid #eee;
+        }
+        details.qa-details .answer-box {
+            padding: 10px 15px;
+            color: #c0392b;
+            font-weight: bold;
+            background-color: #fff;
+        }
+
+        /* 解析區塊樣式 */
+        .section-block {
+            margin-bottom: 25px;
+        }
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #fff;
+            background-color: #2c3e50;
+            padding: 5px 10px;
+            display: inline-block;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+        .highlight {
+            color: #d35400;
+            font-weight: bold;
+        }
+        ul {
+            padding-left: 20px;
+            margin: 5px 0;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+
+        /* 一頁速記卡 */
+        .flashcard {
+            margin-top: 40px;
+            background-color: #fff8e1;
+            border: 2px solid #ffecb3;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .flashcard h3 {
+            text-align: center;
+            border-bottom: 1px solid #ffe082;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #fff3e0;
+            width: 30%;
+        }
+        tr:nth-child(even) {
+            background-color: #fffde7;
+        }
+
+        /* RWD 適配 */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.1rem;
+            }
+            .header-info {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .action-area {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-info">
+            <div>
+                <span class="topic-tag">第 11 題</span>
+                <h1>主題：存取控制方法：MAC / ACL / RBAC</h1>
+            </div>
+            <div class="subtitle">看到「Randomly」要提高警覺（陷阱名詞）</div>
+        </div>
+    </header>
+
+    <main>
+        <!-- 題目區 -->
+        <div class="question-box">
+            <div class="question-text">題目：「關於『資料』存取的控制方法，『不』包括下列何者？」</div>
+            <form id="quizForm">
+                <div class="options-group">
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="A">
+                        (A) 強制存取控制（Mandatory Access Control，MAC）
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="B">
+                        (B) 存取控制清單（Access Control List，ACL）
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="C">
+                        (C) 隨機存取控制（Randomly Access Control，RAC）
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="D">
+                        (D) 角色基準存取控制（Role-based Access Control，RBAC）
+                    </label>
+                </div>
+                
+                <div class="action-area">
+                    <button type="button" class="btn-submit" onclick="checkAnswer()">送出答案</button>
+                    <button type="button" class="btn-reset" onclick="resetQuiz()">重新作答</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 回饋區 -->
+        <div id="feedback"></div>
+
+        <!-- 教學解析區 -->
+        <details id="explanationArea">
+            <summary>點此展開完整教學解析</summary>
+            <div class="explanation-content">
+                
+                <div class="section-block">
+                    <div class="section-title">【題目】</div>
+                    <p>關於「資料」存取的控制方法，「不」包括下列何者？<br>
+                    (A) 強制存取控制（Mandatory Access Control，MAC）<br>
+                    (B) 存取控制清單（Access Control List，ACL）<br>
+                    (C) 隨機存取控制（Randomly Access Control，RAC）<br>
+                    (D) 角色基準存取控制（Role-based Access Control，RBAC）</p>
+                </div>
+
+                <div class="section-block">
+                    <div class="section-title">【第一步：找關鍵字】</div>
+                    <p>用粗體標出並解釋線索：</p>
+                    <ul>
+                        <li><strong>資料存取的控制方法</strong>：題目在問「有哪些正式的方法/模型」。</li>
+                        <li><strong>不包括</strong>：反向題，找「不是正規名詞」。</li>
+                        <li><strong>MAC / ACL / RBAC</strong>：這三個是資安課本常見標準詞。</li>
+                        <li><strong>Randomly</strong>：隨機。在安全控管上通常不是正規模型名稱，常用來設陷阱。</li>
+                    </ul>
+                </div>
+
+                <div class="section-block">
+                    <div class="section-title">【第二步：白話翻譯】</div>
+                    <p>用高中生日常口語說：</p>
+                    <p>「哪些方法可以決定『誰能看/改這份資料』？下面哪個聽起來像名詞，但其實不是正規的存取控制方法？」</p>
+                </div>
+
+                <div class="section-block">
+                    <div class="section-title">【第三步：解題思路】</div>
+                    <p><strong>這題在考什麼觀念？</strong><br>
+                    → 辨識常見存取控制模型與機制名稱，排除不存在的假名詞。</p>
+                    <p><strong>解題步驟：</strong></p>
+                    <ol>
+                        <li>先把你熟悉、課本常見的存取控制模型圈起來（MAC、RBAC）。</li>
+                        <li>再看控制實作機制（ACL）。</li>
+                        <li>剩下那個若是「不像正式術語」通常就是答案（RAC）。</li>
+                    </ol>
+                    <p><strong>原理與規則（名詞第一次出現要括號白話解釋）：</strong></p>
+                    <ul>
+                        <li>強制存取控制 MAC（由系統強制規則，使用者不能自己改權限）</li>
+                        <li>角色基準存取控制 RBAC（把權限發給「角色」，人再被指派到角色）</li>
+                        <li>存取控制清單 ACL（一份名單，列出誰對某資源有什麼權限）</li>
+                        <li>隨機存取控制 RAC（題目中的 Randomly Access Control 不是常見標準模型；真正常見的是 DAC/MAC/RBAC/ABAC 等）</li>
+                    </ul>
+                </div>
+
+                <div class="section-block">
+                    <div class="section-title">【第四步：選項分析】</div>
+                    <ul>
+                        <li>(A) MAC：為什麼是正規方法？（系統強制規則，常見模型）</li>
+                        <li>(B) ACL：為什麼算控制方法？（實作權限設定與檢查的常見機制）</li>
+                        <li>(C) RAC：為什麼不包括？（不是標準存取控制模型/機制名稱，屬干擾選項）</li>
+                        <li>(D) RBAC：為什麼是正規方法？（以角色管理權限，企業常用）</li>
+                    </ul>
+                </div>
+
+                <div class="section-block">
+                    <div class="section-title">【觀念補充與延伸】 (★重要)</div>
+                    <p><strong>核心觀念定位：</strong><br>
+                    - 屬於「存取控制模型（Access Control Models）」的高頻必考題型，常用來考名詞辨識與概念對比。</p>
+                    <p><strong>法條或定義（學術定義＋白話）：</strong><br>
+                    - 存取控制（Access Control：決定誰能對資料/系統做什麼動作）<br>
+                    - MAC/RBAC/ACL 的簡要定義如上所述。</p>
+                    <p><strong>觸類旁通（舉一反三）：</strong></p>
+                    <ul>
+                        <li>對比概念：DAC（自主存取控制：資源擁有者可授權） vs MAC（系統強制）</li>
+                        <li>變化題型：
+                            <ol>
+                                <li>「下列何者屬於存取控制模型？」（模型 vs 機制）</li>
+                                <li>「RBAC 的優點是什麼？適合什麼情境？」（角色多、權限管理複雜的組織）</li>
+                            </ol>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="section-block">
+                    <div class="section-title">【記憶口訣】</div>
+                    <ul>
+                        <li>「三真一假：MAC、ACL、RBAC 是真的；RAC 多半是假的。」</li>
+                        <li>「Randomly 聽起來就不安全：不會拿來當正式控管模型名。」</li>
+                    </ul>
+                </div>
+
+                <div class="section-block">
+                    <div class="section-title">【常見陷阱】</div>
+                    <p><strong>最容易搞混：</strong><br>
+                    - 以為每個縮寫都是真的，看到 RAC 就直覺覺得是新名詞。</p>
+                    <p><strong>心理盲點：</strong><br>
+                    - 英文縮寫＋中文翻譯看起來很像正式術語，容易被騙。</p>
+                    <p><strong>避坑指南：</strong><br>
+                    - 考試快速檢查：
+                        <br>1) 你背過的四大模型通常是 DAC / MAC / RBAC / ABAC
+                        <br>2) 不在這個範圍內的，多半是干擾（除非題目明確教新名詞）</p>
+                </div>
+
+                <div class="section-block">
+                    <div class="section-title">【正確答案】</div>
+                    <p>答案：(C)</p>
+                    <p>一句話理由：RAC（Randomly Access Control）不是常見或標準的資料存取控制模型/機制，屬干擾選項。</p>
+                </div>
+
+                <div class="section-block">
+                    <div class="section-title">【自我檢測】</div>
+                    <p>設計 3 題延伸小問題（點擊題目查看答案）：</p>
+                    
+                    <details class="qa-details">
+                        <summary>1) RBAC 為什麼適合企業？</summary>
+                        <div class="answer-box">答：用角色集中管理權限，員工異動時只要換角色即可</div>
+                    </details>
+
+                    <details class="qa-details">
+                        <summary>2) MAC 和 DAC 最大差異是什麼？</summary>
+                        <div class="answer-box">答：MAC 由系統強制；DAC 可由資源擁有者自行授權</div>
+                    </details>
+
+                    <details class="qa-details">
+                        <summary>3) ACL 比較像「模型」還是「實作機制」？</summary>
+                        <div class="answer-box">答：比較像實作機制/權限清單的表達方式</div>
+                    </details>
+                </div>
+            </div>
+        </details>
+
+        <!-- 一頁速記卡 -->
+        <div class="flashcard">
+            <h3>【一頁速記卡】存取控制關鍵字</h3>
+            <table>
+                <tr>
+                    <th>MAC</th>
+                    <td>系統強制規則（使用者不能隨便改）</td>
+                </tr>
+                <tr>
+                    <th>RBAC</th>
+                    <td>角色管理權限（人→角色→權限）</td>
+                </tr>
+                <tr>
+                    <th>ACL</th>
+                    <td>針對資源列權限清單（誰能做什麼）</td>
+                </tr>
+                <tr>
+                    <th>常見陷阱</th>
+                    <td><strong>RAC</strong>（Randomly）不是正規模型</td>
+                </tr>
+            </table>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    function checkAnswer() {
+        const form = document.getElementById('quizForm');
+        const feedback = document.getElementById('feedback');
+        const explanationDetails = document.getElementById('explanationArea');
+        
+        // 取得選中的值
+        const selected = form.querySelector('input[name="answer"]:checked');
+        
+        if (!selected) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        const answer = selected.value;
+
+        // 顯示回饋區域
+        feedback.style.display = 'block';
+
+        if (answer === 'C') {
+            // 答對邏輯
+            feedback.className = 'feedback-correct';
+            feedback.innerHTML = '<strong>正確！</strong><br>RAC 不是正規存取控制模型/機制，這是一個干擾選項。';
+        } else {
+            // 答錯邏輯
+            feedback.className = 'feedback-incorrect';
+            feedback.innerHTML = '<strong>答錯了。</strong><br>你選擇了 (' + answer + ')，正確答案是 (C)。<br>' +
+                                 '提示：A/B/D 都是常見或標準化的存取控制模型/機制；C 的「隨機存取控制」是干擾選項。';
+        }
+
+        // 自動展開解析區
+        explanationDetails.open = true;
+        // 滾動到回饋區
+        feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetQuiz() {
+        const form = document.getElementById('quizForm');
+        const feedback = document.getElementById('feedback');
+        const explanationDetails = document.getElementById('explanationArea');
+
+        // 重置表單
+        form.reset();
+        
+        // 隱藏回饋與收合解析
+        feedback.style.display = 'none';
+        feedback.className = '';
+        feedback.innerHTML = '';
+        explanationDetails.open = false;
+        
+        // 滾動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

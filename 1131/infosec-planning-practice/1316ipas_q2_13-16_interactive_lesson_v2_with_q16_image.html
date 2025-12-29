@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安實務題組教學 (Q13-16)</title>
+    
+    <!-- 引入外部 CDN -->
+    <!-- Google Fonts: Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome (取代 Emoji) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* 標題與導覽 */
+        .main-header {
+            background: white;
+            border-bottom: 3px solid var(--primary-color);
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .nav-pills .nav-link {
+            color: var(--primary-color);
+            margin: 0 5px;
+            border: 1px solid #dee2e6;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* 情境卡 */
+        .scenario-card {
+            background-color: #e3f2fd;
+            border-left: 5px solid var(--accent-color);
+            border-radius: 4px;
+        }
+
+        /* 題目卡片 */
+        .question-card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 2px solid #f0f0f0;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        /* 選項按鈕 */
+        .option-btn {
+            text-align: left;
+            position: relative;
+            margin-bottom: 10px;
+            border: 1px solid #ced4da;
+            color: #495057;
+            background-color: white;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            background-color: #f8f9fa;
+            border-color: var(--accent-color);
+        }
+
+        .option-btn.selected {
+            border-color: var(--accent-color);
+            background-color: #ecf6fb;
+        }
+
+        .option-btn.correct {
+            border-color: #198754;
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .option-btn.wrong {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        /* Q16 圖片 */
+        .q16-img-container {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            background: #fff;
+            border-radius: 4px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .q16-img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .img-caption {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* Accordion 教學區 */
+        .accordion-button {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #e9ecef;
+            color: var(--primary-color);
+            box-shadow: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(0,0,0,.125);
+        }
+
+        .highlight-text {
+            background-color: #fff3cd; /* 螢光筆效果 */
+            padding: 0 3px;
+            border-radius: 2px;
+        }
+
+        .concept-tag {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .mnemonics-box {
+            border: 2px dashed #ffc107;
+            background-color: #fffbf2;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #555;
+            text-align: center;
+        }
+
+        /* 統計數據 */
+        .stats-badge {
+            font-size: 0.85rem;
+            font-weight: normal;
+            background-color: #f0f0f0;
+            color: #666;
+            padding: 5px 10px;
+            border-radius: 15px;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- 頂部標題與導覽 -->
+<header class="main-header sticky-top">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h1 class="h4 mb-0 fw-bold"><i class="fas fa-shield-alt text-primary me-2"></i>iPAS 資安實務題組教學 (Set 2)</h1>
+                <small class="text-muted">高中生入門版｜互動式講義</small>
+            </div>
+            <button class="btn btn-sm btn-outline-danger" onclick="resetAllStats()">
+                <i class="fas fa-trash-alt me-1"></i>重置紀錄
+            </button>
+        </div>
+        
+        <ul class="nav nav-pills justify-content-center" id="question-nav">
+            <li class="nav-item"><a class="nav-link" href="#q13">Q13</a></li>
+            <li class="nav-item"><a class="nav-link" href="#q14">Q14</a></li>
+            <li class="nav-item"><a class="nav-link" href="#q15">Q15</a></li>
+            <li class="nav-item"><a class="nav-link" href="#q16">Q16 (圖表題)</a></li>
+        </ul>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- 情境卡 -->
+    <div class="card scenario-card mb-4">
+        <div class="card-body">
+            <h5 class="card-title fw-bold text-primary"><i class="fas fa-building me-2"></i>題組情境：A 公司（新創露營電商）</h5>
+            <p class="card-text mb-2"><strong>背景：</strong>資本額一千萬以上，透過網路販售露營商品，擁有大量會員個資。</p>
+            <p class="card-text mb-2"><strong>組織架構：</strong></p>
+            <ul class="mb-3">
+                <li><strong>總經理室：</strong>老闆（兼資安長）</li>
+                <li><strong>資訊部：</strong>負責系統管理，後續新增資安業務</li>
+                <li><strong>業務部：</strong>進出貨、客服（接觸個資最頻繁）</li>
+                <li><strong>行政部：</strong>會計、財務、人事</li>
+            </ul>
+            <div class="alert alert-light border mb-0">
+                <strong class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>情境核心風險（白話解讀）：</strong>
+                <ul class="mb-0 ps-3">
+                    <li>會員個資集中存放，若內部權限沒控好，員工容易偷看。</li>
+                    <li>若使用「共用帳號」，出事了抓不到是誰做的（無法歸責）。</li>
+                    <li>蒐集資料時，若問了與「賣露營用品」無關的隱私（如健康），就違法了。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 題目區域 -->
+    <div id="quiz-container">
+        <!-- Q13-16 將由 JavaScript 動態生成 -->
+    </div>
+
+</div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // --- 題目資料 ---
+    const quizData = [
+        {
+            id: "q13",
+            type: "single",
+            badge: "單選題",
+            question: "13. 為了避免公司所保有的會員個人資料遭受內部未經授權的存取，因此公司資安長（老闆）要求資訊部評估採取適切的控制措施，以降低個人資料外洩風險的發生，試問資訊部對於會員個人資料遭受內部未經授權存取的風險所採取之控制措施，下列敘述何者<span class='text-danger fw-bold'>錯誤</span>？",
+            options: [
+                "(A) 採用圖靈驗證碼（Captcha）控制措施，以識別該身分於存取系統或資源時的權限",
+                "(B) 採取權限管理之控制措施，以確保每個使用者僅能存取其需要的資源與功能防止越權存取",
+                "(C) 採取存取紀錄監控與審查，以確保及時發現異常之系統存取活動",
+                "(D) 採取桌面淨空政策，以避免遭受未經授權存取之風險"
+            ],
+            correct: [0], // Index 0 = A
+            steps: [
+                { title: "第一步：找關鍵字", content: "關鍵字：<span class='highlight-text'>內部人員</span>、<span class='highlight-text'>未經授權存取</span>、<span class='highlight-text'>錯誤</span>。" },
+                { title: "第二步：白話翻譯", content: "老闆怕員工偷看會員資料，要設防護。下面哪一招對於「限制員工權限」是沒用的？" },
+                { title: "第三步：解題思路", content: "<strong>考點：身分驗證 vs. 權限控制</strong><br>1. Captcha (選圖片裡的紅綠燈) 是用來分「人」跟「機器人」的。<br>2. 員工都已經登入帳號了，你再考他 Captcha，也不能證明他有沒有權限看薪水單。<br>3. <strong>生活比喻：</strong>Captcha 像是大樓門口的「防廣告機器人柵欄」，但它不能決定「誰可以進金庫」。" },
+                { title: "第四步：選項分析", content: "<ul><li>(A) <strong class='text-danger'>錯誤</strong>。Captcha 無法識別員工的「職位權限」（你是經理還是工讀生）。</li><li>(B) 正確。這叫「最小權限原則」（Least Privilege），只給工作需要的權限。</li><li>(C) 正確。這叫「日誌審查」（Log Review），凡走過必留下痕跡。</li><li>(D) 正確。桌面淨空（Clear Desk）是指離開座位要鎖電腦、收文件。</li></ul>" },
+                { title: "觀念補充與延伸", content: "<span class='concept-tag'>存取控制 (Access Control)</span> 限制誰(Who)可以對什麼資源(What)做什麼動作(Action)。" },
+                { title: "記憶口訣", content: "Captcha 防機器，不防自己人。" },
+                { title: "常見陷阱", content: "看到「驗證」兩個字就覺得是身分驗證。要分清楚是驗證「是不是人」(Captcha) 還是驗證「是誰」(Authentication)。" },
+                { title: "自我檢測", content: "Q: 限制工讀生不能看財務報表，該用什麼技術？<br><button class='btn btn-sm btn-link' onclick='this.nextElementSibling.style.display=\"block\"'>顯示答案</button><div style='display:none' class='text-success fw-bold mt-1'>A: 存取控制清單 (ACL) 或 角色權限管理 (RBAC)</div>" }
+            ]
+        },
+        {
+            id: "q14",
+            type: "single",
+            badge: "單選題",
+            question: "14. 為了強化公司對於會員個人資料保護的作為，資安長（老闆）要求資訊部重新評估公司整體資訊安全相關作為，以降低整體營運上之風險，試問資訊部對於整體資訊安全強化所採取之作為，下列敘述何者<span class='text-danger fw-bold'>錯誤</span>？",
+            options: [
+                "(A) 採取邊界防禦評估，包含防火牆、入侵偵測/防禦系統（IDS/IPS）與網路安全設備等，以防止未經授權之存取",
+                "(B) 採用防毒軟體進行身分驗證及授權管理評估",
+                "(C) 採取應用程式保護評估，包含弱點掃描、滲透測試以及源碼檢測等",
+                "(D) 採取資料保護評估，包含機密等級識別、資料加密傳輸、存取控制等"
+            ],
+            correct: [1], // Index 1 = B
+            steps: [
+                { title: "第一步：找關鍵字", content: "關鍵字：<span class='highlight-text'>整體資訊安全</span>、<span class='highlight-text'>強化作為</span>、<span class='highlight-text'>錯誤</span>。" },
+                { title: "第二步：白話翻譯", content: "資訊部提了一堆資安方案，哪一個方案明顯是在「牛頭不對馬嘴」？" },
+                { title: "第三步：解題思路", content: "<strong>考點：資安設備的功能分類</strong><br>1. 防毒軟體 (Antivirus)：抓病毒、木馬。<br>2. 身分驗證 (Authentication)：確認你是誰 (帳號密碼/指紋)。<br>3. <strong>生活比喻：</strong>防毒軟體像「體溫計」(量有沒有生病)，它不能當作「身分證」(檢查你是誰)。" },
+                { title: "第四步：選項分析", content: "<ul><li>(A) 正確。防火牆、IDS/IPS 是標準的邊界防禦。</li><li>(B) <strong class='text-danger'>錯誤</strong>。防毒軟體不能做「身分驗證」也不能管「授權」。身分驗證要靠 AD 或 IAM 系統。</li><li>(C) 正確。弱掃和滲透測試是用來檢查系統有沒有漏洞。</li><li>(D) 正確。資料分級與加密是資料層面的保護。</li></ul>" },
+                { title: "觀念補充與延伸", content: "<span class='concept-tag'>縱深防禦</span> 資安要有好幾層：網路層(FW)、端點層(AV)、應用層(WAF)、資料層(Encryption)。" },
+                { title: "記憶口訣", content: "防毒殺病毒，不管你是誰。" },
+                { title: "常見陷阱", content: "看到「防毒軟體」覺得是好東西就不敢選。要注意題目描述的功能（身分驗證）是否匹配。" },
+                { title: "自我檢測", content: "Q: 想確認登入者是不是本人，最有效的方法是？<br><button class='btn btn-sm btn-link' onclick='this.nextElementSibling.style.display=\"block\"'>顯示答案</button><div style='display:none' class='text-success fw-bold mt-1'>A: 多因子驗證 (MFA)</div>" }
+            ]
+        },
+        {
+            id: "q15",
+            type: "single",
+            badge: "單選題",
+            question: "15. 依據 A 公司現行事業之經營模式，若要滿足個人資料保護相關之法規範要求，下列敘述何者<span class='text-danger fw-bold'>錯誤</span>？",
+            options: [
+                "(A) 依據 A 公司個人資料蒐集、處理與利用之目的，對於會員個人資料蒐集之特定目的項目與類別可包含○四○行銷（包含金控共同行銷業務）、C○○一識別個人者、C一一一健康紀錄等",
+                "(B) 在實施個人資料之蒐集前應向潛在客戶告知：公司名稱、蒐集目的、資料類別、利用期間/地區/對象/方式、當事人得行使之權利及方式、不提供對權益之影響",
+                "(C) 應採行適當之安全措施，防止個人資料被竊取、竄改、毀損、滅失或洩漏，包含技術上及組織上之措施",
+                "(D) 依據網際網路零售業及網際網路零售服務平台業個人資料檔案安全維護計畫及業務終止後個人資料處理作業辦法，制定個人資料檔案安全維護計畫及業務終止後個人資料處理方法之訂定、修正及執行"
+            ],
+            correct: [0], // Index 0 = A
+            steps: [
+                { title: "第一步：找關鍵字", content: "關鍵字：<span class='highlight-text'>露營商品</span>、<span class='highlight-text'>健康紀錄</span>、<span class='highlight-text'>共同行銷</span>。" },
+                { title: "第二步：白話翻譯", content: "這家公司賣帳篷的，結果蒐集個資時，問你的「健康紀錄」(生過什麼病) 還要跟銀行「共同行銷」。這樣合法嗎？" },
+                { title: "第三步：解題思路", content: "<strong>考點：個資法之「必要範圍」與「目的性限制」</strong><br>1. 賣露營用品需要知道你有沒有高血壓嗎？不需要。<br>2. 蒐集資料必須跟業務目的有「正當合理關聯」。" },
+                { title: "第四步：選項分析", content: "<ul><li>(A) <strong class='text-danger'>錯誤</strong>。C111 健康紀錄是敏感性個資，賣露營用品蒐集這個已「逾越必要範圍」。金控共同行銷也與本業無關。</li><li>(B) 正確。這是個資法第 8 條的「告知義務」。</li><li>(C) 正確。這是個資法第 27 條的「安全維護措施」。</li><li>(D) 正確。這是依據該產業的主管機關法規制定計畫。</li></ul>" },
+                { title: "觀念補充與延伸", content: "<span class='concept-tag'>資料最小化</span> 只蒐集達成目的所需的最小限度資料。<br><span class='concept-tag'>告知後同意</span> 蒐集前要講清楚，當事人同意才能收。" },
+                { title: "記憶口訣", content: "賣什麼問什麼，不賣藥別問病。" },
+                { title: "常見陷阱", content: "選項 A 有很多代號 (C001, C111) 看起來很專業，容易以為是對的。重點在於內容「健康紀錄」是否合理。" },
+                { title: "自我檢測", content: "Q: 個資法告知義務包含哪幾項？<br><button class='btn btn-sm btn-link' onclick='this.nextElementSibling.style.display=\"block\"'>顯示答案</button><div style='display:none' class='text-success fw-bold mt-1'>A: 公(公司)、目(目的)、類(類別)、利(利用期間地區對象方式)、權(權利)、影(不提供的影響)</div>" }
+            ]
+        },
+        {
+            id: "q16",
+            type: "multi",
+            badge: "複選題",
+            question: "16. 為了因應日益成長的網路業務，A 公司擴大規模，將會計與財務作業由行政部獨立出來，進出貨與客服作業由業務部獨立出來，資訊部由原本資訊管理作業增加資安業務。依新的組織架構（如附圖資訊），下列哪些規劃措施較<span class='text-danger fw-bold'>「不」符合</span>資安管理要求？（複選）",
+            hasImage: true,
+            options: [
+                "(A) 依據部門屬性切分網段隔離",
+                "(B) 全組織人員之權限均為 admin",
+                "(C) 資訊部人員共用 Admin 帳號",
+                "(D) 財會部人員共用 User 3 帳號"
+            ],
+            correct: [1, 2, 3], // B, C, D
+            steps: [
+                { title: "第一步：找關鍵字", content: "關鍵字：<span class='highlight-text'>不符合</span>、<span class='highlight-text'>附圖</span>、<span class='highlight-text'>Admin</span>、<span class='highlight-text'>共用</span>。" },
+                { title: "第二步：白話翻譯", content: "看圖找碴。雖然網路切分了 LAN1~6 (很好)，但「人」的設定很爛。請選出哪裡做錯了？" },
+                { title: "第三步：解題思路", content: "<strong>考點：最小權限、責任歸屬 (Accountability)</strong><br>1. <strong>觀察圖片：</strong><br>- LAN1~LAN6：有切分網段 (Good)。<br>- 權限欄位：幾乎全是 Admin (Bad)。<br>- 帳號欄位：資訊部共用Admin、財會部共用User3 (Bad)。<br>2. <strong>Admin 全開：</strong> 就像給全校學生校長室鑰匙，極度危險。<br>3. <strong>共用帳號：</strong> 就像全班共用一本聯絡簿，誰亂寫都查不到是誰。" },
+                { title: "第四步：選項分析", content: "<ul><li>(A) 符合。切分網段 (VLAN/Subnet) 是好的措施，避免病毒擴散。因為題目問「不符合」，所以這項不選。</li><li>(B) <strong class='text-danger'>不符合</strong>。所有人都是 admin，違反最小權限原則。</li><li>(C) <strong class='text-danger'>不符合</strong>。資訊部共用 Admin，無法追究責任 (Non-repudiation)。</li><li>(D) <strong class='text-danger'>不符合</strong>。管錢的財會部共用 User3，發生虧空查不出是誰。</li></ul>" },
+                { title: "觀念補充與延伸", content: "<span class='concept-tag'>職務區隔 (SoD)</span> 財務與會計應該分開，共用帳號打破了這個規則。<br><span class='concept-tag'>可歸責性</span> 必須能確認「誰」做了這件事。" },
+                { title: "記憶口訣", content: "共用帳號抓不到人，Admin 全開等著完蛋。" },
+                { title: "常見陷阱", content: "題目問「不符合」，不要看到 (A) 是好的就選下去。" },
+                { title: "自我檢測", content: "Q: 資訊部有兩人，應開幾個管理帳號？<br><button class='btn btn-sm btn-link' onclick='this.nextElementSibling.style.display=\"block\"'>顯示答案</button><div style='display:none' class='text-success fw-bold mt-1'>A: 兩個。每人一個獨立帳號 (如 john_adm, mary_adm) 以便稽核。</div>" }
+            ]
+        }
+    ];
+
+    // --- 初始化 ---
+    document.addEventListener('DOMContentLoaded', () => {
+        renderQuiz();
+        loadStats();
+    });
+
+    // --- 渲染題目 ---
+    function renderQuiz() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = quizData.map((q, index) => {
+            // 生成選項 HTML
+            const optionsHtml = q.options.map((opt, i) => `
+                <button class="btn btn-light w-100 option-btn" 
+                        onclick="selectOption('${q.id}', ${i}, '${q.type}')" 
+                        id="opt-${q.id}-${i}">
+                    ${q.type === 'multi' ? '<i class="far fa-square me-2"></i>' : ''} ${opt}
+                </button>
+            `).join('');
+
+            // 生成 Q16 圖片區塊 (如果有的話)
+            const imageHtml = q.hasImage ? `
+                <div class="q16-img-container">
+                    <img src="https://i.meee.com.tw/sjltSDX.png" alt="A公司組織網路架構圖" class="q16-img">
+                    <div class="img-caption"><i class="fas fa-search me-1"></i>此圖呈現 A 公司各部門的 LAN 分段、帳號、資料儲存空間與權限配置，為本題判斷「哪些不符合資安管理」的關鍵線索。</div>
+                </div>
+            ` : '';
+
+            // 生成 Accordion 步驟 HTML
+            const accordionHtml = q.steps.map((step, i) => `
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading-${q.id}-${i}">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${q.id}-${i}">
+                            ${step.title}
+                        </button>
+                    </h2>
+                    <div id="collapse-${q.id}-${i}" class="accordion-collapse collapse" data-bs-parent="#accordion-${q.id}">
+                        <div class="accordion-body">
+                            ${step.content}
+                            ${step.title === '正確答案' ? `<div class="mt-2 p-2 bg-light border rounded">正確答案為：<span class="text-success fw-bold">${q.options.filter((_, idx) => q.correct.includes(idx)).map(o => o.substring(0,3)).join(', ')}</span></div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="card question-card" id="${q.id}">
+                    <div class="card-header">
+                        <span><span class="badge bg-primary me-2">${q.badge}</span>${q.id.toUpperCase()}</span>
+                        <span class="stats-badge" id="stats-${q.id}"><i class="fas fa-chart-bar me-1"></i>作答: 0 | 正確: 0%</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="question-text">${q.question}</div>
+                        ${imageHtml}
+                        <div class="options-container mb-3">
+                            ${optionsHtml}
+                        </div>
+                        
+                        <!-- 複選題送出按鈕 -->
+                        ${q.type === 'multi' ? `<button class="btn btn-primary w-100 mb-3" id="submit-${q.id}" onclick="submitMulti('${q.id}')">送出答案</button>` : ''}
+                        
+                        <!-- 重作按鈕 (預設隱藏) -->
+                        <button class="btn btn-outline-secondary w-100 mb-3" id="retry-${q.id}" onclick="resetQuestion('${q.id}')" style="display:none;">
+                            <i class="fas fa-redo me-1"></i>重作此題
+                        </button>
+
+                        <!-- 結果訊息 -->
+                        <div id="result-${q.id}" class="mb-3"></div>
+
+                        <!-- 導覽按鈕 -->
+                        <div class="d-flex justify-content-end mb-2">
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="toggleAccordion('${q.id}', true)">展開解析</button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="toggleAccordion('${q.id}', false)">收合</button>
+                        </div>
+
+                        <!-- 解析 Accordion -->
+                        <div class="accordion" id="accordion-${q.id}">
+                            ${accordionHtml}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${q.id}-ans">
+                                        正確答案
+                                    </button>
+                                </h2>
+                                <div id="collapse-${q.id}-ans" class="accordion-collapse collapse" data-bs-parent="#accordion-${q.id}">
+                                    <div class="accordion-body">
+                                        <span class="text-success fw-bold fs-5">
+                                            ${q.correct.map(idx => String.fromCharCode(65 + idx)).join('、')}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // --- 互動邏輯 ---
+    const userSelections = {}; // 暫存複選題的選擇
+
+    function selectOption(qId, idx, type) {
+        const btn = document.getElementById(`opt-${qId}-${idx}`);
+        const qData = quizData.find(q => q.id === qId);
+
+        if (document.getElementById(`result-${qId}`).innerHTML !== "") return; // 已作答則鎖定
+
+        if (type === 'single') {
+            // 單選：直接判定
+            checkAnswer(qId, [idx]);
+            // UI 更新
+            const allBtns = document.querySelectorAll(`#${qId} .option-btn`);
+            allBtns.forEach(b => b.classList.add('disabled'));
+        } else {
+            // 複選：切換樣式與暫存
+            if (!userSelections[qId]) userSelections[qId] = [];
+            const indexInArr = userSelections[qId].indexOf(idx);
+            
+            if (indexInArr > -1) {
+                userSelections[qId].splice(indexInArr, 1);
+                btn.classList.remove('selected');
+                btn.innerHTML = `<i class="far fa-square me-2"></i>${qData.options[idx]}`;
+            } else {
+                userSelections[qId].push(idx);
+                btn.classList.add('selected');
+                btn.innerHTML = `<i class="far fa-check-square me-2"></i>${qData.options[idx]}`;
+            }
+        }
+    }
+
+    function submitMulti(qId) {
+        const selection = userSelections[qId] || [];
+        if (selection.length === 0) {
+            alert("請至少選擇一個選項！");
+            return;
+        }
+        checkAnswer(qId, selection);
+        document.getElementById(`submit-${qId}`).style.display = 'none';
+        
+        // 鎖定 UI
+        const allBtns = document.querySelectorAll(`#${qId} .option-btn`);
+        allBtns.forEach(b => b.classList.add('disabled'));
+    }
+
+    function checkAnswer(qId, selection) {
+        const qData = quizData.find(q => q.id === qId);
+        const correct = qData.correct.sort().toString();
+        const user = selection.sort().toString();
+        const isCorrect = (correct === user);
+
+        updateStats(qId, isCorrect);
+
+        // 顯示結果
+        const resultDiv = document.getElementById(`result-${qId}`);
+        const retryBtn = document.getElementById(`retry-${qId}`);
+        
+        if (isCorrect) {
+            resultDiv.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i><strong>答對了！</strong>觀念正確。</div>`;
+            // 標示正確選項
+            selection.forEach(idx => {
+                const btn = document.getElementById(`opt-${qId}-${idx}`);
+                btn.classList.add('correct');
+            });
+        } else {
+            let msg = "答錯了。";
+            if (qData.type === 'multi') {
+                msg = "答案不完整或有誤。請參考下方解析（特別是圖表中的紅色異常處）。";
+            }
+            resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i><strong>${msg}</strong></div>`;
+            // 標示使用者選錯的
+            selection.forEach(idx => {
+                const btn = document.getElementById(`opt-${qId}-${idx}`);
+                if (!qData.correct.includes(idx)) btn.classList.add('wrong');
+                else btn.classList.add('correct');
+            });
+            // 標示漏選的正確答案
+            qData.correct.forEach(idx => {
+                const btn = document.getElementById(`opt-${qId}-${idx}`);
+                btn.classList.add('correct');
+            });
+        }
+
+        retryBtn.style.display = 'block';
+    }
+
+    function resetQuestion(qId) {
+        // 清除狀態
+        userSelections[qId] = [];
+        document.getElementById(`result-${qId}`).innerHTML = "";
+        document.getElementById(`retry-${qId}`).style.display = "none";
+        
+        const qData = quizData.find(q => q.id === qId);
+        if (qData.type === 'multi') {
+            document.getElementById(`submit-${qId}`).style.display = "block";
+        }
+
+        // 重置按鈕樣式
+        const allBtns = document.querySelectorAll(`#${qId} .option-btn`);
+        allBtns.forEach((btn, idx) => {
+            btn.classList.remove('disabled', 'selected', 'correct', 'wrong');
+            if (qData.type === 'multi') {
+                btn.innerHTML = `<i class="far fa-square me-2"></i>${qData.options[idx]}`;
+            }
+        });
+    }
+
+    // --- 輔助功能 ---
+    function toggleAccordion(qId, show) {
+        const accordion = document.getElementById(`accordion-${qId}`);
+        const items = accordion.querySelectorAll('.accordion-collapse');
+        items.forEach(item => {
+            if (show) new bootstrap.Collapse(item, { show: true });
+            else new bootstrap.Collapse(item, { hide: true });
+        });
+    }
+
+    // --- 統計功能 (localStorage) ---
+    function loadStats() {
+        const stats = JSON.parse(localStorage.getItem('ipas_q2_stats_v4')) || {};
+        quizData.forEach(q => {
+            const s = stats[q.id] || { total: 0, correct: 0 };
+            const rate = s.total === 0 ? 0 : Math.round((s.correct / s.total) * 100);
+            document.getElementById(`stats-${q.id}`).innerHTML = `<i class="fas fa-chart-bar me-1"></i>作答: ${s.total} | 正確: ${rate}%`;
+        });
+    }
+
+    function updateStats(qId, isCorrect) {
+        const stats = JSON.parse(localStorage.getItem('ipas_q2_stats_v4')) || {};
+        if (!stats[qId]) stats[qId] = { total: 0, correct: 0 };
+        
+        stats[qId].total++;
+        if (isCorrect) stats[qId].correct++;
+        
+        localStorage.setItem('ipas_q2_stats_v4', JSON.stringify(stats));
+        loadStats();
+    }
+
+    function resetAllStats() {
+        if(confirm("確定要重置所有學習紀錄嗎？")) {
+            localStorage.removeItem('ipas_q2_stats_v4');
+            location.reload();
+        }
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 12 題（複選）身分驗證管理 - iPAS 資安教學</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 深藍灰，專業感 */
+            --accent-color: #34495e;
+            --highlight-bg: #ecf0f1;
+            --border-color: #bdc3c7;
+            --correct-color: #27ae60;
+            --error-color: #c0392b;
+            --text-color: #2c3e50;
+            --bg-color: #f9f9f9;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 16px; /* 基準字級 */
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* 標題與內文字級差距控制在 1 級以內 */
+        h1 {
+            font-size: 1.125rem; /* 18px */
+            margin: 0 0 5px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        h2 {
+            font-size: 1rem; /* 16px */
+            margin: 20px 0 10px 0;
+            color: var(--accent-color);
+            font-weight: bold;
+            background-color: var(--highlight-bg);
+            padding: 5px 10px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        h3 {
+            font-size: 1rem;
+            margin: 15px 0 5px 0;
+            color: var(--text-color);
+            text-decoration: underline;
+        }
+
+        .header-info {
+            margin-bottom: 20px;
+        }
+
+        .sub-title {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 0;
+        }
+
+        /* 互動區塊樣式 */
+        .quiz-section {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+
+        .option-group {
+            margin-bottom: 15px;
+        }
+
+        .option-label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border: 1px solid transparent;
+            border-radius: 3px;
+        }
+
+        .option-label:hover {
+            background-color: #f0f3f4;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        button {
+            font-size: 1rem;
+            padding: 8px 20px;
+            margin: 0 5px;
+            cursor: pointer;
+            border: 1px solid var(--primary-color);
+            background-color: #fff;
+            color: var(--primary-color);
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        button.primary-btn {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        button.primary-btn:hover {
+            background-color: var(--accent-color);
+        }
+
+        /* 回饋區塊 */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            display: none;
+            border: 1px solid;
+        }
+
+        .feedback-correct {
+            background-color: #d4efdf;
+            border-color: #27ae60;
+            color: #145a32;
+        }
+
+        .feedback-error {
+            background-color: #fadbd8;
+            border-color: #c0392b;
+            color: #7b241c;
+        }
+
+        /* 教學解析區 - 展開/收合 */
+        /* 修改為特定 class，避免影響自我檢測區的小按鈕 */
+        details.explanation-details {
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+        }
+
+        summary.explanation-summary {
+            padding: 12px;
+            background-color: var(--highlight-bg);
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+        }
+
+        summary.explanation-summary::after {
+            content: "+ 點此展開詳細解析"; 
+            float: right;
+            font-size: 0.9rem;
+        }
+
+        details.explanation-details[open] summary.explanation-summary::after {
+            content: "- 點此收合解析";
+        }
+
+        .explanation-content {
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        .highlight-keyword {
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        /* 速記卡 */
+        .summary-card {
+            margin-top: 30px;
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .summary-table th, .summary-table td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+        }
+
+        .summary-table th {
+            background-color: var(--highlight-bg);
+            width: 30%;
+        }
+        
+        /* 自我檢測隱藏答案樣式 */
+        .check-answer-btn {
+            background-color: #f0f3f4;
+            border: 1px solid #bdc3c7;
+            padding: 2px 10px;
+            font-size: 0.85rem;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            color: #555;
+            display: inline-block;
+        }
+        
+        .check-answer-btn:hover {
+            background-color: #e0e0e0;
+            color: #000;
+        }
+
+        .answer-hidden {
+            display: none;
+            color: var(--correct-color);
+            font-weight: bold;
+            margin-left: 5px;
+            background-color: #ecf9f1;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        
+        .self-check-list li {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        /* RWD */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            button {
+                width: 100%;
+                margin: 5px 0;
+            }
+            h1 {
+                font-size: 1.1rem;
+            }
+            .check-answer-btn {
+                display: block;
+                margin: 5px 0 0 0;
+                width: fit-content;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-info">
+        <h1>第 12 題（複選）｜ 主題：身分驗證管理的基本控制措施</h1>
+        <p class="sub-title">副標：帳號、密碼與登入行為怎麼管，才算「有在管」</p>
+    </div>
+
+    <!-- 題目互動區 -->
+    <div class="quiz-section">
+        <p style="font-weight: bold;">題目：關於「身分驗證管理」相關控制措施的敘述，下列哪些正確？（請勾選所有正確選項）</p>
+        
+        <form id="quiz-form">
+            <div class="option-group">
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="A">
+                    (A) 使用預設密碼登入系統時，於登入後無需立即變更
+                </label>
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="B">
+                    (B) 應具備帳戶鎖定機制，例如：帳號登入進行身分驗證失敗達五次後，至少十五分鐘內不允許該帳號繼續嘗試登入
+                </label>
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="C">
+                    (C) 已逾期之臨時或緊急帳號應刪除或禁用
+                </label>
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="D">
+                    (D) 使用密碼進行驗證時，應強制最低密碼複雜度
+                </label>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="primary-btn" onclick="checkAnswer()">送出答案</button>
+                <button type="button" onclick="resetQuiz()">重新作答</button>
+            </div>
+        </form>
+
+        <div id="feedback-area"></div>
+    </div>
+
+    <!-- 教學解析區 -->
+    <details class="explanation-details">
+        <summary class="explanation-summary">教學解析區（請作答後參考）</summary>
+        <div class="explanation-content">
+            
+            <h2>【題目】</h2>
+            <p>關於「身分驗證管理」相關控制措施的敘述，下列哪些正確？（複選題）</p>
+            <ul>
+                <li>(A) 使用預設密碼登入系統時，於登入後無需立即變更</li>
+                <li>(B) 應具備帳戶鎖定機制，例如：帳號登入進行身分驗證失敗達五次後，至少十五分鐘內不允許該帳號繼續嘗試登入</li>
+                <li>(C) 已逾期之臨時或緊急帳號應刪除或禁用</li>
+                <li>(D) 使用密碼進行驗證時，應強制最低密碼複雜度</li>
+            </ul>
+
+            <h2>【第一步：找關鍵字】</h2>
+            <p>請留意以下線索：</p>
+            <ul>
+                <li><span class="highlight-keyword">身分驗證管理</span>（就是管「你是誰、你怎麼證明你是你」）</li>
+                <li><span class="highlight-keyword">控制措施</span>（代表制度或技術上的「限制與保護」）</li>
+                <li><span class="highlight-keyword">哪些正確</span>（複選題，可能不只一個）</li>
+                <li><span class="highlight-keyword">預設密碼 / 帳戶鎖定 / 臨時帳號 / 密碼複雜度</span>（全部都是常見資安考點）</li>
+            </ul>
+
+            <h2>【第二步：白話翻譯】</h2>
+            <p>「系統要怎麼管帳號跟密碼，才不容易被猜、被試、被亂用？下面哪些說法是對的？」</p>
+
+            <h2>【第三步：解題思路】</h2>
+            <ul>
+                <li><strong>這題在考什麼觀念？</strong><br>→ 身分驗證管理的「基本防護原則」。</li>
+                <li><strong>解題步驟：</strong>
+                    <ol>
+                        <li>先想：哪些做法可以防止「暴力破解」與「帳號被濫用」。</li>
+                        <li>再看：哪些敘述違反一般資安常識（例如預設密碼不用改）。</li>
+                        <li>複選題要注意：錯一個就不該選。</li>
+                    </ol>
+                </li>
+                <li><strong>原理與規則：</strong>
+                    <ul>
+                        <li>預設密碼（出廠或系統一開始給的密碼，通常大家都知道）</li>
+                        <li>帳戶鎖定（連續登入失敗就暫時鎖住，避免一直被試）</li>
+                        <li>臨時/緊急帳號（短期使用的帳號，用完就該回收）</li>
+                        <li>密碼複雜度（要求密碼長度、大小寫、數字或符號）</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h2>【第四步：選項分析】</h2>
+            <ul>
+                <li><strong>(A) 為什麼錯？</strong><br>→ 預設密碼風險極高，登入後一定要立刻更換。</li>
+                <li><strong>(B) 為什麼對？</strong><br>→ 帳戶鎖定可以防止暴力破解與持續嘗試。</li>
+                <li><strong>(C) 為什麼對？</strong><br>→ 過期帳號若不清除，容易被撿來利用。</li>
+                <li><strong>(D) 為什麼對？</strong><br>→ 密碼越簡單，越容易被猜或被破解。</li>
+            </ul>
+
+            <h2>【觀念補充與延伸】</h2>
+            <ul>
+                <li><strong>核心觀念定位：</strong><br>- 屬於「身分與存取管理（IAM）」與「驗證機制」的高頻考題。</li>
+                <li><strong>對比概念：</strong><br>- 驗證（Authentication：你是誰）<br>  vs<br>- 授權（Authorization：你能做什麼）</li>
+                <li><strong>變化題型：</strong>
+                    <ol>
+                        <li>「下列何者不是良好密碼管理原則？」</li>
+                        <li>「哪一項措施最能降低暴力破解風險？」</li>
+                    </ol>
+                </li>
+            </ul>
+
+            <h2>【記憶口訣】</h2>
+            <ul>
+                <li>「預設一定要改，失敗要鎖，過期要刪，密碼要難。」</li>
+                <li>「帳號管不好，後面防火牆也白做。」</li>
+            </ul>
+
+            <h2>【常見陷阱】</h2>
+            <ul>
+                <li><strong>最容易搞混：</strong><br>- 以為預設密碼只要藏好就沒事。</li>
+                <li><strong>心理盲點：</strong><br>- 覺得臨時帳號「反正快用完了」就不管。</li>
+                <li><strong>避坑指南：</strong><br>檢查四件事：
+                    <ol>
+                        <li>有沒有預設密碼？</li>
+                        <li>登入錯誤會不會被鎖？</li>
+                        <li>臨時帳號會不會過期？</li>
+                        <li>密碼夠不夠難？</li>
+                    </ol>
+                </li>
+            </ul>
+
+            <h2>【正確答案】</h2>
+            <p><strong>答案：B、C、D</strong></p>
+            <p>一句話理由：帳戶鎖定、清除過期帳號與密碼複雜度，都是身分驗證管理的基本防護措施。</p>
+
+            <h2>【自我檢測】</h2>
+            <ol class="self-check-list">
+                <li>
+                    如果系統沒有帳戶鎖定機制，最容易遭到哪種攻擊？
+                    <button class="check-answer-btn" onclick="toggleSelfCheckAnswer(this)">看答案</button>
+                    <span class="answer-hidden">（答：暴力破解攻擊）</span>
+                </li>
+                <li>
+                    為什麼臨時帳號比正式帳號更危險？
+                    <button class="check-answer-btn" onclick="toggleSelfCheckAnswer(this)">看答案</button>
+                    <span class="answer-hidden">（答：容易被遺忘與缺乏持續管理）</span>
+                </li>
+                <li>
+                    密碼複雜度是不是越高越好？還要搭配什麼？
+                    <button class="check-answer-btn" onclick="toggleSelfCheckAnswer(this)">看答案</button>
+                    <span class="answer-hidden">（答：需搭配 MFA、多因子驗證）</span>
+                </li>
+            </ol>
+        </div>
+    </details>
+
+    <!-- 一頁速記卡 -->
+    <div class="summary-card">
+        <h1>【一頁速記卡】</h1>
+        <table class="summary-table">
+            <tr>
+                <th>預設密碼</th>
+                <td>一定要改</td>
+            </tr>
+            <tr>
+                <th>登入失敗</th>
+                <td>要鎖帳</td>
+            </tr>
+            <tr>
+                <th>臨時帳號</th>
+                <td>過期就刪或停用</td>
+            </tr>
+            <tr>
+                <th>密碼政策</th>
+                <td>要有最低複雜度</td>
+            </tr>
+            <tr>
+                <th>正確答案</th>
+                <td style="font-weight: bold; color: var(--error-color);">B、C、D</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    function checkAnswer() {
+        // 取得所有勾選的選項
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        const selectedValues = Array.from(checkboxes).map(cb => cb.value);
+        
+        const feedbackArea = document.getElementById('feedback-area');
+        
+        // 正確答案定義
+        const correctAnswers = ['B', 'C', 'D'];
+        
+        // 判斷邏輯：
+        // 1. 數量必須相符 (3個)
+        // 2. 必須完全包含 B, C, D (且不能包含 A)
+        
+        const isCorrectCount = selectedValues.length === 3;
+        const hasA = selectedValues.includes('A');
+        const hasB = selectedValues.includes('B');
+        const hasC = selectedValues.includes('C');
+        const hasD = selectedValues.includes('D');
+        
+        const isAllCorrect = !hasA && hasB && hasC && hasD;
+
+        if (isAllCorrect) {
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = '<strong>[正確]</strong><br>完全正確！帳戶鎖定、清除過期帳號與密碼複雜度，都是身分驗證管理的基本防護措施。';
+        } else {
+            feedbackArea.className = 'feedback-error';
+            let msg = '<strong>[錯誤]</strong><br>';
+            
+            if (selectedValues.length === 0) {
+                msg += '您尚未選擇任何答案。';
+            } else if (hasA) {
+                msg += '選項 (A) 是錯誤的！預設密碼風險極高，必須強制變更。<br>';
+            } else {
+                msg += '您選擇的答案不完整或有誤。<br>';
+            }
+            
+            msg += '<br><strong>正確答案應為：B、C、D</strong><br>';
+            msg += '<br><span style="color:#d35400; font-weight:bold;">關鍵提醒：身分驗證管理的核心精神是：降低被猜到、被濫用、被撐久的風險。</span>';
+            
+            feedbackArea.innerHTML = msg;
+        }
+        
+        feedbackArea.style.display = 'block';
+    }
+
+    function resetQuiz() {
+        // 清除所有勾選
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        // 隱藏回饋區
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'none';
+        
+        // 收合解析區 (可選)
+        document.querySelector('details').removeAttribute('open');
+    }
+
+    // 自我檢測答案切換
+    function toggleSelfCheckAnswer(btn) {
+        const answerSpan = btn.nextElementSibling;
+        if (answerSpan.style.display === 'inline-block' || answerSpan.style.display === 'inline') {
+            answerSpan.style.display = 'none';
+            btn.textContent = '看答案';
+            btn.style.backgroundColor = '#f0f3f4';
+            btn.style.color = '#555';
+        } else {
+            answerSpan.style.display = 'inline-block';
+            btn.textContent = '隱藏';
+            btn.style.backgroundColor = '#2c3e50';
+            btn.style.color = '#fff';
+        }
+    }
+</script>
+
+</body>
+</html>

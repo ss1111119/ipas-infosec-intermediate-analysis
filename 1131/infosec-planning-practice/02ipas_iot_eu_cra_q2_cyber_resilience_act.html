@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安考題教學：IoT 進歐盟與 CRA</title>
+    <style>
+        /* 基礎設定：低飽和度配色，閱讀舒適 */
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-secondary: #555555;
+            --primary-color: #4a6fa5; /* 穩重的藍色 */
+            --primary-hover: #3b5b8b;
+            --accent-color: #e6eef8;
+            --border-color: #ddd;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-bg: #ffebee;
+            --error-text: #c62828;
+            --highlight: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 頁首 */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: normal;
+        }
+
+        /* 卡片區塊 */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        /* 題目區域 */
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: var(--accent-color);
+        }
+
+        .option-label input {
+            margin-top: 5px;
+            margin-right: 12px;
+        }
+
+        .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-reset {
+            background-color: #9e9e9e;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #757575;
+        }
+
+        /* 回饋區 */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-correct {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            border-left: 5px solid var(--success-text);
+        }
+
+        .feedback-wrong {
+            background-color: var(--error-bg);
+            color: var(--error-text);
+            border-left: 5px solid var(--error-text);
+        }
+
+        /* 展開/收合教學區 */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: #fff;
+        }
+
+        summary {
+            padding: 15px;
+            background-color: var(--accent-color);
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設三角形 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::after {
+            content: "+";
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* 修正內層自我檢測的 details 樣式 (輕量化) */
+        details.inner-details {
+            border: none;
+            background: transparent;
+            margin-bottom: 8px;
+            border-bottom: 1px dashed var(--border-color);
+            border-radius: 0;
+        }
+        details.inner-details:last-child {
+            border-bottom: none;
+        }
+        details.inner-details summary {
+            background-color: transparent;
+            padding: 8px 0;
+            justify-content: flex-start;
+            gap: 10px;
+            color: var(--text-main);
+            font-weight: normal;
+            font-size: 0.95rem;
+        }
+        details.inner-details summary:hover {
+            color: var(--primary-color);
+        }
+        details.inner-details summary::after {
+            content: " (點擊看答案)";
+            font-size: 0.8rem;
+            color: #888;
+            font-weight: normal;
+        }
+        details.inner-details[open] summary::after {
+            content: ""; /* 展開後不顯示提示文字 */
+        }
+        details.inner-details .answer-box {
+            margin: 5px 0 10px 0;
+            padding: 10px 15px;
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .highlight {
+            background-color: var(--highlight);
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* 速記表格 */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--accent-color);
+            color: var(--text-main);
+        }
+
+        /* 小測驗配對 */
+        .match-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        @media (min-width: 600px) {
+            .match-row {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .match-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            flex: 1;
+        }
+
+        .match-options {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .btn-option {
+            background-color: #fff;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            padding: 6px 12px;
+        }
+
+        .btn-option:hover {
+            background-color: var(--accent-color);
+        }
+
+        .btn-option.correct {
+            background-color: var(--success-text);
+            color: white;
+            border-color: var(--success-text);
+        }
+
+        .btn-option.wrong {
+            background-color: var(--error-text);
+            color: white;
+            border-color: var(--error-text);
+        }
+
+        .match-feedback {
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* 頁尾 */
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Utility */
+        .hidden { display: none; }
+        .bold { font-weight: bold; }
+        .red { color: var(--error-text); }
+        .blue { color: var(--primary-color); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>IoT 進歐盟：產品資安合規 CRA</h1>
+        <div class="subtitle">看到「1,500 萬歐元罰鍰」與「產品上市」要想到誰？</div>
+    </header>
+
+    <!-- 作答區 -->
+    <section class="card">
+        <h2>考題練習</h2>
+        <div class="question-text">
+            題目：「智慧型物聯網（IoT）設備於進入歐盟市場之時，應該要遵循下列何項歐盟新發布的法案，以完成應遵循的安全責任及義務事項，以避免高額的罰鍰(如 1,500 萬歐元)？」
+        </div>
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="quiz" value="A">
+                (A) NIS2 Directive（歐盟第 2022/2555 號《於歐盟實施高度共通程度之資安措施指令》）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="quiz" value="B">
+                (B) Cybersecurity Resilience Act（《資通安全韌性法案》）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="quiz" value="C">
+                (C) NIS Directive（《網路與資訊系統安全指令》）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="quiz" value="D">
+                (D) Cybersecurity Act, Regulation 2019/881（《資通訊安全法案》）
+            </label>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-submit" onclick="checkAnswer()">送出答案</button>
+            <button class="btn-reset" onclick="resetAnswer()">重新作答</button>
+        </div>
+
+        <div id="feedback-area"></div>
+    </section>
+
+    <!-- 分段式教學區 -->
+    <section class="card">
+        <h2>分段式詳解與教學</h2>
+        
+        <details open>
+            <summary>【題目】完整題目回顧</summary>
+            <div class="details-content">
+                <p>「智慧型物聯網（IoT）設備於進入歐盟市場之時，應該要遵循下列何項歐盟新發布的法案，以完成應遵循的安全責任及義務事項，以避免高額的罰鍰(如 1,500 萬歐元)？」</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>【第一步：找關鍵字】</summary>
+            <div class="details-content">
+                <p>請圈出以下四個關鍵線索：</p>
+                <ul>
+                    <li><span class="highlight bold">IoT 設備</span>：就是會連網、會更新韌體/軟體的產品。</li>
+                    <li><span class="highlight bold">進入歐盟市場</span>：就是「賣到 EU」這個動作，屬於產品合規/上架市場規範。</li>
+                    <li><span class="highlight bold">新發布法案</span>：暗示是近期歐盟的新規定。</li>
+                    <li><span class="highlight bold">高額罰鍰：1,500 萬歐元</span>：這是最重要的數字線索，對應 CRA 的最高罰則上限之一。</li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>【第二步：白話翻譯】</summary>
+            <div class="details-content">
+                <p>用白話文翻譯題目：</p>
+                <p class="bold" style="color: var(--primary-color);">
+                    「你的連網產品要賣到歐盟，該遵守哪個『針對產品安全』的新規，才不會被罰很多錢？」
+                </p>
+            </div>
+        </details>
+
+        <details>
+            <summary>【第三步：解題思路】</summary>
+            <div class="details-content">
+                <p><strong>這題在考什麼？</strong><br>辨識 EU 四大資安法規中，哪個是針對「產品上市場」的強制資安要求。</p>
+                
+                <p><strong>解題三步驟：</strong></p>
+                <ol>
+                    <li>先判斷題目是管「產品」還是管「組織/公司」。題目提到 IoT 設備、進入市場，所以是<strong>產品法</strong>。</li>
+                    <li>看到「IoT/軟硬體產品」＋「罰鍰 1,500 萬歐元」，直接鎖定 <span class="bold">CRA</span>。</li>
+                    <li>用排除法：
+                        <ul>
+                            <li>NIS/NIS2 是管「組織」的（如水電公司、大企業）。</li>
+                            <li>Cybersecurity Act 是「認證框架」，不是強制產品義務。</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <p><strong>原理與規則（不要死背）：</strong></p>
+                <ul>
+                    <li><span class="bold">CRA (Cyber Resilience Act)</span>：<br>
+                        是「產品法」。重點在製造商要把產品放到 EU 市場時，必須確保從設計階段就安全（Secure by Design），並且要在產品整個生命週期提供安全更新。沒做好會罰很重（最高 1500 萬歐元或全球營收 2.5%）。
+                    </li>
+                    <li><span class="bold">NIS2 (NIS Directive 2)</span>：<br>
+                        是「組織法」。主要管重要/關鍵組織（如能源、交通、數位服務提供商）要做風險管理和資安通報。它不是針對單一台除濕機或監視器上市的規定。
+                    </li>
+                    <li><span class="bold">Cybersecurity Act (EU 2019/881)</span>：<br>
+                        偏「制度與認證」。它建立了歐盟的資安認證框架，並強化了歐盟資安局 (ENISA) 的角色。
+                    </li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>【第四步：選項分析】</summary>
+            <div class="details-content">
+                <ul>
+                    <li><strong>(A) NIS2 Directive：[錯誤]</strong><br>
+                        它是「組織面」的規範，要求企業做好資安治理與通報，不是針對 IoT 產品上市的義務。
+                    </li>
+                    <li><strong>(B) Cybersecurity Resilience Act (CRA)：[正確]</strong><br>
+                        針對「含數位元件產品」上市到 EU 的資安要求與責任，且罰則特徵符合。
+                    </li>
+                    <li><strong>(C) NIS Directive：[錯誤]</strong><br>
+                        舊版的組織面指令，且題目強調「新發布」與高額罰鍰，舊法已不適用或非最佳解。
+                    </li>
+                    <li><strong>(D) Cybersecurity Act 2019/881：[錯誤]</strong><br>
+                        這是建立資安「認證框架」與 ENISA 權責的法案，不是強制產品上市的安全義務法。
+                    </li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>【觀念補充與延伸】★核心舉一反三</summary>
+            <div class="details-content">
+                <p><strong>常見陷阱與比較：</strong></p>
+                <ul>
+                    <li><strong>產品法 vs 組織法：</strong>
+                        <br>CRA 管產品（上市要合規）；NIS2 管組織（公司要治理）。
+                    </li>
+                    <li><strong>變化題型 1：</strong>
+                        <br>若題目問「EU 重要/關鍵組織必須做 24 小時初步通報」，答案是？
+                        <br><span class="bold blue">→ NIS2</span>
+                    </li>
+                    <li><strong>變化題型 2：</strong>
+                        <br>若題目問「EU 建立 ICT 產品/服務的自願性資安認證機制」，答案是？
+                        <br><span class="bold blue">→ Cybersecurity Act (2019/881)</span>
+                    </li>
+                </ul>
+                
+                <p><strong>記憶口訣：</strong></p>
+                <div style="background-color: var(--highlight); padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+                    1. <strong>CRA = C 到市場 (Commercial/Market)</strong> → 產品要賣要合規。<br>
+                    2. <strong>三字抓法：</strong>「進市場」→ CRA；「組織治理」→ NIS2；「認證框架」→ CSA。
+                </div>
+                
+                <p><strong>自我檢測：</strong></p>
+                <div style="margin-left: 10px;">
+                    <details class="inner-details">
+                        <summary>1. 若題目改成「對關鍵基礎設施要求資安風險管理」，答案會變嗎？</summary>
+                        <div class="answer-box">答：會，改選 NIS2。（因為主體變成了組織）</div>
+                    </details>
+                    
+                    <details class="inner-details">
+                        <summary>2. 看到題幹出現「產品生命週期、漏洞修補、secure-by-design」，你優先想到誰？</summary>
+                        <div class="answer-box">答：CRA。（這是產品資安韌性的核心）</div>
+                    </details>
+
+                    <details class="inner-details">
+                        <summary>3. 若題目改成「EU 建立資安認證框架、ENISA 角色強化」，答案是？</summary>
+                        <div class="answer-box">答：Cybersecurity Act (2019/881)。</div>
+                    </details>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <!-- 一頁速記卡 -->
+    <section class="card">
+        <h2>1 分鐘速記卡：歐盟資安法規比較</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>法規名稱</th>
+                        <th>CRA<br>(資通安全韌性法案)</th>
+                        <th>NIS2<br>(網資系統安全指令2)</th>
+                        <th>Cybersecurity Act<br>(資通訊安全法案)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>管誰/主體</strong></td>
+                        <td class="bold blue">產品 (硬體/軟體)</td>
+                        <td>組織 (關鍵基礎設施/企業)</td>
+                        <td>認證制度 / ENISA</td>
+                    </tr>
+                    <tr>
+                        <td><strong>核心要求</strong></td>
+                        <td>上市前安全檢測<br>上市後漏洞修補</td>
+                        <td>風險管理<br>事件通報</td>
+                        <td>建立歐盟資安認證框架</td>
+                    </tr>
+                    <tr>
+                        <td><strong>關鍵字</strong></td>
+                        <td class="bold red">IoT、進市場、罰鍰1500萬</td>
+                        <td>關鍵實體、治理、供應鏈管理</td>
+                        <td>認證 schemes、標章</td>
+                    </tr>
+                    <tr>
+                        <td><strong>IoT 上市直接關聯</strong></td>
+                        <td>是 (必要條件)</td>
+                        <td>否 (是企業管理責任)</td>
+                        <td>否 (認證多為自願性)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 小測驗強化 -->
+    <section class="card">
+        <h2>觀念連連看 (點擊右側按鈕配對)</h2>
+        
+        <div class="match-row">
+            <div class="match-question">1. IoT 產品要「進入 EU 市場」販售</div>
+            <div class="match-options">
+                <button class="btn-option" onclick="checkMatch(this, 'correct', '沒錯！產品進市場要找 CRA。')">CRA</button>
+                <button class="btn-option" onclick="checkMatch(this, 'wrong', 'NIS2 是管公司的，不是管產品上架的。')">NIS2</button>
+                <button class="btn-option" onclick="checkMatch(this, 'wrong', 'CSA 是搞認證框架的，不是強制上市義務。')">Cybersecurity Act</button>
+            </div>
+            <div class="match-feedback"></div>
+        </div>
+
+        <div class="match-row">
+            <div class="match-question">2. 重要/關鍵「組織」要做資安治理與通報</div>
+            <div class="match-options">
+                <button class="btn-option" onclick="checkMatch(this, 'wrong', 'CRA 是管硬體產品的。')">CRA</button>
+                <button class="btn-option" onclick="checkMatch(this, 'correct', '正確！NIS2 就是管組織治理與通報。')">NIS2</button>
+                <button class="btn-option" onclick="checkMatch(this, 'wrong', 'CSA 是認證制度。')">Cybersecurity Act</button>
+            </div>
+            <div class="match-feedback"></div>
+        </div>
+
+        <div class="match-row">
+            <div class="match-question">3. 歐盟建立「資安認證框架」與強化 ENISA</div>
+            <div class="match-options">
+                <button class="btn-option" onclick="checkMatch(this, 'wrong', 'CRA 是產品上市法規。')">CRA</button>
+                <button class="btn-option" onclick="checkMatch(this, 'wrong', 'NIS2 是組織治理指令。')">NIS2</button>
+                <button class="btn-option" onclick="checkMatch(this, 'correct', '答對了！2019/881 就是資安法，負責認證框架。')">Cybersecurity Act</button>
+            </div>
+            <div class="match-feedback"></div>
+        </div>
+    </section>
+
+    <footer>
+        <p>iPAS 資安考題輔助教材 | 僅供學習參考</p>
+    </footer>
+</div>
+
+<script>
+    // 主測驗邏輯
+    function checkAnswer() {
+        const options = document.getElementsByName('quiz');
+        let selectedValue = null;
+        const feedbackArea = document.getElementById('feedback-area');
+
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        if (!selectedValue) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        feedbackArea.style.display = 'block';
+        feedbackArea.className = ''; // 清除舊樣式
+
+        if (selectedValue === 'B') {
+            feedbackArea.classList.add('feedback-correct');
+            feedbackArea.innerHTML = `
+                <h3>[正確] 答案是 B (CRA)</h3>
+                <p>觀念正確！題目提到「IoT 產品」、「進入歐盟市場」、「1,500 萬歐元罰鍰」，這些都是 <strong>Cyber Resilience Act (CRA)</strong> 的核心特徵。</p>
+            `;
+        } else {
+            feedbackArea.classList.add('feedback-wrong');
+            let wrongReason = "";
+            if (selectedValue === 'A' || selectedValue === 'C') wrongReason = "NIS/NIS2 是針對「組織/企業」的資安管理要求，不是針對「產品上市」的義務。";
+            if (selectedValue === 'D') wrongReason = "Cybersecurity Act 主要是建立「資安認證框架」，不是強制產品上市的法律義務。";
+
+            feedbackArea.innerHTML = `
+                <h3>[錯誤] 你選擇了 ${selectedValue}</h3>
+                <p>${wrongReason}</p>
+                <p><strong>解題關鍵：</strong>題目講的是「產品進市場」＋「最高 1,500 萬歐元罰鍰」，優先想到 <strong>CRA</strong>。</p>
+            `;
+        }
+    }
+
+    function resetAnswer() {
+        const options = document.getElementsByName('quiz');
+        for (const option of options) {
+            option.checked = false;
+        }
+        document.getElementById('feedback-area').style.display = 'none';
+    }
+
+    // 連連看小遊戲邏輯
+    function checkMatch(btn, type, msg) {
+        // 找到同一行的所有按鈕並重置樣式
+        const parent = btn.parentElement;
+        const buttons = parent.getElementsByClassName('btn-option');
+        for (let b of buttons) {
+            b.classList.remove('correct', 'wrong');
+        }
+        
+        // 設定當前按鈕樣式
+        btn.classList.add(type);
+        
+        // 顯示回饋文字
+        const feedbackDiv = parent.nextElementSibling;
+        feedbackDiv.textContent = msg;
+        if (type === 'correct') {
+            feedbackDiv.style.color = 'var(--success-text)';
+            feedbackDiv.style.fontWeight = 'bold';
+        } else {
+            feedbackDiv.style.color = 'var(--error-text)';
+            feedbackDiv.style.fontWeight = 'normal';
+        }
+    }
+</script>
+
+</body>
+</html>

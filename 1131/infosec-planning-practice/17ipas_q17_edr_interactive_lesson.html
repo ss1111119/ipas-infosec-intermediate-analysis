@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安規劃/防護實務 - 單元衝刺：EDR 觀念解析</title>
+    <!-- 引入 Google Fonts: Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入 Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #2980b9;
+            --highlight-bg: #fff3cd;
+            --highlight-text: #856404;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --bg-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            line-height: 1.8;
+            padding-bottom: 50px;
+        }
+
+        /* 講義風格標題 */
+        .lesson-header {
+            background-color: white;
+            border-bottom: 3px solid var(--accent-color);
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .lesson-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .lesson-subtitle {
+            font-size: 1rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        /* 題目區塊 */
+        .question-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 500;
+            margin-bottom: 25px;
+        }
+
+        .option-btn {
+            text-align: left;
+            margin-bottom: 12px;
+            padding: 15px 20px;
+            border: 1px solid #ced4da;
+            background-color: white;
+            color: var(--primary-color);
+            transition: all 0.2s;
+            font-size: 1rem;
+            width: 100%;
+            border-radius: 6px;
+        }
+
+        .option-btn:hover {
+            background-color: #f1f3f5;
+            border-color: var(--accent-color);
+        }
+
+        .option-btn.selected-correct {
+            background-color: #d4edda;
+            border-color: var(--correct-color);
+            color: #155724;
+        }
+
+        .option-btn.selected-wrong {
+            background-color: #f8d7da;
+            border-color: var(--wrong-color);
+            color: #721c24;
+        }
+
+        /* 統計儀表板 */
+        .stats-panel {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #ffd700;
+        }
+
+        /* 解析摺疊區塊樣式調整 */
+        .accordion-button {
+            font-weight: 700;
+            color: var(--secondary-color);
+            background-color: #fff;
+        }
+        
+        .accordion-button:not(.collapsed) {
+            color: var(--accent-color);
+            background-color: #eaf4fc;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(41, 128, 185, 0.25);
+        }
+
+        /* 重點螢光筆效果 */
+        .highlight-keyword {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .explanation-text {
+            font-size: 1rem;
+            color: #444;
+        }
+
+        .concept-tag {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+
+        /* 按鈕樣式 */
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+        
+        .btn-reset:hover {
+            background-color: #5a6268;
+        }
+
+        /* 自我檢測區塊 */
+        .self-check-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .reveal-btn {
+            font-size: 0.9rem;
+            margin-top: 10px;
+            text-decoration: underline;
+            cursor: pointer;
+            color: var(--accent-color);
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .hidden-answer {
+            display: none;
+            margin-top: 10px;
+            color: var(--correct-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 頁首 -->
+    <header class="lesson-header">
+        <div class="container">
+            <h1 class="lesson-title">iPAS 資訊安全規劃／防護實務</h1>
+            <p class="lesson-subtitle">考前衝刺講義：第 17 題 - 端點偵測及回應（EDR）觀念</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <!-- 統計面板 -->
+                <div class="stats-panel d-flex justify-content-between align-items-center">
+                    <div>
+                        <span>作答次數：<span id="total-attempts" class="stat-value">0</span></span>
+                        <span class="mx-3">|</span>
+                        <span>正確次數：<span id="correct-count" class="stat-value">0</span></span>
+                    </div>
+                    <div>
+                        <span>正確率：<span id="accuracy-rate" class="stat-value">0%</span></span>
+                    </div>
+                </div>
+
+                <!-- 題目區塊 -->
+                <div class="question-card">
+                    <span class="concept-tag">題號：17</span>
+                    <p class="question-text">
+                        關於端點偵測及回應（Endpoint Detection and Response，EDR）的作用敘述，下列何者較「不」正確？
+                    </p>
+                    <div id="options-container">
+                        <button class="option-btn" onclick="checkAnswer('A')">(A) 記錄所有端點上發生的活動和事件</button>
+                        <button class="option-btn" onclick="checkAnswer('B')">(B) 分析事件以偵測可疑行為</button>
+                        <button class="option-btn" onclick="checkAnswer('C')">(C) 可協助使用者快速回應安全事件</button>
+                        <button class="option-btn" onclick="checkAnswer('D')">(D) 能夠完全防止所有端點安全事件發生</button>
+                    </div>
+
+                    <!-- 作答反饋區 (預設隱藏) -->
+                    <div id="feedback-area" class="mt-4" style="display: none;">
+                        <div id="feedback-alert" class="alert" role="alert"></div>
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-outline-primary" onclick="scrollToAnalysis()">查看完整解析</button>
+                            <button class="btn btn-reset" onclick="resetQuestion()">重作本題</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 教學解析區塊 (手風琴) -->
+                <div class="accordion" id="lessonAccordion">
+                    
+                    <!-- 步驟一：找關鍵字 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                第一步：找關鍵字
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#lessonAccordion">
+                            <div class="accordion-body explanation-text">
+                                <p>這題在考這四個關鍵字的邏輯關係，請拿螢光筆畫起來：</p>
+                                <ul>
+                                    <li><span class="highlight-keyword">端點</span>（Endpoint）：指使用者操作的設備，如電腦、筆電、手機、伺服器等。</li>
+                                    <li><span class="highlight-keyword">偵測</span>（Detection）：像監視器一樣「發現」有壞人。</li>
+                                    <li><span class="highlight-keyword">回應</span>（Response）：發現壞人後「採取行動」（如隔離檔案、發出警報）。</li>
+                                    <li><span class="highlight-keyword">完全防止</span>（Completely Prevent）：這是最危險的關鍵字，表示「100% 不會發生」。</li>
+                                </ul>
+                                <p><strong>判斷線索：</strong>看到「完全」、「所有」這種絕對性的字眼，在資安考試中通常都是錯誤的選項。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 步驟二：白話翻譯 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                第二步：白話翻譯（這題在問什麼？）
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#lessonAccordion">
+                            <div class="accordion-body explanation-text">
+                                <p>如果我們把資安專有名詞翻譯成高中生日常對話，這題其實是在問：</p>
+                                <div class="alert alert-light border">
+                                    <strong>「關於 EDR 這個安裝在電腦上的『進階保全系統』，哪一句話是在『吹牛』？」</strong>
+                                </div>
+                                <p>你要判斷的是：EDR 到底是「能幫忙抓小偷的監視器」，還是「能讓小偷永遠無法靠近的神奇防護罩」？</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 步驟三：解題思路 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                第三步：解題思路與原理
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#lessonAccordion">
+                            <div class="accordion-body explanation-text">
+                                <p><strong>核心觀念：</strong>這題在考「EDR 是偵測與回應工具，不是萬能防護工具」。</p>
+                                <h6>解題三步驟：</h6>
+                                <ol>
+                                    <li><strong>想清楚定義：</strong>EDR 的名字裡就有「偵測（Detection）」和「回應（Response）」，但沒有「保證防護（Guaranteed Prevention）」。</li>
+                                    <li><strong>生活化比喻：</strong>EDR 就像是大樓的<strong>「保全人員 + 監視器」</strong>。
+                                        <ul>
+                                            <li>保全可以巡邏（偵測）、抓到小偷後報警或制止（回應）。</li>
+                                            <li>但是，保全能不能保證大樓「永遠不會」被小偷闖入？<strong>不可能</strong>，小偷可能會挖地道、偽裝成住戶。</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>找誇大敘述：</strong>選項中只要出現把功能說得太神、太絕對的，就是錯誤敘述。</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 步驟四：選項分析 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                第四步：選項逐一分析
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#lessonAccordion">
+                            <div class="accordion-body explanation-text">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <strong>(A) 記錄所有端點上發生的活動和事件</strong><br>
+                                        <span class="text-success">✔ 正確。</span>這是 EDR 的基本功，就像飛機的黑盒子或路口的監視器，它必須持續記錄電腦在做什麼（例如開了什麼檔案、連了什麼網站），未來出事才有證據查。
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>(B) 分析事件以偵測可疑行為</strong><br>
+                                        <span class="text-success">✔ 正確。</span>EDR 不只會錄影，還會分析。例如：有人半夜三點突然大量刪除檔案，EDR 會判斷這很「可疑」，並發出警報。
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>(C) 可協助使用者快速回應安全事件</strong><br>
+                                        <span class="text-success">✔ 正確。</span>這是 EDR 的價值所在。當發現中毒時，資安人員可以透過 EDR 遠端把那台電腦「斷網」或「隔離」，這就是「回應」。
+                                    </li>
+                                    <li class="list-group-item bg-light">
+                                        <strong>(D) 能夠完全防止所有端點安全事件發生</strong><br>
+                                        <span class="text-danger">✖ 錯誤（本題答案）。</span>
+                                        <br><strong>解析：</strong>資安界有一句名言：「沒有 100% 的安全」。駭客手法日新月異，總是會有未知的漏洞（Zero-day）或是人為疏失。EDR 主要是用來「縮短發現駭客的時間」以及「事後補救」，它無法做到「完全防止」。
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 觀念補充與延伸 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFive">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                觀念補充與延伸
+                            </button>
+                        </h2>
+                        <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#lessonAccordion">
+                            <div class="accordion-body explanation-text">
+                                <h6>1. 核心觀念定位</h6>
+                                <p>本題屬於「資訊安全防護實務」中的<strong>端點安全（Endpoint Security）</strong>章節。這是考試中的基本送分題，觀念一定要清楚。</p>
+                                
+                                <h6>2. 定義複習</h6>
+                                <p><strong>端點偵測及回應（EDR）：</strong>在使用者電腦（端點）上，持續監控行為、偵測異常，並協助資安人員進行調查與回應的工具。</p>
+
+                                <h6>3. 觸類旁通：EDR vs 防毒軟體（Anti-Virus）</h6>
+                                <table class="table table-bordered table-sm mt-2">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>項目</th>
+                                            <th>傳統防毒軟體 (AV)</th>
+                                            <th>端點偵測回應 (EDR)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>主要方法</strong></td>
+                                            <td>比對特徵碼（像拿通緝令抓人）</td>
+                                            <td>分析行為模式（像看某人鬼鬼祟祟就攔查）</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>對付未知威脅</strong></td>
+                                            <td>較弱（沒看過的病毒抓不到）</td>
+                                            <td>較強（異常行為即可偵測）</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>功能重點</strong></td>
+                                            <td>阻擋已知病毒</td>
+                                            <td>偵測、調查、回應、獵捕威脅</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 記憶口訣與常見陷阱 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingSix">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                記憶口訣 & 常見陷阱
+                            </button>
+                        </h2>
+                        <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#lessonAccordion">
+                            <div class="accordion-body explanation-text">
+                                <h6>記憶口訣：</h6>
+                                <div class="alert alert-info text-center">
+                                    <strong>「EDR 會看、會抓、會幫忙處理，但不可能保證零事故。」</strong>
+                                </div>
+
+                                <h6>常見陷阱與避坑指南：</h6>
+                                <ul>
+                                    <li><strong>陷阱：</strong>學生常以為新技術（AI、EDR、MDR）就是萬能的，看到「完全防止」很容易因為對工具有過高期待而選錯。</li>
+                                    <li><strong>避坑技巧：</strong>在單選題中，若看到<strong>「完全」、「絕對」、「所有」、「保證」</strong>這類極端字眼，有 99% 的機率是錯誤選項。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 自我檢測 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingSeven">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                                自我檢測（確認真的懂了沒？）
+                            </button>
+                        </h2>
+                        <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#lessonAccordion">
+                            <div class="accordion-body explanation-text">
+                                <p>試著回答以下問題，檢驗觀念是否清晰：</p>
+                                
+                                <div class="self-check-box">
+                                    <p class="mb-1"><strong>Q1：如果把選項 (D) 改成「可降低端點安全事件發生後的災害風險」，這句話會變成正確的嗎？</strong></p>
+                                    <button class="reveal-btn" onclick="toggleAnswer('ans1')">顯示答案</button>
+                                    <div id="ans1" class="hidden-answer">A：是的。EDR 的目的就是透過快速回應來降低災害範圍，雖然不能防止發生，但能「止血」。</div>
+                                </div>
+
+                                <div class="self-check-box">
+                                    <p class="mb-1"><strong>Q2：有了 EDR 之後，還需要裝傳統防毒軟體嗎？</strong></p>
+                                    <button class="reveal-btn" onclick="toggleAnswer('ans2')">顯示答案</button>
+                                    <div id="ans2" class="hidden-answer">A：通常建議兩者互補，或使用整合型的端點防護。防毒軟體在第一線過濾已知病毒效率很高，EDR 則負責處理漏網之魚和複雜攻擊。</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- End Accordion -->
+                
+                <div class="text-center mt-5 text-muted small">
+                    <p>&copy; iPAS 資安衝刺教學模組 | 僅供教學練習使用</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入 Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ----------------------------------------------------
+        // 變數設定
+        // ----------------------------------------------------
+        const CORRECT_ANSWER = 'D';
+        const STORAGE_KEY = 'ipas_q17_stats';
+        
+        let hasAnswered = false;
+
+        // ----------------------------------------------------
+        // 初始化：讀取 localStorage 資料
+        // ----------------------------------------------------
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatsUI();
+        });
+
+        // ----------------------------------------------------
+        // 核心功能：檢查答案
+        // ----------------------------------------------------
+        function checkAnswer(selectedOption) {
+            if (hasAnswered) return; // 防止重複點擊
+            hasAnswered = true;
+
+            const btns = document.querySelectorAll('.option-btn');
+            const feedbackArea = document.getElementById('feedback-area');
+            const feedbackAlert = document.getElementById('feedback-alert');
+            
+            // 停用所有按鈕並標示樣式
+            btns.forEach(btn => {
+                btn.disabled = true;
+                if (btn.innerText.startsWith('(' + CORRECT_ANSWER)) {
+                    // 標示正確答案（綠色）
+                    if (selectedOption !== CORRECT_ANSWER) {
+                        btn.classList.add('selected-correct'); 
+                    }
+                }
+            });
+
+            // 判斷對錯
+            const isCorrect = (selectedOption === CORRECT_ANSWER);
+            
+            // 標示使用者選擇的按鈕
+            btns.forEach(btn => {
+                if (btn.innerText.startsWith('(' + selectedOption)) {
+                    if (isCorrect) {
+                        btn.classList.add('selected-correct');
+                    } else {
+                        btn.classList.add('selected-wrong');
+                    }
+                }
+            });
+
+            // 更新統計資料
+            saveStats(isCorrect);
+            updateStatsUI();
+
+            // 顯示反饋訊息
+            feedbackArea.style.display = 'block';
+            if (isCorrect) {
+                feedbackAlert.className = 'alert alert-success';
+                feedbackAlert.innerHTML = `<strong>答對了！</strong><br>沒錯，EDR 不是萬能神盾，無法「完全防止」所有事件。請點擊下方查看完整解析。`;
+            } else {
+                feedbackAlert.className = 'alert alert-danger';
+                feedbackAlert.innerHTML = `<strong>答錯了。</strong><br>您選擇了 (${selectedOption})，但本題正確答案是 (${CORRECT_ANSWER})。<br>提示：注意題目中的「完全防止」這四個字。`;
+            }
+
+            // 自動展開第一個解析步驟 (引導學生閱讀)
+            const firstAccordionBtn = document.querySelector('#headingOne button');
+            if (firstAccordionBtn.classList.contains('collapsed')) {
+                firstAccordionBtn.click();
+            }
+        }
+
+        // ----------------------------------------------------
+        // 輔助功能：重置題目
+        // ----------------------------------------------------
+        function resetQuestion() {
+            hasAnswered = false;
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('selected-correct', 'selected-wrong');
+            });
+            document.getElementById('feedback-area').style.display = 'none';
+            
+            // 關閉所有摺疊區塊
+            const accordionItems = document.querySelectorAll('.accordion-collapse');
+            accordionItems.forEach(item => {
+                item.classList.remove('show');
+            });
+            const accordionBtns = document.querySelectorAll('.accordion-button');
+            accordionBtns.forEach(btn => {
+                btn.classList.add('collapsed');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+            
+            // 隱藏自我檢測的答案
+            document.querySelectorAll('.hidden-answer').forEach(el => el.style.display = 'none');
+        }
+
+        // ----------------------------------------------------
+        // 資料儲存：LocalStorage
+        // ----------------------------------------------------
+        function saveStats(isCorrect) {
+            let stats = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { attempts: 0, correct: 0 };
+            stats.attempts++;
+            if (isCorrect) {
+                stats.correct++;
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+        }
+
+        function updateStatsUI() {
+            const stats = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { attempts: 0, correct: 0 };
+            document.getElementById('total-attempts').textContent = stats.attempts;
+            document.getElementById('correct-count').textContent = stats.correct;
+            
+            const rate = stats.attempts === 0 ? 0 : Math.round((stats.correct / stats.attempts) * 100);
+            document.getElementById('accuracy-rate').textContent = rate + '%';
+        }
+
+        // ----------------------------------------------------
+        // UI 互動
+        // ----------------------------------------------------
+        function scrollToAnalysis() {
+            document.getElementById('lessonAccordion').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function toggleAnswer(id) {
+            const el = document.getElementById(id);
+            if (el.style.display === 'none' || el.style.display === '') {
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

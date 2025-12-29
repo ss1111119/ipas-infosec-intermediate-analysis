@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 第 26 題教學：ISO/CNS 31010 後果／機率矩陣</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f9f9f9;
+            --box-bg: #ffffff;
+            --highlight-bg: #e8f4fc;
+            --border-color: #dcdcdc;
+            --text-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--box-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+            background-color: #f0f0f0;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        .section-box {
+            background-color: var(--highlight-bg);
+            border: 1px solid #bde0f7;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .hint-box {
+            background-color: #fff8e1;
+            border: 1px solid #ffe0b2;
+            color: #8d6e63;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .list-group {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .list-group li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .question-content {
+            font-size: 1.05rem;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #e9ecef;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        #result-area {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .result-correct {
+            background-color: #d4edda;
+            color: var(--success-color);
+            border: 1px solid #c3e6cb;
+        }
+
+        .result-incorrect {
+            background-color: #f8d7da;
+            color: var(--error-color);
+            border: 1px solid #f5c6cb;
+        }
+
+        #explanation-area {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 20px;
+        }
+
+        .concept-highlight {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            background-color: #eee;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9rem;
+            margin-right: 5px;
+            color: #555;
+        }
+
+        /* RWD Adjustments */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+            }
+            .btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資安規劃實務 - 第 26 題教學</h1>
+
+    <div style="margin-bottom: 20px;">
+        <strong>【題型說明】</strong><br>
+        本題為「風險評鑑方法理解型單題」，非事件公告題。<br>
+        重點在理解「後果／機率矩陣」能評估出哪些風險結果。
+    </div>
+
+    <!-- 附圖內容區域 -->
+    <div class="section-box">
+        <h3>【附圖參考清單】</h3>
+        <ul class="list-group">
+            <li>1. 復原時間目標（RTO）</li>
+            <li>2. 受到影響的可能性（Likelihood）</li>
+            <li>3. 影響程度（Impact）</li>
+            <li>4. 營運持續（Continuity）策略</li>
+            <li>5. 營運復原（Recovery）策略</li>
+            <li>6. 風險處置事項</li>
+        </ul>
+    </div>
+
+    <!-- 教學提示框 -->
+    <div class="hint-box">
+        請注意：後果／機率矩陣主要用來「分析風險」，不是直接產出「策略方案」。
+    </div>
+
+    <!-- 題目區域 -->
+    <div class="question-content">
+        <p><strong>26. 如附圖所示，依據 ISO/CNS 31010，當資通安全主管決定利用「後果／機率矩陣」模型，完成以資通資產（Asset）為基礎的風險評鑑。附圖中的哪些項目，比較能夠說明該方式可能會得到的結果？</strong></p>
+    </div>
+
+    <!-- 選項區域 -->
+    <div class="options-group" id="options-form">
+        <label class="option-label">
+            <input type="radio" name="answer" value="A">
+            (A) 1、2、3
+        </label>
+        <label class="option-label">
+            <input type="radio" name="answer" value="B">
+            (B) 2、3、6
+        </label>
+        <label class="option-label">
+            <input type="radio" name="answer" value="C">
+            (C) 3、4、5
+        </label>
+        <label class="option-label">
+            <input type="radio" name="answer" value="D">
+            (D) 1、4、5、6
+        </label>
+    </div>
+
+    <!-- 按鈕區域 -->
+    <div class="btn-group">
+        <button class="btn btn-submit" id="submit-btn" onclick="checkAnswer()">提交答案</button>
+        <button class="btn btn-retry" id="retry-btn" onclick="retryQuiz()">重作本題</button>
+    </div>
+
+    <!-- 結果回饋 -->
+    <div id="result-area"></div>
+
+    <!-- 詳解區域 -->
+    <div id="explanation-area">
+        <h2>【解析內容】</h2>
+
+        <div class="section-box">
+            <h3>【題目】</h3>
+            <p>26. 如附圖所示，依據 ISO/CNS 31010，當資通安全主管決定利用「後果／機率矩陣」模型，完成以資通資產（Asset）為基礎的風險評鑑。附圖中的哪些項目，比較能夠說明該方式可能會得到的結果？</p>
+        </div>
+
+        <h3>【第一步：找關鍵字】</h3>
+        <p>
+            <span class="keyword-tag">ISO/CNS 31010</span>
+            <span class="keyword-tag">後果／機率矩陣</span>
+            <span class="keyword-tag">風險評鑑</span>
+            <span class="keyword-tag">結果（output）</span>
+        </p>
+
+        <h3>【第二步：白話翻譯】</h3>
+        <p>（用高中生日常語言解釋：這個模型「最後會算出什麼」）</p>
+
+        <h3>【第三步：解題思路】</h3>
+        <ul class="list-group">
+            <li><strong>這題在考什麼觀念？</strong><br>考你知不知道風險矩陣是用來做什麼的。</li>
+            <li><strong>解題步驟：</strong>
+                <ol>
+                    <li>先確認「矩陣的輸入是什麼」</li>
+                    <li>再判斷「矩陣的輸出是什麼」</li>
+                    <li>排除屬於「後續管理或策略」的項目</li>
+                </ol>
+            </li>
+            <li><strong>原理與規則：</strong><br>為什麼 <span class="concept-highlight">後果 × 機率</span> 只能得到「風險等級與處置方向」。</li>
+        </ul>
+
+        <h3>【第四步：選項分析】</h3>
+        <ul class="list-group">
+            <li>(A) <strong>為什麼錯</strong>：RTO 屬於復原規劃，不是矩陣直接產出。</li>
+            <li>(B) <strong>為什麼對</strong>：Likelihood + Impact → 風險結果與處置。</li>
+            <li>(C) <strong>為什麼錯</strong>：策略不是評鑑結果。</li>
+            <li>(D) <strong>為什麼錯</strong>：混入復原與策略層面。</li>
+        </ul>
+
+        <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+
+        <h3>【觀念補充與延伸】</h3>
+        <ul class="list-group">
+            <li><strong>核心觀念定位：</strong><br>iPAS 資訊安全規劃實務 → 風險管理與評鑑方法</li>
+            <li><strong>定義說明：</strong>
+                <ul>
+                    <li><strong>後果（Impact）：</strong>事情發生後的嚴重程度。</li>
+                    <li><strong>機率（Likelihood）：</strong>事情發生的可能性。</li>
+                    <li><strong>風險處置：</strong>接受、降低、轉移、避免。</li>
+                </ul>
+            </li>
+            <li><strong>對比概念：</strong><br>風險評鑑 vs 風險處理</li>
+            <li><strong>變化題型：</strong>
+                <ul>
+                    <li>把「策略」選項混進矩陣結果中。</li>
+                    <li>把 RTO 誤當成風險評鑑輸出。</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>【記憶口訣】</h3>
+        <div class="section-box" style="text-align: center; font-weight: bold; background-color: #fff3cd; border-color: #ffeeba;">
+            「矩陣只算風險，不生策略」
+        </div>
+
+        <h3>【常見陷阱】</h3>
+        <ul>
+            <li>把營運策略誤認為風險評鑑結果。</li>
+            <li>看到 RTO 就以為一定是風險分析的一部分。</li>
+        </ul>
+
+        <div class="section-box" style="background-color: #d4edda; border-color: #c3e6cb; margin-top: 20px;">
+            <h3>【正確答案】</h3>
+            <p><strong>答案：B</strong></p>
+            <p><strong>一句話理由：</strong>後果／機率矩陣的結果是風險程度與處置方向，而非復原或營運策略。</p>
+        </div>
+
+        <h3>【自我檢測】</h3>
+        <ul class="list-group">
+            <li>
+                <details>
+                    <summary style="cursor: pointer; padding: 5px 0;">
+                        <strong>Q1：後果／機率矩陣可以直接決定備援方案嗎？為什麼？</strong>
+                        <span style="font-size: 0.9rem; color: #888; margin-left: 5px;">(點擊查看答案)</span>
+                    </summary>
+                    <div style="margin-top: 10px; padding-left: 15px; border-left: 3px solid #eee;">
+                        <span style="color: #c0392b; font-weight: bold;">答案：不行。</span><br>
+                        <span style="font-size: 0.95em; color: #555;">理由：此矩陣主要產出「風險等級」（如：高/中/低）與大方向的「處置策略」（如：降低、轉移）。具體的備援技術（如冷/熱備援）屬於後續「風險處理」或「營運持續計畫 (BCP)」的細節規劃，並非矩陣直接產出。</span>
+                    </div>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary style="cursor: pointer; padding: 5px 0;">
+                        <strong>Q2：RTO 應該在哪個階段才會被訂出來？</strong>
+                        <span style="font-size: 0.9rem; color: #888; margin-left: 5px;">(點擊查看答案)</span>
+                    </summary>
+                    <div style="margin-top: 10px; padding-left: 15px; border-left: 3px solid #eee;">
+                        <span style="color: #c0392b; font-weight: bold;">答案：營運衝擊分析（BIA）階段。</span><br>
+                        <span style="font-size: 0.95em; color: #555;">理由：RTO 是營運持續管理（BCM）的指標。必須先分析業務中斷會造成多大損失（BIA），才能根據可容忍度設定 RTO，這與風險評鑑（評估資產被打掛的機率與後果）是不同的步驟。</span>
+                    </div>
+                </details>
+            </li>
+        </ul>
+
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        // 取得使用者選擇的選項
+        const options = document.getElementsByName('answer');
+        let selectedValue = null;
+        
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const resultArea = document.getElementById('result-area');
+        const explanationArea = document.getElementById('explanation-area');
+        const submitBtn = document.getElementById('submit-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const optionsDiv = document.getElementById('options-form');
+
+        // 未作答防呆
+        if (!selectedValue) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        // 鎖定選項
+        const radios = optionsDiv.querySelectorAll('input[type="radio"]');
+        radios.forEach(radio => radio.disabled = true);
+
+        // 判斷對錯
+        if (selectedValue === 'B') {
+            resultArea.className = 'result-correct';
+            resultArea.innerHTML = '恭喜答對！正確答案是 (B)';
+        } else {
+            resultArea.className = 'result-incorrect';
+            resultArea.innerHTML = '答錯了！正確答案是 (B)';
+        }
+
+        // 顯示區域控制
+        resultArea.style.display = 'block';
+        explanationArea.style.display = 'block';
+        submitBtn.style.display = 'none';
+        retryBtn.style.display = 'inline-block';
+        
+        // 滾動到結果處
+        resultArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function retryQuiz() {
+        const resultArea = document.getElementById('result-area');
+        const explanationArea = document.getElementById('explanation-area');
+        const submitBtn = document.getElementById('submit-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const optionsDiv = document.getElementById('options-form');
+
+        // 清除選項狀態
+        const radios = optionsDiv.querySelectorAll('input[type="radio"]');
+        radios.forEach(radio => {
+            radio.checked = false;
+            radio.disabled = false;
+        });
+
+        // 隱藏結果與詳解
+        resultArea.style.display = 'none';
+        explanationArea.style.display = 'none';
+        
+        // 按鈕狀態還原
+        submitBtn.style.display = 'inline-block';
+        retryBtn.style.display = 'none';
+
+        // 滾動回頂部
+        document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

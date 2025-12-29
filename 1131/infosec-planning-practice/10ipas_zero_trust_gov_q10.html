@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安考題教學 - 第 10 題</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #2980b9;
+            --bg-color: #f4f6f7;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --border-color: #bdc3c7;
+            --text-color: #2c3e50;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* 補教講義風格：乾淨、框線分明 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            min-height: 100vh;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--accent-color);
+            border-right: 5px solid var(--accent-color);
+        }
+
+        /* 頁首 */
+        header {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 15px 20px;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        h1 {
+            font-size: 1.125rem; /* 18px */
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .header-info {
+            font-size: 1rem; /* 16px */
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        /* 內容區塊 */
+        .content-area {
+            padding: 20px;
+        }
+
+        /* 題目區 */
+        .question-box {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+
+        .question-text {
+            font-weight: bold;
+            font-size: 1.125rem;
+            margin-bottom: 15px;
+            color: #000;
+        }
+
+        .options-list {
+            list-style: none;
+        }
+
+        .option-item {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-item input[type="radio"] {
+            margin-top: 5px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .option-item label {
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .option-item:hover {
+            background-color: #f0f8ff;
+        }
+
+        /* 按鈕區 */
+        .action-area {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            margin: 0 5px;
+            transition: background 0.3s;
+        }
+
+        .btn-submit {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        .btn-submit:hover {
+            background-color: #1a5276;
+        }
+
+        .btn-retry {
+            background-color: #95a5a6;
+            color: #fff;
+            display: none; /* 初始隱藏 */
+        }
+
+        .btn-retry:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* 回饋區 */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none; /* 初始隱藏 */
+            border-left: 5px solid transparent;
+        }
+
+        .feedback-correct {
+            background-color: #e8f8f5;
+            border-color: var(--correct-color);
+            color: #145a32;
+        }
+
+        .feedback-wrong {
+            background-color: #fdedec;
+            border-color: var(--wrong-color);
+            color: #78281f;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            font-size: 1.125rem;
+            margin-bottom: 5px;
+        }
+
+        /* 教學解析區（可展開/收合） */
+        .explanation-section {
+            margin-top: 30px;
+            border-top: 2px dashed var(--border-color);
+        }
+
+        details {
+            margin-top: 20px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        summary {
+            padding: 15px;
+            background-color: #ecf0f1;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.06rem;
+            list-style: none; /* 隱藏預設箭頭 */
+            position: relative;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            position: absolute;
+            right: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        .explanation-content {
+            padding: 20px;
+        }
+
+        .section-block {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #fff;
+            background-color: var(--secondary-color);
+            padding: 5px 10px;
+            display: inline-block;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            border-radius: 2px;
+        }
+
+        .section-body {
+            padding-left: 5px;
+        }
+
+        .highlight {
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        /* 自我檢測互動按鈕 */
+        .btn-reveal {
+            background-color: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            color: #2c3e50;
+            padding: 3px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            transition: background 0.2s;
+        }
+        
+        .btn-reveal:hover {
+            background-color: #dfe6e9;
+        }
+
+        .answer-hidden {
+            display: none;
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* 一頁速記卡 */
+        .cheat-sheet {
+            margin-top: 40px;
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 20px;
+            border-radius: 4px;
+        }
+
+        .cheat-sheet h3 {
+            border-bottom: 1px solid #7f8c8d;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .cheat-sheet-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .cheat-item strong {
+            color: #f1c40f;
+        }
+
+        /* 手機適配 */
+        @media (max-width: 600px) {
+            .container {
+                border-left: none;
+                border-right: none;
+            }
+            header {
+                padding: 10px 15px;
+            }
+            h1 {
+                font-size: 1rem;
+            }
+            .question-text {
+                font-size: 1rem;
+            }
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-info">題號：第 10 題</div>
+        <h1>主題：政府零信任（Zero Trust）三大核心機制</h1>
+    </header>
+
+    <div class="content-area">
+        <!-- 題目區 -->
+        <div class="question-box">
+            <div class="question-text">
+                關於政府零信任（Zero Trust）網路之敘述，下列何項正確？
+            </div>
+            <ul class="options-list">
+                <li class="option-item">
+                    <input type="radio" name="quiz" id="optA" value="A">
+                    <label for="optA">(A) 政府推動零信任網路是由國家通訊傳播委員會推動主導</label>
+                </li>
+                <li class="option-item">
+                    <input type="radio" name="quiz" id="optB" value="B">
+                    <label for="optB">(B) 政府零信任網路包含身分鑑別、設備鑑別及信任推斷等 3 大核心機制</label>
+                </li>
+                <li class="option-item">
+                    <input type="radio" name="quiz" id="optC" value="C">
+                    <label for="optC">(C) FIDO2 無密碼雙因子驗證滿足零信任網路要求</label>
+                </li>
+                <li class="option-item">
+                    <input type="radio" name="quiz" id="optD" value="D">
+                    <label for="optD">(D) 持續掌握設備健康管理即滿足設備鑑別要求</label>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 互動按鈕 -->
+        <div class="action-area">
+            <button class="btn btn-submit" onclick="checkAnswer()">送出答案</button>
+            <button class="btn btn-retry" onclick="resetQuiz()">重新作答</button>
+        </div>
+
+        <!-- 即時回饋區 -->
+        <div id="feedback" class="feedback-box">
+            <!-- 內容由 JS 動態填入 -->
+        </div>
+
+        <!-- 教學解析區 -->
+        <div class="explanation-section">
+            <details id="explanationDetails">
+                <summary>點擊查看完整教學解析</summary>
+                <div class="explanation-content">
+                    
+                    <div class="section-block">
+                        <div class="section-title">【題目】</div>
+                        <div class="section-body">
+                            <p>關於政府零信任（Zero Trust）網路之敘述，下列何項正確？</p>
+                            <ul>
+                                <li>(A) 政府推動零信任網路是由國家通訊傳播委員會推動主導</li>
+                                <li>(B) 政府零信任網路包含身分鑑別、設備鑑別及信任推斷等 3 大核心機制</li>
+                                <li>(C) FIDO2 無密碼雙因子驗證滿足零信任網路要求</li>
+                                <li>(D) 持續掌握設備健康管理即滿足設備鑑別要求</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【第一步：找關鍵字】</div>
+                        <div class="section-body">
+                            <p>題目線索解析：</p>
+                            <ul>
+                                <li><strong>政府零信任（Zero Trust）網路</strong>：核心概念是不預設任何人、事、物或設備是可信的，每次存取資源都要重新驗證。</li>
+                                <li><strong>何項正確</strong>：需要找出最符合整體定義與架構的選項。</li>
+                                <li><strong>3 大核心機制</strong>：這是架構級別的關鍵字，比單一工具（如 FIDO2）更具代表性。</li>
+                                <li><strong>身分鑑別／設備鑑別／信任推斷</strong>：當這三個詞同時出現時，通常是正確答案的強力線索。</li>
+                            </ul>
+                            <p><em>提示：看到「單一技術就滿足」多半是陷阱。</em></p>
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【第二步：白話翻譯】</div>
+                        <div class="section-body">
+                            <p>用白話文說：</p>
+                            <p>「政府做零信任的意思，是每次要用系統都要重新確認『你是誰』『你用的設備是不是那台』『現在能不能信你』。下面哪一句話說得最對？」</p>
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【第三步：解題思路】</div>
+                        <div class="section-body">
+                            <p><strong>這題在考什麼觀念？</strong><br>
+                            → 零信任不是一套產品，而是一個由多個機制組成的安全架構。</p>
+                            
+                            <p><strong>解題步驟：</strong></p>
+                            <ol>
+                                <li>先找「描述整體架構」的選項（通常比單一工具更正確）。</li>
+                                <li>檢查選項是否把零信任簡化成「只要做 X 就達成」（常見錯法）。</li>
+                                <li>選最符合政府零信任核心機制描述者。</li>
+                            </ol>
+
+                            <p><strong>原理與規則：</strong></p>
+                            <ul>
+                                <li><strong>身分鑑別</strong>（Identity）：確認你是誰，例如帳密、憑證、MFA。</li>
+                                <li><strong>設備鑑別</strong>（Device）：確認你用的是哪台設備、是否受管控。</li>
+                                <li><strong>信任推斷</strong>（Trust Inference）：把身分、設備狀態、行為風險綜合起來算「現在可不可信」。</li>
+                                <li><strong>FIDO2</strong>：用硬體金鑰/生物特徵等做無密碼登入的一套標準，是「身分鑑別」的工具之一，但不是零信任全部。</li>
+                                <li><strong>設備健康管理</strong>：看設備是否更新、是否中毒等，是「設備面的一部分資訊」，但不等於完成設備鑑別。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【第四步：選項分析】</div>
+                        <div class="section-body">
+                            <ul>
+                                <li><strong>(A) 為什麼錯？</strong><br>主導單位並非 NCC（通常由資安院、數位發展部等推動）。且題目的重點在考「核心機制」，不應被單位名稱迷惑。</li>
+                                <li><strong>(B) 為什麼對？</strong><br>完整點出了政府零信任架構的三大核心支柱：身分鑑別、設備鑑別、信任推斷。描述最完整且正確。</li>
+                                <li><strong>(C) 為什麼錯？</strong><br>FIDO2 只是「身分鑑別」的一種手段，不能說「滿足零信任全部要求」。若設備有毒或行為異常，FIDO2 驗證通過也不應放行。</li>
+                                <li><strong>(D) 為什麼錯？</strong><br>設備健康只是狀態資訊；真正的「設備鑑別」還需要能唯一識別該設備的身分（例如 TPM 晶片、憑證），並建立可信關聯，單看健康度不夠。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【觀念補充與延伸】</div>
+                        <div class="section-body">
+                            <p><strong>核心觀念定位：</strong><br>
+                            本題屬於「零信任架構／身份與存取管理（IAM）」章節，屬於常考觀念題（考你能不能分辨『架構』與『單一技術』）。</p>
+
+                            <p><strong>法條或定義：</strong></p>
+                            <ul>
+                                <li><strong>零信任（Zero Trust）</strong>：永不信任、持續驗證；每次存取都要重新評估風險。</li>
+                                <li><strong>核心機制</strong>：三件事——人（身分）、設備、風險信任。</li>
+                            </ul>
+
+                            <p><strong>觸類旁通（對比概念）：</strong></p>
+                            <ul>
+                                <li><strong>零信任 vs 傳統內網信任</strong>：以前進內網就較信任（城堡護城河模式），零信任是無邊界、每次都驗。</li>
+                                <li><strong>身分鑑別 vs 存取控制</strong>：身分鑑別是先確認「你是誰」，存取控制是決定「你能做什麼」。</li>
+                            </ul>
+
+                            <p><strong>變化題型：</strong></p>
+                            <ol>
+                                <li>「下列何者不是零信任的核心精神？」答案通常會選「進入內網就預設可信」。</li>
+                                <li>「MFA、EDR、ZTNA 分別比較接近零信任的哪一塊？」MFA 對應身分，EDR 輔助設備鑑別與信任推斷。</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【記憶口訣】</div>
+                        <div class="section-body">
+                            <ul>
+                                <li>「零信任三件事：<strong>人要驗、機要驗、風險要算</strong>。」</li>
+                                <li>「B 就是『身分、設備、信任推斷』三合一。」</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【常見陷阱】</div>
+                        <div class="section-body">
+                            <p><strong>學生最容易搞混的地方：</strong><br>
+                            把零信任當成「買一個產品」或「只要上 MFA 就完成」。</p>
+                            
+                            <p><strong>心理盲點：</strong><br>
+                            看到熟悉名詞（FIDO2、設備健康）就以為是答案；但題目問的是「政府零信任的整體描述」。</p>
+
+                            <p><strong>避坑指南：</strong><br>
+                            看到零信任題，先用三問檢查：<br>
+                            1) 有沒有講「身分」？<br>
+                            2) 有沒有講「設備」？<br>
+                            3) 有沒有講「信任/風險推斷」？<br>
+                            三個都有，通常就是正解或最接近正解。</p>
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【正確答案】</div>
+                        <div class="section-body">
+                            <p><strong>答案：(B)</strong></p>
+                            <p>一句話理由：政府零信任網路以「身分鑑別、設備鑑別、信任推斷」作為三大核心機制，符合零信任架構的完整描述。</p>
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【自我檢測】</div>
+                        <div class="section-body">
+                            <ol>
+                                <li>如果只有導入 FIDO2，但沒有做設備鑑別與信任推斷，算零信任嗎？為什麼？<br>
+                                <button class="btn-reveal" onclick="this.style.display='none'; this.nextElementSibling.style.display='inline'">點擊查看答案</button>
+                                <span class="answer-hidden">（答：不算；只涵蓋身分鑑別的一部分）</span></li>
+                                
+                                <li>「設備健康管理」和「設備鑑別」差在哪？<br>
+                                <button class="btn-reveal" onclick="this.style.display='none'; this.nextElementSibling.style.display='inline'">點擊查看答案</button>
+                                <span class="answer-hidden">（答：健康是狀態；鑑別是確認設備身分並建立可信關聯）</span></li>
+                                
+                                <li>若題目改成「零信任的核心精神」，你會用哪一句話回答？<br>
+                                <button class="btn-reveal" onclick="this.style.display='none'; this.nextElementSibling.style.display='inline'">點擊查看答案</button>
+                                <span class="answer-hidden">（答：永不信任、持續驗證；每次存取都要重新評估）</span></li>
+                            </ol>
+                        </div>
+                    </div>
+
+                </div>
+            </details>
+        </div>
+
+        <!-- 一頁速記卡 -->
+        <div class="cheat-sheet">
+            <h3>【一頁速記卡】重點複習</h3>
+            <div class="cheat-sheet-grid">
+                <div class="cheat-item"><strong>核心機制：</strong>身分鑑別／設備鑑別／信任推斷</div>
+                <div class="cheat-item"><strong>常見誤解：</strong>MFA/FIDO2 不是零信任全部；設備健康 ≠ 設備鑑別</div>
+                <div class="cheat-item"><strong>一句話：</strong>零信任＝每次存取都要重新驗證與評估風險</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function checkAnswer() {
+        // 取得使用者選擇
+        const options = document.getElementsByName('quiz');
+        let selectedValue = null;
+        
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        const feedbackBox = document.getElementById('feedback');
+        const submitBtn = document.querySelector('.btn-submit');
+        const retryBtn = document.querySelector('.btn-retry');
+        const explanationDetails = document.getElementById('explanationDetails');
+
+        if (!selectedValue) {
+            alert('請先選擇一個選項再送出！');
+            return;
+        }
+
+        // 鎖定選項
+        options.forEach(opt => opt.disabled = true);
+        submitBtn.style.display = 'none';
+        retryBtn.style.display = 'inline-block';
+        feedbackBox.style.display = 'block';
+
+        if (selectedValue === 'B') {
+            // 答對
+            feedbackBox.className = 'feedback-box feedback-correct';
+            feedbackBox.innerHTML = `
+                <div class="feedback-title">正確！</div>
+                <p>政府推動的零信任架構，正是由「身分鑑別」、「設備鑑別」與「信任推斷」這三大核心機制所組成。</p>
+            `;
+            // 自動展開解析（鼓勵閱讀）
+            explanationDetails.open = true;
+        } else {
+            // 答錯
+            feedbackBox.className = 'feedback-box feedback-wrong';
+            feedbackBox.innerHTML = `
+                <div class="feedback-title">回答錯誤</div>
+                <p>你選擇了 <strong>(${selectedValue})</strong>。</p>
+                <p><strong>正確答案是 (B)。</strong></p>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #c0392b;">
+                <p><strong>關鍵提示：</strong>題目在考「政府零信任的核心構成」，不是考單一技術（如 FIDO2）或單一管理動作（設備健康）。請往下看解析了解完整架構。</p>
+            `;
+            // 答錯也展開解析
+            explanationDetails.open = true;
+        }
+    }
+
+    function resetQuiz() {
+        const options = document.getElementsByName('quiz');
+        const feedbackBox = document.getElementById('feedback');
+        const submitBtn = document.querySelector('.btn-submit');
+        const retryBtn = document.querySelector('.btn-retry');
+        const explanationDetails = document.getElementById('explanationDetails');
+
+        // 清除選擇並解鎖
+        options.forEach(opt => {
+            opt.checked = false;
+            opt.disabled = false;
+        });
+
+        // 恢復按鈕狀態
+        submitBtn.style.display = 'inline-block';
+        retryBtn.style.display = 'none';
+
+        // 隱藏回饋與收合解析
+        feedbackBox.style.display = 'none';
+        explanationDetails.open = false;
+
+        // 隱藏自我檢測的答案（重置回初始狀態）
+        const revealBtns = document.querySelectorAll('.btn-reveal');
+        const hiddenAnswers = document.querySelectorAll('.answer-hidden');
+        
+        revealBtns.forEach(btn => btn.style.display = 'inline-block');
+        hiddenAnswers.forEach(ans => ans.style.display = 'none');
+        
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資訊安全規劃實務 - 第 28 題互動教學</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #34495e;
+            --highlight-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+            --box-bg-gray: #f0f2f5;
+            --box-bg-hint: #e8f4f8;
+            --box-bg-note: #fff8e1;
+            --text-main: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Header Styles - Restricted size */
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        h1 { font-size: 1.3em; border-bottom: 2px solid var(--primary-color); padding-bottom: 8px; }
+        h2 { font-size: 1.2em; border-left: 4px solid var(--accent-color); padding-left: 10px; margin-top: 24px; }
+        h3 { font-size: 1.1em; margin-top: 16px; }
+
+        .type-label {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 4px 8px;
+            font-size: 0.9em;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+
+        /* SOW & Hint Boxes */
+        .sow-box {
+            background-color: var(--box-bg-gray);
+            border-left: 5px solid #95a5a6;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+
+        .hint-box {
+            background-color: var(--box-bg-hint);
+            border: 1px solid #b3d7ff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .hint-title {
+            font-weight: bold;
+            color: #2980b9;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Question Section */
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 20px;
+            font-size: 1.05em;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: var(--highlight-bg);
+        }
+
+        .option-item input[type="checkbox"] {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        /* Interactive Area */
+        .action-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        #submitBtn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #resetBtn {
+            background-color: #95a5a6;
+            color: white;
+            display: none;
+        }
+
+        .feedback {
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section */
+        #explanationArea {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 20px;
+        }
+
+        .step-block {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+            display: block;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 4px;
+        }
+
+        .highlight-text {
+            font-weight: bold;
+            color: #d35400;
+            background-color: #fff3e0;
+            padding: 0 4px;
+        }
+
+        .concept-box {
+            background-color: var(--box-bg-note);
+            border-left: 5px solid #f1c40f;
+            padding: 15px;
+        }
+
+        /* Self Check Toggle */
+        .toggle-answer {
+            color: #2980b9;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        
+        .hidden-answer {
+            display: none;
+            margin-top: 8px;
+            padding: 10px;
+            background-color: #e8f4f8;
+            border-radius: 4px;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .container { padding: 15px; }
+            h1 { font-size: 1.2em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="type-label">本題為「專業倫理與合約規範理解型複選題」</div>
+    <h1>iPAS 資訊安全規劃實務 - 滲透測試倫理與 SOW 規範</h1>
+
+    <!-- 附圖內容 -->
+    <div class="sow-box">
+        <strong>【SOW 條款摘要】</strong><br><br>
+        「網路架構圖、邏輯和實體資產清單，以及員工姓名均僅視為客戶機密資料。<br>
+        參與專案完成結案後，滲透測試人員必須透過加密協議向客戶的資訊安全長（CISO）提交檢測結果，<br>
+        隨後即利用安全資料抹除方式，處理所有該案件相關的作業紀錄（含檢測結果）。」
+    </div>
+
+    <!-- 教學提示框 -->
+    <div class="hint-box">
+        <span class="hint-title">【教學提示】</span>
+        請特別注意：<br>
+        - 客戶資料的「使用範圍」與「交付對象」<br>
+        - 測試人員是否超出合約授權的用途或行為
+    </div>
+
+    <!-- 題目內容 -->
+    <div class="question-content">
+        <div class="question-text">
+            28. 如附圖所示，委外廠商的滲透測試人員在與客戶接洽之前，會在工作說明書（SOW）訂定附圖中的規定並由客戶完成審核。而根據 SOW 所呈現的資訊，下列哪些行為會較容易被視為該廠商人員具有「不道德」的風險行為？（複選）
+        </div>
+
+        <div class="options-group">
+            <label class="option-item">
+                <input type="checkbox" name="option" value="A">
+                <span>(A) 使用合法軟體授權之滲透測試工具，進行安全查核和檢視</span>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" name="option" value="B">
+                <span>(B) 利用公鑰加密技術以確保檢測結果在檢測作業完成後，能妥適安全地交付 CISO</span>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" name="option" value="C">
+                <span>(C) 未能將發現的重要漏洞報告及討論，以滿足客戶的高階領導團隊的安全需求</span>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" name="option" value="D">
+                <span>(D) 使用客戶所屬 IP 位址，至地下駭客論壇或暗網查找技術文件或工具</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 互動區 -->
+    <div class="action-area">
+        <button id="submitBtn">提交答案</button>
+        <button id="resetBtn">重作本題</button>
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <!-- 解析內容 -->
+    <div id="explanationArea">
+        <h1>【解析】</h1>
+
+        <div class="step-block">
+            <span class="step-title">【第一步：找關鍵字】</span>
+            <ul>
+                <li><span class="highlight-text">SOW（工作說明書）</span></li>
+                <li><span class="highlight-text">客戶機密資料</span></li>
+                <li>滲透測試人員</li>
+                <li><span class="highlight-text">不道德風險行為</span></li>
+            </ul>
+        </div>
+
+        <div class="step-block">
+            <span class="step-title">【第二步：白話翻譯】</span>
+            <p>這題要我們判斷，測試人員的行為哪些是「合約允許」的乖寶寶行為，哪些是「踩線或越界」的壞榜樣。</p>
+            <p>簡單說：合約沒叫你做的，或是合約規定要保密結果你沒做好，都是不道德。</p>
+        </div>
+
+        <div class="step-block">
+            <span class="step-title">【第三步：解題思路】</span>
+            <ul>
+                <li><strong>這題在考什麼觀念？</strong> 委外廠商的 <span class="highlight-text">行為邊界</span> 與 <span class="highlight-text">責任揭露</span>。</li>
+                <li><strong>解題步驟：</strong>
+                    <ol>
+                        <li>確認哪些行為「在 SOW 授權範圍內」：如使用合法工具、加密交付報告。</li>
+                        <li>判斷哪些行為「超出授權或違反專業倫理」：如挪用資源做私事、隱瞞重大風險。</li>
+                        <li>勾選具有實質風險或不當意圖的行為。</li>
+                    </ol>
+                </li>
+                <li><strong>原理與規則：</strong> 滲透測試「合法 ≠ 什麼都能做」。所有操作必須緊貼合約（SOW）規範，並履行告知義務。</li>
+            </ul>
+        </div>
+
+        <div class="step-block">
+            <span class="step-title">【第四步：選項分析】</span>
+            <ul>
+                <li><strong>(A) 為什麼不是不道德？</strong>
+                    <br>使用合法授權工具進行查核，是滲透測試的本職工作，完全符合職業規範。
+                </li>
+                <li style="margin-top: 10px;"><strong>(B) 為什麼不是不道德？</strong>
+                    <br>題目提到必須透過「加密協議」向 CISO 提交結果。公鑰加密是標準的安全交付手段，符合 SOW 的保密要求。
+                </li>
+                <li style="margin-top: 10px;"><strong>(C) <span style="color:var(--wrong-color)">為什麼是不道德？</span></strong>
+                    <br>滲透測試的核心價值在於「揭露風險」。若發現重要漏洞卻 <span class="highlight-text">未能報告</span> 或 <span class="highlight-text">隱瞞</span>，導致客戶高階團隊無法決策，違反了專業倫理中的「誠信」與「盡責」原則。
+                </li>
+                <li style="margin-top: 10px;"><strong>(D) <span style="color:var(--wrong-color)">為什麼是不道德？</span></strong>
+                    <br>使用客戶的 IP 位址去暗網或地下論壇，這屬於 <span class="highlight-text">公器私用</span> 甚至可能讓客戶 IP 被列入黑名單或捲入非法調查。這完全超出 SOW 的授權範圍，是極高風險且不道德的行為。
+                </li>
+            </ul>
+        </div>
+
+        <div class="step-block concept-box">
+            <span class="step-title">【觀念補充與延伸】</span>
+            <p><strong>核心觀念定位：</strong> iPAS 資訊安全規劃實務 → 委外管理與資安倫理</p>
+            <p><strong>定義說明：</strong></p>
+            <ul>
+                <li><strong>SOW (Statement of Work)：</strong> 明確規範「可以做什麼、不可以做什麼」。它是專案的法律與執行邊界。</li>
+                <li><strong>專業倫理：</strong> 即使技術上可行（例如測試人員有能力駭入其他系統），也不代表合約或道德允許這麼做。</li>
+            </ul>
+            <p><strong>常見陷阱：</strong> 以為「駭客論壇只是查資料」就沒問題。實際上，使用客戶名義（IP）進入高風險區域，會對客戶商譽造成威脅。</p>
+        </div>
+
+        <div class="step-block">
+            <span class="step-title">【記憶口訣】</span>
+            <p style="font-size: 1.2em; font-weight: bold; text-align: center; color: var(--primary-color);">「合約沒寫，就不能做；發現漏洞，一定要說。」</p>
+        </div>
+
+        <div class="step-block" style="background-color: #e3f2fd; border-color: #90caf9;">
+            <span class="step-title">【正確答案】</span>
+            <p><strong>答案：C、D</strong></p>
+            <p>一句話理由：未盡揭露責任與濫用客戶資源，皆屬專業倫理高風險行為。</p>
+        </div>
+
+        <div class="step-block">
+            <span class="step-title">【自我檢測】</span>
+            <div>
+                1. 滲透測試人員可以自行決定漏洞要不要回報嗎？為什麼？
+                <span class="toggle-answer" onclick="toggleAnswer('ans1')">看解答</span>
+                <div id="ans1" class="hidden-answer">不可以。滲透測試的目的是揭露風險，隱瞞漏洞違背了委託目的與職業道德。</div>
+            </div>
+            <div style="margin-top: 10px;">
+                2. 客戶授權的 IP 是否可以拿來做與專案無關的事情？
+                <span class="toggle-answer" onclick="toggleAnswer('ans2')">看解答</span>
+                <div id="ans2" class="hidden-answer">絕對不行。這屬於濫用資源，且可能帶給客戶法律或資安風險。</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const feedback = document.getElementById('feedback');
+    const explanationArea = document.getElementById('explanationArea');
+    const checkboxes = document.querySelectorAll('input[name="option"]');
+
+    // 定義正確答案
+    const correctAnswers = ['C', 'D'];
+
+    submitBtn.addEventListener('click', () => {
+        // 取得使用者選中的選項
+        const selected = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value)
+            .sort();
+
+        // 判斷對錯：必須完全吻合
+        const isCorrect = JSON.stringify(selected) === JSON.stringify(correctAnswers);
+
+        // 顯示回饋
+        feedback.style.display = 'block';
+        feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+        
+        if (isCorrect) {
+            feedback.textContent = '恭喜答對！請詳閱下方解析。';
+        } else {
+            feedback.textContent = '答案不正確，請再試試看，或查看下方解析。';
+        }
+
+        // 顯示解析區塊
+        explanationArea.style.display = 'block';
+        explanationArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // 切換按鈕
+        submitBtn.style.display = 'none';
+        resetBtn.style.display = 'inline-block';
+        
+        // 鎖定選項
+        checkboxes.forEach(cb => cb.disabled = true);
+    });
+
+    resetBtn.addEventListener('click', () => {
+        // 重置狀態
+        checkboxes.forEach(cb => {
+            cb.checked = false;
+            cb.disabled = false;
+        });
+        feedback.style.display = 'none';
+        explanationArea.style.display = 'none';
+        submitBtn.style.display = 'inline-block';
+        resetBtn.style.display = 'none';
+        
+        // 隱藏自我檢測答案
+        document.querySelectorAll('.hidden-answer').forEach(el => el.style.display = 'none');
+        
+        // 滾動回頂端
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // 切換自我檢測答案顯示
+    window.toggleAnswer = function(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安實務教學：系統安全架構控制措施（第20題）</title>
+    <!-- 引入 Bootstrap 5 CSS (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 30px;
+            margin-bottom: 50px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #dee2e6;
+        }
+        /* 標題設定：字級不大於內文太多 */
+        h1 {
+            font-size: 1.5rem; 
+            font-weight: bold;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: #0d6efd;
+        }
+        h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #495057;
+            background-color: #e9ecef;
+            padding: 8px 15px;
+            border-left: 5px solid #6c757d;
+        }
+        h3 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #212529;
+        }
+        /* 螢光筆效果 */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+        .highlight-danger {
+            background-color: #f8d7da;
+            color: #842029;
+            padding: 0 4px;
+        }
+        /* 作答區塊 */
+        .quiz-section {
+            background-color: #f1f3f5;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            margin-bottom: 30px;
+        }
+        .form-check-label {
+            cursor: pointer;
+            width: 100%;
+        }
+        .form-check {
+            margin-bottom: 10px;
+            padding: 10px 10px 10px 35px;
+            border-radius: 4px;
+        }
+        .form-check:hover {
+            background-color: #e2e6ea;
+        }
+        /* 結果回饋 */
+        .result-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .stats-bar {
+            background-color: #e7f1ff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid #b6d4fe;
+        }
+        /* Accordion 客製化 */
+        .accordion-button {
+            font-weight: bold;
+            background-color: #fff;
+            color: #333;
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+        }
+        .accordion-body {
+            font-size: 1rem;
+        }
+        /* 自我檢測隱藏答案 */
+        .answer-reveal {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #d1e7dd;
+            border-radius: 5px;
+            border: 1px solid #badbcc;
+            color: #0f5132;
+        }
+        .btn-reveal {
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資安衝刺班：系統安全架構控制措施（第20題）</h1>
+    
+    <!-- 統計數據區 -->
+    <div class="stats-bar">
+        <span>累積作答：<strong id="totalAttempts">0</strong> 次</span>
+        <span>答對次數：<strong id="correctAttempts">0</strong> 次</span>
+        <span>正確率：<strong id="accuracy">0%</strong></span>
+    </div>
+
+    <!-- 1. 題目區塊 -->
+    <div class="quiz-section">
+        <p class="mb-3 fw-bold">第 20 題（複選題）</p>
+        <p class="mb-3">規劃系統安全架構時可採取之控制措施，下列敘述哪些<span class="highlight-danger">「有誤」</span>？</p>
+        
+        <form id="quizForm">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="options" value="A" id="optionA">
+                <label class="form-check-label" for="optionA">
+                    (A) 使用單一的帳號名稱及密碼
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="options" value="B" id="optionB">
+                <label class="form-check-label" for="optionB">
+                    (B) 無須定期檢視防火牆規則
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="options" value="C" id="optionC">
+                <label class="form-check-label" for="optionC">
+                    (C) 定期執行漏洞掃描並修補漏洞
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="options" value="D" id="optionD">
+                <label class="form-check-label" for="optionD">
+                    (D) 開放不必要的伺服器連接埠
+                </label>
+            </div>
+            
+            <div class="mt-3">
+                <button type="button" class="btn btn-primary" id="submitBtn">送出答案</button>
+                <button type="button" class="btn btn-secondary ms-2" id="retryBtn" style="display:none;">重作本題</button>
+            </div>
+        </form>
+
+        <div id="resultFeedback" class="result-box"></div>
+    </div>
+
+    <!-- 教學內容折疊區 -->
+    <div class="accordion" id="lessonAccordion">
+        
+        <!-- 2. 第一步：找關鍵字 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                    第一步：找關鍵字
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <ul>
+                        <li><span class="highlight">系統安全架構</span>：整體防護設計，不是指單一的設備，而是整個系統的規劃。</li>
+                        <li><span class="highlight">控制措施</span>：用來降低風險、保護系統安全的具體做法。</li>
+                        <li><span class="highlight-danger">有誤</span>：題目要選的是「不安全」、「觀念錯誤」的敘述。</li>
+                    </ul>
+                    <div class="alert alert-warning py-2">
+                        <strong>特別提醒：</strong>這題是「選錯的」，不是選正確的。千萬不要習慣性看到正確的選項就勾下去。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 第二步：白話翻譯 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                    第二步：白話翻譯
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <p>用最簡單的話來說，這題在問：</p>
+                    <p class="fs-5 text-center fw-bold text-primary">「下面哪些做法，其實會讓系統變得比較不安全？」</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 第三步：解題思路 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                    第三步：解題思路
+                </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <p><strong>考點觀念：</strong>基本資安控制原則與常見錯誤做法。</p>
+                    <p><strong>解題步驟：</strong></p>
+                    <ol>
+                        <li>想清楚什麼是「基本一定要做的安全措施」（如：每人有獨立帳號、定期檢查）。</li>
+                        <li>看到「全部共用」、「完全不管」、「隨便開放」這種絕對寬鬆的字眼要提高警覺。</li>
+                        <li>選出違反「最小權限」、「可追溯性」與「持續管理」原則的選項。</li>
+                    </ol>
+                    <p><strong>生活化比喻：</strong></p>
+                    <p>想像你家裝大門：</p>
+                    <ul>
+                        <li>全家人共用同一把鑰匙（丟了不知道是誰丟的）→ <strong>不安全</strong></li>
+                        <li>裝了防盜門卻從來不檢查鎖有沒有壞 → <strong>不安全</strong></li>
+                        <li>窗戶為了通風全部打開，小偷隨便爬 → <strong>不安全</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 第四步：選項分析 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFour">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                    第四步：選項分析
+                </button>
+            </h2>
+            <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <div class="mb-3">
+                        <h5>(A) 使用單一的帳號名稱及密碼 <span class="badge bg-danger">有誤</span></h5>
+                        <p><strong>原因：</strong>如果所有管理員都用同一個帳號（例如都用 admin），當系統被亂改設定或資料被刪除時，無法分辨是誰做的。這違反了「可追溯性」（Accountability，誰做的事要能追蹤到誰）。</p>
+                    </div>
+                    <div class="mb-3">
+                        <h5>(B) 無須定期檢視防火牆規則 <span class="badge bg-danger">有誤</span></h5>
+                        <p><strong>原因：</strong>防火牆（Firewall，擋住壞人的數位警衛）的規則如果很久沒看，可能會留下以前暫時開放但現在不用的通道，或是規則設定錯誤。必須定期檢視才能確保安全。</p>
+                    </div>
+                    <div class="mb-3">
+                        <h5>(C) 定期執行漏洞掃描並修補漏洞 <span class="badge bg-success">正確</span></h5>
+                        <p><strong>原因：</strong>漏洞掃描（Vulnerability Scanning，像是幫電腦做健康檢查）能發現系統弱點，修補漏洞是標準且必要的資安措施，所以這個敘述是對的（不能選）。</p>
+                    </div>
+                    <div class="mb-3">
+                        <h5>(D) 開放不必要的伺服器連接埠 <span class="badge bg-danger">有誤</span></h5>
+                        <p><strong>原因：</strong>連接埠（Port，電腦對外溝通的門窗）如果沒用到卻開著，駭客就多了一個可以嘗試入侵的入口。這違反了「最小權限原則」（只開放必要的）。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. 觀念補充與延伸 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFive">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive">
+                    觀念補充與延伸（核心）
+                </button>
+            </h2>
+            <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <p><strong>核心觀念定位：</strong>本題屬於「系統安全架構」與「基本防護原則」。</p>
+                    
+                    <h6>精簡定義：</h6>
+                    <ul>
+                        <li><strong>最小權限 (Least Privilege)：</strong>只開放必要的帳號、權限與連接埠。不用的就關掉。</li>
+                        <li><strong>可追溯性 (Accountability)：</strong>發生資安事件時，要能知道是哪個「特定的人」做的。共用帳號會破壞這一點。</li>
+                        <li><strong>持續管理 (Continuous Management)：</strong>資安不是做一次就好，防火牆規則、漏洞修補都要「定期」做。</li>
+                    </ul>
+
+                    <h6>觸類旁通（舉一反三）：</h6>
+                    <ul>
+                        <li><strong>對比概念：</strong>管控 vs 開放。資安強調適度的管控。</li>
+                        <li><strong>變化題型：</strong>
+                            <ul>
+                                <li>如果把 (B) 改成「定期檢視防火牆規則」→ 會變成正確敘述。</li>
+                                <li>如果把 (D) 改成「關閉不必要的連接埠」→ 會變成正確敘述。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 記憶口訣 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSix">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix">
+                    記憶口訣
+                </button>
+            </h2>
+            <div id="collapseSix" class="accordion-collapse collapse" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body text-center">
+                    <p class="fs-5">為了考試快速反應，請記住這句話：</p>
+                    <div class="alert alert-primary d-inline-block fw-bold fs-4">
+                        「帳號不共用、規則要檢查、<br>漏洞要修補、埠號別亂開」
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. 常見陷阱 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSeven">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven">
+                    常見陷阱
+                </button>
+            </h2>
+            <div id="collapseSeven" class="accordion-collapse collapse" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <ul>
+                        <li><strong>容易搞混：</strong>初學者常以為「方便就是好」，覺得共用帳號很方便、連接埠全開很方便。但在資安裡，「方便」通常等於「危險」。</li>
+                        <li><strong>心理盲點：</strong>覺得「先能用比較重要」，忽略了後續維護（如檢視防火牆規則）。</li>
+                        <li><strong>避坑指南：</strong>看到選項出現「單一帳號共用」、「無須檢視/無須管理」、「開放所有/不必要」這類字眼，幾乎一定是錯誤的資安觀念。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. 正確答案 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingEight">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEight">
+                    正確答案
+                </button>
+            </h2>
+            <div id="collapseEight" class="accordion-collapse collapse" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <p><strong>答案：A、B、D</strong></p>
+                    <p><strong>一句話理由：</strong>這三項都違反了基本的資安控制原則（可追溯性、持續管理、最小權限），會大大提高系統被入侵與誤用的風險。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. 自我檢測 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingNine">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNine">
+                    自我檢測
+                </button>
+            </h2>
+            <div id="collapseNine" class="accordion-collapse collapse" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <div class="mb-4">
+                        <p class="fw-bold">Q1. 為什麼共用帳號會影響資安事件追查？</p>
+                        <button class="btn btn-sm btn-outline-secondary btn-reveal" onclick="toggleAnswer('ans1')">顯示答案</button>
+                        <div id="ans1" class="answer-reveal">
+                            因為紀錄檔只會顯示該「共用帳號」做了操作，無法分辨具體是哪一位使用者（如張三或李四）執行的，導致無法究責（違反不可否認性/可追溯性）。
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="fw-bold">Q2. 防火牆規則多久檢視一次比較合理？</p>
+                        <button class="btn btn-sm btn-outline-secondary btn-reveal" onclick="toggleAnswer('ans2')">顯示答案</button>
+                        <div id="ans2" class="answer-reveal">
+                            通常建議至少每半年或一年檢視一次，或者在系統架構有重大變更時立即檢視。絕不能「無須檢視」。
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="fw-bold">Q3. 為什麼「少開連接埠」能降低攻擊面？</p>
+                        <button class="btn btn-sm btn-outline-secondary btn-reveal" onclick="toggleAnswer('ans3')">顯示答案</button>
+                        <div id="ans3" class="answer-reveal">
+                            每一個開啟的連接埠（Port）就像是房子的一扇窗。窗戶開得越少，小偷（駭客）能爬進來的入口就越少，被攻擊的機率自然降低。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-5 text-center text-muted" style="font-size: 0.8rem;">
+        &copy; 資安衝刺教學講義 | 專為初學者設計
+    </div>
+</div>
+
+<!-- 引入 Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // 定義正確答案
+    const correctAnswers = ['A', 'B', 'D'];
+
+    // DOM 元素
+    const submitBtn = document.getElementById('submitBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const resultFeedback = document.getElementById('resultFeedback');
+    const checkboxes = document.querySelectorAll('input[name="options"]');
+    
+    // 統計 DOM 元素
+    const elTotal = document.getElementById('totalAttempts');
+    const elCorrect = document.getElementById('correctAttempts');
+    const elAccuracy = document.getElementById('accuracy');
+
+    // 初始化統計數據
+    let stats = {
+        total: 0,
+        correct: 0
+    };
+
+    // 載入 localStorage
+    function loadStats() {
+        const savedStats = localStorage.getItem('ipas_q20_stats');
+        if (savedStats) {
+            stats = JSON.parse(savedStats);
+            updateStatsUI();
+        }
+    }
+
+    // 更新統計介面
+    function updateStatsUI() {
+        elTotal.innerText = stats.total;
+        elCorrect.innerText = stats.correct;
+        const rate = stats.total === 0 ? 0 : Math.round((stats.correct / stats.total) * 100);
+        elAccuracy.innerText = rate + "%";
+    }
+
+    // 儲存統計數據
+    function saveStats() {
+        localStorage.setItem('ipas_q20_stats', JSON.stringify(stats));
+        updateStatsUI();
+    }
+
+    // 檢查答案邏輯
+    function checkAnswer() {
+        const userSelection = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value)
+            .sort();
+        
+        // 判斷狀態
+        let isCorrect = false;
+        let message = "";
+        let alertClass = "";
+
+        // 比對邏輯
+        // 1. 找出選錯的 (使用者有選，但不在正確答案內)
+        const wrongSelections = userSelection.filter(val => !correctAnswers.includes(val));
+        // 2. 找出少選的 (正確答案有，但使用者沒選)
+        const missedSelections = correctAnswers.filter(val => !userSelection.includes(val));
+
+        if (userSelection.length === 0) {
+            message = "<strong>尚未作答！</strong> 請至少勾選一個選項。";
+            alertClass = "alert-warning";
+            renderResult(message, alertClass);
+            return;
+        }
+
+        // 增加作答次數
+        stats.total++;
+
+        if (wrongSelections.length === 0 && missedSelections.length === 0) {
+            // 全對
+            isCorrect = true;
+            stats.correct++;
+            message = "<strong>🎉 恭喜答對！</strong><br>您選的 A、B、D 都是系統安全架構中「有誤」的做法。觀念非常正確！";
+            alertClass = "alert-success";
+        } else if (wrongSelections.length > 0) {
+            // 選到錯誤選項 (多選/錯選)
+            message = `<strong>❌ 答錯了！</strong><br>您選了 ${userSelection.join('、')}。<br>`;
+            if(wrongSelections.includes('C')) {
+                message += "選項 (C) 是正確的資安做法，題目問的是「有誤」的，所以不該選它。<br>";
+            }
+            message += "請重新檢視題目要求「有誤」的敘述。";
+            alertClass = "alert-danger";
+        } else if (missedSelections.length > 0) {
+            // 少選
+            message = `<strong>⚠️ 差一點點！</strong><br>您選了 ${userSelection.join('、')}，方向是對的，但還有其他錯誤做法沒選出來。<br>題目是複選題，請再找找看。`;
+            alertClass = "alert-warning";
+        }
+
+        saveStats();
+        renderResult(message, alertClass);
+        
+        // 鎖定選項並切換按鈕
+        checkboxes.forEach(cb => cb.disabled = true);
+        submitBtn.style.display = 'none';
+        retryBtn.style.display = 'inline-block';
+        
+        // 如果答錯，自動展開解析的第一步
+        if (!isCorrect) {
+            const firstCollapse = document.getElementById('collapseOne');
+            const bsCollapse = new bootstrap.Collapse(firstCollapse, { show: true });
+        }
+    }
+
+    // 渲染結果文字
+    function renderResult(msg, cls) {
+        resultFeedback.innerHTML = msg;
+        resultFeedback.className = `result-box alert ${cls}`;
+        resultFeedback.style.display = 'block';
+    }
+
+    // 重置題目
+    function resetQuiz() {
+        checkboxes.forEach(cb => {
+            cb.checked = false;
+            cb.disabled = false;
+        });
+        resultFeedback.style.display = 'none';
+        submitBtn.style.display = 'inline-block';
+        retryBtn.style.display = 'none';
+    }
+
+    // 自我檢測顯示答案開關
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    }
+
+    // 事件監聽
+    submitBtn.addEventListener('click', checkAnswer);
+    retryBtn.addEventListener('click', resetQuiz);
+    
+    // 初始化
+    loadStats();
+
+</script>
+</body>
+</html>

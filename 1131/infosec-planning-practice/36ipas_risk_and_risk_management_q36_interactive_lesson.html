@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安規劃實務 - 第36題：風險管理互動教學</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --spacing-unit: 1rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* Requirement: Min 16px */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Header & Progress */
+        header {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .stats {
+            font-size: 0.9rem;
+            color: #666;
+            background: #eee;
+            padding: 5px 10px;
+            border-radius: 15px;
+        }
+
+        .intro-text {
+            background-color: #e8f4fc;
+            border-left: 5px solid var(--accent-color);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+
+        /* Visual Concept Area */
+        .concept-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: #fff;
+            border: 1px dashed #ccc;
+            border-radius: var(--border-radius);
+        }
+
+        .flow-item {
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            position: relative;
+            font-size: 0.9rem;
+        }
+
+        .arrow {
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .formula-box {
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--error-color);
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        /* Question Area */
+        .question-box {
+            margin-bottom: 1.5rem;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9f9f9;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            accent-color: var(--accent-color);
+        }
+
+        /* Feedback & Buttons */
+        .controls {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.9; }
+
+        .btn-submit { background-color: var(--accent-color); color: white; }
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-explain { background-color: var(--success-color); color: white; display: none; }
+        
+        .feedback-area {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .feedback-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Explanation Section */
+        .explanation-container {
+            display: none; /* Default hidden */
+            margin-top: 2rem;
+            border-top: 2px dashed #ccc;
+            padding-top: 1rem;
+        }
+
+        .exp-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .exp-title {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 5px 10px;
+            display: inline-block;
+            border-radius: 4px;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .exp-content {
+            padding-left: 10px;
+        }
+
+        .highlight {
+            background-color: #fff3cd; /* Highlighter yellow */
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+        .option-analysis-item {
+            margin-bottom: 8px;
+            padding-left: 1rem;
+            border-left: 3px solid #ddd;
+        }
+        
+        .option-analysis-item.correct { border-left-color: var(--success-color); }
+        .option-analysis-item.incorrect { border-left-color: var(--error-color); }
+
+        .tag-concept {
+            background-color: #e2e6ea;
+            color: #495057;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-right: 5px;
+        }
+
+        /* Self Check */
+        .self-check-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        .self-check-answer {
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: none; /* Hidden by default */
+            border-top: 1px dashed #ddd;
+            padding-top: 5px;
+        }
+
+        .btn-show-answer {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .btn-show-answer:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .clear-storage-btn {
+            background: none;
+            border: none;
+            text-decoration: underline;
+            color: #999;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .controls { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安衝刺 - 第36題</h1>
+        <div class="stats" id="progressStats">本題練習：0 次 | 正確：0 次</div>
+    </header>
+
+    <div class="intro-text">
+        <strong>一句話說明：</strong> 本頁將帶你建立「資產—威脅—弱點」的關聯，並搞懂風險識別與分析的差異。
+    </div>
+
+    <!-- 視覺化概念圖 -->
+    <div class="concept-visual" aria-label="風險流程圖" role="img">
+        <div class="flow-item">資產</div>
+        <div class="arrow">→</div>
+        <div class="flow-item">弱點</div>
+        <div class="arrow">→</div>
+        <div class="flow-item">威脅</div>
+        <div class="arrow">→</div>
+        <div class="flow-item">事件</div>
+        <div class="arrow">→</div>
+        <div class="flow-item">衝擊</div>
+        <div class="formula-box">★ 觀念：風險 = 可能性 × 影響</div>
+    </div>
+
+    <!-- 作答區 -->
+    <div class="question-box">
+        <div class="question-text">
+            36. 關於「風險」與「風險管理」的敘述，下列哪些正確？（複選題）
+        </div>
+        <div class="options-group" role="group" aria-label="選項清單">
+            <label class="option-label">
+                <input type="checkbox" name="option" value="A">
+                (A) 風險是外部威脅利用弱點對內部資產造成衝擊的可能性
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="option" value="B">
+                (B) 通常風險管理都會以 ISO/IEC 27005 風險管理指引作為參考
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="option" value="C">
+                (C) 風險分析可依可用性、完整性、機密性加以質化後，決定風險等級
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="option" value="D">
+                (D) 進行風險識別須包含威脅識別與弱點識別
+            </label>
+        </div>
+    </div>
+
+    <!-- 控制按鈕 -->
+    <div class="controls">
+        <button class="btn btn-submit" onclick="checkAnswer()" aria-label="提交答案">提交答案</button>
+        <button class="btn btn-explain" id="btnExplain" onclick="toggleExplanation()" aria-label="顯示或隱藏解析">顯示解析</button>
+        <button class="btn btn-reset" onclick="resetQuiz()" aria-label="重作本題">重作</button>
+    </div>
+
+    <!-- 反饋訊息 -->
+    <div id="feedback" class="feedback-area" aria-live="polite"></div>
+
+    <!-- 解析區（固定格式） -->
+    <div id="explanation" class="explanation-container">
+        
+        <div class="exp-section">
+            <div class="exp-title">題目</div>
+            <div class="exp-content">關於「風險」與「風險管理」的敘述，下列哪些正確？</div>
+        </div>
+
+        <div class="exp-section">
+            <div class="exp-title">第一步：找關鍵字</div>
+            <div class="exp-content">
+                <span class="highlight">風險</span>、<span class="highlight">風險管理</span>、<span class="highlight">ISO/IEC 27005</span>、<span class="highlight">風險分析</span>、<span class="highlight">風險識別</span>。
+            </div>
+        </div>
+
+        <div class="exp-section">
+            <div class="exp-title">第二步：白話翻譯</div>
+            <div class="exp-content">
+                這題在問你懂不懂「風險」是怎麼形成的？還有一套標準的「管理流程」該怎麼做（先找問題，再分析嚴重性）。
+            </div>
+        </div>
+
+        <div class="exp-section">
+            <div class="exp-title">第三步：解題思路</div>
+            <div class="exp-content">
+                <ul>
+                    <li><strong>考點觀念：</strong> 風險管理的定義與流程步驟。</li>
+                    <li><strong>解題步驟：</strong>
+                        <ol>
+                            <li>先確認你是否知道「風險」的公式（可能性 × 衝擊）。</li>
+                            <li>檢視 ISO 標準是否正確。</li>
+                            <li>區分「識別」（找出來）跟「分析」（算分數）的差別。</li>
+                        </ol>
+                    </li>
+                    <li><strong>原理與規則：</strong> 風險不是一個單一名詞，而是一條「因果鏈」：<br>
+                    因為你有<span class="highlight">資產</span>（公司要保護的東西），上面有<span class="highlight">弱點</span>（被攻擊的破洞），導致<span class="highlight">威脅</span>（駭客/天災）趁虛而入，造成<span class="highlight">衝擊</span>（後果）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="exp-section">
+            <div class="exp-title">第四步：選項分析</div>
+            <div class="exp-content">
+                <div class="option-analysis-item correct">
+                    <strong>(A) 正確：</strong> 這是風險的標準定義。風險 = <span class="highlight">威脅</span>（可能來害你的東西）利用<span class="highlight">弱點</span>（漏洞）對<span class="highlight">資產</span>（資料/系統）造成影響的<span class="highlight">可能性</span>。
+                </div>
+                <div class="option-analysis-item correct">
+                    <strong>(B) 正確：</strong> <span class="highlight">ISO/IEC 27005</span> 正是針對「資訊安全風險管理」的國際標準指引文件，教你怎麼做風險評鑑與處理。
+                </div>
+                <div class="option-analysis-item incorrect">
+                    <strong>(C) 錯誤：</strong> 雖然 CIA（機密性/完整性/可用性）是評估衝擊的重要構面，但決定「風險等級」必須同時考量<strong>「發生的可能性」</strong>與<strong>「衝擊程度」</strong>。光看 CIA 只是在看衝擊面，忽略了可能性，邏輯不完整。且風險分析通常會產出風險值，而非僅靠質化 CIA 就決定等級。
+                </div>
+                <div class="option-analysis-item correct">
+                    <strong>(D) 正確：</strong> 風險識別（Risk Identification）就是「點名」的過程，你必須把<span class="highlight">資產</span>、<span class="highlight">威脅</span>、<span class="highlight">弱點</span>通通列出來，才能進行下一步分析。
+                </div>
+            </div>
+        </div>
+
+        <div class="exp-section">
+            <div class="exp-title">觀念補充與延伸</div>
+            <div class="exp-content">
+                <ul>
+                    <li><strong>核心觀念定位：</strong> iPAS 必考基礎。風險管理流程：識別 → 分析 → 評估 → 處理。</li>
+                    <li><strong>法條或定義：</strong>
+                        <ul>
+                            <li><strong>風險：</strong> 事件發生的可能性與影響的綜合。</li>
+                            <li><strong>ISO/IEC 27005：</strong> 資訊安全風險管理的指引文件。</li>
+                            <li><strong>CIA 三要素：</strong> 機密性（不該看的人看不到）、完整性（資料不被亂改）、可用性（需要時用得到）。</li>
+                        </ul>
+                    </li>
+                    <li><strong>觸類旁通：</strong>
+                        <ul>
+                            <li><strong>對比概念：</strong>
+                                <br>1. <span class="tag-concept">風險識別</span> 找出有哪些風險來源（列清單）。
+                                <br>2. <span class="tag-concept">風險分析</span> 估算可能性與影響（算分數）。
+                                <br>3. <span class="tag-concept">風險評估</span> 跟準則比對，排優先順序（決定誰先修）。
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="exp-section">
+            <div class="exp-title">記憶口訣</div>
+            <div class="exp-content">
+                <ul>
+                    <li>「資弱威事衝」：資產→弱點→威脅→事件→衝擊。</li>
+                    <li>「管風險」：先找（識別）、再算（分析）、再排（評估）、再做（處理）。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="exp-section">
+            <div class="exp-title">常見陷阱</div>
+            <div class="exp-content">
+                <ul>
+                    <li>把 CIA 當成「直接決定風險等級」：其實 CIA 用來描述影響面向，但風險等級仍需結合「可能性」與「影響」。</li>
+                    <li>把「威脅」當成「風險」：威脅只是原因之一，風險是整體結果（包含機率）。</li>
+                    <li><strong>避坑指南：</strong> 看到「決定風險等級」就要想到還需要準則、可能性與影響，不只 CIA。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="exp-section">
+            <div class="exp-title">正確答案</div>
+            <div class="exp-content">
+                <strong>答案：A、B、D</strong><br>
+                一句話理由：A 是風險鏈的白話定義；B 是常見參考指引；D 是風險識別必做內容；C 把 CIA 說成可直接決定風險等級，過度簡化且漏了「可能性」。
+            </div>
+        </div>
+
+        <div class="exp-section">
+            <div class="exp-title">自我檢測</div>
+            <div class="exp-content">
+                <div class="self-check-item">
+                    <div>Q1：如果「有弱點但沒有威脅」（例如家裡門沒鎖，但住在無人島），風險會怎樣？</div>
+                    <button class="btn-show-answer" onclick="toggleAnswer(this)">顯示答案</button>
+                    <div class="self-check-answer">A：風險極低（因為可能性幾乎為 0）。</div>
+                </div>
+                <div class="self-check-item">
+                    <div>Q2：如果「威脅很強但資產不重要」（例如駭客攻擊了一台空的報廢電腦），風險會怎樣？</div>
+                    <button class="btn-show-answer" onclick="toggleAnswer(this)">顯示答案</button>
+                    <div class="self-check-answer">A：風險很低（因為衝擊/影響幾乎為 0）。</div>
+                </div>
+                <div class="self-check-item">
+                    <div>Q3：把例子分類：勒索軟體、未更新的系統、檔案被加密。</div>
+                    <button class="btn-show-answer" onclick="toggleAnswer(this)">顯示答案</button>
+                    <div class="self-check-answer">A：勒索軟體＝威脅；未更新＝弱點；被加密＝事件（造成可用性喪失的衝擊）。</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <button class="clear-storage-btn" onclick="clearProgress()">清除學習紀錄</button>
+    </footer>
+</div>
+
+<script>
+    // 正確答案定義
+    const correctAnswers = ['A', 'B', 'D'];
+    const storageKey = 'ipas_risk_q36_stats';
+
+    // 初始化頁面
+    document.addEventListener('DOMContentLoaded', () => {
+        loadProgress();
+    });
+
+    function checkAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        const feedbackDiv = document.getElementById('feedback');
+        const btnExplain = document.getElementById('btnExplain');
+        
+        let userSelection = [];
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                userSelection.push(cb.value);
+            }
+        });
+
+        // 排序以便比較
+        userSelection.sort();
+        const sortedCorrect = [...correctAnswers].sort();
+
+        // 判斷邏輯
+        const isCorrect = JSON.stringify(userSelection) === JSON.stringify(sortedCorrect);
+        
+        // 詳細錯誤分析
+        let missing = sortedCorrect.filter(x => !userSelection.includes(x));
+        let extra = userSelection.filter(x => !sortedCorrect.includes(x));
+
+        let msg = '';
+        if (isCorrect) {
+            msg = '🎉 完全正確！你已經掌握風險管理的核心概念了。';
+            feedbackDiv.className = 'feedback-area feedback-success';
+        } else {
+            feedbackDiv.className = 'feedback-area feedback-error';
+            if (userSelection.length === 0) {
+                msg = '⚠️ 你還沒作答喔！請試著選出正確的選項。';
+            } else {
+                msg = '❌ 答錯了。';
+                if (missing.length > 0) msg += ` 漏選了：${missing.join(', ')}。`;
+                if (extra.length > 0) msg += ` 多選了：${extra.join(', ')}。`;
+                msg += ' 請參考下方解析。';
+            }
+        }
+
+        feedbackDiv.innerText = msg;
+        feedbackDiv.style.display = 'block';
+        btnExplain.style.display = 'inline-block';
+
+        // 標記選項對錯視覺效果
+        checkboxes.forEach(cb => {
+            const parent = cb.parentElement;
+            // 清除舊狀態
+            parent.style.borderColor = '#ddd';
+            parent.style.backgroundColor = '#fff';
+
+            if (correctAnswers.includes(cb.value)) {
+                // 這是正確選項
+                if (cb.checked) {
+                    parent.style.backgroundColor = '#d4edda'; // 選對了
+                    parent.style.borderColor = '#28a745';
+                } else {
+                    parent.style.borderColor = '#28a745'; // 漏選提示
+                    parent.style.borderStyle = 'dashed';
+                }
+            } else {
+                // 這是錯誤選項
+                if (cb.checked) {
+                    parent.style.backgroundColor = '#f8d7da'; // 選錯了
+                    parent.style.borderColor = '#dc3545';
+                }
+            }
+        });
+
+        // 記錄進度 (只在有作答時記錄)
+        if (userSelection.length > 0) {
+            saveProgress(isCorrect);
+        }
+    }
+
+    function toggleExplanation() {
+        const exp = document.getElementById('explanation');
+        const btn = document.getElementById('btnExplain');
+        if (exp.style.display === 'none' || exp.style.display === '') {
+            exp.style.display = 'block';
+            btn.innerText = '隱藏解析';
+            // 平滑滾動到解析區
+            exp.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            exp.style.display = 'none';
+            btn.innerText = '顯示解析';
+        }
+    }
+
+    // Toggle Self-Check Answers
+    function toggleAnswer(btn) {
+        const answerDiv = btn.nextElementSibling;
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+            btn.innerText = '顯示答案';
+        } else {
+            answerDiv.style.display = 'block';
+            btn.innerText = '隱藏答案';
+        }
+    }
+
+    function resetQuiz() {
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => {
+            cb.checked = false;
+            cb.parentElement.style.borderColor = '#ddd';
+            cb.parentElement.style.backgroundColor = '#fff';
+            cb.parentElement.style.borderStyle = 'solid';
+        });
+        
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('explanation').style.display = 'none';
+        document.getElementById('btnExplain').style.display = 'none';
+        document.getElementById('btnExplain').innerText = '顯示解析';
+
+        // Reset self-check answers too
+        const answerDivs = document.querySelectorAll('.self-check-answer');
+        const answerBtns = document.querySelectorAll('.btn-show-answer');
+        answerDivs.forEach(div => div.style.display = 'none');
+        answerBtns.forEach(btn => btn.innerText = '顯示答案');
+    }
+
+    // LocalStorage Functions
+    function loadProgress() {
+        const stats = JSON.parse(localStorage.getItem(storageKey)) || { total: 0, correct: 0 };
+        updateStatsUI(stats);
+    }
+
+    function saveProgress(isCorrect) {
+        let stats = JSON.parse(localStorage.getItem(storageKey)) || { total: 0, correct: 0 };
+        stats.total++;
+        if (isCorrect) stats.correct++;
+        localStorage.setItem(storageKey, JSON.stringify(stats));
+        updateStatsUI(stats);
+    }
+
+    function updateStatsUI(stats) {
+        document.getElementById('progressStats').innerText = `本題練習：${stats.total} 次 | 正確：${stats.correct} 次`;
+    }
+
+    function clearProgress() {
+        if(confirm('確定要清除所有學習紀錄嗎？')) {
+            localStorage.removeItem(storageKey);
+            loadProgress();
+        }
+    }
+</script>
+
+</body>
+</html>

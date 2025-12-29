@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS 資訊安全管理系統建置 - 題組衝刺教學 (Q5-Q8)</title>
+    <style>
+        /* 基礎重置與排版 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* 字級控制：標題與內文差異不超過 1 級 */
+        h1 { font-size: 1.25rem; font-weight: bold; margin-bottom: 10px; color: #003366; }
+        h2 { font-size: 1.15rem; font-weight: bold; margin-bottom: 8px; color: #005599; border-left: 5px solid #005599; padding-left: 10px; }
+        h3 { font-size: 1.1rem; font-weight: bold; margin-top: 15px; margin-bottom: 5px; color: #444; }
+        p, li, label, div { font-size: 1rem; }
+
+        /* 版面區塊 */
+        .header-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            border-top: 5px solid #003366;
+        }
+
+        .scenario-box {
+            background-color: #eef7ff;
+            border: 1px solid #cce5ff;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+        .question-card {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            border-left: 5px solid #ddd; /* 預設邊框顏色 */
+        }
+        
+        .question-card.active-card {
+            border-left: 5px solid #005599;
+        }
+
+        /* 題目與選項 */
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .options-group {
+            margin-bottom: 20px;
+        }
+
+        .option-item {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .option-item input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        /* 按鈕區 */
+        .action-area {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit { background-color: #005599; color: white; }
+        .btn-submit:hover { background-color: #003366; }
+        
+        .btn-retry { background-color: #666; color: white; display: none; }
+        .btn-retry:hover { background-color: #444; }
+
+        /* 即時回饋區 */
+        .feedback-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .feedback-correct {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+
+        .feedback-wrong {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+
+        /* 完整解析區 (預設隱藏) */
+        .explanation-area {
+            display: none;
+            margin-top: 25px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+        }
+
+        .explanation-block {
+            margin-bottom: 20px;
+        }
+
+        .explanation-block ul {
+            padding-left: 25px;
+            margin-top: 5px;
+        }
+
+        .explanation-block li {
+            margin-bottom: 5px;
+        }
+
+        /* 強調樣式 */
+        .keyword {
+            color: #d9534f;
+            font-weight: bold;
+            background-color: #fff0f0;
+            padding: 0 4px;
+        }
+
+        .correct-answer-text {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        /* 自我檢測答案遮罩 (新增樣式) */
+        .spoiler {
+            color: transparent;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            padding: 2px 6px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+            margin-left: 5px;
+            display: inline-block;
+        }
+
+        .spoiler:hover {
+            text-shadow: 0 0 5px rgba(0,0,0,0.6);
+            background-color: #e0e0e0;
+        }
+
+        .spoiler.revealed {
+            color: #28a745; /* 顯示時使用綠色強調 */
+            text-shadow: none;
+            background-color: transparent;
+            font-weight: bold;
+        }
+
+        /* 總整理區 */
+        .footer-summary {
+            background-color: #333;
+            color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 40px;
+        }
+
+        .footer-summary h2 {
+            color: #fff;
+            border-left-color: #fff;
+        }
+
+        .footer-summary h3 {
+            color: #ffd700;
+            margin-top: 20px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        /* 展開/收合按鈕 */
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #005599;
+            text-decoration: underline;
+            padding: 0;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 頁首與題組情境 -->
+    <header class="header-section">
+        <h1>IPAS 資訊安全管理系統建置：題組 1 (Q5 - Q8)</h1>
+        <p>本頁為同一情境題組完整版教學頁。</p>
+        <div class="scenario-box">
+            <strong>【題組共用情境】</strong><br>
+            某 A 公司內部已開始實施 ISO 27001 資訊安全管理系統，建置時需要考量內部與外部議題，及關注方要求，其產出相關資訊也已有紀錄留存。
+        </div>
+    </header>
+
+    <!-- 第 5 題 -->
+    <article class="question-card active-card" id="card-q5">
+        <h2>第 5 題：關注方要求</h2>
+        <div class="question-text">
+            題目：關於建置組織內資訊安全管理系統需參考的關注方要求，下列敘述何者錯誤？
+        </div>
+        <div class="options-group">
+            <label class="option-item"><input type="radio" name="q5" value="A"> (A) 建置組織內資訊安全管理系統時，關注方亦包含相關適用法規要求</label>
+            <label class="option-item"><input type="radio" name="q5" value="B"> (B) 個人資料保護法屬於電腦處理相關行業才須遵守的法規</label>
+            <label class="option-item"><input type="radio" name="q5" value="C"> (C) 主管機關也為組織建置資訊安全管理系統的關注方</label>
+            <label class="option-item"><input type="radio" name="q5" value="D"> (D) 組織有合約規範的供應商，也為組織內建置資訊安全管理系統的關注方</label>
+        </div>
+        <div class="action-area">
+            <button class="btn-submit" onclick="checkSingle('q5', 'B')">送出答案</button>
+            <button class="btn-retry" onclick="resetQuestion('q5')">重新作答</button>
+        </div>
+        <div id="feedback-q5" class="feedback-box"></div>
+
+        <!-- 第 5 題 解析區 -->
+        <div id="explain-q5" class="explanation-area">
+            <button class="toggle-btn" onclick="toggleVisibility('detail-q5')">展開 / 收合完整解析</button>
+            <div id="detail-q5">
+                <div class="explanation-block">
+                    <h3>【題目】</h3>
+                    <p>關於建置組織內資訊安全管理系統需參考的關注方要求，下列敘述何者錯誤？</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第一步：找關鍵字】</h3>
+                    <ul>
+                        <li><span class="keyword">關注方要求</span>：解題核心，誰有權利對公司的資安說話？</li>
+                        <li><span class="keyword">錯誤</span>：這是負面表列題，要找不合理的敘述。</li>
+                    </ul>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第二步：白話翻譯】</h3>
+                    <p>公司在做資安管理時，要聽很多人的意見（如政府、客戶、廠商）。下面哪一句關於「誰該聽、聽什麼」的描述是講錯的？</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第三步：解題思路】</h3>
+                    <ol>
+                        <li><strong>考點：</strong>ISO 27001 條文 4.2「理解關注方的需求與期望」。</li>
+                        <li><strong>定義：</strong>關注方（Stakeholders）包含主管機關、客戶、員工、供應商、股東等。</li>
+                        <li><strong>法規邏輯：</strong>法律是所有組織都必須遵守的底線，不會因為行業別而豁免基本的法律責任（如個資法）。</li>
+                    </ol>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第四步：選項分析】</h3>
+                    <ul>
+                        <li>(A) 正確。法規主管機關是重要的關注方，法律要求必須遵守。</li>
+                        <li>(B) <span class="keyword">錯誤</span>。個人資料保護法適用於「任何蒐集、處理、利用個人資料」的公務機關與非公務機關，不限於電腦處理行業。傳統產業若擁有員工資料，也須遵守。</li>
+                        <li>(C) 正確。主管機關（如金管會對於銀行、衛福部對於醫院）的要求必須納入。</li>
+                        <li>(D) 正確。供應商若有連線或接觸資料，其合約要求必須納入管理。</li>
+                    </ul>
+                </div>
+                <div class="explanation-block">
+                    <h3>【觀念補充與延伸】</h3>
+                    <ul>
+                        <li><strong>核心觀念：</strong>對應 ISO 27001 第 4 章「組織全景」。</li>
+                        <li><strong>對比概念：</strong>內部議題（文化、資源） vs. 外部議題（法規、市場趨勢）。</li>
+                        <li><strong>常見變化：</strong>題目可能會問「股東」是否為關注方？答案是肯定的，因為資安影響公司價值。</li>
+                    </ul>
+                </div>
+                <div class="explanation-block">
+                    <h3>【記憶口訣】</h3>
+                    <p>「個資法管全體，不分電腦業。」</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【常見陷阱】</h3>
+                    <p>誤以為「電腦處理」這幾個字只針對科技業。事實上只要你有員工名單、客戶電話，就受個資法規範。</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【正確答案】</h3>
+                    <p><span class="correct-answer-text">答案：(B)</span>。理由：個資法適用範圍包含各行各業，非僅限電腦處理相關行業。</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【自我檢測】<small style="font-size: 0.8em; color: #666; font-weight: normal;">（點擊模糊處顯示答案）</small></h3>
+                    <ol>
+                        <li>Q: 公司的清潔公司（外包商）是否屬於資安管理系統的關注方？<br><span class="spoiler" onclick="this.classList.toggle('revealed')">A: 是（因為他們能物理接觸到公司環境）。</span></li>
+                        <li>Q: 只有合約上有寫的要求才需要遵守嗎？<br><span class="spoiler" onclick="this.classList.toggle('revealed')">A: 否（隱含的法規要求、社會責任也需考量）。</span></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- 第 6 題 -->
+    <article class="question-card" id="card-q6">
+        <h2>第 6 題：資通安全責任等級</h2>
+        <div class="question-text">
+            題目：關於資通安全責任等級分級辦法，下列敘述何者正確？
+        </div>
+        <div class="options-group">
+            <label class="option-item"><input type="radio" name="q6" value="A"> (A) 資通安全管理法規範公務機關及特定非公務機關之資通安全責任等級，分為 A 至 D 級</label>
+            <label class="option-item"><input type="radio" name="q6" value="B"> (B) 公務機關應每三年核定其所屬機關資通安全責任等級</label>
+            <label class="option-item"><input type="radio" name="q6" value="C"> (C) 公務機關其負責業務有涉及國家機密，其資通安全責任等級即為 A 級</label>
+            <label class="option-item"><input type="radio" name="q6" value="D"> (D) 各公務機關未維運自行或委外開發之資通系統者，其資通安全責任等級為 C 級</label>
+        </div>
+        <div class="action-area">
+            <button class="btn-submit" onclick="checkSingle('q6', 'C')">送出答案</button>
+            <button class="btn-retry" onclick="resetQuestion('q6')">重新作答</button>
+        </div>
+        <div id="feedback-q6" class="feedback-box"></div>
+
+        <!-- 第 6 題 解析區 -->
+        <div id="explain-q6" class="explanation-area">
+            <button class="toggle-btn" onclick="toggleVisibility('detail-q6')">展開 / 收合完整解析</button>
+            <div id="detail-q6">
+                <div class="explanation-block">
+                    <h3>【題目】</h3>
+                    <p>關於資通安全責任等級分級辦法，下列敘述何者正確？</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第一步：找關鍵字】</h3>
+                    <ul>
+                        <li><span class="keyword">資通安全責任等級</span>：這是台灣特有的法規題（資安法）。</li>
+                        <li><span class="keyword">正確</span>：四個選項中只有一個是對的。</li>
+                    </ul>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第二步：白話翻譯】</h3>
+                    <p>政府規定機關要分資安等級（A、B、C...），等級越高管越嚴。請問下面哪個分級的規定是對的？</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第三步：解題思路】</h3>
+                    <ol>
+                        <li><strong>考點：</strong>《資通安全責任等級分級辦法》。</li>
+                        <li><strong>分級標準：</strong>
+                            <ul>
+                                <li>A級：涉及國家機密、軍事、外交、關鍵基礎設施。</li>
+                                <li>B級：涉及公務機密、全機關或跨機關個資、區域性關鍵基礎設施。</li>
+                                <li>C級：自行或委外開發系統、涉及一般公務機密或單一機關個資。</li>
+                                <li>D級、E級：其餘。</li>
+                            </ul>
+                        </li>
+                        <li><strong>級距：</strong>公務機關分 A、B、C、D、E 五級。</li>
+                    </ol>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第四步：選項分析】</h3>
+                    <ul>
+                        <li>(A) 錯誤。分為 A、B、C、D、E 共五級（非只到 D）。</li>
+                        <li>(B) 錯誤。原則上初次核定後，每兩年檢討或遇重大變更時重核，並非固定每三年。</li>
+                        <li>(C) <span class="keyword">正確</span>。涉及「國家機密」是 A 級的最主要特徵。</li>
+                        <li>(D) 錯誤。未維運自行或委外開發系統者（僅使用套裝軟體且無敏感業務），通常等級更低（如 D 或 E 級），C 級通常仍需維運核心業務系統。</li>
+                    </ul>
+                </div>
+                <div class="explanation-block">
+                    <h3>【觀念補充與延伸】</h3>
+                    <ul>
+                        <li><strong>核心觀念：</strong>資通安全管理法 - 應辦事項與分級。</li>
+                        <li><strong>常考數字：</strong>A 級機關每年需辦理 2 次資安稽核；B 級每年 1 次。</li>
+                    </ul>
+                </div>
+                <div class="explanation-block">
+                    <h3>【記憶口訣】</h3>
+                    <p>「國家機密是 A 級，ABCDE 分五級。」</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【常見陷阱】</h3>
+                    <p>很容易跟個資法的等級或其他 ISO 分級搞混。記住「涉及國家機密」權重最高，一定是 A。</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【正確答案】</h3>
+                    <p><span class="correct-answer-text">答案：(C)</span>。理由：依分級辦法，業務涉及國家機密者列為 A 級。</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【自我檢測】<small style="font-size: 0.8em; color: #666; font-weight: normal;">（點擊模糊處顯示答案）</small></h3>
+                    <ol>
+                        <li>Q: 某鄉公所僅使用中央配發的系統，無自行開發，通常是哪一級？<br><span class="spoiler" onclick="this.classList.toggle('revealed')">A: 可能是 D 或 E 級。</span></li>
+                        <li>Q: 關鍵基礎設施提供者（如台電）通常是哪一級？<br><span class="spoiler" onclick="this.classList.toggle('revealed')">A: A 級（特定非公務機關）。</span></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- 第 7 題 -->
+    <article class="question-card" id="card-q7">
+        <h2>第 7 題：法規遵循性</h2>
+        <div class="question-text">
+            題目：關於組織建置資訊安全管理系統的法規遵循性敘述，下列何者錯誤？
+        </div>
+        <div class="options-group">
+            <label class="option-item"><input type="radio" name="q7" value="A"> (A) 組織識別適用所在地之法規為主，不予以考量營業據點所在其他國家相關的法規事項</label>
+            <label class="option-item"><input type="radio" name="q7" value="B"> (B) 智慧財產權為所有組織皆須遵守的法規</label>
+            <label class="option-item"><input type="radio" name="q7" value="C"> (C) 客戶提供之紀錄，亦須予以授權保護，以免違反與客戶合約要求</label>
+            <label class="option-item"><input type="radio" name="q7" value="D"> (D) 個人隱私資訊的法規，需將資料會傳遞的國家法規皆予以納入</label>
+        </div>
+        <div class="action-area">
+            <button class="btn-submit" onclick="checkSingle('q7', 'A')">送出答案</button>
+            <button class="btn-retry" onclick="resetQuestion('q7')">重新作答</button>
+        </div>
+        <div id="feedback-q7" class="feedback-box"></div>
+
+        <!-- 第 7 題 解析區 -->
+        <div id="explain-q7" class="explanation-area">
+            <button class="toggle-btn" onclick="toggleVisibility('detail-q7')">展開 / 收合完整解析</button>
+            <div id="detail-q7">
+                <div class="explanation-block">
+                    <h3>【題目】</h3>
+                    <p>關於組織建置資訊安全管理系統的法規遵循性敘述，下列何者錯誤？</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第一步：找關鍵字】</h3>
+                    <ul>
+                        <li><span class="keyword">法規遵循性</span>：Compliance，合規。</li>
+                        <li><span class="keyword">錯誤</span>：找出一項違背 ISO 27001 精神的敘述。</li>
+                        <li><span class="keyword">其他國家</span>：這是判斷重點。</li>
+                    </ul>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第二步：白話翻譯】</h3>
+                    <p>公司做資安要守法。下面關於「要守哪些法」的說法，哪一個是不對的？特別注意跨國的情況。</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第三步：解題思路】</h3>
+                    <ol>
+                        <li><strong>考點：</strong>ISO 27001 控制項 5.31（舊 A.18）法律、法規、監管及合約要求。</li>
+                        <li><strong>原則：</strong>法規遵循包含「所在地法規」、「客戶所在地法規」以及「資料傳輸途經/儲存地法規」。</li>
+                        <li><strong>全球化觀點：</strong>網際網路無國界，若業務涉及歐盟公民個資（GDPR）或在當地設有據點，絕對要考量當地法規。</li>
+                    </ol>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第四步：選項分析】</h3>
+                    <ul>
+                        <li>(A) <span class="keyword">錯誤</span>。若組織有海外據點或業務涉及他國，必須考量該國法規（例如 GDPR、CCPA）。只看所在地是不夠的。</li>
+                        <li>(B) 正確。軟體授權、專利、商標等智財權是所有企業的通用底線。</li>
+                        <li>(C) 正確。合約要求等同於法律義務，必須保護客戶資料。</li>
+                        <li>(D) 正確。跨境傳輸資料時，起點、終點、甚至中繼點的法規都可能需要考量。</li>
+                    </ul>
+                </div>
+                <div class="explanation-block">
+                    <h3>【觀念補充與延伸】</h3>
+                    <ul>
+                        <li><strong>核心觀念：</strong>識別適用的法律與合約要求。</li>
+                        <li><strong>常見案例：</strong>台灣公司做歐洲人生意，必須遵守 GDPR（歐盟一般資料保護規則）。</li>
+                    </ul>
+                </div>
+                <div class="explanation-block">
+                    <h3>【記憶口訣】</h3>
+                    <p>「網路無國界，法規看流向。」</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【常見陷阱】</h3>
+                    <p>認為「我在台灣就只要管台灣法律」。這是嚴重的法規遵循盲點。</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【正確答案】</h3>
+                    <p><span class="correct-answer-text">答案：(A)</span>。理由：必須考量所有營業據點及資料流向涉及國家的法規，不可僅以所在地為主。</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【自我檢測】<small style="font-size: 0.8em; color: #666; font-weight: normal;">（點擊模糊處顯示答案）</small></h3>
+                    <ol>
+                        <li>Q: 公司的網站使用盜版圖片，違反了哪類法規？<br><span class="spoiler" onclick="this.classList.toggle('revealed')">A: 智慧財產權（著作權）。</span></li>
+                        <li>Q: 未遵守客戶合約中的保密條款，是否屬於 ISMS 缺失？<br><span class="spoiler" onclick="this.classList.toggle('revealed')">A: 是（違反 A.18/5.31 合約要求）。</span></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- 第 8 題 (複選) -->
+    <article class="question-card" id="card-q8">
+        <h2>第 8 題：ISMS 實施範圍（複選）</h2>
+        <div class="question-text">
+            題目：下列哪些是組織建置資訊安全管理系統決定實施範圍需要考量的項目？（全對才給分）
+        </div>
+        <div class="options-group">
+            <label class="option-item"><input type="checkbox" name="q8" value="A"> (A) 會影響組織實施資訊安全管理系統時的內部與外部議題</label>
+            <label class="option-item"><input type="checkbox" name="q8" value="B"> (B) 組織關注方有關資訊安全管理系統實施的要求事項</label>
+            <label class="option-item"><input type="checkbox" name="q8" value="C"> (C) 與組織實施資訊安全管理系統，範圍內有委外給供應商的活動，可以不予納入</label>
+            <label class="option-item"><input type="checkbox" name="q8" value="D"> (D) 與客戶合約要求的系統範圍，應納入資訊安全管理系統範圍考量</label>
+        </div>
+        <div class="action-area">
+            <button class="btn-submit" onclick="checkMultiple('q8', ['A', 'B', 'D'])">送出答案</button>
+            <button class="btn-retry" onclick="resetQuestion('q8')">重新作答</button>
+        </div>
+        <div id="feedback-q8" class="feedback-box"></div>
+
+        <!-- 第 8 題 解析區 -->
+        <div id="explain-q8" class="explanation-area">
+            <button class="toggle-btn" onclick="toggleVisibility('detail-q8')">展開 / 收合完整解析</button>
+            <div id="detail-q8">
+                <div class="explanation-block">
+                    <h3>【題目】</h3>
+                    <p>下列哪些是組織建置資訊安全管理系統決定實施範圍需要考量的項目？</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第一步：找關鍵字】</h3>
+                    <ul>
+                        <li><span class="keyword">實施範圍</span> (Scope)：這是 ISO 27001 第 4.3 條的重點。</li>
+                        <li><span class="keyword">考量項目</span>：決定畫圈圈大小時，要看什麼？</li>
+                        <li><span class="keyword">委外</span>：陷阱關鍵字。</li>
+                    </ul>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第二步：白話翻譯】</h3>
+                    <p>公司要畫出「資安保護圈（ISMS 範圍）」。在決定這個圈圈要畫多大、包住哪些東西時，哪些因素必須考慮進去？</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第三步：解題思路】</h3>
+                    <ol>
+                        <li><strong>考點：</strong>ISO 27001 條文 4.3「決定資訊安全管理系統之範圍」。</li>
+                        <li><strong>條文規定：</strong>組織應決定 ISMS 的邊界與適用性，並考量：
+                            <ul>
+                                <li>4.1 的內部與外部議題。</li>
+                                <li>4.2 的關注方要求。</li>
+                                <li>組織活動與其他組織的介面與依賴性。</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+                <div class="explanation-block">
+                    <h3>【第四步：選項分析】</h3>
+                    <ul>
+                        <li>(A) <span class="keyword">正確</span>。這是條文 4.3 直接引用的項目（參照 4.1）。</li>
+                        <li>(B) <span class="keyword">正確</span>。這也是條文 4.3 直接引用的項目（參照 4.2）。</li>
+                        <li>(C) 錯誤。外包/供應商活動若影響資安，必須納入範圍管理，不能因為外包就說「不關我的事」。雖然供應商實體可能在範圍外，但「管理供應商這個流程」在範圍內。</li>
+                        <li>(D) <span class="keyword">正確</span>。客戶合約要求保護的系統，理所當然是驗證範圍的核心。</li>
+                    </ul>
+                </div>
+                <div class="explanation-block">
+                    <h3>【觀念補充與延伸】</h3>
+                    <ul>
+                        <li><strong>核心觀念：</strong>範圍（Scope）必須文件化。</li>
+                        <li><strong>常見變化：</strong>題目若說「ISMS 範圍必須包含整個公司」，通常是錯的。範圍可以是一個部門、一個系統或全公司，重點是邊界要清楚。</li>
+                    </ul>
+                </div>
+                <div class="explanation-block">
+                    <h3>【記憶口訣】</h3>
+                    <p>「範圍三要素：議題、關注方、介面依賴性（外包也要管）。」</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【常見陷阱】</h3>
+                    <p>看到「委外」就選「不納入」。記住，外包是你花錢請人做事，責任還是在你身上，所以一定要納入管理範圍。</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【正確答案】</h3>
+                    <p><span class="correct-answer-text">答案：(A)、(B)、(D)</span>。理由：外包活動仍屬組織風險管理一環，不可排除。</p>
+                </div>
+                <div class="explanation-block">
+                    <h3>【自我檢測】<small style="font-size: 0.8em; color: #666; font-weight: normal;">（點擊模糊處顯示答案）</small></h3>
+                    <ol>
+                        <li>Q: 如果機房設在國外，可以不列入 ISMS 範圍嗎？<br><span class="spoiler" onclick="this.classList.toggle('revealed')">A: 如果該機房存放重要資料，通常必須納入，或透過供應商管理來納入。</span></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <!-- 頁面底部：題組共用總整理 -->
+    <footer class="footer-summary">
+        <h2>題組共用總整理 (Q5 - Q8)</h2>
+        <div class="footer-grid">
+            <div>
+                <h3>【一頁速記卡】</h3>
+                <ul>
+                    <li><strong>關注方：</strong>法規、主管機關、客戶、供應商（清潔工也算）。</li>
+                    <li><strong>法規遵循：</strong>不只看所在地，跨國營運需納入資料流向國家法規。</li>
+                    <li><strong>資通安全責任等級：</strong>涉及國家機密/關鍵基礎設施 = <strong>A 級</strong>。</li>
+                    <li><strong>ISMS 範圍：</strong>外包仍須納入管理、合約範圍必納入、考量內外議題。</li>
+                </ul>
+            </div>
+            <div>
+                <h3>【高頻記憶口訣總表】</h3>
+                <ul>
+                    <li>個資法不分行業，有資料就得守。</li>
+                    <li>涉密就是 A 級，資安法分五級。</li>
+                    <li>外包還是我的責任，不能切割。</li>
+                    <li>範圍跟著合約走，議題關注方不可少。</li>
+                </ul>
+            </div>
+            <div style="grid-column: 1 / -1;">
+                <h3>【題組常見陷阱總整理】</h3>
+                <ul>
+                    <li>❌ 誤以為「個資法」只管科技業或電腦公司。</li>
+                    <li>❌ 誤以為「委外」就可以排除在 ISMS 範圍外。</li>
+                    <li>❌ 忽略跨國資料傳輸時的「對方國家法規」。</li>
+                    <li>❌ 混淆資安責任等級：誤選成 D 級（通常未開發系統是低等級，但不絕對是 C）。</li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 切換顯示/隱藏解析區塊
+        function toggleVisibility(id) {
+            var element = document.getElementById(id);
+            if (element.style.display === "none" || element.style.display === "") {
+                element.style.display = "block";
+            } else {
+                element.style.display = "none";
+            }
+        }
+
+        // 鎖定/解鎖選項輸入
+        function setInputsDisabled(questionId, disabled) {
+            const inputs = document.querySelectorAll(`input[name="${questionId}"]`);
+            inputs.forEach(input => {
+                input.disabled = disabled;
+            });
+        }
+
+        // 單選題檢查邏輯
+        function checkSingle(questionId, correctAnswer) {
+            const options = document.getElementsByName(questionId);
+            let selectedValue = null;
+            
+            for (const option of options) {
+                if (option.checked) {
+                    selectedValue = option.value;
+                    break;
+                }
+            }
+
+            const feedbackBox = document.getElementById(`feedback-${questionId}`);
+            const explanationArea = document.getElementById(`explain-${questionId}`);
+            const submitBtn = document.querySelector(`#card-${questionId} .btn-submit`);
+            const retryBtn = document.querySelector(`#card-${questionId} .btn-retry`);
+
+            if (!selectedValue) {
+                alert("請先選擇一個答案！");
+                return;
+            }
+
+            setInputsDisabled(questionId, true);
+            submitBtn.style.display = "none";
+            retryBtn.style.display = "inline-block";
+            explanationArea.style.display = "block"; // 強制顯示解析區
+
+            if (selectedValue === correctAnswer) {
+                feedbackBox.className = "feedback-box feedback-correct";
+                feedbackBox.innerHTML = `正確！<br>你選了 (${selectedValue})。理由：請參考下方詳細解析。`;
+            } else {
+                feedbackBox.className = "feedback-box feedback-wrong";
+                feedbackBox.innerHTML = `錯誤。<br>你選了 (${selectedValue})，正確答案是 (${correctAnswer})。<br>提示：請閱讀下方解析中的「陷阱」與「選項分析」。`;
+            }
+            feedbackBox.style.display = "block";
+        }
+
+        // 複選題檢查邏輯 (Q8)
+        function checkMultiple(questionId, correctArray) {
+            const options = document.getElementsByName(questionId);
+            let selectedValues = [];
+            
+            for (const option of options) {
+                if (option.checked) {
+                    selectedValues.push(option.value);
+                }
+            }
+
+            const feedbackBox = document.getElementById(`feedback-${questionId}`);
+            const explanationArea = document.getElementById(`explain-${questionId}`);
+            const submitBtn = document.querySelector(`#card-${questionId} .btn-submit`);
+            const retryBtn = document.querySelector(`#card-${questionId} .btn-retry`);
+
+            if (selectedValues.length === 0) {
+                alert("請至少選擇一個選項！");
+                return;
+            }
+
+            // 排序並比對陣列
+            selectedValues.sort();
+            correctArray.sort();
+            const isCorrect = JSON.stringify(selectedValues) === JSON.stringify(correctArray);
+
+            setInputsDisabled(questionId, true);
+            submitBtn.style.display = "none";
+            retryBtn.style.display = "inline-block";
+            explanationArea.style.display = "block";
+
+            if (isCorrect) {
+                feedbackBox.className = "feedback-box feedback-correct";
+                feedbackBox.innerHTML = `正確！<br>答案完全符合。理由：請參考下方詳細解析。`;
+            } else {
+                let msg = `錯誤。<br>你選了 (${selectedValues.join(', ')})。<br>正確組合應為 (${correctArray.join(', ')})。`;
+                
+                // 簡單提示
+                if (selectedValues.includes('C')) {
+                    msg += `<br>判斷提醒：選項 (C) 是錯的，因為委外活動必須納入範圍管理。`;
+                }
+
+                feedbackBox.className = "feedback-box feedback-wrong";
+                feedbackBox.innerHTML = msg;
+            }
+            feedbackBox.style.display = "block";
+        }
+
+        // 重新作答重置邏輯
+        function resetQuestion(questionId) {
+            const inputs = document.querySelectorAll(`input[name="${questionId}"]`);
+            inputs.forEach(input => {
+                input.checked = false;
+                input.disabled = false;
+            });
+
+            const feedbackBox = document.getElementById(`feedback-${questionId}`);
+            feedbackBox.style.display = "none";
+            feedbackBox.className = "feedback-box";
+
+            const explanationArea = document.getElementById(`explain-${questionId}`);
+            explanationArea.style.display = "none";
+
+            // 重置自我檢測的遮罩狀態
+            const spoilers = document.querySelectorAll(`#detail-${questionId} .spoiler`);
+            spoilers.forEach(sp => sp.classList.remove('revealed'));
+
+            const submitBtn = document.querySelector(`#card-${questionId} .btn-submit`);
+            const retryBtn = document.querySelector(`#card-${questionId} .btn-retry`);
+            
+            submitBtn.style.display = "inline-block";
+            retryBtn.style.display = "none";
+        }
+    </script>
+</body>
+</html>

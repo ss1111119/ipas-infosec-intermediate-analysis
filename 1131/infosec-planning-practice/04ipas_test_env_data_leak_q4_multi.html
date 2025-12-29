@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安考題 Q4：測試環境與資料外洩</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5; /* 低飽和藍 */
+            --primary-light: #e6eef5;
+            --secondary-color: #6c757d;
+            --success-color: #2e7d32;
+            --error-color: #c62828;
+            --text-color: #333333;
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --border-color: #dddddd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* 版面結構 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 頁首 */
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 3px solid var(--primary-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--secondary-color);
+            font-weight: normal;
+        }
+
+        /* 通用卡片樣式 */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        /* 題目區 */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: var(--primary-light);
+        }
+
+        .option-label input[type="checkbox"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* 回饋區 */
+        #feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-success {
+            background-color: #e8f5e9;
+            border-left: 5px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .feedback-error {
+            background-color: #ffebee;
+            border-left: 5px solid var(--error-color);
+            color: var(--error-color);
+        }
+
+        .key-concept-alert {
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        /* 折疊選單 Accordion */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--card-bg);
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 15px;
+            background-color: #f1f3f5;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+            position: relative;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            position: absolute;
+            right: 20px;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* 教學內容樣式 */
+        .step-title {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        /* 翻卡練習區 */
+        .flashcard-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .flashcard {
+            flex: 1 1 200px;
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .flashcard.revealed {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .flashcard .answer {
+            display: none;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: 10px;
+            width: 100%;
+        }
+
+        .flashcard.revealed .question {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .flashcard.revealed .answer {
+            display: block;
+        }
+
+        /* 自我檢測隱藏區 */
+        .self-check-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dotted #ddd;
+        }
+        .reveal-btn {
+            background: none;
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-color);
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        .answer-hidden {
+            display: none;
+            color: var(--success-color);
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        /* 速記卡 */
+        .cheat-sheet {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .cheat-sheet h3 {
+            color: #ffb74d; /* 琥珀色 */
+            border-bottom: 1px solid #555;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .cheat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .cheat-item strong {
+            display: block;
+            color: #90caf9;
+            margin-bottom: 5px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+        }
+
+        /* 手機版優化 */
+        @media (max-width: 600px) {
+            .cheat-grid {
+                grid-template-columns: 1fr;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安考題 Q4：測試區遭入侵與防護</h1>
+        <div class="subtitle">單元：測試環境 ≠ 正式環境</div>
+    </header>
+
+    <!-- 作答區 -->
+    <section class="card">
+        <div class="question-text">
+            題目：某公司建置的測試區域遭受駭客入侵，導致重要客戶資料外流。以下哪些選項可作為前述資安問題的改善措施？（複選題）
+        </div>
+        <div class="options-group">
+            <label class="option-label">
+                <input type="checkbox" name="quiz" value="A">
+                (A) 避免使用真實資料做為測試資料
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="quiz" value="B">
+                (B) 強化測試區防火牆管理
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="quiz" value="C">
+                (C) 在公司測試系統輸入重要客戶資料
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="quiz" value="D">
+                (D) 將測試區與公司正式區實施安全、明確之區隔
+            </label>
+        </div>
+        <div class="btn-group">
+            <button class="btn-submit" onclick="checkAnswer()">送出答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重新作答</button>
+        </div>
+
+        <div id="feedback-area"></div>
+    </section>
+
+    <!-- 分段式教學區 -->
+    <section>
+        <details open>
+            <summary>【題目分析】題目在問什麼？</summary>
+            <div class="details-content">
+                <p>完整題目：「某公司建置的測試區域遭受駭客入侵，導致重要客戶資料外流。以下哪些選項可作為前述資安問題的改善措施？」</p>
+                <br>
+                <h4 class="step-title">第一步：找關鍵字</h4>
+                <ul>
+                    <li><strong>測試區域</strong>：就是開發/測試用的系統，通常安全性設定較正式環境弱。</li>
+                    <li><strong>駭客入侵</strong>：代表技術防護（如防火牆）或管理控制不足。</li>
+                    <li><strong>重要客戶資料外流</strong>：顯示測試區放了不該放的「敏感真實資料」。</li>
+                    <li><strong>改善措施</strong>：題目問的是「事後要怎麼補救與避免再發生」，要選正面的做法。</li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>【白話翻譯】這題到底在考什麼？</summary>
+            <div class="details-content">
+                <h4 class="step-title">第二步：白話翻譯</h4>
+                <p>簡單來說就是：</p>
+                <p style="background:#eee; padding:10px; border-radius:4px;">「公司測試系統被駭，裡面竟然放了真的客戶資料，結果資料外洩了。現在老闆問你：以後要怎麼做才不會再發生這種鳥事？」</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>【解題思路】核心觀念與邏輯</summary>
+            <div class="details-content">
+                <h4 class="step-title">第三步：解題思路</h4>
+                <p><strong>核心觀念：</strong>測試環境的資安管理原則與資料使用原則。</p>
+                <br>
+                <strong>解題步驟：</strong>
+                <ol>
+                    <li>先判斷哪些選項是「降低風險」的作法。</li>
+                    <li>排除「反而增加風險」或「無效」的選項。</li>
+                    <li>複選題請注意：只要是能改善現況的都要選。</li>
+                </ol>
+                <br>
+                <strong>原理（為什麼）：</strong>
+                <ul>
+                    <li>測試區是拿來試功能、抓錯誤的地方，通常為了方便除錯，防護會開得比較鬆。</li>
+                    <li>真實客戶資料（PII）一旦外洩會造成法律責任與賠償，絕對不能出現在低防護區。</li>
+                    <li>正確做法公式：<strong>降低資料敏感度 ＋ 加強邊界防護 ＋ 清楚環境區隔</strong>。</li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>【選項詳解】為什麼選 A、B、D？</summary>
+            <div class="details-content">
+                <h4 class="step-title">第四步：選項分析</h4>
+                <ul>
+                    <li><span style="color:var(--success-color);">[正確]</span> <strong>(A) 避免使用真實資料做為測試資料</strong>：如果不放真資料，就算被駭客入侵，偷走的也是假資料，沒有實質損失。這是釜底抽薪的辦法。</li>
+                    <li><span style="color:var(--success-color);">[正確]</span> <strong>(B) 強化測試區防火牆管理</strong>：雖然是測試區，但也不能門戶大開。加強防火牆可以降低被入侵的機率。</li>
+                    <li><span style="color:var(--error-color);">[錯誤]</span> <strong>(C) 在公司測試系統輸入重要客戶資料</strong>：這正是題目中導致「資料外流」的元兇！這是增加風險，不是改善措施。</li>
+                    <li><span style="color:var(--success-color);">[正確]</span> <strong>(D) 將測試區與公司正式區實施安全、明確之區隔</strong>：這叫「網段隔離」。如果測試區被駭，隔離做得好，駭客就無法跳板攻擊到正式區，避免災情擴大。</li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>【重點整理】記憶口訣與陷阱</summary>
+            <div class="details-content">
+                <h4 class="step-title">記憶口訣</h4>
+                <p style="font-size:1.1rem; font-weight:bold; color:var(--primary-color);">「測試不碰真資料，環境一定要隔離；防火牆沒少，外洩才會少。」</p>
+                <br>
+                <h4 class="step-title">常見陷阱</h4>
+                <ul>
+                    <li><strong>誤區 1</strong>：以為測試區「反正不是正式對外」，就可以隨便放資料方便測試。這是大忌！</li>
+                    <li><strong>誤區 2</strong>：只顧功能測試，忘記測試區也是駭客常利用的跳板。</li>
+                    <li><strong>避坑指南</strong>：遵守測試區三不原則——不放真資料、不開放多餘連線、不與正式區混用。</li>
+                </ul>
+                <br>
+                <h4 class="step-title">自我檢測（點擊查看答案）</h4>
+                <div class="self-check-item">
+                    1. 若測試需要真實資料結構但不能用真資料，該怎麼做？
+                    <button class="reveal-btn" onclick="toggleAnswer('ans1')">看答案</button>
+                    <div id="ans1" class="answer-hidden">答：使用「假資料」或經過「去識別化（脫敏）」的資料。</div>
+                </div>
+                <div class="self-check-item">
+                    2. 若測試區可直接連到正式資料庫，會有什麼風險？
+                    <button class="reveal-btn" onclick="toggleAnswer('ans2')">看答案</button>
+                    <div id="ans2" class="answer-hidden">答：容易發生橫向入侵，駭客攻破測試區後可直接存取正式庫。</div>
+                </div>
+                <div class="self-check-item">
+                    3. 若題目改成「開發人員可直接存取正式區資料」，是否屬於資安缺失？
+                    <button class="reveal-btn" onclick="toggleAnswer('ans3')">看答案</button>
+                    <div id="ans3" class="answer-hidden">答：是。違反了權限最小化與職責分離原則（SOD）。</div>
+                </div>
+            </div>
+        </details>
+    </section>
+
+    <!-- 加分題：互動配對 -->
+    <section class="card" style="margin-top: 20px;">
+        <h3 style="margin-bottom: 15px;">小測驗：觀念強化配對</h3>
+        <p style="margin-bottom: 15px; font-size: 0.9rem;">點擊卡片翻開對應的解決方案：</p>
+        <div class="flashcard-container">
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="question">目的：<br>避免資料外流</div>
+                <div class="answer">對策：<br>不用真實資料</div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="question">目的：<br>降低入侵面</div>
+                <div class="answer">對策：<br>強化防火牆</div>
+            </div>
+            <div class="flashcard" onclick="flipCard(this)">
+                <div class="question">目的：<br>避免橫向攻擊</div>
+                <div class="answer">對策：<br>環境完全隔離</div>
+            </div>
+        </div>
+        <div id="flashcard-feedback" style="margin-top:10px; text-align:center; height:20px; color:var(--primary-color); font-weight:bold;"></div>
+    </section>
+
+    <!-- 一分鐘速記卡 -->
+    <section class="cheat-sheet">
+        <h3>⚡ 1 分鐘速記卡</h3>
+        <div class="cheat-grid">
+            <div class="cheat-item">
+                <strong>✅ 測試區正確作法 (Do's)</strong>
+                <ul>
+                    <li>使用假資料 / 去識別化資料</li>
+                    <li>設置獨立防火牆</li>
+                    <li>與正式環境實體或邏輯隔離</li>
+                </ul>
+            </div>
+            <div class="cheat-item">
+                <strong>❌ 測試區錯誤作法 (Don'ts)</strong>
+                <ul>
+                    <li>直接匯入真實客戶個資</li>
+                    <li>允許直連正式區資料庫</li>
+                    <li>為了方便全開 Port</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>此教材為 iPAS 資安考題教學練習用</p>
+    </footer>
+</div>
+
+<script>
+    // 正確答案
+    const correctAnswers = ['A', 'B', 'D'];
+
+    function checkAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="quiz"]:checked');
+        const userAnswers = Array.from(checkboxes).map(cb => cb.value).sort();
+        const feedbackArea = document.getElementById('feedback-area');
+
+        // 判斷是否全對
+        const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctAnswers);
+        
+        // 準備回饋文字
+        let htmlContent = '';
+        
+        if (isCorrect) {
+            feedbackArea.className = 'feedback-success';
+            feedbackArea.style.display = 'block';
+            htmlContent = `
+                <strong>回答正確！</strong>
+                <p>觀念非常清楚。您掌握了測試環境的資料保護與隔離原則。</p>
+            `;
+        } else {
+            feedbackArea.className = 'feedback-error';
+            feedbackArea.style.display = 'block';
+            
+            // 找出漏選或多選
+            htmlContent = `<strong>回答錯誤。</strong><br>`;
+            
+            if (userAnswers.includes('C')) {
+                htmlContent += `<p>提示：選項 (C) 輸入真實資料是「造成問題的原因」，不是改善措施喔！</p>`;
+            } else if (userAnswers.length < 3) {
+                htmlContent += `<p>提示：這題是複選題，還有其他改善措施可以併行。</p>`;
+            }
+            
+            htmlContent += `
+                <div class="key-concept-alert">
+                    觀念導正：測試區常被忽略，但一旦放入真實資料，就等於把正式區風險提前暴露。<br>
+                    正確答案是：A、B、D
+                </div>
+            `;
+        }
+        
+        feedbackArea.innerHTML = htmlContent;
+    }
+
+    function resetQuiz() {
+        // 清除勾選
+        const checkboxes = document.querySelectorAll('input[name="quiz"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        // 隱藏回饋
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'none';
+    }
+
+    // 翻卡功能
+    function flipCard(element) {
+        element.classList.toggle('revealed');
+        const feedback = document.getElementById('flashcard-feedback');
+        if (element.classList.contains('revealed')) {
+            feedback.textContent = "正確！這就是對應的資安觀念。";
+        } else {
+            feedback.textContent = "";
+        }
+    }
+
+    // 自我檢測顯示答案
+    function toggleAnswer(id) {
+        const ans = document.getElementById(id);
+        if (ans.style.display === 'block') {
+            ans.style.display = 'none';
+        } else {
+            ans.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

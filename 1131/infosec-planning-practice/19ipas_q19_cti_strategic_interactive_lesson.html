@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安規劃實務衝刺 - 第 19 題：CTI 情資分級</title>
+    <!-- 引入 Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入 Google Fonts Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* 模擬講義/試卷的排版風格 */
+        .container {
+            max-width: 900px;
+            background-color: #fff;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+
+        /* 標題字級控制 */
+        h1.lecture-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+
+        h2.section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            background-color: #f1f3f5;
+            padding: 10px 15px;
+            border-left: 5px solid #0d6efd;
+        }
+
+        /* 題目區域樣式 */
+        .question-box {
+            border: 1px solid #ced4da;
+            padding: 25px;
+            border-radius: 6px;
+            background-color: #fff;
+        }
+
+        .question-text {
+            font-size: 1.05rem;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .btn-option {
+            text-align: left;
+            border: 1px solid #adb5bd;
+            color: #495057;
+            font-weight: 500;
+            padding: 12px 18px;
+            transition: all 0.2s;
+            background-color: #fff;
+            width: 100%;
+        }
+
+        .btn-option:hover {
+            background-color: #e9ecef;
+            border-color: #6c757d;
+        }
+
+        /* 回饋區塊 */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+            font-size: 1rem;
+        }
+
+        .feedback-correct {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        /* 螢光筆效果 */
+        .highlight-text {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            font-weight: 700;
+            border-bottom: 2px solid #ffc107;
+        }
+
+        /* 手風琴教學區樣式 */
+        .accordion-button {
+            font-weight: 700;
+            color: #495057;
+            background-color: #f8f9fa;
+        }
+        
+        .accordion-button:not(.collapsed) {
+            color: #0d6efd;
+            background-color: #e7f1ff;
+        }
+
+        /* 統計區塊 */
+        .stats-bar {
+            font-size: 0.95rem;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+            padding-top: 15px;
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 專有名詞第一次出現樣式 */
+        .term-def {
+            color: #0d6efd;
+            font-weight: 500;
+        }
+
+        /* CTI 卡片互動區 */
+        .cti-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+            border: 1px solid #dee2e6;
+        }
+        .cti-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: #0d6efd;
+        }
+        .cti-card.active {
+            background-color: #e7f1ff;
+            border-color: #0d6efd;
+        }
+        .card-detail-box {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 20px;
+            margin-top: 15px;
+            display: none; /* 預設隱藏 */
+        }
+
+        /* 自我檢測樣式 */
+        .quiz-item {
+            border-bottom: 1px dashed #dee2e6;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .quiz-answer {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            color: #0f5132;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="lecture-title">iPAS 資訊安全規劃實務 - 重點衝刺講義</h1>
+    
+    <div class="mb-3 text-muted" style="font-size: 0.95rem;">
+        單元：資訊安全防護實務 &gt; 資安威脅情資 (CTI) &gt; 題型解析
+    </div>
+
+    <!-- 手風琴主結構 -->
+    <div class="accordion" id="lessonAccordion">
+        
+        <!-- 1. 題目 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    【題目】第 19 題：CTI 類型與受眾選擇
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <div class="question-box">
+                        <p class="question-text">
+                            <span class="badge bg-secondary mb-2">單選題</span><br>
+                            「<span class="term-def">資通威脅情資</span>」（Cyber Threat Intelligence，簡稱 CTI）是指蒐集、分析和處理有關網宇威脅行為和漏洞的資訊，以幫助組織瞭解資安威脅的狀況，主動做好威脅應對和預防措施，以保護組織的營運，並降低事件所造成的衝擊影響。<br><br>
+                            若以提供 <strong>高階主管</strong> 的 CTI 類型應選擇下列何項較為合適？
+                        </p>
+                        <div class="options-grid">
+                            <button class="btn btn-option" onclick="checkAnswer('A')">(A) Strategic（戰略型）</button>
+                            <button class="btn btn-option" onclick="checkAnswer('B')">(B) Tactical（戰術型）</button>
+                            <button class="btn btn-option" onclick="checkAnswer('C')">(C) Technical（技術型）</button>
+                            <button class="btn btn-option" onclick="checkAnswer('D')">(D) Operational（操作型）</button>
+                        </div>
+                    </div>
+
+                    <!-- 作答回饋區 -->
+                    <div id="feedback-area"></div>
+                    <div class="mt-3 text-end">
+                        <button class="btn btn-sm btn-outline-primary" onclick="resetQuestion()">重作本題</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 第一步：找關鍵字 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    【第一步】找關鍵字：這題在問誰？
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <p>請用螢光筆將題目中的這三個詞圈起來：</p>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            1. <span class="highlight-text">高階主管</span>：決策者（CEO、CISO、董事會）。他們關心的是「公司的大方向」與「風險」，通常沒時間看技術細節設定。
+                        </li>
+                        <li class="list-group-item">
+                            2. <span class="highlight-text">CTI 類型</span>：這暗示情資有分等級，因為「不同受眾要看不同層級的情資」。
+                        </li>
+                        <li class="list-group-item">
+                            3. <span class="highlight-text">合適</span>：題目不是問哪個「技術最厲害」，而是問哪個「最符合需求」。
+                        </li>
+                    </ul>
+                    <div class="alert alert-warning mt-3 border-0">
+                        <strong>提醒學生：</strong> 這題的核心不是考「駭客技術」，而是考「職場溝通」——給誰看什麼報告。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 第二步：白話翻譯 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    【第二步】白話翻譯：用老闆聽得懂的話
+                </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <p>我們把題目翻譯成日常口語：</p>
+                    <blockquote class="blockquote border-start border-4 border-primary ps-3 bg-light py-3">
+                        「如果你要把資安威脅情況<strong>『用老闆聽得懂』</strong>的方式報告，該選哪一種情資？」
+                    </blockquote>
+                    <p>老闆聽得懂什麼？聽得懂「虧損」、「商譽」、「趨勢」。<br>老闆聽不懂什麼？聽不懂「Hash Value」、「TCP Handshake」。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 第三步：解題思路 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFour">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                    【第三步】解題思路：觀念與步驟
+                </button>
+            </h2>
+            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <h5 class="fw-bold text-primary">這題考什麼觀念？</h5>
+                    <p><strong>CTI 必須依受眾分層（Audience-driven）；高階主管看的是戰略層的風險與趨勢。</strong></p>
+                    
+                    <h5 class="fw-bold text-primary mt-4">解題步驟 1-2-3</h5>
+                    <ol>
+                        <li><strong>先確認受眾：</strong>題目指定「高階主管」。</li>
+                        <li><strong>分析需求：</strong>高階主管關心風險趨勢、財務影響、投資優先順序（而不是 IOC 技術細節）。</li>
+                        <li><strong>選擇對應類型：</strong>在四種 CTI 類型中，選出「最高層、最決策導向」的那一個。</li>
+                    </ol>
+
+                    <h5 class="fw-bold text-primary mt-4">生活化比喻</h5>
+                    <div class="p-3 bg-light rounded">
+                        <p class="mb-0">老闆要看的是<strong>「天氣預報與颱風路徑圖」</strong>（決定要不要放假、防災預算），<br>工程師才需要看<strong>「每分鐘風速與氣壓數據」</strong>（決定怎麼調校儀器）。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 第四步：選項分析 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFive">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                    【第四步】選項分析：A~D 逐一破解
+                </button>
+            </h2>
+            <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong class="text-success">(A) Strategic（戰略型） [正確]</strong><br>
+                            內容偏向：威脅趨勢、商業衝擊、風險等級、投資與治理建議。<br>
+                            <span class="text-muted">→ 適合：董事會、高階主管 (C-Level)。</span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong class="text-secondary">(B) Tactical（戰術型） [不最合適]</strong><br>
+                            內容偏向：攻擊手法、TTP（攻擊者常用的戰術、技術與流程）與防禦建議。<br>
+                            <span class="text-muted">→ 適合：SOC 經理、藍隊主管、資安架構師。</span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong class="text-secondary">(C) Technical（技術型） [不合適]</strong><br>
+                            內容偏向：IOC（入侵指標，如惡意 IP、惡意網域、檔案雜湊值）。<br>
+                            <span class="text-muted">→ 適合：一線 SOC 分析師、防火牆/SIEM 偵測規則。</span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong class="text-secondary">(D) Operational（操作型） [不合適]</strong><br>
+                            內容偏向：特定事件、特定駭客組織的具體行動計畫、時間線與意圖。<br>
+                            <span class="text-muted">→ 適合：事件應變 (IR) 團隊、威脅情蒐分析師。</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. 觀念補充與延伸 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSix">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                    【觀念補充】核心架構與變化題
+                </button>
+            </h2>
+            <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <h5 class="fw-bold">核心觀念定位</h5>
+                    <p>本題屬於「威脅情資 (CTI)、資安治理與決策」章節。</p>
+                    
+                    <h5 class="fw-bold mt-4">互動學習：CTI 類型對照卡</h5>
+                    <p class="text-muted small">點擊下方卡片查看詳細內容</p>
+                    <div class="row g-2">
+                        <div class="col-6 col-md-3">
+                            <div class="card cti-card text-center py-3" onclick="showCtiDetail('strategic')">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title fw-bold mb-0">Strategic<br>戰略型</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="card cti-card text-center py-3" onclick="showCtiDetail('tactical')">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title fw-bold mb-0">Tactical<br>戰術型</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="card cti-card text-center py-3" onclick="showCtiDetail('technical')">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title fw-bold mb-0">Technical<br>技術型</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="card cti-card text-center py-3" onclick="showCtiDetail('operational')">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title fw-bold mb-0">Operational<br>操作型</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 動態顯示詳情區 -->
+                    <div id="cti-detail-display" class="card-detail-box">
+                        <h5 id="cti-detail-title" class="fw-bold text-primary"></h5>
+                        <p><strong>適合對象：</strong><span id="cti-detail-audience"></span></p>
+                        <p><strong>常見內容：</strong><span id="cti-detail-content"></span></p>
+                        <p class="mb-0 bg-white p-2 border rounded"><strong>生活比喻：</strong><span id="cti-detail-analogy"></span></p>
+                    </div>
+
+                    <h5 class="fw-bold mt-4">觸類旁通：變化題型</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item">問「給 SOC 分析師」較適合哪種？ <span class="badge bg-secondary">Technical</span></li>
+                        <li class="list-group-item">問「給藍隊主管制定防禦策略」較適合哪種？ <span class="badge bg-secondary">Tactical</span></li>
+                        <li class="list-group-item">問「支援正在處理的勒索事件時間線」較適合哪種？ <span class="badge bg-secondary">Operational</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 記憶口訣與陷阱 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSeven">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                    【記憶口訣 & 常見陷阱】
+                </button>
+            </h2>
+            <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <h5 class="fw-bold text-success">記憶口訣</h5>
+                    <div class="alert alert-success fs-5 text-center fw-bold">
+                        「老闆看戰略，主管看戰術；<br>工程看技術，應變看操作。」
+                    </div>
+
+                    <h5 class="fw-bold text-danger mt-4">常見陷阱</h5>
+                    <ul>
+                        <li><strong>容易搞混：</strong>以為「技術型」最專業、數據最多，所以應該給老闆看以示負責。（錯！老闆看不懂也沒時間看）。</li>
+                        <li><strong>心理盲點：</strong>把「資訊量越多越好」當成好報告。（錯！好的情資報告是「對的人看到對的資訊」）。</li>
+                        <li><strong>避坑指南：</strong>
+                            <ul>
+                                <li>看到「高階主管/董事會」 → 直接選 <strong>Strategic</strong>。</li>
+                                <li>看到「IOC/Hash/IP」 → 直接選 <strong>Technical</strong>。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. 正確答案 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingEight">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
+                    【正確答案】
+                </button>
+            </h2>
+            <div id="collapseEight" class="accordion-collapse collapse" aria-labelledby="headingEight" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <div class="text-center my-3">
+                        <h1 class="display-1 fw-bold text-success">A</h1>
+                        <p class="fs-5">高階主管需要決策導向的風險趨勢與影響評估，因此選戰略型 (Strategic) CTI。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. 自我檢測 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingNine">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNine" aria-expanded="false" aria-controls="collapseNine">
+                    【自我檢測】考考你是否真懂？
+                </button>
+            </h2>
+            <div id="collapseNine" class="accordion-collapse collapse" aria-labelledby="headingNine" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <p class="text-muted mb-4">請嘗試回答以下延伸問題，點擊按鈕查看答案。</p>
+                    
+                    <div class="quiz-item">
+                        <p class="fw-bold mb-2">Q1. 若要提供 SOC 一線分析師用來下偵測規則（阻擋惡意 IP），CTI 類型會選哪個？</p>
+                        <button class="btn btn-sm btn-outline-dark" onclick="toggleQuizAnswer('q1-ans')">看答案</button>
+                        <div id="q1-ans" class="quiz-answer">答案：Technical（技術型）。因為涉及具體的 IOC 指標。</div>
+                    </div>
+
+                    <div class="quiz-item">
+                        <p class="fw-bold mb-2">Q2. 若要讓藍隊主管了解攻擊者常用手法 (TTPs) 並調整整體防禦策略，應選哪個？</p>
+                        <button class="btn btn-sm btn-outline-dark" onclick="toggleQuizAnswer('q2-ans')">看答案</button>
+                        <div id="q2-ans" class="quiz-answer">答案：Tactical（戰術型）。因為重點在於攻擊者的戰術與防禦對策。</div>
+                    </div>
+
+                    <div class="quiz-item border-0">
+                        <p class="fw-bold mb-2">Q3. 若針對特定勒索組織的行動時間線、意圖與目標進行分析，較像哪個？</p>
+                        <button class="btn btn-sm btn-outline-dark" onclick="toggleQuizAnswer('q3-ans')">看答案</button>
+                        <div id="q3-ans" class="quiz-answer">答案：Operational（操作型）。因為針對特定事件/行動的細節與脈絡。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 統計與重置區 -->
+    <div class="stats-bar">
+        <div>
+            <span class="fw-bold">作答統計：</span>
+            <span id="stats-display">載入中...</span>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="resetStats()">清除紀錄</button>
+    </div>
+
+</div>
+
+<!-- 引入 Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // 定義正確答案
+    const CORRECT_ANSWER = 'A';
+
+    // 初始化統計數據變數
+    let stats = {
+        total: 0,
+        correct: 0
+    };
+
+    // 頁面載入時執行
+    document.addEventListener('DOMContentLoaded', () => {
+        loadStats();
+        updateStatsDisplay();
+    });
+
+    // 載入 localStorage 數據
+    function loadStats() {
+        const storedStats = localStorage.getItem('ipas_q19_stats');
+        if (storedStats) {
+            stats = JSON.parse(storedStats);
+        }
+    }
+
+    // 儲存數據到 localStorage
+    function saveStats() {
+        localStorage.setItem('ipas_q19_stats', JSON.stringify(stats));
+    }
+
+    // 檢查答案邏輯
+    function checkAnswer(selectedOption) {
+        const feedbackArea = document.getElementById('feedback-area');
+        
+        // 更新統計次數
+        stats.total++;
+        if (selectedOption === CORRECT_ANSWER) {
+            stats.correct++;
+            
+            // 顯示正確回饋
+            feedbackArea.className = 'feedback-correct';
+            feedbackArea.innerHTML = `
+                <strong>【答對了！】(A) Strategic（戰略型）</strong><br>
+                高階主管需要的是決策依據。戰略型情資提供「風險、趨勢、商業影響」，正是老闆做決策需要的內容。
+            `;
+        } else {
+            // 顯示錯誤回饋
+            let explanation = "";
+            switch(selectedOption) {
+                case 'B': explanation = "戰術型 (Tactical) 偏重「攻擊手法 (TTPs)」，這對主管或技術經理比較有用，老闆可能會聽不懂。"; break;
+                case 'C': explanation = "技術型 (Technical) 偏重「IOC (IP、雜湊)」，這太細節了，是給機器或分析師看的。"; break;
+                case 'D': explanation = "操作型 (Operational) 偏重「特定事件行動」，適合應變團隊，對老闆來說太瑣碎。"; break;
+            }
+
+            feedbackArea.className = 'feedback-wrong';
+            feedbackArea.innerHTML = `
+                <strong>【答錯了】</strong><br>
+                你選擇了 (${selectedOption})，這不太合適。<br>
+                ${explanation}<br>
+                <small class="text-muted">請試著再選一次，或參考下方「選項分析」。</small>
+            `;
+        }
+
+        feedbackArea.style.display = 'block';
+        saveStats();
+        updateStatsDisplay();
+    }
+
+    // 重作本題（僅清除回饋區，不清除統計）
+    function resetQuestion() {
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('feedback-area').innerHTML = '';
+    }
+
+    // 更新介面上的統計數字
+    function updateStatsDisplay() {
+        const display = document.getElementById('stats-display');
+        let rate = 0;
+        if (stats.total > 0) {
+            rate = Math.round((stats.correct / stats.total) * 100);
+        }
+        display.innerHTML = `作答 ${stats.total} 次 / 正確 ${stats.correct} 次 (正確率: ${rate}%)`;
+    }
+
+    // 清除所有紀錄
+    function resetStats() {
+        if(confirm('確定要清除所有學習紀錄嗎？')) {
+            stats = { total: 0, correct: 0 };
+            saveStats();
+            updateStatsDisplay();
+            resetQuestion();
+        }
+    }
+
+    // 自我檢測顯示答案
+    function toggleQuizAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    }
+
+    // CTI 卡片互動邏輯
+    function showCtiDetail(type) {
+        const displayBox = document.getElementById('cti-detail-display');
+        const titleEl = document.getElementById('cti-detail-title');
+        const audienceEl = document.getElementById('cti-detail-audience');
+        const contentEl = document.getElementById('cti-detail-content');
+        const analogyEl = document.getElementById('cti-detail-analogy');
+        
+        // 移除所有卡片的 active 狀態
+        document.querySelectorAll('.cti-card').forEach(el => el.classList.remove('active'));
+        // 簡單標示當前點擊的卡片 (透過 event target 的父層查找略顯複雜，這裡簡化處理)
+        
+        displayBox.style.display = 'block';
+
+        const data = {
+            'strategic': {
+                title: 'Strategic (戰略型)',
+                audience: '高階主管、董事會 (C-Suite)',
+                content: '產業威脅趨勢、地緣政治、財務衝擊、風險評估',
+                analogy: '「天氣預報」與「氣候變遷報告」（決定要不要買保險、要不要蓋堤防）'
+            },
+            'tactical': {
+                title: 'Tactical (戰術型)',
+                audience: '資安經理、SOC 主管、資安架構師',
+                content: '攻擊者戰術、技術與程序 (TTPs)、惡意軟體功能、防禦策略',
+                analogy: '「防颱指南」與「沙包堆疊教學」（決定怎麼防禦、怎麼調度人力）'
+            },
+            'technical': {
+                title: 'Technical (技術型)',
+                audience: 'SOC 分析師、防火牆/SIEM 設備',
+                content: '入侵指標 (IOCs)：惡意 IP、網域、Hash、垃圾郵件主旨',
+                analogy: '「雨量數據」與「風速計讀數」（純數據，用來設定警報器）'
+            },
+            'operational': {
+                title: 'Operational (操作型)',
+                audience: '事件應變 (IR) 團隊、威脅情蒐分析師',
+                content: '特定攻擊行動的細節、駭客意圖、能力、攻擊時間線',
+                analogy: '「某個颱風的即時動態路徑」與「登陸時間預測」（針對正在發生的事件做反應）'
+            }
+        };
+
+        const info = data[type];
+        titleEl.textContent = info.title;
+        audienceEl.textContent = info.audience;
+        contentEl.textContent = info.content;
+        analogyEl.textContent = info.analogy;
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS/ISO 27001 資安教學 - 第 9 題</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* 深藍灰，專業感 */
+            --accent-color: #3498db;  /* 補教藍 */
+            --error-color: #c0392b;   /* 錯誤紅 */
+            --success-color: #27ae60; /* 正確綠 */
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --border-color: #ddd;
+            --text-main: #333;
+            --text-light: #666;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            font-size: 16px;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 30px;
+        }
+
+        /* Header Style */
+        header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header-info {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 1.1em; /* 稍微加大，但不超過1級 */
+        }
+
+        /* Question Section */
+        .question-block {
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-size: 1.125rem; /* 18px */
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        /* Options */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f7fb;
+            border-color: var(--accent-color);
+        }
+
+        input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* Buttons */
+        .action-area {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        #submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #reset-btn {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Feedback Section */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none; /* Hidden by default */
+        }
+
+        .feedback-correct {
+            background-color: #e8f8f5;
+            border: 1px solid var(--success-color);
+            color: #145a32;
+        }
+
+        .feedback-wrong {
+            background-color: #fdedec;
+            border: 1px solid var(--error-color);
+            color: #78281f;
+        }
+
+        /* Analysis Section */
+        .analysis-section {
+            margin-top: 30px;
+            border-top: 1px dashed #aaa;
+            padding-top: 20px;
+        }
+
+        details {
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        summary {
+            padding: 12px 15px;
+            font-weight: bold;
+            cursor: pointer;
+            list-style: none; /* Hide default triangle in some browsers */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e9ecef;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .analysis-content {
+            padding: 20px;
+        }
+
+        .section-block {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+            margin-bottom: 10px;
+            font-size: 1.05rem;
+        }
+
+        .highlight {
+            color: #d35400;
+            font-weight: bold;
+        }
+
+        .keyword-box {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+        
+        li {
+            margin-bottom: 5px;
+        }
+        
+        /* Self Check Styles */
+        .self-check-answer {
+            display: none; /* Default hidden */
+            color: #2c3e50;
+            font-weight: bold;
+            background-color: #ecf0f1;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+        
+        .toggle-answer-btn {
+            background-color: #34495e;
+            color: white;
+            font-size: 0.9em;
+            padding: 8px 16px;
+            margin-top: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .question-text {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-info">第 9 題</div>
+        <div class="header-info">主題：ISO 27001－防止資產未經授權或誤用</div>
+    </header>
+
+    <main>
+        <div class="question-block">
+            <div class="question-text">
+                「一個要導入 ISO 27001 的組織，為了降低組織資產未經授權或誤用的機會，下列何種措施較『無法』避免？」
+            </div>
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A">
+                    (A) 職務區隔
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B">
+                    (B) 職務輪調
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C">
+                    (C) 資產清冊
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D">
+                    (D) 存取控制政策
+                </label>
+            </div>
+        </div>
+
+        <div class="action-area">
+            <button id="submit-btn" onclick="checkAnswer()">送出答案</button>
+            <button id="reset-btn" onclick="resetQuiz()">重新作答</button>
+        </div>
+
+        <div id="feedback-area"></div>
+
+        <div class="analysis-section">
+            <details id="analysis-details">
+                <summary>點此展開教學解析</summary>
+                <div class="analysis-content">
+                    
+                    <div class="section-block">
+                        <div class="section-title">【題目】</div>
+                        <p>一個要導入 ISO 27001 的組織，為了降低組織資產未經授權或誤用的機會，下列何種措施較『無法』避免？<br>
+                        (A) 職務區隔<br>
+                        (B) 職務輪調<br>
+                        (C) 資產清冊<br>
+                        (D) 存取控制政策</p>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【第一步：找關鍵字】</div>
+                        <div class="keyword-box">
+                            <ul>
+                                <li><strong>導入 ISO 27001</strong></li>
+                                <li><strong>降低資產未經授權或誤用</strong></li>
+                                <li><strong>較無法避免</strong>（反向題）</li>
+                            </ul>
+                        </div>
+                        <p>說明：題目要找的是「看起來很重要，但實際上不能直接防止誤用」的措施。</p>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【第二步：白話翻譯】</div>
+                        <p>用高中生日常語言說明：<br>
+                        「公司想避免員工亂用或偷用公司資產，下面哪一個做法其實幫助最小？」</p>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【第三步：解題思路】</div>
+                        <p>這題在考什麼觀念？<br>
+                        → ISO 27001 中「預防控制（preventive controls）」與「管理性文件」的差異。</p>
+                        <p style="margin-top: 10px;">解題步驟：</p>
+                        <ol style="padding-left: 20px;">
+                            <li>先找出哪些措施可以『直接限制或分散權力』。</li>
+                            <li>再找出只是在『記錄、盤點』，但不會阻止行為的選項。</li>
+                            <li>題目問「較無法避免」，選效果最弱者。</li>
+                        </ol>
+                        <p style="margin-top: 10px;">原理與規則（名詞解釋）：</p>
+                        <ul>
+                            <li><strong>職務區隔：</strong>把重要工作拆給不同人做，避免一人亂來（例如：開支票的人不能同時管帳）。</li>
+                            <li><strong>職務輪調：</strong>定期換人做，降低長期舞弊風險（避免老鳥隻手遮天）。</li>
+                            <li><strong>存取控制政策：</strong>規定誰可以用、誰不能用（直接設權限）。</li>
+                            <li><strong>資產清冊：</strong>只是列清單，知道有什麼，不等於有人不能亂用。</li>
+                        </ul>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【第四步：選項分析】</div>
+                        <ul>
+                            <li><strong>(A) 職務區隔：</strong>為什麼能避免？因為權力被分散，單一人員無法完成所有未授權動作。</li>
+                            <li><strong>(B) 職務輪調：</strong>為什麼能降低誤用？因為新人接手容易發現舊人的問題，且減少長期濫用權限的機會。</li>
+                            <li><strong>(C) 資產清冊：</strong>為什麼較無法避免？因為它只是一份記錄表。就算清冊寫得很完美，如果沒有搭配門禁或權限鎖，小偷還是可以直接拿走資產。它主要功能是「盤點」與「當責」，而非「阻擋」。</li>
+                            <li><strong>(D) 存取控制政策：</strong>為什麼能直接防止未授權使用？因為它直接定義規則與技術限制，阻擋無權限者進入。</li>
+                        </ul>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【觀念補充與延伸】（★重要）</div>
+                        <p>核心觀念定位：<br>屬於 ISO 27001「存取控制與人員控制」常考觀念題。</p>
+                        <p>對比概念：<br>
+                        <strong>預防控制</strong>（職務區隔、存取控制） vs <strong>管理工具</strong>（資產清冊）</p>
+                        <p>變化題型：<br>
+                        1. 「下列何者屬於偵測性而非預防性控制？」<br>
+                        2. 「哪一項措施最無法直接阻止內部人員舞弊？」</p>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【記憶口訣】</div>
+                        <p>「清冊只是記，不會幫你擋。」</p>
+                        <p>「要防亂用，要管人，不只管表。」</p>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【常見陷阱】</div>
+                        <ul>
+                            <li><strong>最容易搞混：</strong>以為「資產清冊很重要＝一定能防誤用」。</li>
+                            <li><strong>心理盲點：</strong>把『知道有哪些資產』誤認為『能阻止資產被亂用』。</li>
+                            <li><strong>避坑指南：</strong>問自己一句話：「這個措施，有沒有真的『限制人』？」</li>
+                        </ul>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【正確答案】</div>
+                        <p><strong>答案：C</strong></p>
+                        <p>一句話理由：資產清冊只負責盤點資產，並不能直接防止未經授權或誤用行為。</p>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="section-title">【自我檢測】</div>
+                        <p>延伸問題（附答案參考）：</p>
+                        <ul>
+                            <li>1) 如果公司只有資產清冊，卻沒有存取控制，會有什麼風險？<br>
+                                <span class="self-check-answer">（答：仍可能被未授權使用）</span>
+                            </li>
+                            <li>2) 若要防止內部舞弊，應優先加強哪一類控制？<br>
+                                <span class="self-check-answer">（答：職務區隔與存取控制）</span>
+                            </li>
+                            <li>3) 資產清冊最主要的用途是什麼？<br>
+                                <span class="self-check-answer">（答：資產盤點與管理基礎）</span>
+                            </li>
+                        </ul>
+                        <button class="toggle-answer-btn" onclick="toggleSelfCheckAnswers()">顯示參考答案</button>
+                    </div>
+
+                </div>
+            </details>
+        </div>
+    </main>
+</div>
+
+<script>
+    function checkAnswer() {
+        const selectedOption = document.querySelector('input[name="answer"]:checked');
+        const feedbackArea = document.getElementById('feedback-area');
+        const analysisDetails = document.getElementById('analysis-details');
+
+        if (!selectedOption) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        const answer = selectedOption.value;
+        const correctAnswer = 'C';
+
+        feedbackArea.style.display = 'block';
+        feedbackArea.className = ''; // Reset classes
+
+        if (answer === correctAnswer) {
+            feedbackArea.classList.add('feedback-correct');
+            feedbackArea.innerHTML = `
+                <strong>回答正確！</strong><br>
+                關鍵理由：資產清冊僅是盤點記錄，無法產生限制行為的強制力。
+            `;
+            // 自動展開解析
+            analysisDetails.open = true;
+        } else {
+            feedbackArea.classList.add('feedback-wrong');
+            feedbackArea.innerHTML = `
+                <strong>回答錯誤。</strong><br>
+                你選擇了：(${answer})。<br>
+                <strong>正確答案是：(C)。</strong><br><br>
+                <span class="highlight">關鍵提示：這題問的是『避免誤用的控制措施』，不是『盤點用的管理工具』。</span><br>
+                請展開下方解析查看詳細原因。
+            `;
+        }
+        
+        // Disable inputs after submit
+        const inputs = document.querySelectorAll('input[name="answer"]');
+        inputs.forEach(input => input.disabled = true);
+        document.getElementById('submit-btn').disabled = true;
+    }
+
+    function resetQuiz() {
+        // Clear selection
+        const inputs = document.querySelectorAll('input[name="answer"]');
+        inputs.forEach(input => {
+            input.checked = false;
+            input.disabled = false;
+        });
+
+        // Hide feedback
+        const feedbackArea = document.getElementById('feedback-area');
+        feedbackArea.style.display = 'none';
+        feedbackArea.innerHTML = '';
+
+        // Reset button
+        document.getElementById('submit-btn').disabled = false;
+
+        // Reset self check answers if they were opened
+        const answers = document.querySelectorAll('.self-check-answer');
+        const btn = document.querySelector('.toggle-answer-btn');
+        if (answers.length > 0 && window.getComputedStyle(answers[0]).display !== 'none') {
+             answers.forEach(ans => ans.style.display = 'none');
+             if(btn) btn.textContent = '顯示參考答案';
+        }
+
+        // Close details (optional, depends on preference, here we keep it as is or close it)
+        // document.getElementById('analysis-details').open = false; 
+    }
+
+    function toggleSelfCheckAnswers() {
+        const answers = document.querySelectorAll('.self-check-answer');
+        const btn = document.querySelector('.toggle-answer-btn');
+        
+        if (answers.length === 0) return;
+
+        // Check state of first answer to decide
+        const isHidden = window.getComputedStyle(answers[0]).display === 'none';
+        
+        answers.forEach(ans => {
+            ans.style.display = isHidden ? 'inline-block' : 'none';
+        });
+        
+        btn.textContent = isHidden ? '隱藏參考答案' : '顯示參考答案';
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安衝刺班 - 風險處理目的 (第35題)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --highlight-color: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 16px;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Header Area */
+        header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.1);
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .progress-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 0.9rem;
+            background: rgba(0,0,0,0.3);
+            padding: 5px 10px;
+            border-radius: 8px;
+            text-align: right;
+        }
+
+        .progress-indicator span {
+            display: block;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            padding: 30px 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .question-box {
+            background: #eef2f7;
+            padding: 15px;
+            border-left: 5px solid var(--accent-color);
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+            border-color: var(--accent-color);
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        /* Controls */
+        .controls {
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-submit { background: var(--accent-color); color: white; }
+        .btn-reset { background: #95a5a6; color: white; display: none; }
+        .btn-explain { background: #e67e22; color: white; display: none; }
+        .btn-clear-storage { background: transparent; color: #999; font-size: 0.8rem; border: 1px solid #ddd; }
+
+        /* Feedback */
+        .feedback {
+            margin: 10px 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.wrong {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Explanation Section */
+        .explanation-container {
+            display: none;
+            padding: 0 20px 40px 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .exp-block {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .exp-block:last-child {
+            border-bottom: none;
+        }
+
+        .exp-title {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: inline-block;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 2px;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+            background-clip: text; /* Fallback */
+            background: yellow;
+            color: black;
+            padding: 0 4px;
+            font-weight: bold;
+        }
+
+        .concept-list li {
+            margin-bottom: 8px;
+            margin-left: 20px;
+        }
+
+        .metaphor-box {
+            background: #e8f6f3;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #1abc9c;
+            margin: 15px 0;
+        }
+
+        .self-test-box {
+            background: #fef9e7;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #f1c40f;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.2rem; }
+            .controls { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; margin-bottom: 5px; }
+            .progress-indicator { position: static; margin-bottom: 10px; text-align: left; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="progress-indicator" id="progressArea">
+            學習狀態：<span id="statusText">尚未作答</span>
+            <span id="attemptCount">累計練習：0 次</span>
+        </div>
+        <h1>iPAS 資安規劃／防護實務</h1>
+        <div class="subtitle">重點：分清楚識別/分析/評估/處理</div>
+    </header>
+
+    <main>
+        <section class="quiz-section">
+            <div class="question-box">
+                35. 有關風險處理目的之敘述，下列何項正確？
+            </div>
+            <div class="options-group" role="radiogroup" aria-label="選項列表">
+                <label class="option-label">
+                    <input type="radio" name="q35" value="A">
+                    (A) 風險處理之目的係選擇並實施識別風險的選項
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q35" value="B">
+                    (B) 風險處理之目的係選擇並實施評估風險的選項
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q35" value="C">
+                    (C) 風險處理之目的係選擇並實施分析風險的選項
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q35" value="D">
+                    (D) 風險處理之目的係選擇並實施處理風險的選項
+                </label>
+            </div>
+        </section>
+
+        <div id="feedback" class="feedback" aria-live="polite"></div>
+
+        <div class="controls">
+            <button class="btn btn-submit" onclick="submitAnswer()" aria-label="提交答案">提交答案</button>
+            <button class="btn btn-explain" id="btnExplain" onclick="toggleExplanation()" aria-label="顯示解析">顯示解析</button>
+            <button class="btn btn-reset" id="btnReset" onclick="resetQuiz()" aria-label="重作">再來一次</button>
+            <button class="btn btn-clear-storage" onclick="clearProgress()" aria-label="清除學習紀錄">清除進度</button>
+        </div>
+
+        <section id="explanationSection" class="explanation-container">
+            <!-- 解析內容開始 -->
+            <div class="exp-block">
+                <div class="exp-title">【題目】</div>
+                <p>有關風險處理目的之敘述，下列何項正確？</p>
+            </div>
+
+            <div class="exp-block">
+                <div class="exp-title">【第一步：找關鍵字】</div>
+                <p>請把題目中的 <span class="highlight">風險處理目的</span> 以及選項中的 <span class="highlight">選擇並實施</span> 圈起來。</p>
+            </div>
+
+            <div class="exp-block">
+                <div class="exp-title">【第二步：白話翻譯】</div>
+                <p>題目在問：「風險處理」這個動作到底是在幹嘛？</p>
+                <p>簡單說：前面都檢查完了，現在要動手解決問題，所以是在「選方法並執行它」。</p>
+            </div>
+
+            <div class="exp-block">
+                <div class="exp-title">【第三步：解題思路】</div>
+                <ul>
+                    <li><strong>這題在考什麼觀念？</strong> 考你是否分得清楚風險管理流程的四個階段定義。</li>
+                    <li><strong>解題步驟：</strong>
+                        <ol>
+                            <li>看到「風險處理」，要想到它是流程的最後一步。</li>
+                            <li>既然是「處理」，關鍵動作就是「實施（Action）」。</li>
+                            <li>找選項中，唯一把「處理」對應到「處理選項」的答案。</li>
+                        </ol>
+                    </li>
+                    <li><strong>原理與規則：</strong> 風險管理就像「看病流程」，不同階段做不同事，不能混淆。</li>
+                </ul>
+                <div class="metaphor-box">
+                    <strong>生活比喻：看病流程</strong><br>
+                    🏥 <strong>識別 (Identify)</strong>：醫生問診「你哪裡不舒服？」（找出病徵）<br>
+                    📊 <strong>分析 (Analyze)</strong>：量體溫、驗血數據（估算嚴重程度數值）<br>
+                    ⚖️ <strong>評估 (Evaluate)</strong>：醫生判斷「這需要住院嗎？還是吃藥就好？」（跟標準比對）<br>
+                    💊 <strong>處理 (Treat)</strong>：開藥、手術、復健並<strong>真的去做</strong>（採取措施）
+                </div>
+            </div>
+
+            <div class="exp-block">
+                <div class="exp-title">【第四步：選項分析】</div>
+                <ul>
+                    <li>(A) ❌ <strong>識別風險</strong>：這是第一步（找出有哪些風險），還沒到處理階段。</li>
+                    <li>(B) ❌ <strong>評估風險</strong>：這是第三步（決定優先順序與是否接受風險），還沒開始動手做。</li>
+                    <li>(C) ❌ <strong>分析風險</strong>：這是第二步（算機率與衝擊），屬於計算過程。</li>
+                    <li>(D) ⭕ <strong>處理風險</strong>：正確！風險處理的目的，就是從各種處理方案（如規避、轉移、降低、接受）中「選擇」一個，並「實施」它。</li>
+                </ul>
+            </div>
+
+            <div class="exp-block">
+                <div class="exp-title">【觀念補充與延伸】</div>
+                <p><strong>核心觀念定位：</strong> iPAS 常考題，特別喜歡考流程順序與名詞配對。</p>
+                <ul class="concept-list">
+                    <li><strong>風險識別 (Identification)：</strong> 找出資產、威脅、弱點。（像列出可能會出事的清單）</li>
+                    <li><strong>風險分析 (Analysis)：</strong> 估算可能性與影響程度。（像判斷會不會發生、發生有多嚴重）</li>
+                    <li><strong>風險評估 (Evaluation)：</strong> 將分析結果與風險準則比對，決定處理優先順序。（像急診檢傷分類，決定誰先救）</li>
+                    <li><strong>風險處理 (Treatment)：</strong> 選擇並實施處理選項。（像真的去治療或改善資安設備）</li>
+                </ul>
+                <br>
+                <p><strong>觸類旁通：</strong></p>
+                <ul>
+                    <li><em>變形考法1：</em> 如果問「風險評估」在做什麼？答案會是「將分析結果與準則比較，決定是否需要處理」。</li>
+                    <li><em>變形考法2：</em> 給一段情境（例如：正在列出公司有多少台伺服器），問這是哪一步？（答案：識別）。</li>
+                </ul>
+            </div>
+
+            <div class="exp-block">
+                <div class="exp-title">【記憶口訣】</div>
+                <p style="font-size: 1.2rem; text-align: center; color: var(--accent-color); font-weight: bold; margin: 10px 0;">
+                    「先找（識別）→ 再算（分析）→ 再排（評估）→ 再做（處理）」
+                </p>
+            </div>
+
+            <div class="exp-block">
+                <div class="exp-title">【常見陷阱】</div>
+                <ul>
+                    <li>把「評估」與「處理」混在一起：很多人以為評估完就沒事了，其實評估只是「決定要不要做」，處理才是「真的做」。</li>
+                    <li>看到題目有「選擇並實施」就亂選：其實只有到了「處理」階段，才會有實施（Implementation）的動作。</li>
+                    <li><strong>避坑指南：抓住動詞</strong>
+                        <br>識別＝找
+                        <br>分析＝算
+                        <br>評估＝比（跟標準比）
+                        <br>處理＝做（採取措施）
+                    </li>
+                </ul>
+            </div>
+
+            <div class="exp-block">
+                <div class="exp-title">【正確答案】</div>
+                <p><strong>答案：(D)</strong></p>
+                <p>一句話理由：風險處理就是「選策略並把措施做下去」，不是在找、算、比。</p>
+            </div>
+
+            <div class="exp-block">
+                <div class="exp-title">【自我檢測】</div>
+                <div class="self-test-box">
+                    <p>試著回答下列情境屬於哪一步驟？</p>
+                    <p><strong>Q1：</strong>如果你在整理「有哪些資產可能被勒索軟體影響」？</p>
+                    <p><strong>Q2：</strong>如果你在估算「被攻擊機率=中、影響=高」？</p>
+                    <p><strong>Q3：</strong>如果你決定「導入 MFA 並設定完成期限與負責人」？</p>
+                    <hr style="margin: 10px 0; border: 0; border-top: 1px solid #ccc;">
+                    
+                    <div style="text-align: center; margin-bottom: 5px;">
+                        <button id="btnSelfTest" class="btn" style="background: #f39c12; color: white; padding: 5px 15px; font-size: 0.9rem;" onclick="toggleSelfTest()">顯示參考答案</button>
+                    </div>
+
+                    <div id="selfTestAnswers" style="display: none; padding-top: 10px; border-top: 1px dashed #ccc;">
+                        <p style="font-size: 0.9rem; color: #555;">
+                            <strong>參考答案：</strong><br>
+                            Q1：識別（因為在「找」資產）<br>
+                            Q2：分析（因為在「算」等級）<br>
+                            Q3：處理（因為在「做」導入 MFA 的動作）
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- 解析內容結束 -->
+        </section>
+    </main>
+</div>
+
+<script>
+    // Constants
+    const CORRECT_ANSWER = 'D';
+    const STORAGE_KEY = 'ipas_q35_stats';
+    
+    // DOM Elements
+    const options = document.querySelectorAll('input[name="q35"]');
+    const feedbackBox = document.getElementById('feedback');
+    const explanationSection = document.getElementById('explanationSection');
+    const btnSubmit = document.querySelector('.btn-submit');
+    const btnExplain = document.getElementById('btnExplain');
+    const btnReset = document.getElementById('btnReset');
+    const statusText = document.getElementById('statusText');
+    const attemptCountText = document.getElementById('attemptCount');
+
+    // Load Stats on Init
+    loadProgress();
+
+    function submitAnswer() {
+        let selectedValue = null;
+        options.forEach(opt => {
+            if (opt.checked) selectedValue = opt.value;
+        });
+
+        if (!selectedValue) {
+            alert('同學，請先選一個答案喔！');
+            return;
+        }
+
+        // Logic
+        const isCorrect = selectedValue === CORRECT_ANSWER;
+        
+        // Update Stats
+        updateProgress(isCorrect);
+
+        // UI Feedback
+        feedbackBox.style.display = 'block';
+        feedbackBox.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+        
+        if (isCorrect) {
+            feedbackBox.innerHTML = `✅ 答對了！你的選擇是 (${selectedValue})。<br>太棒了！完全掌握風險處理的核心概念。`;
+        } else {
+            feedbackBox.innerHTML = `❌ 答錯了。你選了 (${selectedValue})，正確答案是 (${CORRECT_ANSWER})。<br>別氣餒，看看解析，弄懂流程就不會忘了！`;
+        }
+
+        // Disable options
+        options.forEach(opt => opt.disabled = true);
+        
+        // Button toggles
+        btnSubmit.style.display = 'none';
+        btnExplain.style.display = 'inline-block';
+        btnReset.style.display = 'inline-block';
+
+        // Scroll to feedback
+        feedbackBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function toggleExplanation() {
+        if (explanationSection.style.display === 'block') {
+            explanationSection.style.display = 'none';
+            btnExplain.innerText = '顯示解析';
+        } else {
+            explanationSection.style.display = 'block';
+            btnExplain.innerText = '隱藏解析';
+            // Scroll to explanation
+            setTimeout(() => {
+                explanationSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    }
+
+    function toggleSelfTest() {
+        const div = document.getElementById('selfTestAnswers');
+        const btn = document.getElementById('btnSelfTest');
+        if (div.style.display === 'none') {
+            div.style.display = 'block';
+            btn.innerText = '隱藏參考答案';
+        } else {
+            div.style.display = 'none';
+            btn.innerText = '顯示參考答案';
+        }
+    }
+
+    function resetQuiz() {
+        // Reset Inputs
+        options.forEach(opt => {
+            opt.checked = false;
+            opt.disabled = false;
+        });
+
+        // Reset UI
+        feedbackBox.style.display = 'none';
+        explanationSection.style.display = 'none';
+        btnSubmit.style.display = 'inline-block';
+        btnExplain.style.display = 'none';
+        btnReset.style.display = 'none';
+        btnExplain.innerText = '顯示解析';
+        
+        // Reset Self Test visibility
+        const selfTestDiv = document.getElementById('selfTestAnswers');
+        const selfTestBtn = document.getElementById('btnSelfTest');
+        if(selfTestDiv) selfTestDiv.style.display = 'none';
+        if(selfTestBtn) selfTestBtn.innerText = '顯示參考答案';
+
+        // Scroll top
+        document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Storage Functions
+    function loadProgress() {
+        const statsStr = localStorage.getItem(STORAGE_KEY);
+        let stats = { attempts: 0, lastStatus: '尚未作答' };
+        
+        if (statsStr) {
+            stats = JSON.parse(statsStr);
+        }
+
+        renderStats(stats);
+    }
+
+    function updateProgress(isCorrect) {
+        let statsStr = localStorage.getItem(STORAGE_KEY);
+        let stats = statsStr ? JSON.parse(statsStr) : { attempts: 0, lastStatus: '尚未作答' };
+
+        stats.attempts += 1;
+        stats.lastStatus = isCorrect ? '上次答對 ✅' : '上次答錯 ❌';
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+        renderStats(stats);
+    }
+
+    function renderStats(stats) {
+        statusText.innerText = stats.lastStatus;
+        statusText.style.color = stats.lastStatus.includes('✅') ? '#aaffaa' : (stats.lastStatus.includes('❌') ? '#ffaaaa' : 'white');
+        attemptCountText.innerText = `累計練習：${stats.attempts} 次`;
+    }
+
+    function clearProgress() {
+        if(confirm('確定要清除所有學習紀錄嗎？')) {
+            localStorage.removeItem(STORAGE_KEY);
+            loadProgress();
+            resetQuiz();
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>iPAS 資安衝刺 - 第18題：機密性觀念解析</title>
+    <!-- 引入 Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* 模擬講義風格 */
+        .container {
+            max-width: 800px;
+            margin-top: 30px;
+            margin-bottom: 50px;
+            background: #fff;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            border-top: 5px solid #0d6efd;
+        }
+
+        h1 {
+            font-size: 1.5rem; /* 標題字級控制 */
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        h2, h3, h4, h5 {
+            font-size: 1.1rem; /* 標題字級控制，不超過內文太多 */
+            font-weight: bold;
+            color: #495057;
+            margin-top: 20px;
+        }
+
+        .highlight-pen {
+            background: linear-gradient(to top, #fff59d 50%, transparent 50%);
+            padding: 0 2px;
+            font-weight: bold;
+        }
+
+        .term-def {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        /* 題目選項樣式 */
+        .option-btn {
+            text-align: left;
+            margin-bottom: 10px;
+            padding: 12px 20px;
+            border: 1px solid #dee2e6;
+            background-color: #fff;
+            width: 100%;
+            border-radius: 6px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .option-btn.selected-correct {
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+            color: #0f5132;
+        }
+
+        .option-btn.selected-wrong {
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+            color: #842029;
+        }
+
+        .feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .stats-bar {
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Accordion 客製化 */
+        .accordion-button {
+            background-color: #f8f9fa;
+            color: #333;
+            font-weight: bold;
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: #e7f1ff;
+            color: #0c63e4;
+        }
+        
+        .answer-toggle-btn {
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .hidden-answer {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 3px solid #0d6efd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="text-center mb-4">
+        <span class="badge bg-secondary mb-2">iPAS 資訊安全規劃實務</span>
+        <h1>第 18 題：機密性 Confidentiality 觀念解析</h1>
+    </div>
+
+    <!-- 統計數據區 -->
+    <div class="stats-bar">
+        <span><strong>您的練習記錄：</strong></span>
+        <span>作答次數：<span id="stat-total">0</span></span>
+        <span>正確次數：<span id="stat-correct">0</span></span>
+        <span>正確率：<span id="stat-rate">0%</span></span>
+        <button class="btn btn-sm btn-outline-secondary" onclick="resetStats()">清除記錄</button>
+    </div>
+
+    <!-- 1. 題目區塊 -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">題目：</h5>
+            <p class="card-text fs-5 mb-4">
+                規劃網路安全架構時，下列何項措施能「較有效」的保護資料的機密性？
+            </p>
+            <div id="options-container">
+                <button class="btn option-btn" onclick="checkAnswer('A')">(A) 資料傳輸加密</button>
+                <button class="btn option-btn" onclick="checkAnswer('B')">(B) 強化防火牆設置</button>
+                <button class="btn option-btn" onclick="checkAnswer('C')">(C) 定期資料備份</button>
+                <button class="btn option-btn" onclick="checkAnswer('D')">(D) 內部網路隔離</button>
+            </div>
+
+            <!-- 即時回饋區 -->
+            <div id="feedback-box" class="feedback-area">
+                <h5 id="feedback-title"></h5>
+                <p id="feedback-text"></p>
+                <button class="btn btn-primary btn-sm mt-2" onclick="resetQuestion()">重作本題</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 教學內容 Accordion -->
+    <div class="accordion" id="lessonAccordion">
+        
+        <!-- 2. 第一步：找關鍵字 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                    第一步：找關鍵字
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <p>請拿起您的螢光筆，將題目中的以下三個詞畫起來：</p>
+                    <ul>
+                        <li><span class="highlight-pen">網路安全架構</span> <span class="term-def">（指整體的防護設計藍圖）</span></li>
+                        <li><span class="highlight-pen">較有效</span> <span class="term-def">（題目可能有好幾個相關選項，但你要選最直接對準目標的那一個）</span></li>
+                        <li><span class="highlight-pen">機密性</span> <span class="term-def">（Confidentiality，指不讓不該看的人看到內容）</span></li>
+                    </ul>
+                    <p><strong>重點提示：</strong>本題的核心是在問資安三要素 CIA 中的 <strong>C = Confidentiality（機密性）</strong>。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 第二步：白話翻譯 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    第二步：白話翻譯
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <p>用我們日常生活的語言來說，這題其實在問：</p>
+                    <blockquote class="blockquote border-start border-4 border-primary ps-3">
+                        「要讓資料在網路上傳送時<strong>『不要被偷看』</strong>，下面哪一個做法最有效、最直接？」
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 第三步：解題思路 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    第三步：解題思路
+                </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <p><strong>這題在考什麼？</strong> 機密性最直接的手段是「加密」，目的是讓攻擊者就算攔截到資料，也看不懂內容。</p>
+                    <hr>
+                    <h6>解題三步驟：</h6>
+                    <ol>
+                        <li><strong>對應觀念：</strong>看到「機密性」，腦中要馬上浮現「防偷看」、「防洩漏」。</li>
+                        <li><strong>檢視目標：</strong>看每個選項主要保護的是 CIA 的哪一個（機密性、完整性、還是可用性？）。</li>
+                        <li><strong>選最直接者：</strong>選擇那個「專門用來保護機密性」的手段。</li>
+                    </ol>
+                    <p><strong>生活比喻：</strong><br>
+                    <strong>加密</strong>就像是把信寫成「暗號」。即使郵差（傳輸過程）把信弄丟了被壞人撿去，壞人沒有密碼表（金鑰）也看不懂信裡寫什麼。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 第四步：選項分析 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFour">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                    第四步：選項分析
+                </button>
+            </h2>
+            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>(A) 資料傳輸加密 <span class="badge bg-success">正解</span></strong><br>
+                            為什麼對？因為加密將明文（看得懂的字）轉為密文（亂碼）。這是保護機密性最根本、最有效的技術。即便駭客在網路傳輸途中攔截封包，看到的也只是一堆亂碼。
+                        </li>
+                        <li class="list-group-item">
+                            <strong>(B) 強化防火牆設置</strong><br>
+                            為什麼不如 (A) 直接？防火牆像是大樓的警衛，負責管理誰可以進出（存取控制）。但如果警衛放行了，或者資料在外面傳輸時被攔截，防火牆無法保護資料內容不被看見。
+                        </li>
+                        <li class="list-group-item">
+                            <strong>(C) 定期資料備份</strong><br>
+                            為什麼不對？備份是為了「資料不見時可以救回來」，這對應的是 <strong>Availability（可用性）</strong>，跟防偷看（機密性）無關。
+                        </li>
+                        <li class="list-group-item">
+                            <strong>(D) 內部網路隔離</strong><br>
+                            為什麼不如 (A) 直接？隔離（Segmentation）是為了避免駭客進來後到處亂跑（降低擴散風險）。雖然能間接減少資料被接觸的機會，但不是針對「資料內容本身」進行保密的最直接手段。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. 觀念補充與延伸 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFive">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                    觀念補充與延伸（核心必考）
+                </button>
+            </h2>
+            <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <p><strong>核心觀念定位：</strong> 本題屬於「資訊安全基本原則（CIA Triad）」章節。</p>
+                    
+                    <h6>關鍵名詞定義：</h6>
+                    <ul>
+                        <li><strong>機密性 (Confidentiality)：</strong> 確保資料只讓獲得授權的人存取，不讓未授權的人看到。</li>
+                        <li><strong>加密 (Encryption)：</strong> 利用演算法將資料轉換形式，只有持有金鑰（Key）的人能還原。</li>
+                    </ul>
+
+                    <h6>觸類旁通（舉一反三）：</h6>
+                    <table class="table table-bordered table-sm mt-2">
+                        <thead class="table-light">
+                            <tr>
+                                <th>性質</th>
+                                <th>白話意義</th>
+                                <th>常見手段（答案）</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>機密性 (C)</td>
+                                <td>防偷看</td>
+                                <td>加密、存取控制</td>
+                            </tr>
+                            <tr>
+                                <td>完整性 (I)</td>
+                                <td>防亂改</td>
+                                <td>數位簽章、雜湊函數 (Hash)</td>
+                            </tr>
+                            <tr>
+                                <td>可用性 (A)</td>
+                                <td>隨時能用</td>
+                                <td>備份、備援、不斷電系統</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 記憶口訣 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSix">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                    記憶口訣
+                </button>
+            </h2>
+            <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body text-center">
+                    <h5 class="text-primary">「機密怕偷看，加密最直接；備份保能用，雜湊防亂改」</h5>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. 常見陷阱 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSeven">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                    常見陷阱與避坑指南
+                </button>
+            </h2>
+            <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <ul>
+                        <li><strong>迷思：</strong> 許多初學者會把「防火牆」當成萬能丹，覺得有了防火牆就安全了。</li>
+                        <li><strong>盲點：</strong> 防火牆主要功能是「擋住外面的連線」，但如果資料是透過合法的連線傳出去（例如網頁瀏覽），防火牆不會阻止，此時若資料未加密，一樣會被看光光。</li>
+                        <li><strong>避坑指南：</strong> 考試時看到關鍵字：
+                            <ul>
+                                <li>問<strong>機密性</strong> &rarr; 優先找「加密」。</li>
+                                <li>問<strong>可用性</strong> &rarr; 優先找「備份」、「異地備援」。</li>
+                                <li>問<strong>完整性</strong> &rarr; 優先找「雜湊」、「簽章」。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. 正確答案 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingEight">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
+                    正確答案
+                </button>
+            </h2>
+            <div id="collapseEight" class="accordion-collapse collapse" aria-labelledby="headingEight" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <p class="fs-4 text-success fw-bold">答案：(A)</p>
+                    <p><strong>一句話理由：</strong>加密能讓資料即使在傳輸過程中被攔截，攻擊者也無法解讀內容，這是保護機密性最直接有效的技術。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. 自我檢測 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingNine">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNine" aria-expanded="false" aria-controls="collapseNine">
+                    自我檢測（延伸練習）
+                </button>
+            </h2>
+            <div id="collapseNine" class="accordion-collapse collapse" aria-labelledby="headingNine" data-bs-parent="#lessonAccordion">
+                <div class="accordion-body">
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>Q1：</strong>如果把選項 (A) 改成「資料靜態加密（硬碟加密）」，仍能保護機密性嗎？</p>
+                        <button class="btn btn-outline-primary btn-sm answer-toggle-btn" onclick="toggleAnswer('ans1')">顯示答案</button>
+                        <div id="ans1" class="hidden-answer">
+                            <strong>可以。</strong><br>
+                            不論是傳輸中（Data in Transit）還是儲存中（Data at Rest）的資料，只要使用「加密」，主要目的都是為了保護機密性（防止設備遺失或硬碟被偷時資料外洩）。
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>Q2：</strong>題目選項中，哪一個措施最偏向提升「可用性（Availability）」？</p>
+                        <button class="btn btn-outline-primary btn-sm answer-toggle-btn" onclick="toggleAnswer('ans2')">顯示答案</button>
+                        <div id="ans2" class="hidden-answer">
+                            <strong>(C) 定期資料備份。</strong><br>
+                            備份是為了災難發生時能還原資料，確保系統與資料持續可用。
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>Q3：</strong>題目選項中，哪一個措施最偏向降低內部「橫向擴散（Lateral Movement）」的風險？</p>
+                        <button class="btn btn-outline-primary btn-sm answer-toggle-btn" onclick="toggleAnswer('ans3')">顯示答案</button>
+                        <div id="ans3" class="hidden-answer">
+                            <strong>(D) 內部網路隔離。</strong><br>
+                            將網路切分成不同區塊（網段），駭客攻破一台電腦後，比較難直接連線到其他重要主機。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- End Accordion -->
+
+    <div class="text-center mt-5 text-muted small">
+        <hr>
+        &copy; iPAS 資安規劃實務衝刺教材 | Designed for High School Beginners
+    </div>
+</div>
+
+<!-- JavaScript Logic -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 定義 LocalStorage Key
+    const STORAGE_KEY_TOTAL = 'ipas_q18_total';
+    const STORAGE_KEY_CORRECT = 'ipas_q18_correct';
+
+    // 初始化統計變數
+    let totalAttempts = parseInt(localStorage.getItem(STORAGE_KEY_TOTAL) || '0');
+    let correctAttempts = parseInt(localStorage.getItem(STORAGE_KEY_CORRECT) || '0');
+
+    // 頁面載入時更新介面
+    window.addEventListener('load', updateStatsUI);
+
+    function updateStatsUI() {
+        document.getElementById('stat-total').textContent = totalAttempts;
+        document.getElementById('stat-correct').textContent = correctAttempts;
+        
+        let rate = 0;
+        if (totalAttempts > 0) {
+            rate = Math.round((correctAttempts / totalAttempts) * 100);
+        }
+        document.getElementById('stat-rate').textContent = rate + '%';
+    }
+
+    function checkAnswer(selectedOption) {
+        const correctOption = 'A';
+        const feedbackBox = document.getElementById('feedback-box');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+        const buttons = document.querySelectorAll('.option-btn');
+
+        // 更新統計數據
+        totalAttempts++;
+        if (selectedOption === correctOption) {
+            correctAttempts++;
+        }
+        
+        // 寫入 LocalStorage
+        localStorage.setItem(STORAGE_KEY_TOTAL, totalAttempts);
+        localStorage.setItem(STORAGE_KEY_CORRECT, correctAttempts);
+        updateStatsUI();
+
+        // 鎖定按鈕並顯示樣式
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            if (btn.textContent.includes(`(${correctOption})`)) {
+                btn.classList.add('selected-correct');
+            } else if (btn.textContent.includes(`(${selectedOption})`) && selectedOption !== correctOption) {
+                btn.classList.add('selected-wrong');
+            }
+        });
+
+        // 顯示回饋
+        feedbackBox.style.display = 'block';
+        if (selectedOption === correctOption) {
+            feedbackBox.className = 'feedback-area alert alert-success';
+            feedbackTitle.textContent = '✅ 答對了！';
+            feedbackText.textContent = '觀念正確！加密就是保護機密性最直接的手段，讓資料被偷了也看不懂。';
+            // 自動打開解析的第一個區塊作為獎勵/引導
+            new bootstrap.Collapse(document.getElementById('collapseFour'), { toggle: false }).show();
+        } else {
+            feedbackBox.className = 'feedback-area alert alert-danger';
+            feedbackTitle.textContent = '❌ 答錯了，別氣餒！';
+            feedbackText.textContent = '想一下「機密性」是不被偷看，而您的選項可能有其他主要用途（如阻擋連線或備份）。請點開下方「第四步：選項分析」查看詳解。';
+        }
+    }
+
+    function resetQuestion() {
+        const buttons = document.querySelectorAll('.option-btn');
+        const feedbackBox = document.getElementById('feedback-box');
+
+        buttons.forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('selected-correct', 'selected-wrong');
+        });
+
+        feedbackBox.style.display = 'none';
+        
+        // 關閉所有 Accordion (選擇性)
+        // const collapses = document.querySelectorAll('.accordion-collapse');
+        // collapses.forEach(c => new bootstrap.Collapse(c, { toggle: false }).hide());
+    }
+
+    function resetStats() {
+        if(confirm('確定要清除作答記錄嗎？')) {
+            totalAttempts = 0;
+            correctAttempts = 0;
+            localStorage.setItem(STORAGE_KEY_TOTAL, '0');
+            localStorage.setItem(STORAGE_KEY_CORRECT, '0');
+            updateStatsUI();
+        }
+    }
+
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    }
+</script>
+</body>
+</html>

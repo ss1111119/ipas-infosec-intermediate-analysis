@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安規劃/防護實務 - 題組五：DDoS 風險量化衝刺班</title>
+    <style>
+        :root {
+            --primary-color: #2563eb; /* 專業藍 */
+            --accent-color: #f59e0b; /* 重點橘 */
+            --success-color: #10b981; /* 正確綠 */
+            --error-color: #ef4444; /* 錯誤紅 */
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+            --card-bg: #ffffff;
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 16px;
+            padding-bottom: 50px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #1e40af);
+            color: white;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            width: 200px;
+            height: 24px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .progress-bar {
+            background-color: var(--accent-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Main Layout */
+        .main-container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 15px;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .nav-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border: 2px solid transparent;
+            background-color: transparent;
+            text-align: left;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-color);
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: #f0f9ff;
+            color: var(--primary-color);
+        }
+
+        .nav-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+        }
+
+        .nav-btn.completed::after {
+            content: '✓';
+            float: right;
+            font-weight: bold;
+        }
+
+        .reset-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .reset-btn:hover {
+            background: #fee2e2;
+        }
+
+        /* Content Area */
+        .content-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .content-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 3px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+
+        .highlight-box {
+            background-color: #fffbeb;
+            border-left: 5px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .scenario-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            cursor: zoom-in;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        /* Modal for Image Zoom */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            padding-top: 50px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 1200px;
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        /* Quiz Styles */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f9ff;
+        }
+
+        .option-label input {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-retry {
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid #d1d5db;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 10px;
+            display: none;
+        }
+
+        /* Feedback & Explanation */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #34d399;
+        }
+
+        .feedback-wrong {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #f87171;
+        }
+
+        .explanation-details {
+            margin-top: 20px;
+            border-top: 2px dashed #e5e7eb;
+            padding-top: 20px;
+        }
+
+        .exp-section {
+            margin-bottom: 15px;
+        }
+
+        .exp-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            display: inline-block;
+            background: #e0f2fe;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .exp-content {
+            padding-left: 5px;
+        }
+
+        /* Calculation Helper */
+        .calc-helper {
+            background: #fff7ed;
+            border: 2px solid var(--accent-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .calc-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .calc-step:last-child {
+            border-bottom: none;
+        }
+
+        .step-label {
+            font-weight: bold;
+            min-width: 120px;
+            color: #92400e;
+        }
+
+        .step-val {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 0 10px;
+        }
+
+        .step-desc {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        /* Specific for Q40 Checkbox */
+        .checkbox-group .option-label {
+            /* Same as radio but explicitly for differentiation in logic if needed */
+        }
+
+        /* Tags for teacher tips */
+        .teacher-tag {
+            background: #ef4444;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        /* Self Check Toggle Styles */
+        .self-check-details summary {
+            cursor: pointer;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 8px;
+            user-select: none;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .self-check-details summary:hover {
+            background-color: #eff6ff;
+        }
+
+        .self-check-answer {
+            margin-top: 5px;
+            margin-left: 15px;
+            color: #065f46;
+            background: #d1fae5;
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid #34d399;
+            animation: fadeIn 0.3s;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <div>
+                <h1>iPAS 資安衝刺班 - 題組 5</h1>
+                <div class="subtitle">DDoS 攻擊與風險量化整合分析 (第 37-40 題)</div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-text">學習進度：<span id="progressText">0%</span></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- 左側導覽 -->
+        <aside class="sidebar">
+            <button class="nav-btn active" onclick="switchTab('intro')">📝 題組背景與觀念</button>
+            <button class="nav-btn" onclick="switchTab('q37')" id="btn-q37">Q37. 防禦機制選擇</button>
+            <button class="nav-btn" onclick="switchTab('q38')" id="btn-q38">Q38. 降低金額計算</button>
+            <button class="nav-btn" onclick="switchTab('q39')" id="btn-q39">Q39. 投資價值分析</button>
+            <button class="nav-btn" onclick="switchTab('q40')" id="btn-q40">Q40. 其他防禦設備</button>
+            
+            <button class="reset-btn" onclick="resetProgress()">🔄 清除學習進度</button>
+        </aside>
+
+        <!-- 內容區 -->
+        <main id="content-area">
+
+            <!-- Intro Tab -->
+            <div id="intro" class="content-card active">
+                <h2 class="section-title">題組背景說明</h2>
+                <div class="highlight-box">
+                    <strong>💡 一句話學習重點：</strong> 
+                    搞懂 DDoS 怎麼擋、錢怎麼算 (年 vs 季)、設備放哪裡。
+                </div>
+
+                <p style="margin-bottom: 10px;"><strong>【情境描述】</strong></p>
+                <p>您是 Quick GO 公司的資安官，負責 Quick GO 公司整體資安管理制度（含資通安全風險）的規劃、執行及監控。該公司目前已建置一個線上購物網站，每一年經由該網站完成的交易收入金額達 500 萬元（占公司全部營收的 70%）。</p>
+                <br>
+                <p>但近年遭受到全球分散式阻斷服務（DDoS）攻擊的損失，經評估後預期每年約為 100,000 元，身為 Quick GO 公司資安官的您，在導入某一項防禦機制後，預估年度的損失值將降為 30,000 元，但該機制的季度服務費用 20,000 元。</p>
+                
+                <div style="margin: 20px 0; text-align: center;">
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">▼ 點擊圖片可放大查看架構圖 ▼</p>
+                    <img src="https://i.meee.com.tw/uu3orf2.jpg" alt="Quick GO 公司網路架構圖" class="scenario-img" onclick="openModal()">
+                </div>
+
+                <div class="highlight-box" style="background-color: #e0f2fe; border-left-color: var(--primary-color);">
+                    <strong>👨‍🏫 老師幫你畫重點：</strong>
+                    <ul>
+                        <li>關鍵字：<strong>DDoS 攻擊</strong>、<strong>ISP</strong>。</li>
+                        <li>關鍵數字：
+                            <ul>
+                                <li>原始年損失 = 10 萬</li>
+                                <li>防禦後年損失 = 3 萬</li>
+                                <li>防禦成本 = <strong>2 萬/季</strong> (注意單位！)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <button class="btn-submit" onclick="switchTab('q37')" style="width:100%">開始挑戰第一題 ➔</button>
+            </div>
+
+            <!-- Q37 -->
+            <div id="q37" class="content-card">
+                <h2 class="section-title">第 37 題：防禦機制選擇</h2>
+                <div class="question-text">
+                    情境如附圖所示。請問應該選用下列何項由 <strong>ISP 業者</strong>提供的服務型防護機制，較能有效地減緩攻擊及其所帶來的影響？
+                </div>
+                
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q37" value="A"> (A) 網路存取控制（NAC）</label>
+                    <label class="option-label"><input type="radio" name="q37" value="B"> (B) 網路流量清洗服務（Flow Cleaning）</label>
+                    <label class="option-label"><input type="radio" name="q37" value="C"> (C) 蜜罐誘捕系統（Honey Pot）</label>
+                    <label class="option-label"><input type="radio" name="q37" value="D"> (D) 入侵偵測系統（IDS）</label>
+                </div>
+
+                <button class="btn-submit" onclick="checkAnswer('q37', 'B')">提交答案</button>
+                <button class="btn-retry" id="retry-q37" onclick="resetQuestion('q37')">重作本題</button>
+
+                <div id="feedback-q37" class="feedback-area"></div>
+                
+                <div id="explanation-q37" class="explanation-details" style="display:none;">
+                    <!-- 解析內容由 JS 動態填入 -->
+                </div>
+            </div>
+
+            <!-- Q38 -->
+            <div id="q38" class="content-card">
+                <h2 class="section-title">第 38 題：風險降低金額計算</h2>
+                
+                <div class="calc-helper">
+                    <h3 style="margin-bottom:10px; color:var(--accent-color);">🧮 計算輔助區</h3>
+                    <div class="calc-step">
+                        <span class="step-label">原始年損失</span>
+                        <span class="step-val">100,000</span>
+                        <span class="step-desc">元 (攻擊發生時會賠掉的錢)</span>
+                    </div>
+                    <div class="calc-step">
+                        <span class="step-label">導入後年損失</span>
+                        <span class="step-val">30,000</span>
+                        <span class="step-desc">元 (雖然有防禦，但還是會損失一點點)</span>
+                    </div>
+                    <div class="calc-step" style="background: #fff; padding:5px; border-radius:4px;">
+                        <span class="step-label">❓ 問題重點</span>
+                        <span class="step-desc">「降低」了多少金額？ (兩者相減)</span>
+                    </div>
+                </div>
+
+                <div class="question-text">
+                    情境如附圖所示。承上題，單以<strong>營業損失</strong>而言，該項防禦機制一年能為 Quick GO <strong>降低</strong>多少金額？
+                </div>
+
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q38" value="A"> (A) 10,000 元</label>
+                    <label class="option-label"><input type="radio" name="q38" value="B"> (B) 80,000 元</label>
+                    <label class="option-label"><input type="radio" name="q38" value="C"> (C) 70,000 元</label>
+                    <label class="option-label"><input type="radio" name="q38" value="D"> (D) 30,000 元</label>
+                </div>
+
+                <button class="btn-submit" onclick="checkAnswer('q38', 'C')">提交答案</button>
+                <button class="btn-retry" id="retry-q38" onclick="resetQuestion('q38')">重作本題</button>
+                
+                <div id="feedback-q38" class="feedback-area"></div>
+                <div id="explanation-q38" class="explanation-details" style="display:none;"></div>
+            </div>
+
+            <!-- Q39 -->
+            <div id="q39" class="content-card">
+                <h2 class="section-title">第 39 題：防護投資價值</h2>
+
+                <div class="calc-helper">
+                    <h3 style="margin-bottom:10px; color:var(--accent-color);">🧮 計算輔助區</h3>
+                    <div class="calc-step">
+                        <span class="step-label">防護效益</span>
+                        <span class="step-val">70,000</span>
+                        <span class="step-desc">元 (剛剛 Q38 算出來的省下的錢)</span>
+                    </div>
+                    <div class="calc-step">
+                        <span class="step-label">防護成本</span>
+                        <span class="step-val">20,000 × 4</span>
+                        <span class="step-desc">= 80,000 元 (<span class="teacher-tag">陷阱</span>季度費用要 × 4)</span>
+                    </div>
+                    <div class="calc-step" style="background: #fff; padding:5px; border-radius:4px;">
+                        <span class="step-label">❓ 創造價值</span>
+                        <span class="step-desc">效益 − 成本 = ?</span>
+                    </div>
+                </div>
+
+                <div class="question-text">
+                    情境如附圖所示。承本題組第一題，該項防禦機制於每一年能夠為 Quick GO 公司<strong>創造的價值</strong>為何？
+                </div>
+
+                <div class="options-group">
+                    <label class="option-label"><input type="radio" name="q39" value="A"> (A) 負 20,000 元</label>
+                    <label class="option-label"><input type="radio" name="q39" value="B"> (B) 負 10,000 元</label>
+                    <label class="option-label"><input type="radio" name="q39" value="C"> (C) 20,000 元</label>
+                    <label class="option-label"><input type="radio" name="q39" value="D"> (D) 50,000 元</label>
+                </div>
+
+                <button class="btn-submit" onclick="checkAnswer('q39', 'B')">提交答案</button>
+                <button class="btn-retry" id="retry-q39" onclick="resetQuestion('q39')">重作本題</button>
+
+                <div id="feedback-q39" class="feedback-area"></div>
+                <div id="explanation-q39" class="explanation-details" style="display:none;"></div>
+            </div>
+
+            <!-- Q40 -->
+            <div id="q40" class="content-card">
+                <h2 class="section-title">第 40 題：其他防禦設備 (複選)</h2>
+                <div class="question-text">
+                    情境如附圖所示。有關 DDoS 攻擊的防禦機制，除本題組第一題的服務型機制外，還可以建置下列哪些設備或服務，以減輕攻擊所造成的影響？<br>
+                    <span style="font-size:0.9rem; color:red;">(請勾選所有正確答案)</span>
+                </div>
+
+                <div class="options-group checkbox-group">
+                    <label class="option-label"><input type="checkbox" name="q40" value="A"> (A) 建置網頁型防火牆（WAF）</label>
+                    <label class="option-label"><input type="checkbox" name="q40" value="B"> (B) 建置內容傳遞網路（CDN）</label>
+                    <label class="option-label"><input type="checkbox" name="q40" value="C"> (C) 建置負載平衡伺服器（Server Load Balancer）</label>
+                    <label class="option-label"><input type="checkbox" name="q40" value="D"> (D) 建置資料外洩防護（DLP）</label>
+                </div>
+
+                <button class="btn-submit" onclick="checkAnswer('q40', ['A', 'B', 'C'])">提交答案</button>
+                <button class="btn-retry" id="retry-q40" onclick="resetQuestion('q40')">重作本題</button>
+
+                <div id="feedback-q40" class="feedback-area"></div>
+                <div id="explanation-q40" class="explanation-details" style="display:none;"></div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="myModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="img01">
+    </div>
+
+    <script>
+        // 資料結構：每題的解析內容
+        const explanations = {
+            'q37': `
+                <div class="exp-section">
+                    <div class="exp-title">【題目】</div>
+                    <div class="exp-content">ISP 業者的服務型防護機制，哪一個能減緩 DDoS？</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【第一步：找關鍵字】</div>
+                    <div class="exp-content">DDoS (塞爆你的網路)、ISP (網路提供商)、服務型防護。</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【第二步：白話翻譯】</div>
+                    <div class="exp-content">
+                        <p>想像你的店面（網站）被一大堆「假客人」擠爆門口，導致真客人進不來。</p>
+                        <p>你要請誰幫忙？當然是請警察（ISP）在「馬路上」就把假客人攔下來，不要讓他們塞到你家門口。</p>
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【第三步：解題思路】</div>
+                    <div class="exp-content">
+                        <p>DDoS 是「流量」攻擊。要處理流量，最有效的位置是在「源頭」或「管線」上。</p>
+                        <p>Flow Cleaning (流量清洗) 就是 ISP 幫你把流量過濾一遍，把髒的（攻擊流量）丟掉，乾淨的才送到你家。</p>
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【第四步：選項分析】</div>
+                    <div class="exp-content">
+                        <ul>
+                            <li><strong>(A) NAC (網路存取控制)：</strong> 這是檢查「員工識別證」的。用來確認內部設備是否合規、是否中毒，跟外部大量攻擊無關。</li>
+                            <li><strong>(B) 流量清洗：</strong> 正解。警察在外面擋人。</li>
+                            <li><strong>(C) Honey Pot (蜜罐)：</strong> 這是「誘餌」。騙駭客去攻擊假目標以蒐集證據，無法當下阻擋海量 DDoS。</li>
+                            <li><strong>(D) IDS (入侵偵測)：</strong> 這是「監視器」。它只會嗶嗶叫告訴你有人入侵，通常無法直接阻擋 DDoS 這種暴力塞滿頻寬的攻擊。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【觀念補充與延伸】</div>
+                    <div class="exp-content">DDoS (Distributed DoS) 是「多對一」攻擊，駭客控制大量殭屍電腦 (Botnet) 同時發動。若是單一來源攻擊 (DoS)，直接封鎖該 IP 即可，但 DDoS 來源太多，無法單靠防火牆封鎖。</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【記憶口訣】</div>
+                    <div class="exp-content">流量大水沖過來，ISP 清洗最實在。</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【常見陷阱】</div>
+                    <div class="exp-content">看到「防禦攻擊」就選防火牆 (Firewall) 或 IDS。注意！傳統防火牆可能會被大量連線塞爆 (State exhaustion)，反而變成瓶頸。</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【自我檢測】</div>
+                    <div class="exp-content">
+                        <details class="self-check-details">
+                            <summary>Q: 如果題目改成「應用層 (Layer 7) 的 DDoS 攻擊」，ISP 流量清洗一定有效嗎？ (點擊看答案)</summary>
+                            <div class="self-check-answer">
+                                A: <strong>不一定</strong>。應用層攻擊流量小但消耗伺服器資源，通常更適合用 WAF (網頁防火牆) 處理，單靠 ISP 清洗可能看不出來。
+                            </div>
+                        </details>
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【正確答案】</div>
+                    <div class="exp-content">B</div>
+                </div>
+            `,
+            'q38': `
+                <div class="exp-section">
+                    <div class="exp-title">【題目】</div>
+                    <div class="exp-content">防禦機制一年能為 Quick GO「降低」多少營業損失？</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【第二步：白話翻譯】</div>
+                    <div class="exp-content">
+                        不用管防禦花多少錢，題目只問「原本會賠多少」減去「現在只賠多少」。
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【常見陷阱】</div>
+                    <div class="exp-content">
+                        <p class="teacher-tag">大坑注意</p>
+                        很多同學會急著把「防禦成本 (20,000)」減進去。不對！這題問的是「降低的損失 (Benefit)」，不是「淨值 (Net Value)」。
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【解題步驟】</div>
+                    <div class="exp-content">
+                        <p>1. 沒做防禦時，每年賠：<strong>100,000 元</strong> (ALE_pre)</p>
+                        <p>2. 做了防禦後，每年還要賠：<strong>30,000 元</strong> (ALE_post)</p>
+                        <p>3. 降低金額 = 100,000 - 30,000 = <strong>70,000 元</strong></p>
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【觀念補充與延伸】</div>
+                    <div class="exp-content">風險量化公式：ALE (年度預期損失) = SLE (單次損失) × ARO (年度發生率)。本題直接給了 ALE，省去計算發生率的步驟。</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【記憶口訣】</div>
+                    <div class="exp-content">降低金額 = 原本賠的 − 後來賠的 (跟成本無關)。</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【選項分析】</div>
+                    <div class="exp-content">
+                        <ul>
+                            <li>(A) 10,000：計算錯誤。</li>
+                            <li>(B) 80,000：這是防護機制的年成本 (2萬 × 4)，不是降低的損失。</li>
+                            <li>(C) 70,000：10萬 - 3萬，正確。</li>
+                            <li>(D) 30,000：這是導入後的剩餘損失。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【自我檢測】</div>
+                    <div class="exp-content">
+                        <details class="self-check-details">
+                            <summary>Q: 為什麼計算「降低金額」時，不需要扣除「防禦成本」？ (點擊看答案)</summary>
+                            <div class="self-check-answer">
+                                A: 因為「<strong>效益 (Benefit)</strong>」是指風險減少的幅度；而扣除成本後的是「<strong>淨值 (Net Value)</strong>」。請看清楚題目問的是「效益」還是「淨值」！
+                            </div>
+                        </details>
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【正確答案】</div>
+                    <div class="exp-content">C</div>
+                </div>
+            `,
+            'q39': `
+                <div class="exp-section">
+                    <div class="exp-title">【題目】</div>
+                    <div class="exp-content">該機制每年能創造的「價值」(Value) 為何？</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【常見陷阱】</div>
+                    <div class="exp-content">
+                        <p class="teacher-tag">陷阱王</p>
+                        題目說「季度」服務費用 20,000 元。一年有幾季？<strong>4 季！</strong><br>
+                        很多同學眼殘直接用 20,000 去算，直接再見。
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【解題步驟】</div>
+                    <div class="exp-content">
+                        <p><strong>公式：ROI/價值 = (降低的損失) - (防護成本)</strong></p>
+                        <p>1. 降低的損失 (效益)：<strong>70,000 元</strong> (上一題算出來的)</p>
+                        <p>2. 防護成本 (年)：20,000 × 4 = <strong>80,000 元</strong></p>
+                        <p>3. 價值 = 70,000 - 80,000 = <strong>-10,000 元</strong></p>
+                        <p>備註：雖然算出來是負的，代表這項投資在財務上是虧錢的，但實務上資安可能為了商譽還是得做，這是題外話。</p>
+                    </div>
+                </div>
+                 <div class="exp-section">
+                    <div class="exp-title">【觀念補充與延伸】</div>
+                    <div class="exp-content">ROS (Return on Security) 分析：即使算出來是負值，企業仍可能為了「合規性 (Compliance)」或「商譽 (Reputation)」而導入，因為商譽損失往往難以量化。</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【記憶口訣】</div>
+                    <div class="exp-content">看到「季度」要乘以四，算錢單位要一致。</div>
+                </div>
+                 <div class="exp-section">
+                    <div class="exp-title">【選項分析】</div>
+                    <div class="exp-content">
+                        <ul>
+                            <li>(A) -20,000：可能是把降低金額算成 5 萬 (錯) 減 7 萬? 或者是計算錯誤。</li>
+                            <li>(B) -10,000：效益 7 萬 - 成本 8 萬 = -1 萬。正確。</li>
+                            <li>(C) 20,000：可能是誤把成本當作一年 2 萬，7 萬 - 2 萬 = 5 萬 (也不對)。</li>
+                            <li>(D) 50,000：如果成本只算 2 萬，7 - 2 = 5 萬。這就是落入季度陷阱的答案。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【自我檢測】</div>
+                    <div class="exp-content">
+                        <details class="self-check-details">
+                            <summary>Q: 如果這一題的成本改成「月費 5,000 元」，那價值是多少？ (點擊看答案)</summary>
+                            <div class="self-check-answer">
+                                A: <br>
+                                1. 年成本 = 5,000 × 12 = 60,000。<br>
+                                2. 價值 = 70,000 (降低損失) - 60,000 (成本) = <strong>+10,000 元</strong> (變成正的囉！)。
+                            </div>
+                        </details>
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【正確答案】</div>
+                    <div class="exp-content">B</div>
+                </div>
+            `,
+            'q40': `
+                <div class="exp-section">
+                    <div class="exp-title">【題目】</div>
+                    <div class="exp-content">還有哪些設備可以「減輕」DDoS 影響？(複選)</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【生活化比喻】</div>
+                    <div class="exp-content">
+                        <p>DDoS 就是大量的假客人衝進來。</p>
+                        <ul>
+                            <li><strong>ISP 清洗：</strong> 警察在路口擋人。</li>
+                            <li><strong>CDN (內容傳遞網路)：</strong> 開很多家「分店」(節點)，把客人分散掉，總店就不會爆。</li>
+                            <li><strong>Load Balancer (負載平衡)：</strong> 開很多個「收銀台」(伺服器)，讓大家排隊快一點，比較不容易塞死。</li>
+                            <li><strong>WAF (網頁防火牆)：</strong> 門口安檢員。檢查客人有沒有帶危險物品 (應用層攻擊)，也能過濾一些惡意連線。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【選項分析】</div>
+                    <div class="exp-content">
+                        <ul>
+                            <li><strong>(A) WAF：</strong> ✅ 可以擋應用層 DDoS (Layer 7)，例如一直按 F5 重新整理的那種攻擊。</li>
+                            <li><strong>(B) CDN：</strong> ✅ 分散流量神器，吸收 DDoS 流量最有效。</li>
+                            <li><strong>(C) Load Balancer：</strong> ✅ 增加承受量，雖然不能「擋」，但能「撐」比較久，符合題目說的「減輕影響」。</li>
+                            <li><strong>(D) DLP (資料外洩防護)：</strong> ❌ DLP 是怕員工把機密資料「帶出去」，跟駭客把流量「灌進來」完全是兩回事。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【觀念補充與延伸】</div>
+                    <div class="exp-content">縱深防禦 (Defense in Depth)：面對 DDoS 沒有單一萬靈丹，通常是 ISP 清洗 (第一道) + CDN 分流 (第二道) + WAF/LB (第三道) 混合使用。</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【記憶口訣】</div>
+                    <div class="exp-content">CDN 像分店，LB 像排隊，WAF 像保全，DLP 只管內賊。</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【常見陷阱】</div>
+                    <div class="exp-content">看到「資安設備」就全選。要區分該設備是擋「進來」的攻擊 (WAF, IDS, IPS) 還是怕「出去」的資料 (DLP)。</div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【自我檢測】</div>
+                    <div class="exp-content">
+                        <details class="self-check-details">
+                            <summary>Q: WAF (網頁防火牆) 和傳統防火牆有什麼不同？ (點擊看答案)</summary>
+                            <div class="self-check-answer">
+                                A: 
+                                <ul>
+                                    <li><strong>傳統防火牆 (FW)：</strong> 看 IP 和 Port (L3/L4)，像警衛只看身分證。</li>
+                                    <li><strong>網頁防火牆 (WAF)：</strong> 看網頁內容 (L7)，像安檢員會翻包包，能擋下 SQL Injection 或針對網頁應用層的慢速 DDoS。</li>
+                                </ul>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+                <div class="exp-section">
+                    <div class="exp-title">【正確答案】</div>
+                    <div class="exp-content">A、B、C</div>
+                </div>
+            `
+        };
+
+        // 狀態管理
+        let userProgress = {
+            'q37': false,
+            'q38': false,
+            'q39': false,
+            'q40': false
+        };
+
+        // 初始化
+        window.onload = function() {
+            loadProgress();
+        };
+
+        // 切換頁籤
+        function switchTab(tabId) {
+            // 隱藏所有卡片
+            document.querySelectorAll('.content-card').forEach(el => el.classList.remove('active'));
+            // 顯示目標卡片
+            document.getElementById(tabId).classList.add('active');
+            
+            // 更新按鈕狀態
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            const btnId = tabId === 'intro' ? document.querySelector('.nav-btn[onclick="switchTab(\'intro\')"]') : document.getElementById('btn-' + tabId);
+            if(btnId) btnId.classList.add('active');
+
+            // 滾動到頂部
+            window.scrollTo(0, 0);
+        }
+
+        // 檢查答案
+        function checkAnswer(qId, correctAnswer) {
+            let isCorrect = false;
+            let userAns = [];
+
+            if (Array.isArray(correctAnswer)) {
+                // 複選題 (Q40)
+                const checkboxes = document.querySelectorAll(`input[name="${qId}"]:checked`);
+                checkboxes.forEach((cb) => {
+                    userAns.push(cb.value);
+                });
+                // 排序後比對字串
+                isCorrect = JSON.stringify(userAns.sort()) === JSON.stringify(correctAnswer.sort());
+            } else {
+                // 單選題
+                const selected = document.querySelector(`input[name="${qId}"]:checked`);
+                if (!selected) {
+                    alert("請先選擇一個答案喔！");
+                    return;
+                }
+                userAns = selected.value;
+                isCorrect = (userAns === correctAnswer);
+            }
+
+            const feedbackEl = document.getElementById(`feedback-${qId}`);
+            const explanationEl = document.getElementById(`explanation-${qId}`);
+            const retryBtn = document.getElementById(`retry-${qId}`);
+
+            // 顯示回饋
+            feedbackEl.style.display = 'block';
+            if (isCorrect) {
+                feedbackEl.className = 'feedback-area feedback-correct';
+                feedbackEl.innerHTML = `<strong>🎉 答對了！</strong> <br> 你的觀念非常正確！趕快往下看解析確認細節。`;
+                // 記錄進度
+                userProgress[qId] = true;
+                saveProgress();
+                // 鎖定選項
+                disableOptions(qId, true);
+            } else {
+                feedbackEl.className = 'feedback-area feedback-wrong';
+                feedbackEl.innerHTML = `<strong>⚠️ 答錯囉...</strong> <br> 沒關係，這題比較難。正確答案是 <strong>${Array.isArray(correctAnswer) ? correctAnswer.join('、') : correctAnswer}</strong>。<br>點擊下方解析看看為什麼。`;
+                userProgress[qId] = false; // 答錯不算完成
+                // 鎖定選項並顯示重作按鈕
+                disableOptions(qId, true);
+                retryBtn.style.display = 'inline-block';
+            }
+
+            // 顯示解析
+            explanationEl.innerHTML = explanations[qId];
+            explanationEl.style.display = 'block';
+            explanationEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function disableOptions(qId, disabled) {
+            const inputs = document.querySelectorAll(`input[name="${qId}"]`);
+            inputs.forEach(input => input.disabled = disabled);
+        }
+
+        function resetQuestion(qId) {
+            // 清除選項
+            const inputs = document.querySelectorAll(`input[name="${qId}"]`);
+            inputs.forEach(input => {
+                input.checked = false;
+                input.disabled = false;
+            });
+            
+            // 隱藏回饋與解析
+            document.getElementById(`feedback-${qId}`).style.display = 'none';
+            document.getElementById(`explanation-${qId}`).style.display = 'none';
+            document.getElementById(`retry-${qId}`).style.display = 'none';
+        }
+
+        // LocalStorage 進度儲存
+        function saveProgress() {
+            localStorage.setItem('ipas_q37_40_progress', JSON.stringify(userProgress));
+            updateProgressBar();
+            updateSidebarStatus();
+        }
+
+        function loadProgress() {
+            const stored = localStorage.getItem('ipas_q37_40_progress');
+            if (stored) {
+                userProgress = JSON.parse(stored);
+                updateProgressBar();
+                updateSidebarStatus();
+            }
+        }
+
+        function updateProgressBar() {
+            const total = 4;
+            let current = 0;
+            if (userProgress['q37']) current++;
+            if (userProgress['q38']) current++;
+            if (userProgress['q39']) current++;
+            if (userProgress['q40']) current++;
+
+            const percentage = (current / total) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressText').innerText = Math.round(percentage) + '%';
+        }
+
+        function updateSidebarStatus() {
+            for (const [key, value] of Object.entries(userProgress)) {
+                if (value) {
+                    const btn = document.getElementById(`btn-${key}`);
+                    if (btn) btn.classList.add('completed');
+                }
+            }
+        }
+
+        function resetProgress() {
+            if(confirm("確定要清除所有學習紀錄嗎？")) {
+                userProgress = { 'q37': false, 'q38': false, 'q39': false, 'q40': false };
+                localStorage.removeItem('ipas_q37_40_progress');
+                location.reload();
+            }
+        }
+
+        // Modal Image Logic
+        function openModal() {
+            var modal = document.getElementById("myModal");
+            var modalImg = document.getElementById("img01");
+            modal.style.display = "block";
+            modalImg.src = "https://i.meee.com.tw/uu3orf2.jpg";
+        }
+
+        function closeModal() {
+            document.getElementById("myModal").style.display = "none";
+        }
+        
+        // 點擊 Modal 外部也可關閉
+        window.onclick = function(event) {
+            var modal = document.getElementById("myModal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+    </script>
+</body>
+</html>

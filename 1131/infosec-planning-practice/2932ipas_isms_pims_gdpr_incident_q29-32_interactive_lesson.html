@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安規劃/防護實務 - Q29-32 題組衝刺特訓</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --highlight-bg: #f1c40f;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* Header */
+        header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+        }
+
+        header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        /* Image Section */
+        .scenario-box {
+            width: 100%;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .scenario-img {
+            max-width: 100%;
+            max-height: 300px;
+            cursor: zoom-in;
+            border: 2px solid #eee;
+            border-radius: 4px;
+            transition: transform 0.2s;
+        }
+        
+        .scenario-img.zoomed {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(2);
+            z-index: 1000;
+            max-height: 80vh;
+            width: auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            cursor: zoom-out;
+            background: white;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            width: 100%;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-btn {
+            background: #e9ecef;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .tab-btn.completed::after {
+            content: '✓';
+            margin-left: 5px;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        
+        .tab-btn.active.completed::after {
+            color: #fff;
+        }
+
+        /* Question Content */
+        .main-content {
+            width: 100%;
+        }
+
+        .question-panel {
+            display: none;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: var(--box-shadow);
+            animation: fadeIn 0.3s;
+        }
+
+        .question-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .q-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 1rem;
+        }
+
+        /* Options */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+            border-color: #cbd3da;
+        }
+
+        .option-label input {
+            margin-right: 1rem;
+            margin-top: 0.3rem;
+            transform: scale(1.2);
+        }
+
+        .option-text {
+            flex: 1;
+        }
+
+        /* Feedback Styles */
+        .option-label.correct-choice {
+            background-color: #d4edda;
+            border-color: var(--success-color);
+        }
+
+        .option-label.wrong-choice {
+            background-color: #f8d7da;
+            border-color: var(--error-color);
+        }
+
+        .option-label.missed-choice {
+            border-color: var(--success-color);
+            border-style: dashed;
+        }
+        
+        .option-label.missed-choice::after {
+            content: "(漏選)";
+            color: var(--success-color);
+            font-size: 0.8rem;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Self Assessment Toggle Styles */
+        .ans-details {
+            margin-top: 5px;
+            background: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            border-left: 3px solid var(--success-color);
+        }
+        
+        .ans-details summary {
+            cursor: pointer;
+            color: var(--accent-color);
+            font-weight: bold;
+            user-select: none;
+        }
+        
+        .ans-details summary:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+
+        /* Action Buttons */
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+        }
+
+        .btn-primary { background: var(--accent-color); color: white; }
+        .btn-primary:hover { background: #2980b9; }
+
+        .btn-outline { background: transparent; border: 2px solid var(--accent-color); color: var(--accent-color); }
+        .btn-outline:hover { background: #ebf5fb; }
+
+        .btn-reset { background: #95a5a6; color: white; }
+        .btn-reset:hover { background: #7f8c8d; }
+
+        /* Explanation Section */
+        .explanation-area {
+            display: none;
+            border-top: 2px dashed #ddd;
+            padding-top: 2rem;
+        }
+
+        .explanation-area.show {
+            display: block;
+        }
+
+        .exp-block {
+            margin-bottom: 1.5rem;
+        }
+
+        .exp-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            background: #e9ecef;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .exp-content {
+            padding-left: 0.5rem;
+            color: #444;
+        }
+
+        .highlight {
+            background: linear-gradient(to top, rgba(241, 196, 15, 0.4) 50%, transparent 50%);
+            font-weight: bold;
+        }
+        
+        .term-def {
+            color: #d35400;
+            font-weight: bold;
+        }
+
+        /* Footer / Summary */
+        .summary-section {
+            width: 100%;
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border-top: 4px solid var(--accent-color);
+        }
+        
+        .summary-card h3 { margin-top: 0; }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .comparison-table th { background: #f1f1f1; }
+
+        /* Progress Bar */
+        .progress-indicator {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.9);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 0.9rem;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-btn {
+            background: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 2px 5px;
+        }
+
+        /* Accessibility */
+        :focus {
+            outline: 3px solid var(--highlight-bg);
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+            .tab-btn {
+                flex: 1 1 40%;
+                text-align: center;
+            }
+            .action-bar {
+                flex-direction: column;
+            }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-indicator">
+        <span id="progress-text">進度：0/4</span>
+        <button class="progress-btn" onclick="clearProgress()" aria-label="清除學習紀錄">清除紀錄</button>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <header>
+        <h1>iPAS 資安規劃/防護實務：衝刺題組 (Q29-32)</h1>
+        <p>法規、風險識別與處置的整合應用｜高中生也能懂的資安教室</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- Scenario Image -->
+        <div class="scenario-box">
+            <p><strong>【題組情境圖】</strong>（點擊圖片可放大查看細節）</p>
+            <img src="https://i.meee.com.tw/PdYYWKS.png" alt="資安事件情境圖：A企業總部位於台北，在英國設有電子商務平台，發生駭客入侵與個資外洩事件" class="scenario-img" id="scenarioImg">
+            <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">情境重點：A企業(總部台北) -> 英國分部(電商平台) -> 發生駭客入侵 -> 大量個資外洩</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs" role="tablist">
+            <button class="tab-btn active" onclick="switchTab('q29')" id="tab-q29" role="tab" aria-selected="true" aria-controls="panel-q29">Q29 應變與通報</button>
+            <button class="tab-btn" onclick="switchTab('q30')" id="tab-q30" role="tab" aria-selected="false" aria-controls="panel-q30">Q30 風險識別</button>
+            <button class="tab-btn" onclick="switchTab('q31')" id="tab-q31" role="tab" aria-selected="false" aria-controls="panel-q31">Q31 管理制度</button>
+            <button class="tab-btn" onclick="switchTab('q32')" id="tab-q32" role="tab" aria-selected="false" aria-controls="panel-q32">Q32 風險處理</button>
+        </div>
+
+        <div class="main-content">
+
+            <!-- Q29 -->
+            <div id="panel-q29" class="question-panel active" role="tabpanel">
+                <div class="q-title">Q29. 情境如附圖所示，請問在 A 企業位於英國的電子商務平台發生駭客入侵事故，下列應變與處理程序哪些正確？(複選)</div>
+                <div class="options-group" id="form-q29">
+                    <label class="option-label">
+                        <input type="checkbox" name="q29" value="A">
+                        <span class="option-text">(A) 依資通安全管理法規定於 2 小時之內通報目的事業主管機關</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q29" value="B">
+                        <span class="option-text">(B) 依一般資料保護規範（GDPR）規定於 1 週內通報個資外洩</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q29" value="C">
+                        <span class="option-text">(C) 應該至公開資訊觀測站發佈重大訊息</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q29" value="D">
+                        <span class="option-text">(D) 發佈的程序應遵循 A 企業訂定的相關程序進行處理</span>
+                    </label>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn btn-primary" onclick="checkAnswer('q29', ['C','D'])" aria-label="提交答案">提交答案</button>
+                    <button class="btn btn-outline" onclick="toggleExplain('q29')" aria-label="顯示解析">顯示解析</button>
+                    <button class="btn btn-reset" onclick="resetQuestion('q29')" aria-label="重作本題">重作</button>
+                </div>
+
+                <div id="explain-q29" class="explanation-area">
+                    <div class="exp-block">
+                        <div class="exp-title">第一步：找關鍵字</div>
+                        <div class="exp-content">A企業位於<span class="highlight">英國</span>的電子商務平台、<span class="highlight">駭客入侵事故</span>、應變與處理程序。</div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">第二步：白話翻譯</div>
+                        <div class="exp-content">台灣總公司的英國分店出事了，個資被偷，老闆應該要遵守哪裡的規矩？要怎麼對外說？</div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">第三步：解題思路</div>
+                        <div class="exp-content">
+                            <ol>
+                                <li><strong>確認法規管轄權：</strong>事發地在英國，主要受歐盟/英國法律管轄。台灣法律是否適用要看「對象」身分（如是否為台灣關鍵基礎設施或上市公司）。</li>
+                                <li><strong>確認通報時效：</strong>不同法律對「要在多久內講」有不同規定。</li>
+                                <li><strong>確認公司治理：</strong>大公司出事，內部一定要有SOP，不能亂講。</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">第四步：選項分析</div>
+                        <div class="exp-content">
+                            <ul>
+                                <li>(A) <strong>錯誤</strong>。這是台灣《資通安全管理法》針對公務機關或特定非公務機關的規定（1小時通報/36小時復原等）。除非 A 企業被指定為台灣的關鍵基礎設施提供者，且該規定通常針對台灣境內事件，直接套用在英國分部事件較牽強。</li>
+                                <li>(B) <strong>錯誤</strong>。<span class="term-def">GDPR（歐盟一般資料保護規則）</span>規定非常嚴格，發生個資外洩風險時，原則上是發現後 <strong>72 小時</strong>內通報監管機構，不是「1週」。1週太慢了，早就被罰錢了。</li>
+                                <li>(C) <strong>正確</strong>。「公開資訊觀測站」是台灣上市櫃公司發布重大消息的地方。雖然題目沒明說 A 是上市公司，但這類題目通常假設 A 為台灣大型公開發行公司，個資外洩影響股價與商譽，故需發佈重訊。</li>
+                                <li>(D) <strong>正確</strong>。這叫「公司治理」。發生災難時，員工不能隨便發文，必須依照公司內部訂好的「緊急應變程序（SOP）」來走，才不會越描越黑。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">觀念補充與延伸</div>
+                        <div class="exp-content">
+                            <p><strong>核心觀念：</strong>法規遵循與通報時效（必考）。</p>
+                            <p><strong>重點口訣：</strong>台灣公家看資安法，歐洲個資看 GDPR (72hr)。</p>
+                            <p><strong>常見陷阱：</strong>看到「2小時」就想選？那是台灣的規定。看到「1週」覺得很合理？資安世界裡，1週太久了，黃金時間通常是「小時」級別。</p>
+                        </div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">正確答案</div>
+                        <div class="exp-content"><strong>C、D</strong>（C是市場揭露義務，D是內部控制原則）</div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">自我檢測</div>
+                        <div class="exp-content">
+                            <ul>
+                                <li>
+                                    <strong>Q1:</strong> 若是台灣「公務機關」發生資通安全事件，依規定需在發現後多久內通報？
+                                    <details class="ans-details">
+                                        <summary>點擊查看解答</summary>
+                                        <span style="color:#27ae60">Ans: 1小時內。</span>
+                                    </details>
+                                </li>
+                                <li>
+                                    <strong>Q2:</strong> GDPR 的罰款上限非常高，最高可達全球年營業額的多少百分比？
+                                    <details class="ans-details">
+                                        <summary>點擊查看解答</summary>
+                                        <span style="color:#27ae60">Ans: 4% 或 2000萬歐元（取其高者）。</span>
+                                    </details>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q30 -->
+            <div id="panel-q30" class="question-panel" role="tabpanel">
+                <div class="q-title">Q30. 情境如附圖所示，請問在進行風險識別作業時，對於本類型的跨國企業以何種方式進行風險識別較「不」合適？(單選)</div>
+                <div class="options-group" id="form-q30">
+                    <label class="option-label">
+                        <input type="checkbox" name="q30" value="A">
+                        <span class="option-text">(A) 以資產為基礎的風險識別</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q30" value="B">
+                        <span class="option-text">(B) 以事件為基礎的風險識別</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q30" value="C">
+                        <span class="option-text">(C) 以教材範本進行風險識別</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q30" value="D">
+                        <span class="option-text">(D) 以人員為基礎的風險識別</span>
+                    </label>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn btn-primary" onclick="checkAnswer('q30', ['C'])" aria-label="提交答案">提交答案</button>
+                    <button class="btn btn-outline" onclick="toggleExplain('q30')" aria-label="顯示解析">顯示解析</button>
+                    <button class="btn btn-reset" onclick="resetQuestion('q30')" aria-label="重作本題">重作</button>
+                </div>
+
+                <div id="explain-q30" class="explanation-area">
+                    <div class="exp-block">
+                        <div class="exp-title">第一步：找關鍵字</div>
+                        <div class="exp-content">跨國企業、風險識別、較<span class="highlight">「不」合適</span>。</div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">第二步：白話翻譯</div>
+                        <div class="exp-content">老闆想知道公司哪裡有危險（風險），哪一種方法是「偷懶且沒用」的？</div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">第三步：解題思路</div>
+                        <div class="exp-content">
+                            風險評鑑（Risk Assessment）必須要「客製化」。每家公司的電腦、員工、流程都不一樣，不能直接拿別人的作業來抄。
+                        </div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">第四步：選項分析</div>
+                        <div class="exp-content">
+                            <ul>
+                                <li>(A) <strong>合適</strong>。<strong>資產基礎 (Asset-based)</strong>：最經典的方法。盤點公司有幾台伺服器、幾份機密文件，然後一個個看它們會不會壞掉或被偷。</li>
+                                <li>(B) <strong>合適</strong>。<strong>事件基礎 (Event/Scenario-based)</strong>：想像各種劇本，例如「如果發生地震」、「如果駭客DDOS」，評估會發生什麼事。</li>
+                                <li>(C) <strong>不合適</strong>。<strong>教材範本</strong>：就像寫數學作業直接抄解答本，完全沒考慮這題數字有沒有改。跨國企業架構複雜，直接套用教科書範本會漏掉大量實際風險，是流於形式的做法。</li>
+                                <li>(D) <strong>合適</strong>。<strong>人員基礎</strong>：從「誰擁有什麼權限」或「誰可能做錯事」的角度切入，尤其針對內部威脅很有效。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">觀念補充與延伸</div>
+                        <div class="exp-content">
+                            <p><strong>核心觀念：</strong>風險管理（Risk Management）的實務性。</p>
+                            <p><strong>比喻：</strong>你要幫家裡裝防盜鎖，A方法是算你有幾個窗戶（資產），B方法是想小偷會怎麼爬（事件），C方法是去書局買一本「標準家庭防盜指南」然後照做，完全不管你家其實住帳篷。</p>
+                        </div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">正確答案</div>
+                        <div class="exp-content"><strong>C</strong>（因為套版/照抄無法識別真實風險）</div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">自我檢測</div>
+                        <div class="exp-content">
+                            <ul>
+                                <li>
+                                    <strong>Q1:</strong> 若甲公司直接拿乙公司的風險評鑑報告來改個名字就用，這犯了風險管理中的什麼大忌？
+                                    <details class="ans-details">
+                                        <summary>點擊查看解答</summary>
+                                        <span style="color:#27ae60">Ans: 未考慮自身資產價值與威脅情境的獨特性（流於形式）。</span>
+                                    </details>
+                                </li>
+                                <li>
+                                    <strong>Q2:</strong> 進行風險識別時，除了資產、事件，還有一種是針對「業務流程(Business Process)」進行識別，適合用來評估什麼？
+                                    <details class="ans-details">
+                                        <summary>點擊查看解答</summary>
+                                        <span style="color:#27ae60">Ans: 評估流程中斷對營運的影響（常結合 BIA 使用）。</span>
+                                    </details>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q31 -->
+            <div id="panel-q31" class="question-panel" role="tabpanel">
+                <div class="q-title">Q31. 情境如附圖所示，請問於 A 企業於歐盟內系統據點執行的資訊安全管理系統（ISMS）及個人資料保護管理系統（PIMS），執行下列選項較為適當？(單選)</div>
+                <div class="options-group" id="form-q31">
+                    <label class="option-label">
+                        <input type="checkbox" name="q31" value="A">
+                        <span class="option-text">(A) 資訊安全風險評鑑（ISRA）及營運衝擊評鑑（BIA）</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q31" value="B">
+                        <span class="option-text">(B) 資訊安全風險評鑑（ISRA）及資料保護衝擊評鑑（DPIA）</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q31" value="C">
+                        <span class="option-text">(C) 環境影響評鑑（EIA）及營運衝擊評鑑（BIA）</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q31" value="D">
+                        <span class="option-text">(D) 環境影響評鑑（EIA）及資訊安全風險評鑑（ISRA）</span>
+                    </label>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn btn-primary" onclick="checkAnswer('q31', ['B'])" aria-label="提交答案">提交答案</button>
+                    <button class="btn btn-outline" onclick="toggleExplain('q31')" aria-label="顯示解析">顯示解析</button>
+                    <button class="btn btn-reset" onclick="resetQuestion('q31')" aria-label="重作本題">重作</button>
+                </div>
+
+                <div id="explain-q31" class="explanation-area">
+                    <div class="exp-block">
+                        <div class="exp-title">第一步：找關鍵字</div>
+                        <div class="exp-content"><span class="highlight">ISMS</span>（資安）、<span class="highlight">PIMS</span>（個資）、較為適當。</div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">第二步：白話翻譯</div>
+                        <div class="exp-content">題目說公司有導入「資安制度」和「個資保護制度」，那這兩個制度分別主要是在做什麼評估工作？</div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">第三步：解題思路</div>
+                        <div class="exp-content">
+                            把英文字母對對碰：
+                            <ul>
+                                <li>ISMS (Information Security Management System) 核心工作是做 <strong>ISRA (資安風險評鑑)</strong>。</li>
+                                <li>PIMS (Privacy Information Management System) 尤其是 GDPR 下，核心工作是做 <strong>DPIA (資料保護衝擊評鑑)</strong>。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">第四步：選項分析</div>
+                        <div class="exp-content">
+                            <ul>
+                                <li>(A) BIA（營運衝擊評鑑）是「營運持續管理 (BCM)」在做的，目的是算「系統掛掉一天會賠多少錢」，跟 PIMS 的直接關聯不如 DPIA 強。</li>
+                                <li>(B) <strong>正確</strong>。ISRA 對應 ISMS；DPIA 對應 PIMS/GDPR。這是最標準的組合。</li>
+                                <li>(C) EIA（環境影響評鑑）是蓋工廠怕汙染環境做的，跟資安無關。</li>
+                                <li>(D) 同上，EIA 是亂入的選項。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">專有名詞小辭典</div>
+                        <div class="exp-content">
+                            <ul>
+                                <li><span class="term-def">ISRA</span>：算資安風險分數（資產價值 x 威脅 x 弱點）。</li>
+                                <li><span class="term-def">DPIA</span>：當你要大規模處理個資（如人臉辨識、大數據分析）前，先評估會不會侵害人權。</li>
+                                <li><span class="term-def">BIA</span>：評估當機太久對公司的傷害。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">正確答案</div>
+                        <div class="exp-content"><strong>B</strong></div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">自我檢測</div>
+                        <div class="exp-content">
+                            <ul>
+                                <li>
+                                    <strong>Q1:</strong> 實施 ISMS (ISO 27001) 的 PDCA 循環中，「風險評鑑」主要屬於哪個階段？
+                                    <details class="ans-details">
+                                        <summary>點擊查看解答</summary>
+                                        <span style="color:#27ae60">Ans: Plan (規劃階段)。</span>
+                                    </details>
+                                </li>
+                                <li>
+                                    <strong>Q2:</strong> PIMS (ISO 27701) 強調的一個核心設計原則，意指「系統開發初期就該把隱私保護考慮進去」，這個詞叫什麼？
+                                    <details class="ans-details">
+                                        <summary>點擊查看解答</summary>
+                                        <span style="color:#27ae60">Ans: Privacy by Design (隱私設計)。</span>
+                                    </details>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q32 -->
+            <div id="panel-q32" class="question-panel" role="tabpanel">
+                <div class="q-title">Q32. 情境如附圖所示，A 企業欲針對此次在英國的電子商務平台所發生的大量客戶個資外洩事件進行風險處理，請問下列何風險處理方式較「不」適當？(單選)</div>
+                <div class="options-group" id="form-q32">
+                    <label class="option-label">
+                        <input type="checkbox" name="q32" value="A">
+                        <span class="option-text">(A) 電子商務平台個人資料去識別化</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q32" value="B">
+                        <span class="option-text">(B) 落實資料庫加密以避免未經授權的存取</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q32" value="C">
+                        <span class="option-text">(C) 採用 SSL3.0 的傳輸加密</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q32" value="D">
+                        <span class="option-text">(D) 採用多因子身份認證（MFA）</span>
+                    </label>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn btn-primary" onclick="checkAnswer('q32', ['C'])" aria-label="提交答案">提交答案</button>
+                    <button class="btn btn-outline" onclick="toggleExplain('q32')" aria-label="顯示解析">顯示解析</button>
+                    <button class="btn btn-reset" onclick="resetQuestion('q32')" aria-label="重作本題">重作</button>
+                </div>
+
+                <div id="explain-q32" class="explanation-area">
+                    <div class="exp-block">
+                        <div class="exp-title">第一步：找關鍵字</div>
+                        <div class="exp-content">風險處理、<span class="highlight">較「不」適當</span>。</div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">第二步：白話翻譯</div>
+                        <div class="exp-content">要怎麼補救或預防個資外洩？選一個「爛方法」。</div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">第三步：解題思路</div>
+                        <div class="exp-content">
+                            資安技術日新月異，用「過期」的技術不但沒保護作用，反而會給駭客開後門。
+                        </div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">第四步：選項分析</div>
+                        <div class="exp-content">
+                            <ul>
+                                <li>(A) <strong>適當</strong>。去識別化（把名字蓋掉、身分證碼賽克），駭客偷走也看不懂是誰，這是保護隱私的好方法。</li>
+                                <li>(B) <strong>適當</strong>。資料庫加密，就像把保險箱上鎖，偷走硬碟也打不開。</li>
+                                <li>(C) <strong>不適當</strong>。<span class="term-def">SSL 3.0</span> 是 1996 年的老古董，存在嚴重漏洞（如 POODLE 攻擊），早就被廢棄了。現在應該用 <strong>TLS 1.2 或 1.3</strong>。用 SSL 3.0 就像用生鏽的一字鎖鎖金庫，非常危險。</li>
+                                <li>(D) <strong>適當</strong>。<span class="term-def">MFA（多因子認證）</span>，除了密碼還要手機驗證碼，能有效防止帳號被盜。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">記憶口訣</div>
+                        <div class="exp-content">
+                            <p><strong>SSL 已死，TLS 當道。</strong> 看到 SSL 3.0 或 2.0，選它是錯的就對了。</p>
+                        </div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">正確答案</div>
+                        <div class="exp-content"><strong>C</strong>（使用了過時且不安全的協定）</div>
+                    </div>
+                    <div class="exp-block">
+                        <div class="exp-title">自我檢測</div>
+                        <div class="exp-content">
+                            <ul>
+                                <li>
+                                    <strong>Q1:</strong> 除了 SSL 3.0，還有哪個常見的遠端連線協定因「明碼傳輸」而不安全，已被 SSH 取代？
+                                    <details class="ans-details">
+                                        <summary>點擊查看解答</summary>
+                                        <span style="color:#27ae60">Ans: Telnet。</span>
+                                    </details>
+                                </li>
+                                <li>
+                                    <strong>Q2:</strong> 網站從 HTTP 升級到 HTTPS，主要是為了確保資安三要素 (CIA) 中的哪一項？
+                                    <details class="ans-details">
+                                        <summary>點擊查看解答</summary>
+                                        <span style="color:#27ae60">Ans: 機密性 (Confidentiality) 與 完整性 (Integrity)。</span>
+                                    </details>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-section">
+            <div class="summary-card">
+                <h3>🔍 考前觀念對照小抄</h3>
+                <table class="comparison-table">
+                    <tr>
+                        <th>縮寫</th>
+                        <th>中文名稱</th>
+                        <th>用途/一句話解說</th>
+                    </tr>
+                    <tr>
+                        <td><strong>ISMS</strong></td>
+                        <td>資訊安全管理系統</td>
+                        <td>ISO 27001，把資安制度化。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PIMS</strong></td>
+                        <td>個資保護管理系統</td>
+                        <td>ISO 27701，把個資隱私管好。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ISRA</strong></td>
+                        <td>資安風險評鑑</td>
+                        <td>找資安漏洞、算風險分數。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DPIA</strong></td>
+                        <td>資料保護衝擊評鑑</td>
+                        <td>GDPR要求，做大事前先評估會不會害到人權。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GDPR</strong></td>
+                        <td>歐盟一般資料保護規則</td>
+                        <td>史上最嚴個資法，罰金天價，72小時通報。</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="summary-card">
+                <h3>⚡ 混合快問快答</h3>
+                <div id="quick-quiz">
+                    <p>Q1: GDPR 通報時限是多久？</p>
+                    <button class="btn btn-outline" onclick="alert('答對了！黃金72小時。')">72小時</button>
+                    <button class="btn btn-outline" style="margin-top:0.5rem" onclick="alert('錯！那是台灣資安法的概念，且台灣是1小時內通報。')">24小時</button>
+                    <hr>
+                    <p>Q2: 哪個加密協定現在已經不安全？</p>
+                    <button class="btn btn-outline" onclick="alert('答對了！它已經有 POODLE 漏洞。')">SSL 3.0</button>
+                    <button class="btn btn-outline" style="margin-top:0.5rem" onclick="alert('錯！這是目前主流標準。')">TLS 1.3</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Data & State
+        const correctAnswers = {
+            'q29': ['C', 'D'],
+            'q30': ['C'],
+            'q31': ['B'],
+            'q32': ['C']
+        };
+
+        const questions = ['q29', 'q30', 'q31', 'q32'];
+
+        // Load progress
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgress();
+            
+            // Image Zoom Logic
+            const img = document.getElementById('scenarioImg');
+            const overlay = document.getElementById('overlay');
+            
+            img.addEventListener('click', () => {
+                img.classList.toggle('zoomed');
+                overlay.classList.toggle('active');
+            });
+
+            overlay.addEventListener('click', () => {
+                img.classList.remove('zoomed');
+                overlay.classList.remove('active');
+            });
+        });
+
+        // Tab Switching
+        function switchTab(qId) {
+            // Hide all panels
+            document.querySelectorAll('.question-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            // Show selected
+            document.getElementById(`panel-${qId}`).classList.add('active');
+            document.getElementById(`tab-${qId}`).classList.add('active');
+        }
+
+        // Check Answer Logic
+        function checkAnswer(qId, correctArr) {
+            const inputs = document.querySelectorAll(`input[name="${qId}"]:checked`);
+            const labels = document.querySelectorAll(`#form-${qId} .option-label`);
+            let userValues = Array.from(inputs).map(i => i.value);
+
+            // Reset styles
+            labels.forEach(l => {
+                l.classList.remove('correct-choice', 'wrong-choice', 'missed-choice');
+            });
+
+            // Logic Check
+            let isAllCorrect = true;
+
+            // 1. Mark user selections (Right or Wrong)
+            userValues.forEach(val => {
+                const input = document.querySelector(`input[name="${qId}"][value="${val}"]`);
+                const label = input.closest('.option-label');
+                
+                if (correctArr.includes(val)) {
+                    label.classList.add('correct-choice'); // User picked right
+                } else {
+                    label.classList.add('wrong-choice'); // User picked wrong
+                    isAllCorrect = false;
+                }
+            });
+
+            // 2. Check for missed answers
+            correctArr.forEach(ans => {
+                if (!userValues.includes(ans)) {
+                    const input = document.querySelector(`input[name="${qId}"][value="${ans}"]`);
+                    const label = input.closest('.option-label');
+                    label.classList.add('missed-choice');
+                    isAllCorrect = false;
+                }
+            });
+
+            // Save Progress if correct
+            if (isAllCorrect && userValues.length === correctArr.length) {
+                saveProgress(qId);
+            }
+        }
+
+        // Toggle Explanation
+        function toggleExplain(qId) {
+            const exp = document.getElementById(`explain-${qId}`);
+            if (exp.classList.contains('show')) {
+                exp.classList.remove('show');
+                event.target.textContent = "顯示解析";
+            } else {
+                exp.classList.add('show');
+                event.target.textContent = "隱藏解析";
+                // Scroll to explanation
+                exp.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Reset Question
+        function resetQuestion(qId) {
+            const inputs = document.querySelectorAll(`input[name="${qId}"]`);
+            inputs.forEach(i => i.checked = false);
+            
+            const labels = document.querySelectorAll(`#form-${qId} .option-label`);
+            labels.forEach(l => {
+                l.classList.remove('correct-choice', 'wrong-choice', 'missed-choice');
+            });
+
+            document.getElementById(`explain-${qId}`).classList.remove('show');
+            const btn = document.querySelector(`#panel-${qId} .btn-outline`);
+            if(btn) btn.textContent = "顯示解析";
+        }
+
+        // Local Storage Logic
+        function saveProgress(qId) {
+            let progress = JSON.parse(localStorage.getItem('ipas_study_progress')) || [];
+            if (!progress.includes(qId)) {
+                progress.push(qId);
+                localStorage.setItem('ipas_study_progress', JSON.stringify(progress));
+                updateProgressUI(progress);
+            }
+        }
+
+        function loadProgress() {
+            let progress = JSON.parse(localStorage.getItem('ipas_study_progress')) || [];
+            updateProgressUI(progress);
+        }
+
+        function updateProgressUI(progress) {
+            document.getElementById('progress-text').textContent = `進度：${progress.length}/4`;
+            
+            progress.forEach(qId => {
+                const tab = document.getElementById(`tab-${qId}`);
+                if (tab) tab.classList.add('completed');
+            });
+        }
+
+        function clearProgress() {
+            if(confirm("確定要清除所有學習紀錄嗎？")) {
+                localStorage.removeItem('ipas_study_progress');
+                location.reload();
+            }
+        }
+
+    </script>
+</body>
+</html>
