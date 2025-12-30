@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安考題解析：零信任架構</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #cccccc;
+            --accent-color: #555555;
+            --highlight-bg: #f4f4f4;
+            --correct-color: #2e7d32;
+            --error-color: #c62828;
+            --font-main: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            --size-title: 20px;
+            --size-body: 18px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: var(--size-body);
+        }
+
+        h1, h2, h3 {
+            font-size: var(--size-title);
+            font-weight: 700;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            color: #000;
+            border-bottom: 2px solid var(--text-color);
+            padding-bottom: 5px;
+        }
+
+        h2 {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        p, li {
+            margin-bottom: 1em;
+        }
+
+        strong {
+            font-weight: 700;
+            background-color: #e0e0e0; /* 模擬螢光筆效果但不刺眼 */
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+
+        /* 題目區樣式 */
+        .question-card {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            background-color: var(--bg-color);
+        }
+
+        .question-stem {
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 8px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: var(--highlight-bg);
+        }
+
+        .option-label input[type="radio"] {
+            margin-top: 6px;
+            margin-right: 10px;
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: var(--size-body);
+            cursor: pointer;
+            border-radius: 4px;
+            margin-right: 10px;
+            margin-top: 15px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--highlight-bg);
+        }
+
+        /* 回饋區樣式 */
+        #feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .feedback-correct {
+            border: 1px solid var(--correct-color);
+            background-color: #e8f5e9;
+            color: var(--correct-color);
+        }
+
+        .feedback-error {
+            border: 1px solid var(--error-color);
+            background-color: #ffebee;
+            color: var(--error-color);
+        }
+
+        .current-selection {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        /* 解析區導覽與 Accordion */
+        .nav-anchors {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: var(--highlight-bg);
+            border-radius: 4px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            font-size: 0.9em;
+            text-decoration: none;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            background: #fff;
+            border-radius: 20px;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--accent-color);
+            background-color: #eee;
+        }
+
+        details {
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: var(--highlight-bg);
+            padding: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            list-style: none; /* 隱藏預設三角形，部分瀏覽器需要 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 15px;
+            background-color: #fff;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* 隱藏答案區塊 */
+        .hidden-answer {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-left: 3px solid var(--accent-color);
+            display: none;
+        }
+        
+        .toggle-answer-btn {
+            font-size: 0.9em;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            cursor: pointer;
+            padding: 0;
+            margin-top: 5px;
+        }
+
+        /* 小螢幕優化 */
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>iPAS 資安考題：零信任架構解析</h1>
+        <p>適用對象：高中職學生、資安初學者</p>
+    </header>
+
+    <main>
+        <!-- 題目區 -->
+        <section class="question-card" id="question-section">
+            <div class="question-stem">
+                11. 在存取控制上，零信任（Zero Trust）是一個重要課題。關於零信任的敘述，下列何者較「不」適當？
+            </div>
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="q11" value="A">
+                    (A) 零信任依循「永不信任，一律驗證」的原則
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q11" value="B">
+                    (B) 推動零信任，企業可能需要重新評估每項資產的保護方式
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q11" value="C">
+                    (C) 零信任倚重於最大特權原則等治理政策
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q11" value="D">
+                    (D) 是 Forrester 的 John Kindervag 首次創造的一個名詞
+                </label>
+            </div>
+            
+            <div class="current-selection" id="current-selection-display"></div>
+
+            <button class="btn" id="submit-btn">送出答案</button>
+            <button class="btn btn-outline" id="reset-btn">重作一次</button>
+
+            <!-- 回饋區 -->
+            <div id="feedback-area"></div>
+        </section>
+
+        <!-- 解析導覽區 -->
+        <section id="analysis-section" style="display:none;">
+            <h2>解析區塊導覽</h2>
+            <div style="margin-bottom: 15px;">
+                <button class="btn btn-outline" id="expand-all-btn" style="padding: 5px 10px; font-size: 0.9em;">全部展開</button>
+                <button class="btn btn-outline" id="collapse-all-btn" style="padding: 5px 10px; font-size: 0.9em;">全部收合</button>
+            </div>
+            
+            <div class="nav-anchors">
+                <a href="#step1" class="nav-btn">找關鍵字</a>
+                <a href="#step2" class="nav-btn">白話翻譯</a>
+                <a href="#step3" class="nav-btn">解題思路</a>
+                <a href="#step4" class="nav-btn">選項分析</a>
+                <a href="#concept" class="nav-btn">觀念補充</a>
+                <a href="#test" class="nav-btn">自我檢測</a>
+            </div>
+
+            <!-- 解析內容 Accordion -->
+            
+            <details id="step0" open>
+                <summary>【題目】</summary>
+                <div class="details-content">
+                    <p>11. 在存取控制上，零信任（Zero Trust）是一個重要課題。關於零信任的敘述，下列何者較「不」適當？</p>
+                </div>
+            </details>
+
+            <details id="step1">
+                <summary>【第一步：找關鍵字】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>零信任（Zero Trust）</strong>：這是本題的核心主題。預設誰都不可信，每次存取都要查身分與權限。</li>
+                        <li><strong>不適當</strong>：這是反向題！要選出「錯的」或「邏輯不通」的選項，不要看到對的就選下去。</li>
+                        <li><strong>最大特權原則</strong>（出現在選項中）：這是一個極端且危險的詞，通常資安都在講「最小」，看到「最大」要警鈴大作。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details id="step2">
+                <summary>【第二步：白話翻譯】</summary>
+                <div class="details-content">
+                    <p>這題用高中生聽得懂的話來說就是：</p>
+                    <p>「現在很紅的『零信任』資安觀念，下面哪一句話是在<strong>胡說八道</strong>？」</p>
+                    <p>你要找的是那個違背零信任精神的選項。</p>
+                </div>
+            </details>
+
+            <details id="step3">
+                <summary>【第三步：解題思路】</summary>
+                <div class="details-content">
+                    <h4>這題在考什麼觀念？</h4>
+                    <p>考你懂不懂零信任的核心邏輯是「管得很嚴（最小權限）」而不是「隨便你用（最大權限）」。</p>
+                    
+                    <h4>解題步驟</h4>
+                    <ol>
+                        <li>回想零信任的口號：「永不信任，一律驗證」。</li>
+                        <li>檢查每個選項，看誰違背了這個口號。</li>
+                        <li>看到 (C) 提到「最大特權」，跟資安基本常識（最小特權原則）完全相反，直接鎖定它。</li>
+                    </ol>
+
+                    <h4>原理與規則</h4>
+                    <p>零信任假設壞人已經在屋子裡了（Assume Breach，假設已被入侵）。如果你採用「最大特權」，等於把所有房間鑰匙都給壞人，這絕對不是零信任要做的。</p>
+                </div>
+            </details>
+
+            <details id="step4">
+                <summary>【第四步：選項分析】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li>
+                            <strong>(A) 零信任依循「永不信任，一律驗證」的原則</strong>
+                            <br><span>狀態：正確</span>
+                            <br><span>白話比喻：</span>就像搭飛機，不管你是不是 VIP，過海關每次都要查護照（驗證），不會因為認識你就讓你直接過。
+                        </li>
+                        <li>
+                            <strong>(B) 推動零信任，企業可能需要重新評估每項資產的保護方式</strong>
+                            <br><span>狀態：正確</span>
+                            <br><span>白話比喻：</span>以前只要守大門（防火牆），現在每個房間門（資產）都要裝鎖，當然要重新盤點家裡有哪些房間、哪些貴重物品。
+                        </li>
+                        <li>
+                            <strong>(C) 零信任倚重於最大特權原則等治理政策</strong>
+                            <br><span style="color:var(--error-color); font-weight:bold;">狀態：錯誤（本題答案）</span>
+                            <br><span>錯在哪：</span>資安鐵律是「<strong>最小特權原則</strong>（Least Privilege）」。
+                            <br><span>白話比喻：</span>「最大特權」就像你去圖書館借書，館員直接把「整座圖書館的鑰匙」給你，甚至讓你可以改寫書本內容。這太瘋狂了！零信任強調「只給你讀這本書的權限」，看完就收回。
+                        </li>
+                        <li>
+                            <strong>(D) 是 Forrester 的 John Kindervag 首次創造的一個名詞</strong>
+                            <br><span>狀態：正確</span>
+                            <br><span>背景知識：</span>這是資安歷史題。2010 年由分析師 John Kindervag 提出，後來被 Google 等大公司發揚光大。
+                        </li>
+                    </ul>
+                </div>
+            </details>
+
+            <details id="concept">
+                <summary>【觀念補充與延伸】</summary>
+                <div class="details-content">
+                    <h4>核心觀念定位</h4>
+                    <p>屬於「存取控制（Access Control）」與「網路安全架構」章節。是目前最主流的資安顯學。</p>
+                    
+                    <h4>法條或定義</h4>
+                    <ul>
+                        <li><strong>零信任架構（ZTA）：</strong>NIST SP 800-207 標準定義了它。核心精神是移除對位置（內網/外網）的信任。</li>
+                        <li><strong>最小特權原則（Principle of Least Privilege）：</strong>只給予使用者完成工作所需的「最少」權限，時間到了就收回。</li>
+                        <li><strong>微分段（Micro-segmentation）：</strong>把網路切成很小的區塊。就像船艙設計成很多隔間，一間進水（被駭）不會整艘船沉沒。</li>
+                    </ul>
+
+                    <h4>觸類旁通：變化題型</h4>
+                    <p>考試可能會改問：</p>
+                    <ul>
+                        <li>「零信任認為內網是安全的嗎？」答案：<strong>否</strong>，零信任視內網與外網一樣危險。</li>
+                        <li>「零信任依賴單一次驗證嗎？」答案：<strong>否</strong>，依賴持續驗證（Continuous Verification）。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details id="memory">
+                <summary>【記憶口訣】</summary>
+                <div class="details-content">
+                    <p><strong>「零信任，沒好人；權限給最小，時時都要查。」</strong></p>
+                    <ul>
+                        <li>沒好人 = 永不信任（內外網都一樣）</li>
+                        <li>權限給最小 = 最小特權（絕非最大）</li>
+                        <li>時時都要查 = 持續驗證</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details id="trap">
+                <summary>【常見陷阱】</summary>
+                <div class="details-content">
+                    <ul>
+                        <li><strong>陷阱 1：以為有 VPN 就是零信任。</strong>
+                            <br>錯！傳統 VPN 進了門就暢行無阻，零信任進了門還是寸步難行，要一直驗證。</li>
+                        <li><strong>陷阱 2：看到「最大特權」覺得好像很厲害。</strong>
+                            <br>錯！在資安世界裡，「最大」通常代表漏洞最大、風險最大。</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details id="answer">
+                <summary>【正確答案】</summary>
+                <div class="details-content">
+                    <p><strong>答案：(C)</strong></p>
+                    <p>理由：零信任必須嚴格控管權限，絕對不可能採用「最大特權原則」，那是駭客最喜歡的狀況。</p>
+                </div>
+            </details>
+
+            <details id="test">
+                <summary>【自我檢測】</summary>
+                <div class="details-content">
+                    <p>試試看，觀念通了嗎？</p>
+                    
+                    <div style="margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+                        <p><strong>Q1. 小明公司的資安政策是「只要在辦公室內網連線，就不需要輸入密碼」。請問這符合零信任原則嗎？</strong></p>
+                        <button class="toggle-answer-btn" onclick="toggleAnswer('ans1')">看答案</button>
+                        <div id="ans1" class="hidden-answer">
+                            <strong>不符合。</strong>
+                            <br>零信任強調「不以位置做為信任依據」，就算在辦公室內（內網），也要驗證身分，不能直接信任。
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+                        <p><strong>Q2. 下列哪個詞彙最能代表零信任對於「權限給予」的態度？ (1) 慷慨大方 (2) 斤斤計較</strong></p>
+                        <button class="toggle-answer-btn" onclick="toggleAnswer('ans2')">看答案</button>
+                        <div id="ans2" class="hidden-answer">
+                            <strong>(2) 斤斤計較。</strong>
+                            <br>也就是「最小特權原則」，只給你剛剛好夠用的權限，多一點都不給。
+                        </div>
+                    </div>
+
+                    <div>
+                        <p><strong>Q3. 零信任架構中，如果駭客攻破了一個伺服器，他能輕易控制整個網路嗎？為什麼？</strong></p>
+                        <button class="toggle-answer-btn" onclick="toggleAnswer('ans3')">看答案</button>
+                        <div id="ans3" class="hidden-answer">
+                            <strong>不能（或很難）。</strong>
+                            <br>因為有「微分段（Micro-segmentation）」技術，把網路切碎了，且沒有「最大特權」，駭客被困在那個小房間裡，很難橫向移動去別的地方。
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </section>
+    </main>
+
+    <script>
+        // 互動邏輯
+        const submitBtn = document.getElementById('submit-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const feedbackArea = document.getElementById('feedback-area');
+        const radioButtons = document.querySelectorAll('input[name="q11"]');
+        const currentSelectionDisplay = document.getElementById('current-selection-display');
+        const analysisSection = document.getElementById('analysis-section');
+        const expandAllBtn = document.getElementById('expand-all-btn');
+        const collapseAllBtn = document.getElementById('collapse-all-btn');
+
+        // 即時顯示選擇
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                currentSelectionDisplay.textContent = `你目前選了：(${e.target.value})`;
+                // 清除之前的回饋，讓使用者專注於重新選擇
+                feedbackArea.style.display = 'none';
+                feedbackArea.className = '';
+            });
+        });
+
+        // 送出答案邏輯
+        submitBtn.addEventListener('click', () => {
+            let selectedValue = null;
+            radioButtons.forEach(radio => {
+                if (radio.checked) {
+                    selectedValue = radio.value;
+                }
+            });
+
+            if (!selectedValue) {
+                alert('請先選擇一個答案喔！');
+                return;
+            }
+
+            // 顯示解析區
+            analysisSection.style.display = 'block';
+
+            feedbackArea.style.display = 'block';
+            feedbackArea.innerHTML = ''; // 清空
+
+            if (selectedValue === 'C') {
+                // 答對
+                feedbackArea.className = 'feedback-correct';
+                feedbackArea.innerHTML = `
+                    <h3>答對了！</h3>
+                    <p>觀念正確！零信任絕對不是「最大特權」，而是要「最小特權」（斤斤計較）。</p>
+                    <p>往下看完整解析，鞏固觀念吧！</p>
+                `;
+            } else {
+                // 答錯
+                feedbackArea.className = 'feedback-error';
+                let reason = '';
+                if (selectedValue === 'A') reason = '這是零信任的核心口號，敘述是正確的（題目問不適當）。';
+                if (selectedValue === 'B') reason = '推動新架構當然要重新盤點資產，這敘述是合理的。';
+                if (selectedValue === 'D') reason = '這是正確的歷史事實，John Kindervag 是零信任之父。';
+
+                feedbackArea.innerHTML = `
+                    <h3>答錯囉！</h3>
+                    <p>正確答案是 <strong>(C)</strong>。</p>
+                    <p>你選的 (${selectedValue}) 是正確的敘述，但題目要找「不適當」的。</p>
+                    <p><strong>錯誤原因：</strong>${reason}</p>
+                    <p><strong>關鍵提示：</strong>想想看，資安會希望給使用者的權限是「最大」還是「最小」？</p>
+                `;
+            }
+
+            // 自動捲動到回饋區
+            feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        // 重作一次邏輯
+        resetBtn.addEventListener('click', () => {
+            radioButtons.forEach(radio => radio.checked = false);
+            currentSelectionDisplay.textContent = '';
+            feedbackArea.style.display = 'none';
+            feedbackArea.className = '';
+            analysisSection.style.display = 'none'; // 隱藏解析
+            
+            // 捲動回頂部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // 展開/收合所有詳解
+        expandAllBtn.addEventListener('click', () => {
+            document.querySelectorAll('details').forEach(el => el.open = true);
+        });
+
+        collapseAllBtn.addEventListener('click', () => {
+            document.querySelectorAll('details').forEach(el => el.open = false);
+        });
+
+        // 自我檢測答案切換
+        function toggleAnswer(id) {
+            const el = document.getElementById(id);
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+            } else {
+                el.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

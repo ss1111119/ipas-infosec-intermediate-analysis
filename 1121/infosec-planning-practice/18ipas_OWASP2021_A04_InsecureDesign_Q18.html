@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安考題詳解：Insecure Design</title>
+    <style>
+        :root {
+            --bg-color: #fdfdfd;
+            --text-color: #333333;
+            --highlight-color: #0056b3;
+            --border-color: #dddddd;
+            --success-bg: #e6fffa;
+            --success-text: #006d5b;
+            --error-bg: #fff5f5;
+            --error-text: #c53030;
+            --btn-primary: #333;
+            --btn-hover: #555;
+            --btn-secondary: #f0f0f0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Typography Restrictions: Title not > 1 level bigger than body */
+        h1 { font-size: 22px; margin-bottom: 16px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        h2 { font-size: 20px; margin-top: 30px; margin-bottom: 15px; color: #444; }
+        h3 { font-size: 19px; margin-top: 20px; margin-bottom: 10px; font-weight: bold; }
+        p, li, label, div { font-size: 18px; }
+
+        /* Terminology highlight */
+        .term {
+            font-weight: bold;
+            color: var(--highlight-color);
+            cursor: help;
+            border-bottom: 1px dotted var(--highlight-color);
+        }
+
+        .term-def {
+            background-color: #f0f8ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #444;
+            display: inline-block;
+            margin: 0 4px;
+        }
+
+        /* Question Section */
+        .question-box {
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .option-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .option-item input[type="radio"] {
+            margin-top: 6px;
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .current-selection {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #666;
+            font-size: 16px;
+        }
+
+        /* Buttons */
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-submit { background-color: var(--btn-primary); color: #fff; }
+        .btn-submit:hover { background-color: var(--btn-hover); }
+
+        .btn-reset { background-color: var(--btn-secondary); color: #333; border: 1px solid #ccc; }
+        .btn-reset:hover { background-color: #e0e0e0; }
+
+        .btn-goto { background-color: var(--highlight-color); color: white; display: none; } /* Hidden initially */
+
+        /* Feedback Section */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: var(--success-bg);
+            border-left: 5px solid var(--success-text);
+            color: var(--success-text);
+        }
+
+        .feedback-wrong {
+            background-color: var(--error-bg);
+            border-left: 5px solid var(--error-text);
+            color: var(--error-text);
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Analysis Section (Accordion) */
+        #analysis-section {
+            margin-top: 50px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+        }
+
+        .accordion-controls {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .accordion-header {
+            background-color: #f7f7f7;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: #eeeeee;
+        }
+
+        .accordion-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s;
+            background-color: #fff;
+        }
+
+        .accordion-content.open {
+            padding: 20px;
+            max-height: 2000px; /* Arbitrary large height for animation */
+            border-top: 1px solid #eee;
+        }
+
+        .indicator {
+            font-size: 20px;
+            font-weight: normal;
+        }
+
+        /* Self Check Section */
+        .self-check-item {
+            margin-bottom: 20px;
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .toggle-answer {
+            color: var(--highlight-color);
+            text-decoration: underline;
+            cursor: pointer;
+            margin-top: 10px;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        .answer-box {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #eee;
+            color: #444;
+        }
+
+        /* Utility */
+        .bold { font-weight: bold; }
+        .red-text { color: var(--error-text); }
+        .blue-text { color: var(--highlight-color); }
+        
+        /* Anchor offset for fixed header if needed, strictly not needed here but good practice */
+        section { scroll-margin-top: 20px; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>資安觀念入門：Insecure Design (不安全的設計)</h1>
+        <p>適用對象：高中職學生、資安初學者 | 來源：iPAS 資訊安全工程師考題</p>
+    </header>
+
+    <main>
+        <!-- Question Block -->
+        <section class="question-box">
+            <h2>第 18 題 (單選)</h2>
+            <p>
+                <span class="term">OWASP Top 10:2021</span><span class="term-def">最常見的十大網站風險清單</span>
+                所發布之 
+                <span class="term">A04:2021 - Insecure Design</span><span class="term-def">設計上就不安全</span>
+                主要是呈現出許多不同的弱點，代表著「缺乏或無效的
+                <span class="term">控制設計</span><span class="term-def">防止問題的規則</span>」。
+                試問下列對於預防 Insecure Design 發生的控制措施何者較「不」適當？
+            </p>
+
+            <form id="quiz-form">
+                <ul class="options-list">
+                    <li class="option-item">
+                        <label>
+                            <input type="radio" name="answer" value="A">
+                            (A) 建立與使用安全開發生命週期並且協同應用程式安全的專業人士來評估與設計安全與隱私相關的控制措施
+                        </label>
+                    </li>
+                    <li class="option-item">
+                        <label>
+                            <input type="radio" name="answer" value="B">
+                            (B) 建立與使用第三方的開源函式庫，或是使用已完成的元件
+                        </label>
+                    </li>
+                    <li class="option-item">
+                        <label>
+                            <input type="radio" name="answer" value="C">
+                            (C) 使用威脅建模在關鍵的認證、存取控制、商業邏輯與關鍵缺陷上
+                        </label>
+                    </li>
+                    <li class="option-item">
+                        <label>
+                            <input type="radio" name="answer" value="D">
+                            (D) 撰寫單元測試與整合測試來驗證所有的關鍵流程對威脅建模都有抵抗
+                        </label>
+                    </li>
+                </ul>
+            </form>
+
+            <div class="current-selection" id="selection-display">你目前選擇的是：（尚未選擇）</div>
+
+            <div class="btn-group">
+                <button class="btn-submit" id="submit-btn" onclick="checkAnswer()">送出答案</button>
+                <button class="btn-reset" id="reset-btn" onclick="resetQuiz()">重作一次</button>
+                <button class="btn-goto" id="goto-analysis-btn" onclick="scrollToAnalysis()">前往解析</button>
+            </div>
+
+            <!-- Feedback Area -->
+            <div id="feedback-area">
+                <span class="feedback-title" id="feedback-title"></span>
+                <p id="feedback-content"></p>
+            </div>
+        </section>
+
+        <!-- Analysis Section -->
+        <section id="analysis-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;">詳細解析</h2>
+                <button class="btn-reset" onclick="toggleAllAccordions()">全部展開 / 全部收合</button>
+            </div>
+
+            <!-- Accordion 1: Question Restatement -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【題目重述】
+                    <span class="indicator">+</span>
+                </div>
+                <div class="accordion-content">
+                    <p>OWASP Top 10:2021 所發布之 A04:2021 - Insecure Design 主要是呈現出許多不同的弱點，代表著「缺乏或無效的控制設計」。試問下列對於預防 A04:2021 - Insecure Design 發生的控制措施何者較「不」適當？</p>
+                </div>
+            </div>
+
+            <!-- Accordion 2: Keywords -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第一步：找關鍵字】
+                    <span class="indicator">+</span>
+                </div>
+                <div class="accordion-content">
+                    <p>請留意以下詞彙：</p>
+                    <ul>
+                        <li><span class="term">OWASP</span><span class="term-def">做網站安全指引的國際社群</span>：出題目的來源組織，權威性高。</li>
+                        <li><span class="term">A04:2021-Insecure Design</span><span class="term-def">設計缺陷</span>：這是題目的核心，指的是系統在「畫藍圖」的時候就錯了。</li>
+                        <li><span class="term">缺乏或無效的控制設計</span>：問題出在「規則」沒訂好，而不是程式碼寫錯字。</li>
+                        <li><span class="term">預防</span>：要找事前就能避免的方法。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Accordion 3: Plain Translation -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第二步：白話翻譯】
+                    <span class="indicator">+</span>
+                </div>
+                <div class="accordion-content">
+                    <p>這題用高中生的話來說就是：</p>
+                    <p class="bold">「這題在問：『系統一開始就設計得不安全』要怎麼避免？下面哪一個做法其實<span class="red-text">不是</span>在解決『設計/藍圖』的問題？」</p>
+                </div>
+            </div>
+
+            <!-- Accordion 4: Logic -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第三步：解題思路】
+                    <span class="indicator">+</span>
+                </div>
+                <div class="accordion-content">
+                    <h3>這題在考什麼觀念？</h3>
+                    <p>Insecure Design 是「設計階段就沒把安全想進去」，不是單純寫程式寫錯。</p>
+                    
+                    <h3>解題步驟</h3>
+                    <ol>
+                        <li>先釐清「設計」指的是：需求、架構、流程、控制點怎麼規劃。</li>
+                        <li>看到每個選項就問：它是在「設計時先防呆」還是在「寫程式時使用現成材料」？</li>
+                        <li>找出跟「控制設計」關聯最弱、甚至可能帶來新風險的選項。</li>
+                    </ol>
+
+                    <h3>原理與規則</h3>
+                    <p>把安全做在設計層，就像是蓋房子時先在藍圖上規劃好消防通道、逃生門、門禁系統；而不是等房子蓋好發現容易失火，才買膠帶隨便貼貼。</p>
+                </div>
+            </div>
+
+            <!-- Accordion 5: Option Analysis -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【第四步：選項分析】
+                    <span class="indicator">+</span>
+                </div>
+                <div class="accordion-content">
+                    <div style="margin-bottom: 20px;">
+                        <span class="bold">(A) 為什麼適當？</span><br>
+                        <span class="term">SSDLC</span><span class="term-def">安全軟體開發生命週期</span>
+                        就是把需求→設計→開發→測試→上線每一步都加上安全檢查。加上專業人士評估，就是直接在改善「控制設計」的品質，所以這是好的預防措施。
+                    </div>
+                    
+                    <div style="margin-bottom: 20px; background-color: #fff0f0; padding: 10px; border-radius: 4px;">
+                        <span class="bold red-text">(B) 為什麼較不適當？（本題正解）</span><br>
+                        使用第三方/<span class="term">開源元件</span><span class="term-def">公開原始碼的程式積木</span>
+                        只是使用了別人寫好的程式積木。這不等於「你有把控制設計好」。
+                        <br><br>
+                        例如：你買了全世界最堅固的鎖（元件），但你的設計藍圖上根本沒畫大門（設計缺陷），小偷還是能直接走進來。<br>
+                        甚至這還可能引入<span class="term">供應鏈風險</span><span class="term-def">依賴的外部元件出事連累你</span>。這比較像是在講「降低開發成本」，而不是針對「設計缺陷」的預防。
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <span class="bold">(C) 為什麼適當？</span><br>
+                        使用<span class="term">威脅建模</span><span class="term-def">先想像攻擊手法來補防線</span>
+                        是典型的設計階段措施。在寫程式前，先針對<span class="term">認證</span><span class="term-def">確認你是誰</span>、
+                        <span class="term">存取控制</span><span class="term-def">決定你能做什麼</span>、
+                        <span class="term">商業邏輯</span><span class="term-def">系統的規則與流程</span>
+                        進行兵推，找出設計漏洞，這完全符合預防 Insecure Design。
+                    </div>
+
+                    <div>
+                        <span class="bold">(D) 為什麼適當？</span><br>
+                        <span class="term">單元測試</span><span class="term-def">測小功能</span>
+                        與<span class="term">整合測試</span><span class="term-def">測流程串起來</span>
+                        可以驗證你的關鍵流程是否有達到安全需求。雖然測試是事後驗證，但它能確認「設計有沒有落地」。如果測試失敗，代表設計沒被做出來，所以廣義上也是確保設計有效的一環。
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accordion 6: Supplements -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【觀念補充與延伸】
+                    <span class="indicator">+</span>
+                </div>
+                <div class="accordion-content">
+                    <h3>核心觀念定位</h3>
+                    <p>本題屬於 OWASP Top 10 中「設計/架構層面」常考觀念，容易與「實作錯誤」混淆。</p>
+                    
+                    <h3>觸類旁通</h3>
+                    <ul>
+                        <li><strong>Insecure Design (設計缺陷)</strong>：房子藍圖沒畫門，誰都能進來。</li>
+                        <li><strong>Security Misconfiguration (設定錯誤)</strong>：有門也有鎖，但你忘記鎖上，或者鑰匙插在門上。</li>
+                        <li><strong>Vulnerable Components (元件漏洞)</strong>：門鎖上了，但那個鎖的材質很爛，一敲就碎（這就是選項 B 沒處理好的話會變成的另一個風險）。</li>
+                    </ul>
+
+                    <h3>變化題型</h3>
+                    <p>如果題目把選項 B 改成「在設計階段進行元件版本控管與弱點掃描規劃」，那它就會變比較適當一點，但依然不如威脅建模(C)直接針對「設計邏輯」。</p>
+                </div>
+            </div>
+
+            <!-- Accordion 7: Mnemonic & Traps -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【記憶口訣與常見陷阱】
+                    <span class="indicator">+</span>
+                </div>
+                <div class="accordion-content">
+                    <h3>記憶口訣</h3>
+                    <p style="font-size: 20px; font-weight: bold; color: var(--highlight-color); border: 2px solid var(--highlight-color); padding: 10px; display: inline-block;">
+                        「設計先畫防線，元件只是積木；積木再好，房子沒門禁也會被闖。」
+                    </p>
+
+                    <h3>常見陷阱</h3>
+                    <ul>
+                        <li><span class="bold">最容易搞混：</span>以為「用現成元件」就一定比較安全。其實只是省工，跟設計安不安全無關。</li>
+                        <li><span class="bold">心理盲點：</span>把「少寫程式」誤認為「少漏洞」，忽略了「控制點設計（例如誰可以看薪資資料）」才是重點。</li>
+                        <li><span class="bold">避坑指南：</span>看到 Insecure Design 就先問自己：這個選項是在「畫藍圖」還是在「換材料」？</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Accordion 8: Answer -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【正確答案】
+                    <span class="indicator">+</span>
+                </div>
+                <div class="accordion-content">
+                    <h3>答案：(B)</h3>
+                    <p>一句話理由：使用第三方/開源元件不等於把安全控制「設計好」，也無法直接預防「控制設計缺陷」。</p>
+                </div>
+            </div>
+
+            <!-- Accordion 9: Self Check -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    【自我檢測】(點擊看答案)
+                    <span class="indicator">+</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="self-check-item">
+                        <p class="bold">1) 若選項 B 改成「建立第三方元件管理政策與漏洞掃描流程」，還會是不適當嗎？為什麼？</p>
+                        <span class="toggle-answer" onclick="toggleAnswer(this)">點擊查看答案</span>
+                        <div class="answer-box">
+                            答案：這會變成預防 A06 (Vulnerable Components) 的好方法，但對於 A04 (Insecure Design) 來說，依然不是最核心的「設計預防」。設計問題通常是邏輯問題，而不是元件舊不舊的問題。
+                        </div>
+                    </div>
+
+                    <div class="self-check-item">
+                        <p class="bold">2) 什麼情況屬於 Insecure Design？請舉一個生活例子。</p>
+                        <span class="toggle-answer" onclick="toggleAnswer(this)">點擊查看答案</span>
+                        <div class="answer-box">
+                            答案：例如電影院設計了逃生門，但逃生門設計成「需要刷票卡才能開」。這就是設計缺陷，因為逃生時大家可能找不到票卡。這不是門壞掉，是設計邏輯一開始就錯了。
+                        </div>
+                    </div>
+
+                    <div class="self-check-item">
+                        <p class="bold">3) 威脅建模通常在開發哪個階段做最有效？為什麼？</p>
+                        <span class="toggle-answer" onclick="toggleAnswer(this)">點擊查看答案</span>
+                        <div class="answer-box">
+                            答案：在「設計階段」做最有效。因為在還沒蓋房子前改藍圖很便宜；等房子蓋好了才發現要加裝防火牆，成本會非常高。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        // Data
+        const correctAnswer = "B";
+        const explanationCorrect = "答對了！使用現成元件只是像買積木，不能保證你蓋出來的房子設計是安全的（例如沒畫門禁），這不是解決「設計缺陷」的核心方法。";
+        const explanationWrong = "答錯囉！這個選項其實是「適當」的預防措施。Insecure Design 需要在「設計階段」就介入（如 SSDLC、威脅建模、測試驗證）。而選項 (B) 只是使用現成元件，這比較偏向「實作」而非「設計控制」，且使用外部元件不保證設計邏輯安全，甚至可能有供應鏈風險。";
+
+        // DOM Elements
+        const form = document.getElementById('quiz-form');
+        const selectionDisplay = document.getElementById('selection-display');
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackContent = document.getElementById('feedback-content');
+        const gotoBtn = document.getElementById('goto-analysis-btn');
+
+        // Event Listener for Radio Change
+        form.addEventListener('change', (e) => {
+            if (e.target.name === 'answer') {
+                selectionDisplay.textContent = `你目前選擇的是：${e.target.value}`;
+            }
+        });
+
+        // Check Answer
+        function checkAnswer() {
+            const formData = new FormData(form);
+            const userChoice = formData.get('answer');
+
+            if (!userChoice) {
+                alert("請先選擇一個答案！");
+                return;
+            }
+
+            // Show feedback area
+            feedbackArea.style.display = 'block';
+            gotoBtn.style.display = 'inline-block'; // Show goto button
+
+            if (userChoice === correctAnswer) {
+                // Correct
+                feedbackArea.className = 'feedback-correct';
+                feedbackTitle.textContent = '答對';
+                feedbackContent.textContent = explanationCorrect;
+            } else {
+                // Wrong
+                feedbackArea.className = 'feedback-wrong';
+                feedbackTitle.textContent = `答錯（正確答案是 ${correctAnswer}）`;
+                feedbackContent.textContent = explanationWrong;
+            }
+
+            // Scroll to feedback slightly
+            feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Reset Quiz
+        function resetQuiz() {
+            form.reset();
+            selectionDisplay.textContent = '你目前選擇的是：（尚未選擇）';
+            feedbackArea.style.display = 'none';
+            feedbackArea.className = '';
+            gotoBtn.style.display = 'none';
+            
+            // Collapse all accordions
+            const contents = document.querySelectorAll('.accordion-content');
+            const indicators = document.querySelectorAll('.indicator');
+            contents.forEach(c => c.classList.remove('open'));
+            indicators.forEach(i => i.textContent = '+');
+            
+            // Hide all self-check answers
+            document.querySelectorAll('.answer-box').forEach(box => box.style.display = 'none');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Scroll to Analysis
+        function scrollToAnalysis() {
+            const section = document.getElementById('analysis-section');
+            section.scrollIntoView({ behavior: 'smooth' });
+            // Optionally open first accordion
+            const firstContent = section.querySelector('.accordion-content');
+            const firstIndicator = section.querySelector('.indicator');
+            if(firstContent) {
+                firstContent.classList.add('open');
+                firstIndicator.textContent = '-';
+            }
+        }
+
+        // Accordion Logic
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const indicator = header.querySelector('.indicator');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                indicator.textContent = '+';
+            } else {
+                content.classList.add('open');
+                indicator.textContent = '-';
+            }
+        }
+
+        // Toggle All Accordions
+        let allOpen = false;
+        function toggleAllAccordions() {
+            const contents = document.querySelectorAll('.accordion-content');
+            const indicators = document.querySelectorAll('.indicator');
+            
+            allOpen = !allOpen;
+            
+            contents.forEach(content => {
+                if (allOpen) content.classList.add('open');
+                else content.classList.remove('open');
+            });
+            
+            indicators.forEach(ind => {
+                ind.textContent = allOpen ? '-' : '+';
+            });
+        }
+
+        // Toggle Self Check Answer
+        function toggleAnswer(btn) {
+            const answerBox = btn.nextElementSibling;
+            if (answerBox.style.display === 'block') {
+                answerBox.style.display = 'none';
+                btn.textContent = '點擊查看答案';
+            } else {
+                answerBox.style.display = 'block';
+                btn.textContent = '收合答案';
+            }
+        }
+    </script>
+</body>
+</html>

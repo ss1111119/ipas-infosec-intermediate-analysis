@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安規劃實務衝刺 - 題組 1 (Q5-Q8)</title>
+    <style>
+        :root {
+            --primary-color: #0056b3; /* Professional Blue */
+            --secondary-color: #004494;
+            --accent-color: #d9534f; /* Alert Red */
+            --success-color: #28a745; /* Success Green */
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --highlight-color: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 60px; /* Space for footer */
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .progress-container {
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        /* Scenario Section */
+        .scenario-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--secondary-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ascii-art {
+            font-family: "Consolas", "Courier New", monospace;
+            background-color: #2d2d2d;
+            color: #f1f1f1;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            line-height: 1.2;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-tool {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .btn-tool:hover { background-color: #5a6268; }
+        .btn-tool.active { background-color: #e0a800; color: #000; }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover { color: var(--primary-color); }
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        /* Question Content */
+        .question-panel {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .question-panel.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Accordion Style Sections */
+        .section-block {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            margin-bottom: 15px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background-color: #e9ecef;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header:hover { background-color: #dde2e6; }
+        
+        .section-content {
+            padding: 15px;
+            display: none; /* Collapsed by default */
+            border-top: 1px solid var(--border-color);
+        }
+
+        .section-content.open { display: block; }
+        .section-content.always-open { display: block; } /* For Question Text */
+
+        /* 修正列表縮排問題，確保 1, 2, 3 不會被吃掉 */
+        .section-content ol, .section-content ul {
+            padding-left: 25px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .section-content li {
+            margin-bottom: 5px;
+        }
+
+        /* Quiz Interaction */
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .option-btn {
+            padding: 12px;
+            text-align: left;
+            background-color: white;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: #f0f7ff;
+        }
+
+        .option-btn.correct {
+            border-color: var(--success-color);
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .option-btn.wrong {
+            border-color: var(--accent-color);
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .feedback-msg {
+            margin-top: 10px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .feedback-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .feedback-wrong { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Multi-select Specific */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            background: white;
+        }
+        .checkbox-label:hover { background-color: #f0f7ff; }
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+            align-self: flex-start;
+        }
+        .btn-submit:hover { background-color: var(--secondary-color); }
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+
+        /* Keyword Highlighting */
+        mark.keyword {
+            background-color: yellow;
+            color: black;
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+        
+        span.hidden-keyword {
+            background-color: transparent;
+            color: inherit;
+        }
+
+        /* One Minute Summary */
+        .quick-note {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 30px;
+        }
+        .quick-note h3 { margin-bottom: 10px; color: #856404; }
+        .quick-note ul { margin-left: 20px; }
+        .quick-note li { margin-bottom: 5px; font-size: 0.95rem; }
+
+        /* Utilities */
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            color: white;
+        }
+        .badge-ot { background-color: #e83e8c; }
+        .badge-net { background-color: #17a2b8; }
+
+        .hidden { display: none !important; }
+        
+        .analysis-lock-msg {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            background: #eee;
+            border-radius: 4px;
+            font-style: italic;
+        }
+        
+        /* Focus styles for accessibility */
+        *:focus-visible {
+            outline: 3px solid var(--secondary-color);
+            outline-offset: 2px;
+        }
+
+        /* Self check toggle */
+        .self-check-answer {
+            display: none;
+            margin-top: 5px;
+            padding: 5px 10px;
+            background: #e2e3e5;
+            border-left: 3px solid #383d41;
+        }
+        .show-answer-btn {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .toolbar { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>iPAS 資安規劃實務</h1>
+            <span style="font-size: 0.9rem; opacity: 0.9;">題組 1 (第 5-8 題) 重點衝刺</span>
+        </div>
+        <div class="progress-container">
+            完成進度：<span id="progress-text">0/4</span>
+        </div>
+    </header>
+
+    <!-- Context Section -->
+    <section class="scenario-box">
+        <div class="scenario-title">
+            <span>題組 1 背景描述</span>
+        </div>
+        <p style="margin-bottom: 10px;">
+            A 公司為某先進產品的製造商，該公司主要據點 <span class="kw-target">B (業務/技服)</span> 與 <span class="kw-target">C (管/資/研發/製造)</span> 分散在國內兩地，距離約 20 km。主要客戶位於歐洲。公司已通過 ISO 9001、ISO 27001 及 ISO 27701 驗證。
+        </p>
+        <p>
+            兩地通訊在成本考量下，分別租用業者 <span class="kw-target">ISP D</span> 的網際網路接取服務連接 <span class="kw-target">Internet</span>。
+        </p>
+        <p style="margin-top:10px; font-size:0.9rem; color:#555;">(請搭配下方簡易拓樸圖理解)</p>
+        
+        <div class="ascii-art" aria-label="網路拓樸圖">
+      [ 網際網路 (Internet) ]
+               |
+          [ ISP 業者 D ]
+          /            \
+    (據點 B)          (據點 C)
+       |                 |
+  +----+----+       [防火牆(NAT)]
+  |         |            |
+(業務部)  (技術部)    (內部網路)
+  |         |            |
+[印表機]   [電腦]     [管理/資訊]
+(公有IP)  (私有IP)    [研發/製造]
+  ^
+  |__ !! 風險點 !!
+        </div>
+    </section>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <button class="btn-tool" onclick="toggleKeywords()" id="btn-keyword">💡 關鍵字提示 (開/關)</button>
+    </div>
+
+    <!-- Navigation -->
+    <div class="tabs" role="tablist">
+        <button class="tab-btn active" onclick="switchTab('q5')" role="tab" aria-selected="true" aria-controls="panel-q5">Q5. 入侵節點</button>
+        <button class="tab-btn" onclick="switchTab('q6')" role="tab" aria-selected="false" aria-controls="panel-q6">Q6. 安全列印</button>
+        <button class="tab-btn" onclick="switchTab('q7')" role="tab" aria-selected="false" aria-controls="panel-q7">Q7. OT 標準</button>
+        <button class="tab-btn" onclick="switchTab('q8')" role="tab" aria-selected="false" aria-controls="panel-q8">Q8. 流程認證</button>
+    </div>
+
+    <!-- Q5 Section -->
+    <div id="panel-q5" class="question-panel active" role="tabpanel">
+        <div class="section-block">
+            <div class="section-content always-open">
+                <span class="badge badge-net">網路安全</span>
+                <p><strong>Q5.</strong> 近日業務部門的印表機突然印出紙本的<span class="kw-target">勒索信</span>，信中表示該公司的電腦已被駭客組織 E 入侵... 經調查發現：業務部門為方便從外部列印，私自將該部門的<span class="kw-target">印表機</span>設定使用<span class="kw-target">公有 IP (Public IP)</span>，且其他電腦皆位於啟用 <span class="kw-target">NAT</span> 功能的防火牆後方。請問最有可能被入侵的網路節點？</p>
+                <div class="quiz-options" id="options-q5">
+                    <button class="option-btn" onclick="checkQ5('A', this)">(A) 據點 C 中資訊部門的電腦</button>
+                    <button class="option-btn" onclick="checkQ5('B', this)">(B) 據點 B 中業務部門的電腦</button>
+                    <button class="option-btn" onclick="checkQ5('C', this)">(C) 據點 B 中技術服務部門的電腦</button>
+                    <button class="option-btn" onclick="checkQ5('D', this)">(D) 印表機遭惡意濫用</button>
+                </div>
+                <div id="feedback-q5" class="feedback-msg"></div>
+                <button class="btn-reset hidden" id="reset-q5" onclick="resetQuestion('q5')">⟳ 重新作答</button>
+            </div>
+        </div>
+
+        <div id="analysis-q5" class="hidden">
+            <!-- Teaching Steps -->
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">步驟一：找關鍵字 & 步驟二：白話翻譯 <span class="toggle-icon">▼</span></div>
+                <div class="section-content open">
+                    <ul>
+                        <li><mark class="kw-target">公有 IP (Public IP)</mark>：在網際網路上大家都能直接找到的門牌號碼，沒有警衛擋著。</li>
+                        <li><mark class="kw-target">NAT (網路位址轉換)</mark>：把內部很多台電腦「藏在」同一個對外門牌後面，外部人通常看不到內部的真實位置。</li>
+                        <li><mark class="kw-target">勒索信 / 駭客入侵</mark>：代表已經被打進來了。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">步驟三：解題思路 <span class="toggle-icon">▼</span></div>
+                <div class="section-content open">
+                    <p><strong>這題考什麼？</strong> 考你「暴露面」的概念。誰沒穿衣服（防火牆保護），誰就先著涼。</p>
+                    <ol>
+                        <li><strong>比較環境：</strong> 
+                            <br>其他電腦 -> 有 NAT 防火牆保護（像住在大樓內，有警衛過濾）。
+                            <br>印表機 -> 設定公有 IP（像直接睡在大馬路邊）。
+                        </li>
+                        <li><strong>駭客行為：</strong> 駭客會在網路上隨機掃描（像小偷沿街拉門把）。</li>
+                        <li><strong>結論：</strong> 擁有「公有 IP」的設備會最先被掃描到並嘗試入侵。</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">步驟四：選項分析 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <ul>
+                        <li>(A)(B)(C) 錯誤：這些電腦都在 NAT/防火牆後方，外部無法直接連線發動攻擊，除非內部人員主動點擊釣魚信，但題幹未提及。</li>
+                        <li>(D) 正確：印表機直接掛在網際網路上（公有 IP），且印表機通常缺乏防護軟體，容易存在漏洞，是完美的入侵跳板。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">觀念補充與延伸 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>核心觀念定位：</strong> 屬於「網路安全架構」章節，強調網路邊界（Perimeter）與暴露面管理。</li>
+                        <li><strong>定義重點：</strong> NAT (Network Address Translation) 不僅是為了解決 IPv4 不足，在資安上它提供了「隱藏內部拓樸」的效果，是基礎防禦的一環。</li>
+                        <li><strong>觸類旁通：</strong> 
+                            <br>Q: 如果電腦都在 NAT 後面就絕對安全嗎？
+                            <br>A: 不一定。駭客可以透過「釣魚郵件」讓內部員工主動連出來 (C2 連線)，繞過 NAT 的「外部無法主動連入」限制。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">記憶口訣 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <p><strong>記憶口訣：</strong> <span style="color:var(--primary-color); font-weight:bold;">公有 IP 裸奔最危險，NAT 藏身保平安。</span></p>
+                    <p><strong>常見陷阱：</strong> 看到「勒索信」就以為是員工亂點 Email (釣魚)。要注意題幹強調的「網路設定差異」（公有 IP vs NAT），這才是題目給的主線索。</p>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">自我檢測 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <div style="margin-bottom: 15px;">
+                        1. 如果印表機必須對外開放（例如給廠商維修），最安全的做法是什麼？
+                        <button class="show-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+                        <div class="self-check-answer">設定防火牆 ACL 限制來源 IP（白名單），只允許廠商 IP 連線，或強制使用 VPN。</div>
+                    </div>
+                    <div>
+                        2. 駭客掃描到公有 IP 後，通常第一步會做什麼？
+                        <button class="show-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+                        <div class="self-check-answer">進行通訊埠掃描 (Port Scanning) 來看有哪些服務開啟（如 TCP 9100, 80, 443）。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="lock-q5" class="analysis-lock-msg">請先作答以解鎖詳細解析</div>
+    </div>
+
+    <!-- Q6 Section -->
+    <div id="panel-q6" class="question-panel" role="tabpanel">
+        <div class="section-block">
+            <div class="section-content always-open">
+                <span class="badge badge-net">網路安全</span>
+                <p><strong>Q6.</strong> 為符合業務部門員工從公司<span class="kw-target">外部列印</span>資料的需求，下列何種解決方案，可以<span class="kw-target">不需</span>在印表機設定公有 IP 的前提下達成此需求？</p>
+                <div class="quiz-options" id="options-q6">
+                    <button class="option-btn" onclick="checkQ6('A', this)">(A) WAF (Web Application Firewall)</button>
+                    <button class="option-btn" onclick="checkQ6('B', this)">(B) IDS (Intrusion Detection System)</button>
+                    <button class="option-btn" onclick="checkQ6('C', this)">(C) VPN (Virtual Private Network)</button>
+                    <button class="option-btn" onclick="checkQ6('D', this)">(D) EDR (Endpoint Detection and Response)</button>
+                </div>
+                <div id="feedback-q6" class="feedback-msg"></div>
+                <button class="btn-reset hidden" id="reset-q6" onclick="resetQuestion('q6')">⟳ 重新作答</button>
+            </div>
+        </div>
+
+        <div id="analysis-q6" class="hidden">
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">步驟一 & 二：關鍵字與名詞解釋 <span class="toggle-icon">▼</span></div>
+                <div class="section-content open">
+                    <ul>
+                        <li><mark class="kw-target">外部列印</mark>：人不在公司，要連回公司設備。</li>
+                        <li><mark class="kw-target">WAF</mark>：網站應用程式防火牆，專門保護 Web 網站 (HTTP/S)。</li>
+                        <li><mark class="kw-target">VPN</mark>：虛擬私人網路，像拉一條「加密隧道」回公司內網。</li>
+                        <li><mark class="kw-target">IDS</mark>：入侵偵測系統，像警報器，只會叫不會擋（除非是 IPS）。</li>
+                        <li><mark class="kw-target">EDR</mark>：端點偵測與回應，裝在電腦上的防毒軟體進階版。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">步驟三：解題思路 <span class="toggle-icon">▼</span></div>
+                <div class="section-content open">
+                    <p><strong>這題考什麼？</strong> 考你「遠端安全存取」的標準解法。</p>
+                    <ol>
+                        <li><strong>需求：</strong> 員工在外面，想用內網的印表機。</li>
+                        <li><strong>限制：</strong> 不能讓印表機裸奔 (公有 IP)。</li>
+                        <li><strong>解法：</strong> 把員工「虛擬」傳送回內網。透過 VPN 建立加密通道，員工電腦取得內網 IP 後，就能像坐在辦公室一樣列印。</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">步驟四：選項分析 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <ul>
+                        <li>(A) WAF：印表機通訊協定通常不是 Web (HTTP)，且 WAF 是防護網站被攻擊，不是做連線存取通道。</li>
+                        <li>(B) IDS：只能偵測攻擊，無法提供連線功能。</li>
+                        <li>(C) VPN：正確。建立加密隧道，安全連回內網。</li>
+                        <li>(D) EDR：裝在電腦上殺毒的，跟遠端連線無關。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">觀念補充與延伸 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>核心觀念定位：</strong> 屬於「通訊與作業安全」中的「遠端存取控制」。VPN 是解決遠端連線隱私性與完整性的標準技術。</li>
+                        <li><strong>技術對比：</strong> 
+                            <br>VPN vs RDP (遠端桌面)：直接將 RDP (Port 3389) 開放在公網非常危險，極易被暴力破解。標準做法是「先撥 VPN，再用 RDP」。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">記憶口訣 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <p><strong>記憶口訣：</strong> <span style="color:var(--primary-color); font-weight:bold;">遠端回公司，首選 VPN。</span></p>
+                    <p><strong>常見陷阱：</strong> 混淆 WAF 和 Firewall。一般防火牆可以開 Port 讓外部連線（但不安全），但 WAF 專門針對 Web 層，印表機列印通常走 TCP 9100 或 LPR，WAF 幫不上忙。</p>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">自我檢測 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <div style="margin-bottom: 15px;">
+                        1. WAF 為什麼不能保護印表機列印？
+                        <button class="show-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+                        <div class="self-check-answer">因為 WAF 是針對 Web (HTTP/S) 應用層過濾，印表機列印通常走 LPR/TCP 9100 等非 Web 協定。</div>
+                    </div>
+                    <div>
+                        2. 想要「不需安裝專用軟體」就能用的 VPN 是哪種？
+                        <button class="show-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+                        <div class="self-check-answer">SSL VPN (或稱 Web VPN)，透過瀏覽器即可登入使用，適合行動辦公。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="lock-q6" class="analysis-lock-msg">請先作答以解鎖詳細解析</div>
+    </div>
+
+    <!-- Q7 Section -->
+    <div id="panel-q7" class="question-panel" role="tabpanel">
+        <div class="section-block">
+            <div class="section-content always-open">
+                <span class="badge badge-ot">OT 資安</span>
+                <p><strong>Q7.</strong> 若要進一步強化該公司<span class="kw-target">製造場域</span>部分的資訊安全 (<span class="kw-target">Operational Technology, OT</span>)，宜再導入下列何種標準驗證較為合適？</p>
+                <div class="quiz-options" id="options-q7">
+                    <button class="option-btn" onclick="checkQ7('A', this)">(A) BS 10012</button>
+                    <button class="option-btn" onclick="checkQ7('B', this)">(B) IEC 62443-2-1</button>
+                    <button class="option-btn" onclick="checkQ7('C', this)">(C) IEC 62443-2-4</button>
+                    <button class="option-btn" onclick="checkQ7('D', this)">(D) ISO/IEC 27001</button>
+                </div>
+                <div id="feedback-q7" class="feedback-msg"></div>
+                <button class="btn-reset hidden" id="reset-q7" onclick="resetQuestion('q7')">⟳ 重新作答</button>
+            </div>
+        </div>
+
+        <div id="analysis-q7" class="hidden">
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">步驟一 & 二：關鍵字與名詞解釋 <span class="toggle-icon">▼</span></div>
+                <div class="section-content open">
+                    <ul>
+                        <li><mark class="kw-target">製造場域 / OT</mark>：工廠、產線、機台控制系統的環境。</li>
+                        <li><mark class="kw-target">IEC 62443</mark>：工業控制系統 (ICS) 的資安聖經。</li>
+                        <li><mark class="kw-target">ISO 27001</mark>：通用的資訊安全管理系統 (ISMS)，偏向 IT 與辦公室環境。</li>
+                        <li><mark class="kw-target">BS 10012</mark>：個人資料保護管理制度（個資）。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">步驟三：解題思路 <span class="toggle-icon">▼</span></div>
+                <div class="section-content open">
+                    <p><strong>這題考什麼？</strong> 考你「IT 與 OT 標準的適用性」以及「IEC 62443 子章節定義」。</p>
+                    <ol>
+                        <li><strong>區分領域：</strong> 題目問「製造場域 OT」，直接排除 BS 10012 (個資) 和 ISO 27001 (公司已通過且偏 IT)。目標鎖定 IEC 62443。</li>
+                        <li><strong>區分角色：</strong> 公司是「製造商」(Asset Owner)，要導入「管理驗證」。</li>
+                        <li><strong>挑選章節：</strong>
+                            <br>IEC 62443-2-1：資產擁有者的安全計畫 (IACS Security Program)。適合業主建立管理制度。
+                            <br>IEC 62443-2-4：服務提供商的要求 (系統整合商/維護商)。
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">步驟四：選項分析 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <ul>
+                        <li>(A) BS 10012：是個資保護，跟工廠機台無關。</li>
+                        <li>(B) 正確。針對資產擁有者 (Asset Owner) 建立工控資安管理系統 (CSMS) 的標準。</li>
+                        <li>(C) IEC 62443-2-4：是對「服務商/整合商」的要求，非製造商自己的管理制度。</li>
+                        <li>(D) ISO 27001：題幹說「已通過」，且題目強調「強化 OT」，故選專用的 IEC 62443。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">觀念補充與延伸 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>核心觀念定位：</strong> OT (Operational Technology) 與 IT (Information Technology) 的融合是近年重點。OT 重視可用性 (Availability)，IT 重視機密性 (Confidentiality)。</li>
+                        <li><strong>標準重點：</strong> 
+                            <br>IEC 62443-2-1 等同於工控界的 ISO 27001，協助業主建立管理制度 (CSMS)。
+                        </li>
+                        <li><strong>觸類旁通：</strong>
+                            <br>Q: ISO 27001 就不適用工廠嗎？
+                            <br>A: 仍適用，但 62443 針對工控特性的「即時性」、「可用性」有更具體的技術要求 (如分區 Conduits 概念)。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">記憶口訣 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <p><strong>IEC 62443 簡易版：</strong></p>
+                    <ul>
+                        <li>2-1：業主自己管 (Program)</li>
+                        <li>2-4：廠商幫你管 (Service Provider)</li>
+                        <li>3-3：系統要安全 (System)</li>
+                        <li>4-2：產品要安全 (Component)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">自我檢測 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <div style="margin-bottom: 15px;">
+                        1. 誰最適合導入 IEC 62443-2-4？
+                        <button class="show-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+                        <div class="self-check-answer">系統整合商 (SI) 或維護服務提供商，證明他們的服務流程安全。</div>
+                    </div>
+                    <div>
+                        2. 2-1 裡的 CSMS 是什麼縮寫？
+                        <button class="show-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+                        <div class="self-check-answer">Cyber Security Management System (資安管理系統)。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="lock-q7" class="analysis-lock-msg">請先作答以解鎖詳細解析</div>
+    </div>
+
+    <!-- Q8 Section -->
+    <div id="panel-q8" class="question-panel" role="tabpanel">
+        <div class="section-block">
+            <div class="section-content always-open">
+                <span class="badge badge-ot">OT 資安</span>
+                <p><strong>Q8 (複選題).</strong> 公司希望其<span class="kw-target">服務提供商</span>亦具備相關的工業控制系統資訊安全能力。從<span class="kw-target">流程 (Process) 認證</span>而言，可以進行下列哪兩種標準的認證？(需全對才得分)</p>
+                <div class="quiz-options" id="options-q8">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="q8" value="A"> (A) IEC 62443-2-4
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="q8" value="B"> (B) IEC 62443-3-3
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="q8" value="C"> (C) IEC 62443-2-3
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="q8" value="D"> (D) IEC 62443-4-2
+                    </label>
+                </div>
+                <button class="btn-submit" id="btn-submit-q8" onclick="checkQ8()">送出答案</button>
+                <div id="feedback-q8" class="feedback-msg"></div>
+                <button class="btn-reset hidden" id="reset-q8" onclick="resetQuestion('q8')">⟳ 重新作答</button>
+            </div>
+        </div>
+
+        <div id="analysis-q8" class="hidden">
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">步驟一 & 二：關鍵字與名詞解釋 <span class="toggle-icon">▼</span></div>
+                <div class="section-content open">
+                    <ul>
+                        <li><mark class="kw-target">服務提供商</mark>：幫忙裝機器、維護系統的廠商 (SI)。</li>
+                        <li><mark class="kw-target">流程 (Process) 認證</mark>：認證你的「做事方法/管理程序」，而不是認證產品本身硬不硬。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">步驟三：解題思路 <span class="toggle-icon">▼</span></div>
+                <div class="section-content open">
+                    <p><strong>這題考什麼？</strong> 考 IEC 62443 的章節架構分類。</p>
+                    <p>IEC 62443 分為四大層：</p>
+                    <ul>
+                        <li>Part 1：通則 (名詞定義)。</li>
+                        <li>Part 2：政策與程序 (Policies & Procedures) -> <strong>這就是「流程」</strong>。</li>
+                        <li>Part 3：系統 (System) -> 技術面。</li>
+                        <li>Part 4：元件 (Component) -> 技術面。</li>
+                    </ul>
+                    <p>題目問「流程認證」，直接找 2-X 開頭的選項。</p>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">步驟四：選項分析 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>(A) IEC 62443-2-4 (正確)</strong>：對服務提供商的資安計畫要求。屬於流程。</li>
+                        <li>(B) IEC 62443-3-3：系統安全需求與等級 (SR/SL)。屬於技術/系統面。</li>
+                        <li><strong>(C) IEC 62443-2-3 (正確)</strong>：IACS 環境中的修補程式管理 (Patch Management)。這是一個「管理流程」。</li>
+                        <li>(D) IEC 62443-4-2：元件技術安全需求。屬於產品技術面。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">觀念補充與延伸 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <ul>
+                        <li><strong>核心觀念定位：</strong> 認證類型分為「Process (流程/管理)」與「Product (產品/技術)」。流程是軟實力，產品是硬實力。</li>
+                        <li><strong>標準重點：</strong> 
+                            <br>IEC 62443-4-1 也是流程認證（針對產品開發商的生命週期管理 SDLC），但選項沒出。
+                            <br>IEC 62443-2-3 專講 Patch Management（修補），也是流程的一種。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="section-header" onclick="toggleSection(this)">自我檢測 <span class="toggle-icon">▼</span></div>
+                <div class="section-content">
+                    <div style="margin-bottom: 15px;">
+                        1. 如果我是賣 PLC 硬體的廠商，想證明產品很安全，該做哪個認證？
+                        <button class="show-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+                        <div class="self-check-answer">IEC 62443-4-2 (元件技術安全)。</div>
+                    </div>
+                    <div>
+                        2. 負責維護工廠資安的廠商，如果沒有做好修補程式管理 (Patch Management)，是不符合哪一章節？
+                        <button class="show-answer-btn" onclick="toggleSelfCheck(this)">顯示答案</button>
+                        <div class="self-check-answer">IEC 62443-2-3 (修補程式管理)。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="lock-q8" class="analysis-lock-msg">請先作答以解鎖詳細解析</div>
+    </div>
+
+    <!-- Quick Note Footer -->
+    <section class="quick-note">
+        <h3>⚡ 一分鐘速記 (考前必背)</h3>
+        <ul>
+            <li><strong>公有 IP vs NAT：</strong> 公有 IP 像全裸站在路邊 (危險/易被掃)；NAT 像躲在大樓房間 (安全/外部連不到)。</li>
+            <li><strong>VPN：</strong> 遠端安全連線唯一解，建立加密隧道。</li>
+            <li><strong>OT 資安標準：</strong> 看到工控/OT 就選 IEC 62443。</li>
+            <li><strong>IEC 62443 結構：</strong> 
+                <br>2-X = 流程/管理 (2-1 業主, 2-4 服務商)。
+                <br>3-3 = 系統整合技術。
+                <br>4-2 = 單一產品/元件技術。
+            </li>
+        </ul>
+    </section>
+
+    <!-- Extended Learning Section -->
+    <section class="section-block" style="margin-top: 30px; border-left: 5px solid #6f42c1;">
+        <div class="section-header" onclick="toggleSection(this)" style="background-color: #f3f0ff; color: #6f42c1;">
+            📚 延伸學習：進階觀念與考點補充 <span class="toggle-icon">▼</span>
+        </div>
+        <div class="section-content open">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                
+                <!-- Topic 1 -->
+                <div>
+                    <h4 style="color: #6f42c1; border-bottom: 2px solid #e0d2ff; padding-bottom: 5px; margin-bottom: 10px;">1. 常考 VPN 協定比較</h4>
+                    <ul style="font-size: 0.95rem; margin-left: 20px;">
+                        <li><strong>IPsec VPN：</strong> 運作在 Layer 3 (網路層)。通常需要安裝專用軟體，適合總公司與分公司間的連線 (Site-to-Site)。</li>
+                        <li><strong>SSL/TLS VPN：</strong> 運作在 Layer 4 (傳輸層) 以上。通常透過瀏覽器即可使用，適合員工遠端辦公 (Client-to-Site/Remote Access)。</li>
+                        <li><strong>考點：</strong> 題目若問「不需安裝客戶端軟體」、「行動辦公」，通常選 SSL VPN。</li>
+                    </ul>
+                </div>
+
+                <!-- Topic 2 -->
+                <div>
+                    <h4 style="color: #6f42c1; border-bottom: 2px solid #e0d2ff; padding-bottom: 5px; margin-bottom: 10px;">2. IEC 62443 安全等級 (SL)</h4>
+                    <ul style="font-size: 0.95rem; margin-left: 20px;">
+                        <li><strong>SL 1：</strong> 防止無心/偶然的違規 (Casual/Coincidental)。</li>
+                        <li><strong>SL 2：</strong> 防止簡單手段、資源有限的駭客 (Cybercrime)。</li>
+                        <li><strong>SL 3：</strong> 防止複雜手段、具備中等資源的駭客 (Hacktivist)。</li>
+                        <li><strong>SL 4：</strong> 防止國家級、資源豐富的攻擊 (Nation State)。</li>
+                    </ul>
+                </div>
+
+                <!-- Topic 3 -->
+                <div>
+                    <h4 style="color: #6f42c1; border-bottom: 2px solid #e0d2ff; padding-bottom: 5px; margin-bottom: 10px;">3. 縱深防禦 (Defense in Depth)</h4>
+                    <ul style="font-size: 0.95rem; margin-left: 20px;">
+                        <li><strong>邊界防禦：</strong> 防火牆 (Firewall)、DDoS 防護。</li>
+                        <li><strong>網路防禦：</strong> IDS/IPS (入侵偵測/防禦)、NDR (網路偵測回應)。</li>
+                        <li><strong>端點防禦：</strong> 防毒軟體 (AV)、EDR (端點偵測回應)。</li>
+                        <li><strong>應用防禦：</strong> WAF (網站防火牆)、程式碼掃描。</li>
+                    </ul>
+                </div>
+
+                <!-- Topic 4 -->
+                <div>
+                    <h4 style="color: #6f42c1; border-bottom: 2px solid #e0d2ff; padding-bottom: 5px; margin-bottom: 10px;">4. 區域 (Zones) 與 管線 (Conduits)</h4>
+                    <ul style="font-size: 0.95rem; margin-left: 20px;">
+                        <li><strong>觀念：</strong> IEC 62443 強調將網路切分為不同的「區域」。</li>
+                        <li><strong>Zone：</strong> 具有相同資安需求的資產群組 (如：控制室區、產線區)。</li>
+                        <li><strong>Conduit：</strong> 連接兩個 Zone 的通訊通道，是實施資安管控 (如防火牆規則) 的地方。</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // State Management
+    const gameState = {
+        q5: false,
+        q6: false,
+        q7: false,
+        q8: false
+    };
+
+    function updateProgress() {
+        const completed = Object.values(gameState).filter(Boolean).length;
+        document.getElementById('progress-text').innerText = `${completed}/4`;
+    }
+
+    // Tab Navigation
+    function switchTab(tabId) {
+        // Hide all panels
+        document.querySelectorAll('.question-panel').forEach(p => p.classList.remove('active'));
+        // Remove active class from buttons
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'aria-selected="false"'));
+        
+        // Show selected
+        const selectedPanel = document.getElementById(`panel-${tabId}`);
+        selectedPanel.classList.add('active');
+        
+        // Highlight button
+        const selectedBtn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
+        selectedBtn.classList.add('active');
+        selectedBtn.setAttribute('aria-selected', 'true');
+    }
+
+    // Accordion Toggle
+    function toggleSection(header) {
+        const content = header.nextElementSibling;
+        const icon = header.querySelector('.toggle-icon');
+        
+        if (content.classList.contains('open')) {
+            content.classList.remove('open');
+            icon.innerText = '▼';
+        } else {
+            content.classList.add('open');
+            icon.innerText = '▲';
+        }
+    }
+
+    // Keyword Toggle
+    function toggleKeywords() {
+        const btn = document.getElementById('btn-keyword');
+        const keywords = document.querySelectorAll('.kw-target');
+        
+        if (btn.classList.contains('active')) {
+            // Turn off
+            btn.classList.remove('active');
+            btn.innerText = '💡 關鍵字提示 (開/關)';
+            keywords.forEach(k => {
+                if(k.tagName === 'MARK') {
+                    // Revert mark to span for non-highlighted state logic if needed, 
+                    // but simple CSS toggle is easier. 
+                    // Since text replacement is complex, let's just use CSS class.
+                    k.classList.remove('keyword');
+                    k.classList.add('hidden-keyword');
+                    k.style.backgroundColor = "transparent";
+                    k.style.color = "inherit";
+                    k.style.fontWeight = "normal";
+                } else {
+                    k.style.fontWeight = "normal";
+                    k.style.backgroundColor = "transparent";
+                }
+            });
+        } else {
+            // Turn on
+            btn.classList.add('active');
+            btn.innerText = '💡 關鍵字提示 (已開啟)';
+            keywords.forEach(k => {
+                 k.style.fontWeight = "bold";
+                 k.style.backgroundColor = "yellow";
+                 k.style.color = "black";
+                 if(k.tagName === 'MARK') {
+                     k.classList.remove('hidden-keyword');
+                     k.classList.add('keyword');
+                 }
+            });
+        }
+    }
+
+    // Self Check Toggle
+    function toggleSelfCheck(btn) {
+        const answerDiv = btn.nextElementSibling;
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+            btn.innerText = '顯示答案';
+        } else {
+            answerDiv.style.display = 'block';
+            btn.innerText = '隱藏答案';
+        }
+    }
+
+    // Q5 Logic
+    function checkQ5(answer, btn) {
+        if (gameState.q5) return; // Prevent re-answering without reset
+        
+        const feedback = document.getElementById('feedback-q5');
+        const correctAns = 'D';
+        
+        // Visuals
+        const allBtns = document.querySelectorAll('#options-q5 .option-btn');
+        allBtns.forEach(b => b.disabled = true);
+        
+        if (answer === correctAns) {
+            btn.classList.add('correct');
+            feedback.className = 'feedback-msg feedback-correct';
+            feedback.innerHTML = '★ 正確！印表機使用公有 IP，等於沒有防火牆保護，最容易被攻擊。';
+        } else {
+            btn.classList.add('wrong');
+            // Highlight correct one
+            allBtns.forEach(b => {
+                if(b.innerText.includes('(D)')) b.classList.add('correct');
+            });
+            feedback.className = 'feedback-msg feedback-wrong';
+            feedback.innerHTML = '➤ 錯誤。防火牆內的電腦相對安全，暴露在外(公有 IP)的印表機才是破口。';
+        }
+        
+        feedback.style.display = 'block';
+        document.getElementById('reset-q5').classList.remove('hidden');
+        document.getElementById('analysis-q5').classList.remove('hidden');
+        document.getElementById('lock-q5').classList.add('hidden');
+        
+        gameState.q5 = true;
+        updateProgress();
+    }
+
+    // Q6 Logic
+    function checkQ6(answer, btn) {
+        if (gameState.q6) return;
+        
+        const feedback = document.getElementById('feedback-q6');
+        const correctAns = 'C';
+        
+        const allBtns = document.querySelectorAll('#options-q6 .option-btn');
+        allBtns.forEach(b => b.disabled = true);
+        
+        if (answer === correctAns) {
+            btn.classList.add('correct');
+            feedback.className = 'feedback-msg feedback-correct';
+            feedback.innerHTML = '★ 正確！VPN 能建立加密通道，安全連回內網列印。';
+        } else {
+            btn.classList.add('wrong');
+            allBtns.forEach(b => { if(b.innerText.includes('(C)')) b.classList.add('correct'); });
+            feedback.className = 'feedback-msg feedback-wrong';
+            feedback.innerHTML = '➤ 錯誤。WAF/IDS/EDR 無法提供「遠端連回內網」的連線功能。';
+        }
+        
+        feedback.style.display = 'block';
+        document.getElementById('reset-q6').classList.remove('hidden');
+        document.getElementById('analysis-q6').classList.remove('hidden');
+        document.getElementById('lock-q6').classList.add('hidden');
+        
+        gameState.q6 = true;
+        updateProgress();
+    }
+
+    // Q7 Logic
+    function checkQ7(answer, btn) {
+        if (gameState.q7) return;
+        
+        const feedback = document.getElementById('feedback-q7');
+        const correctAns = 'B';
+        
+        const allBtns = document.querySelectorAll('#options-q7 .option-btn');
+        allBtns.forEach(b => b.disabled = true);
+        
+        if (answer === correctAns) {
+            btn.classList.add('correct');
+            feedback.className = 'feedback-msg feedback-correct';
+            feedback.innerHTML = '★ 正確！IEC 62443-2-1 是針對資產擁有者(業主)的管理系統規範。';
+        } else {
+            btn.classList.add('wrong');
+            allBtns.forEach(b => { if(b.innerText.includes('(B)')) b.classList.add('correct'); });
+            feedback.className = 'feedback-msg feedback-wrong';
+            feedback.innerHTML = '➤ 錯誤。27001 偏 IT，2-4 偏廠商，2-1 才是業主管理 OT 的首選。';
+        }
+        
+        feedback.style.display = 'block';
+        document.getElementById('reset-q7').classList.remove('hidden');
+        document.getElementById('analysis-q7').classList.remove('hidden');
+        document.getElementById('lock-q7').classList.add('hidden');
+        
+        gameState.q7 = true;
+        updateProgress();
+    }
+
+    // Q8 Logic (Multi-select)
+    function checkQ8() {
+        if (gameState.q8) return;
+        
+        const checkboxes = document.querySelectorAll('input[name="q8"]:checked');
+        const selected = Array.from(checkboxes).map(cb => cb.value).sort();
+        const correct = ['A', 'C'];
+        
+        const feedback = document.getElementById('feedback-q8');
+        const inputs = document.querySelectorAll('input[name="q8"]');
+        
+        // Check if exact match
+        const isCorrect = JSON.stringify(selected) === JSON.stringify(correct);
+        
+        inputs.forEach(i => i.disabled = true);
+        document.getElementById('btn-submit-q8').disabled = true;
+        
+        if (isCorrect) {
+            feedback.className = 'feedback-msg feedback-correct';
+            feedback.innerHTML = '★ 正確！2-4 (服務商要求) 與 2-3 (修補管理) 皆屬流程認證。';
+        } else {
+            feedback.className = 'feedback-msg feedback-wrong';
+            feedback.innerHTML = '➤ 錯誤。正確答案是 (A) 與 (C)。(B)(D) 偏向技術規格而非流程。';
+        }
+        
+        feedback.style.display = 'block';
+        document.getElementById('reset-q8').classList.remove('hidden');
+        document.getElementById('analysis-q8').classList.remove('hidden');
+        document.getElementById('lock-q8').classList.add('hidden');
+        
+        gameState.q8 = true;
+        updateProgress();
+    }
+
+    // Reset Function
+    function resetQuestion(qId) {
+        gameState[qId] = false;
+        
+        // Reset UI
+        const feedback = document.getElementById(`feedback-${qId}`);
+        feedback.style.display = 'none';
+        feedback.className = 'feedback-msg';
+        
+        document.getElementById(`reset-${qId}`).classList.add('hidden');
+        document.getElementById(`analysis-${qId}`).classList.add('hidden');
+        document.getElementById(`lock-${qId}`).classList.remove('hidden');
+
+        // Reset inputs
+        if (qId === 'q8') {
+            const inputs = document.querySelectorAll(`input[name="${qId}"]`);
+            inputs.forEach(i => {
+                i.checked = false;
+                i.disabled = false;
+            });
+            document.getElementById(`btn-submit-${qId}`).disabled = false;
+        } else {
+            const btns = document.querySelectorAll(`#options-${qId} .option-btn`);
+            btns.forEach(b => {
+                b.classList.remove('correct', 'wrong');
+                b.disabled = false;
+            });
+        }
+        
+        // Note: Progress bar logic in this simple version doesn't decrement 
+        // because "Done is done", but we can update it if strictly needed.
+        // Let's keep "Completed" count stable or decrement. 
+        // To be strict:
+        updateProgress();
+    }
+    
+    // Initialize keywords highlight to off style initially (ensure consistency)
+    toggleKeywords(); toggleKeywords(); // Toggle twice to set initial state correctly if needed, or rely on CSS default.
+</script>
+
+</body>
+</html>

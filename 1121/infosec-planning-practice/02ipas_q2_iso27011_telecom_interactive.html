@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安衝刺班 - ISO 標準題型解析</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary-color: #475569;
+            --success-color: #16a34a;
+            --error-color: #dc2626;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --highlight-color: #fef08a; /* 螢光筆顏色 */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header & Tools */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--primary-color);
+            background-color: white;
+            color: var(--primary-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .tool-btn:hover, .tool-btn:focus {
+            background-color: var(--primary-color);
+            color: white;
+            outline: 2px solid var(--primary-dark);
+            outline-offset: 2px;
+        }
+
+        .tool-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Interactive Highlights */
+        .keyword-highlight {
+            background-color: transparent;
+            padding: 0 2px;
+            border-radius: 2px;
+            transition: background-color 0.3s;
+        }
+        
+        body.show-highlights .keyword-highlight {
+            background-color: var(--highlight-color);
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* Card Style */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 24px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            background-color: #fff;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Question Section */
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-btn {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: #f1f5f9;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            text-align: left;
+            color: var(--text-main);
+        }
+
+        .option-btn:hover {
+            background-color: #e2e8f0;
+        }
+
+        .option-btn:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .option-btn.selected-correct {
+            background-color: #dcfce7;
+            border-color: var(--success-color);
+            color: #14532d;
+        }
+
+        .option-btn.selected-wrong {
+            background-color: #fee2e2;
+            border-color: var(--error-color);
+            color: #7f1d1d;
+        }
+
+        .option-btn.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .option-letter {
+            font-weight: bold;
+            margin-right: 10px;
+            min-width: 25px;
+        }
+
+        /* Feedback Area */
+        #feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #dcfce7;
+            border-left: 5px solid var(--success-color);
+            color: #14532d;
+        }
+
+        .feedback-wrong {
+            background-color: #fee2e2;
+            border-left: 5px solid var(--error-color);
+            color: #7f1d1d;
+        }
+
+        .reset-btn {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .reset-btn:hover {
+            background-color: #334155;
+        }
+
+        /* Accordion Style */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        details summary {
+            padding: 15px;
+            background-color: #f8fafc;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Hide default triangle */
+            position: relative;
+            padding-right: 40px;
+            color: var(--text-main);
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details summary::after {
+            content: '+';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+            background-color: #fff;
+            color: var(--primary-color);
+        }
+
+        .accordion-content {
+            padding: 20px;
+            background-color: #fff;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        /* Step Indicators */
+        .step-badge {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* Analysis Content Lock */
+        #analysis-container {
+            position: relative;
+            opacity: 0.5;
+            pointer-events: none;
+            filter: blur(2px);
+            transition: all 0.5s ease;
+        }
+
+        #analysis-container.unlocked {
+            opacity: 1;
+            pointer-events: auto;
+            filter: blur(0);
+        }
+
+        .lock-overlay {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -20%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            text-align: center;
+            border: 2px solid var(--primary-color);
+            font-weight: bold;
+            width: 80%;
+        }
+
+        /* Cheat Sheet Modal */
+        .cheat-sheet-content {
+            display: none;
+            margin-top: 15px;
+            background: #fff;
+            border: 2px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .cheat-sheet-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .cheat-sheet-table th, .cheat-sheet-table td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .cheat-sheet-table th {
+            background-color: #f1f5f9;
+        }
+
+        /* Self Test */
+        .self-test-item {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 10px;
+        }
+        
+        .self-test-question {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .self-test-answer {
+            color: var(--primary-color);
+            display: none;
+            margin-top: 5px;
+            padding: 5px 10px;
+            background-color: #f0f9ff;
+            border-radius: 4px;
+        }
+        
+        .show-answer-btn {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-decoration: underline;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        /* Utility */
+        ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+        
+        li {
+            margin-bottom: 5px;
+        }
+
+        mark {
+            background-color: var(--highlight-color);
+            padding: 0 2px;
+        }
+
+        .concept-tag {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Accessibility focus styles */
+        *:focus-visible {
+            outline: 2px solid var(--primary-dark);
+            outline-offset: 2px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安規劃/防護實務</h1>
+        <p class="subtitle">單元：ISMS 國際標準系列與產業應用</p>
+        
+        <div class="toolbar">
+            <button class="tool-btn" onclick="toggleKeywords()" aria-pressed="false" id="btn-keyword">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right:5px;">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                    <path d="M2 2l7.586 7.586"></path>
+                    <circle cx="11" cy="11" r="2"></circle>
+                </svg>
+                關鍵字提示
+            </button>
+            <button class="tool-btn" onclick="toggleCheatSheet()" aria-expanded="false" id="btn-cheat">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right:5px;">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                一分鐘速記卡
+            </button>
+        </div>
+
+        <div id="cheat-sheet-panel" class="cheat-sheet-content">
+            <h3 style="margin-bottom:10px; color:var(--primary-dark);">ISO 標準產業對照速記表</h3>
+            <table class="cheat-sheet-table">
+                <thead>
+                    <tr>
+                        <th>標準編號</th>
+                        <th>適用產業/領域</th>
+                        <th>記憶點</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>ISO 27011</strong></td>
+                        <td><span style="color:var(--primary-color)">電信產業</span></td>
+                        <td>11 像兩根天線</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ISO 27015</strong></td>
+                        <td>金融服務業</td>
+                        <td>已廢止，但考題常出現作為干擾項</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ISO 27799</strong></td>
+                        <td>醫療健康資訊</td>
+                        <td>99 (救救) 救護車/醫院</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ISO 27001</strong></td>
+                        <td>所有產業 (通用)</td>
+                        <td>ISMS 的根本大法</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </header>
+
+    <!-- 題目區域 -->
+    <div class="card">
+        <div class="card-header">
+            <span>題目卷 Q2</span>
+            <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: normal;">單選題</span>
+        </div>
+        <div class="card-body">
+            <p class="question-text">
+                2. 在 <span class="keyword-highlight">ISO 系列</span>的 <span class="keyword-highlight">ISMS 標準</span>中，下列何者與<span class="keyword-highlight">電信產業</span>資訊安全管理最有關聯？
+            </p>
+            
+            <div class="options-grid" id="options-container">
+                <button class="option-btn" onclick="checkAnswer('A', this)">
+                    <span class="option-letter">(A)</span> ISO / IEC 27010
+                </button>
+                <button class="option-btn" onclick="checkAnswer('B', this)">
+                    <span class="option-letter">(B)</span> ISO / IEC 27011
+                </button>
+                <button class="option-btn" onclick="checkAnswer('C', this)">
+                    <span class="option-letter">(C)</span> ISO / IEC 27015
+                </button>
+                <button class="option-btn" onclick="checkAnswer('D', this)">
+                    <span class="option-letter">(D)</span> ISO 27799
+                </button>
+            </div>
+
+            <div id="feedback-area">
+                <div id="feedback-message" style="font-weight:bold; margin-bottom:5px;"></div>
+                <div id="feedback-reason"></div>
+                <button class="reset-btn" onclick="resetQuiz()">重新作答</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 解析區域 (作答後解鎖) -->
+    <div id="analysis-container">
+        <div class="lock-overlay" id="lock-msg">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--secondary-color); margin-bottom:10px;">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <p>請先完成作答<br>才能查看補教名師的完整解析！</p>
+        </div>
+
+        <!-- 1. 找關鍵字 -->
+        <details open>
+            <summary><span class="step-badge">第一步</span>找關鍵字</summary>
+            <div class="accordion-content">
+                <ul>
+                    <li><mark>ISO 系列</mark>：確認這是考國際標準組織的規範。</li>
+                    <li><mark>ISMS 標準</mark>：範圍限定在資訊安全管理系統（Information Security Management System，用制度把資安工作系統化管理）的家族成員。</li>
+                    <li><mark>電信產業</mark>：<strong>這是最重要的解題線索！</strong> 題目問的不是通用的，而是「特定給電信業」用的。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- 2. 白話翻譯 -->
+        <details>
+            <summary><span class="step-badge">第二步</span>白話翻譯</summary>
+            <div class="accordion-content">
+                <p>這題用高中生聽得懂的話來說就是：</p>
+                <blockquote style="border-left: 4px solid var(--primary-color); padding-left: 15px; margin: 10px 0; font-style: italic; color: var(--secondary-color);">
+                    「同學，ISO 27001 是資安界的基本法，大家都通用。但如果你今天是開中華電信、遠傳這種『電信公司』，你要參考哪一本專屬的說明書？」
+                </blockquote>
+            </div>
+        </details>
+
+        <!-- 3. 解題思路 -->
+        <details>
+            <summary><span class="step-badge">第三步</span>解題思路</summary>
+            <div class="accordion-content">
+                <p><strong>這題在考什麼觀念？</strong> 考你對「ISMS 產業別延伸標準」的編號對應記憶。</p>
+                <br>
+                <strong>解題步驟：</strong>
+                <ol style="margin-left: 20px;">
+                    <li><strong>識別需求：</strong> 看到「電信」兩個字。</li>
+                    <li><strong>回想編號：</strong> 腦中搜索 ISO 270xx 系列中，誰是負責電信的。</li>
+                    <li><strong>排除法：</strong> 如果忘記正確的，先刪掉明顯錯誤的（如 27799 是醫療）。</li>
+                </ol>
+                <br>
+                <strong>原理與規則：</strong>
+                <p>ISO/IEC 27001（ISMS 的核心要求標準）雖然通用，但某些行業太特殊了（如電信、醫療、能源），所以 ISO 組織會出「補充包」，這些補充包就是我們選項中的這些標準。</p>
+            </div>
+        </details>
+
+        <!-- 4. 選項分析 -->
+        <details>
+            <summary><span class="step-badge">第四步</span>選項分析</summary>
+            <div class="accordion-content">
+                <div style="display: grid; gap: 15px;">
+                    <div style="border-left: 3px solid var(--error-color); padding-left: 10px;">
+                        <strong>(A) ISO / IEC 27010</strong> <span style="color:var(--error-color); font-weight:bold;">[錯誤]</span>
+                        <p>這是關於「跨組織、跨部門」資訊共享的溝通管理標準。例如政府跟企業要交換情資時怎麼做才安全。與單純的電信產業營運無直接對應。</p>
+                    </div>
+                    <div style="border-left: 3px solid var(--success-color); padding-left: 10px; background-color: #f0fdf4;">
+                        <strong>(B) ISO / IEC 27011</strong> <span style="color:var(--success-color); font-weight:bold;">[正確]</span>
+                        <p>這就是專為「電信組織」設計的資安管理指引。它是基於 ISO/IEC 27002，並增加了電信業特有的控制措施（例如基站安全、通訊隱私）。<br><em>備註：電信產業資安指引：針對電信網路與服務特性延伸 ISMS。</em></p>
+                    </div>
+                    <div style="border-left: 3px solid var(--error-color); padding-left: 10px;">
+                        <strong>(C) ISO / IEC 27015</strong> <span style="color:var(--error-color); font-weight:bold;">[錯誤]</span>
+                        <p>這是給「金融服務業」（銀行、保險）的資安管理指引。（註：雖然此標準已在 ISO 組織中被撤銷，但考古題仍常出現作為干擾選項，記得它跟錢有關即可）。</p>
+                    </div>
+                    <div style="border-left: 3px solid var(--error-color); padding-left: 10px;">
+                        <strong>(D) ISO 27799</strong> <span style="color:var(--error-color); font-weight:bold;">[錯誤]</span>
+                        <p>這是「醫療產業」與健康資訊學的資安管理標準。看到醫院、病歷、健康資料，就要選這個。</p>
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <!-- 5. 觀念補充與延伸 -->
+        <details>
+            <summary><span class="step-badge">觀念</span>補充與延伸</summary>
+            <div class="accordion-content">
+                <p><strong>1. 核心觀念定位：</strong></p>
+                <p>這類題目屬於「死背題」，但也反映了資安管理必須「因地制宜」。</p>
+                
+                <p style="margin-top:10px;"><strong>2. 觸類旁通（考題變形）：</strong></p>
+                <ul>
+                    <li>如果題目把「電信產業」改成「公有雲服務提供者」，答案要選什麼？ <br>→ <strong>ISO / IEC 27017</strong> (雲端服務資安) 或 <strong>ISO / IEC 27018</strong> (雲端個資保護)。</li>
+                    <li>如果題目問「能源產業」？ <br>→ <strong>ISO / IEC 27019</strong> (能源公用事業)。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- 6. 記憶口訣 -->
+        <details>
+            <summary><span class="step-badge">口訣</span>記憶口訣</summary>
+            <div class="accordion-content">
+                <p style="font-size: 1.1rem; text-align: center; background: #fffbeb; padding: 15px; border-radius: 8px; border: 1px dashed orange;">
+                    <strong>「11 是電信天線，7799 是急救醫院，17 是一起上雲端。」</strong>
+                </p>
+                <ul style="margin-top: 10px;">
+                    <li><strong>27011</strong>：尾數 11 像兩根聳立的<strong>電信天線</strong>。</li>
+                    <li><strong>27799</strong>：7799 諧音像救護車聲音或「急救」，對應<strong>醫療</strong>。</li>
+                    <li><strong>27017</strong>：17 諧音「一起」，大家一起上<strong>雲端</strong> (27017 是雲端資安)。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- 7. 常見陷阱 -->
+        <details>
+            <summary><span class="step-badge">陷阱</span>常見陷阱</summary>
+            <div class="accordion-content">
+                <ul>
+                    <li><strong>陷阱一：混淆 27001 與 27011。</strong><br>如果題目問「最基礎」、「通用的」標準，要選 27001。如果有特定產業（電信），一定要優先選延伸標準（27011）。</li>
+                    <li><strong>陷阱二：看到數字就頭暈。</strong><br>iPAS 考試很愛考這些編號，千萬不要放棄，把這幾個最常見的產業標準（電信、醫療、雲端、隱私）背起來就能拿分。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- 8. 正確答案 -->
+        <details>
+            <summary><span class="step-badge">答案</span>正確答案</summary>
+            <div class="accordion-content">
+                <p style="font-size: 1.5rem; font-weight: bold; color: var(--success-color); text-align: center;">
+                    (B) ISO / IEC 27011
+                </p>
+            </div>
+        </details>
+
+        <!-- 9. 自我檢測 -->
+        <details>
+            <summary><span class="step-badge">測驗</span>自我檢測</summary>
+            <div class="accordion-content">
+                <div class="self-test-item">
+                    <p class="self-test-question">1. 小明在醫院擔任資安人員，主管要求他導入針對醫療個資保護的 ISO 標準，請問他該查閱哪一份？</p>
+                    <button class="show-answer-btn" onclick="toggleAnswer(this)">顯示答案</button>
+                    <div class="self-test-answer">答案：ISO 27799</div>
+                </div>
+                
+                <div class="self-test-item">
+                    <p class="self-test-question">2. 某雲端硬碟服務商想要證明自己的雲端資安控制措施符合國際規範，應參考哪個標準？</p>
+                    <button class="show-answer-btn" onclick="toggleAnswer(this)">顯示答案</button>
+                    <div class="self-test-answer">答案：ISO / IEC 27017</div>
+                </div>
+
+                <div class="self-test-item">
+                    <p class="self-test-question">3. ISO / IEC 27011 是基於哪一個核心標準進行延伸的？</p>
+                    <button class="show-answer-btn" onclick="toggleAnswer(this)">顯示答案</button>
+                    <div class="self-test-answer">答案：ISO / IEC 27002 (實作指引) 與 ISO / IEC 27001 (管理制度)</div>
+                </div>
+            </div>
+        </details>
+    </div>
+</div>
+
+<script>
+    // 狀態變數
+    let isAnswered = false;
+
+    // 檢查答案
+    function checkAnswer(selectedOption, btnElement) {
+        if (isAnswered) return; // 防止重複作答
+        
+        const correctOption = 'B';
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const feedbackReason = document.getElementById('feedback-reason');
+        const analysisContainer = document.getElementById('analysis-container');
+        const lockMsg = document.getElementById('lock-msg');
+        const options = document.querySelectorAll('.option-btn');
+
+        // 鎖定所有按鈕
+        options.forEach(btn => {
+            btn.classList.add('disabled');
+            // 標示正確答案
+            if (btn.innerText.includes(`(${correctOption})`)) {
+                btn.classList.add('selected-correct');
+            }
+        });
+
+        isAnswered = true;
+        feedbackArea.style.display = 'block';
+
+        if (selectedOption === correctOption) {
+            // 答對
+            feedbackArea.className = 'feedback-correct';
+            feedbackMessage.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="vertical-align:text-bottom"><polyline points="20 6 9 17 4 12"></polyline></svg> 答對了！';
+            feedbackReason.textContent = 'ISO 27011 確實是針對電信產業特性的資安管理指引。';
+        } else {
+            // 答錯
+            btnElement.classList.add('selected-wrong');
+            feedbackArea.className = 'feedback-wrong';
+            feedbackMessage.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="vertical-align:text-bottom"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> 答錯了！';
+            feedbackReason.textContent = `正確答案是 (B)。您選的選項適用於其他領域，請看下方詳細解析。`;
+        }
+
+        // 解鎖解析區域
+        analysisContainer.classList.add('unlocked');
+        lockMsg.style.display = 'none';
+        
+        // 自動捲動到解析區
+        setTimeout(() => {
+            document.querySelector('details[open]').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+    }
+
+    // 重新作答
+    function resetQuiz() {
+        isAnswered = false;
+        
+        // 重置按鈕樣式
+        const options = document.querySelectorAll('.option-btn');
+        options.forEach(btn => {
+            btn.className = 'option-btn'; // 移除 selected, disabled
+        });
+
+        // 隱藏回饋
+        document.getElementById('feedback-area').style.display = 'none';
+
+        // 鎖定解析
+        const analysisContainer = document.getElementById('analysis-container');
+        const lockMsg = document.getElementById('lock-msg');
+        analysisContainer.classList.remove('unlocked');
+        lockMsg.style.display = 'block';
+        
+        // 收合除了第一題以外的解析 (可選)
+        // document.querySelectorAll('details').forEach((el, index) => { if(index > 0) el.removeAttribute('open'); });
+        
+        // 捲動回頂端
+        document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 切換關鍵字高亮
+    function toggleKeywords() {
+        const body = document.body;
+        const btn = document.getElementById('btn-keyword');
+        
+        body.classList.toggle('show-highlights');
+        
+        if (body.classList.contains('show-highlights')) {
+            btn.classList.add('active');
+            btn.setAttribute('aria-pressed', 'true');
+        } else {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
+        }
+    }
+
+    // 切換速記卡
+    function toggleCheatSheet() {
+        const panel = document.getElementById('cheat-sheet-panel');
+        const btn = document.getElementById('btn-cheat');
+        
+        if (panel.style.display === 'block') {
+            panel.style.display = 'none';
+            btn.classList.remove('active');
+            btn.setAttribute('aria-expanded', 'false');
+        } else {
+            panel.style.display = 'block';
+            btn.classList.add('active');
+            btn.setAttribute('aria-expanded', 'true');
+        }
+    }
+
+    // 自我檢測顯示答案
+    function toggleAnswer(btn) {
+        const answerDiv = btn.nextElementSibling;
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+            btn.textContent = '顯示答案';
+        } else {
+            answerDiv.style.display = 'block';
+            btn.textContent = '隱藏答案';
+        }
+    }
+</script>
+
+</body>
+</html>

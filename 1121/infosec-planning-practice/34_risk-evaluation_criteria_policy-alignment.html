@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 34 題 - 風險評估準則</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 樣式 Tokens 固定 */
+        :root {
+            --font-family: system-ui, "Noto Sans TC", sans-serif;
+            --text-base: 16px;
+            --text-header: 18px;
+            --text-small: 14px;
+            --spacing-padding: 16px;
+            --spacing-gap: 12px;
+            
+            /* 解析段落卡專用色 */
+            --explain-card-bg: #f8fafc; /* Slate-50 */
+            --explain-card-border: #e2e8f0; /* Slate-200 */
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: #f3f4f6;
+            color: #374151;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* 規範二：版型與寬度規範 */
+        .container {
+            width: 100%;
+            max-width: 960px; /* 強制 960px */
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-gap);
+            padding-bottom: var(--spacing-padding);
+            margin: 0 auto; /* 水平置中 */
+        }
+
+        /* Header */
+        header {
+            background: #2563eb;
+            color: white;
+            padding: var(--spacing-padding);
+            font-size: var(--text-header);
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            font-size: var(--text-small);
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 9999px;
+        }
+
+        /* Cards & Sections */
+        .card {
+            margin: 0 var(--spacing-padding);
+            padding: var(--spacing-padding);
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        /* Context */
+        .context {
+            background: #f9fafb;
+            color: #6b7280;
+            font-size: var(--text-small);
+            border-left: 4px solid #9ca3af;
+        }
+
+        /* Question */
+        .question-title {
+            font-size: var(--text-base);
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* Options */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .option-label input[type="radio"] {
+            margin-top: 5px;
+            margin-right: 12px;
+            accent-color: #2563eb;
+            transform: scale(1.2);
+            flex-shrink: 0;
+        }
+
+        /* Feedback */
+        .feedback {
+            display: none; /* 預設隱藏 */
+            margin: 0 var(--spacing-padding);
+            padding: var(--spacing-padding);
+            border-radius: 8px;
+            font-size: var(--text-base);
+        }
+
+        .feedback.correct {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #34d399;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #f87171;
+            display: block;
+        }
+
+        /* Details (Explain & SelfCheck) */
+        details {
+            margin: 0 var(--spacing-padding);
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        summary {
+            background-color: #f3f4f6;
+            padding: 12px var(--spacing-padding);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: var(--text-base);
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        summary::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .details-content {
+            padding: var(--spacing-padding);
+            background: #fff;
+            border-top: 1px solid #e5e7eb;
+            font-size: var(--text-base);
+        }
+
+        /* 規範十一：解析段落卡 (Explain Section Cards) */
+        .explain-card {
+            background-color: var(--explain-card-bg);
+            border: 1px solid var(--explain-card-border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .explain-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .explain-title {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: var(--text-base);
+        }
+
+        .explain-body {
+            font-size: var(--text-small);
+            color: #334155;
+        }
+
+        .explain-body ul {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+
+        /* Custom Highlights & Tags */
+        mark {
+            background-color: #fef08a; /* 黃色 highlight */
+            padding: 0 4px;
+            border-radius: 2px;
+            color: inherit;
+        }
+
+        /* 標籤顏色規範 (完全一致) */
+        .tag-base {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: normal;
+            line-height: 1.5;
+        }
+
+        .tag-law { background-color: #7f8c8d; }
+        .tag-iso { background-color: #27ae60; }
+        .tag-zt  { background-color: #8e44ad; }
+        .tag-net { background-color: #2980b9; }
+        .tag-sec { background-color: #c0392b; }
+        .tag-mgm { background-color: #d35400; } /* 風險管理 */
+
+        /* Button */
+        .btn-submit {
+            margin: 0 var(--spacing-padding);
+            background-color: #2563eb;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: var(--text-base);
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
+        
+        .btn-submit:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Self Check QA */
+        .qa-box {
+            margin-bottom: 16px;
+            border-bottom: 1px solid #f3f4f6;
+            padding-bottom: 12px;
+        }
+        .qa-box:last-child {
+            border-bottom: none;
+        }
+        .qa-q {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        .qa-a {
+            color: #4b5563;
+            font-size: var(--text-small);
+            margin-top: 8px;
+            padding: 8px;
+            background: #f9fafb;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1. Header -->
+        <header>
+            <span>第 34 題</span>
+            <span id="statusBadge" class="status-badge">未作答</span>
+        </header>
+
+        <!-- 2. Context -->
+        <div class="card context">
+            本題無額外情境
+        </div>
+
+        <!-- 3. Question -->
+        <div class="card">
+            <div class="question-title">
+                <span class="tag-base tag-mgm">風險管理</span>
+                <span>關於<mark>風險評估準則</mark>的敘述，下列何者錯誤？</span>
+            </div>
+            <div class="options-group" id="optionsContainer">
+                <label class="option-label">
+                    <input type="radio" name="quiz" value="A">
+                    <span>(A) 組織應定義用於評估風險重要性的準則</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="quiz" value="B">
+                    <span>(B) 不同組織可能採用不同的方法跟準則</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="quiz" value="C">
+                    <span>(C) 這些準則應反映組織的價值觀、目標和資源</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="quiz" value="D">
+                    <span>(D) 風險評估準則應與組織的管理政策可以不一致</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button id="submitBtn" class="btn-submit">送出答案</button>
+
+        <!-- 4. Feedback -->
+        <div id="feedbackBox" class="feedback">
+            <!-- Dynamic Content -->
+        </div>
+
+        <!-- 5. Explain -->
+        <details class="explain">
+            <summary>點擊查看詳解</summary>
+            <div class="details-content">
+                
+                <!-- 解析段落卡 1 -->
+                <div class="explain-card">
+                    <div class="explain-title">🔍 第一步：找關鍵字</div>
+                    <div class="explain-body">
+                        關鍵字：<mark>風險評估準則</mark>、<mark>評估風險重要性</mark>、<mark>不同組織</mark>、價值觀、目標和資源、<mark>管理政策是否一致</mark>。<br>
+                        這些關鍵字顯示，本題不是在考計算風險，而是在考「風險評估準則」在組織治理中的定位與一致性原則。
+                    </div>
+                </div>
+
+                <!-- 解析段落卡 2 -->
+                <div class="explain-card">
+                    <div class="explain-title">🗣️ 第二步：白話翻譯</div>
+                    <div class="explain-body">
+                        這一題在問：組織在訂定「怎麼判斷風險高不高」的規則時，下列哪一個說法在觀念上是錯的？
+                    </div>
+                </div>
+
+                <!-- 解析段落卡 3 -->
+                <div class="explain-card">
+                    <div class="explain-title">💡 第三步：解題思路</div>
+                    <div class="explain-body">
+                        本題主要考風險管理中「風險評估準則（Risk Evaluation Criteria）」的正確觀念。<br>
+                        解題可以分為三個步驟：<br>
+                        1. 確認什麼是風險評估準則。<br>
+                        2. 理解不同組織是否可以有不同準則。<br>
+                        3. 判斷風險評估準則是否可以脫離組織政策而獨立存在。
+                    </div>
+                </div>
+
+                <!-- 解析段落卡 4 -->
+                <div class="explain-card">
+                    <div class="explain-title">📘 核心觀念說明</div>
+                    <div class="explain-body">
+                        <strong>風險評估準則</strong>是指：組織用來判斷風險是否重要、是否可接受、是否需要處理的一套判斷標準。<br>
+                        這些準則通常會用來決定：哪些是高風險、哪些是中風險、哪些是可接受風險。<br>
+                        <mark>風險評估準則不是隨便訂的，而是必須與組織的治理方向一致。</mark>
+                    </div>
+                </div>
+
+                <!-- 解析段落卡 5 -->
+                <div class="explain-card">
+                    <div class="explain-title">⚖️ 選項分析</div>
+                    <div class="explain-body">
+                        <ul class="list-disc">
+                            <li><strong>(A) 正確：</strong> 組織必須先定義「怎樣算重要風險」，否則就無法進行後續的風險評估與處理。</li>
+                            <li><strong>(B) 正確：</strong> 不同組織的產業、規模、法規責任不同，因此可能採用不同的風險評估方法與準則，這是合理且必要的。</li>
+                            <li><strong>(C) 正確：</strong> 風險評估準則必須反映組織的價值觀、經營目標與可用資源，否則評估結果會與實際決策脫節。</li>
+                            <li><strong>(D) 錯誤：</strong> <mark>風險評估準則不能與組織的管理政策不一致。</mark> 管理政策是高層訂定的方向與原則，風險評估準則必須依循這些政策，否則風險管理將失去治理基礎。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 解析段落卡 6 -->
+                <div class="explain-card">
+                    <div class="explain-title">📚 觀念補充與延伸</div>
+                    <div class="explain-body">
+                        本題屬於資訊安全規劃實務中「風險管理架構」的核心觀念題。<br>
+                        風險評估準則的定位是：將抽象的管理政策，轉化為可操作的風險判斷標準。<br>
+                        換句話說：<strong>管理政策是方向，風險評估準則是落地的判斷工具。</strong>
+                    </div>
+                </div>
+
+                <!-- 解析段落卡 7 -->
+                <div class="explain-card">
+                    <div class="explain-title">🔄 觸類旁通（舉一反三）</div>
+                    <div class="explain-body">
+                        對比觀念：管理政策與風險評估準則必須一致，不能各做各的。<br>
+                        常見變形考法：題目可能改問「風險評估準則是否應與組織目標一致」或「風險容忍度是否可脫離管理政策單獨訂定」。<br>
+                        正確觀念都是否定的。
+                    </div>
+                </div>
+
+                <!-- 解析段落卡 8 -->
+                <div class="explain-card">
+                    <div class="explain-title">⚠️ 常見陷阱</div>
+                    <div class="explain-body">
+                        學生容易被選項 (D) 的「可以」誤導，以為彈性越大越好。<br>
+                        實際上：彈性不等於混亂，風險管理最怕的就是準則與政策脫鉤。<br>
+                        <strong>避坑方法是：</strong>只要看到「風險評估準則」加上「與管理政策不一致」，直接判定為錯。
+                    </div>
+                </div>
+
+                <!-- 解析段落卡 9 -->
+                <div class="explain-card">
+                    <div class="explain-title">🔑 記憶口訣</div>
+                    <div class="explain-body">
+                        <span class="bg-blue-50 p-1 rounded inline-block">準則跟著政策走，不一致一定錯</span>
+                    </div>
+                </div>
+
+            </div>
+        </details>
+
+        <!-- 6. Self Check -->
+        <details class="selfcheck">
+            <summary>自我檢測</summary>
+            <div class="details-content">
+                <div class="qa-box">
+                    <div class="qa-q">問題一：為什麼不同組織可以有不同的風險評估準則？</div>
+                    <details>
+                        <summary class="text-sm text-blue-600">顯示參考答案</summary>
+                        <div class="qa-a">因為組織的目標、資源、法規責任不同。</div>
+                    </details>
+                </div>
+                <div class="qa-box">
+                    <div class="qa-q">問題二：如果風險評估準則與管理政策不一致，會造成什麼後果？</div>
+                    <details>
+                        <summary class="text-sm text-blue-600">顯示參考答案</summary>
+                        <div class="qa-a">會導致風險判斷混亂，影響決策與治理。</div>
+                    </details>
+                </div>
+                <div class="qa-box">
+                    <div class="qa-q">問題三：風險評估準則主要是用來支援哪一個風險管理階段？</div>
+                    <details>
+                        <summary class="text-sm text-blue-600">顯示參考答案</summary>
+                        <div class="qa-a">風險評估與風險處理決策階段。</div>
+                    </details>
+                </div>
+            </div>
+        </details>
+
+    </div>
+
+    <script>
+        // Data
+        const correctAnswer = 'D';
+        const correctReason = '風險評估準則必須與組織的管理政策一致，不可脫鉤。';
+
+        // Elements
+        const submitBtn = document.getElementById('submitBtn');
+        const feedbackBox = document.getElementById('feedbackBox');
+        const statusBadge = document.getElementById('statusBadge');
+        const options = document.getElementsByName('quiz');
+        const optionLabels = document.querySelectorAll('.option-label');
+
+        // Logic
+        submitBtn.addEventListener('click', () => {
+            let selectedValue = null;
+            options.forEach(option => {
+                if (option.checked) {
+                    selectedValue = option.value;
+                }
+            });
+
+            if (!selectedValue) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            // Disable interaction
+            submitBtn.disabled = true;
+            submitBtn.textContent = '已作答';
+            options.forEach(opt => opt.disabled = true);
+            optionLabels.forEach(label => label.style.cursor = 'default');
+
+            // Determine result
+            if (selectedValue === correctAnswer) {
+                // Correct
+                statusBadge.textContent = '答對';
+                statusBadge.style.background = '#059669'; // Green-600
+                
+                feedbackBox.innerHTML = `
+                    <strong>判定：正確</strong><br>
+                    ${correctReason}
+                `;
+                feedbackBox.className = 'feedback correct';
+            } else {
+                // Incorrect
+                statusBadge.textContent = '答錯';
+                statusBadge.style.background = '#dc2626'; // Red-600
+
+                feedbackBox.innerHTML = `
+                    <strong>判定：錯誤</strong><br>
+                    正確答案：${correctAnswer}<br>
+                    理由：${correctReason}
+                `;
+                feedbackBox.className = 'feedback incorrect';
+            }
+        });
+    </script>
+</body>
+</html>

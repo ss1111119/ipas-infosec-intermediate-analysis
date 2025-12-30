@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q28_風險分析與風險評估_複選題</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 1.2em;
+            margin-bottom: 0.5em;
+        }
+
+        h1 { font-size: 1.25rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
+        h2 { font-size: 1.15rem; background-color: #eee; padding: 8px; border-left: 5px solid var(--accent-color); }
+        h3 { font-size: 1.1rem; color: var(--accent-color); margin-top: 1.5em; }
+
+        p, ul, ol {
+            margin-bottom: 1em;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background-color: #e8f4f8;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-text {
+            color: var(--primary-color);
+        }
+
+        .status-indicator {
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #ccc;
+            color: #fff;
+            font-size: 0.9em;
+        }
+
+        .status-indicator.correct { background-color: var(--success-color); }
+        .status-indicator.wrong { background-color: var(--error-color); }
+
+        /* Question Area */
+        .question-box {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+        }
+
+        .option-input {
+            margin-top: 4px;
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* Feedback Styles */
+        .option-feedback {
+            margin-left: 10px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .feedback-correct { color: var(--success-color); }
+        .feedback-wrong { color: var(--error-color); }
+
+        .result-summary {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .result-summary.show { display: block; }
+        .result-summary.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-summary.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.9; }
+
+        .btn-submit { background-color: var(--primary-color); color: #fff; }
+        .btn-reset { background-color: #95a5a6; color: #fff; }
+        .btn-toggle { background-color: var(--accent-color); color: #fff; margin-left: auto; }
+
+        /* Explanation Section */
+        .explanation-container {
+            margin-top: 30px;
+            border-top: 2px dashed var(--border-color);
+            padding-top: 20px;
+            display: none;
+        }
+
+        .explanation-container.visible {
+            display: block;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+
+        .keyword {
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        /* Details Summary */
+        details {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 600px) {
+            .btn-toggle { margin-left: 0; width: 100%; }
+            .controls { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="status-bar">
+        <span class="status-text">答題狀態</span>
+        <span id="statusIndicator" class="status-indicator">未作答</span>
+    </div>
+
+    <div class="question-box">
+        <div class="question-text">
+            28. 關於風險分析及風險評估議題的敘述，下列哪些正確？（複選）
+        </div>
+        <div class="options-group">
+            <label class="option-label" id="label-A">
+                <input type="checkbox" name="option" value="A" class="option-input">
+                <span>(A) 風險評估的過程，須將目前已實施的措施結果納入考量</span>
+                <span class="option-feedback" id="feedback-A"></span>
+            </label>
+            <label class="option-label" id="label-B">
+                <input type="checkbox" name="option" value="B" class="option-input">
+                <span>(B) 風險分析時產出的後果與可能性的評估方式應定義清楚</span>
+                <span class="option-feedback" id="feedback-B"></span>
+            </label>
+            <label class="option-label" id="label-C">
+                <input type="checkbox" name="option" value="C" class="option-input">
+                <span>(C) 風險識別僅需將與機密性有關風險識別清楚</span>
+                <span class="option-feedback" id="feedback-C"></span>
+            </label>
+            <label class="option-label" id="label-D">
+                <input type="checkbox" name="option" value="D" class="option-input">
+                <span>(D) 以風險評鑑工具直接執行的過程與結果皆須留存紀錄</span>
+                <span class="option-feedback" id="feedback-D"></span>
+            </label>
+        </div>
+
+        <div id="resultSummary" class="result-summary"></div>
+
+        <div class="controls">
+            <button class="btn-submit" onclick="submitAnswer()">提交答案</button>
+            <button class="btn-reset" onclick="resetQuiz()">重作題目</button>
+            <button class="btn-toggle" onclick="toggleExplanation()">顯示/隱藏詳解</button>
+        </div>
+    </div>
+
+    <div id="explanationArea" class="explanation-container">
+        <h2>【題目】</h2>
+        <p>28. 關於風險分析及風險評估議題的敘述，下列哪些正確？（複選）<br>
+        (A) 風險評估的過程，須將目前已實施的措施結果納入考量<br>
+        (B) 風險分析時產出的後果與可能性的評估方式應定義清楚<br>
+        (C) 風險識別僅需將與機密性有關風險識別清楚<br>
+        (D) 以風險評鑑工具直接執行的過程與結果皆須留存紀錄</p>
+
+        <h2>【第一步：找關鍵字】</h2>
+        <p>各位同學，看到這題不要慌，先把關鍵字圈出來：</p>
+        <ul>
+            <li><strong>風險分析</strong>（分析會發生什麼事、發生機率多高、後果多嚴重）：這是解題的核心主題。</li>
+            <li><strong>風險評估</strong>（依分析結果判斷哪些風險重要、要不要處理）：這也是核心主題。</li>
+            <li><strong>已實施措施</strong>：也就是所謂的「控制措施（已經採取的保護方法，例如防火牆、權限控管）」。</li>
+            <li><strong>後果與可能性</strong>：這是計算風險值的兩個最重要的參數。</li>
+            <li><strong>留存紀錄</strong>：資安管理最重視證據。</li>
+        </ul>
+
+        <h2>【第二步：白話翻譯】</h2>
+        <p>這題用白話文說就是：<br>
+        「我們在算系統危不危險的時候，下面這四個做法，哪幾個是『對的』、合乎邏輯的？」<br>
+        大家只要憑著「做資安要有憑有據、要周全」的常識去判斷，就能選出答案。</p>
+
+        <h2>【第三步：解題思路】</h2>
+        <ul>
+            <li><strong>這題在考什麼觀念？</strong> 考你對「風險管理流程」細節的理解，不是只背定義。</li>
+            <li><strong>解題步驟：</strong>
+                <ol>
+                    <li>檢查有沒有考慮「現況」（已經裝好的鎖算不算數？）。</li>
+                    <li>檢查標準有沒有統一（大家對「嚴重」的定義一不一樣？）。</li>
+                    <li>檢查範圍有沒有漏掉（資安只有機密性嗎？）。</li>
+                    <li>檢查有沒有留證據（用工具跑一跑就算了嗎？）。</li>
+                </ol>
+            </li>
+            <li><strong>原理與規則：</strong>
+                <p>想像你在評估家裡遭小偷的風險。如果你已經裝了「鐵窗」和「監視器」（這就是已實施的控制措施），那你被偷的機率是不是會降低？當然會！所以評估風險絕對不能忽略現在已經有的保護措施，這就是所謂的「殘餘風險」概念。</p>
+            </li>
+        </ul>
+
+        <h2>【第四步：選項分析】</h2>
+        <ul>
+            <li><strong>(A) 正確。</strong> 風險評估一定要看「現在式」。如果我們已經有防火牆（控制措施），被駭客入侵的機率就會降低。如果不考慮這些，我們就會高估風險，浪費錢去重複保護。</li>
+            <li><strong>(B) 正確。</strong> 什麼叫「後果很嚴重」？是損失 1 萬元還是 100 萬元？什麼叫「可能性很高」？是一年一次還是每天一次？這些如果不「定義清楚」，每個人算出來的結果都不一樣，根本沒辦法管理。</li>
+            <li><strong>(C) 錯誤。</strong> 這是一個超級大陷阱！資訊安全的核心是「CIA 三角」，不只要保護資料不外洩（機密性），還要保護資料不被亂改（完整性），以及系統隨時能用（可用性）。只看機密性就太偏心啦！</li>
+            <li><strong>(D) 正確。</strong> 資安管理講究「凡走過必留下痕跡」。就算你是用自動化工具掃描弱點，掃描的過程（什麼時候掃的、掃了哪裡）和結果（發現什麼漏洞）都要存檔，以後稽核員來查才有證據。</li>
+        </ul>
+
+        <h2>【觀念補充與延伸】</h2>
+        <ul>
+            <li><strong>核心觀念定位：</strong> 這是「風險管理」章節的基礎題，屬於 ISO 27005 或 NIST SP 800-30 的範疇。</li>
+            <li><strong>定義補充：</strong>
+                <ul>
+                    <li><strong>風險識別（Risk Identification）：</strong> 找出資產有哪些、有什麼威脅、有什麼弱點。</li>
+                    <li><strong>風險分析（Risk Analysis）：</strong> 算算看風險值 = 後果 × 可能性。</li>
+                    <li><strong>風險評估（Risk Evaluation）：</strong> 拿算出來的風險值跟標準比，決定哪個要優先處理。</li>
+                </ul>
+            </li>
+            <li><strong>觸類旁通：</strong>
+                <p>如果在題目看到「僅需」、「只要」這種字眼（像 C 選項），通常都要提高警覺，因為資安通常是全面性的。</p>
+            </li>
+        </ul>
+
+        <h2>【記憶口訣】</h2>
+        <div class="highlight" style="padding: 15px; border-left: 4px solid var(--accent-color);">
+            <strong>口訣：評估看已做，分析定清楚，紀錄一定留，CIA不可少。</strong>
+        </div>
+        <p>解釋：
+            <br>- 評估要看「已做」的措施。
+            <br>- 分析要把標準「定清楚」。
+            <br>- 過程結果「紀錄」一定要留。
+            <br>- 識別風險時機密、完整、可用（CIA）一個都「不可少」。
+        </p>
+
+        <h2>【常見陷阱】</h2>
+        <ul>
+            <li><strong>陷阱一：只把風險識別當成「抓內鬼」（機密性）。</strong> 其實系統當機（可用性）、資料被竄改（完整性）都是風險。</li>
+            <li><strong>陷阱二：以為用工具就不用寫報告。</strong> 很多學生以為「工具自動化」等於「免文書」，其實工具跑出來的 Log 檔和報告才是最重要的證據。</li>
+            <li><strong>陷阱三：忽略現有措施。</strong> 評估的是「現實世界」的風險，不是「裸奔」的風險，所以現有的防護一定要算進去。</li>
+        </ul>
+
+        <h2>【正確答案】</h2>
+        <p><strong>答案：A、B、D</strong></p>
+        <p>一句話理由：評估要算進現有防護、標準要統一、過程要留紀錄，而且不能只看機密性。</p>
+
+        <h2>【自我檢測】</h2>
+        <p>做完這題，試試看能不能回答這幾個小問題：</p>
+        
+        <details>
+            <summary>問題 1：如果在風險分析時，大家對「高風險」的定義不一樣，會發生什麼事？</summary>
+            <p><strong>參考答案：</strong> 會導致評估結果不一致，沒辦法客觀比較哪些風險需要優先處理（對應選項 B 的重要性）。</p>
+        </details>
+
+        <details>
+            <summary>問題 2：除了機密性（Confidentiality），資訊安全還有哪兩個核心要素？</summary>
+            <p><strong>參考答案：</strong> 完整性（Integrity）與可用性（Availability）。</p>
+        </details>
+
+        <details>
+            <summary>問題 3：為什麼「已經實施的控制措施」會影響風險值？</summary>
+            <p><strong>參考答案：</strong> 因為有效的控制措施可以降低威脅發生的可能性，或者減輕發生後的衝擊，所以風險值會變低（這叫做殘餘風險）。</p>
+        </details>
+    </div>
+</div>
+
+<script>
+    // 正確答案設定
+    const CORRECT_ANSWERS = ['A', 'B', 'D'];
+
+    function submitAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        const userSelection = [];
+        
+        // 1. 收集使用者選擇
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                userSelection.push(cb.value);
+            }
+        });
+
+        // 2. 排序以便比較
+        userSelection.sort();
+        const correctSorted = [...CORRECT_ANSWERS].sort();
+
+        // 3. 判斷是否完全正確
+        const isCorrect = JSON.stringify(userSelection) === JSON.stringify(correctSorted);
+
+        // 4. 更新狀態列
+        const statusIndicator = document.getElementById('statusIndicator');
+        const summaryBox = document.getElementById('resultSummary');
+        
+        if (userSelection.length === 0) {
+            statusIndicator.textContent = "未作答";
+            statusIndicator.className = "status-indicator";
+            summaryBox.className = "result-summary show error";
+            summaryBox.textContent = "請至少選擇一個選項！";
+            resetFeedback();
+            return;
+        }
+
+        if (isCorrect) {
+            statusIndicator.textContent = "已作答（完全正確）";
+            statusIndicator.className = "status-indicator correct";
+            summaryBox.className = "result-summary show success";
+            summaryBox.textContent = "恭喜你！觀念完全正確！(A)(B)(D) 都是正確的敘述。";
+        } else {
+            statusIndicator.textContent = "已作答（部分錯誤）";
+            statusIndicator.className = "status-indicator wrong";
+            summaryBox.className = "result-summary show error";
+            summaryBox.textContent = "哎呀！再檢查一下。記得這是複選題，要選出所有正確的選項，且不能有多餘的。";
+        }
+
+        // 5. 個別選項回饋
+        checkboxes.forEach(cb => {
+            const feedbackSpan = document.getElementById(`feedback-${cb.value}`);
+            const isSelected = cb.checked;
+            const isAnswer = CORRECT_ANSWERS.includes(cb.value);
+
+            // 清除舊樣式
+            feedbackSpan.className = "option-feedback";
+            
+            if (isAnswer) {
+                // 這是正確選項
+                if (isSelected) {
+                    feedbackSpan.textContent = "⭕ 選對了！";
+                    feedbackSpan.classList.add("feedback-correct");
+                } else {
+                    feedbackSpan.textContent = "❌ 漏選了！"; // 這是正確答案但沒選
+                    feedbackSpan.classList.add("feedback-wrong");
+                }
+            } else {
+                // 這是錯誤選項
+                if (isSelected) {
+                    feedbackSpan.textContent = "❌ 選錯了！"; // 這是錯誤答案但選了
+                    feedbackSpan.classList.add("feedback-wrong");
+                } else {
+                    feedbackSpan.textContent = ""; // 沒選錯誤選項，不特別顯示
+                }
+            }
+        });
+    }
+
+    function resetQuiz() {
+        // 清除 Checkbox
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => cb.checked = false);
+
+        // 重置狀態列
+        const statusIndicator = document.getElementById('statusIndicator');
+        statusIndicator.textContent = "未作答";
+        statusIndicator.className = "status-indicator";
+
+        // 隱藏總結
+        const summaryBox = document.getElementById('resultSummary');
+        summaryBox.className = "result-summary";
+        summaryBox.textContent = "";
+
+        // 清除個別回饋
+        resetFeedback();
+    }
+
+    function resetFeedback() {
+        const feedbacks = document.querySelectorAll('.option-feedback');
+        feedbacks.forEach(span => {
+            span.textContent = "";
+            span.className = "option-feedback";
+        });
+    }
+
+    function toggleExplanation() {
+        const explanation = document.getElementById('explanationArea');
+        explanation.classList.toggle('visible');
+    }
+</script>
+
+</body>
+</html>

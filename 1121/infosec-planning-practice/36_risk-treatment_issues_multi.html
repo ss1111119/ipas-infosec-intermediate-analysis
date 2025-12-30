@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第36題_風險處理相關議題</title>
+    <style>
+        /* Reset & Base */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+
+        /* Layout Rules */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* UI Blocks */
+        .header {
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .content-area {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Card Styles */
+        .card {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 16px;
+            background-color: #fff;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #2c3e50;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 8px;
+        }
+
+        .context-text {
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Question & Options */
+        .question-text {
+            font-size: 18px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+        }
+
+        .option-input {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* Button */
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .submit-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Feedback */
+        .feedback-card {
+            display: none;
+            margin-top: 12px;
+            background-color: #f8f9fa;
+            border-left: 5px solid #bdc3c7;
+        }
+
+        .feedback-card.correct {
+            border-left-color: #27ae60;
+            background-color: #eafaf1;
+        }
+
+        .feedback-card.incorrect {
+            border-left-color: #c0392b;
+            background-color: #fdedec;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .correct-answer-text {
+            color: #c0392b;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        /* Explanation Section */
+        details.explain-section {
+            margin-top: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        details.explain-section summary {
+            background-color: #f1f2f6;
+            padding: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            list-style: none; /* Remove default triangle */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        details.explain-section summary::after {
+            content: '+';
+            font-size: 20px;
+        }
+
+        details.explain-section[open] summary::after {
+            content: '-';
+        }
+
+        .explain-content {
+            padding: 16px;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Analysis Segment Cards (解析段落卡) */
+        .analysis-card {
+            background-color: #fdfdfd;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 14px;
+            border-left: 4px solid #d35400; /* Default color for this topic */
+        }
+
+        .analysis-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 12px;
+            color: #fff;
+            border-radius: 12px;
+            font-weight: normal;
+        }
+
+        .tag-law { background-color: #7f8c8d; }
+        .tag-iso { background-color: #27ae60; }
+        .tag-zt  { background-color: #8e44ad; }
+        .tag-net { background-color: #2980b9; }
+        .tag-sec { background-color: #c0392b; }
+        .tag-mgm { background-color: #d35400; }
+
+        /* Highlights */
+        mark {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+
+        .keyword {
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        /* Self Check */
+        .self-check-item {
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 12px;
+        }
+
+        .self-check-item:last-child {
+            border-bottom: none;
+        }
+
+        .check-question {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .check-answer {
+            color: #27ae60;
+            margin-top: 8px;
+            padding: 8px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>第36題：風險處理相關議題</h1>
+            <span class="status-badge" id="statusBadge">未作答</span>
+        </div>
+
+        <div class="content-area">
+            <!-- Context -->
+            <div class="card">
+                <div class="card-title">情境</div>
+                <div class="context-text">本題無額外情境</div>
+            </div>
+
+            <!-- Question -->
+            <div class="card">
+                <div class="card-title">題目 <span class="tag tag-mgm" style="margin-left: 10px;">風險管理</span></div>
+                <div class="question-text">
+                    36. 關於風險處理相關議題的敘述，下列哪些正確？（複選）
+                </div>
+                <div class="options-group">
+                    <label class="option-label">
+                        <input type="checkbox" name="option" value="A" class="option-input">
+                        <span>(A) 制定資訊安全目標，可依據風險處理的實施狀況來量化其達成結果</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="option" value="B" class="option-input">
+                        <span>(B) 風險處理的計畫，需細部描述其內容，包含實施內容及相關負責人員等</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="option" value="C" class="option-input">
+                        <span>(C) 風險處理的方式必須以修正風險的選項處理</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="option" value="D" class="option-input">
+                        <span>(D) 風險分析結果可能性高、衝擊大的可考量選用避免風險</span>
+                    </label>
+                </div>
+                <button class="submit-btn" id="submitBtn" onclick="checkAnswer()">送出答案</button>
+            </div>
+
+            <!-- Feedback -->
+            <div class="card feedback-card" id="feedbackCard">
+                <div class="feedback-title" id="feedbackTitle"></div>
+                <div id="correctAnswerDisplay" class="correct-answer-text"></div>
+                <div id="feedbackReason"></div>
+            </div>
+
+            <!-- Explain -->
+            <details class="explain-section" id="explainSection">
+                <summary>點擊查看詳解</summary>
+                <div class="explain-content">
+                    
+                    <!-- 1. 找關鍵字 -->
+                    <div class="analysis-card">
+                        <div class="analysis-title">
+                            <span class="tag tag-mgm">第一步</span> 找關鍵字
+                        </div>
+                        <p>
+                            本題關鍵字為：<span class="keyword">風險處理</span>、<span class="keyword">量化達成結果</span>、<span class="keyword">必須</span>、<span class="keyword">避免風險</span>、<span class="keyword">可能性高、衝擊大</span>。這類題目主要在測驗風險管理流程中，處理選項的多樣性與彈性。
+                        </p>
+                    </div>
+
+                    <!-- 2. 白話翻譯 -->
+                    <div class="analysis-card">
+                        <div class="analysis-title">
+                            <span class="tag tag-mgm">第二步</span> 白話翻譯
+                        </div>
+                        <p>
+                            這一題在問：關於風險處理的規劃、執行與策略選擇，下列哪些說法在觀念上是正確的？因為是複選題，所以要找「合理、符合風險管理原則」的敘述，而不是只找一個最正確的。
+                        </p>
+                    </div>
+
+                    <!-- 3. 解題思路 -->
+                    <div class="analysis-card">
+                        <div class="analysis-title">
+                            <span class="tag tag-mgm">第三步</span> 解題思路
+                        </div>
+                        <p>
+                            解這一題時，可以依序做三件事：
+                            <br>1. 確認風險處理是否能與資訊安全目標連動。
+                            <br>2. 確認風險處理計畫是否需要具體與可追蹤。
+                            <br>3. 檢查選項中是否出現「必須、一定」等過度絕對的用語。
+                        </p>
+                    </div>
+
+                    <!-- 4. 選項分析 -->
+                    <div class="analysis-card">
+                        <div class="analysis-title">
+                            <span class="tag tag-mgm">第四步</span> 選項分析
+                        </div>
+                        <ul style="list-style-type: none; padding-left: 0;">
+                            <li style="margin-bottom: 8px;">
+                                <strong>(A) 正確：</strong> 資安目標的設定應具體可量化（SMART原則）。透過觀察風險處理後的殘餘風險變化，或控制措施的落實程度，確實可以用來量化目標的達成狀況。
+                            </li>
+                            <li style="margin-bottom: 8px;">
+                                <strong>(B) 正確：</strong> 根據 ISO 27001 等標準，風險處理計畫 (Risk Treatment Plan) 必須具體明確，包含要做什麼、資源需求、負責人員、預計時程等，才能有效追蹤管理。
+                            </li>
+                            <li style="margin-bottom: 8px;">
+                                <strong>(C) <mark>錯誤</mark>：</strong> 選項使用了「<span class="keyword">必須</span>」這個絕對詞彙。風險處理常見方式包括：降低（修正）、避免、移轉或接受，並非只能選擇修正。
+                            </li>
+                            <li>
+                                <strong>(D) 正確：</strong> 當風險帶來的衝擊極大且發生機率很高，且控制成本過高或無效時，「避免風險」（例如直接不使用該高風險系統）是一個合理的決策選項。
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 5. 觀念補充與延伸 -->
+                    <div class="analysis-card">
+                        <div class="analysis-title">
+                            <span class="tag tag-mgm">觀念補充</span> 延伸思考
+                        </div>
+                        <p>
+                            本題屬於資訊安全規劃實務中「風險處理策略與治理連動」的重點觀念題，常以複選題形式出現。風險處理不是只有技術問題，而是管理決策的一部分，必須考量成本效益與業務需求。
+                        </p>
+                    </div>
+
+                    <!-- 6. 觸類旁通 -->
+                    <div class="analysis-card">
+                        <div class="analysis-title">
+                            <span class="tag tag-mgm">觸類旁通</span> 舉一反三
+                        </div>
+                        <p>
+                            <strong>對比概念：</strong>「修正風險」只是降低風險的一種方式，但不是唯一選項。<br>
+                            <strong>常見變形考法：</strong>將選項中的「必須」改成「可以」，題目答案可能就會改變。或改問「何種情況適合避免風險」，答案通常是高可能性且高衝擊。
+                        </p>
+                    </div>
+
+                    <!-- 7. 記憶口訣 -->
+                    <div class="analysis-card">
+                        <div class="analysis-title">
+                            <span class="tag tag-mgm">記憶口訣</span>
+                        </div>
+                        <p>
+                            風險處理有四路：<br>
+                            降、避、移、接（降避一姐）。<br>
+                            看到「必須」先刪除，彈性管理才是福。
+                        </p>
+                    </div>
+
+                    <!-- 8. 常見陷阱 -->
+                    <div class="analysis-card">
+                        <div class="analysis-title">
+                            <span class="tag tag-mgm">常見陷阱</span> 避坑指南
+                        </div>
+                        <p>
+                            學生最容易被選項 (C) 誤導，因為實務上常聽到「風險要降低」。<br>
+                            但在考試中，只要說「只能這樣做」或「必須」，通常就是錯。避坑方式是：看到「必須」就立刻檢查是否忽略其他風險處理選項。
+                        </p>
+                    </div>
+
+                </div>
+            </details>
+
+            <!-- Self Check -->
+            <div class="card">
+                <div class="card-title">自我檢測</div>
+                
+                <div class="self-check-item">
+                    <div class="check-question">問題一：風險處理成果可以用哪些指標來衡量？</div>
+                    <details>
+                        <summary style="cursor: pointer; color: #3498db; font-size: 14px;">顯示答案</summary>
+                        <div class="check-answer">風險等級的下降程度、高風險項目的減少數量、控制措施的實施完成率等。</div>
+                    </details>
+                </div>
+
+                <div class="self-check-item">
+                    <div class="check-question">問題二：什麼情況下組織會選擇「接受風險」？</div>
+                    <details>
+                        <summary style="cursor: pointer; color: #3498db; font-size: 14px;">顯示答案</summary>
+                        <div class="check-answer">當評估後的殘餘風險已在組織設定的「可接受風險水準」之內，或者是處理該風險的成本遠高於風險可能造成的損失時。</div>
+                    </details>
+                </div>
+
+                <div class="self-check-item">
+                    <div class="check-question">問題三：為什麼選項 (C) 的「必須」是錯的？</div>
+                    <details>
+                        <summary style="cursor: pointer; color: #3498db; font-size: 14px;">顯示答案</summary>
+                        <div class="check-answer">因為風險管理強調針對不同情境選擇最適策略，並非只有「修正（降低）」一條路，過度絕對的限定違反了風險管理的彈性原則。</div>
+                    </details>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const correctAnswers = ['A', 'B', 'D'];
+
+        function checkAnswer() {
+            // Get selected options
+            const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+            const userSelected = Array.from(checkboxes).map(cb => cb.value).sort();
+            
+            // Logic Check
+            const isCorrect = JSON.stringify(userSelected) === JSON.stringify(correctAnswers);
+
+            // UI Updates
+            const statusBadge = document.getElementById('statusBadge');
+            const feedbackCard = document.getElementById('feedbackCard');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const correctAnswerDisplay = document.getElementById('correctAnswerDisplay');
+            const feedbackReason = document.getElementById('feedbackReason');
+            const submitBtn = document.getElementById('submitBtn');
+            const explainSection = document.getElementById('explainSection');
+
+            feedbackCard.style.display = 'block';
+            submitBtn.disabled = true;
+            submitBtn.innerText = '已作答';
+
+            if (isCorrect) {
+                // Correct State
+                statusBadge.innerText = '答對';
+                statusBadge.style.backgroundColor = '#27ae60';
+                
+                feedbackCard.className = 'card feedback-card correct';
+                feedbackTitle.innerText = '判定：正確';
+                correctAnswerDisplay.style.display = 'none';
+                feedbackReason.innerText = '觀念正確！風險處理可用來量化資安目標、計畫需具體描述，且高可能性高衝擊風險可考量避免；但處理方式不只限於修正風險。';
+                
+                // Auto expand explanation for reinforcement
+                explainSection.open = true;
+            } else {
+                // Incorrect State
+                statusBadge.innerText = '答錯';
+                statusBadge.style.backgroundColor = '#c0392b';
+                
+                feedbackCard.className = 'card feedback-card incorrect';
+                feedbackTitle.innerText = '判定：錯誤';
+                correctAnswerDisplay.style.display = 'block';
+                correctAnswerDisplay.innerText = '正確答案：' + correctAnswers.join('、');
+                feedbackReason.innerText = '風險處理方式不只限於修正，還包含避免、移轉或接受；請特別注意選項 (C) 中「必須」的絕對語氣陷阱。';
+                
+                // Auto expand explanation for learning
+                explainSection.open = true;
+            }
+            
+            // Scroll to feedback
+            feedbackCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    </script>
+</body>
+</html>

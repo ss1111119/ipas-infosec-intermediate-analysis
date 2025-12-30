@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題組4_ISO27001xISO31000_風險流程與評估_Q29-32</title>
+    <style>
+        /* 基礎設定 */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 進度條 */
+        .progress-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #eef2f5;
+            border-radius: 5px;
+        }
+
+        .progress-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #ccc;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--success-color);
+            width: 0%;
+            transition: width 0.3s ease;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        /* 題組背景區塊 */
+        .context-box {
+            border: 2px solid var(--primary-color);
+            background-color: #fffcf5;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+
+        .context-title {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 15px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        /* 導覽列 Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: 1px solid transparent;
+            border-bottom: none;
+            cursor: pointer;
+            background: #f1f1f1;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+            font-weight: bold;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            background: #e9e9e9;
+        }
+
+        .tab-btn.active {
+            background: #fff;
+            border-color: var(--border-color);
+            border-bottom-color: #fff;
+            color: var(--accent-color);
+            margin-bottom: -2px;
+            border-top: 3px solid var(--accent-color);
+        }
+
+        /* 題目內容區 */
+        .question-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .question-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .q-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        /* 選項樣式 */
+        .options-group {
+            margin: 20px 0;
+        }
+
+        .option-label {
+            display: block;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+        }
+
+        .option-label input {
+            margin-right: 10px;
+        }
+
+        /* 按鈕群組 */
+        .btn-group {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed #ccc;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 10px;
+            color: white;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-submit { background-color: var(--accent-color); }
+        .btn-retry { background-color: #95a5a6; }
+        .btn-toggle { background-color: #e67e22; }
+
+        /* 回饋區與詳解 */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .explanation-area {
+            margin-top: 20px;
+            border: 1px solid var(--accent-color);
+            border-radius: 5px;
+            display: none; /* 預設隱藏 */
+            background-color: #fff;
+        }
+
+        .exp-header {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+        }
+
+        .exp-body {
+            padding: 20px;
+        }
+
+        .exp-section-title {
+            background-color: #eee;
+            padding: 5px 10px;
+            margin: 15px 0 10px 0;
+            font-weight: bold;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .keyword {
+            font-weight: bold;
+            color: #d35400;
+            background-color: #fff3e0;
+            padding: 0 4px;
+        }
+
+        /* 拖曳排序樣式 (Q29) */
+        .sortable-container {
+            background: #f8f9fa;
+            padding: 15px;
+            border: 1px dashed #aaa;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .sortable-instruction {
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            color: #555;
+            font-style: italic;
+        }
+
+        .sortable-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sortable-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            margin-bottom: 8px;
+            padding: 12px;
+            cursor: move;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .sortable-item:hover {
+            background-color: #f0faff;
+            border-color: var(--accent-color);
+        }
+        
+        .sortable-item.dragging {
+            opacity: 0.5;
+            border: 2px dashed var(--accent-color);
+        }
+
+        /* 手機按鈕輔助 */
+        .move-btn {
+            background: #eee;
+            border: 1px solid #ccc;
+            padding: 2px 8px;
+            margin-left: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+
+        /* 自我檢測隱藏區塊 */
+        details {
+            margin-top: 10px;
+            background: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        summary:hover {
+            color: var(--primary-color);
+        }
+
+        .self-check-q {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px dotted #ccc;
+        }
+
+        /* 響應式微調 */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .tab-btn { flex: 1; text-align: center; margin-right: 2px; font-size: 0.9rem; padding: 10px 5px; }
+            .q-title { font-size: 1.1em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 style="text-align: center; color: var(--primary-color); margin-bottom: 5px;">【題組4】ISO27001 x ISO31000 風險流程與評估</h1>
+    <p style="text-align: center; color: #666; font-size: 0.9em; margin-bottom: 20px;">適用對象：高中職初學者 | 補教名師：Gemini 老師</p>
+
+    <!-- 進度條 -->
+    <div class="progress-section">
+        <span class="progress-label">學習進度：<span id="progress-text">0/4</span></span>
+        <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+    </div>
+
+    <!-- 題組背景 -->
+    <div class="context-box">
+        <div class="context-title">題組 4 背景</div>
+        <div>
+            A 公司年初導入 <span class="keyword">ISO 27001（資安管理制度的國際標準）</span>，並參考 <span class="keyword">ISO 31000（風險管理的通用框架）</span> 風險架構制度訂定風險管理辦法及相關程序。公司亦順利於年底取得驗證通過，驗證過程稽核員於風險管理過程出具一項 <span class="keyword">次要缺失（小問題，不影響整體系統失效）</span>，主因為 A 公司於年度 <span class="keyword">風險評鑑（列出風險並算分數的過程）</span> 過程，風險項目 <span class="keyword">量化（用數字打分數）</span> 數值計算錯誤，但不影響風險排序以及後續選擇風險進行回應之作業。
+        </div>
+    </div>
+
+    <!-- 導覽 Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('q29')">Q29 風險流程</button>
+        <button class="tab-btn" onclick="switchTab('q30')">Q30 缺失處理</button>
+        <button class="tab-btn" onclick="switchTab('q31')">Q31 全景建立</button>
+        <button class="tab-btn" onclick="switchTab('q32')">Q32 評估要素</button>
+    </div>
+
+    <!-- Q29 -->
+    <div id="q29" class="question-content active">
+        <div class="q-title">Q29. 風險管理流程排序 (單選題)</div>
+        
+        <!-- 額外互動：排序練習 -->
+        <div class="sortable-container">
+            <div class="sortable-instruction">
+                <strong>★ 互動小遊戲：</strong>請試著拖曳（或按上下鍵）將下方步驟排成正確的「ISO 31000 風險管理流程」順序，完成後按「檢查排序」！
+            </div>
+            <ul id="sortable-list-q29" class="sortable-list">
+                <!-- 預設亂序 -->
+                <li class="sortable-item" draggable="true" data-id="1">
+                    <span>1. 風險回應</span>
+                    <div><button class="move-btn" onclick="moveItem(this, -1)">↑</button><button class="move-btn" onclick="moveItem(this, 1)">↓</button></div>
+                </li>
+                <li class="sortable-item" draggable="true" data-id="2">
+                    <span>2. 建立全景</span>
+                    <div><button class="move-btn" onclick="moveItem(this, -1)">↑</button><button class="move-btn" onclick="moveItem(this, 1)">↓</button></div>
+                </li>
+                <li class="sortable-item" draggable="true" data-id="3">
+                    <span>3. 風險分析及評估</span>
+                    <div><button class="move-btn" onclick="moveItem(this, -1)">↑</button><button class="move-btn" onclick="moveItem(this, 1)">↓</button></div>
+                </li>
+                <li class="sortable-item" draggable="true" data-id="4">
+                    <span>4. 風險辨識</span>
+                    <div><button class="move-btn" onclick="moveItem(this, -1)">↑</button><button class="move-btn" onclick="moveItem(this, 1)">↓</button></div>
+                </li>
+            </ul>
+            <button class="btn" style="background:#7f8c8d; font-size:0.9rem; margin-top:10px;" onclick="checkSortOrder()">檢查排序</button>
+            <div id="sort-feedback" style="margin-top:10px; font-weight:bold;"></div>
+        </div>
+
+        <p>【題目】ISO 31000 風險管理架構所述簡要列示如後：1.風險回應、2.建立全景、3.風險分析及評估、4.風險辨識，以及貫穿於整個風險管理流程之「監督與覆核」、「溝通及協商」。請問上述 1~4 項風險管理流程的正確順序為下列何項？</p>
+        
+        <div class="options-group" id="opt-q29">
+            <label class="option-label"><input type="radio" name="q29" value="A"> (A) 1234</label>
+            <label class="option-label"><input type="radio" name="q29" value="B"> (B) 4321</label>
+            <label class="option-label"><input type="radio" name="q29" value="C"> (C) 2431</label>
+            <label class="option-label"><input type="radio" name="q29" value="D"> (D) 4231</label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-submit" onclick="submitAnswer('q29', 'C')">提交答案</button>
+            <button class="btn btn-retry" onclick="resetQuestion('q29')">重作本題</button>
+            <button class="btn btn-toggle" onclick="toggleExplanation('exp-q29')">顯示/隱藏詳解</button>
+        </div>
+
+        <div id="feedback-q29" class="feedback-area"></div>
+
+        <div id="exp-q29" class="explanation-area">
+            <div class="exp-header">Q29 老師詳解</div>
+            <div class="exp-body">
+                <div class="exp-section-title">題目</div>
+                <p>ISO 31000 風險管理架構所述...請問上述 1~4 項風險管理流程的正確順序為下列何項？</p>
+
+                <div class="exp-section-title">第一步：找關鍵字</div>
+                <p>請圈出 <span class="keyword">ISO 31000</span>、<span class="keyword">風險管理流程</span>、<span class="keyword">正確順序</span>。這些字告訴我們，這題考的是一個「標準作業程序」，順序是死的，不能亂跳。</p>
+
+                <div class="exp-section-title">第二步：白話翻譯</div>
+                <p>各位同學，這題其實在問：「當你要處理生活中的危險（例如過馬路）時，正確的思考步驟是什麼？」</p>
+
+                <div class="exp-section-title">第三步：解題思路</div>
+                <ul>
+                    <li><strong>考什麼觀念？</strong> 風險管理的基本四部曲。</li>
+                    <li><strong>解題步驟：</strong>
+                        <ol>
+                            <li>你得先搞清楚狀況（我在哪？紅綠燈在哪？）→ 這叫 <strong>建立全景 (2)</strong>。</li>
+                            <li>看清楚有什麼危險（有無闖紅燈的車？）→ 這叫 <strong>風險辨識 (4)</strong>。</li>
+                            <li>判斷這些危險多可怕（被撞到會死還是受傷？機率高嗎？）→ 這叫 <strong>風險分析及評估 (3)</strong>。</li>
+                            <li>最後決定怎麼做（等綠燈、快跑、還是不過去了）→ 這叫 <strong>風險回應 (1)</strong>。</li>
+                        </ol>
+                    </li>
+                </ul>
+
+                <div class="exp-section-title">第四步：選項分析</div>
+                <ul>
+                    <li>(A) 1234：一開始就「回應」？還不知道危險在哪就先跑，這是瞎忙。</li>
+                    <li>(B) 4321：先找危險才建立全景？不對，要先劃定範圍（全景）才能在範圍內找危險。</li>
+                    <li>(C) 2431：先確立環境背景(2)，再找問題(4)，再算分數(3)，最後解決(1)。<strong>正解。</strong></li>
+                    <li>(D) 4231：把建立全景放在辨識之後，順序顛倒了。</li>
+                </ul>
+
+                <div class="exp-section-title">觀念補充與延伸</div>
+                <p>這屬於「風險管理」的核心章節。ISO 31000 是一個通用的邏輯，不只資安，連你以後開公司、投資股票都是用這套邏輯：環境 -> 找問題 -> 算嚴重性 -> 處理。</p>
+
+                <div class="exp-section-title">記憶口訣</div>
+                <p><strong>「景、辨、析、應」</strong><br>記法：<strong>警</strong>察<strong>變</strong>身<strong>吸</strong>引<strong>應</strong>援團。<br>(全景 -> 辨識 -> 分析評估 -> 回應)</p>
+
+                <div class="exp-section-title">常見陷阱</div>
+                <p>學生最常搞混「建立全景」和「風險辨識」誰先誰後。記住，一定要先有「戰場」（全景），才能在戰場上「找敵人」（辨識）。</p>
+
+                <div class="exp-section-title">正確答案</div>
+                <p><strong>答案：(C)</strong><br>理由：邏輯順序必須是先定範圍、找問題、評估大小、最後解決。</p>
+
+                <div class="exp-section-title">自我檢測</div>
+                <div class="self-check-q">
+                    <p>1. 如果我們還沒定義好這家公司是做什麼的（建立全景），就直接開始列風險，會發生什麼事？</p>
+                    <details>
+                        <summary>點我看答案</summary>
+                        <p>會列出一大堆不相干的風險（例如軟體公司卻在擔心農作物欠收），浪費時間且失焦。</p>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Q30 -->
+    <div id="q30" class="question-content">
+        <div class="q-title">Q30. 稽核缺失處理 (單選題)</div>
+        <p>【題目】請問 A 公司是否必須要重新進行年度風險評鑑作業，其原因為下列何項？（背景提示：稽核員出具「次要缺失」，因量化計算錯誤，但不影響排序與選擇。）</p>
+        
+        <div class="options-group" id="opt-q30">
+            <label class="option-label"><input type="radio" name="q30" value="A"> (A) 是，因為此為外部稽核缺失</label>
+            <label class="option-label"><input type="radio" name="q30" value="B"> (B) 是，因為必須以此做為矯正預防措施之處理方式</label>
+            <label class="option-label"><input type="radio" name="q30" value="C"> (C) 否，僅需修正量化計算結果，因為不影響風險評鑑之結果</label>
+            <label class="option-label"><input type="radio" name="q30" value="D"> (D) 否，因為此項缺失並非主要缺失，不須立即於期限內回應驗證單位</label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-submit" onclick="submitAnswer('q30', 'C')">提交答案</button>
+            <button class="btn btn-retry" onclick="resetQuestion('q30')">重作本題</button>
+            <button class="btn btn-toggle" onclick="toggleExplanation('exp-q30')">顯示/隱藏詳解</button>
+        </div>
+
+        <div id="feedback-q30" class="feedback-area"></div>
+
+        <div id="exp-q30" class="explanation-area">
+            <div class="exp-header">Q30 老師詳解</div>
+            <div class="exp-body">
+                <div class="exp-section-title">題目</div>
+                <p>請問 A 公司是否必須要重新進行年度風險評鑑作業...？</p>
+
+                <div class="exp-section-title">第一步：找關鍵字</div>
+                <p>圈起來：<span class="keyword">次要缺失</span>、<span class="keyword">量化數值計算錯誤</span>、<span class="keyword">不影響風險排序</span>。這些詞已經把答案告訴你了！</p>
+
+                <div class="exp-section-title">第二步：白話翻譯</div>
+                <p>老師改考卷發現你算錯一題數學，扣了分（次要缺失），但你還是全班第一名（不影響排序）。請問，老師需要叫你「整張考卷重寫一次」嗎？</p>
+
+                <div class="exp-section-title">第三步：解題思路</div>
+                <ul>
+                    <li><strong>觀念：</strong> 稽核缺失的改善要符合「比例原則」。</li>
+                    <li><strong>邏輯：</strong> 風險評鑑的最終目的是「排序出哪些風險最重要」。既然題目說「計算錯誤但不影響排序」，代表結果（End Game）是沒錯的，只是過程有瑕疵。</li>
+                    <li><strong>處理：</strong> 修正那個錯誤的數字就好，不用大費周章全部重來。</li>
+                </ul>
+
+                <div class="exp-section-title">第四步：選項分析</div>
+                <ul>
+                    <li>(A) 錯。外部稽核缺失也要看嚴重程度，不是所有缺失都要「打掉重練」。</li>
+                    <li>(B) 錯。矯正措施是對的，但矯正的方式是「修正錯誤」，而不是「重做評鑑」。</li>
+                    <li>(C) <strong>對。</strong> 既然結果沒變，只要把算錯的地方改對，並記錄下來即可。</li>
+                    <li>(D) 錯。次要缺失還是缺失，必須在期限內回應並改善，不能置之不理。</li>
+                </ul>
+
+                <div class="exp-section-title">觀念補充與延伸</div>
+                <p><strong>次要缺失 (Minor Non-conformity)</strong>：通常指單一偶發事件，未造成系統性崩潰。相對的如果是「主要缺失 (Major)」，例如整個風險評鑑方法論都錯了，那就真的要整套重做了。</p>
+
+                <div class="exp-section-title">記憶口訣</div>
+                <p><strong>「小錯修補，大錯重來」</strong><br>計算錯是不影響大局的小錯，修補就好。</p>
+
+                <div class="exp-section-title">常見陷阱</div>
+                <p>同學看到「缺失」兩個字會很緊張，覺得一定要全部重做才叫負責。其實職場上講求效率，沒壞的部分不需要重修。</p>
+
+                <div class="exp-section-title">正確答案</div>
+                <p><strong>答案：(C)</strong><br>理由：計算錯誤是局部問題，且題目確認不影響決策結果，故修正該數值即可。</p>
+
+                <div class="exp-section-title">自我檢測</div>
+                <div class="self-check-q">
+                    <p>如果題目改成「計算錯誤導致原本第一名的風險變成了最後一名（影響排序）」，這時候要不要重做？</p>
+                    <details>
+                        <summary>點我看答案</summary>
+                        <p>要！因為這已經影響到決策結果（原本該處理的沒處理到），屬於嚴重瑕疵。</p>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Q31 -->
+    <div id="q31" class="question-content">
+        <div class="q-title">Q31. 風險管理階段 (單選題)</div>
+        <p>【題目】公司取得 ISO 27001 驗證不久之後，即因違反法令規定收到政府機關之處罰，且該項法令規定並未被公司所關注。請問依照前述之風險管理流程，此問題應該在下列何項階段即被關注？</p>
+        
+        <div class="options-group" id="opt-q31">
+            <label class="option-label"><input type="radio" name="q31" value="A"> (A) 風險辨識</label>
+            <label class="option-label"><input type="radio" name="q31" value="B"> (B) 建立全景</label>
+            <label class="option-label"><input type="radio" name="q31" value="C"> (C) 風險回應</label>
+            <label class="option-label"><input type="radio" name="q31" value="D"> (D) 風險分析及評估</label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-submit" onclick="submitAnswer('q31', 'B')">提交答案</button>
+            <button class="btn btn-retry" onclick="resetQuestion('q31')">重作本題</button>
+            <button class="btn btn-toggle" onclick="toggleExplanation('exp-q31')">顯示/隱藏詳解</button>
+        </div>
+
+        <div id="feedback-q31" class="feedback-area"></div>
+
+        <div id="exp-q31" class="explanation-area">
+            <div class="exp-header">Q31 老師詳解</div>
+            <div class="exp-body">
+                <div class="exp-section-title">題目</div>
+                <p>公司...因違反法令規定收到處罰，且該項法令規定並未被公司所關注。請問...此問題應該在下列何項階段即被關注？</p>
+
+                <div class="exp-section-title">第一步：找關鍵字</div>
+                <p>關鍵在 <span class="keyword">違反法令</span>、<span class="keyword">未被關注</span>。這代表公司一開始就不知道這條法律的存在。</p>
+
+                <div class="exp-section-title">第二步：白話翻譯</div>
+                <p>假設你去參加一場籃球比賽，結果一直被吹犯規，因為你根本不知道這個比賽規定「不能運球超過兩次」。請問你應該在什麼時候知道這條規則？當然是比賽前（建立全景）就要先讀規則啊！</p>
+
+                <div class="exp-section-title">第三步：解題思路</div>
+                <ul>
+                    <li><strong>觀念：</strong> 「建立全景」包含了解組織的內外部議題，其中最重要的外部議題就是「法律法規」。</li>
+                    <li><strong>邏輯：</strong> 如果你連這條法律都不知道，你怎麼可能在後面的步驟去「辨識」違反它的風險？所以問題出在源頭。</li>
+                </ul>
+
+                <div class="exp-section-title">第四步：選項分析</div>
+                <ul>
+                    <li>(A) 風險辨識：這是在已知的範圍內找問題。如果連法律都不知道，根本無從辨識起。</li>
+                    <li>(B) 建立全景：<strong>正解。</strong> 這個階段要定義「我們公司受哪些法律管轄」。漏掉法律，就是全景沒建好。</li>
+                    <li>(C) 風險回應：這是最後處理階段，太晚了。</li>
+                    <li>(D) 風險分析及評估：這是算分數階段，同樣太晚。</li>
+                </ul>
+
+                <div class="exp-section-title">觀念補充與延伸</div>
+                <p>ISO 27001 第 4 章「組織全景」特別強調要了解「利害關係人需求」，政府就是最大的利害關係人，法律就是他們的需求。漏看法規是資安管理的大忌。</p>
+
+                <div class="exp-section-title">記憶口訣</div>
+                <p><strong>「法規是背景，不懂先歸零」</strong><br>法律屬於背景（全景）知識，一開始就要懂。</p>
+
+                <div class="exp-section-title">常見陷阱</div>
+                <p>同學會選 (A) 風險辨識，覺得「不知道這條法」是「沒辨識到」。但邏輯上，要先收入全景清單，才會有後續的辨識動作。</p>
+
+                <div class="exp-section-title">正確答案</div>
+                <p><strong>答案：(B)</strong><br>理由：法規遵循要求屬於組織的外部環境脈絡，應在第一階段「建立全景」時就盤點清楚。</p>
+
+                <div class="exp-section-title">自我檢測</div>
+                <div class="self-check-q">
+                    <p>除了法律，還有什麼也是「建立全景」時要考慮的？</p>
+                    <details>
+                        <summary>點我看答案</summary>
+                        <p>還有：客戶合約要求、公司未來的戰略目標、競爭對手狀況等。</p>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Q32 -->
+    <div id="q32" class="question-content">
+        <div class="q-title">Q32. 風險評估關注事項 (複選題)</div>
+        <p>【題目】導入 ISO 27001 後，A 公司評估資安市場商機龐大，擬開發以 AES 512 加密技術之資安產品，並將主要目標市場設定為：美國、中國、日本、韓國、台灣。公司已瞭解此為重大事項，要求風險部門啟動風險評估作業，下列哪些項目是風險評估過程應被關注的事項？（複選：全對才給分）</p>
+        
+        <div class="options-group" id="opt-q32">
+            <label class="option-label"><input type="checkbox" name="q32" value="A"> (A) 法律法規</label>
+            <label class="option-label"><input type="checkbox" name="q32" value="B"> (B) 公司資本</label>
+            <label class="option-label"><input type="checkbox" name="q32" value="C"> (C) 技術</label>
+            <label class="option-label"><input type="checkbox" name="q32" value="D"> (D) 評估者之偏好</label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-submit" onclick="submitAnswer('q32', ['A','B','C'])">提交答案</button>
+            <button class="btn btn-retry" onclick="resetQuestion('q32')">重作本題</button>
+            <button class="btn btn-toggle" onclick="toggleExplanation('exp-q32')">顯示/隱藏詳解</button>
+        </div>
+
+        <div id="feedback-q32" class="feedback-area"></div>
+
+        <div id="exp-q32" class="explanation-area">
+            <div class="exp-header">Q32 老師詳解</div>
+            <div class="exp-body">
+                <div class="exp-section-title">題目</div>
+                <p>擬開發加密技術產品，目標市場為美、中、日、韓、台。下列哪些項目是風險評估過程應被關注的事項？</p>
+
+                <div class="exp-section-title">第一步：找關鍵字</div>
+                <p><span class="keyword">加密技術</span>、<span class="keyword">多國市場</span>、<span class="keyword">應被關注的事項</span>。重點在於「客觀」與「限制」。</p>
+
+                <div class="exp-section-title">第二步：白話翻譯</div>
+                <p>你要賣一個高科技軍火（加密技術很敏感，類似數位軍火）到全世界，你要擔心什麼？
+                1. 各國讓不讓你賣？（法律）
+                2. 你有沒有錢做？（資本）
+                3. 你做得出來嗎？（技術）
+                4. 你喜不喜歡這個產品？（偏好 -> 這不重要！）</p>
+
+                <div class="exp-section-title">第三步：解題思路</div>
+                <ul>
+                    <li><strong>觀念：</strong> 風險評估必須基於「客觀事實」與「限制條件」。</li>
+                    <li><strong>邏輯：</strong>
+                        <ul>
+                            <li><strong>(A) 法律：</strong> 加密技術在很多國家（如中國、美國）都有嚴格出口或使用管制，這絕對是最大風險。</li>
+                            <li><strong>(B) 資本：</strong> 開發新技術需要錢，錢燒完了產品還沒出來就是風險。</li>
+                            <li><strong>(C) 技術：</strong> AES 512 是很高的規格，做得出來嗎？效能好嗎？這是技術風險。</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="exp-section-title">第四步：選項分析</div>
+                <ul>
+                    <li>(A) 法律法規：<strong>要選。</strong> 各國對加密產品管制不同（例如中國的密碼法）。</li>
+                    <li>(B) 公司資本：<strong>要選。</strong> 這是內部資源限制，沒錢就沒戲唱。</li>
+                    <li>(C) 技術：<strong>要選。</strong> 這是產品可行性的核心。</li>
+                    <li>(D) 評估者之偏好：<strong>不可選！</strong> 風險評估必須客觀，「我覺得這產品很酷」不是風險評估，是個人幻想。引入主觀偏好會導致評估失準。</li>
+                </ul>
+
+                <div class="exp-section-title">觀念補充與延伸</div>
+                <p>在 ISO 31000 中，風險評估要考慮「人、財、時、地、物、法」。其中「偏好 (Bias)」是我們要極力避免的干擾因子。</p>
+
+                <div class="exp-section-title">記憶口訣</div>
+                <p><strong>「法、財、技，客觀評；主觀偏好不要停」</strong><br>法律、財務、技術都要看，但個人的主觀偏好要拿掉。</p>
+
+                <div class="exp-section-title">常見陷阱</div>
+                <p>有些同學會覺得 (D) 也是「人」的因素，為什麼不選？請注意，我們要評估的是「使用者的行為風險」或「人員能力風險」，而不是評估人員的「喜好」。喜好無法量化且不理性。</p>
+
+                <div class="exp-section-title">正確答案</div>
+                <p><strong>答案：(A)、(B)、(C)</strong><br>理由：風險評估需考量法規限制、財務資源與技術可行性等客觀條件，應排除主觀偏好。</p>
+
+                <div class="exp-section-title">自我檢測</div>
+                <div class="self-check-q">
+                    <p>如果選項中有「市場競爭對手」，要不要選？</p>
+                    <details>
+                        <summary>點我看答案</summary>
+                        <p>要！這是外部環境風險，屬於「市場風險」的一環。</p>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // 狀態管理
+    const state = {
+        q29: false,
+        q30: false,
+        q31: false,
+        q32: false
+    };
+
+    // 切換 Tab 功能
+    function switchTab(tabId) {
+        // 隱藏所有內容
+        const contents = document.querySelectorAll('.question-content');
+        contents.forEach(el => el.classList.remove('active'));
+        
+        // 顯示目標內容
+        document.getElementById(tabId).classList.add('active');
+
+        // 更新按鈕狀態
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        // 簡單透過 onclick 觸發的按鈕找對應的比較麻煩，這裡用遍歷檢查 onclick 屬性
+        buttons.forEach(btn => {
+            if(btn.getAttribute('onclick').includes(tabId)) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    // 提交答案邏輯
+    function submitAnswer(qId, correctAnswer) {
+        let isCorrect = false;
+        let userAns = [];
+
+        // 取得使用者選擇
+        if (Array.isArray(correctAnswer)) { // 複選題
+            const checkboxes = document.querySelectorAll(`input[name="${qId}"]:checked`);
+            checkboxes.forEach((cb) => userAns.push(cb.value));
+            // 排序後比較 (A,B,C)
+            userAns.sort();
+            correctAnswer.sort();
+            // 比較陣列內容是否完全一致
+            if (JSON.stringify(userAns) === JSON.stringify(correctAnswer)) {
+                isCorrect = true;
+            }
+        } else { // 單選題
+            const selected = document.querySelector(`input[name="${qId}"]:checked`);
+            if (selected) {
+                userAns = selected.value;
+                if (userAns === correctAnswer) isCorrect = true;
+            } else {
+                alert("請先選擇一個答案喔！");
+                return;
+            }
+        }
+
+        // 顯示回饋
+        const feedbackDiv = document.getElementById(`feedback-${qId}`);
+        feedbackDiv.style.display = 'block';
+        
+        if (isCorrect) {
+            feedbackDiv.className = 'feedback-area feedback-correct';
+            feedbackDiv.innerHTML = `<strong>🎉 答對了！</strong><br>這題的觀念你已經掌握囉！趕快看看詳解確認細節吧。`;
+            state[qId] = true;
+        } else {
+            feedbackDiv.className = 'feedback-area feedback-wrong';
+            let correctStr = Array.isArray(correctAnswer) ? correctAnswer.join('、') : correctAnswer;
+            feedbackDiv.innerHTML = `<strong>⚠️ 答錯了...</strong><br>別灰心！正確答案是 <strong>${correctStr}</strong>。<br>快點開【顯示/隱藏詳解】聽聽老師怎麼說！`;
+            state[qId] = false; // 答錯不計分，若之前對過會被取消嗎？這裡邏輯設為最新狀態為主
+        }
+
+        updateProgressBar();
+    }
+
+    // 重作題目邏輯
+    function resetQuestion(qId) {
+        // 清除選項
+        const inputs = document.querySelectorAll(`input[name="${qId}"]`);
+        inputs.forEach(input => input.checked = false);
+
+        // 隱藏回饋與詳解
+        document.getElementById(`feedback-${qId}`).style.display = 'none';
+        document.getElementById(`exp-${qId}`).style.display = 'none';
+
+        // 更新狀態
+        state[qId] = false;
+        updateProgressBar();
+    }
+
+    // 顯示/隱藏詳解
+    function toggleExplanation(expId) {
+        const expDiv = document.getElementById(expId);
+        if (expDiv.style.display === 'none' || expDiv.style.display === '') {
+            expDiv.style.display = 'block';
+        } else {
+            expDiv.style.display = 'none';
+        }
+    }
+
+    // 更新進度條
+    function updateProgressBar() {
+        const total = 4;
+        let correctCount = 0;
+        for (let key in state) {
+            if (state[key]) correctCount++;
+        }
+        
+        const percentage = (correctCount / total) * 100;
+        const bar = document.getElementById('progress-bar');
+        const text = document.getElementById('progress-text');
+        
+        bar.style.width = percentage + '%';
+        bar.innerText = Math.round(percentage) + '%';
+        text.innerText = `${correctCount}/${total}`;
+    }
+
+    // ---------------------------------------------------------
+    // Q29 拖曳排序邏輯 (Drag & Drop + Mobile Buttons)
+    // ---------------------------------------------------------
+    const list = document.getElementById('sortable-list-q29');
+    let draggedItem = null;
+
+    list.addEventListener('dragstart', function(e) {
+        draggedItem = e.target;
+        e.target.classList.add('dragging');
+        setTimeout(() => e.target.style.display = 'none', 0);
+    });
+
+    list.addEventListener('dragend', function(e) {
+        e.target.style.display = 'flex';
+        e.target.classList.remove('dragging');
+        draggedItem = null;
+    });
+
+    list.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(list, e.clientY);
+        if (afterElement == null) {
+            list.appendChild(draggedItem);
+        } else {
+            list.insertBefore(draggedItem, afterElement);
+        }
+    });
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.sortable-item:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // 按鈕移動邏輯 (手機版輔助)
+    function moveItem(btn, direction) {
+        const item = btn.closest('li');
+        if (direction === -1) { // Up
+            if (item.previousElementSibling) {
+                item.parentNode.insertBefore(item, item.previousElementSibling);
+            }
+        } else { // Down
+            if (item.nextElementSibling) {
+                item.parentNode.insertBefore(item.nextElementSibling, item);
+            }
+        }
+    }
+
+    // 檢查排序結果
+    function checkSortOrder() {
+        const items = document.querySelectorAll('#sortable-list-q29 li');
+        const currentOrder = Array.from(items).map(item => item.getAttribute('data-id'));
+        const correctOrder = ["2", "4", "3", "1"];
+        
+        const feedback = document.getElementById('sort-feedback');
+        if (JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
+            feedback.style.color = '#27ae60';
+            feedback.innerHTML = "太棒了！排序完全正確：建立全景 → 辨識 → 分析評估 → 回應";
+        } else {
+            feedback.style.color = '#c0392b';
+            feedback.innerHTML = "順序還不太對喔，再試試看！提示：先把戰場（全景）建立起來...";
+        }
+    }
+</script>
+
+</body>
+</html>

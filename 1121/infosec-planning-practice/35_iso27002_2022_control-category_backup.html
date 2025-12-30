@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q35 - ISO/IEC 27002 控制措施屬性</title>
+    <!-- 引入 Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-main: system-ui, "Noto Sans TC", sans-serif;
+            --color-text: #333;
+            --color-bg: #f5f7fa;
+            --color-card-bg: #ffffff;
+            --color-border: #e2e8f0;
+            --color-primary: #3498db;
+            --color-success: #2ecc71;
+            --color-error: #e74c3c;
+            
+            /* Tag Colors (Fixed) */
+            --tag-law: #7f8c8d;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+
+            /* Spacing Tokens */
+            --spacing-base: 16px;
+            --spacing-gap: 12px;
+            
+            /* Font Size Tokens */
+            --fs-base: 16px;
+            --fs-title: 18px;
+            --fs-small: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            font-size: var(--fs-base);
+        }
+
+        /* Layout Constraint: Max width 960px, Centered */
+        .container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-gap);
+        }
+
+        /* Card Style */
+        .card {
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: var(--spacing-base);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2c3e50;
+            color: white;
+        }
+        .header-title {
+            font-size: var(--fs-title);
+            font-weight: 700;
+        }
+        .status-badge {
+            font-size: var(--fs-small);
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* Context */
+        .context-text {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* Question */
+        .question-title {
+            font-weight: 700;
+            margin-bottom: var(--spacing-base);
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: var(--fs-small);
+            margin-right: 6px;
+            margin-bottom: 4px;
+            vertical-align: middle;
+            font-weight: normal;
+        }
+        /* Tag Classes */
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt  { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: var(--spacing-base);
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start; /* Align top for multiline */
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .option-label:hover {
+            background-color: #f8f9fa;
+        }
+        .option-input {
+            margin-top: 5px; /* Visual alignment with text */
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .submit-btn {
+            margin-top: var(--spacing-base);
+            padding: 10px 20px;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: var(--fs-base);
+            width: 100%;
+        }
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+        .submit-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Feedback */
+        #feedback-section {
+            display: none;
+            border-left: 5px solid transparent;
+        }
+        .feedback-correct {
+            border-color: var(--color-success) !important;
+            background-color: #f0fdf4;
+        }
+        .feedback-incorrect {
+            border-color: var(--color-error) !important;
+            background-color: #fef2f2;
+        }
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Explain & SelfCheck Structure */
+        details {
+            margin-top: 4px;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 10px;
+            padding: 4px 0;
+        }
+        
+        /* Analysis Paragraph Card (Rule 11) */
+        .analysis-card {
+            background-color: #f8f9fa; /* Uniform light background */
+            border-left: 4px solid var(--color-border); /* Neutral accent */
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .analysis-card h4 {
+            margin: 0 0 8px 0;
+            font-size: var(--fs-base);
+            color: #2c3e50;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .analysis-card p {
+            margin: 0 0 8px 0;
+        }
+        .analysis-card p:last-child {
+            margin-bottom: 0;
+        }
+        .analysis-card ul {
+            margin: 4px 0 4px 20px;
+            padding: 0;
+        }
+        .analysis-card li {
+            margin-bottom: 4px;
+        }
+
+        /* Specific accents for different analysis types (Optional visual aid, keeping consistent bg) */
+        .card-concept { border-left-color: var(--tag-iso); }
+        .card-analysis { border-left-color: var(--tag-mgm); }
+        .card-trap { border-left-color: var(--color-error); }
+
+        /* Highlighting */
+        mark {
+            background-color: #fff3cd;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1. Header -->
+        <div class="card header">
+            <div class="header-title">Q35. 資安管理與控制</div>
+            <div class="status-badge" id="status-badge">未作答</div>
+        </div>
+
+        <!-- 2. Context -->
+        <div class="card context">
+            <div class="context-text">本題無額外情境</div>
+        </div>
+
+        <!-- 3. Question -->
+        <div class="card question">
+            <div class="question-content">
+                <span class="tag tag-iso">ISO 27002</span>
+                <span class="tag tag-mgm">風險管理</span>
+                <div class="question-title">
+                    ISO/IEC 27002 於 2022 年 2 月發布最新版本，該版本與 2013 年版本的差異之一，是增加控制措施的屬性標籤，其中一項是「類別」，共有預防、偵測與矯正等 3 項，請問<mark>系統資料備份</mark>比較偏向下列哪一類型？
+                </div>
+                
+                <div class="options-group">
+                    <label class="option-label">
+                        <input type="radio" name="q1" value="A" class="option-input">
+                        <span>(A) 預防（Preventive）</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q1" value="B" class="option-input">
+                        <span>(B) 偵測（Detective）及矯正</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q1" value="C" class="option-input">
+                        <span>(C) 矯正（Corrective）</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q1" value="D" class="option-input">
+                        <span>(D) 預防及偵測</span>
+                    </label>
+                </div>
+
+                <button class="submit-btn" id="submit-btn" onclick="checkAnswer()">提交答案</button>
+            </div>
+        </div>
+
+        <!-- 4. Feedback -->
+        <div class="card" id="feedback-section">
+            <span id="feedback-title" class="feedback-title"></span>
+            <div id="feedback-content"></div>
+        </div>
+
+        <!-- 5. Explain -->
+        <div class="card explain">
+            <details>
+                <summary>點擊查看詳細解析</summary>
+                <div class="explain-content">
+                    
+                    <!-- Step 1: Keywords -->
+                    <div class="analysis-card">
+                        <h4>第一步：找關鍵字</h4>
+                        <p>本題的關鍵字包含：ISO/IEC 27002、2022 年版本、控制措施屬性標籤、類別、<mark>系統資料備份</mark>。</p>
+                        <p>這代表本題重點在考你是否理解「控制措施類別」與「備份的實際功能定位」，而非死記年份。</p>
+                    </div>
+
+                    <!-- Step 2: Plain Language Translation -->
+                    <div class="analysis-card">
+                        <h4>第二步：白話翻譯</h4>
+                        <p>這一題在問：在 ISO/IEC 27002:2022 裡，把資安控制措施分成預防、偵測、矯正三類，那「系統資料備份」這件事，主要是屬於哪一類？</p>
+                    </div>
+
+                    <!-- Step 3: Solution Approach -->
+                    <div class="analysis-card">
+                        <h4>第三步：解題思路</h4>
+                        <p>本題的核心在於判斷：系統資料備份是在事情發生之前防止問題？還是在事情發生時用來發現問題？還是事情發生之後用來修復與復原？</p>
+                        <p>解題步驟如下：</p>
+                        <ul>
+                            <li>步驟 1：想一下資料備份能不能「阻止」事件發生？（答案是不行）</li>
+                            <li>步驟 2：想一下資料備份能不能「即時發現」事件？（答案是不行）</li>
+                            <li>步驟 3：確認資料備份主要在什麼時候發揮作用？（答案是出事之後）</li>
+                        </ul>
+                    </div>
+
+                    <!-- Core Concept -->
+                    <div class="analysis-card card-concept">
+                        <h4><span class="tag tag-iso" style="margin-right: 8px;">觀念</span>核心觀念說明</h4>
+                        <p>ISO/IEC 27002:2022 將控制措施加上「屬性標籤」，其中「類別」定義了三個階段：</p>
+                        <ul>
+                            <li><b>預防 (Preventive)</b>：在事件發生前，降低事件發生的可能性。</li>
+                            <li><b>偵測 (Detective)</b>：在事件發生時或之後，用來發現異常或事件。</li>
+                            <li><b>矯正 (Corrective)</b>：在事件發生後，用來修復、復原、降低衝擊。</li>
+                        </ul>
+                    </div>
+
+                    <!-- Option Analysis -->
+                    <div class="analysis-card">
+                        <h4>第四步：選項分析</h4>
+                        <ul>
+                            <li>(A) 錯誤。系統資料備份無法阻止駭客攻擊或系統故障，故非預防。</li>
+                            <li>(B) 錯誤。備份本身不具備「主動偵測」的功能，不能發現事件是否正在發生。</li>
+                            <li>(C) 正確。系統資料備份的主要用途是在事件發生後，透過還原資料來修復系統，屬於矯正性控制。</li>
+                            <li>(D) 錯誤。既非預防也非偵測。</li>
+                        </ul>
+                    </div>
+
+                    <!-- Supplementary Concepts -->
+                    <div class="analysis-card card-analysis">
+                        <h4>觀念補充與延伸</h4>
+                        <p>本題屬於資訊安全規劃實務中「ISO/IEC 27002 控制措施分類」的高頻考點。</p>
+                        <p>系統資料備份的正確定位是：不是用來防止問題，不是用來抓問題，而是用來<mark>「救回來」</mark>。</p>
+                    </div>
+
+                    <!-- Analogy (触类旁通) -->
+                    <div class="analysis-card card-analysis">
+                        <h4>觸類旁通（舉一反三）</h4>
+                        <p><b>對比概念：</b></p>
+                        <ul>
+                            <li>防火牆屬於預防性控制。</li>
+                            <li>入侵偵測系統屬於偵測性控制。</li>
+                            <li>資料備份與災難復原屬於矯正性控制。</li>
+                        </ul>
+                        <p><b>常見變形考法：</b></p>
+                        <p>題目可能改問「備援系統」、「災難復原機制」、「還原演練」屬於哪一類。答案邏輯皆相同，重點在事件發生後的復原能力。</p>
+                    </div>
+
+                    <!-- Mnemonics (记忆口诀) -->
+                    <div class="analysis-card card-analysis">
+                        <h4>記憶口訣</h4>
+                        <p>備份不是防駭客<br>出事才靠它救</p>
+                    </div>
+
+                    <!-- Pitfalls -->
+                    <div class="analysis-card card-trap">
+                        <h4>常見陷阱</h4>
+                        <p>學生常誤以為「有備份就比較安全，所以算預防」。實際上，安全感不等於預防效果，備份的價值在於事後復原。只要看到「備份」，立刻聯想到「事件發生後」。</p>
+                    </div>
+
+                </div>
+            </details>
+        </div>
+
+        <!-- 6. SelfCheck -->
+        <div class="card self-check">
+            <details>
+                <summary>自我檢測（舉一反三）</summary>
+                <div class="explain-content">
+                    <p><strong>問題一：</strong>為什麼資料備份不能算是預防性控制？</p>
+                    <p class="answer" style="color: var(--color-primary); margin-left: 20px;">因為無法阻止事件發生。</p>
+                    <hr style="border: 0; border-top: 1px dashed #ddd; margin: 10px 0;">
+                    
+                    <p><strong>問題二：</strong>如果是「備份檔完整性檢查」，會偏向哪一類控制？</p>
+                    <p class="answer" style="color: var(--color-primary); margin-left: 20px;">偏向「偵測性控制」，因為它用來發現備份是否損壞。</p>
+                    <hr style="border: 0; border-top: 1px dashed #ddd; margin: 10px 0;">
+
+                    <p><strong>問題三：</strong>備份與備援系統在控制類別上是否相同？</p>
+                    <p class="answer" style="color: var(--color-primary); margin-left: 20px;">大多屬於矯正性控制。</p>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <script>
+        function checkAnswer() {
+            const correctAnswer = 'C';
+            const radios = document.getElementsByName('q1');
+            let selectedValue = null;
+
+            for (const radio of radios) {
+                if (radio.checked) {
+                    selectedValue = radio.value;
+                    break;
+                }
+            }
+
+            if (!selectedValue) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            // Lock inputs
+            for (const radio of radios) {
+                radio.disabled = true;
+            }
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('submit-btn').innerText = '已作答';
+
+            // Show Feedback
+            const feedbackSection = document.getElementById('feedback-section');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackContent = document.getElementById('feedback-content');
+            const statusBadge = document.getElementById('status-badge');
+
+            feedbackSection.style.display = 'block';
+
+            if (selectedValue === correctAnswer) {
+                // Correct
+                feedbackSection.classList.add('feedback-correct');
+                feedbackTitle.innerText = '判定：正確';
+                feedbackTitle.style.color = 'var(--color-success)';
+                feedbackContent.innerText = '系統資料備份主要用於事件發生後的資料復原，屬於矯正性控制。';
+                statusBadge.innerText = '答對';
+                statusBadge.style.backgroundColor = 'var(--color-success)';
+            } else {
+                // Incorrect
+                feedbackSection.classList.add('feedback-incorrect');
+                feedbackTitle.innerText = '判定：錯誤';
+                feedbackTitle.style.color = 'var(--color-error)';
+                feedbackContent.innerHTML = `正確答案：(C)<br>理由：系統資料備份主要用於事件發生後的資料復原，屬於矯正性控制。`;
+                statusBadge.innerText = '答錯';
+                statusBadge.style.backgroundColor = 'var(--color-error)';
+            }
+
+            // Auto-expand explanation on wrong answer
+            if (selectedValue !== correctAnswer) {
+                document.querySelector('.explain details').open = true;
+            }
+        }
+    </script>
+</body>
+</html>

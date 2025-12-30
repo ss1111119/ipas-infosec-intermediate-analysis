@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題組 5｜風險管理與成本效益分析</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Layout Constraint - Strictly Enforced (Rule 2) */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #ffffff;
+            min-height: 100vh;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Padding Utility */
+        .card-padding {
+            padding: 16px;
+        }
+
+        /* Spacing Utility */
+        .section-gap {
+            margin-bottom: 12px;
+        }
+
+        /* Tag Colors - Strictly Enforced (Rule 6) */
+        .tag-law { background-color: #7f8c8d; color: white; }
+        .tag-iso { background-color: #27ae60; color: white; }
+        .tag-zt  { background-color: #8e44ad; color: white; }
+        .tag-net { background-color: #2980b9; color: white; }
+        .tag-sec { background-color: #c0392b; color: white; }
+        .tag-mgm { background-color: #d35400; color: white; }
+
+        .tag-base {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+
+        /* Explanation Paragraph Card Style (Rule 10 - Uniform Style) */
+        .explain-segment {
+            background-color: #f8fafc; /* Uniform light background */
+            border-left: 4px solid #94a3b8; /* Uniform border color */
+            padding: 14px;
+            margin-bottom: 12px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .explain-title {
+            font-weight: 700;
+            color: #334155; /* Slate-700 */
+            margin-bottom: 8px;
+            display: block;
+            font-size: 1.0em;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px;
+        }
+
+        /* Custom Scrollbar for better UX */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Form Elements */
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-label:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+        .option-input {
+            margin-top: 4px;
+            margin-right: 12px;
+        }
+
+        /* Highlight Logic */
+        mark {
+            background-color: #fef08a; /* Yellow-200 */
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Tabs Styling */
+        .tabs-container {
+            display: flex;
+            overflow-x: auto;
+            border-bottom: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+        .tab-btn {
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            color: #1f2937;
+            background-color: #f3f4f6;
+        }
+        .tab-btn.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+            background-color: white;
+        }
+        /* Tab Status Indicators */
+        .tab-status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .dot-none { background-color: #d1d5db; }
+        .dot-correct { background-color: #10b981; }
+        .dot-wrong { background-color: #ef4444; }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container" id="app">
+    <!-- Content will be injected by JavaScript -->
+</div>
+
+<script>
+    // --- Data ---
+
+    const groupContext = `
+        <div class="text-sm text-gray-600 leading-relaxed">
+            <p class="mb-2">風險管理是資訊安全的核心。你是一位資訊安全管理人員，負責公司資訊資產的管理、技術與營運規劃。</p>
+            <p class="mb-2">公司人事單位開發的 <strong>EIP（員工入口網站）</strong> 在測試階段發現嚴重的 <mark>SQL Injection</mark>、<mark>XSS</mark>、<mark>CSRF</mark> 等弱點。承辦廠商無法提供檢測報告，且你評估認為廠商修改程式碼屬於低階錯誤，現階段修補曠日廢時。</p>
+            <p class="mb-2">CEO 要求你針對風險進行評估，需<mark>避免重複花費</mark>，並可接受採用<mark>現有公司防護設備</mark>進行保護。</p>
+            <p class="mb-2 font-bold text-gray-700">盤點後，一個月內可行的降低風險方案包含：</p>
+            <ol class="list-decimal list-inside pl-2 space-y-1 text-xs bg-gray-50 p-2 rounded border border-gray-200">
+                <li>納入網站應用程式防火牆（WAF），防護效益 60%</li>
+                <li>要求廠商提出改善計畫，需三個月</li>
+                <li>外包修補弱點，需額外超過本案 50% 成本</li>
+                <li>透過 MSSP 進行監控與預警，需額外 25% 成本</li>
+                <li><strong>設定網站伺服器平台過濾 URI 字串功能，防護效益 85%</strong></li>
+            </ol>
+        </div>
+    `;
+
+    const questions = [
+        {
+            id: 37,
+            type: 'single',
+            tags: ['tag-mgm', 'tag-sec'],
+            question: "承上題，哪一種暫時性的降低風險方式具有最佳成本效益？",
+            options: [
+                { id: 'A', text: "(A) 向 ISP 業者租用流量清洗機制，過濾惡意程式碼" },
+                { id: 'B', text: "(B) 設定網站伺服器平台過濾 URI 字串功能" },
+                { id: 'C', text: "(C) 透過 MSSP 進行監控與預警" },
+                { id: 'D', text: "(D) 緊急採購網站應用程式防火牆（WAF）" }
+            ],
+            correct: ['B'],
+            feedbackCorrect: "利用既有平台功能，成本最低，防護效益最高（85%）。",
+            feedbackWrong: "應選擇不需要額外採購且效益最高的既有功能。",
+            context: null, // No extra context
+            explanation: `
+                <div class="explain-segment">
+                    <span class="explain-title">【第一步：找關鍵字】</span>
+                    <p class="text-sm">風險管理、成本效益（Cost Effective）、降低風險、暫時性防護、現有設備。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【第二步：白話翻譯】</span>
+                    <p class="text-sm">題目要找的是：老闆不想多花錢（成本效益），又要馬上能擋住攻擊（暫時性降低風險）。請問在不買新設備的情況下，哪個方法最划算又有效？</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【第三步：解題思路】</span>
+                    <ol class="list-decimal pl-5 text-sm space-y-1">
+                        <li>先刪除需要大筆預算的選項（不符成本效益）。</li>
+                        <li>再刪除無法「降低」風險的選項（如僅能監控）。</li>
+                        <li>最後比較剩餘選項的「防護效益」數值。</li>
+                    </ol>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【第四步：選項分析】</span>
+                    <p class="text-sm mb-2 font-bold text-gray-700">重點：暫時性防護＋最佳成本效益</p>
+                    <ul class="list-disc pl-5 text-sm space-y-1">
+                        <li>(A) 錯誤。流量清洗主要針對 DDoS，且成本極高。</li>
+                        <li><strong>(B) 正確。利用 IIS/Apache 內建功能，成本為 0，且效益高達 85%。</strong></li>
+                        <li>(C) 錯誤。MSSP 僅能「預警」，無法直接阻擋攻擊（降低風險）。</li>
+                        <li>(D) 錯誤。WAF 雖然有效，但需額外採購，且題目中效益 (60%) 低於 (B)。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【觀念補充與延伸】</span>
+                    <p class="text-sm">這屬於「縱深防禦」中的伺服器強化（Server Hardening）。當應用程式層修補困難時，利用伺服器層或網路層進行補償性控制（Compensating Control）是標準做法。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【觸類旁通（舉一反三）】</span>
+                    <p class="text-sm">就像家裡窗戶鎖壞了（App漏洞），還沒錢換新窗戶（WAF/修補），最快的方法是用木板先釘起來（伺服器設定），而不是花大錢請保全（MSSP）。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【記憶口訣】</span>
+                    <p class="text-sm font-bold text-blue-600">沒錢修補先設定，內建功能最便宜。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【常見陷阱】</span>
+                    <p class="text-sm">看到 WAF 就選，覺得有買設備才安全。其實「組態設定（Configuration）」往往是 CP 值最高的資安手段，尤其是題目強調「成本效益」時。</p>
+                </div>
+            `,
+            selfCheck: "為什麼 MSSP 不適合作為本題答案？<br>答：因為題目要求「降低風險」，而 MSSP 僅能「監控與預警」，無法立即降低風險發生機率或衝擊。"
+        },
+        {
+            id: 38,
+            type: 'single',
+            tags: ['tag-mgm'],
+            question: "若網站伺服器主機資產價值為 120 萬，該弱點影響指數（Exposure Factor）為 40%，年發生率（Annual Rate of Occurrence）為 12%，請問其年損失期望（ALE）為何？",
+            options: [
+                { id: 'A', text: "(A) 120 萬 × 3（弱點數量）× 12%" },
+                { id: 'B', text: "(B) 120 萬 × 12%" },
+                { id: 'C', text: "(C) (120 萬 × 40%) × 12%" },
+                { id: 'D', text: "(D) 120 萬 × (40% / 3) × 12%" }
+            ],
+            correct: ['C'],
+            feedbackCorrect: "ALE = SLE (資產價值 × EF) × ARO。",
+            feedbackWrong: "請代入公式：ALE = (資產價值 × 暴露因子) × 年發生率。",
+            context: null, // No extra context
+            explanation: `
+                <div class="explain-segment">
+                    <span class="explain-title">【第一步：找關鍵字】</span>
+                    <p class="text-sm">定量風險分析、資產價值 (AV)、影響指數 (EF)、年發生率 (ARO)、年損失期望 (ALE)。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【第二步：白話翻譯】</span>
+                    <p class="text-sm">老闆問：「這個漏洞如果出事，我們一年大概會賠多少錢？」請用數學公式算出來，不要憑感覺。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【第三步：解題思路】</span>
+                    <p class="text-sm mb-1">計算邏輯遵循標準公式：</p>
+                    <ul class="list-disc pl-5 text-sm space-y-1 text-gray-600">
+                        <li>第一步算單次：SLE = 資產價值 × 壞掉的比例 (EF)</li>
+                        <li>第二步算整年：ALE = 單次損失 (SLE) × 一年幾次 (ARO)</li>
+                    </ul>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【第四步：選項分析】</span>
+                    <p class="text-sm mb-2 font-bold text-gray-700">重點：定量風險分析，公式代入</p>
+                    <ul class="list-disc pl-5 text-sm space-y-1">
+                        <li>(A) 錯誤。多乘了「弱點數量」，公式中不包含此項。</li>
+                        <li>(B) 錯誤。漏乘了「影響指數 (EF)」。</li>
+                        <li><strong>(C) 正確。SLE = (120 萬 × 40%)，ALE = SLE × 12%。</strong></li>
+                        <li>(D) 錯誤。不應除以弱點數量。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【觀念補充與延伸】</span>
+                    <p class="text-sm">風險評鑑分為「定量（算錢）」與「定性（算等級，如高/中/低）」。ALE 是定量分析最核心的指標，用來決定該花多少錢做防禦（防禦成本不應高於 ALE）。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【觸類旁通（舉一反三）】</span>
+                    <p class="text-sm">就像買手機保險：手機 3 萬 (AV)，摔壞機率 50% (EF)，一年摔 1 次 (ARO)，那你每年的期望損失就是 1.5 萬。如果保費要 2 萬，就不划算。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【記憶口訣】</span>
+                    <p class="text-sm font-bold text-blue-600">年損失 ＝ 單次痛 × 一年痛幾次。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【常見陷阱】</span>
+                    <p class="text-sm">題目故意給出「弱點數量」、「員工數量」等干擾數字，記得公式裡只有「價值、比例、頻率」，其他都是雜訊。</p>
+                </div>
+            `,
+            selfCheck: "若防護效益改為 30%，計算方式會變嗎？<br>答：不會。題目問的是「原始風險（Inherent Risk）」計算，與後續採取的防護措施效益無關。"
+        },
+        {
+            id: 39,
+            type: 'single',
+            tags: ['tag-mgm'],
+            question: "承上題，降低風險的目標為何？",
+            options: [
+                { id: 'A', text: "(A) 將風險降低至 0" },
+                { id: 'B', text: "(B) 避免風險發生" },
+                { id: 'C', text: "(C) 以最少成本，將風險降低至風險擁有者可接受程度" },
+                { id: 'D', text: "(D) 將風險完全轉移給廠商" }
+            ],
+            correct: ['C'],
+            feedbackCorrect: "風險管理的核心是「成本效益」與「可接受程度」，而非追求零風險。",
+            feedbackWrong: "風險不可能歸零，且需考量成本效益。",
+            context: null, // No extra context
+            explanation: `
+                <div class="explain-segment">
+                    <span class="explain-title">【第一步：找關鍵字】</span>
+                    <p class="text-sm">風險目標、殘餘風險 (Residual Risk)、可接受程度 (Acceptable Level)、成本效益。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【第二步：白話翻譯】</span>
+                    <p class="text-sm">資安要做多少才夠？是不是一定要做到滴水不漏？還是做到老闆覺得「划算且安心」就好？</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【第三步：解題思路】</span>
+                    <p class="text-sm">風險管理的黃金法則：不要花 100 塊去保護 10 塊的東西。目標是控制風險，而不是消滅風險。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【第四步：選項分析】</span>
+                    <p class="text-sm mb-2 font-bold text-gray-700">重點：降低風險的正確目標</p>
+                    <ul class="list-disc pl-5 text-sm space-y-1">
+                        <li>(A) 錯誤。風險不可能歸零（成本會無限大）。</li>
+                        <li>(B) 錯誤。這是「避免」策略（如：不使用網路），通常不符營運需求。</li>
+                        <li><strong>(C) 正確。以最少成本，降至風險擁有者可接受（殘餘風險）。</strong></li>
+                        <li>(D) 錯誤。風險責任無法「完全」轉移，最終責任仍在企業。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【觀念補充與延伸】</span>
+                    <p class="text-sm">這就是 ISO 27001 的核心精神：風險處理計畫 (Risk Treatment Plan)。處理完後的風險稱為「殘餘風險 (Residual Risk)」，必須由管理階層正式接受。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【觸類旁通（舉一反三）】</span>
+                    <p class="text-sm">就像騎機車一定有風險，我們目標不是「完全不騎車（避免）」，也不是「穿鋼鐵人盔甲騎車（成本過高）」，而是「戴安全帽、遵守交通規則（可接受範圍）」。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【記憶口訣】</span>
+                    <p class="text-sm font-bold text-blue-600">風險不歸零，老闆肯點頭就行。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【常見陷阱】</span>
+                    <p class="text-sm">以為資安就是「把駭客全部擋住」，其實資安是「管理學」，重點是資源分配與決策。追求零風險通常會導致業務停擺。</p>
+                </div>
+            `,
+            selfCheck: "為什麼不能將風險降至 0？<br>答：因為邊際成本會遞增至無限大，且實務上技術限制無法完全排除所有未知威脅（Zero-day）。"
+        },
+        {
+            id: 40,
+            type: 'multiple',
+            tags: ['tag-mgm', 'tag-law'],
+            question: "針對此案例，若希望在系統取得之前就能掌握其安全性，下列哪些做法是正確的？（複選）",
+            options: [
+                { id: 'A', text: "(A) 在合約中明訂資安需求與罰則" },
+                { id: 'B', text: "(B) 實施定期弱點掃描" },
+                { id: 'C', text: "(C) 建立系統開發生命週期（SSDLC）的審查制度" },
+                { id: 'D', text: "(D) 系統上線後進行滲透測試" }
+            ],
+            correct: ['A', 'C'],
+            feedbackCorrect: "事前控制包含合約規範與開發流程制度。",
+            feedbackWrong: "請區分「事前預防」與「事後檢測」。",
+            context: null, // No extra context
+            explanation: `
+                <div class="explain-segment">
+                    <span class="explain-title">【第一步：找關鍵字】</span>
+                    <p class="text-sm">系統取得之前、事前控制、合約管理、SSDLC、源碼檢測。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【第二步：白話翻譯】</span>
+                    <p class="text-sm">系統還沒進公司大門（還沒驗收上線）之前，要怎麼把關才不會買到爛東西？</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【第三步：解題思路】</span>
+                    <p class="text-sm">用「時間軸」解題：<br>上線前 = 合約、開發規範 (SSDLC)、源碼檢測。<br>上線後 = 弱點掃描、滲透測試。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【第四步：選項分析】</span>
+                    <p class="text-sm mb-2 font-bold text-gray-700">重點：系統取得「之前」的安全強度</p>
+                    <ul class="list-disc pl-5 text-sm space-y-1">
+                        <li><strong>(A) 正確。合約是源頭管理（採購階段）。</strong></li>
+                        <li>(B) 錯誤。弱點掃描通常是針對「已存在」的系統進行檢測。</li>
+                        <li><strong>(C) 正確。SSDLC 是在開發過程中就把關（設計/實作階段）。</strong></li>
+                        <li>(D) 錯誤。滲透測試屬事後驗證。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【觀念補充與延伸】</span>
+                    <p class="text-sm">本題組完整考驗：技術只是背景 → 真正考的是管理決策 → 最後回到制度治理。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【觸類旁通（舉一反三）】</span>
+                    <p class="text-sm">若情境改成「採購雲端服務」，一樣要看合約（SLA）；若改成「委外開發 App」，一樣要看 SSDLC。只要是「事前」，答案邏輯都一樣。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【記憶口訣】</span>
+                    <p class="text-sm font-bold text-blue-600">來不及修先擋、算錢不憑感覺、風險不用歸零、制度一定要先行。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <span class="explain-title">【常見陷阱】</span>
+                    <p class="text-sm">把「滲透測試」當成事前控制。雖然它在測試階段做，但通常代表系統已經開發完成了，修改成本比在 SSDLC 階段高得多。</p>
+                </div>
+            `,
+            selfCheck: "第 40 題若問的是「系統上線後」，答案會如何改變？<br>答：答案會偏向 B、D 類型的事後檢測與控制。"
+        }
+    ];
+
+    // --- State Management ---
+    
+    // key: questionId, value: { submitted: bool, correct: bool, selections: Set }
+    let questionsState = {};
+    let activeTabId = questions[0].id;
+
+    // Initialize State
+    questions.forEach(q => {
+        questionsState[q.id] = {
+            submitted: false,
+            correct: false,
+            selections: new Set()
+        };
+    });
+
+    const app = document.getElementById('app');
+
+    // --- Render Functions ---
+
+    function render() {
+        // Calculate progress
+        const totalQuestions = questions.length;
+        const submittedCount = Object.values(questionsState).filter(s => s.submitted).length;
+        const progressPercentage = (submittedCount / totalQuestions) * 100;
+        const isAllFinished = submittedCount === totalQuestions;
+        const statusText = isAllFinished ? '本題組已完成' : '尚未完成';
+        const statusClass = isAllFinished ? 'text-green-400' : 'text-gray-400';
+
+        // 1. Group Header
+        const headerHTML = `
+            <div class="bg-gray-900 text-white p-4 shadow-md sticky top-0 z-20">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="font-bold text-lg"><i class="fa-solid fa-layer-group mr-2"></i>題組 5｜風險管理與成本效益分析</div>
+                    <div class="text-xs font-bold ${statusClass} border border-gray-600 px-2 py-1 rounded">${statusText}</div>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-2.5 mb-1">
+                    <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-500" style="width: ${progressPercentage}%"></div>
+                </div>
+                <div class="text-right text-xs text-gray-400">進度：${submittedCount} / ${totalQuestions}</div>
+            </div>
+        `;
+
+        // 2. Group Context
+        const contextHTML = `
+            <div class="bg-white border-b-2 border-gray-100 card-padding">
+                <div class="flex items-center mb-2">
+                    <span class="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded mr-2">題組背景</span>
+                    <h3 class="font-bold text-gray-700">企業入口網站 (EIP) 資安風險案</h3>
+                </div>
+                ${groupContext}
+            </div>
+        `;
+
+        // 3. Tabs
+        const tabsHTML = `
+            <div class="tabs-container">
+                ${questions.map(q => {
+                    const state = questionsState[q.id];
+                    const isActive = q.id === activeTabId ? 'active' : '';
+                    let dotClass = 'dot-none';
+                    if (state.submitted) {
+                        dotClass = state.correct ? 'dot-correct' : 'dot-wrong';
+                    }
+                    return `
+                        <button onclick="switchTab(${q.id})" class="tab-btn ${isActive} flex items-center">
+                            <span class="tab-status-dot ${dotClass}"></span>
+                            第 ${q.id} 題
+                        </button>
+                    `;
+                }).join('')}
+            </div>
+        `;
+
+        // 4. Active Question Content
+        const activeQ = questions.find(q => q.id === activeTabId);
+        const activeState = questionsState[activeTabId];
+        
+        // Tags
+        const tagsHTML = activeQ.tags.map(tag => {
+            let label = "";
+            switch(tag) {
+                case 'tag-law': label = "法規"; break;
+                case 'tag-iso': label = "標準"; break;
+                case 'tag-zt': label = "零信任"; break;
+                case 'tag-net': label = "網路"; break;
+                case 'tag-sec': label = "技術"; break;
+                case 'tag-mgm': label = "風險管理"; break;
+            }
+            return `<span class="${tag} tag-base">${label}</span>`;
+        }).join('');
+
+        // Options
+        const optionsHTML = activeQ.options.map(opt => {
+            const isSelected = activeState.selections.has(opt.id);
+            let inputType = activeQ.type === 'single' ? 'radio' : 'checkbox';
+            let checkAttr = isSelected ? 'checked' : '';
+            let disabledAttr = activeState.submitted ? 'disabled' : '';
+            
+            let labelClass = "option-label";
+            if (activeState.submitted) {
+                if (activeQ.correct.includes(opt.id)) {
+                    labelClass += " bg-green-50 border-green-500 ring-1 ring-green-500";
+                } else if (isSelected && !activeQ.correct.includes(opt.id)) {
+                    labelClass += " bg-red-50 border-red-500";
+                } else {
+                    labelClass += " opacity-60";
+                }
+            } else if (isSelected) {
+                labelClass += " border-blue-500 ring-1 ring-blue-500 bg-blue-50";
+            }
+
+            return `
+                <label class="${labelClass}">
+                    <input type="${inputType}" name="option_${activeQ.id}" value="${opt.id}" class="option-input" ${checkAttr} ${disabledAttr} onchange="handleSelection(${activeQ.id}, '${opt.id}', '${activeQ.type}')">
+                    <span>${opt.text}</span>
+                </label>
+            `;
+        }).join('');
+
+        // Feedback
+        let feedbackHTML = '';
+        if (activeState.submitted) {
+            const statusColor = activeState.correct ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100';
+            const statusIcon = activeState.correct ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-circle-xmark"></i>';
+            const statusText = activeState.correct ? '正確' : '錯誤';
+            const reason = activeState.correct ? activeQ.feedbackCorrect : `${activeQ.feedbackWrong} <br><span class="text-xs text-gray-500 mt-1 block">正確答案：${activeQ.correct.join(', ')}</span>`;
+
+            feedbackHTML = `
+                <div class="card-padding section-gap ${statusColor} rounded-lg border border-opacity-20 flex items-start animate-fadeIn">
+                    <div class="text-xl mr-3 mt-0.5">${statusIcon}</div>
+                    <div>
+                        <div class="font-bold mb-1">判定：${statusText}</div>
+                        <div class="text-sm">${reason}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Action Buttons
+        let buttonHTML = '';
+        if (!activeState.submitted) {
+            buttonHTML = `<button onclick="submitAnswer(${activeQ.id})" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">送出答案</button>`;
+        } else {
+            buttonHTML = `<button onclick="resetQuestion(${activeQ.id})" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">重新練習本題 <i class="fa-solid fa-rotate-right ml-2"></i></button>`;
+        }
+
+        // Bottom Content (Explain & SelfCheck)
+        let bottomContentHTML = '';
+        if (activeState.submitted) {
+            bottomContentHTML = `
+                <div class="card-padding section-gap animate-fadeIn">
+                    <details class="group">
+                        <summary class="flex justify-between items-center font-medium cursor-pointer list-none bg-blue-50 p-3 rounded text-blue-800 hover:bg-blue-100 transition">
+                            <span><i class="fa-solid fa-book-open mr-2"></i> 顯示詳解 (Explain)</span>
+                            <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down"></i></span>
+                        </summary>
+                        <div class="text-gray-600 mt-3">
+                            ${activeQ.explanation}
+                        </div>
+                    </details>
+                </div>
+
+                <div class="card-padding section-gap pb-8 animate-fadeIn">
+                    <details class="group">
+                        <summary class="flex justify-between items-center font-medium cursor-pointer list-none bg-purple-50 p-3 rounded text-purple-800 hover:bg-purple-100 transition">
+                            <span><i class="fa-solid fa-clipboard-question mr-2"></i> 自我檢測 (SelfCheck)</span>
+                            <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down"></i></span>
+                        </summary>
+                        <div class="text-gray-600 mt-3 p-3 border border-purple-100 rounded bg-white">
+                            ${activeQ.selfCheck}
+                        </div>
+                    </details>
+                </div>
+            `;
+        }
+
+        // --- Logic Update for Context ---
+        // If context is null, don't show the block at all.
+        let subContextHTML = '';
+        if (activeQ.context) {
+            subContextHTML = `
+                <div class="bg-white border-b border-gray-100 px-4 py-2">
+                    ${activeQ.context}
+                </div>
+            `;
+        }
+
+        // Construct Tab Content
+        const tabContentHTML = `
+            <!-- Tab Content Header -->
+            <div class="bg-gray-50 border-b border-gray-200 px-4 py-2 flex justify-between items-center">
+                <span class="font-bold text-gray-700">第 ${activeQ.id} 題</span>
+                <span class="text-xs px-2 py-1 rounded ${activeState.submitted ? (activeState.correct ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') : 'bg-gray-200 text-gray-600'}">
+                    ${activeState.submitted ? (activeState.correct ? '已正確' : '已錯誤') : '未作答'}
+                </span>
+            </div>
+
+            <!-- Tab Context (Conditional) -->
+            ${subContextHTML}
+
+            <!-- Question Block -->
+            <div class="card-padding section-gap">
+                <div class="mb-3">
+                    ${tagsHTML}
+                </div>
+                <h2 class="text-lg font-bold text-gray-800 mb-4">${activeQ.question}</h2>
+                <div class="space-y-3">
+                    ${optionsHTML}
+                </div>
+            </div>
+
+            <!-- Feedback -->
+            ${feedbackHTML}
+
+            <!-- Action Button Area -->
+            <div class="card-padding pt-0 section-gap">
+                ${buttonHTML}
+            </div>
+
+            <!-- Explanations -->
+            ${bottomContentHTML}
+        `;
+
+        // Final Injection
+        app.innerHTML = `
+            ${headerHTML}
+            ${contextHTML}
+            ${tabsHTML}
+            <div class="flex-grow bg-white">
+                ${tabContentHTML}
+            </div>
+        `;
+    }
+
+    // --- Interaction Logic ---
+
+    window.switchTab = function(id) {
+        activeTabId = id;
+        render();
+        // Optional: Scroll to top of tab content if needed, but keeping position is often better for UX in tabs
+    };
+
+    window.handleSelection = function(qId, optId, type) {
+        const state = questionsState[qId];
+        if (state.submitted) return;
+
+        if (type === 'single') {
+            state.selections.clear();
+            state.selections.add(optId);
+        } else {
+            if (state.selections.has(optId)) {
+                state.selections.delete(optId);
+            } else {
+                state.selections.add(optId);
+            }
+        }
+        render(); // Re-render to show visual selection state
+    };
+
+    window.submitAnswer = function(qId) {
+        const state = questionsState[qId];
+        const qData = questions.find(q => q.id === qId);
+
+        if (state.selections.size === 0) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        // Logic Check
+        const userAns = Array.from(state.selections).sort();
+        const correctAns = qData.correct.sort();
+        const isCorrect = JSON.stringify(userAns) === JSON.stringify(correctAns);
+
+        state.submitted = true;
+        state.correct = isCorrect;
+        
+        render();
+    };
+
+    window.resetQuestion = function(qId) {
+        const state = questionsState[qId];
+        state.submitted = false;
+        state.correct = false;
+        state.selections.clear();
+        render();
+    };
+
+    // Initial Render
+    render();
+
+</script>
+
+</body>
+</html>

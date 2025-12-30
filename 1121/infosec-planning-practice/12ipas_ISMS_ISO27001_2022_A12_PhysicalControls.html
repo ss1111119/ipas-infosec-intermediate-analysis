@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安考題解析：實體控制措施</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --highlight-bg: #f4f4f4;
+            --accent-color: #555555;
+            --success-color: #2e7d32;
+            --error-color: #c62828;
+            --font-main: "Helvetica Neue", Arial, "Heiti TC", "LiHei Pro", "Microsoft JhengHei", sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 18px; /* 內文基準大小 */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            font-size: 22px; /* 標題不大於內文 1 個級距 */
+            border-bottom: 2px solid var(--text-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+            border-left: 4px solid var(--text-color);
+            padding-left: 10px;
+        }
+
+        .control-panel {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: var(--highlight-bg);
+            border-radius: 4px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background-color: var(--bg-color);
+            border: 1px solid var(--text-color);
+            color: var(--text-color);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #e0e0e0;
+        }
+
+        button.primary {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        .question-box {
+            border: 1px solid var(--text-color);
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border: 1px solid transparent;
+        }
+
+        .options label:hover {
+            background-color: var(--highlight-bg);
+        }
+
+        .feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            background-color: var(--highlight-bg);
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-area.success {
+            border-color: var(--success-color);
+            background-color: #e8f5e9;
+            color: var(--success-color);
+            display: block;
+        }
+
+        .feedback-area.error {
+            border-color: var(--error-color);
+            background-color: #ffebee;
+            color: var(--error-color);
+            display: block;
+        }
+
+        .current-selection {
+            margin-top: 10px;
+            font-style: italic;
+            color: var(--accent-color);
+        }
+
+        /* Accordion Style */
+        details {
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        summary {
+            padding: 12px;
+            cursor: pointer;
+            background-color: #f9f9f9;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設三角形 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .content-body {
+            padding: 15px;
+            background-color: #fff;
+        }
+
+        .highlight-marker {
+            background-color: #fff9c4; /* 螢光筆效果 */
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+
+        .term-def {
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .quiz-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        
+        .quiz-answer {
+            margin-top: 8px;
+            padding: 8px;
+            background-color: var(--highlight-bg);
+            border-left: 3px solid var(--text-color);
+            display: none;
+        }
+
+        .quiz-btn {
+            font-size: 14px;
+            padding: 4px 8px;
+            margin-top: 5px;
+        }
+
+        /* Anchor navigation */
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-color);
+            border-bottom: 1px dotted var(--text-color);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資訊安全工程師考題解析：ISO 27001 實體控制</h1>
+
+    <div class="control-panel">
+        <button onclick="toggleAllDetails(true)">全部展開</button>
+        <button onclick="toggleAllDetails(false)">全部收合</button>
+        <button onclick="resetQuiz()">重作一次</button>
+    </div>
+
+    <div class="nav-links">
+        導覽：
+        <a href="#analysis-step1">找關鍵字</a>
+        <a href="#analysis-step4">選項分析</a>
+        <a href="#analysis-concept">觀念補充</a>
+        <a href="#analysis-trap">常見陷阱</a>
+    </div>
+
+    <!-- 題目互動區 -->
+    <div class="question-box">
+        <div class="question-text">
+            12. 從 ISO 27001:2022 附錄 A「參考控制目標及控制措施」中，下列哪些是「實體控制措施」相關的規範或控制措施？（複選）
+        </div>
+        <div class="options">
+            <label>
+                <input type="checkbox" name="option" value="A" onchange="updateSelectionDisplay()">
+                (A) 實體進入控制措施
+            </label>
+            <label>
+                <input type="checkbox" name="option" value="B" onchange="updateSelectionDisplay()">
+                (B) 遠端工作應提出申請
+            </label>
+            <label>
+                <input type="checkbox" name="option" value="C" onchange="updateSelectionDisplay()">
+                (C) 維護設備，以確保其持續之可用性及完整性
+            </label>
+            <label>
+                <input type="checkbox" name="option" value="D" onchange="updateSelectionDisplay()">
+                (D) 未經事前授權，不得將設備、資訊帶出場域外
+            </label>
+        </div>
+
+        <div class="current-selection" id="currentSelectionText">
+            你目前勾選：（尚未選擇）
+        </div>
+
+        <div style="margin-top: 15px;">
+            <button class="primary" onclick="checkAnswer()">送出答案</button>
+        </div>
+
+        <div id="feedbackBox" class="feedback-area">
+            <!-- 回饋訊息將顯示於此 -->
+        </div>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #ddd; margin: 30px 0;">
+
+    <!-- 解析區塊 -->
+    <h2>詳細解析</h2>
+
+    <details id="analysis-q">
+        <summary>【題目】完整內容</summary>
+        <div class="content-body">
+            <p><strong>題目：</strong>從 ISO 27001:2022 附錄 A「參考控制目標及控制措施」中，下列哪些是「實體控制措施」相關的規範或控制措施？</p>
+            <p><strong>選項：</strong></p>
+            <ul>
+                <li>(A) 實體進入控制措施</li>
+                <li>(B) 遠端工作應提出申請</li>
+                <li>(C) 維護設備，以確保其持續之可用性及完整性</li>
+                <li>(D) 未經事前授權，不得將設備、資訊帶出場域外</li>
+            </ul>
+        </div>
+    </details>
+
+    <details id="analysis-step1">
+        <summary>【第一步：找關鍵字】</summary>
+        <div class="content-body">
+            <p>請拿出想像中的螢光筆，將以下詞彙標記起來：</p>
+            <ul>
+                <li><span class="highlight-marker">ISO 27001:2022</span> <span class="term-def">（一套國際資安管理制度標準，教公司怎麼做資安）</span></li>
+                <li><span class="highlight-marker">附錄 A</span> <span class="term-def">（標準後面附的一張大清單，列出各種可以用的資安防護方法）</span></li>
+                <li><span class="highlight-marker">實體控制措施</span> <span class="term-def">（Physical Controls，跟保護「地點」、管「人進出」、顧「設備」有關的方法）</span></li>
+                <li><span class="highlight-marker">設備</span> <span class="term-def">（電腦、伺服器、硬碟等硬體）</span></li>
+                <li><span class="highlight-marker">帶出場域</span> <span class="term-def">（把東西從公司或機房這個物理空間拿出去）</span></li>
+            </ul>
+        </div>
+    </details>
+
+    <details id="analysis-step2">
+        <summary>【第二步：白話翻譯】</summary>
+        <div class="content-body">
+            <p>這題題目如果翻譯成高中生日常用語，其實是在問：</p>
+            <blockquote style="border-left: 3px solid #666; padding-left: 10px; margin: 10px 0; color: #444;">
+                「在資安管理的規定清單裡，下面哪幾個選項是在講『怎麼顧好公司大門』、『怎麼顧好電腦硬體』或是『怎麼防止東西被偷帶出去』？」
+            </blockquote>
+            <p>你要找的是跟<strong>「看得到的東西」</strong>或<strong>「地點」</strong>有關的選項。</p>
+        </div>
+    </details>
+
+    <details id="analysis-step3">
+        <summary>【第三步：解題思路】</summary>
+        <div class="content-body">
+            <p><strong>這題在考什麼觀念？</strong><br>
+            考你分不分得清楚什麼是「實體控制」vs.「人員/管理控制」。</p>
+
+            <p><strong>解題原理與規則：</strong><br>
+            為什麼實體控制很重要？<br>
+            就算駭客技術再爛，如果他能直接走進機房把伺服器抱走，或是把硬碟拔走，你的防火牆設得再好也沒用。所以，<strong>實體控制</strong>的核心就是：</p>
+            <ol>
+                <li><strong>擋人：</strong>不該進來的人不能進來（門禁）。</li>
+                <li><strong>顧物：</strong>設備要維護好，不能壞掉；也不能被隨便拿走（資產保護）。</li>
+                <li><strong>管地：</strong>辦公室、機房要分等級保護（區域管制）。</li>
+            </ol>
+        </div>
+    </details>
+
+    <details id="analysis-step4" open>
+        <summary>【第四步：選項分析】（重點！）</summary>
+        <div class="content-body">
+            <div style="margin-bottom: 15px;">
+                <strong>(A) 實體進入控制措施</strong> <span style="color:var(--success-color); font-weight:bold;">[應選]</span>
+                <p style="margin-top: 5px;">
+                    <strong>分析：</strong>名字裡就有「實體」兩個字。這就是指刷卡機、警衛、指紋辨識門鎖。<br>
+                    <strong>生活例子：</strong>就像學校圖書館要刷學生證才能進去，這就是最標準的實體控制。
+                </p>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <strong>(B) 遠端工作應提出申請</strong> <span style="color:var(--error-color); font-weight:bold;">[不選]</span>
+                <p style="margin-top: 5px;">
+                    <strong>分析：</strong>「提出申請」是一個<strong>流程</strong>或<strong>政策</strong>。雖然遠端工作發生在公司外面，但這個選項強調的是「要申請、要核准」的管理行為，在 ISO 27001:2022 中，這被歸類在「人員控制」或「組織控制」的範疇，而不是單純的保護物理場地。<br>
+                    <strong>生活例子：</strong>你想請病假要填假單給老師簽名。填假單這個動作是「管理流程」，不是在蓋校門。
+                </p>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <strong>(C) 維護設備，以確保其持續之可用性及完整性</strong> <span style="color:var(--success-color); font-weight:bold;">[應選]</span>
+                <p style="margin-top: 5px;">
+                    <strong>分析：</strong>設備（電腦、伺服器）是實體的東西。維護設備（例如定期清灰塵、換零件、確保不斷電系統 UPS 正常）是為了讓硬體不要壞掉。保護硬體本身，屬於實體控制。<br>
+                    <strong>生活例子：</strong>就像你定期幫你的機車換機油、檢查輪胎，是為了確保這台「實體車子」能跑，不會半路拋錨。
+                </p>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <strong>(D) 未經事前授權，不得將設備、資訊帶出場域外</strong> <span style="color:var(--success-color); font-weight:bold;">[應選]</span>
+                <p style="margin-top: 5px;">
+                    <strong>分析：</strong>關鍵字是「帶出場域」。場域 <span class="term-def">（就是公司/機房/辦公室這個「物理地點」）</span>。防止東西被從這個地點拿走，是典型的出入口管制，屬於實體控制。<br>
+                    <strong>生活例子：</strong>去大賣場結帳後，門口的防盜門如果逼逼叫，保全會檢查你的包包，這就是防止未經授權把商品帶出場域。
+                </p>
+            </div>
+        </div>
+    </details>
+
+    <details id="analysis-concept">
+        <summary>【觀念補充與延伸】</summary>
+        <div class="content-body">
+            <h3>1. 核心觀念定位</h3>
+            <p>這題屬於 <strong>ISMS</strong> <span class="term-def">（資訊安全管理系統，Information Security Management System）</span> 中的 ISO 27001 附錄 A 控制措施分類題。這在 iPAS 考試中非常常見，題目會給一個情境，問你這屬於哪一類控制。</p>
+
+            <h3>2. ISO 27001:2022 的四大主題</h3>
+            <p>舊版標準分很多類，但 2022 新版簡化成四大主題，記起來很有用：</p>
+            <ul>
+                <li><strong>組織控制 (Organizational)：</strong> 跟公司規定、政策有關（例如：資安政策、資產清冊）。</li>
+                <li><strong>人員控制 (People)：</strong> 跟「人」的行為、入職離職有關（例如：背景調查、教育訓練、遠端工作）。</li>
+                <li><strong>實體控制 (Physical)：</strong> 跟「地點、設備、環境」有關（例如：門禁、辦公桌面淨空、設備維護）。</li>
+                <li><strong>技術控制 (Technological)：</strong> 跟「電腦系統設定、軟體」有關（例如：防毒軟體、防火牆、備份、加密）。</li>
+            </ul>
+
+            <h3>3. 觸類旁通</h3>
+            <p><strong>變化題型：</strong>如果題目把選項改成「防火牆設定」，那就要選「技術控制」。如果改成「員工簽署保密協議」，那就要選「人員控制」或「組織控制」。</p>
+        </div>
+    </details>
+
+    <details id="analysis-mnemonic">
+        <summary>【記憶口訣】</summary>
+        <div class="content-body">
+            <p>為了幫助記憶，我們可以把實體控制（Physical Controls）記成：</p>
+            <div style="background-color: #eee; padding: 10px; text-align: center; font-size: 1.1em; border-radius: 5px;">
+                <b>「門、地、物」</b>
+            </div>
+            <ul>
+                <li><strong>門：</strong> 門禁、進出管制、鎖。</li>
+                <li><strong>地：</strong> 場域安全、辦公室保護、防災害（火災水災）。</li>
+                <li><strong>物：</strong> 設備維護、東西不能亂帶走、儲存媒體（硬碟/USB）銷毀。</li>
+            </ul>
+        </div>
+    </details>
+
+    <details id="analysis-trap">
+        <summary>【常見陷阱】</summary>
+        <div class="content-body">
+            <p><strong>陷阱 1：看到「維護」就以為是軟體維護</strong><br>
+            很多人看到選項 (C) 維護設備，會以為是「維護軟體」或「修 Bug」，就想選技術控制。但這裡強調的是確保設備的「可用性」，通常指硬體層面的保養（如電力、空調、零件），所以歸在實體。</p>
+
+            <p><strong>陷阱 2：看到「遠端工作」誤判</strong><br>
+            選項 (B) 遠端工作雖然人不在公司（實體位置變了），但管制的重點是「行為規範」和「申請流程」，這是在管「人」和「制度」，不是在管「牆壁」或「鎖頭」。</p>
+        </div>
+    </details>
+
+    <details id="analysis-answer">
+        <summary>【正確答案】</summary>
+        <div class="content-body">
+            <p style="font-size: 1.2em;"><strong>答案：A、C、D</strong></p>
+            <p><strong>理由總結：</strong>因為這三個選項都直接涉及「物理場所的進出」、「實體硬體的保護」以及「實體資產的移動」。</p>
+        </div>
+    </details>
+
+    <details id="analysis-selfcheck">
+        <summary>【自我檢測】</summary>
+        <div class="content-body">
+            <p>試試看，下列情境屬於哪一種控制？（點擊按鈕看答案）</p>
+            
+            <div class="quiz-item">
+                <strong>Q1. 公司安裝了「指紋辨識系統」來限制誰可以進入伺服器機房。</strong>
+                <br>
+                <button class="quiz-btn" onclick="toggleAnswer('ans1')">看答案</button>
+                <div id="ans1" class="quiz-answer">
+                    <strong>答案：實體控制。</strong><br>這是標準的「實體進入控制」。
+                </div>
+            </div>
+
+            <div class="quiz-item">
+                <strong>Q2. 小明在電腦上安裝了「防毒軟體」來阻擋病毒。</strong>
+                <br>
+                <button class="quiz-btn" onclick="toggleAnswer('ans2')">看答案</button>
+                <div id="ans2" class="quiz-answer">
+                    <strong>答案：技術控制。</strong><br>這是透過軟體工具進行的防護。
+                </div>
+            </div>
+
+            <div class="quiz-item">
+                <strong>Q3. 公司規定新進員工都要進行「背景調查」（確認有沒有前科）。</strong>
+                <br>
+                <button class="quiz-btn" onclick="toggleAnswer('ans3')">看答案</button>
+                <div id="ans3" class="quiz-answer">
+                    <strong>答案：人員控制。</strong><br>這是針對「人」的篩選與管理。
+                </div>
+            </div>
+        </div>
+    </details>
+
+</div>
+
+<script>
+    // 定義正確答案
+    const correctAnswers = ['A', 'C', 'D'];
+
+    // 更新顯示目前勾選的項目
+    function updateSelectionDisplay() {
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        const selected = [];
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                selected.push(cb.value);
+            }
+        });
+
+        const displayArea = document.getElementById('currentSelectionText');
+        if (selected.length > 0) {
+            displayArea.innerText = '你目前勾選：' + selected.join('、');
+            displayArea.style.color = '#333';
+        } else {
+            displayArea.innerText = '你目前勾選：（尚未選擇）';
+            displayArea.style.color = '#555';
+        }
+    }
+
+    // 檢查答案邏輯
+    function checkAnswer() {
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        const userSelection = [];
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                userSelection.push(cb.value);
+            }
+        });
+
+        const feedbackBox = document.getElementById('feedbackBox');
+        feedbackBox.className = 'feedback-area'; // 重置樣式
+
+        // 判斷是否完全正確
+        const isExactMatch = userSelection.length === correctAnswers.length && 
+                             userSelection.every(val => correctAnswers.includes(val));
+
+        if (isExactMatch) {
+            feedbackBox.innerHTML = '<strong>★ 完全正確！</strong><br>太棒了！你已經掌握了實體控制的核心概念（門禁、設備維護、資產帶出管制）。';
+            feedbackBox.classList.add('success');
+        } else {
+            // 分析錯誤
+            const missing = correctAnswers.filter(x => !userSelection.includes(x));
+            const extra = userSelection.filter(x => !correctAnswers.includes(x));
+            
+            let msg = '<strong>X 答錯囉！</strong><br>';
+            
+            if (missing.length > 0) {
+                msg += `你少了：<strong>${missing.join('、')}</strong>（請參考下方解析）。<br>`;
+            }
+            if (extra.length > 0) {
+                msg += `你多選了：<strong>${extra.join('、')}</strong>（這個選項不是實體控制喔）。<br>`;
+            }
+            if (userSelection.length === 0) {
+                msg = '<strong>請先勾選答案再送出喔！</strong>';
+            }
+
+            feedbackBox.innerHTML = msg;
+            feedbackBox.classList.add('error');
+        }
+    }
+
+    // 重置測驗
+    function resetQuiz() {
+        const checkboxes = document.querySelectorAll('input[name="option"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        document.getElementById('currentSelectionText').innerText = '你目前勾選：（尚未選擇）';
+        
+        const feedbackBox = document.getElementById('feedbackBox');
+        feedbackBox.style.display = 'none';
+        feedbackBox.classList.remove('success', 'error');
+
+        // 關閉所有自我檢測答案
+        const quizAnswers = document.querySelectorAll('.quiz-answer');
+        quizAnswers.forEach(qa => qa.style.display = 'none');
+    }
+
+    // 控制所有 Accordion
+    function toggleAllDetails(shouldOpen) {
+        const allDetails = document.querySelectorAll('details');
+        allDetails.forEach(detail => {
+            detail.open = shouldOpen;
+        });
+    }
+
+    // 自我檢測答案切換
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

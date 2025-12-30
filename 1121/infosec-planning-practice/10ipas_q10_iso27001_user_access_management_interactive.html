@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安衝刺班 - ISO 27001 實務解析 Q10</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --highlight-bg: #f1c40f;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --border-radius: 8px;
+            --spacing: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: var(--spacing);
+            overflow: hidden;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        /* Accordion Styles */
+        details {
+            width: 100%;
+        }
+
+        summary {
+            padding: 16px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background-color: #ecf0f1;
+            list-style: none; /* Hide default triangle */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        details[open] summary {
+            border-bottom: 1px solid #ddd;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        /* Typography & Highlights */
+        .highlight-text {
+            background-color: transparent;
+            transition: background-color 0.3s ease;
+            padding: 0 2px;
+            border-radius: 3px;
+        }
+
+        .highlight-active .highlight-text {
+            background-color: var(--highlight-bg);
+            font-weight: bold;
+        }
+
+        mark {
+            background-color: var(--highlight-bg);
+            padding: 0 2px;
+            border-radius: 3px;
+        }
+
+        .definition {
+            color: var(--error-color);
+            font-weight: bold;
+            cursor: help;
+            border-bottom: 1px dashed var(--error-color);
+            position: relative;
+        }
+
+        .definition:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* Quiz Styles */
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-option {
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            background: #fff;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-option:hover:not(:disabled) {
+            border-color: var(--accent-color);
+            background-color: #ebf5fb;
+        }
+
+        .btn-option.correct {
+            border-color: var(--success-color);
+            background-color: #d5f5e3;
+            color: #0e6655;
+        }
+
+        .btn-option.wrong {
+            border-color: var(--error-color);
+            background-color: #fadbd8;
+            color: #7b241c;
+        }
+
+        .feedback-area {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d5f5e3;
+            color: #0e6655;
+            border: 1px solid #abebc6;
+        }
+
+        .feedback-wrong {
+            background-color: #fadbd8;
+            color: #7b241c;
+            border: 1px solid #f5b7b1;
+        }
+
+        /* Tools Bar */
+        .tools-bar {
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tool-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+
+        .tool-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Locked Section */
+        .locked-content {
+            filter: blur(4px);
+            pointer-events: none;
+            user-select: none;
+            opacity: 0.5;
+        }
+        
+        .locked-overlay {
+            text-align: center;
+            padding: 20px;
+            background: #f9f9f9;
+            border: 1px dashed #ccc;
+            margin-top: -10px;
+            color: #666;
+        }
+
+        /* Hidden Class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Self Check List */
+        .self-check-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #eee;
+        }
+        
+        .self-check-answer {
+            margin-top: 8px;
+            color: var(--accent-color);
+            font-weight: bold;
+            display: none;
+            padding-left: 10px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        /* Sticky Note Style */
+        .sticky-note {
+            background-color: #fff9c4;
+            padding: 15px;
+            border: 1px solid #fbc02d;
+            border-radius: 4px;
+            font-family: monospace;
+            display: none;
+            margin-bottom: 20px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .sticky-note h4 {
+            margin-bottom: 8px;
+            color: #f57f17;
+            border-bottom: 1px solid #f9a825;
+            padding-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>iPAS 資訊安全衝刺班</h1>
+            <p>ISO 27001 實務解析：使用者存取管理</p>
+        </header>
+
+        <!-- Tool Bar -->
+        <div class="tools-bar">
+            <button class="tool-btn" id="btn-hint" onclick="toggleHighlights()">關鍵字提示</button>
+            <button class="tool-btn" id="btn-note" onclick="toggleNote()">一分鐘速記</button>
+            <button class="tool-btn hidden" id="btn-reset" onclick="resetQuiz()">重新作答</button>
+        </div>
+
+        <!-- Sticky Note (Hidden by default) -->
+        <div id="sticky-note" class="sticky-note">
+            <h4>一分鐘速記小卡</h4>
+            <p>1. <strong>核心原則</strong>：需知需用 (Need-to-know)。</p>
+            <p>2. <strong>帳號生命週期</strong>：建立 -> 變更 -> 停用/移除。</p>
+            <p>3. <strong>離職處理</strong>：立即停用帳號是第一要務。</p>
+            <p>4. <strong>關鍵字連結</strong>：看到「離職仍可登入」 -> 直覺選「使用者存取管理」。</p>
+            <p>5. <strong>資產處置</strong>：是指設備報廢或資料銷毀，勿混淆。</p>
+        </div>
+
+        <!-- Section 1: Question -->
+        <details open class="card" id="card-question">
+            <summary>【題目】模擬試題 Q10</summary>
+            <div class="content">
+                <p style="font-size: 1.1rem; font-weight: 500;">
+                    10. 一個通過 <span class="definition" data-tooltip="資訊安全管理系統標準：一套國際認證的資安管理規範">ISO 27001</span>:2013 驗證的組織，在<span class="definition" data-tooltip="組織自己檢查制度有沒有真的在跑">內部稽核</span>活動中，發現<span class="highlight-text">已離職員工</span>的帳號<span class="highlight-text">仍沒有停用</span>，且進一步追查<span class="definition" data-tooltip="系統留下的登入與操作紀錄">存取紀錄</span>時，發現其在離職後，<span class="highlight-text">仍有登入</span><span class="highlight-text">存取部門共用資料夾</span>的行為。請問對於該組織上述的狀況，下列何項敘述最為合適？
+                </p>
+                
+                <div class="quiz-options" id="quiz-options">
+                    <button class="btn-option" onclick="checkAnswer(this, 'A')">(A) 該組織可能未落實使用者存取管理之程序</button>
+                    <button class="btn-option" onclick="checkAnswer(this, 'B')">(B) 該組織可能未落實資產處置之程序</button>
+                    <button class="btn-option" onclick="checkAnswer(this, 'C')">(C) 該組織可能未落實實體及環境安全之程序</button>
+                    <button class="btn-option" onclick="checkAnswer(this, 'D')">(D) 該組織可能已落實存取控制政策</button>
+                </div>
+
+                <div id="feedback" class="feedback-area"></div>
+            </div>
+        </details>
+
+        <!-- Section 2: Step 1 Keywords -->
+        <details class="card">
+            <summary>【第一步：找關鍵字】</summary>
+            <div class="content">
+                <p>請注意題目中標示的線索：</p>
+                <ul style="margin-left: 20px; list-style-type: square;">
+                    <li><mark>ISO 27001:2013 驗證</mark>：代表該公司「理論上」應該有完善的制度，但實際上可能未落實。</li>
+                    <li><mark>內部稽核</mark>：這是用來「抓包」制度是否真的有在運作的檢查活動。</li>
+                    <li><mark>已離職員工</mark>：身分關鍵，已經不具備存取權限的人。</li>
+                    <li><mark>帳號仍沒有停用</mark>：問題核心，違反了帳號管理的原則。</li>
+                    <li><mark>離職後仍有登入行為</mark>：造成的後果，發生了未授權存取。</li>
+                    <li><mark>存取部門共用資料夾</mark>：雖然提到資料夾，但根源是因為「帳號」沒關掉。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- Section 3: Step 2 Translation -->
+        <details class="card">
+            <summary>【第二步：白話翻譯】</summary>
+            <div class="content">
+                <p>用高中生日常口語來說就是：</p>
+                <blockquote style="border-left: 4px solid var(--accent-color); padding-left: 10px; margin: 10px 0; color: #555; font-style: italic;">
+                    「人都已經離職走人了，結果他的帳號（鑰匙）居然還能用，甚至還能大搖大擺地開門進去部門資料夾看東西。這代表這家公司管帳號的人在睡覺，管理流程出大包了。」
+                </blockquote>
+            </div>
+        </details>
+
+        <!-- Section 4: Step 3 Logic -->
+        <details class="card">
+            <summary>【第三步：解題思路】</summary>
+            <div class="content">
+                <p><strong>這題在考什麼觀念？</strong></p>
+                <p>一句話：ISO 27001 中「<span class="definition" data-tooltip="管理帳號能不能用、能用多久">使用者存取管理</span>」是否落實。</p>
+                <br>
+                <p><strong>解題步驟：</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>先確認事件重點：<strong>離職 &ne; 帳號停用</strong>（這是異常狀態）。</li>
+                    <li>再對照 ISO 27001 的控制面向：屬於<strong><span class="definition" data-tooltip="帳號從建立到停用的完整過程">帳號生命週期</span>管理</strong>。</li>
+                    <li>排除與帳號無直接關聯的控制措施（如設備報廢、門禁刷卡）。</li>
+                </ol>
+                <br>
+                <p><strong>原理與規則（為什麼這樣判斷）：</strong></p>
+                <ul style="margin-left: 20px; list-style-type: disc;">
+                    <li>帳號是「人」存取系統的鑰匙，人一離職，鑰匙就要收回。</li>
+                    <li>若未即時停用，代表存取管理流程有漏洞，不符合規範。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- Section 5: Step 4 Option Analysis (Locked) -->
+        <details class="card" id="analysis-detail">
+            <summary>【第四步：選項分析】</summary>
+            
+            <div id="analysis-locked" class="locked-overlay">
+                請先完成【題目】作答，正確後即可解鎖完整解析。
+            </div>
+
+            <div id="analysis-content" class="content hidden">
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 10px;">
+                        <span style="color:var(--success-color); font-weight:bold;">(A) 為什麼對？</span><br>
+                        因為未依人員異動（離職）即時停用帳號，這正是「使用者存取管理」章節中關於「使用者存取權限移除與調整」的規範失效。
+                    </li>
+                    <li style="margin-bottom: 10px;">
+                        <span style="color:var(--error-color); font-weight:bold;">(B) 為什麼錯？</span><br>
+                        「資產處置」通常是指電腦設備報廢、硬碟銷毀、紙本文件碎紙等。雖然帳號也是資產，但在 ISO 條文中，帳號權限問題專屬於存取控制領域。
+                    </li>
+                    <li style="margin-bottom: 10px;">
+                        <span style="color:var(--error-color); font-weight:bold;">(C) 為什麼錯？</span><br>
+                        「實體及環境安全」管的是門禁刷卡、機房上鎖、滅火器、攝影機等物理設備。題目強調的是「系統帳號登入」，屬於邏輯安全，非實體安全。
+                    </li>
+                    <li style="margin-bottom: 10px;">
+                        <span style="color:var(--error-color); font-weight:bold;">(D) 為什麼錯？</span><br>
+                        事件已經顯示出嚴重漏洞（離職還能登入），這證明了相關政策「沒有」被落實，而不是已落實。
+                    </li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- Section 6: Concepts -->
+        <details class="card">
+            <summary>【觀念補充與延伸】</summary>
+            <div class="content">
+                <p><strong>核心觀念定位：</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li>屬於「存取控制與帳號生命週期管理」章節。</li>
+                    <li>這是 ISO 27001 驗證與 iPAS 考試的必考題型。</li>
+                </ul>
+                <br>
+                <p><strong>標準重點或定義：</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li><strong>使用者存取管理 (User Access Management)：</strong> 確保只有經過授權的使用者才能存取系統。包含帳號的建立、權限變更、密碼管理、以及最重要的「離職/異動時的停用」。</li>
+                    <li><strong>帳號生命週期：</strong> 到職(申請) &rarr; 在職(使用/變更) &rarr; 離職(停用/刪除)。</li>
+                </ul>
+                <br>
+                <p><strong>觸類旁通：</strong></p>
+                <ul style="margin-left: 20px;">
+                    <li><strong>對比概念：</strong> 人員離職 vs 系統帳號停用（兩者必須同步）。</li>
+                    <li><strong>變化題型：</strong> 如果題目改成「部門異動後，仍擁有原部門權限」，這叫做「權限未移除/權限蔓延」，答案一樣選「存取管理」相關選項。</li>
+                </ul>
+            </div>
+        </details>
+
+        <!-- Section 7: Mnemonic -->
+        <details class="card">
+            <summary>【記憶口訣】</summary>
+            <div class="content">
+                <div style="background-color: #e8f8f5; padding: 15px; border-radius: 5px; text-align: center; border: 2px dashed var(--success-color);">
+                    <h3 style="color: #0e6655; margin-bottom: 5px;">「人走帳號留，一定管不周」</h3>
+                    <p style="font-size: 0.9rem; color: #555;">(人離職了帳號還留著，就是管理不周全)</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- Section 8: Traps -->
+        <details class="card">
+            <summary>【常見陷阱】</summary>
+            <div class="content">
+                <p><strong>避坑指南：</strong>看到「帳號還能登入」，第一時間就想到「使用者存取管理」。</p>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                <p><strong>容易混淆點：</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>看到「共用資料夾」誤以為是「資產處置」問題。（資料夾是標的，帳號才是手段）</li>
+                    <li>看到「通過 ISO 27001 驗證」就直覺以為制度一定有落實。（題目正是要告訴你，驗證過了也可能有疏漏，所以才需要內部稽核）。</li>
+                    <li>混淆「帳號管理」與「實體安全」。（記得：軟體/系統歸邏輯存取，門禁/硬體歸實體安全）。</li>
+                </ol>
+            </div>
+        </details>
+
+        <!-- Section 9: Correct Answer -->
+        <details class="card">
+            <summary>【正確答案】</summary>
+            <div class="content">
+                <h2 style="color: var(--success-color);">(A)</h2>
+                <p><strong>一句話理由：</strong>離職帳號未停用，代表使用者存取管理流程未落實。</p>
+            </div>
+        </details>
+
+        <!-- Section 10: Self Check -->
+        <details class="card">
+            <summary>【自我檢測】</summary>
+            <div class="content">
+                <p>點擊問題查看答案：</p>
+                
+                <div class="self-check-item" onclick="toggleAnswer(this)">
+                    <p><strong>Q1) 若是「帳號已停用，但門禁卡仍可進公司」，應歸類哪一類問題？</strong></p>
+                    <div class="self-check-answer">A: 實體及環境安全 (Physical Security)。因為門禁卡控制的是實體場域的進出。</div>
+                </div>
+
+                <div class="self-check-item" onclick="toggleAnswer(this)">
+                    <p><strong>Q2) 若是「臨時帳號到期後仍可使用」，問題點在哪？</strong></p>
+                    <div class="self-check-answer">A: 一樣是「使用者存取管理」。臨時帳號應設定自動過期或人工定期覆核移除。</div>
+                </div>
+
+                <div class="self-check-item" onclick="toggleAnswer(this)">
+                    <p><strong>Q3) 為什麼 ISO 27001 特別強調帳號生命週期管理？</strong></p>
+                    <div class="self-check-answer">A: 因為「帳號」是駭客與內鬼最主要的攻擊途徑，沒用的帳號（殭屍帳號）是最大的資安後門。</div>
+                </div>
+            </div>
+        </details>
+
+    </div>
+
+    <script>
+        // Quiz Logic
+        function checkAnswer(btn, option) {
+            const options = document.querySelectorAll('.btn-option');
+            const feedback = document.getElementById('feedback');
+            const resetBtn = document.getElementById('btn-reset');
+            const analysisDetail = document.getElementById('analysis-detail');
+            const analysisLocked = document.getElementById('analysis-locked');
+            const analysisContent = document.getElementById('analysis-content');
+
+            // Disable all buttons
+            options.forEach(opt => opt.disabled = true);
+
+            if (option === 'A') {
+                btn.classList.add('correct');
+                feedback.className = 'feedback-area feedback-correct';
+                feedback.innerHTML = '正確！<br>理由：未依規定停用離職帳號，直接屬於存取管理程序的缺失。';
+                
+                // Unlock Analysis
+                analysisLocked.style.display = 'none';
+                analysisContent.classList.remove('hidden');
+                analysisDetail.open = true; // Automatically open analysis
+            } else {
+                btn.classList.add('wrong');
+                feedback.className = 'feedback-area feedback-wrong';
+                let reason = '';
+                if (option === 'B') reason = '資產處置是指設備或資料銷毀，非帳號管理。';
+                if (option === 'C') reason = '實體安全是指門禁、機房等物理環境。';
+                if (option === 'D') reason = '事實證明流程有漏洞，並非已落實。';
+                feedback.innerHTML = '錯誤。<br>' + reason;
+            }
+
+            feedback.style.display = 'block';
+            resetBtn.classList.remove('hidden');
+        }
+
+        function resetQuiz() {
+            const options = document.querySelectorAll('.btn-option');
+            const feedback = document.getElementById('feedback');
+            const resetBtn = document.getElementById('btn-reset');
+            const analysisDetail = document.getElementById('analysis-detail');
+            const analysisLocked = document.getElementById('analysis-locked');
+            const analysisContent = document.getElementById('analysis-content');
+
+            options.forEach(opt => {
+                opt.disabled = false;
+                opt.classList.remove('correct', 'wrong');
+            });
+
+            feedback.style.display = 'none';
+            resetBtn.classList.add('hidden');
+
+            // Re-lock analysis
+            analysisLocked.style.display = 'block';
+            analysisContent.classList.add('hidden');
+            analysisDetail.open = false;
+            
+            // Scroll back to question
+            document.getElementById('card-question').scrollIntoView({behavior: 'smooth'});
+        }
+
+        // Highlight Tool Logic
+        let highlightsActive = false;
+        function toggleHighlights() {
+            const container = document.getElementById('card-question');
+            highlightsActive = !highlightsActive;
+            
+            if (highlightsActive) {
+                container.classList.add('highlight-active');
+                document.getElementById('btn-hint').style.backgroundColor = '#f39c12';
+                document.getElementById('btn-hint').textContent = '隱藏關鍵字';
+            } else {
+                container.classList.remove('highlight-active');
+                document.getElementById('btn-hint').style.backgroundColor = 'var(--primary-color)';
+                document.getElementById('btn-hint').textContent = '關鍵字提示';
+            }
+        }
+
+        // Note Logic
+        function toggleNote() {
+            const note = document.getElementById('sticky-note');
+            if (note.style.display === 'block') {
+                note.style.display = 'none';
+            } else {
+                note.style.display = 'block';
+            }
+        }
+
+        // Self Check Logic
+        function toggleAnswer(item) {
+            const answer = item.querySelector('.self-check-answer');
+            if (answer.style.display === 'block') {
+                answer.style.display = 'none';
+            } else {
+                answer.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

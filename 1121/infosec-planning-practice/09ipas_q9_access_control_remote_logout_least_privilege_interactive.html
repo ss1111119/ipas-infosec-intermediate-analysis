@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資訊安全衝刺班：存取控制與遠端安全</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --highlight-bg: #f1c40f;
+            --highlight-text: #000;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-radius: 8px;
+            --spacing: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            font-weight: normal;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: var(--spacing);
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+            /* 確保 card 本身也有定位上下文，作為雙重保險 */
+            position: relative;
+        }
+
+        .card-header {
+            padding: 15px 20px;
+            background-color: #ecf0f1;
+            border-bottom: 1px solid #bdc3c7;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        .card-header:hover {
+            background-color: #e0e6e8;
+        }
+
+        .card-header::after {
+            content: '+';
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .card.active .card-header::after {
+            content: '-';
+        }
+
+        .card-body {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            /* 修正處：加入 relative 定位，讓內部的 absolute 遮罩只會蓋住這個區塊，不會蓋住全螢幕 */
+            position: relative;
+        }
+
+        .card.active .card-body {
+            padding: 20px;
+            max-height: 2000px; /* 足夠大的數值以容納內容 */
+        }
+
+        /* 特別處理題目的卡片，預設展開且標題不需點擊 */
+        #question-card .card-header {
+            cursor: default;
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        #question-card .card-header::after {
+            content: '';
+        }
+        #question-card .card-body {
+            max-height: none;
+            padding: 20px;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            text-align: left;
+            background-color: white;
+            border: 2px solid #bdc3c7;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            /* 確保按鈕在一般層級 */
+            z-index: 1; 
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #f7f9fa;
+            border-color: var(--primary-color);
+        }
+
+        .option-btn:focus {
+            outline: 3px solid #aac6e3;
+        }
+
+        .option-btn.correct {
+            border-color: var(--success-color);
+            background-color: #e8f8f5;
+            color: #0e6251;
+        }
+
+        .option-btn.wrong {
+            border-color: var(--accent-color);
+            background-color: #fdedec;
+            color: #922b21;
+        }
+
+        .feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: #d4efdf;
+            color: #145a32;
+            border: 1px solid #a9dfbf;
+        }
+
+        .feedback-wrong {
+            background-color: #fadbd8;
+            color: #78281f;
+            border: 1px solid #f5b7b1;
+        }
+
+        /* 鎖定遮罩 */
+        .locked-content {
+            position: relative;
+            filter: blur(5px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .locked-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.7);
+            z-index: 10;
+            font-weight: bold;
+            color: var(--primary-color);
+            border: 2px dashed var(--primary-color);
+        }
+
+        /* 關鍵字高亮 */
+        mark {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .term-def {
+            background-color: #e8f6f3;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border-bottom: 1px dashed #16a085;
+            cursor: help;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .tool-btn:hover {
+            opacity: 0.9;
+        }
+
+        .tool-btn.reset {
+            background-color: var(--accent-color);
+        }
+
+        /* 一分鐘速記小卡 */
+        .cheat-sheet {
+            background-color: #fef9e7;
+            border: 2px solid #f1c40f;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .cheat-sheet h4 {
+            margin-top: 0;
+            color: #7d6608;
+            border-bottom: 1px solid #f9e79f;
+            padding-bottom: 5px;
+        }
+
+        .step-badge {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            margin-bottom: 5px;
+        }
+
+        .explanation-block {
+            margin-bottom: 15px;
+            padding-left: 15px;
+            border-left: 3px solid #bdc3c7;
+        }
+
+        .self-check-item {
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .self-check-btn {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        .self-check-answer {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            display: none;
+            color: #2980b9;
+        }
+
+        /* 無障礙焦點 */
+        button:focus-visible, .card-header:focus-visible {
+            outline: 3px solid #3498db;
+            outline-offset: 2px;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.5rem; }
+            .card-header { font-size: 1rem; padding: 12px 15px; }
+            .question-text { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安衝刺班</h1>
+        <h2>單元：存取控制與遠端安全</h2>
+    </header>
+
+    <div class="toolbar">
+        <button class="tool-btn" onclick="toggleKeywords()">關鍵字提示</button>
+        <button class="tool-btn" onclick="toggleCheatSheet()">一分鐘速記小卡</button>
+        <button class="tool-btn reset" onclick="resetQuiz()">重新作答</button>
+    </div>
+
+    <div id="cheatSheet" class="cheat-sheet">
+        <h4>一分鐘速記：存取控制黃金原則</h4>
+        <ol style="margin: 0; padding-left: 20px;">
+            <li><strong>信任邊界：</strong>客戶端不可信，伺服器端才可信。</li>
+            <li><strong>檢查位置：</strong>權限驗證一定要在「伺服器/閘道」做。</li>
+            <li><strong>閒置登出：</strong>人離開就要斷線，防被盜用 (Session Timeout)。</li>
+            <li><strong>最小權限：</strong>只給剛好夠用的權限 (Need-to-know)。</li>
+            <li><strong>單一入口：</strong>遠端連線要走公司規定的門 (VPN/Gateway)。</li>
+        </ol>
+    </div>
+
+    <!-- 題目卡片 -->
+    <div id="question-card" class="card active">
+        <div class="card-header">
+            【題目】
+        </div>
+        <div class="card-body">
+            <div class="question-text" id="questionText">
+                9. 組織擬採取「存取控制」構面之控制措施，確保組織所保有的資通系統之安全防護，請問關於控制措施的敘述，下列何項錯誤？
+            </div>
+            
+            <div class="options-grid">
+                <button class="option-btn" onclick="checkAnswer('A', this)" id="btn-A" aria-label="選項 A">(A) 遠端存取時使用者之權限檢查作業應於使用者端完成</button>
+                <button class="option-btn" onclick="checkAnswer('B', this)" id="btn-B" aria-label="選項 B">(B) 超過組織所許可之閒置時間或可使用期限時，系統自動將使用者登出</button>
+                <button class="option-btn" onclick="checkAnswer('C', this)" id="btn-C" aria-label="選項 C">(C) 採最小權限原則，僅允許使用者依組織任務及業務功能，完成指派任務所需之授權存取</button>
+                <button class="option-btn" onclick="checkAnswer('D', this)" id="btn-D" aria-label="選項 D">(D) 遠端存取之來源應為組織已預先定義及管理之存取控制點</button>
+            </div>
+
+            <div id="feedback" class="feedback-area" role="alert"></div>
+        </div>
+    </div>
+
+    <!-- 第一步：找關鍵字 -->
+    <div class="card active">
+        <div class="card-header" onclick="toggleAccordion(this)" role="button" tabindex="0" aria-expanded="true">
+            【第一步：找關鍵字】
+        </div>
+        <div class="card-body">
+            <p>這題的解題線索在於找出「違反安全原則」的描述。請注意以下詞彙：</p>
+            <ul>
+                <li><strong><span class="term-def" title="決定誰能用什麼方式碰到哪些資源的規則">存取控制</span></strong>：本題的核心範圍。</li>
+                <li><strong><span class="term-def" title="人在公司外，透過網路登入公司系統">遠端存取</span></strong>：場景設定，風險比在公司內部更高。</li>
+                <li><strong><span class="term-def" title="系統確認你有沒有資格做這件事">權限檢查</span></strong>：這是要判斷動作合不合法的關鍵步驟。</li>
+                <li><strong><span class="term-def" title="只給完成工作所需的最低權限">最小權限</span></strong>：資安的黃金法則。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 第二步：白話翻譯 -->
+    <div class="card">
+        <div class="card-header" onclick="toggleAccordion(this)" role="button" tabindex="0" aria-expanded="false">
+            【第二步：白話翻譯】
+        </div>
+        <div class="card-body">
+            <p><strong>題目翻譯成高中生聽得懂的話：</strong></p>
+            <p>「公司要保護電腦系統安全，訂了一些規則。下面哪一個規則是<strong>觀念錯誤</strong>的，反而會讓系統不安全？」</p>
+            <p>要找的是那個「聽起來好像方便，但其實是大漏洞」的選項。</p>
+        </div>
+    </div>
+
+    <!-- 第三步：解題思路 -->
+    <div class="card">
+        <div class="card-header" onclick="toggleAccordion(this)" role="button" tabindex="0" aria-expanded="false">
+            【第三步：解題思路】
+        </div>
+        <div class="card-body">
+            <p><span class="step-badge">考點</span><strong>「客戶端不可信」原則 (Client-side Untrusted)</strong></p>
+            
+            <h4>解題步驟：</h4>
+            <ol>
+                <li><strong>判斷場景：</strong>題目提到「遠端存取」和「權限檢查」。</li>
+                <li><strong>回想原理：</strong>檢查權限的人必須是公正第三方（系統/伺服器），不能是使用者自己。</li>
+                <li><strong>比對選項：</strong>看哪個選項把「權力」交給了「使用者端」。</li>
+            </ol>
+
+            <h4>原理與比喻：</h4>
+            <div class="explanation-block">
+                <p><strong>生活比喻 - 大考驗證：</strong></p>
+                <p>想像你在考大學學測，進考場時要檢查准考證。</p>
+                <ul>
+                    <li><strong>正確做法 (伺服器端檢查)：</strong>由門口的監考老師（伺服器）拿著名冊核對你的身分證。</li>
+                    <li><strong>錯誤做法 (使用者端檢查)：</strong>監考老師問你：「同學，你自己看看你有沒有帶證件？如果有，你就自己走進去。」</li>
+                </ul>
+                <p>如果是後者（使用者端檢查），想作弊的人只要自己寫一張假證件，或者謊報「我有帶」，就能混進去了。這在資安上是絕對禁止的！</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第四步：選項分析 -->
+    <div class="card">
+        <div class="card-header" onclick="toggleAccordion(this)" role="button" tabindex="0" aria-expanded="false">
+            【第四步：選項分析】
+        </div>
+        <div class="card-body" id="analysisBody">
+            <div id="analysisOverlay" class="locked-overlay">請先作答以解鎖分析</div>
+            <div id="analysisContent" class="locked-content">
+                
+                <div class="explanation-block" style="border-left-color: var(--accent-color);">
+                    <h4>(A) 遠端存取時使用者之權限檢查作業應於使用者端完成 <span style="color:red; font-weight:bold;">(本題選這個，因為它敘述錯誤)</span></h4>
+                    <p><strong>為什麼錯？</strong></p>
+                    <p>這違反了「伺服器端驗證」原則。如果權限檢查在「使用者端」（例如瀏覽器或 App）執行，駭客可以透過修改程式碼、攔截封包等方式，繞過檢查機制，直接欺騙伺服器。</p>
+                    <p><strong>正確觀念：</strong>所有的權限檢查（Authorization）必須在伺服器端或受控的閘道端執行。</p>
+                </div>
+
+                <div class="explanation-block" style="border-left-color: var(--success-color);">
+                    <h4>(B) 超過組織所許可之閒置時間或可使用期限時，系統自動將使用者登出 <span style="color:green; font-weight:bold;">(正確)</span></h4>
+                    <p><strong>為什麼對？</strong></p>
+                    <p>這叫做 Session Timeout。如果你去上廁所，電腦沒登出，路人就可以用你的身分操作。自動登出可以降低這種「實體接觸」或「連線劫持」的風險。</p>
+                </div>
+
+                <div class="explanation-block" style="border-left-color: var(--success-color);">
+                    <h4>(C) 採最小權限原則，僅允許使用者依組織任務及業務功能，完成指派任務所需之授權存取 <span style="color:green; font-weight:bold;">(正確)</span></h4>
+                    <p><strong>為什麼對？</strong></p>
+                    <p>這是 Least Privilege 原則。如果你只需要讀取檔案，就不給你刪除檔案的權限。這樣就算你的帳號被盜，駭客能造成的破壞也被限制在最小範圍。</p>
+                </div>
+
+                <div class="explanation-block" style="border-left-color: var(--success-color);">
+                    <h4>(D) 遠端存取之來源應為組織已預先定義及管理之存取控制點 <span style="color:green; font-weight:bold;">(正確)</span></h4>
+                    <p><strong>為什麼對？</strong></p>
+                    <p><span class="term-def" title="組織用來管控進出系統的關卡，例如 VPN 閘道、跳板機">存取控制點</span>就像大樓的警衛室。公司不希望你從網路上隨便一個後門溜進來，一定要走 VPN 閘道或跳板機，這樣才能統一紀錄、檢查你的流量。</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 觀念補充與延伸 -->
+    <div class="card">
+        <div class="card-header" onclick="toggleAccordion(this)" role="button" tabindex="0" aria-expanded="false">
+            【觀念補充與延伸】
+        </div>
+        <div class="card-body">
+            <p><span class="step-badge">核心觀念</span> <strong>AAA 模型</strong></p>
+            <ul>
+                <li><strong>Authentication (認證)：</strong>你是誰？(帳號密碼)</li>
+                <li><strong>Authorization (授權)：</strong>你能做什麼？(本題考點，必須由伺服器決定)</li>
+                <li><strong>Accounting (稽核)：</strong>你做了什麼？(Log紀錄)</li>
+            </ul>
+
+            <p><span class="step-badge">對比概念</span></p>
+            <ul>
+                <li><strong>客戶端檢查 (Client-side Check)：</strong>為了提升使用者體驗（例如：輸入格式錯誤立刻跳紅字），但<strong>不可信</strong>，只能當輔助。</li>
+                <li><strong>伺服器端檢查 (Server-side Check)：</strong>為了安全，<strong>絕對必要</strong>，這是最後一道防線。</li>
+            </ul>
+
+            <p><span class="step-badge">變化題型</span></p>
+            <ul>
+                <li><strong>變題 1：</strong>如果題目問「為了效能，權限檢查只在客戶端做就好」，對嗎？ -> <strong>錯</strong>，安全優於效能。</li>
+                <li><strong>變題 2：</strong>把「閒置登出」改成「為了方便，系統永不登出」，風險在哪？ -> 風險在於 Session Fixation 攻擊或實體未授權操作。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 記憶與陷阱 -->
+    <div class="card">
+        <div class="card-header" onclick="toggleAccordion(this)" role="button" tabindex="0" aria-expanded="false">
+            【記憶口訣與常見陷阱】
+        </div>
+        <div class="card-body">
+            <h4>記憶口訣：</h4>
+            <div style="background: #fdf2e9; padding: 10px; border-radius: 4px; font-weight: bold; text-align: center;">
+                「權限檢查在Server，客戶端容易被改寫；<br>
+                閒置記得要登出，最小權限保安全。」
+            </div>
+
+            <h4>常見陷阱 (避坑指南)：</h4>
+            <ul>
+                <li><strong>誤區：</strong>以為「使用者端」檢查比較快，所以可以接受。
+                    <br><em>修正：</em>快是快，但就像讓小偷自己檢查口袋有沒有贓物一樣，完全沒用。</li>
+                <li><strong>混淆：</strong>把「身分驗證 (Authentication)」跟「權限檢查 (Authorization)」搞混。
+                    <br><em>區分：</em>驗證是進門看證件，權限是進門後能不能進入金庫。兩者都要在伺服器端做。</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 正確答案 -->
+    <div class="card">
+        <div class="card-header" onclick="toggleAccordion(this)" role="button" tabindex="0" aria-expanded="false">
+            【正確答案】
+        </div>
+        <div class="card-body">
+            <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent-color);">答案：(A)</p>
+            <p><strong>一句話理由：</strong>因為使用者端的環境不可控，駭客可以輕易繞過檢查，所以權限判定必須在伺服器端執行。</p>
+        </div>
+    </div>
+
+    <!-- 自我檢測 -->
+    <div class="card">
+        <div class="card-header" onclick="toggleAccordion(this)" role="button" tabindex="0" aria-expanded="false">
+            【自我檢測】
+        </div>
+        <div class="card-body">
+            <div class="self-check-item">
+                <p><strong>1. 若題幹改成「權限檢查應於伺服器端完成」，你會判斷為對還是錯？為什麼？</strong></p>
+                <button class="self-check-btn" onclick="toggleAnswer(this)">顯示答案</button>
+                <div class="self-check-answer">
+                    <strong>對。</strong>因為伺服器端是受信任的環境，使用者無法直接篡改伺服器上的邏輯，這是安全的基石。
+                </div>
+            </div>
+
+            <div class="self-check-item">
+                <p><strong>2. 若系統不做「閒置自動登出」，最常見的風險情境是什麼？</strong></p>
+                <button class="self-check-btn" onclick="toggleAnswer(this)">顯示答案</button>
+                <div class="self-check-answer">
+                    <strong>Session Hijacking (連線劫持) 或 實體入侵。</strong>例如員工去倒咖啡，螢幕沒鎖，清潔人員或訪客趁機操作電腦，使用該員工的身分竊取資料。
+                </div>
+            </div>
+
+            <div class="self-check-item">
+                <p><strong>3. 「最小權限原則」如果做太嚴格，可能帶來什麼營運副作用？你會怎麼平衡？</strong></p>
+                <button class="self-check-btn" onclick="toggleAnswer(this)">顯示答案</button>
+                <div class="self-check-answer">
+                    <strong>副作用：</strong>工作效率降低，因為員工可能動不動就發現權限不足，需要一直申請開通。<br>
+                    <strong>平衡法：</strong>依照「角色 (Role-Based)」來設定權限，給予該職位「剛好夠用且包含完整工作流程」的權限，並建立快速的臨時權限申請機制。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align: center; margin-top: 40px; color: #7f8c8d; font-size: 0.9rem;">
+        iPAS 資訊安全規劃實務／資訊安全防護實務 衝刺教材<br>
+        Designed for Offline Learning
+    </footer>
+</div>
+
+<script>
+    // 摺疊區塊控制
+    function toggleAccordion(header) {
+        const card = header.parentElement;
+        const body = card.querySelector('.card-body');
+        const isExpanded = header.getAttribute('aria-expanded') === 'true';
+
+        // Toggle active class
+        card.classList.toggle('active');
+        
+        // Update aria attribute
+        header.setAttribute('aria-expanded', !isExpanded);
+    }
+
+    // 關鍵字高亮功能
+    let keywordsHighlighted = false;
+    const originalQuestionHTML = document.getElementById('questionText').innerHTML;
+
+    function toggleKeywords() {
+        const textDiv = document.getElementById('questionText');
+        const keywords = ['存取控制', '遠端存取', '權限檢查', '閒置時間', '最小權限', '存取控制點'];
+
+        if (!keywordsHighlighted) {
+            let content = textDiv.innerHTML;
+            keywords.forEach(kw => {
+                const regex = new RegExp(kw, 'g');
+                content = content.replace(regex, `<mark>${kw}</mark>`);
+            });
+            textDiv.innerHTML = content;
+            keywordsHighlighted = true;
+        } else {
+            textDiv.innerHTML = originalQuestionHTML;
+            keywordsHighlighted = false;
+        }
+    }
+
+    // 作答檢查功能
+    let hasAnswered = false;
+
+    function checkAnswer(selectedOption, btnElement) {
+        if (hasAnswered) return; // 防止重複作答
+        
+        hasAnswered = true;
+        const feedbackDiv = document.getElementById('feedback');
+        const allBtns = document.querySelectorAll('.option-btn');
+
+        // 鎖定所有按鈕
+        allBtns.forEach(btn => btn.disabled = true);
+
+        // 解鎖詳細分析區塊
+        document.getElementById('analysisOverlay').style.display = 'none';
+        document.getElementById('analysisContent').classList.remove('locked-content');
+        
+        // 自動展開分析區塊
+        const analysisCard = document.getElementById('analysisBody').parentElement;
+        if (!analysisCard.classList.contains('active')) {
+            analysisCard.classList.add('active');
+            analysisCard.querySelector('.card-header').setAttribute('aria-expanded', 'true');
+        }
+
+        if (selectedOption === 'A') {
+            // 答對了 (因為題目選錯誤的，A是敘述錯誤的)
+            btnElement.classList.add('correct');
+            feedbackDiv.innerHTML = "<strong>答對了！</strong><br>觀念正確：權限檢查必須在伺服器端進行，不能信任使用者端。";
+            feedbackDiv.className = "feedback-area feedback-correct";
+        } else {
+            // 答錯了
+            btnElement.classList.add('wrong');
+            // 顯示正確選項是 A (把它標成綠色框，提示它是正確答案)
+            document.getElementById('btn-A').classList.add('correct');
+            
+            feedbackDiv.innerHTML = "<strong>答錯了。</strong><br>這項敘述其實是「正確的資安措施」，題目要選「錯誤」的敘述。<br>請看下方解析，選項 (A) 才是錯誤的觀念。";
+            feedbackDiv.className = "feedback-area feedback-wrong";
+        }
+        
+        feedbackDiv.style.display = 'block';
+    }
+
+    // 重置功能
+    function resetQuiz() {
+        hasAnswered = false;
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('correct', 'wrong');
+        });
+
+        const feedbackDiv = document.getElementById('feedback');
+        feedbackDiv.style.display = 'none';
+        feedbackDiv.className = 'feedback-area';
+
+        // 重新鎖定分析區
+        document.getElementById('analysisOverlay').style.display = 'flex';
+        document.getElementById('analysisContent').classList.add('locked-content');
+        const analysisCard = document.getElementById('analysisBody').parentElement;
+        analysisCard.classList.remove('active');
+
+        // 捲動回頂部
+        document.getElementById('question-card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 顯示自我檢測答案
+    function toggleAnswer(btn) {
+        const answerDiv = btn.nextElementSibling;
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+            btn.textContent = '顯示答案';
+        } else {
+            answerDiv.style.display = 'block';
+            btn.textContent = '隱藏答案';
+        }
+    }
+
+    // 切換速記小卡
+    function toggleCheatSheet() {
+        const sheet = document.getElementById('cheatSheet');
+        if (sheet.style.display === 'block') {
+            sheet.style.display = 'none';
+        } else {
+            sheet.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

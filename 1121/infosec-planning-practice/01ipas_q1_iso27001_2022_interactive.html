@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資訊安全規劃實務衝刺班 - 考題解析</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-light: #7f8c8d;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--bg-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            border-bottom: 3px solid var(--accent-color);
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        header p {
+            color: var(--text-light);
+        }
+
+        /* Tool Bar */
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+
+        .tool-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .tool-btn.secondary {
+            background-color: var(--primary-color);
+        }
+
+        /* Floating Note (One Minute) */
+        .quick-note {
+            display: none;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            color: #856404;
+            animation: fadeIn 0.5s;
+        }
+
+        .quick-note h4 {
+            margin-bottom: 8px;
+            border-bottom: 1px solid #ffeeba;
+            padding-bottom: 5px;
+        }
+
+        .quick-note ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        /* Main Question Card */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        /* Highlighting Logic */
+        mark.highlight {
+            background-color: #fffacd;
+            color: #d35400;
+            font-weight: bold;
+            padding: 0 4px;
+            border-radius: 4px;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-btn {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--accent-color);
+            background-color: #f0f8ff;
+        }
+
+        .option-btn.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .option-btn.correct {
+            border-color: var(--success-color);
+            background-color: #e8f8f5;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            border-color: var(--error-color);
+            background-color: #fce4e4;
+            color: var(--error-color);
+        }
+
+        /* Feedback Section */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .feedback-area.correct {
+            display: block;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-area.wrong {
+            display: block;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .reset-btn {
+            margin-top: 15px;
+            background-color: var(--text-light);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: none;
+        }
+
+        /* Accordion Style */
+        .accordion-item {
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .accordion-header {
+            width: 100%;
+            text-align: left;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .accordion-header:hover {
+            background: #e9ecef;
+        }
+
+        .accordion-header::after {
+            content: '+';
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .accordion-header.active::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: white;
+        }
+
+        .accordion-body {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* Section Specific Colors */
+        .step-label {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: white;
+            margin-bottom: 8px;
+        }
+        .bg-step1 { background-color: #e67e22; }
+        .bg-step2 { background-color: #8e44ad; }
+        .bg-step3 { background-color: #2980b9; }
+        .bg-step4 { background-color: #c0392b; }
+        .bg-info { background-color: #16a085; }
+
+        /* Blurred Content for Locking */
+        .locked-content {
+            filter: blur(5px);
+            user-select: none;
+            pointer-events: none;
+            opacity: 0.5;
+            transition: var(--transition);
+        }
+        
+        .locked-message {
+            text-align: center;
+            color: var(--error-color);
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: #fff;
+            padding: 10px;
+            border: 1px dashed var(--error-color);
+        }
+
+        .unlocked {
+            filter: none;
+            user-select: auto;
+            pointer-events: auto;
+            opacity: 1;
+        }
+
+        /* Self Check */
+        .self-check-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .answer-toggle {
+            display: none;
+            margin-top: 5px;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .show-ans-btn {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            margin-left: 10px;
+            cursor: pointer;
+            background: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+        }
+
+        /* Utility */
+        ul.bullet-list {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+        
+        ul.bullet-list li {
+            margin-bottom: 5px;
+        }
+
+        .definition {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Accessibility Focus */
+        button:focus {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安規劃實務衝刺</h1>
+        <p>單元：資訊安全管理制度導入 (ISO 27001)</p>
+    </header>
+
+    <div class="toolbar">
+        <button class="tool-btn secondary" onclick="toggleQuickNote()" aria-expanded="false">一分鐘速記卡</button>
+        <button class="tool-btn" onclick="toggleKeywords()">關鍵字提示</button>
+    </div>
+
+    <!-- Quick Note Card -->
+    <div id="quickNote" class="quick-note">
+        <h4>[速記] ISO/IEC 27001 改版重點</h4>
+        <ul>
+            <li><strong>目的：</strong> ISMS（資訊安全管理系統）的驗證標準。</li>
+            <li><strong>最新版：</strong> 2022 年版（ISO/IEC 27001:2022）。</li>
+            <li><strong>舊版：</strong> 2013 年版（已逐漸淘汰）。</li>
+            <li><strong>其他標準：</strong> 
+                <br>27004 = 量測指引（非驗證用）
+                <br>20000-1 = IT 服務管理（非資安專用）
+            </li>
+            <li><strong>解題關鍵：</strong> 看到「2024年」、「導入驗證」，必選 2022 版。</li>
+        </ul>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="card">
+        <!-- Accordion Item: Question -->
+        <div class="accordion-item">
+            <button class="accordion-header active" onclick="toggleAccordion('panel-question')" aria-expanded="true">
+                【題目】
+            </button>
+            <div id="panel-question" class="accordion-content" style="max-height: 1000px;"> <!-- Default Open -->
+                <div class="accordion-body">
+                    <p class="question-text" id="questionText">
+                        X 公司為在中華民國註冊登記之公司，該公司將於 2023 年<span class="kw-target">導入資安管理制度</span>，並預計於 <span class="kw-target">2024 年第一季</span>通過<span class="kw-target">國際資安驗證</span>，請問下列何項制度最適合 X 公司做為導入資訊安全管理制度依循之參考？
+                    </p>
+                    
+                    <div class="options-grid" id="optionsContainer">
+                        <button class="option-btn" onclick="checkAnswer('A')" id="btn-A">(A) ISO/IEC 27001 : 2013</button>
+                        <button class="option-btn" onclick="checkAnswer('B')" id="btn-B">(B) ISO/IEC 27004 : 2016</button>
+                        <button class="option-btn" onclick="checkAnswer('C')" id="btn-C">(C) ISO/IEC 20000-1 : 2018</button>
+                        <button class="option-btn" onclick="checkAnswer('D')" id="btn-D">(D) ISO/IEC 27001 : 2022</button>
+                    </div>
+
+                    <div id="feedback" class="feedback-area"></div>
+                    <button id="resetBtn" class="reset-btn" onclick="resetQuiz()">重新作答</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accordion Item: Step 1 Keywords -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion('panel-step1')">
+                【第一步：找關鍵字】
+            </button>
+            <div id="panel-step1" class="accordion-content">
+                <div class="accordion-body">
+                    <span class="step-label bg-step1">解題線索</span>
+                    <ul class="bullet-list">
+                        <li><strong>2024 年第一季：</strong> 時間點很重要，這代表舊版標準可能已經過期或不適用。</li>
+                        <li><strong>導入資安管理制度：</strong> 關鍵字是「管理制度」，不是技術指引，也不是 IT 服務。</li>
+                        <li><strong>國際資安驗證：</strong> 關鍵字是「驗證」，只有「要求（Requirements）」類型的標準可以拿來做第三方驗證。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accordion Item: Step 2 Translation -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion('panel-step2')">
+                【第二步：白話翻譯】
+            </button>
+            <div id="panel-step2" class="accordion-content">
+                <div class="accordion-body">
+                    <span class="step-label bg-step2">高中生聽得懂的版本</span>
+                    <p>X 公司要在 2024 年初拿到一張「國際資安認證」的證書。為了拿到這張證書，他們必須照著一本「規則書」來建立公司的資安制度。請問，按照這個時間點，他們應該要買哪一本規則書來看才對？</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accordion Item: Step 3 Logic -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion('panel-step3')">
+                【第三步：解題思路】
+            </button>
+            <div id="panel-step3" class="accordion-content">
+                <div class="accordion-body">
+                    <span class="step-label bg-step3">考點：標準版本與用途區分</span>
+                    <h4>解題步驟：</h4>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>先刪除非「資安管理驗證」標準：</strong> 選項中有的是量測指引，有的是 IT 服務管理，先刪掉。</li>
+                        <li><strong>再比較版本年份：</strong> 剩下都是 ISO 27001，但年份不同。</li>
+                        <li><strong>配合題幹時間：</strong> 2024 年要驗證，必須採用最新版。</li>
+                    </ol>
+                    <br>
+                    <h4>原理：</h4>
+                    <p>ISO/IEC 27001 是建置 ISMS（資訊安全管理系統：用制度把資安工作管起來）的「聖經」。因為資安威脅變化很快，ISO 組織會更新標準。2022 年 10 月發布了新版（:2022），舊版（:2013）有轉轉換期，但如果是新導入的公司，顧問與驗證機構都會強烈建議直接用新版，避免剛過就又要改版。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accordion Item: Step 4 Analysis (LOCKED) -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion('panel-step4')">
+                【第四步：選項分析】
+            </button>
+            <div id="panel-step4" class="accordion-content">
+                <div class="accordion-body">
+                    <div id="lockOverlay" class="locked-message">請先完成題目作答，才能解鎖詳細解析！</div>
+                    <div id="analysisContent" class="locked-content">
+                        <span class="step-label bg-step4">詳細拆解</span>
+                        <ul class="bullet-list">
+                            <li>
+                                <strong>(A) ISO/IEC 27001 : 2013 [錯誤]</strong><br>
+                                這是舊版本的標準。雖然在轉換過渡期內可能還有效，但題目設定在 2024 年且是「新導入」，實務上與考試邏輯都應選擇最新版本。
+                            </li>
+                            <li>
+                                <strong>(B) ISO/IEC 27004 : 2016 [錯誤]</strong><br>
+                                這是「監控、量測、分析與評估」的指引標準（ISO/IEC 27004：資安量測與指標：教你怎麼量化衡量資安成效）。它不是用來做「驗證」的標準（Requirements），而是工具書。
+                            </li>
+                            <li>
+                                <strong>(C) ISO/IEC 20000-1 : 2018 [錯誤]</strong><br>
+                                這是「IT 服務管理系統（ITSMS）」的標準（ISO/IEC 20000-1：偏 IT 服務品質與流程管理，例如叫修回應速度、變更管理）。題目問的是「資安」，不是「IT 服務品質」。
+                            </li>
+                            <li>
+                                <strong>(D) ISO/IEC 27001 : 2022 [正確]</strong><br>
+                                這是目前最新的 ISMS 要求標準。配合題目 2024 年驗證的時間點，這是唯一最適合且正確的選項。
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accordion Item: Extensions -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion('panel-ext')">
+                【觀念補充與延伸】
+            </button>
+            <div id="panel-ext" class="accordion-content">
+                <div class="accordion-body">
+                    <span class="step-label bg-info">核心觀念定位</span>
+                    <p>屬於「資訊安全管理」章節。這類題目常考「標準代號」與「版本」的對應。</p>
+                    <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                    
+                    <h4>名詞定義與白話文：</h4>
+                    <ul class="bullet-list">
+                        <li><strong>ISO/IEC 27001：</strong> 驗證標準（Requirements）。告訴你「必須」做什麼才能拿到證書。</li>
+                        <li><strong>ISO/IEC 27002：</strong> 實作指引（Code of practice）。告訴你「可以」怎麼做來達成 27001 的要求（像是參考書）。</li>
+                        <li><strong>驗證（Certification）：</strong> 請第三方公正機構（如 BSI, SGS）來檢查你是否符合 27001 標準。</li>
+                    </ul>
+                    <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                    
+                    <h4>變化題型：</h4>
+                    <p>如果題目問「關於資安控制措施的實作指引」，答案就要選 <strong>ISO/IEC 27002</strong>。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accordion Item: Memory & Traps -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion('panel-memory')">
+                【記憶口訣與常見陷阱】
+            </button>
+            <div id="panel-memory" class="accordion-content">
+                <div class="accordion-body">
+                    <h4>記憶口訣：</h4>
+                    <p style="font-size: 1.2rem; color: var(--accent-color); font-weight: bold; margin: 10px 0;">
+                        「驗證找 01，指引找 02，量測找 04」
+                    </p>
+                    <p class="definition">（27001 是老大要驗證，27002 是細節指引，27004 是算分數的量測）</p>
+                    
+                    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+
+                    <h4>常見陷阱（避坑指南）：</h4>
+                    <ul class="bullet-list">
+                        <li><strong>盲點 1：</strong> 看到 ISO 就亂選。要看清楚尾數，20000 是 IT 服務，27001 才是資安。</li>
+                        <li><strong>盲點 2：</strong> 忽略年份。考試很愛考「新舊版交替」，年份越新通常越正確。</li>
+                        <li><strong>盲點 3：</strong> 誤選 27002 或 27004 做驗證。記住，只有結尾是 1 的（Requirements）通常才是可以被驗證的標準。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accordion Item: Correct Answer -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion('panel-ans')">
+                【正確答案】
+            </button>
+            <div id="panel-ans" class="accordion-content">
+                <div class="accordion-body">
+                    <h3 style="color: var(--success-color); margin-bottom: 10px;">正確答案：(D)</h3>
+                    <p><strong>一句話理由：</strong> 因為要在 2024 年進行國際驗證，必須依據最新的 ISO/IEC 27001:2022 標準來導入。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accordion Item: Self Test -->
+        <div class="accordion-item">
+            <button class="accordion-header" onclick="toggleAccordion('panel-self')">
+                【自我檢測】
+            </button>
+            <div id="panel-self" class="accordion-content">
+                <div class="accordion-body">
+                    <p style="margin-bottom: 15px;">試著回答下列延伸問題，點擊按鈕查看答案。</p>
+                    
+                    <div class="self-check-item">
+                        <p><strong>Q1.</strong> 如果公司想參考「資訊安全控制措施的具體實作建議」，應該查閱哪一份標準？</p>
+                        <button class="show-ans-btn" onclick="toggleSelfAns('ans1')">顯示答案</button>
+                        <div id="ans1" class="answer-toggle">ISO/IEC 27002</div>
+                    </div>
+
+                    <div class="self-check-item">
+                        <p><strong>Q2.</strong> ISO 27001:2022 版本中，控制措施分為四大主題（組織、人員、實體、技術），請問這是在取代舊版的哪個部分？</p>
+                        <button class="show-ans-btn" onclick="toggleSelfAns('ans2')">顯示答案</button>
+                        <div id="ans2" class="answer-toggle">附錄 A (Annex A) 的 14 個控制領域。</div>
+                    </div>
+
+                    <div class="self-check-item">
+                        <p><strong>Q3.</strong> 27001 是關於資安，那 ISO 27701 是關於什麼？</p>
+                        <button class="show-ans-btn" onclick="toggleSelfAns('ans3')">顯示答案</button>
+                        <div id="ans3" class="answer-toggle">隱私資訊管理 (PIMS)。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- End Main Card -->
+
+    <footer style="text-align: center; color: var(--text-light); font-size: 0.8rem; margin-top: 30px;">
+        Designed for iPAS Exam Prep | Offline Interactive Module
+    </footer>
+</div>
+
+<script>
+    /* Accordion Logic */
+    function toggleAccordion(panelId) {
+        const content = document.getElementById(panelId);
+        const btn = content.previousElementSibling;
+        
+        if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+            content.style.maxHeight = '0px';
+            btn.classList.remove('active');
+            btn.setAttribute('aria-expanded', 'false');
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+            btn.classList.add('active');
+            btn.setAttribute('aria-expanded', 'true');
+        }
+    }
+
+    /* Keyword Highlighter */
+    let keywordsActive = false;
+    function toggleKeywords() {
+        const targets = document.querySelectorAll('.kw-target');
+        keywordsActive = !keywordsActive;
+        
+        targets.forEach(span => {
+            if (keywordsActive) {
+                // Wrap content in <mark> if not already
+                if (span.parentNode.tagName !== 'MARK') {
+                    const mark = document.createElement('mark');
+                    mark.className = 'highlight';
+                    span.parentNode.insertBefore(mark, span);
+                    mark.appendChild(span);
+                }
+            } else {
+                // Unwrap <mark>
+                const parent = span.parentNode;
+                if (parent.tagName === 'MARK') {
+                    parent.parentNode.insertBefore(span, parent);
+                    parent.parentNode.removeChild(parent);
+                }
+            }
+        });
+    }
+
+    /* Quick Note Toggle */
+    function toggleQuickNote() {
+        const note = document.getElementById('quickNote');
+        if (note.style.display === 'block') {
+            note.style.display = 'none';
+        } else {
+            note.style.display = 'block';
+        }
+    }
+
+    /* Quiz Logic */
+    const correctAnswer = 'D';
+    let hasAnswered = false;
+
+    function checkAnswer(selected) {
+        if (hasAnswered) return; // Prevent multiple clicks
+
+        hasAnswered = true;
+        const feedbackDiv = document.getElementById('feedback');
+        const resetBtn = document.getElementById('resetBtn');
+        const correctBtn = document.getElementById('btn-' + correctAnswer);
+        const selectedBtn = document.getElementById('btn-' + selected);
+
+        // Highlight Buttons
+        if (selected === correctAnswer) {
+            selectedBtn.classList.add('correct');
+            selectedBtn.innerHTML += ' [正確]';
+            feedbackDiv.innerHTML = '<strong>答對了！</strong><br>理由：2024年導入驗證，應採用最新的 ISO 27001:2022 版本。';
+            feedbackDiv.className = 'feedback-area correct';
+        } else {
+            selectedBtn.classList.add('wrong');
+            selectedBtn.innerHTML += ' [錯誤]';
+            correctBtn.classList.add('correct'); // Show correct answer too
+            correctBtn.innerHTML += ' [正確答案]';
+            feedbackDiv.innerHTML = '<strong>答錯了。</strong><br>理由：請留意「2024年」這個時間點，舊版 2013 已不適合新導入。';
+            feedbackDiv.className = 'feedback-area wrong';
+        }
+
+        // Disable all buttons
+        ['A', 'B', 'C', 'D'].forEach(opt => {
+            document.getElementById('btn-' + opt).disabled = true;
+        });
+
+        // Unlock Analysis
+        unlockAnalysis();
+
+        // Show Reset Button
+        resetBtn.style.display = 'block';
+    }
+
+    function unlockAnalysis() {
+        document.getElementById('lockOverlay').style.display = 'none';
+        document.getElementById('analysisContent').classList.remove('locked-content');
+        document.getElementById('analysisContent').classList.add('unlocked');
+        // Auto open step 4 if closed
+        const step4Panel = document.getElementById('panel-step4');
+        if (!step4Panel.style.maxHeight || step4Panel.style.maxHeight === '0px') {
+            toggleAccordion('panel-step4');
+        } else {
+            // Recalculate height because blur/hide might have changed layout
+            step4Panel.style.maxHeight = step4Panel.scrollHeight + "px";
+        }
+    }
+
+    function resetQuiz() {
+        hasAnswered = false;
+        
+        // Reset Buttons
+        ['A', 'B', 'C', 'D'].forEach(opt => {
+            const btn = document.getElementById('btn-' + opt);
+            btn.className = 'option-btn';
+            btn.disabled = false;
+            // Remove text appended
+            btn.innerHTML = btn.innerHTML.split(' [')[0]; 
+        });
+
+        // Hide Feedback
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('resetBtn').style.display = 'none';
+
+        // Lock Analysis Again
+        document.getElementById('lockOverlay').style.display = 'block';
+        const analysisContent = document.getElementById('analysisContent');
+        analysisContent.classList.add('locked-content');
+        analysisContent.classList.remove('unlocked');
+        
+        // Close Step 4 panel
+        const step4Panel = document.getElementById('panel-step4');
+        step4Panel.style.maxHeight = '0px';
+        step4Panel.previousElementSibling.classList.remove('active');
+        step4Panel.previousElementSibling.setAttribute('aria-expanded', 'false');
+    }
+
+    /* Self Test Toggle */
+    function toggleSelfAns(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+        // Recalculate parent accordion height
+        const parentPanel = el.closest('.accordion-content');
+        parentPanel.style.maxHeight = parentPanel.scrollHeight + "px";
+    }
+
+</script>
+
+</body>
+</html>

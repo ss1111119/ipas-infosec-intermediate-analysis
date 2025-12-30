@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q26 風險分析與評估 - 互動教學詳解</title>
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --accent-color: #3498db;
+        --correct-color: #27ae60;
+        --wrong-color: #c0392b;
+        --bg-color: #f8f9fa;
+        --text-color: #333;
+        --border-radius: 8px;
+        --spacing: 1.2rem;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        background-color: var(--bg-color);
+        margin: 0;
+        padding: 20px;
+        font-size: 16px;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Header & Status */
+    header {
+        border-bottom: 2px solid #eee;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    h1 {
+        font-size: 1.3rem;
+        margin: 0;
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+
+    .status-badge {
+        font-size: 0.9rem;
+        padding: 5px 12px;
+        border-radius: 20px;
+        background-color: #e0e0e0;
+        color: #555;
+        font-weight: bold;
+    }
+
+    .status-badge.answered-correct {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.answered-wrong {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    /* Question Section */
+    .question-box {
+        margin-bottom: var(--spacing);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .options-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: var(--spacing);
+    }
+
+    .option-label {
+        display: flex;
+        align-items: flex-start;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .option-label:hover {
+        background-color: #f1f8ff;
+        border-color: var(--accent-color);
+    }
+
+    .option-label input[type="radio"] {
+        margin-right: 12px;
+        margin-top: 5px;
+        transform: scale(1.2);
+    }
+
+    /* Buttons */
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        cursor: pointer;
+        font-weight: bold;
+        transition: opacity 0.2s;
+    }
+
+    button:hover {
+        opacity: 0.9;
+    }
+
+    .btn-submit { background-color: var(--accent-color); color: white; }
+    .btn-reset { background-color: #95a5a6; color: white; }
+    .btn-toggle { background-color: var(--primary-color); color: white; margin-left: auto; }
+
+    /* Result Area */
+    #result-area {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: var(--border-radius);
+        display: none;
+    }
+
+    .result-correct {
+        background-color: #d4edda;
+        border-left: 5px solid var(--correct-color);
+        color: #155724;
+    }
+
+    .result-wrong {
+        background-color: #f8d7da;
+        border-left: 5px solid var(--wrong-color);
+        color: #721c24;
+    }
+
+    /* Flowchart */
+    .flowchart-container {
+        margin: 25px 0;
+        padding: 15px;
+        background: #fdfdfd;
+        border: 1px dashed #ccc;
+        border-radius: var(--border-radius);
+    }
+    
+    .flowchart-title {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #555;
+    }
+
+    .flowchart {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .flow-step {
+        background: white;
+        border: 2px solid #aaa;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .flow-arrow {
+        color: #aaa;
+        font-weight: bold;
+    }
+
+    /* Highlight the error point in the flowchart */
+    .flow-step.highlight-error {
+        border-color: var(--wrong-color);
+        color: var(--wrong-color);
+        font-weight: bold;
+        box-shadow: 0 0 5px rgba(192, 57, 43, 0.2);
+    }
+
+    /* Explanation Section */
+    #explanation-section {
+        display: none;
+        margin-top: 30px;
+        border-top: 2px dashed #ddd;
+        padding-top: 20px;
+    }
+
+    .exp-block {
+        margin-bottom: 25px;
+    }
+
+    .exp-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        border-left: 4px solid var(--accent-color);
+        padding-left: 10px;
+        margin-bottom: 10px;
+        background-color: #f0f4f8;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .keyword-highlight {
+        color: #d35400;
+        font-weight: bold;
+        background-color: #ffeaa7;
+        padding: 0 4px;
+        border-radius: 4px;
+    }
+
+    ul.clean-list {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    ul.clean-list li {
+        margin-bottom: 8px;
+        padding-left: 15px;
+        border-left: 2px solid #eee;
+    }
+
+    details {
+        background: #eee;
+        padding: 10px;
+        border-radius: 6px;
+        margin-top: 10px;
+        cursor: pointer;
+    }
+
+    summary {
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    /* Printing */
+    @media print {
+        .btn-group, .status-badge { display: none; }
+        #explanation-section { display: block !important; }
+        body { background: white; padding: 0; }
+        .container { box-shadow: none; border: none; padding: 0; }
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+        .flowchart { flex-direction: column; }
+        .flow-arrow { transform: rotate(90deg); margin: 5px 0; }
+        .btn-toggle { margin-left: 0; margin-top: 10px; width: 100%; }
+        h1 { font-size: 1.1rem; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>高中資安觀念通：風險分析與評估</h1>
+        <span id="status-display" class="status-badge">答題狀態：未作答</span>
+    </header>
+
+    <div class="question-box">
+        26. 關於風險分析與評估之敘述，下列何者錯誤？
+    </div>
+
+    <div class="options-group">
+        <label class="option-label">
+            <input type="radio" name="q26" value="A">
+            (A) 公司最好至少每年定期執行一次風險評鑑
+        </label>
+        <label class="option-label">
+            <input type="radio" name="q26" value="B">
+            (B) 公司營運重大改變時，應進行風險評鑑
+        </label>
+        <label class="option-label">
+            <input type="radio" name="q26" value="C">
+            (C) 重大風險項目完成風險回應後，不需進行風險再評估
+        </label>
+        <label class="option-label">
+            <input type="radio" name="q26" value="D">
+            (D) 進行風險分析與評估前，應先了解相關背景資訊（例如：法規要求、技術環境…）
+        </label>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-submit" onclick="submitAnswer()">提交答案</button>
+        <button class="btn-reset" onclick="resetQuiz()">重作</button>
+        <button class="btn-toggle" onclick="toggleExplanation()">顯示/隱藏詳解</button>
+    </div>
+
+    <div id="result-area"></div>
+
+    <div id="explanation-section">
+        
+        <!-- Flowchart Visualization -->
+        <div class="flowchart-container">
+            <div class="flowchart-title">圖解：正確的風險管理流程</div>
+            <div class="flowchart">
+                <div class="flow-step">建立背景</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">風險辨識</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">風險分析</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">風險評估</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">風險處理</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step highlight-error">風險再評估/監督<br><small>(選項C 漏掉這裡！)</small></div>
+            </div>
+        </div>
+
+        <div class="exp-block">
+            <div class="exp-title">【題目】</div>
+            <p>26. 關於風險分析與評估之敘述，下列何者錯誤？</p>
+        </div>
+
+        <div class="exp-block">
+            <div class="exp-title">【第一步：找關鍵字】</div>
+            <p>請圈出題目中的：<span class="keyword-highlight">錯誤</span>、<span class="keyword-highlight">風險回應</span>、<span class="keyword-highlight">不需</span>、<span class="keyword-highlight">再評估</span>。</p>
+            <p><strong>為什麼是線索？</strong> 題目問「錯誤」，代表有三個選項是合理的資安做法。而選項 (C) 說做完處理「不需」再檢查，這違反了管理學最基本的「檢查確認（Check）」原則。</p>
+        </div>
+
+        <div class="exp-block">
+            <div class="exp-title">【第二步：白話翻譯】</div>
+            <p>這題用高中生的話來說就是：</p>
+            <p>「當我們發現考卷有錯題（風險），訂正（風險回應）之後，需不需要再重新寫一次類似的題目（再評估），來確定真的學會了？」</p>
+            <p>答案當然是：<strong>要！</strong> 不然怎麼知道你是真懂還是假懂？</p>
+        </div>
+
+        <div class="exp-block">
+            <div class="exp-title">【第三步：解題思路】</div>
+            <ul class="clean-list">
+                <li><strong>這題考什麼？</strong> 考你對「風險管理生命週期（Risk Management Lifecycle）」的完整性理解。</li>
+                <li><strong>解題步驟 1：</strong> 理解風險管理的流程是「PDCA」循環，不是做完就停。</li>
+                <li><strong>解題步驟 2：</strong> 看到絕對性的負面詞彙如「不需」、「不用」，要特別警覺，通常是錯的。</li>
+                <li><strong>原理與規則：</strong>
+                    <ul>
+                        <li><strong>風險回應（Risk Response）</strong>：是指我們決定怎麼處理風險（例如：裝防火牆、買保險）。</li>
+                        <li><strong>殘餘風險（Residual Risk，白話：剩下的風險）</strong>：裝了防火牆不代表無敵，可能還有漏洞。所以必須做「再評估（Re-assessment）」來確認剩下來的風險是不是在我們可接受的範圍內。</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="exp-block">
+            <div class="exp-title">【第四步：選項分析】</div>
+            <ul class="clean-list">
+                <li><strong>(A) 公司最好至少每年定期執行一次風險評鑑（把可能出事的地方列出來，估算嚴重度與發生機率）</strong>
+                    <br>➔ <strong>正確</strong>。就像健康檢查一樣，環境會變、駭客技術會進步，定期一年做一次是基本要求（例如 ISO 27001 標準建議）。
+                </li>
+                <li><strong>(B) 公司營運重大改變時，應進行風險評鑑</strong>
+                    <br>➔ <strong>正確</strong>。如果有重大改變（例如：導入新系統、公司合併、換了機房），原本的防護可能失效，當然要馬上重做檢查。
+                </li>
+                <li><strong>(C) 重大風險項目完成風險回應（決定要怎麼處理風險：降低/轉移/接受/避免）後，不需進行風險再評估</strong>
+                    <br>➔ <strong>錯誤！</strong> 這是本題答案。做完處理一定要「驗收」，確認藥有沒有效。如果沒有再評估，我們無法得知控制措施是否有效降低了風險。
+                </li>
+                <li><strong>(D) 進行風險分析與評估前，應先了解相關背景資訊（例如：法規要求、技術環境…）</strong>
+                    <br>➔ <strong>正確</strong>。這叫做「全景分析（Context Establishment）」。你要先知道這家公司是做飛彈的還是賣珍奶的，才能判斷什麼東西最重要（背景資訊：了解公司是做什麼的、用什麼技術、受什麼法律管）。
+                </li>
+            </ul>
+        </div>
+
+        <div class="exp-block">
+            <div class="exp-title">【觀念補充與延伸】</div>
+            <p><strong>核心觀念定位：</strong> 這是「資安管理」章節中，關於 PDCA（Plan-Do-Check-Act）循環的概念。</p>
+            <p><strong>觸類旁通：</strong>
+                <br>如果題目改成「風險評鑑後發現風險很低，是否可以不處理？」
+                <br>答：可以，這叫做「風險接受（Risk Acceptance）」，但前提是已經「評鑑」過了。本題錯在連「再評估」都不做。</p>
+        </div>
+
+        <div class="exp-block">
+            <div class="exp-title">【記憶口訣】</div>
+            <p style="background: #e8f4f8; padding: 10px; border-radius: 6px; font-weight: bold;">
+                「做完處理要檢查，剩下風險（殘餘風險）看大小。」
+            </p>
+        </div>
+
+        <div class="exp-block">
+            <div class="exp-title">【常見陷阱】</div>
+            <p><strong>學生最容易搞混的地方：</strong> 以為「風險回應」就是終點。</p>
+            <p><strong>避坑指南：</strong> 只要看到選項說「做完 A 就不需要做 B」，請先懷疑它。資安是一個持續改進的過程，沒有「做完就沒事」這回事。</p>
+        </div>
+
+        <div class="exp-block">
+            <div class="exp-title">【正確答案】</div>
+            <p>答案：<strong>(C)</strong></p>
+            <p>一句話理由：做完風險處置後，必須透過「再評估」來確認風險是否已降低至可接受水準。</p>
+        </div>
+
+        <div class="exp-block">
+            <div class="exp-title">【自我檢測】</div>
+            <p>試試看，你真的懂了嗎？</p>
+            <details>
+                <summary>Q1. 導入一個新的防毒軟體後，應該要做什麼步驟？(點擊看答案)</summary>
+                <p>答：應該進行<strong>風險再評估</strong>，確認這個防毒軟體是否真的有效阻擋了病毒，以及有沒有帶來新的問題（例如讓電腦變超慢）。</p>
+            </details>
+            <details>
+                <summary>Q2. 「殘餘風險」是指什麼？(點擊看答案)</summary>
+                <p>答：經過風險處置（如安裝防火牆）後，仍然剩下來的風險。因為沒有任何防護是 100% 完美的。</p>
+            </details>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const correctAns = 'C';
+    let hasAnswered = false;
+
+    function submitAnswer() {
+        const radios = document.getElementsByName('q26');
+        let selectedVal = null;
+        
+        for (const radio of radios) {
+            if (radio.checked) {
+                selectedVal = radio.value;
+                break;
+            }
+        }
+
+        if (!selectedVal) {
+            alert("同學，請先選擇一個答案喔！");
+            return;
+        }
+
+        const resultArea = document.getElementById('result-area');
+        const statusDisplay = document.getElementById('status-display');
+        
+        hasAnswered = true;
+
+        if (selectedVal === correctAns) {
+            resultArea.className = "result-correct";
+            resultArea.style.display = "block";
+            resultArea.innerHTML = `
+                <strong>🎉 答對了！太棒了！</strong><br>
+                你的觀念很正確：做完風險處理後，一定要記得做「再評估」，不然怎麼知道有沒有效呢？<br>
+                <small>（請點擊下方「顯示詳解」查看完整老師解說）</small>
+            `;
+            statusDisplay.textContent = "答題狀態：已作答（正確）";
+            statusDisplay.className = "status-badge answered-correct";
+        } else {
+            resultArea.className = "result-wrong";
+            resultArea.style.display = "block";
+            resultArea.innerHTML = `
+                <strong>⚠️ 答錯囉！別氣餒！</strong><br>
+                你選了 (${selectedVal})，但這是一個合理的做法喔。<br>
+                正確答案是 <strong>(C)</strong>。<br>
+                <strong>解析重點：</strong>你想想看，如果你修好了腳踏車的煞車（風險回應），是不是要試騎一下（再評估）確認真的煞得住？不能修完就當作沒事了。<br>
+                <small>（請點擊下方「顯示詳解」查看完整老師解說）</small>
+            `;
+            statusDisplay.textContent = "答題狀態：已作答（錯誤）";
+            statusDisplay.className = "status-badge answered-wrong";
+        }
+
+        // 答題後自動顯示詳解按鈕提示（非自動展開，避免資訊過載，但鼓勵查看）
+        const toggleBtn = document.querySelector('.btn-toggle');
+        if(toggleBtn.innerText.includes('隱藏')) return; 
+        // 保持按鈕文字不變，讓使用者自己點
+    }
+
+    function resetQuiz() {
+        const radios = document.getElementsByName('q26');
+        for (const radio of radios) {
+            radio.checked = false;
+        }
+
+        const resultArea = document.getElementById('result-area');
+        resultArea.style.display = "none";
+        resultArea.innerHTML = "";
+
+        const statusDisplay = document.getElementById('status-display');
+        statusDisplay.textContent = "答題狀態：未作答";
+        statusDisplay.className = "status-badge";
+
+        const expSection = document.getElementById('explanation-section');
+        expSection.style.display = "none";
+
+        hasAnswered = false;
+    }
+
+    function toggleExplanation() {
+        const expSection = document.getElementById('explanation-section');
+        if (expSection.style.display === "none" || expSection.style.display === "") {
+            expSection.style.display = "block";
+            // Scroll to explanation smoothly
+            expSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            expSection.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>

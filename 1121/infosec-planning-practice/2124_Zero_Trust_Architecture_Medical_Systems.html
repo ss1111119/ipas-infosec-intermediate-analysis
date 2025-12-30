@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題組3_零信任_行動醫療雲端監護_Q21-24</title>
+    <!-- 引入 Google Fonts (允許外部資源，優化閱讀體驗) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 四、樣式 tokens 固定 --- */
+        :root {
+            --font-family: system-ui, "Noto Sans TC", sans-serif;
+            --base-font-size: 16px;
+            --title-font-size: 18px;
+            --small-font-size: 14px;
+            --padding-card: 16px;
+            --gap-block: 12px;
+            
+            /* 標籤顏色規範 */
+            --color-tag-law: #7f8c8d;
+            --color-tag-iso: #27ae60;
+            --color-tag-zt: #8e44ad;
+            --color-tag-net: #2980b9;
+            --color-tag-sec: #c0392b;
+            --color-tag-mgm: #d35400;
+
+            /* 介面顏色 */
+            --color-primary: #2c3e50;
+            --color-bg-body: #f4f6f7;
+            --color-bg-card: #ffffff;
+            --color-border: #e0e0e0;
+            --color-text-main: #333333;
+            --color-text-sub: #666666;
+            --color-success: #27ae60;
+            --color-error: #c0392b;
+            --color-hover: #f5f5f5;
+        }
+
+        /* --- Reset & Global --- */
+        * { box-sizing: border-box; }
+        body {
+            font-family: var(--font-family);
+            font-size: var(--base-font-size);
+            line-height: 1.6;
+            background-color: var(--color-bg-body);
+            color: var(--color-text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- 二、整體版型與寬度規範 --- */
+        .container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--color-bg-card);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        /* --- 三、UI 骨架 - 1) Header --- */
+        .group-header {
+            padding: var(--padding-card);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #fff;
+        }
+        .group-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin: 0;
+        }
+        .progress-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .progress-text {
+            font-size: var(--small-font-size);
+            font-weight: bold;
+            color: var(--color-text-sub);
+            min-width: 80px;
+        }
+        .progress-bar-track {
+            flex-grow: 1;
+            height: 8px;
+            background-color: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--color-success);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .completion-status {
+            font-size: var(--small-font-size);
+            color: var(--color-text-sub);
+            margin-left: auto; /* 推到右邊 */
+        }
+        .completion-status.completed {
+            color: var(--color-success);
+            font-weight: bold;
+        }
+
+        /* --- 三、UI 骨架 - 2) Context (題組情境) --- */
+        .group-context {
+            padding: var(--padding-card);
+            background-color: #f8f9fa;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 15px;
+            color: #444;
+        }
+        .group-context h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: var(--color-primary);
+        }
+
+        /* --- 三、UI 骨架 - 3) Tabs (導覽) --- */
+        .tabs-nav {
+            display: flex;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid var(--color-border);
+            overflow-x: auto; /* 手機版可滑動 */
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--color-text-sub);
+            border-right: 1px solid var(--color-border);
+            white-space: nowrap;
+            transition: background 0.2s, color 0.2s;
+            position: relative;
+        }
+        .tab-btn:last-child { border-right: none; }
+        .tab-btn:hover { background-color: #e6e6e6; }
+        .tab-btn.active {
+            background-color: #fff;
+            color: var(--color-primary);
+            font-weight: bold;
+            box-shadow: inset 0 3px 0 var(--color-primary);
+        }
+        .tab-status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 6px;
+            background-color: #ccc;
+        }
+        .tab-status-indicator.done { background-color: var(--color-success); }
+
+        /* --- 三、UI 骨架 - 4) Tab 內容容器 --- */
+        .tab-content {
+            padding: var(--padding-card);
+            min-height: 400px;
+        }
+        .question-panel {
+            display: none; /* 預設隱藏 */
+        }
+        .question-panel.active {
+            display: block; /* 顯示當前 */
+        }
+
+        /* 單題結構 */
+        .q-header {
+            margin-bottom: var(--gap-block);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+        }
+        .q-title {
+            font-size: var(--title-font-size);
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+        .q-status {
+            font-size: var(--small-font-size);
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #eee;
+            color: #666;
+        }
+        .q-status.correct { background-color: #d5f5e3; color: #1e8449; }
+        .q-status.wrong { background-color: #fadbd8; color: #922b21; }
+
+        .q-context-single {
+            background-color: #fff8e1;
+            padding: 12px;
+            border-left: 4px solid #f1c40f;
+            margin-bottom: var(--gap-block);
+            font-size: 15px;
+        }
+
+        .q-question-text {
+            font-size: 18px;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        /* 選項樣式 */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .option-item {
+            display: flex;
+            align-items: flex-start; /* 讓長文字對齊頂部 */
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .option-item:hover {
+            background-color: var(--color-hover);
+        }
+        .option-item input {
+            margin-top: 5px; /* 微調 checkbox/radio 位置 */
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+        .option-text {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        /* 按鈕區 */
+        .action-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn-submit {
+            padding: 10px 24px;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-submit:hover { background-color: #1a252f; }
+        .btn-reset {
+            padding: 10px 16px;
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        /* 七、回饋格式 */
+        .feedback-box {
+            padding: var(--padding-card);
+            border-radius: 6px;
+            margin-bottom: var(--gap-block);
+            display: none; /* 預設隱藏 */
+        }
+        .feedback-box.correct {
+            background-color: #d5f5e3;
+            border: 1px solid #a9dfbf;
+            color: #196f3d;
+        }
+        .feedback-box.wrong {
+            background-color: #fdedec;
+            border: 1px solid #fadbd8;
+            color: #943126;
+        }
+        .feedback-verdict {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        /* 十、解析區塊 (Explain) */
+        details.explain-block, details.selfcheck-block {
+            background-color: #fff;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            margin-bottom: var(--gap-block);
+            overflow: hidden;
+        }
+        summary {
+            padding: 12px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 移除預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        summary::after {
+            content: '+';
+            font-size: 18px;
+            font-weight: bold;
+        }
+        details[open] summary::after {
+            content: '-';
+        }
+        .detail-content {
+            padding: var(--padding-card);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* 解析段落卡 (小主題) */
+        .explain-section-card {
+            background-color: #fdfdfd;
+            border-left: 4px solid var(--color-tag-zt); /* 預設 ZT 色 */
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 0 4px 4px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .explain-section-title {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 6px;
+            display: block;
+            font-size: 15px;
+        }
+        
+        /* 六、標籤顏色規範 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            margin-right: 6px;
+            font-weight: normal;
+            vertical-align: middle;
+        }
+        .tag-law { background-color: var(--color-tag-law); }
+        .tag-iso { background-color: var(--color-tag-iso); }
+        .tag-zt  { background-color: var(--color-tag-zt); }
+        .tag-net { background-color: var(--color-tag-net); }
+        .tag-sec { background-color: var(--color-tag-sec); }
+        .tag-mgm { background-color: var(--color-tag-mgm); }
+
+        /* 五、重點標註 */
+        mark {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 1) Header -->
+    <header class="group-header">
+        <h1 class="group-title">題組3：零信任架構與行動醫療雲端監護</h1>
+        <div class="progress-wrapper">
+            <span class="progress-text" id="progress-text">0 / 4</span>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progress-bar-fill"></div>
+            </div>
+            <span class="completion-status" id="completion-status">尚未完成</span>
+        </div>
+    </header>
+
+    <!-- 2) Context (題組情境) -->
+    <div class="group-context">
+        <h3>【題組背景】</h3>
+        <p>某醫療機構日前發生多起駭客入侵事件，經查發現其行動式醫療車及行動加護病房的雲端即時監護系統皆遭到駭客入侵，駭客並且透過遠端設定改變點滴流速超出原本設定的 50 倍。為了解決行動式醫療設備及雲端監護系統的安全，該機構規劃導入<span class="tag tag-zt">零信任架構</span>（Zero Trust Architecture, ZTA）強化存取控制，解決行動式醫療車及行動加護病房的雲端即時監護系統。</p>
+    </div>
+
+    <!-- 3) Tabs (導覽) -->
+    <nav class="tabs-nav" id="tabs-nav">
+        <!-- JS 產生 Tabs -->
+    </nav>
+
+    <!-- 4) Tab 內容容器 -->
+    <div class="tab-content" id="tab-content">
+        <!-- JS 產生題目面板 -->
+    </div>
+</div>
+
+<script>
+    // --- 題目資料 ---
+    const quizData = [
+        {
+            id: 'q21',
+            tabLabel: '第21題',
+            type: 'single', // radio
+            correctAnswer: 'B',
+            context: null, // 本題無額外情境
+            question: '請問該醫療機構導入零信任（Zero Trust）優先進行的工作為下列何項？',
+            options: [
+                { val: 'A', text: '(A) 建立零信任架構' },
+                { val: 'B', text: '(B) 瞭解現行的架構、設備與流程' },
+                { val: 'C', text: '(C) 建立政策決策點（Policy Decision Point, PDP）' },
+                { val: 'D', text: '(D) 建立政策落實點（Policy Enforcement Point, PEP）' }
+            ],
+            explainContent: `
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第一步：找關鍵字</span>
+                    關鍵字是 <mark>優先進行</mark>。這題問的是導入工程的「第一步」該做什麼。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第二步：白話翻譯</span>
+                    假設你要幫家裡裝一套超級防盜系統（零信任），在你去買鎖、買監視器之前，你應該先做什麼？當然是先搞清楚家裡有幾個門、幾個窗戶、平常誰會進出吧！
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第三步：解題思路</span>
+                    <span class="tag tag-zt">零信任</span> 的基石是「可視性（Visibility）」。你必須先知道自己有哪些資產（Asset）、資料流向（Workflow），才能規劃保護。NIST SP 800-207 標準強調，你不可能保護你「不知道它存在」的東西。在部署任何控制技術（如 PDP、PEP）之前，必須先有全盤的視野。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第四步：選項分析</span>
+                    <ul>
+                        <li>(A) <strong>建立零信任架構</strong>：這是最終目標，不是「優先進行」的具體步驟。這就像說「蓋房子第一步是蓋好房子」，邏輯不通。</li>
+                        <li>(B) <strong>瞭解現行的架構、設備與流程</strong>：<strong>正確</strong>。這就是所謂的「盤點」。你需要知道醫療車有幾台、連哪條線、醫生護士怎麼操作，才能設計規則。</li>
+                        <li>(C) <strong>建立政策決策點 (PDP)</strong>：PDP 是負責下令「准或不准」的大腦。如果不知道有哪些員工和資料，大腦沒辦法做決定。這是後續建置階段的事。</li>
+                        <li>(D) <strong>建立政策落實點 (PEP)</strong>：PEP 是負責「執行開門或關門」的警衛。同樣的，還沒規劃好規則前，請警衛也沒有用。</li>
+                    </ul>
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">觀念補充與延伸</span>
+                    零信任導入通常遵循五步驟循環：
+                    1. <strong>定義保護面（盤點）</strong>。
+                    2. 繪製交易流。
+                    3. 架構設計。
+                    4. 制定零信任政策。
+                    5. 監控與維護。
+                    其中「定義保護面」就是本題的核心。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">觸類旁通（舉一反三）</span>
+                    類似題型若問「導入 ISMS（資訊安全管理系統）的第一步」，答案通常也是「盤點資產」或「界定範圍」。任何資安專案的起手式都是「盤點」。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">記憶口訣</span>
+                    先盤點，再設點（先盤點現況，再設立檢查點）。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">常見陷阱</span>
+                    同學常急著想選看起來很專業的技術名詞（如 PDP、PEP），覺得那才是「在做事」。但管理層面的「盤點」永遠是資安的第一步。看到「優先」、「首要」，請優先尋找與「了解現況」有關的選項。
+                </div>
+            `,
+            selfCheckContent: `
+                <p>Q: 零信任的三大核心精神是什麼？</p>
+                <details><summary>顯示答案</summary>
+                <p>1. 永不信任，始終驗證 (Never Trust, Always Verify)。<br>2. 最小權限原則。<br>3. 假設已被入侵。</p>
+                </details>
+                <p>Q: PDP 的全名是什麼？它負責執行還是決策？</p>
+                <details><summary>顯示答案</summary>
+                <p>Policy Decision Point (政策決策點)。它負責「決策」（下判斷），執行是由 PEP 負責。</p>
+                </details>
+            `
+        },
+        {
+            id: 'q22',
+            tabLabel: '第22題',
+            type: 'single',
+            correctAnswer: 'C',
+            context: null,
+            question: '請問在建置行動式醫療車及行動加護病房的雲端即時監護系統的零信任，下列何者「不」是零信任（Zero Trust）架構的原則？',
+            options: [
+                { val: 'A', text: '(A) 不管與哪個網路位置的裝置通訊都需確保安全' },
+                { val: 'B', text: '(B) 對於個別企業資源的存取要求，應以連線為基礎去判斷是否許可' },
+                { val: 'C', text: '(C) 所有的資料、設備與運算服務，都要被當作是主體（Subject）' },
+                { val: 'D', text: '(D) 所有的資源的身分鑑別與授權機制，都要依監控結果動態決定' }
+            ],
+            explainContent: `
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第一步：找關鍵字</span>
+                    關鍵字是 <mark>原則</mark> 和 <mark>主體 (Subject)</mark>。這題考的是你對 NIST SP 800-207 文件中定義的原則熟不熟。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第二步：白話翻譯</span>
+                    這題在問：零信任的規則裡，哪一句話講錯了？特別注意「主體（去拿東西的人）」和「客體/資源（被拿的東西）」的差別。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第三步：解題思路</span>
+                    <span class="tag tag-zt">零信任</span> 原則中區分了角色：
+                    <ul>
+                        <li><strong>主體 (Subject)</strong>：發起存取請求的人或設備（如醫療車程式）。</li>
+                        <li><strong>資源 (Resource)</strong>：被保護的資料、設備、運算服務。</li>
+                    </ul>
+                    原則是：保護資源，驗證主體。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第四步：選項分析</span>
+                    <ul>
+                        <li>(A) <strong>正確</strong>。零信任的核心就是「沒有內外網之分」，不管你在醫院內還是用 4G 網路，都要加密且驗證。</li>
+                        <li>(B) <strong>正確</strong>。每一次的連線（Session）都要單獨審核，不能因為你早上登入過，下午就不用檢查。</li>
+                        <li>(C) <strong>錯誤</strong>。資料與運算服務是被存取的對象，在資安術語中稱為「資源 (Resource)」，而非發起請求的「主體 (Subject)」。這選項把角色顛倒了。</li>
+                        <li>(D) <strong>正確</strong>。授權不是永久的，要根據當下的環境（有沒有病毒、位置是否異常）動態調整。</li>
+                    </ul>
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">觀念補充與延伸</span>
+                    NIST SP 800-207 列出了零信任的七大原則，其中第一條就是「所有的資料來源與運算服務都被視為資源（Resource）」。理解主客體關係是存取控制（Access Control）的基礎。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">觸類旁通（舉一反三）</span>
+                    如果題目改為「所有的資料與運算服務都視為資源」，那就是正確的敘述。這類題型常玩文字遊戲，把「主體」換成「資源」，或者把「動態」換成「靜態」。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">記憶口訣</span>
+                    主體是人（或設備），資源是物。主體去拿資源。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">常見陷阱</span>
+                    <strong>設備（Device）</strong> 有時候很特殊。當醫療車去讀取資料庫時，它是「主體」；當管理員要維修這台醫療車時，這台車變成被管理的「資源」。但選項(C)把「資料」也說是主體，這絕對是錯的，資料不會自己長腳跑去存取別人。
+                </div>
+            `,
+            selfCheckContent: `
+                <p>Q: 如果一台醫療車正在上傳病患數據到伺服器，誰是主體？誰是資源？</p>
+                <details><summary>顯示答案</summary>
+                <p>醫療車（或其上的程式）是主體；伺服器/數據庫是資源。</p>
+                </details>
+            `
+        },
+        {
+            id: 'q23',
+            tabLabel: '第23題',
+            type: 'single',
+            correctAnswer: 'B',
+            context: null,
+            question: '關於建置行動式醫療車及行動加護病房雲端即時監護系統的零信任架構與角色敘述，下列何者錯誤？',
+            options: [
+                { val: 'A', text: '(A) 政策引擎（Policy Engine, PE）與政策管理者（Policy Administrator, PA）位於政策決策點（Policy Decision Point, PDP）中' },
+                { val: 'B', text: '(B) 政策落實點（Policy Enforcement Point, PEP），可以是網路防火牆或監視系統' },
+                { val: 'C', text: '(C) 持續診斷與緩解系統（Continuous Diagnostics and Mitigation, CDM）的工作是持續收集企業數位資產的狀況，以作為政策引擎（Policy Engine, PE）評估放行與否的參考' },
+                { val: 'D', text: '(D) 信賴評估演算法可以是條件（Criteria-based）為基礎或以分數（Score-based）為基礎' }
+            ],
+            explainContent: `
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第一步：找關鍵字</span>
+                    關鍵字是 <mark>PEP (政策落實點)</mark> 的功能定義。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第二步：白話翻譯</span>
+                    這題考零信任大腦（PDP）跟手腳（PEP）的分工。哪個選項把角色的工作講錯了？重點在於「誰負責下令」跟「誰負責動手」。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第三步：解題思路</span>
+                    <span class="tag tag-zt">零信任</span> 架構中：
+                    <ul>
+                        <li><strong>PDP</strong> (PE+PA)：大腦，負責計算風險並下達指令。</li>
+                        <li><strong>PEP</strong>：手腳（閘門），負責「執行」攔截或放行。它必須具備切斷連線的能力。</li>
+                        <li><strong>監視系統</strong>：眼睛，負責「看」（Monitoring），蒐集資料給大腦分析。</li>
+                    </ul>
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第四步：選項分析</span>
+                    <ul>
+                        <li>(A) <strong>正確</strong>。PDP 是一個邏輯概念，內含 PE（引擎）與 PA（管理員）。</li>
+                        <li>(B) <strong>錯誤</strong>。防火牆可以阻擋封包，所以是 PEP；但「監視系統」主要功能是觀察與紀錄，通常無法直接執行「阻擋」動作，因此不屬於 PEP，而是屬於輸入資料來源（Input Data）。</li>
+                        <li>(C) <strong>正確</strong>。CDM 就像健康檢查報告，隨時告訴大腦這個裝置有沒有中毒。</li>
+                        <li>(D) <strong>正確</strong>。PE 算信任度可以用「條件式」（沒戴口罩就不准進）或「分數式」（低於60分就不准進）。</li>
+                    </ul>
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">觀念補充與延伸</span>
+                    PEP 位於 Data Plane（資料面），直接處理流量；PDP 位於 Control Plane（控制面），不直接接觸資料流量，只送指令給 PEP。這就是所謂的「控制與資料分離」。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">觸類旁通（舉一反三）</span>
+                    VPN Gateway、Agent、API Gateway 都可以是 PEP，因為它們都能控制連線。但 SIEM（資安事件管理系統）主要是收集日誌，屬於監視/分析角色，不是 PEP。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">記憶口訣</span>
+                    PDP 動腦（PE+PA），PEP 動手（擋人）。監視器只看不動手。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">常見陷阱</span>
+                    看到 PEP，請聯想「閘門」、「防火牆」、「代理伺服器 (Proxy)」。這些東西才能真正把惡意連線切斷。如果選項是「日誌系統」、「監視器」，那通常不是 PEP。
+                </div>
+            `,
+            selfCheckContent: `
+                <p>Q: 決定是否允許存取的是哪一個元件？</p>
+                <details><summary>顯示答案</summary>
+                <p>政策引擎 (PE) 做決定，政策管理者 (PA) 傳達決定，兩者合稱 PDP。</p>
+                </details>
+                <p>Q: 實際切斷連線的是哪一個元件？</p>
+                <details><summary>顯示答案</summary>
+                <p>政策落實點 (PEP)。</p>
+                </details>
+            `
+        },
+        {
+            id: 'q24',
+            tabLabel: '第24題',
+            type: 'multi', // checkbox
+            correctAnswer: ['A', 'B', 'C'],
+            context: null,
+            question: '導入零信任架構時，可能面臨的威脅挑戰有下列哪些？（複選）',
+            options: [
+                { val: 'A', text: '(A) 網路的可視性' },
+                { val: 'B', text: '(B) 帳密被盜/內部威脅' },
+                { val: 'C', text: '(C) 遭遇 DoS 阻斷服務或網路中斷' },
+                { val: 'D', text: '(D) 可建立動態存取政策的控管' }
+            ],
+            explainContent: `
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第一步：找關鍵字</span>
+                    關鍵字是 <mark>威脅挑戰</mark>。意思是導入這個架構時會遇到什麼困難，或者這個架構本身怕什麼攻擊。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第二步：白話翻譯</span>
+                    這題問：做零信任很難，難在哪？還有，零信任雖然厲害，但它怕什麼攻擊？
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第三步：解題思路</span>
+                    <span class="tag tag-zt">零信任</span> 架構極度依賴 PDP（大腦）和 PEP（手腳）的溝通。如果大腦被攻擊、或者網路斷掉導致大腦沒辦法指揮手腳，整個系統就會癱瘓。此外，要看清楚全網流量（可視性）技術上很難。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">第四步：選項分析</span>
+                    <ul>
+                        <li>(A) <strong>挑戰</strong>：在零信任架構中，流量通常都是加密的，且來自四面八方。要達成完整的「網路可視性」是非常困難的挑戰，若做不到就是安全盲點。</li>
+                        <li>(B) <strong>威脅</strong>：雖然零信任能減緩內部威脅，但若高權限管理員（PA/PE）的帳號被盜，或者內部人員本身就是惡意的，這依然是系統的一大威脅。</li>
+                        <li>(C) <strong>威脅</strong>：零信任要求「持續驗證」，代表設備需一直跟 PDP 連線。若遭遇 DoS 導致網路中斷，PEP 收不到指令，為了安全通常會預設阻擋（Fail-closed），導致業務全面停擺。</li>
+                        <li>(D) <strong>優點/目標</strong>：這是我們導入零信任「想要達成」的好處，不是負面的威脅或挑戰。</li>
+                    </ul>
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">觀念補充與延伸</span>
+                    NIST SP 800-207 第七章專門列出了零信任相關威脅，其中「控制面（Control Plane）的可用性」是最關鍵的弱點。一旦控制面被 DoS，整個資料面都會死掉。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">觸類旁通（舉一反三）</span>
+                    傳統 VPN 架構若斷線，內網機器可能還能互通；但在零信任架構下，驗證伺服器連不上，你可能連隔壁的印表機都不能用（因為每次列印都要驗證）。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">記憶口訣</span>
+                    零信任怕：看不見（可視性）、被盜號（內部威脅）、網路斷（DoS）。
+                </div>
+                <div class="explain-section-card">
+                    <span class="explain-section-title">常見陷阱</span>
+                    同學可能覺得 (A)「網路可視性」是好事，為什麼選它？題目問的是「挑戰」。要達成好事是很困難的（挑戰），且若缺乏可視性就是一種風險。要分辨「目標/優點」（如 D）與「困難/風險」（如 A, B, C）。
+                </div>
+            `,
+            selfCheckContent: `
+                <p>Q: 為什麼 DoS 攻擊對零信任架構影響特別大？</p>
+                <details><summary>顯示答案</summary>
+                <p>因為零信任依賴中心化的決策點 (PDP) 隨時進行驗證，一旦 PDP 被阻斷服務，所有存取請求都無法被授權，系統會陷入癱瘓。</p>
+                </details>
+            `
+        }
+    ];
+
+    // --- 狀態管理 ---
+    let currentTabIndex = 0;
+    // 儲存每題的狀態: 'unsubmitted', 'correct', 'wrong'
+    const userStatus = quizData.map(() => 'unsubmitted');
+
+    // --- 初始化 UI ---
+    function init() {
+        const tabsNav = document.getElementById('tabs-nav');
+        const tabContent = document.getElementById('tab-content');
+
+        quizData.forEach((q, index) => {
+            // 1. 建立 Tab 按鈕
+            const btn = document.createElement('button');
+            btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+            btn.innerHTML = `${q.tabLabel} <span class="tab-status-indicator" id="ind-${index}"></span>`;
+            btn.onclick = () => switchTab(index);
+            tabsNav.appendChild(btn);
+
+            // 2. 建立題目面板
+            const panel = document.createElement('div');
+            panel.className = `question-panel ${index === 0 ? 'active' : ''}`;
+            panel.id = `panel-${index}`;
+            
+            // 2.1 Header: 題號 + 狀態
+            let html = `
+                <div class="q-header">
+                    <div class="q-title">${q.id.toUpperCase()}</div>
+                    <div class="q-status" id="status-text-${index}">未作答</div>
+                </div>
+            `;
+
+            // 2.2 Context (單題)
+            if (q.context) {
+                html += `<div class="q-context-single">${q.context}</div>`;
+            }
+
+            // 2.3 題目與選項
+            html += `<div class="q-question-text">${q.question}</div>`;
+            html += `<div class="options-list">`;
+            const inputType = q.type === 'single' ? 'radio' : 'checkbox';
+            q.options.forEach(opt => {
+                html += `
+                    <label class="option-item">
+                        <input type="${inputType}" name="opt-${index}" value="${opt.val}">
+                        <span class="option-text">${opt.text}</span>
+                    </label>
+                `;
+            });
+            html += `</div>`;
+
+            // 2.4 按鈕區
+            html += `
+                <div class="action-bar">
+                    <button class="btn-submit" onclick="submitAnswer(${index})">提交</button>
+                    <button class="btn-reset" onclick="resetQuestion(${index})">重作本題</button>
+                </div>
+            `;
+
+            // 2.5 Feedback
+            html += `<div class="feedback-box" id="feedback-${index}"></div>`;
+
+            // 2.6 Explain
+            html += `
+                <details class="explain-block" id="explain-${index}">
+                    <summary>顯示詳解</summary>
+                    <div class="detail-content">
+                        ${q.explainContent}
+                    </div>
+                </details>
+            `;
+
+            // 2.7 SelfCheck
+            html += `
+                <details class="selfcheck-block" id="selfcheck-${index}">
+                    <summary>自我檢測</summary>
+                    <div class="detail-content">
+                        ${q.selfCheckContent}
+                    </div>
+                </details>
+            `;
+
+            panel.innerHTML = html;
+            tabContent.appendChild(panel);
+        });
+        
+        updateProgress();
+    }
+
+    // --- Tab 切換 ---
+    function switchTab(index) {
+        currentTabIndex = index;
+        
+        // 更新 Tab 樣式
+        document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+            btn.classList.toggle('active', idx === index);
+        });
+
+        // 更新面板顯示
+        document.querySelectorAll('.question-panel').forEach((panel, idx) => {
+            panel.classList.toggle('active', idx === index);
+        });
+    }
+
+    // --- 提交答案邏輯 ---
+    function submitAnswer(index) {
+        const q = quizData[index];
+        const inputs = document.querySelectorAll(`input[name="opt-${index}"]:checked`);
+        const userVals = Array.from(inputs).map(i => i.value).sort();
+        
+        // 尚未選擇
+        if (userVals.length === 0) {
+            alert('請先選擇答案再提交！');
+            return;
+        }
+
+        // 判分
+        let isCorrect = false;
+        if (q.type === 'single') {
+            isCorrect = (userVals[0] === q.correctAnswer);
+        } else {
+            // 複選：必須完全一致
+            const correctArr = q.correctAnswer.sort();
+            isCorrect = (JSON.stringify(userVals) === JSON.stringify(correctArr));
+        }
+
+        // 更新狀態
+        userStatus[index] = isCorrect ? 'correct' : 'wrong';
+        updateStatusUI(index, isCorrect);
+        showFeedback(index, isCorrect, q.correctAnswer);
+        updateProgress();
+        
+        // 自動展開詳解 (提升學習體驗，也可不自動)
+        // document.getElementById(`explain-${index}`).open = true;
+    }
+
+    // --- 更新單題狀態 UI ---
+    function updateStatusUI(index, isCorrect) {
+        const statusText = document.getElementById(`status-text-${index}`);
+        const indicator = document.getElementById(`ind-${index}`);
+        
+        if (isCorrect) {
+            statusText.textContent = '已提交：正確';
+            statusText.className = 'q-status correct';
+        } else {
+            statusText.textContent = '已提交：錯誤';
+            statusText.className = 'q-status wrong';
+        }
+
+        // Tab 上的完成點
+        indicator.classList.add('done');
+    }
+
+    // --- 顯示回饋 ---
+    function showFeedback(index, isCorrect, correctAns) {
+        const box = document.getElementById(`feedback-${index}`);
+        box.style.display = 'block';
+        box.className = isCorrect ? 'feedback-box correct' : 'feedback-box wrong';
+        
+        if (isCorrect) {
+            box.innerHTML = `
+                <div class="feedback-verdict">判定：正確</div>
+                <div>觀念正確！請參閱下方詳解確認細節。</div>
+            `;
+        } else {
+            let correctStr = Array.isArray(correctAns) ? correctAns.join('、') : correctAns;
+            box.innerHTML = `
+                <div class="feedback-verdict">判定：錯誤</div>
+                <div>正確答案：${correctStr}</div>
+                <div>觀念尚有誤，請仔細閱讀下方解析。</div>
+            `;
+        }
+    }
+
+    // --- 重作本題 ---
+    function resetQuestion(index) {
+        // 清空選項
+        const inputs = document.querySelectorAll(`input[name="opt-${index}"]`);
+        inputs.forEach(i => i.checked = false);
+
+        // 重置狀態
+        userStatus[index] = 'unsubmitted';
+        
+        // 重置 UI
+        const statusText = document.getElementById(`status-text-${index}`);
+        statusText.textContent = '未作答';
+        statusText.className = 'q-status';
+
+        const indicator = document.getElementById(`ind-${index}`);
+        indicator.classList.remove('done');
+
+        // 隱藏回饋與收合詳解
+        document.getElementById(`feedback-${index}`).style.display = 'none';
+        document.getElementById(`explain-${index}`).open = false;
+        document.getElementById(`selfcheck-${index}`).open = false;
+
+        updateProgress();
+    }
+
+    // --- 更新進度條 ---
+    function updateProgress() {
+        const completedCount = userStatus.filter(s => s !== 'unsubmitted').length;
+        const total = quizData.length;
+        
+        document.getElementById('progress-text').textContent = `${completedCount} / ${total}`;
+        
+        const percent = (completedCount / total) * 100;
+        document.getElementById('progress-bar-fill').style.width = `${percent}%`;
+
+        const statusLabel = document.getElementById('completion-status');
+        if (completedCount === total) {
+            statusLabel.textContent = '本題組已完成';
+            statusLabel.classList.add('completed');
+        } else {
+            statusLabel.textContent = '尚未完成';
+            statusLabel.classList.remove('completed');
+        }
+    }
+
+    // 啟動
+    init();
+
+</script>
+
+</body>
+</html>

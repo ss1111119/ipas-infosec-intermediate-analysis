@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q25_資安風險分析_議題敘述_單選</title>
+    <!-- 引入 Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 標籤顏色規範 (強制) */
+            --tag-law: #7f8c8d;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+
+            /* 樣式 Tokens */
+            --font-family: system-ui, "Noto Sans TC", sans-serif;
+            --base-size: 16px;
+            --header-size: 18px;
+            --small-size: 14px;
+            --card-padding: 16px;
+            --gap: 12px;
+            
+            /* 其他 UI 色彩 */
+            --primary-bg: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-secondary: #5f6368;
+            --border-color: #dfe6e9;
+            --highlight-bg: #fff3cd; /* 重點標註底色 */
+            --explain-section-bg: #f8f9fa; /* 解析段落卡底色 */
+            
+            /* 狀態色 */
+            --success: #27ae60;
+            --error: #c0392b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            font-size: var(--base-size);
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* 版型與寬度規範 */
+        .container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap);
+        }
+
+        /* 卡片通用樣式 */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: var(--card-padding);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: var(--header-size);
+            border-left: 5px solid var(--tag-mgm); /* 風險管理主題色 */
+        }
+
+        .status-badge {
+            font-size: var(--small-size);
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #eee;
+            color: var(--text-secondary);
+        }
+
+        .status-badge.answered {
+            background-color: var(--tag-net);
+            color: white;
+        }
+
+        /* Context */
+        .context-text {
+            color: var(--text-secondary);
+            font-size: var(--small-size);
+            font-style: italic;
+        }
+
+        /* Question & Options */
+        .question-title {
+            font-size: var(--header-size);
+            font-weight: 700;
+            margin-bottom: var(--gap);
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+            border-color: #bdc3c7;
+        }
+
+        .option-label input {
+            margin-right: 12px;
+            margin-top: 6px;
+            accent-color: var(--tag-net);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: var(--gap);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: var(--base-size);
+            cursor: pointer;
+            font-family: var(--font-family);
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.9; }
+
+        .btn-submit {
+            background-color: var(--tag-net);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: var(--text-secondary);
+            color: white;
+        }
+
+        /* Feedback */
+        .feedback-card {
+            display: none; /* 預設隱藏 */
+            border-left: 5px solid transparent;
+        }
+
+        .feedback-card.correct {
+            background-color: #eafaf1;
+            border-left-color: var(--success);
+            color: var(--success);
+        }
+
+        .feedback-card.incorrect {
+            background-color: #fdedec;
+            border-left-color: var(--error);
+            color: var(--error);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            font-size: var(--header-size);
+            margin-bottom: 8px;
+        }
+
+        /* Explain (Details) */
+        details.explain-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        details.explain-card summary {
+            padding: var(--card-padding);
+            font-weight: 700;
+            cursor: pointer;
+            background-color: #f1f2f6;
+            list-style: none; /* 移除預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        details.explain-card summary::after {
+            content: '+';
+            font-size: 20px;
+        }
+
+        details.explain-card[open] summary::after {
+            content: '-';
+        }
+
+        .explain-content {
+            padding: var(--card-padding);
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap);
+        }
+
+        /* 解析段落卡 (小主題) */
+        .explain-section-card {
+            background-color: var(--explain-section-bg);
+            padding: var(--card-padding);
+            border-radius: 6px;
+            border-left: 3px solid var(--border-color);
+        }
+
+        .explain-section-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: var(--base-size);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 標籤樣式 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt  { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        /* 重點標註 */
+        mark {
+            background-color: var(--highlight-bg);
+            color: inherit;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* SelfCheck */
+        .self-check-item {
+            margin-top: 10px;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 10px;
+        }
+
+        .self-check-item summary {
+            color: var(--tag-net);
+            cursor: pointer;
+            font-weight: 500;
+            padding: 5px 0;
+            background: none;
+        }
+        
+        .self-check-item summary::after {
+            content: none; /* 移除外層樣式影響 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <header class="card header">
+        <span>Q25. 資安風險分析</span>
+        <span class="status-badge" id="statusBadge">未作答</span>
+    </header>
+
+    <!-- Context -->
+    <section class="card context-card">
+        <div class="context-text">本題無額外情境</div>
+    </section>
+
+    <!-- Question -->
+    <main class="card question-card">
+        <div class="question-title">
+            25. 與資訊安全風險分析相關議題的敘述，下列何者錯誤？
+        </div>
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A">
+                <span>(A) 主管機關公文來函要求事項，可納入風險分析的參考</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B">
+                <span>(B) 法律法規適用的要求事項，可納入風險分析的參考</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C">
+                <span>(C) 客戶合約的要求，可以不用納入風險分析的參考</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D">
+                <span>(D) 組織本身內部與外部的議題，可納入風險分析的參考</span>
+            </label>
+        </div>
+        <div class="controls" style="margin-top: 16px;">
+            <button class="btn btn-submit" id="submitBtn">提交</button>
+            <button class="btn btn-reset" id="resetBtn">重作</button>
+        </div>
+    </main>
+
+    <!-- Feedback -->
+    <section class="card feedback-card" id="feedbackCard">
+        <div class="feedback-title" id="feedbackTitle"></div>
+        <div id="feedbackContent"></div>
+    </section>
+
+    <!-- Explain -->
+    <details class="explain-card" id="explainCard">
+        <summary>顯示/隱藏 詳細解析</summary>
+        <div class="explain-content">
+            
+            <!-- 第一步：找關鍵字 -->
+            <div class="explain-section-card">
+                <div class="explain-section-title">
+                    <span class="tag tag-mgm">解題技巧</span> 第一步：找關鍵字
+                </div>
+                <p>看到題目請先圈出：<mark>資安風險分析</mark>（主題）、<mark>參考</mark>（來源依據）、<mark>錯誤</mark>（選不合理的）。</p>
+            </div>
+
+            <!-- 第二步：白話翻譯 -->
+            <div class="explain-section-card">
+                <div class="explain-section-title">第二步：白話翻譯</div>
+                <p>題目在問：「當我們在計算公司可能會發生什麼倒楣事（風險）時，下面哪一種東西是『你可以完全不用理會』的？」</p>
+            </div>
+
+            <!-- 第三步：解題思路 -->
+            <div class="explain-section-card">
+                <div class="explain-section-title">
+                    <span class="tag tag-mgm">觀念</span> 第三步：解題思路
+                </div>
+                <p>這題考的是風險分析的<strong>「輸入來源（Inputs）」</strong>。除了防毒防駭客，<strong>「合規性（Compliance）」</strong>也是重點。</p>
+                <ul>
+                    <li>就像辦活動要看校規（法律）、老師命令（主管機關）、場地合約（客戶合約）。</li>
+                    <li>任何一項沒遵守都可能出事（被罰款、違約賠償），所以全部都要納入評估。</li>
+                </ul>
+            </div>
+
+            <!-- 第四步：選項分析 -->
+            <div class="explain-section-card">
+                <div class="explain-section-title">第四步：選項分析</div>
+                <ul>
+                    <li>(A) <strong>正確</strong>：主管機關命令如同聖旨，不遵守有行政處罰風險。</li>
+                    <li>(B) <strong>正確</strong>：法律（如個資法）是底線，違法後果嚴重。</li>
+                    <li>(C) <strong>錯誤</strong>：<mark>客戶合約</mark>具有法律效力。若沒評估導致違約（如服務中斷），需鉅額賠償，必須納入風險分析。</li>
+                    <li>(D) <strong>正確</strong>：ISO 27001 強調「組織全景」，內外部議題都要看。</li>
+                </ul>
+            </div>
+
+            <!-- 記憶口訣 -->
+            <div class="explain-section-card">
+                <div class="explain-section-title">記憶口訣</div>
+                <p><strong>「法、管、約、景，通通都要看！」</strong>（法規、主管機關、合約、全景議題）。</p>
+            </div>
+
+            <!-- 避坑指南 -->
+            <div class="explain-section-card">
+                <div class="explain-section-title">避坑指南</div>
+                <p>看到選項出現<strong>「可以不用」、「無效」</strong>這類絕對排除的字眼，99% 都是錯誤敘述（也就是本題的正確答案）。</p>
+            </div>
+
+        </div>
+    </details>
+
+    <!-- SelfCheck -->
+    <section class="card">
+        <div class="question-title" style="font-size: var(--header-size);">自我檢測</div>
+        
+        <details class="self-check-item">
+            <summary>Q1. ISO 27001 中，客戶算不算「利害關係人」？</summary>
+            <div style="padding-top: 8px;">
+                答案：<mark>算</mark>。客戶、供應商、員工、股東都是利害關係人，他們的需求（如合約要求）必須被重視。
+            </div>
+        </details>
+
+        <details class="self-check-item">
+            <summary>Q2. 為了省事忽略法規要求，在資安風險處置中屬於哪一類？</summary>
+            <div style="padding-top: 8px;">
+                答案：這通常視為<mark>違規/違法</mark>。這不是正規的風險接受（Risk Acceptance），因為違法通常屬於「不可接受的風險」。
+            </div>
+        </details>
+    </section>
+
+</div>
+
+<script>
+    // --- 資料定義 ---
+    const CORRECT_ANSWER = 'C';
+    
+    // --- DOM 元素 ---
+    const options = document.getElementsByName('answer');
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const feedbackCard = document.getElementById('feedbackCard');
+    const feedbackTitle = document.getElementById('feedbackTitle');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const statusBadge = document.getElementById('statusBadge');
+    const explainCard = document.getElementById('explainCard');
+
+    // --- 互動邏輯 ---
+
+    // 提交按鈕
+    submitBtn.addEventListener('click', () => {
+        let selected = null;
+        options.forEach(opt => {
+            if (opt.checked) selected = opt.value;
+        });
+
+        if (!selected) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // 鎖定選項
+        options.forEach(opt => opt.disabled = true);
+        submitBtn.disabled = true;
+
+        // 判定與回饋
+        feedbackCard.style.display = 'block';
+        if (selected === CORRECT_ANSWER) {
+            // 正確
+            feedbackCard.className = 'card feedback-card correct';
+            feedbackTitle.textContent = '判定：正確';
+            feedbackContent.textContent = '觀念正確！合約具有法律約束力，違約會造成賠償損失，當然要納入風險考量。';
+            statusBadge.textContent = '已作答 (正確)';
+            statusBadge.classList.add('answered');
+            statusBadge.style.backgroundColor = 'var(--success)';
+        } else {
+            // 錯誤
+            feedbackCard.className = 'card feedback-card incorrect';
+            feedbackTitle.textContent = '判定：錯誤';
+            feedbackContent.innerHTML = `正確答案：<strong>${CORRECT_ANSWER}</strong><br>理由：合約若沒做到會賠錢，這是很大的風險，不能不看。`;
+            statusBadge.textContent = '已作答 (錯誤)';
+            statusBadge.classList.add('answered');
+            statusBadge.style.backgroundColor = 'var(--error)';
+        }
+
+        // 自動展開詳解 (選用，依題目設計也可不自動展開，這邊保持收合讓使用者自行點開)
+        // explainCard.open = true; 
+    });
+
+    // 重作按鈕
+    resetBtn.addEventListener('click', () => {
+        // 清除選項與狀態
+        options.forEach(opt => {
+            opt.checked = false;
+            opt.disabled = false;
+        });
+        submitBtn.disabled = false;
+
+        // 隱藏回饋與重置 Badge
+        feedbackCard.style.display = 'none';
+        statusBadge.textContent = '未作答';
+        statusBadge.classList.remove('answered');
+        statusBadge.style.backgroundColor = '#eee';
+
+        // 收合詳解
+        explainCard.open = false;
+        
+        // 收合自我檢測
+        document.querySelectorAll('.self-check-item').forEach(item => item.open = false);
+
+        // 捲動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+</script>
+
+</body>
+</html>

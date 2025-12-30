@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS DBIR 題組練習：SQL Server 異常連線與封包分析</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --accent-color: #2c3e50;
+            --highlight-bg: #f8f9fa;
+            --border-color: #dddddd;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --hint-bg: #e2e6ea;
+            --btn-hover: #e9ecef;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            font-size: 18px; /* 基礎字級 */
+        }
+
+        /* 標題字級控制：不大於內文 1 個級距 */
+        h1 { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: var(--accent-color); }
+        h2 { font-size: 20px; font-weight: bold; margin-top: 30px; border-left: 5px solid var(--accent-color); padding-left: 10px; }
+        h3 { font-size: 19px; font-weight: bold; margin-top: 15px; }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 導覽列 */
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 0;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-btn {
+            text-decoration: none;
+            color: var(--accent-color);
+            font-size: 16px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            background-color: #f1f3f5;
+        }
+        .nav-btn:hover { background-color: #e9ecef; }
+
+        /* 情境卡片 */
+        .scenario-card {
+            background-color: var(--highlight-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .scenario-text {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .scenario-hint {
+            flex: 1;
+            min-width: 200px;
+            background-color: #fff;
+            border: 1px dashed var(--accent-color);
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .scenario-hint h4 {
+            margin-top: 0;
+            color: var(--accent-color);
+            font-size: 18px;
+        }
+
+        /* 題目區塊 */
+        .question-block {
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-text {
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .option-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-item:hover {
+            background-color: #f8f9fa;
+            border-color: #ddd;
+        }
+
+        .option-item input {
+            margin-top: 6px;
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .current-selection {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* 按鈕群組 */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 8px 16px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 1px solid var(--accent-color);
+            background-color: white;
+            color: var(--accent-color);
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--btn-hover);
+        }
+
+        button.btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        button.btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .feedback-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none; /* 預設隱藏 */
+        }
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback-wrong {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 解析 Accordion */
+        details.explanation-details {
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        details.explanation-details summary {
+            background-color: #f1f3f5;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        details.explanation-details summary::after {
+            content: '+';
+            font-size: 20px;
+        }
+
+        details.explanation-details[open] summary::after {
+            content: '-';
+        }
+
+        .explanation-content {
+            padding: 20px;
+            background-color: white;
+        }
+
+        .exp-section {
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 10px;
+        }
+        
+        .exp-section:last-child {
+            border-bottom: none;
+        }
+
+        .exp-label {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 14px;
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+
+        /* 自我檢測隱藏區 */
+        .self-check-answer {
+            cursor: pointer;
+            background-color: #eee;
+            color: transparent;
+            padding: 2px 5px;
+            border-radius: 3px;
+            user-select: none;
+            transition: all 0.3s;
+        }
+        .self-check-answer:hover, .self-check-answer:active {
+            color: var(--text-color);
+            background-color: #d4edda;
+        }
+        .self-check-answer::before {
+            content: "（點擊看答案）";
+            color: #666;
+            font-size: 14px;
+        }
+        .self-check-answer:hover::before {
+            content: "";
+        }
+
+        /* 回到頂部按鈕 */
+        #back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+            z-index: 1000;
+            border: none;
+            font-size: 14px;
+        }
+
+        /* 總結區塊 */
+        .summary-recap {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 40px;
+        }
+
+        .story-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .story-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .step-icon {
+            background: var(--accent-color);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-top: 3px;
+        }
+
+        /* 全域控制按鈕區 */
+        .global-actions {
+            text-align: center;
+            margin: 40px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        /* 專有名詞樣式 */
+        .term-highlight {
+            font-weight: 500;
+            color: #0056b3;
+        }
+
+        @media (max-width: 600px) {
+            .scenario-card {
+                flex-direction: column;
+            }
+            .nav-bar {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">回到頂部</button>
+
+    <div class="nav-bar">
+        <span style="padding: 5px; font-weight:bold;">導覽：</span>
+        <a href="#q13" class="nav-btn">第 13 題</a>
+        <a href="#q14" class="nav-btn">第 14 題</a>
+        <a href="#q15" class="nav-btn">第 15 題</a>
+        <a href="#q16" class="nav-btn">第 16 題</a>
+        <a href="#section-recap" class="nav-btn">題組總整理</a>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>iPAS 資安題組 2：異常連線調查</h1>
+            
+            <div class="scenario-card">
+                <div class="scenario-text">
+                    <h3>【題組 2 情境（題目附圖文字版）】</h3>
+                    <p>
+                        某公司資訊系統管理人員發現該公司 <span class="term-highlight">SQL Server（微軟的資料庫系統）</span> 有些異常現象發生，經檢視相關 <span class="term-highlight">SQL Server 之紀錄檔／Log（系統留下的行為紀錄）</span> 之後，並未發現足以支撐該管理人員對此異常現象發生原因之推論。
+                    </p>
+                    <p>
+                        惟該管理人員可以判斷的是，這個異常現象應該是人為的因素比較大，因此，管理人員為了確認 SQL Server 異常現象的發生是其所判斷的「人為因素」所產生。
+                    </p>
+                </div>
+                <div class="scenario-hint">
+                    <h4>情境重點提示</h4>
+                    <ul>
+                        <li>Log 紀錄不完整，看不出原因。</li>
+                        <li>懷疑是「人為操作」。</li>
+                        <li>需要進一步蒐證（抓兇手）。</li>
+                        <li>後續採用「封包側錄」與「深夜外部連線」調查。</li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Q13 -->
+            <section id="q13" class="question-block" data-type="single" data-answer="B">
+                <h2>第 13 題（單選）</h2>
+                <div class="question-text">
+                    此因素仍然可能持續發生，下列何項措施較有助於釐清以下議題？
+                </div>
+                <ul class="options-list">
+                    <li class="option-item"><label><input type="radio" name="q13" value="A"> (A) 防火牆設定阻擋 TCP 21 埠</label></li>
+                    <li class="option-item"><label><input type="radio" name="q13" value="B"> (B) 安裝資料庫稽核工具</label></li>
+                    <li class="option-item"><label><input type="radio" name="q13" value="C"> (C) 安裝防毒軟體</label></li>
+                    <li class="option-item"><label><input type="radio" name="q13" value="D"> (D) 重新設定路由器之路由表</label></li>
+                </ul>
+                <div class="current-selection">你目前選了：<span id="q13-disp">（尚未選擇）</span></div>
+                
+                <div class="feedback-box" id="q13-feedback"></div>
+
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="submitSingle('q13')">送出本題</button>
+                    <button onclick="resetQuestion('q13')">重作本題</button>
+                </div>
+
+                <details class="explanation-details" id="q13-exp">
+                    <summary>點此查看第 13 題完整解析</summary>
+                    <div class="explanation-content">
+                        <div class="exp-section"><span class="exp-label">題目</span> 釐清異常現象的人為因素。</div>
+                        <div class="exp-section"><span class="exp-label">第一步：找關鍵字</span> 釐清議題、人為因素、紀錄檔不足。</div>
+                        <div class="exp-section"><span class="exp-label">第二步：白話翻譯</span> 老闆問：「既然 Log 看不出是誰幹的好事，你要裝什麼工具才能把人抓出來？」</div>
+                        <div class="exp-section"><span class="exp-label">第三步：解題思路</span> 原本的 Log 不夠詳細，想知道「誰（Who）」在「什麼時間（When）」對「資料庫（Where）」做了「什麼指令（What）」。這就是<span class="term-highlight">稽核／審計（Audit）</span>的功能：把人的行為記清楚。</div>
+                        <div class="exp-section"><span class="exp-label">第四步：選項分析</span>
+                            <ul>
+                                <li>(A) 阻擋 TCP 21：這是 FTP 的 Port，跟資料庫無關。</li>
+                                <li>(B) <strong>資料庫稽核工具</strong>：專門記錄 SQL 指令與操作者，正解。</li>
+                                <li>(C) 防毒軟體：抓病毒程式，不是抓「人為操作指令」。</li>
+                                <li>(D) 設定路由表：這是決定網路怎麼走，跟紀錄行為無關。</li>
+                            </ul>
+                        </div>
+                        <div class="exp-section"><span class="exp-label">觀念補充與延伸</span> 稽核工具（Database Activity Monitoring, DAM）通常比內建 Log 更強大，甚至能阻擋惡意指令。</div>
+                        <div class="exp-section"><span class="exp-label">記憶口訣</span> 抓人要看紀錄，紀錄不足裝稽核。</div>
+                        <div class="exp-section"><span class="exp-label">常見陷阱</span> 看到「防毒」覺得是萬靈丹。防毒擋不了合法的帳號做壞事（例如刪庫）。</div>
+                        <div class="exp-section"><span class="exp-label">正確答案</span> <strong>(B)</strong></div>
+                        <div class="exp-section">
+                            <span class="exp-label">自我檢測</span>
+                            <p>Q: 如果目的是防止外部攻擊者掃描 Port，該用什麼？ <span class="self-check-answer">防火牆</span></p>
+                            <p>Q: FTP 傳輸檔案通常使用哪兩個 Port？ <span class="self-check-answer">20, 21</span></p>
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- Q14 -->
+            <section id="q14" class="question-block" data-type="single" data-answer="D">
+                <h2>第 14 題（單選）</h2>
+                <div class="question-text">
+                    該管理人員安裝<span class="term-highlight">網路封包側錄器（把經過的資料小包裹先錄下來）</span>後，發現有一個來自 210.34.17.8 的 <span class="term-highlight">IP 位址（網路上的門牌號碼）</span> 在深夜連接至資料庫主機（TCP 3389 埠以及 TCP 1433 埠）。請問下列敘述何者較為適當？
+                </div>
+                <ul class="options-list">
+                    <li class="option-item"><label><input type="radio" name="q14" value="A"> (A) 外部人員使用 VNC 軟體進行連線</label></li>
+                    <li class="option-item"><label><input type="radio" name="q14" value="B"> (B) 外部人員使用虛擬私有網路（VPN）連接內部網路</label></li>
+                    <li class="option-item"><label><input type="radio" name="q14" value="C"> (C) 外部人員使用虛擬私有網路（VPN）連接 SQL Server</label></li>
+                    <li class="option-item"><label><input type="radio" name="q14" value="D"> (D) 外部人員使用 Remote Desktop Protocol（RDP）連接內部網路設備</label></li>
+                </ul>
+                <div class="current-selection">你目前選了：<span id="q14-disp">（尚未選擇）</span></div>
+                
+                <div class="feedback-box" id="q14-feedback"></div>
+
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="submitSingle('q14')">送出本題</button>
+                    <button onclick="resetQuestion('q14')">重作本題</button>
+                </div>
+
+                <details class="explanation-details" id="q14-exp">
+                    <summary>點此查看第 14 題完整解析</summary>
+                    <div class="explanation-content">
+                        <div class="exp-section"><span class="exp-label">題目</span> 判斷 Port 號代表的服務。</div>
+                        <div class="exp-section"><span class="exp-label">第一步：找關鍵字</span> TCP 3389、TCP 1433、深夜連線。</div>
+                        <div class="exp-section"><span class="exp-label">第二步：白話翻譯</span> 「我看見兩個門牌號碼：3389 號房和 1433 號房有人進出，這是什麼房間？」</div>
+                        <div class="exp-section"><span class="exp-label">第三步：解題思路</span> 這是考 Port 號對應：
+                            <ul>
+                                <li><strong>TCP 3389</strong>：微軟遠端桌面（<span class="term-highlight">RDP</span>, Remote Desktop Protocol）。</li>
+                                <li><strong>TCP 1433</strong>：SQL Server 預設通訊埠。</li>
+                            </ul>
+                        </div>
+                        <div class="exp-section"><span class="exp-label">第四步：選項分析</span>
+                            <ul>
+                                <li>(A) VNC：通常使用 TCP 5900。</li>
+                                <li>(B)(C) <span class="term-highlight">VPN（加密隧道，把外部的人「安全接進來」）</span>：VPN 是一種通道技術，連上後再去連內部服務。雖然有可能先撥 VPN，但題目直接呈現的是「看到 3389 連線」，最直接的證據指向 RDP。且 VPN 通訊埠通常是 UDP 1194 (OpenVPN) 或 TCP 443 (SSL VPN)。</li>
+                                <li>(D) <strong>使用 RDP 連接</strong>：3389 就是 RDP 的特徵，完全吻合。</li>
+                            </ul>
+                        </div>
+                        <div class="exp-section"><span class="exp-label">觀念補充與延伸</span> 駭客常掃描 3389 埠進行暴力破解密碼，一定要改 Port 或限制來源 IP。</div>
+                        <div class="exp-section"><span class="exp-label">記憶口訣</span> 3389 遠端見（RDP），1433 資料現（SQL）。</div>
+                        <div class="exp-section"><span class="exp-label">常見陷阱</span> 看到「連接內部網路」就想選 VPN。要看證據（Port 號）說話。</div>
+                        <div class="exp-section"><span class="exp-label">正確答案</span> <strong>(D)</strong></div>
+                        <div class="exp-section">
+                            <span class="exp-label">自我檢測</span>
+                            <p>Q: 網頁瀏覽 HTTP 預設是哪個 Port？ <span class="self-check-answer">80</span></p>
+                            <p>Q: 加密網頁 HTTPS 預設是哪個 Port？ <span class="self-check-answer">443</span></p>
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- Q15 -->
+            <section id="q15" class="question-block" data-type="single" data-answer="D">
+                <h2>第 15 題（單選）</h2>
+                <div class="question-text">
+                    警察迅速找到案件當事人（前 MIS 經理），請問對於警察為什麼可以在短短的時間內就可以找到案件當事人的敘述，下列何者最<strong>「不」</strong>可能？
+                </div>
+                <ul class="options-list">
+                    <li class="option-item"><label><input type="radio" name="q15" value="A"> (A) 因為網路封包的內容有案件當事人進入 SQL Server 使用的帳號</label></li>
+                    <li class="option-item"><label><input type="radio" name="q15" value="B"> (B) 因為網路封包的內容有案件當事人進入 SQL Server 使用的外部 IP 位址</label></li>
+                    <li class="option-item"><label><input type="radio" name="q15" value="C"> (C) 因為網路封包的內容有案件當事人進入 SQL Server 的 MFA Token</label></li>
+                    <li class="option-item"><label><input type="radio" name="q15" value="D"> (D) 因為網路封包的內容有案件當事人在 SQL Server 所下的 Command</label></li>
+                </ul>
+                <div class="current-selection">你目前選了：<span id="q15-disp">（尚未選擇）</span></div>
+                
+                <div class="feedback-box" id="q15-feedback"></div>
+
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="submitSingle('q15')">送出本題</button>
+                    <button onclick="resetQuestion('q15')">重作本題</button>
+                </div>
+
+                <details class="explanation-details" id="q15-exp">
+                    <summary>點此查看第 15 題完整解析</summary>
+                    <div class="explanation-content">
+                        <div class="exp-section"><span class="exp-label">題目</span> 哪一個證據對「確認身分（是誰做的）」幫助最小？</div>
+                        <div class="exp-section"><span class="exp-label">第一步：找關鍵字</span> 迅速找到當事人、最不可能。</div>
+                        <div class="exp-section"><span class="exp-label">第二步：白話翻譯</span> 警察抓到人是因為知道「他是誰」。下面哪一個東西只能證明「做了壞事」但無法直接證明「是誰做的」？</div>
+                        <div class="exp-section"><span class="exp-label">第三步：解題思路</span>
+                            <ul>
+                                <li>帳號 (A) = 名字（雖然可能被盜用，但直指某人）。</li>
+                                <li>IP (B) = 地址（可向電信商調閱是誰家）。</li>
+                                <li>MFA Token (C) = 驗證代碼。這選項其實也有爭議，因為 Token 是一次性的且加密，通常很難從封包還原身分。但本題邏輯傾向比較 A/B/D 的功能性。</li>
+                                <li>Command (D) = 做了什麼動作（如 <code>DROP TABLE</code>）。指令本身是文字，任何人登入都可以打一樣的指令。知道「有人殺人」跟知道「兇手是誰」是兩回事。</li>
+                            </ul>
+                        </div>
+                        <div class="exp-section"><span class="exp-label">第四步：選項分析</span>
+                            <ul>
+                                <li>(A) 帳號：直接關聯到人。</li>
+                                <li>(B) IP：可追查物理位置。</li>
+                                <li>(C) <span class="term-highlight">MFA Token（多因素驗證代碼）</span>：雖然難以逆推，但若有紀錄對應，仍屬身分驗證環節。</li>
+                                <li>(D) <strong>SQL Command</strong>：這是「犯罪行為」的證據，不是「犯罪者身分」的證據。封包裡看到 `DELETE DATA` 只能確認被攻擊，不能確認是前經理做的（除非他把自己名字打在 SQL 裡，但這不合理）。</li>
+                            </ul>
+                        </div>
+                        <div class="exp-section"><span class="exp-label">觀念補充與延伸</span> 這是鑑識科學的邏輯：證據分為「行為證據」與「身分證據」。指令是行為，帳號/IP 是身分。</div>
+                        <div class="exp-section"><span class="exp-label">記憶口訣</span> 帳號是名，IP 是家，指令是動作（動作不等於人）。</div>
+                        <div class="exp-section"><span class="exp-label">常見陷阱</span> 覺得每個選項都在封包裡，所以都很重要。要區分「What (做了什麼)」與「Who (是誰)」。</div>
+                        <div class="exp-section"><span class="exp-label">正確答案</span> <strong>(D)</strong></div>
+                        <div class="exp-section">
+                            <span class="exp-label">自我檢測</span>
+                            <p>Q: 如果 IP 是來自國外跳板（Proxy），還容易抓到人嗎？ <span class="self-check-answer">不容易，需要跨國司法互助</span></p>
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- Q16 -->
+            <section id="q16" class="question-block" data-type="multi" data-answer="A,B,D">
+                <h2>第 16 題（複選）</h2>
+                <div class="question-text">
+                    公司高層要求降低風險，防止類似案再次發生，請問下列哪些是正確的控制措施？
+                </div>
+                <ul class="options-list">
+                    <li class="option-item"><label><input type="checkbox" name="q16" value="A"> (A) 建立內部資訊安全管理制度並發布與確實施行</label></li>
+                    <li class="option-item"><label><input type="checkbox" name="q16" value="B"> (B) 對於離職人員應及時將其所使用之帳號停用或刪除</label></li>
+                    <li class="option-item"><label><input type="checkbox" name="q16" value="C"> (C) 重新調整防火牆政策以阻擋所有對資料庫的連線</label></li>
+                    <li class="option-item"><label><input type="checkbox" name="q16" value="D"> (D) 進行內部資訊安全教育訓練與資安意識宣導</label></li>
+                </ul>
+                <div class="current-selection">你目前選了：<span id="q16-disp">（尚未選擇）</span></div>
+                
+                <div class="feedback-box" id="q16-feedback"></div>
+
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="submitMulti('q16')">送出本題</button>
+                    <button onclick="resetQuestion('q16')">重作本題</button>
+                </div>
+
+                <details class="explanation-details" id="q16-exp">
+                    <summary>點此查看第 16 題完整解析</summary>
+                    <div class="explanation-content">
+                        <div class="exp-section"><span class="exp-label">題目</span> 防止離職人員搞破壞的正確措施。</div>
+                        <div class="exp-section"><span class="exp-label">第一步：找關鍵字</span> 降低風險、防止再發生、離職 MIS 經理。</div>
+                        <div class="exp-section"><span class="exp-label">第二步：白話翻譯</span> 怎麼做才能避免下次又被離職員工回來亂搞？</div>
+                        <div class="exp-section"><span class="exp-label">第三步：解題思路</span> 資安管理三大要素：人、制度、技術。
+                            <ul>
+                                <li>(A) 制度面：要有規矩。</li>
+                                <li>(B) 技術/程序面：人走了，鑰匙（帳號）要收回來。</li>
+                                <li>(D) 人員面：要教員工要有資安觀念。</li>
+                            </ul>
+                        </div>
+                        <div class="exp-section"><span class="exp-label">第四步：選項分析</span>
+                            <ul>
+                                <li>(A) <strong>正確</strong>：ISMS（資訊安全管理制度）是根本。</li>
+                                <li>(B) <strong>正確</strong>：帳號管理最基本的原則，離職即停用。本案就是因為沒停用才被進來。</li>
+                                <li>(C) 錯誤：<strong>阻擋「所有」連線</strong>？那公司的網站、ERP 系統怎麼讀資料？這叫「因噎廢食」，為了安全犧牲所有可用性，是錯誤的控制措施。</li>
+                                <li>(D) <strong>正確</strong>：教育訓練可提升整體防護意識。</li>
+                            </ul>
+                        </div>
+                        <div class="exp-section"><span class="exp-label">觀念補充與延伸</span> 權限管理原則：最小權限原則（Need-to-Know）。離職流程（Exit Interview）中必須包含 IT 資產與帳號回收。</div>
+                        <div class="exp-section"><span class="exp-label">記憶口訣</span> 制度要訂、帳號要刪、教育要做，但生意還是要做（不能全擋）。</div>
+                        <div class="exp-section"><span class="exp-label">常見陷阱</span> 看到「阻擋連線」覺得很安全。資安的目標是 CIA（機密、完整、可用），選項 C 破壞了可用性。</div>
+                        <div class="exp-section"><span class="exp-label">正確答案</span> <strong>(A)、(B)、(D)</strong></div>
+                        <div class="exp-section">
+                            <span class="exp-label">自我檢測</span>
+                            <p>Q: 為了方便，所有人共用一個 Administrator 帳號好嗎？ <span class="self-check-answer">不好，無法歸屬責任（不可否認性）</span></p>
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- Global Action -->
+            <div class="global-actions">
+                <h3>準備好交卷了嗎？</h3>
+                <button class="btn-primary" style="font-size: 20px; padding: 15px 30px;" onclick="submitAll()">全部送出與批改</button>
+            </div>
+
+            <!-- 總整理 -->
+            <section id="section-recap" class="summary-recap">
+                <h2 style="margin-top:0; border-left:none;">【題組總整理】事件調查流程與生活比喻</h2>
+                
+                <div class="story-flow">
+                    <div class="story-step">
+                        <div class="step-icon">1</div>
+                        <div>
+                            <strong>發現問題與蒐證不足（對應 Q13）：</strong><br>
+                            就像家裡遭小偷，結果發現監視器（Log）壞了或是角度不對，看不清楚小偷是誰。這時候需要加裝「更高解析度的攝影機」或「動作感應器」，也就是<strong>資料庫稽核工具</strong>，才能把誰開了門、拿了什麼記錄得清清楚楚。
+                        </div>
+                    </div>
+                    
+                    <div class="story-step">
+                        <div class="step-icon">2</div>
+                        <div>
+                            <strong>技術偵查與定位（對應 Q14）：</strong><br>
+                            管理員決定蹲點埋伏（側錄封包）。半夜看到有人用萬能鑰匙開了 3389 號房門（RDP 遠端桌面）和 1433 號保險箱（SQL 資料庫）。這確認了小偷是從這兩個「入口」進來的，而不是爬窗戶（VPN 或其他途徑）。
+                        </div>
+                    </div>
+
+                    <div class="story-step">
+                        <div class="step-icon">3</div>
+                        <div>
+                            <strong>確認嫌疑犯身分（對應 Q15）：</strong><br>
+                            警察來了，為什麼能抓到人？因為封包裡留下了小偷的身分證（帳號）和他是從哪裡開車來的（IP 位址）。至於小偷在裡面把花瓶打破了（下 Command），這只能證明他搞破壞，不能證明「他是張三還是李四」，所以 Command 本身對「找人」幫助最小。
+                        </div>
+                    </div>
+
+                    <div class="story-step">
+                        <div class="step-icon">4</div>
+                        <div>
+                            <strong>事後補救與預防（對應 Q16）：</strong><br>
+                            抓到人後發現是離職的前管家。檢討改進：
+                            <ul>
+                                <li>(A) 訂好家規（制度）。</li>
+                                <li>(B) 管家離職當天就要把鑰匙收回來（刪除帳號）。</li>
+                                <li>(D) 告訴大家要有警覺心（教育訓練）。</li>
+                                <li>(C) <strong>錯誤示範</strong>：把家裡大門用水泥封死（阻擋所有連線），這樣連主人自己都回不了家了。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p style="text-align: center; color: #666; font-size: 14px; margin-top: 50px;">
+                iPAS 資訊安全工程師能力鑑定 - 題組練習與解析
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // 初始化：監聽所有選項變更
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+            inputs.forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const qId = e.target.name;
+                    updateSelectionDisplay(qId);
+                });
+            });
+
+            // 顯示回到頂部按鈕
+            window.onscroll = function() {
+                const btn = document.getElementById("back-to-top");
+                if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                    btn.style.display = "block";
+                } else {
+                    btn.style.display = "none";
+                }
+            };
+        });
+
+        // 更新選擇顯示文字
+        function updateSelectionDisplay(qId) {
+            const displaySpan = document.getElementById(qId + '-disp');
+            const inputs = document.querySelectorAll(`input[name="${qId}"]:checked`);
+            
+            if (inputs.length === 0) {
+                displaySpan.innerText = '（尚未選擇）';
+                return;
+            }
+
+            const values = Array.from(inputs).map(i => i.value).sort();
+            displaySpan.innerText = values.join('、');
+        }
+
+        // 重置單題
+        function resetQuestion(qId) {
+            const inputs = document.querySelectorAll(`input[name="${qId}"]`);
+            inputs.forEach(i => i.checked = false);
+            updateSelectionDisplay(qId);
+            
+            const feedbackBox = document.getElementById(qId + '-feedback');
+            feedbackBox.style.display = 'none';
+            feedbackBox.className = 'feedback-box';
+            feedbackBox.innerHTML = '';
+
+            // 關閉解析（選用）
+            // document.getElementById(qId + '-exp').open = false;
+        }
+
+        // 取得使用者答案
+        function getUserAnswer(qId) {
+            const inputs = document.querySelectorAll(`input[name="${qId}"]:checked`);
+            return Array.from(inputs).map(i => i.value).sort();
+        }
+
+        // 提交單選題 (Q13, Q14, Q15)
+        function submitSingle(qId) {
+            const section = document.getElementById(qId);
+            const correctAnswer = section.dataset.answer;
+            const userAnswer = getUserAnswer(qId);
+            const feedbackBox = document.getElementById(qId + '-feedback');
+
+            if (userAnswer.length === 0) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            feedbackBox.style.display = 'block';
+            
+            if (userAnswer[0] === correctAnswer) {
+                feedbackBox.className = 'feedback-box feedback-correct';
+                feedbackBox.innerHTML = `<strong>答對了！</strong> 正確答案是 ${correctAnswer}。`;
+            } else {
+                feedbackBox.className = 'feedback-box feedback-wrong';
+                feedbackBox.innerHTML = `<strong>答錯了。</strong> 你選了 ${userAnswer[0]}，但正確答案是 <strong>${correctAnswer}</strong>。<br>建議點擊下方「看解析」了解原因。`;
+            }
+            
+            // 鼓勵查看解析
+            // document.getElementById(qId + '-exp').open = true; 
+        }
+
+        // 提交複選題 (Q16)
+        function submitMulti(qId) {
+            const section = document.getElementById(qId);
+            const correctArr = section.dataset.answer.split(',');
+            const userAnswer = getUserAnswer(qId);
+            const feedbackBox = document.getElementById(qId + '-feedback');
+
+            if (userAnswer.length === 0) {
+                alert('請先選擇答案！');
+                return;
+            }
+
+            feedbackBox.style.display = 'block';
+
+            // 比對邏輯
+            const missing = correctArr.filter(x => !userAnswer.includes(x));
+            const extra = userAnswer.filter(x => !correctArr.includes(x));
+            const isPerfect = missing.length === 0 && extra.length === 0;
+
+            if (isPerfect) {
+                feedbackBox.className = 'feedback-box feedback-correct';
+                feedbackBox.innerHTML = `<strong>完全正確！</strong> 答案就是 ${correctArr.join('、')}。`;
+            } else {
+                feedbackBox.className = 'feedback-box feedback-wrong';
+                let msg = `<strong>答錯了。</strong><br>`;
+                if (missing.length > 0) msg += `你少選了：${missing.join('、')}<br>`;
+                if (extra.length > 0) msg += `你多選了：${extra.join('、')}<br>`;
+                msg += `正確答案是：<strong>${correctArr.join('、')}</strong>`;
+                feedbackBox.innerHTML = msg;
+            }
+        }
+
+        // 全部送出
+        function submitAll() {
+            const qIds = ['q13', 'q14', 'q15', 'q16'];
+            let score = 0;
+            let total = 4;
+
+            qIds.forEach(qId => {
+                const section = document.getElementById(qId);
+                const type = section.dataset.type;
+                const correct = section.dataset.answer;
+                const user = getUserAnswer(qId).join(','); // 轉字串比對
+                
+                // 觸發個別批改顯示
+                if (type === 'single') submitSingle(qId);
+                else submitMulti(qId);
+
+                // 計算分數
+                if (user === correct) {
+                    score++;
+                }
+            });
+
+            setTimeout(() => {
+                alert(`批改完成！\n\n你答對了 ${score} / ${total} 題。\n\n請檢視每一題下方的回饋與解析。`);
+                // 自動展開所有解析（選用，視教學需求而定，這裡先不自動展開以免版面太亂）
+            }, 300);
+        }
+    </script>
+</body>
+</html>

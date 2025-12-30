@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安衝刺 - 題號3：上市櫃公司資安組織設置</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --highlight-color: #fffacd; /* 預設螢光筆顏色 */
+            --active-highlight: #ffd700;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 卡片與版面設計 */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        p, li {
+            margin-bottom: 10px;
+        }
+
+        ul {
+            padding-left: 25px;
+        }
+
+        /* 關鍵字高亮樣式 */
+        .keyword-span {
+            padding: 0 2px;
+            border-radius: 2px;
+            transition: background-color 0.3s;
+        }
+        
+        .highlight-active {
+            background-color: var(--active-highlight);
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* 互動按鈕區 */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .btn-option {
+            background-color: #fff;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .btn-option:hover, .btn-option:focus {
+            background-color: #eef2f5;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-option.correct {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .btn-option.wrong {
+            background-color: var(--error-color);
+            color: white;
+            border-color: var(--error-color);
+        }
+
+        /* 工具列 */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-tool {
+            padding: 10px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: bold;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .btn-tool:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+        }
+
+        /* 手風琴效果 (Accordion) */
+        details {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        summary {
+            background-color: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 移除預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        /* 選項分析鎖定遮罩 */
+        .analysis-locked {
+            filter: blur(5px);
+            pointer-events: none;
+            opacity: 0.5;
+            user-select: none;
+        }
+        
+        .locked-message {
+            display: none;
+            text-align: center;
+            font-weight: bold;
+            color: var(--error-color);
+            padding: 10px;
+            background: #ffecec;
+            border: 1px solid var(--error-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        /* 一分鐘速記小卡 */
+        .cheat-sheet {
+            background-color: #fffbe6; /* 淡黃色便利貼感 */
+            border-left: 5px solid #f1c40f;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none; /* 預設隱藏 */
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        /* 標籤 */
+        .tag {
+            display: inline-block;
+            background-color: #e1e1e1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #555;
+            margin-right: 5px;
+        }
+
+        /* 自我檢測按鈕 */
+        .btn-show-answer {
+            background-color: transparent;
+            border: 1px dashed var(--accent-color);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        
+        .hidden-answer {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f6f3;
+            border-left: 3px solid var(--success-color);
+        }
+
+        /* 回饋區 */
+        #feedback-area {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1>iPAS 資訊安全規劃實務 - 短期衝刺精選</h1>
+        <p>單元：公司治理與法遵 / 資安組織設置</p>
+    </div>
+
+    <!-- 工具列 -->
+    <div class="toolbar">
+        <button class="btn-tool" onclick="toggleKeywords()">[觀念] 關鍵字提示</button>
+        <button class="btn-tool" onclick="toggleCheatSheet()">[速記] 一分鐘小卡</button>
+        <button class="btn-tool btn-reset" onclick="resetQuiz()">重新作答</button>
+    </div>
+
+    <!-- 一分鐘速記小卡 -->
+    <div id="cheatSheet" class="cheat-sheet">
+        <h2>一分鐘速記：上市櫃資安分級</h2>
+        <ul style="list-style-type: none;">
+            <li><strong>對象：</strong>第一級（資本額 &ge; 100億 或 成分股）</li>
+            <li><strong>期限：</strong>111年底前完成</li>
+            <li><strong>要求（全配）：</strong>
+                <ul>
+                    <li>(1) 資訊安全長 (CISO)</li>
+                    <li>(2) 資安專責單位</li>
+                    <li>(5) 資安專責單位主管</li>
+                    <li>(4) 資安專責人員 (至少2名)</li>
+                </ul>
+            </li>
+            <li><strong>口訣：</strong>百億大戶要全套：長、單、管、雙人。</li>
+        </ul>
+    </div>
+
+    <!-- 題目區塊 -->
+    <div class="card">
+        <h2>【題目】</h2>
+        <p id="question-text">
+            3. 依據民國 <span class="keyword-span" data-idx="0">110 年 12 月</span>發布的《<span class="tooltip" title="股票或債券對外公開募集/交易的公司">公開發行公司</span>建立<span class="tooltip" title="公司用來管流程、避免出錯與舞弊的管理制度">內部控制制度</span>處理準則》<span class="keyword-span" data-idx="1">第九條之一第二項</span>規定，以及金融監督管理委員會 110 年 12 月 28 日<span class="keyword-span" data-idx="2">金管證審字第 11003656544 號函釋</span>，<span class="keyword-span" data-idx="3">上市（櫃）公司</span><span class="keyword-span" data-idx="4">實收資本額達新台幣 100 億元以上</span>時，應於民國 <span class="keyword-span" data-idx="5">111 年 12 月 31 日前</span>，完成<span class="keyword-span" data-idx="6">哪些資訊安全單位及人員的設置</span>？
+        </p>
+        
+        <div style="background: #f9f9f9; padding: 10px; border-radius: 4px; margin: 10px 0;">
+            <strong>選項代碼：</strong><br>
+            1. 資訊安全長<br>
+            2. 資安專責單位<br>
+            3. 資安專責人<br>
+            4. 資安專責人員（至少 2 名）<br>
+            5. 資安專責單位主管
+        </div>
+
+        <div class="options-grid">
+            <button class="btn-option" onclick="checkAnswer('A', this)">(A) 1、3、5</button>
+            <button class="btn-option" onclick="checkAnswer('B', this)">(B) 1、4、5</button>
+            <button class="btn-option" onclick="checkAnswer('C', this)">(C) 1、2、4、5</button>
+            <button class="btn-option" onclick="checkAnswer('D', this)">(D) 1、2、3、5</button>
+        </div>
+
+        <div id="feedback-area"></div>
+    </div>
+
+    <!-- 第一步：找關鍵字 -->
+    <details open>
+        <summary>【第一步：找關鍵字】</summary>
+        <div class="details-content">
+            <p>請注意題幹中的以下線索（點擊上方「關鍵字提示」按鈕可查看標示）：</p>
+            <ul>
+                <li><mark>民國 110 年 12 月</mark>：規範發布的時間點，用來定位這是新版法規的要求。</li>
+                <li><mark>第九條之一第二項</mark>：這題考的是具體的條文規定，不是憑感覺選。</li>
+                <li><mark>金管證審字第 11003656544 號函釋</mark>：<span class="tag">名詞解釋</span><strong>函釋</strong>是指主管機關（金管會）對法規如何執行所做的解釋與補充說明。這裡用來補強條文落地細節。</li>
+                <li><mark>上市（櫃）公司</mark>：確認適用對象，非一般中小企業。</li>
+                <li><mark>實收資本額達 100 億元以上</mark>：<strong>最重要的門檻條件</strong>。這是區分「第一級」公司與其他等級的關鍵。</li>
+                <li><mark>111 年 12 月 31 日前完成</mark>：這是給第一級公司的緩衝期限（題目有時會考期限）。</li>
+                <li><mark>設置哪些資訊安全單位及人員</mark>：題目核心，要你從清單中選出正確的組織編制組合。</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 第二步：白話翻譯 -->
+    <details>
+        <summary>【第二步：白話翻譯】</summary>
+        <div class="details-content">
+            <p>用高中生聽得懂的話來說：</p>
+            <div style="background-color: #e8f4f8; padding: 15px; border-radius: 4px;">
+                「如果這家公司是股票有上市櫃的大公司，而且真的很有錢（資本額超過 100 億），政府規定他們必須在期限內把資安團隊建立起來。請問，這個『資安團隊』到底包含哪些角色和單位？」
+            </div>
+            <p style="margin-top:10px;">
+                名詞補充：<br>
+                1. <strong>公開發行公司</strong>：股票或債券對外公開募集/交易的公司，受金管會嚴格監管。<br>
+                2. <strong>內部控制制度</strong>：公司為了避免出錯、舞弊，並確保營運效率所設計的一套管理流程與規範。
+            </p>
+        </div>
+    </details>
+
+    <!-- 第三步：解題思路 -->
+    <details>
+        <summary>【第三步：解題思路】</summary>
+        <div class="details-content">
+            <h3>這題在考什麼觀念？</h3>
+            <p>考公司治理規範下，大型上市櫃公司（第一級）的資安組織設置標準要求。</p>
+
+            <h3>解題步驟</h3>
+            <ol>
+                <li><strong>先抓門檻：</strong>看到「資本額 &ge; 100 億」和「上市櫃」，直接判定這是<strong>第一級</strong>資安責任公司。</li>
+                <li><strong>對照「必設清單」：</strong>第一級公司資源多、風險大，要求最高。必須要有：
+                    <ul>
+                        <li><span class="tag">首長</span><strong>資訊安全長 (CISO)</strong>：公司資安最高負責人。</li>
+                        <li><span class="tag">組織</span><strong>資安專責單位</strong>：公司裡專門負責資安的獨立部門。</li>
+                        <li><span class="tag">管理</span><strong>資安專責單位主管</strong>：帶領該部門的人。</li>
+                        <li><span class="tag">執行</span><strong>資安專責人員（至少 2 名）</strong>：實際做事的人。</li>
+                    </ul>
+                </li>
+                <li><strong>用排除法：</strong>分辨選項中的「資安專責人」與「資安專責人員（至少 2 名）」。題目要的是第一級編制，所以必須選有「單位」且人員有「數量要求」的選項。</li>
+            </ol>
+
+            <h3>原理與規則</h3>
+            <p>大型公司資安要「有人（CISO/人員）+ 有組織（專責單位）+ 有管理者（單位主管）」才能形成可負責、可執行、可稽核的治理鏈。題目代碼 4 特別寫「至少 2 名」，表示這是對人數的硬性規定，不能只派一個人（代碼 3 的專責人）兼著做。</p>
+        </div>
+    </details>
+
+    <!-- 第四步：選項分析 -->
+    <details id="analysis-section">
+        <summary>【第四步：選項分析】</summary>
+        <div class="details-content">
+            <div id="locked-msg" class="locked-message">請先回答題目以查看詳細解析！</div>
+            <div id="analysis-content" class="analysis-locked">
+                <p>讓我們逐一檢查 A、B、C、D 四個選項，看它們錯在哪裡：</p>
+                
+                <div style="margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+                    <strong>(A) 1、3、5</strong> <span style="color:var(--error-color); font-weight:bold;">[錯誤]</span><br>
+                    <span style="color:#666;">理由：</span>缺少了「2. 資安專責單位」。此外，選項用的是「3. 資安專責人」（通常指單一窗口），不符合第一級公司要求「4. 資安專責人員（至少 2 名）」的編制數量。
+                </div>
+
+                <div style="margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+                    <strong>(B) 1、4、5</strong> <span style="color:var(--error-color); font-weight:bold;">[錯誤]</span><br>
+                    <span style="color:#666;">理由：</span>雖然有選到資安長和 2 名人員，但漏掉了「2. 資安專責單位」。法規要求這是一個正式的「單位」（部門），不能只是幾個人散落在其他部門。
+                </div>
+
+                <div style="margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">
+                    <strong>(C) 1、2、4、5</strong> <span style="color:var(--success-color); font-weight:bold;">[正確]</span><br>
+                    <span style="color:#666;">理由：</span>完全符合法規對第一級公司的要求：
+                    <ul>
+                        <li>1. 資訊安全長（CISO）</li>
+                        <li>2. 資安專責單位（組織）</li>
+                        <li>4. 資安專責人員（至少 2 名，人力充足）</li>
+                        <li>5. 資安專責單位主管（管理層）</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <strong>(D) 1、2、3、5</strong> <span style="color:var(--error-color); font-weight:bold;">[錯誤]</span><br>
+                    <span style="color:#666;">理由：</span>這裡選了「3. 資安專責人」，而漏了「4. 資安專責人員（至少 2 名）」。對於百億等級的大公司，只設一個「專責人」是不合規的，必須要有明確的員額編制（至少 2 人）。
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- 觀念補充與延伸 -->
+    <details>
+        <summary>【觀念補充與延伸】</summary>
+        <div class="details-content">
+            <h3>核心觀念定位</h3>
+            <p>本題屬於「治理與法遵」章節。最常見的考法就是給定「資本額」或「公司等級」，要你配對出正確的「應設置項目」。</p>
+
+            <h3>觸類旁通（舉一反三）</h3>
+            <ul>
+                <li><strong>對比概念：</strong>
+                    <ul>
+                        <li><strong>資安專責人</strong>：通常指第二級公司要求，只需設一名負責主管與一名人員，要求較寬鬆。</li>
+                        <li><strong>資安專責人員（至少 2 名）</strong>：第一級公司專屬要求，強調人力備援與分工。</li>
+                    </ul>
+                </li>
+                <li><strong>變化題型：</strong>
+                    <ul>
+                        <li>如果題目改成「實收資本額未達 100 億元但屬電子商務業者」，要求的層級就會下降（變第二級）。</li>
+                        <li>可能會問：「誰要對董事會報告資安執行情形？」答案通常是「資訊安全長」。</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 記憶口訣 -->
+    <details>
+        <summary>【記憶口訣】</summary>
+        <div class="details-content">
+            <p>要選出「1、2、4、5」，請記住以下口訣（無 Emoji 版）：</p>
+            <div style="background-color: #fdf2e9; padding: 15px; border-left: 5px solid #d35400; font-weight: bold; font-size: 1.1rem;">
+                「百億大戶要全套：長、單、管、雙人」
+            </div>
+            <ul style="margin-top: 10px;">
+                <li><strong>百億大戶</strong>：資本額 100 億以上。</li>
+                <li><strong>長</strong>：資安長 (1)。</li>
+                <li><strong>單</strong>：專責單位 (2)。</li>
+                <li><strong>管</strong>：單位主管 (5)。</li>
+                <li><strong>雙人</strong>：人員至少 2 名 (4)。</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 常見陷阱 -->
+    <details>
+        <summary>【常見陷阱】</summary>
+        <div class="details-content">
+            <h3>考生容易犯錯的三個點：</h3>
+            <ol>
+                <li><strong>混淆人員定義：</strong>把「專責人」(3) 誤以為就是「專責人員」(4)。記得看到 100 億就要找有寫「至少 2 名」的選項。</li>
+                <li><strong>遺漏組織：</strong>只記得要有「長」(CISO)，卻忘了法規強調要有「單位」(部門)。</li>
+                <li><strong>忽略主管：</strong>容易覺得有了單位就有主管，但題目選項把「單位」和「單位主管」拆開，兩個都要選才完整。</li>
+            </ol>
+            
+            <h3>避坑指南</h3>
+            <p>作答時，請用<strong>「人、組織、管理」</strong>三件事檢查一次：</p>
+            <ul>
+                <li>有資安長（高層人）</li>
+                <li>有專責單位（組織）</li>
+                <li>有主管（管理層）</li>
+                <li>有人員至少 2 名（執行層）</li>
+            </ul>
+        </div>
+    </details>
+
+    <!-- 正確答案 -->
+    <details>
+        <summary>【正確答案】</summary>
+        <div class="details-content">
+            <p style="font-size: 1.2rem; font-weight: bold; color: var(--success-color);">答案：(C)</p>
+            <p>理由：資本額 100 億以上屬第一級公司，需設置「資安長、資安專責單位、資安專責單位主管、資安專責人員（至少 2 人）」。</p>
+        </div>
+    </details>
+
+    <!-- 自我檢測 -->
+    <details>
+        <summary>【自我檢測】</summary>
+        <div class="details-content">
+            <p>考考你是否真的懂了：</p>
+
+            <div style="margin-bottom: 20px;">
+                <p><strong>Q1. 如果題目選項把「至少 2 名」改成「至少 1 名」，這符合 100 億資本額公司的規定嗎？</strong></p>
+                <button class="btn-show-answer" onclick="toggleAnswer('ans1')">顯示答案</button>
+                <div id="ans1" class="hidden-answer">
+                    <strong>不符合。</strong><br>
+                    第一級公司（100億以上）法規明確要求專責人員「至少 2 名」。若是第二級公司才允許設 1 名。
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <p><strong>Q2. 題目若只問「單位」要設哪些（不問人員），答案會剩下哪幾項？</strong></p>
+                <button class="btn-show-answer" onclick="toggleAnswer('ans2')">顯示答案</button>
+                <div id="ans2" class="hidden-answer">
+                    <strong>剩下「2. 資安專責單位」。</strong><br>
+                    資安長、主管、人員都屬於「人」的範疇，只有「資安專責單位」是組織單位的編制。但通常題目會混在一起考。
+                </div>
+            </div>
+
+            <div>
+                <p><strong>Q3. 為什麼需要特別指定「單位主管」而不是只有人員就好？</strong></p>
+                <button class="btn-show-answer" onclick="toggleAnswer('ans3')">顯示答案</button>
+                <div id="ans3" class="hidden-answer">
+                    <strong>為了落實管理責任。</strong><br>
+                    人員負責執行，主管負責督導與管理。在內控制度中，「權責分工」是很重要的概念，主管職能確保資安業務有被正確推動與考核。
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <div style="margin-top: 40px; text-align: center; color: #888; font-size: 0.9rem;">
+        iPAS 資訊安全規劃實務 - 互動式講義
+    </div>
+</div>
+
+<script>
+    // 狀態變數
+    let hasAnswered = false;
+
+    // 關鍵字高亮功能
+    function toggleKeywords() {
+        const keywords = document.querySelectorAll('.keyword-span');
+        keywords.forEach(span => {
+            span.classList.toggle('highlight-active');
+        });
+    }
+
+    // 速記小卡切換
+    function toggleCheatSheet() {
+        const sheet = document.getElementById('cheatSheet');
+        if (sheet.style.display === 'none' || sheet.style.display === '') {
+            sheet.style.display = 'block';
+        } else {
+            sheet.style.display = 'none';
+        }
+    }
+
+    // 檢查答案
+    function checkAnswer(option, btnElement) {
+        if (hasAnswered) return; // 防止重複作答
+
+        const feedback = document.getElementById('feedback-area');
+        const analysisContent = document.getElementById('analysis-content');
+        const lockedMsg = document.getElementById('locked-msg');
+        const analysisDetails = document.getElementById('analysis-section');
+
+        // 鎖定所有按鈕
+        const buttons = document.querySelectorAll('.btn-option');
+        buttons.forEach(btn => btn.style.pointerEvents = 'none');
+
+        hasAnswered = true;
+
+        if (option === 'C') {
+            // 正確
+            btnElement.classList.add('correct');
+            feedback.style.display = 'block';
+            feedback.style.backgroundColor = '#d4edda';
+            feedback.style.color = '#155724';
+            feedback.innerHTML = '✅ 正確！完全命中法規四要素：資安長 + 單位 + 主管 + 至少2名人員。';
+        } else {
+            // 錯誤
+            btnElement.classList.add('wrong');
+            feedback.style.display = 'block';
+            feedback.style.backgroundColor = '#f8d7da';
+            feedback.style.color = '#721c24';
+            let errorMsg = '';
+            switch(option) {
+                case 'A': errorMsg = '錯誤。缺少了「專責單位」，且人員數量定義不清。'; break;
+                case 'B': errorMsg = '錯誤。雖然有人員，但漏掉了建立「專責單位」這個組織要求。'; break;
+                case 'D': errorMsg = '錯誤。把「至少2名人員」選成了單一的「專責人」，不符百億公司規格。'; break;
+            }
+            feedback.innerHTML = '❌ ' + errorMsg + ' 請看下方解析。';
+            
+            // 標示出正確答案
+            buttons.forEach(btn => {
+                if(btn.textContent.includes('(C)')) {
+                    btn.classList.add('correct'); // 視覺提示正確答案
+                }
+            });
+        }
+
+        // 解鎖解析區
+        analysisContent.classList.remove('analysis-locked');
+        lockedMsg.style.display = 'none';
+        
+        // 自動展開解析區塊
+        if (!analysisDetails.open) {
+            analysisDetails.open = true;
+        }
+    }
+
+    // 重置測驗
+    function resetQuiz() {
+        hasAnswered = false;
+        
+        // 重置按鈕樣式
+        const buttons = document.querySelectorAll('.btn-option');
+        buttons.forEach(btn => {
+            btn.classList.remove('correct', 'wrong');
+            btn.style.pointerEvents = 'auto';
+        });
+
+        // 重置回饋區
+        const feedback = document.getElementById('feedback-area');
+        feedback.style.display = 'none';
+        feedback.innerHTML = '';
+
+        // 重置解析區鎖定
+        const analysisContent = document.getElementById('analysis-content');
+        const lockedMsg = document.getElementById('locked-msg');
+        const analysisDetails = document.getElementById('analysis-section');
+        
+        analysisContent.classList.add('analysis-locked');
+        lockedMsg.style.display = 'block';
+        analysisDetails.open = false; // 關閉解析摺疊
+
+        // 隱藏所有自我檢測答案
+        const hiddenAnswers = document.querySelectorAll('.hidden-answer');
+        hiddenAnswers.forEach(ans => ans.style.display = 'none');
+    }
+
+    // 自我檢測顯示答案
+    function toggleAnswer(id) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
+    }
+
+    // 初始化：顯示解析區的鎖定訊息
+    window.onload = function() {
+        const lockedMsg = document.getElementById('locked-msg');
+        lockedMsg.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

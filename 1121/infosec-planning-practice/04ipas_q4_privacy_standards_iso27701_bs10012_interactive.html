@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安衝刺 - 隱私標準解析 (Q4)</title>
+    <!-- 引入 Google Fonts (允許外部資源) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           4. 樣式 Tokens 固定
+           ========================================= */
+        :root {
+            /* 字體與字級 */
+            --font-family: system-ui, "Noto Sans TC", sans-serif;
+            --font-size-base: 16px;
+            --font-size-title: 18px;
+            --font-size-small: 14px;
+            
+            /* 間距與尺寸 */
+            --spacing-unit: 12px;
+            --card-padding: 16px;
+            --border-radius: 8px;
+            
+            /* 顏色 - 標籤規範 (不得修改) */
+            --color-tag-law: #7f8c8d;
+            --color-tag-iso: #27ae60;
+            --color-tag-zt:  #8e44ad;
+            --color-tag-net: #2980b9;
+            --color-tag-sec: #c0392b;
+            --color-tag-mgm: #d35400;
+
+            /* UI 顏色 */
+            --color-bg: #f4f6f7;
+            --color-text: #2c3e50;
+            --color-card-bg: #ffffff;
+            --color-border: #e0e0e0;
+            --color-primary: #34495e;
+            --color-accent: #3498db;
+            --color-success-bg: #d4edda;
+            --color-success-text: #155724;
+            --color-error-bg: #f8d7da;
+            --color-error-text: #721c24;
+            --color-explain-section-bg: #f8f9fa; /* 解析段落卡底色 */
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* =========================================
+           2. 整體版型與寬度規範
+           ========================================= */
+        .container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto; /* 水平置中 */
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-unit);
+        }
+
+        /* 卡片通用樣式 */
+        .card {
+            background-color: var(--color-card-bg);
+            border-radius: var(--border-radius);
+            padding: var(--card-padding);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--color-border);
+        }
+
+        /* =========================================
+           3. UI 骨架樣式
+           ========================================= */
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--color-primary);
+            color: white;
+        }
+        .header-title {
+            font-size: var(--font-size-title);
+            font-weight: 700;
+        }
+        .header-status {
+            font-size: var(--font-size-small);
+            background-color: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* Context */
+        .context-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #7f8c8d;
+            font-size: var(--font-size-small);
+            text-transform: uppercase;
+        }
+        .context-content {
+            color: #555;
+            font-style: italic;
+        }
+
+        /* Question */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 2px solid var(--color-border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-item:hover {
+            border-color: var(--color-accent);
+            background-color: #f0f8ff;
+        }
+
+        .option-item input {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--color-accent);
+        }
+
+        .action-btn {
+            margin-top: 16px;
+            background-color: var(--color-accent);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+        }
+        
+        .action-btn:hover {
+            filter: brightness(0.9);
+        }
+
+        /* Feedback */
+        .feedback {
+            display: none; /* 預設隱藏 */
+            border-left: 5px solid transparent;
+        }
+        .feedback.correct {
+            background-color: var(--color-success-bg);
+            color: var(--color-success-text);
+            border-left-color: #28a745;
+            display: block;
+        }
+        .feedback.error {
+            background-color: var(--color-error-bg);
+            color: var(--color-error-text);
+            border-left-color: #dc3545;
+            display: block;
+        }
+        .feedback-title {
+            font-weight: bold;
+            font-size: var(--font-size-title);
+            margin-bottom: 8px;
+        }
+
+        /* Explain (Accordion) */
+        .explain-toggle {
+            width: 100%;
+            text-align: left;
+            background-color: #f1f3f5;
+            border: none;
+            padding: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: var(--border-radius);
+        }
+        .explain-toggle::after {
+            content: '+';
+            font-size: 1.2rem;
+        }
+        .explain-toggle.active::after {
+            content: '-';
+        }
+        
+        .explain-content {
+            display: none;
+            margin-top: var(--spacing-unit);
+            flex-direction: column;
+            gap: var(--spacing-unit);
+        }
+        .explain-content.show {
+            display: flex;
+        }
+
+        /* 11. 解析段落卡 (Analysis Paragraph Cards) */
+        .analysis-card {
+            background-color: var(--color-explain-section-bg);
+            padding: var(--card-padding);
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+        .analysis-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--color-primary);
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 4px;
+        }
+        
+        .analysis-card ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+        .analysis-card li {
+            margin-bottom: 6px;
+        }
+
+        /* SelfCheck */
+        .self-check-item {
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 12px;
+        }
+        .self-check-item:last-child {
+            border-bottom: none;
+        }
+        details summary {
+            cursor: pointer;
+            color: var(--color-accent);
+            font-weight: 500;
+        }
+        details[open] summary {
+            margin-bottom: 8px;
+        }
+        .answer-text {
+            padding-left: 18px;
+            color: #555;
+            font-size: var(--font-size-small);
+        }
+
+        /* =========================================
+           6. 標籤顏色規範 (強制)
+           ========================================= */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: normal;
+            vertical-align: middle;
+        }
+        .tag-law { background-color: var(--color-tag-law); }
+        .tag-iso { background-color: var(--color-tag-iso); }
+        .tag-zt  { background-color: var(--color-tag-zt); }
+        .tag-net { background-color: var(--color-tag-net); }
+        .tag-sec { background-color: var(--color-tag-sec); }
+        .tag-mgm { background-color: var(--color-tag-mgm); }
+
+        /* 5. 重點字標註 */
+        mark {
+            background-color: #fff3cd;
+            color: inherit;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1. Header: 題號＋答題狀態 -->
+        <div class="card header">
+            <div class="header-title">Q4</div>
+            <div class="header-status" id="status-display">未作答</div>
+        </div>
+
+        <!-- 2. Context: 情境卡 -->
+        <div class="card context">
+            <div class="context-title">情境</div>
+            <div class="context-content">本題無額外情境</div>
+        </div>
+
+        <!-- 3. Question: 題目與選項 -->
+        <div class="card question">
+            <p class="question-text">
+                4. 常見的資訊安全標準中，下列哪些標準可以為<mark>個人資訊保護</mark>或<mark>隱私資訊管理</mark>提供指引？（複選）
+            </p>
+            <div class="options-list" id="options-container">
+                <label class="option-item">
+                    <input type="checkbox" name="option" value="A">
+                    <span>(A) <span class="tag tag-iso">ISO 27001</span></span>
+                </label>
+                <label class="option-item">
+                    <input type="checkbox" name="option" value="B">
+                    <span>(B) <span class="tag tag-iso">ISO 27701</span></span>
+                </label>
+                <label class="option-item">
+                    <input type="checkbox" name="option" value="C">
+                    <span>(C) <span class="tag tag-iso">BS 10012</span></span>
+                </label>
+                <label class="option-item">
+                    <input type="checkbox" name="option" value="D">
+                    <span>(D) <span class="tag tag-iso">IEC 62443</span></span>
+                </label>
+            </div>
+            <button class="action-btn" onclick="submitAnswer()">送出答案</button>
+        </div>
+
+        <!-- 4. Feedback: 判定結果與一句話理由 -->
+        <div class="card feedback" id="feedback-card">
+            <div class="feedback-title" id="feedback-title"></div>
+            <div id="feedback-reason"></div>
+        </div>
+
+        <!-- 5. Explain: 詳解卡（預設收合） -->
+        <div class="card explain">
+            <button class="explain-toggle" onclick="toggleExplain(this)">詳細解析</button>
+            <div class="explain-content" id="explain-content">
+                
+                <!-- 1. 找關鍵字 -->
+                <div class="analysis-card">
+                    <div class="analysis-title">第一步：找關鍵字</div>
+                    <ul>
+                        <li><mark>複選題</mark>：暗示答案可能不只一個。</li>
+                        <li><mark>個人資訊保護</mark>：俗稱個資保護，指保護可識別個人的資料。</li>
+                        <li><mark>隱私資訊管理</mark>：用制度來管個資的蒐集、使用與保存。</li>
+                        <li><mark>提供指引</mark>：尋找「專門」指導隱私保護的標準。</li>
+                    </ul>
+                </div>
+
+                <!-- 2. 白話翻譯 -->
+                <div class="analysis-card">
+                    <div class="analysis-title">第二步：白話翻譯</div>
+                    <p>這題在問：「下面這四個標準中，哪些是<strong>專門</strong>教怎麼管個資、保護隱私的？（請選出所有符合的）」</p>
+                </div>
+
+                <!-- 3. 解題思路 (新增) -->
+                <div class="analysis-card">
+                    <div class="analysis-title">第三步：解題思路</div>
+                    <p><strong>考點：</strong> 分辨「一般資安標準」與「隱私/個資專用標準」。</p>
+                    <p><strong>解題步驟：</strong></p>
+                    <ol style="margin-top: 5px; padding-left: 20px;">
+                        <li>先分辨哪些標準「專門談隱私/個資」。</li>
+                        <li>再排除「只談一般資安」(如 27001) 或「談工控安全」(如 62443) 的標準。</li>
+                        <li>因為是複選題，要確認「所有符合的都要選」。</li>
+                    </ol>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 8px;">
+                        <strong>原理：</strong> 隱私管理（Privacy）是資安的一個子領域，不是所有 ISO 27xxx 系列都直接處理個資。
+                    </p>
+                </div>
+
+                <!-- 4. 選項分析 -->
+                <div class="analysis-card">
+                    <div class="analysis-title">第四步：選項分析</div>
+                    <ul>
+                        <li><strong>(A) ISO 27001</strong> <span class="tag tag-iso">標準</span>：<br>這是「資訊安全管理系統」(ISMS)。重點在保護資產不外洩，雖涵蓋廣泛但非專門針對隱私指引。</li>
+                        <li><strong>(B) ISO 27701</strong> <span class="tag tag-iso">標準</span>：<br>這是「隱私資訊管理系統」(PIMS)。它是 ISO 27001 的擴充，專門針對隱私保護與個資管理提供指引。</li>
+                        <li><strong>(C) BS 10012</strong> <span class="tag tag-iso">標準</span>：<br>這是英國的「個人資訊管理標準」。這是全球早期針對個資保護的重要驗證標準。</li>
+                        <li><strong>(D) IEC 62443</strong> <span class="tag tag-iso">標準</span>：<br>這是「工業控制系統資安」(OT Security)。主要保護工廠機器與基礎設施，與個資隱私關聯最低。</li>
+                    </ul>
+                </div>
+
+                <!-- 5. 觀念補充與延伸 (新增) -->
+                <div class="analysis-card">
+                    <div class="analysis-title">觀念補充與延伸</div>
+                    <ul>
+                        <li><strong>核心定位</strong>：本題屬於「隱私與個人資料保護」章節。</li>
+                        <li><strong>標準目的簡表</strong>：
+                            <ul>
+                                <li>ISO 27001：保護資料安全（不被駭）。</li>
+                                <li>ISO 27701：保護個人隱私（合法使用資料）。</li>
+                                <li>BS 10012：英國版個資管理標準。</li>
+                                <li>IEC 62443：保護工廠與關鍵設施運作。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 6. 觸類旁通 (新增) -->
+                <div class="analysis-card">
+                    <div class="analysis-title">觸類旁通（舉一反三）</div>
+                    <ul>
+                        <li><strong>對比概念</strong>：ISMS（資訊安全管理系統） vs PIMS（隱私資訊管理系統）。</li>
+                        <li><strong>變化題型</strong>：如果考題問「與歐盟 GDPR 法規最相關的標準」，答案通常也是 ISO 27701 或 BS 10012。</li>
+                    </ul>
+                </div>
+
+                <!-- 7. 記憶口訣 -->
+                <div class="analysis-card">
+                    <div class="analysis-title">記憶口訣</div>
+                    <div style="background-color: #fff; padding: 8px; border-radius: 4px; text-align: center; border: 1px dashed #ccc;">
+                        「隱私要管人，27701、10012」
+                    </div>
+                </div>
+
+                 <!-- 8. 常見陷阱 -->
+                 <div class="analysis-card">
+                    <div class="analysis-title">常見陷阱</div>
+                    <ul>
+                        <li>看到 ISO 27001 就直覺選：它是一般資安，不是隱私專用。</li>
+                        <li>不認識 BS 10012：因為不是 ISO 開頭容易被忽略，但它是個資界的權威標準。</li>
+                        <li>誤選 IEC 62443：數字看起來很專業，但它是管機器的，不是管人的。</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 6. SelfCheck: 自我檢測 -->
+        <div class="card self-check">
+            <div class="analysis-title" style="margin-bottom: 12px;">自我檢測</div>
+            
+            <div class="self-check-item">
+                <details>
+                    <summary>若題目改問「一般資訊安全管理制度」，會選哪一個？</summary>
+                    <div class="answer-text">ISO 27001</div>
+                </details>
+            </div>
+            
+            <div class="self-check-item">
+                <details>
+                    <summary>ISO 27701 是建立在哪一個標準之上？</summary>
+                    <div class="answer-text">ISO 27001 (PIMS 是 ISMS 的擴充模組)</div>
+                </details>
+            </div>
+
+            <div class="self-check-item">
+                <details>
+                    <summary>為什麼 IEC 62443 不適合用來管個資？</summary>
+                    <div class="answer-text">因為它是針對工業控制系統（OT）的標準，重點在機器的運作安全，而非人的資料隱私。</div>
+                </details>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 定義標準答案 (複選題)
+        const CORRECT_ANSWERS = ["B", "C"];
+
+        function submitAnswer() {
+            // 取得所有勾選項目
+            const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+            const userAnswers = Array.from(checkboxes).map(cb => cb.value).sort();
+            
+            const statusDisplay = document.getElementById('status-display');
+            const feedbackCard = document.getElementById('feedback-card');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackReason = document.getElementById('feedback-reason');
+            const explainContent = document.getElementById('explain-content');
+            const explainToggle = document.querySelector('.explain-toggle');
+
+            // 判定邏輯：必須完全一致
+            const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(CORRECT_ANSWERS);
+
+            // 清除之前的樣式
+            feedbackCard.classList.remove('correct', 'error');
+
+            if (isCorrect) {
+                // 正確
+                statusDisplay.textContent = "答對";
+                statusDisplay.style.backgroundColor = "var(--color-success-bg)";
+                statusDisplay.style.color = "var(--color-success-text)";
+                
+                feedbackCard.classList.add('correct');
+                feedbackTitle.textContent = "判定：正確";
+                feedbackReason.textContent = "太棒了！您準確識別出了兩個專門針對隱私管理的標準。";
+                
+                // 自動展開詳解
+                explainContent.classList.add('show');
+                explainToggle.classList.add('active');
+            } else {
+                // 錯誤
+                statusDisplay.textContent = "答錯";
+                statusDisplay.style.backgroundColor = "var(--color-error-bg)";
+                statusDisplay.style.color = "var(--color-error-text)";
+                
+                feedbackCard.classList.add('error');
+                feedbackTitle.textContent = "判定：錯誤";
+                
+                // 產生錯誤提示文字
+                let reason = "正確答案是 (B)、(C)。";
+                if (userAnswers.length === 0) {
+                    reason += " 您沒有選擇任何選項。";
+                } else {
+                    // 簡單分析錯誤
+                    const hasWrong = userAnswers.some(ans => !CORRECT_ANSWERS.includes(ans));
+                    const missed = CORRECT_ANSWERS.filter(ans => !userAnswers.includes(ans));
+                    
+                    if (hasWrong) reason += " 包含錯誤選項（一般資安或工控標準不專屬於隱私）。";
+                    if (missed.length > 0) reason += " 還有其他隱私標準未被選中。";
+                }
+
+                feedbackReason.textContent = reason;
+            }
+        }
+
+        function toggleExplain(btn) {
+            const content = document.getElementById('explain-content');
+            content.classList.toggle('show');
+            btn.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資訊安全 - ZTA 邏輯元件 (Q20)</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --accent-color: #4a4a4a;
+            --highlight-bg: #f9f9f9;
+            --success-color: #2e7d32;
+            --error-color: #c62828;
+            --font-main: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: #f0f0f0;
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+            font-size: 18px; /* 內文基準大小 */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--bg-color);
+            padding: 40px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* 標題設定：不超過內文 1 個級距 */
+        h1 {
+            font-size: 22px; 
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            color: #000;
+        }
+
+        h2 {
+            font-size: 20px;
+            background-color: var(--accent-color);
+            color: #fff;
+            padding: 8px 15px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            font-size: 19px;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: #444;
+        }
+
+        /* 題目區塊 */
+        .question-box {
+            background-color: var(--highlight-bg);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* 選項樣式 */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid transparent;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #eef;
+        }
+
+        .option-label input[type="checkbox"] {
+            margin-top: 6px;
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        /* 互動控制區 */
+        .controls {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-color);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .current-selection {
+            font-weight: bold;
+            color: #555;
+            flex-grow: 1;
+            min-width: 200px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 1px solid var(--accent-color);
+            background-color: #fff;
+            color: var(--accent-color);
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        button.primary {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        button.primary:hover {
+            background-color: #222;
+        }
+
+        /* 回饋區塊 */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid;
+            display: none;
+        }
+
+        .feedback-success {
+            border-color: var(--success-color);
+            background-color: #e8f5e9;
+            color: var(--success-color);
+        }
+
+        .feedback-error {
+            border-color: var(--error-color);
+            background-color: #ffebee;
+            color: var(--error-color);
+        }
+
+        /* 解析區塊 (Accordion) */
+        .analysis-section {
+            display: none; /* 預設隱藏，點擊後顯示 */
+            margin-top: 40px;
+            border-top: 3px double var(--border-color);
+        }
+
+        details {
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+        }
+
+        summary {
+            padding: 15px;
+            cursor: pointer;
+            background-color: #f4f4f4;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::after {
+            content: "+";
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        details[open] summary::after {
+            content: "-";
+        }
+
+        .details-content {
+            padding: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        /* 重點標示 */
+        .highlight {
+            font-weight: bold;
+            background-color: #e0e0e0;
+            padding: 0 4px;
+        }
+
+        .term-def {
+            color: #555;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        ul {
+            padding-left: 25px;
+            margin: 10px 0;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* 響應式 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>iPAS 資訊安全 - 零信任架構解析 (Q20)</h1>
+
+    <div class="question-box">
+        <div class="question-text">
+            <span style="background:#333; color:#fff; padding:2px 6px; font-size:14px; margin-right:5px;">複選題</span>
+            關於 NIST SP 800-207 零信任架構（Zero Trust Architecture, ZTA）的「邏輯元件」敘述，下列哪些正確？
+        </div>
+        
+        <div class="options-group">
+            <label class="option-label">
+                <input type="checkbox" name="q20" value="A">
+                <span>(A) 威脅情資（Threat Intelligence, TI）來源：提供外部資訊給政策落實點（Policy Enforcement Point, PEP），以進行存取決策</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q20" value="B">
+                <span>(B) 持續診斷緩解（Continuous Diagnostics and Mitigation, CDM）系統：收集資產目前狀態，並套用更新至設定與軟體元件</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q20" value="C">
+                <span>(C) 公鑰基礎設施（Public Key Infrastructure, PKI）：系統產生給資源、服務與應用程式之憑證，並進行紀錄</span>
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="q20" value="D">
+                <span>(D) 安全資訊事件管理（Security Information and Event Management, SIEM）系統：收集以安全為主的資訊，並用於日後分析</span>
+            </label>
+        </div>
+
+        <div class="controls">
+            <div class="current-selection" id="selectionDisplay">你目前勾選的是：（尚未選擇）</div>
+            <button class="primary" id="submitBtn">送出答案</button>
+            <button id="resetBtn">重作一次</button>
+            <button id="explainBtn">前往解析</button>
+        </div>
+
+        <div id="feedbackArea" class="feedback-area"></div>
+    </div>
+
+    <!-- 解析區 -->
+    <div id="analysisSection" class="analysis-section">
+        <h2>試題詳解與觀念釐清</h2>
+
+        <details open>
+            <summary>第一步：找關鍵字</summary>
+            <div class="details-content">
+                <p>請圈出題目中的解題線索：</p>
+                <ul>
+                    <li><strong>NIST SP 800-207</strong>（零信任架構官方文件）：這是所有零信任考試的標準依據。</li>
+                    <li><strong>零信任架構</strong>（Zero Trust Architecture, ZTA）：本題的討論範圍。</li>
+                    <li><strong>邏輯元件</strong>（架構中負責特定功能的角色）：題目問的是「各個系統的功能與分工」。</li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>第二步：白話翻譯</summary>
+            <div class="details-content">
+                <p>讓我們用高中生也能懂的語言來說明：</p>
+                <p>「這題不是在問你這些資安工具（如防毒、防火牆）好不好用，而是在問：<strong>在零信任的運作流程中，哪些系統是負責『蒐集資訊、回報狀態』，而不是『直接發號施令』的？</strong>」</p>
+                <p>零信任就像是一個極度嚴格的機場安檢：</p>
+                <ul>
+                    <li>有些系統負責<strong>提供情報</strong>（例如：這是通緝犯名單、這是護照驗證機）。</li>
+                    <li>有些系統負責<strong>下決定</strong>（例如：安檢官決定是否放行）。</li>
+                    <li>有些系統負責<strong>執行</strong>（例如：閘門打開或關閉）。</li>
+                </ul>
+                <p>這題就是要你找出符合「提供情報與支援功能」敘述正確的選項。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>第三步：解題思路</summary>
+            <div class="details-content">
+                <h3>這題在考什麼觀念？</h3>
+                <p>ZTA 的「邏輯元件分工」。你需要區分誰是「大腦」（決策）、誰是「手腳」（執行）、誰是「感官」（蒐集資訊）。</p>
+                
+                <h3>解題步驟：</h3>
+                <ol>
+                    <li>先確認「邏輯元件」是支援零信任運作的功能模組。</li>
+                    <li>仔細看選項描述的「流向」與「功能」。</li>
+                    <li>特別注意：<strong>資訊是給誰的？</strong> 是給決策者（PE），還是給執行者（PEP）？</li>
+                </ol>
+
+                <h3>原理與規則：</h3>
+                <p>在 NIST 架構中，大部分的外部系統（如 CDM, SIEM, PKI, TI）都是將資料餵給<strong>政策引擎（Policy Engine, PE）</strong>來做風險評估，而不是直接指揮 PEP。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>第四步：選項分析</summary>
+            <div class="details-content">
+                <ul>
+                    <li>
+                        <strong>(A) [錯誤] 威脅情資 (TI)</strong><br>
+                        <span class="term-def">理由：</span> TI 是提供外部攻擊與風險情報（例如最新的病毒特徵）。這些資訊應該是提供給<strong>政策引擎（PE）</strong>（負責判斷是否允許存取）來做決策依據。選項說「提供給政策落實點（PEP，真正執行存取允許或阻擋的地方）」是錯誤的流程。PEP 只聽 PE 的指令，不具備分析情資的能力。
+                    </li>
+                    <li>
+                        <strong>(B) [正確] 持續診斷緩解 (CDM)</strong><br>
+                        <span class="term-def">理由：</span> CDM 系統負責掌握資產（電腦、手機）的健康狀態（有沒有更新？有沒有中毒？），並協助修補。這是 ZTA 判斷裝置是否「乾淨」的重要來源。
+                    </li>
+                    <li>
+                        <strong>(C) [正確] 公鑰基礎設施 (PKI)</strong><br>
+                        <span class="term-def">理由：</span> PKI 負責發放憑證（像是數位身分證）。在零信任中，我們需要靠憑證來確認「你是誰」（身分鑑別），這是核心邏輯元件之一。
+                    </li>
+                    <li>
+                        <strong>(D) [正確] 安全資訊事件管理 (SIEM)</strong><br>
+                        <span class="term-def">理由：</span> SIEM 負責把所有設備的 Log（紀錄）集中起來分析。它可以提供歷史紀錄給政策引擎參考，也可以在事後進行調查，是標準的支援元件。
+                    </li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>觀念補充與延伸</summary>
+            <div class="details-content">
+                <h3>記憶口訣</h3>
+                <p style="background:#eee; padding:10px; border-left:4px solid #333;">
+                    「<strong>PE 想、PEP 做；其他系統負責『提供資料』</strong>」
+                </p>
+                
+                <h3>常見陷阱 (避坑指南)</h3>
+                <ul>
+                    <li><strong>容易誤判 A：</strong> 看到「威脅情資」覺得很重要，又看到「存取決策」覺得很合理，就勾選了。</li>
+                    <li><strong>破解法：</strong> 看到 ZTA 元件題，先問自己「這個資料流向對嗎？」。資料是流向大腦 (PE)，指令才是流向手腳 (PEP)。</li>
+                </ul>
+
+                <h3>觸類旁通</h3>
+                <p>如果題目把選項改成 <strong>IAM (身分識別與存取管理)</strong>，它也是正確的邏輯元件喔！因為它負責提供使用者屬性資料。</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>自我檢測 (點擊展開答案)</summary>
+            <div class="details-content">
+                <p>試著回答以下問題，測試你是否真的懂了：</p>
+                
+                <details style="margin-top:10px;">
+                    <summary>1) 為什麼 PEP 不自己判斷是否放行？</summary>
+                    <div class="details-content" style="background:#fafafa;">
+                        <p><strong>答案：</strong> 因為 PEP (Policy Enforcement Point) 只是執行點（像閘門或開關）。為了安全與效率，判斷邏輯必須集中在後端的控制層（PE/PA），才能整合多方資訊（TI, CDM, SIEM 等）做動態決策。</p>
+                    </div>
+                </details>
+
+                <details style="margin-top:10px;">
+                    <summary>2) 如果沒有 PKI，零信任會遇到什麼問題？</summary>
+                    <div class="details-content" style="background:#fafafa;">
+                        <p><strong>答案：</strong> 零信任的核心是「永不信任，始終驗證」。沒有 PKI 發放與管理憑證，系統就無法強而有力地驗證使用者與設備的身分，零信任架構就會瓦解。</p>
+                    </div>
+                </details>
+
+                <details style="margin-top:10px;">
+                    <summary>3) SIEM 的資料如何影響零信任決策？</summary>
+                    <div class="details-content" style="background:#fafafa;">
+                        <p><strong>答案：</strong> SIEM 提供長期的行為紀錄與警報。如果某個帳號過去紀錄良好，這次存取可能被放行；如果 SIEM 發現該帳號最近有異常登入紀錄，政策引擎 (PE) 就可能拒絕此次存取。</p>
+                    </div>
+                </details>
+            </div>
+        </details>
+
+        <div style="margin-top:30px; padding:15px; background:#eee; text-align:center; font-weight:bold;">
+            正確答案：B、C、D
+        </div>
+    </div>
+</div>
+
+<script>
+    // 定義正確答案
+    const CORRECT_ANSWERS = ['B', 'C', 'D'];
+    
+    // DOM 元素
+    const checkboxes = document.querySelectorAll('input[name="q20"]');
+    const selectionDisplay = document.getElementById('selectionDisplay');
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const explainBtn = document.getElementById('explainBtn');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const analysisSection = document.getElementById('analysisSection');
+
+    // 監聽選項變更，即時顯示選擇
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateSelectionText);
+    });
+
+    function updateSelectionText() {
+        const selected = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value)
+            .sort();
+        
+        if (selected.length === 0) {
+            selectionDisplay.textContent = '你目前勾選的是：（尚未選擇）';
+        } else {
+            selectionDisplay.textContent = '你目前勾選的是：' + selected.join('、');
+        }
+    }
+
+    // 送出答案邏輯
+    submitBtn.addEventListener('click', () => {
+        const selected = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value)
+            .sort();
+
+        // 判斷是否全對
+        // 1. 數量必須一致
+        // 2. 內容必須完全吻合
+        const isExactMatch = JSON.stringify(selected) === JSON.stringify(CORRECT_ANSWERS);
+        
+        feedbackArea.style.display = 'block';
+        
+        if (isExactMatch) {
+            feedbackArea.className = 'feedback-area feedback-success';
+            feedbackArea.innerHTML = `
+                <strong>完全正確！</strong><br>
+                你的觀念非常清晰。CDM、PKI、SIEM 都是負責提供資訊與狀態的邏輯元件。<br>
+                威脅情資 (TI) 是提供給政策引擎 (PE) 的，不是 PEP。
+            `;
+            // 自動顯示解析
+            analysisSection.style.display = 'block';
+            window.scrollTo({ top: feedbackArea.offsetTop, behavior: 'smooth' });
+        } else {
+            // 分析錯誤
+            const missing = CORRECT_ANSWERS.filter(ans => !selected.includes(ans));
+            const extra = selected.filter(ans => !CORRECT_ANSWERS.includes(ans));
+            
+            let errorMsg = '<strong>答錯囉！請再檢查一下：</strong><br>';
+            
+            if (missing.length > 0) {
+                errorMsg += `• 你少選了：${missing.join('、')}<br>`;
+            }
+            if (extra.length > 0) {
+                errorMsg += `• 你多選了：${extra.join('、')}（這項敘述有誤）<br>`;
+            }
+
+            errorMsg += `<br><span style="font-size:0.9em; color:#666;">提示：請注意每個元件「資料傳遞的對象」是誰。</span>`;
+
+            feedbackArea.className = 'feedback-area feedback-error';
+            feedbackArea.innerHTML = errorMsg;
+        }
+    });
+
+    // 重作一次
+    resetBtn.addEventListener('click', () => {
+        checkboxes.forEach(cb => cb.checked = false);
+        updateSelectionText();
+        feedbackArea.style.display = 'none';
+        analysisSection.style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // 前往解析
+    explainBtn.addEventListener('click', () => {
+        analysisSection.style.display = 'block';
+        // 滾動到解析區
+        setTimeout(() => {
+            analysisSection.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    });
+
+</script>
+
+</body>
+</html>

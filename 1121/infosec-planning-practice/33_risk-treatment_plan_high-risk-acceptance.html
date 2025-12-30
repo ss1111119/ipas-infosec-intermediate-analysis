@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題號 33 - 風險處理觀念測驗</title>
+    <!-- 引入 Noto Sans TC 字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入 Tailwind CSS (用於快速佈局，顏色將依規範覆蓋) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* --- 1. 基礎樣式 Tokens --- */
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: #f3f4f6; /* 頁面背景 */
+            color: #1f2937;
+            margin: 0;
+            padding: 20px 0; /* 讓上下有點呼吸空間 */
+        }
+
+        /* 標題與內文設定 */
+        .text-base { font-size: 16px; line-height: 1.5; }
+        .text-title { font-size: 18px; font-weight: 700; }
+        .text-small { font-size: 14px; }
+        
+        /* 間距設定 */
+        .card-padding { padding: 16px; }
+        .section-gap { display: flex; flex-direction: column; gap: 12px; }
+
+        /* --- 2. 標籤顏色規範 (強制) --- */
+        .tag-base {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        .tag-law { background-color: #7f8c8d; }
+        .tag-iso { background-color: #27ae60; }
+        .tag-zt  { background-color: #8e44ad; }
+        .tag-net { background-color: #2980b9; }
+        .tag-sec { background-color: #c0392b; }
+        .tag-mgm { background-color: #d35400; } /* 本題主要使用 */
+
+        /* --- 3. 重點標註 --- */
+        mark {
+            background-color: #fef3c7; /* 淺黃底 */
+            color: #92400e; /* 深褐字 */
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* --- 4. 自定義 Radio 樣式 --- */
+        input[type="radio"]:checked + label {
+            border-color: #4f46e5;
+            background-color: #eef2ff;
+            color: #4338ca;
+        }
+        .custom-radio:focus + label {
+            box-shadow: 0 0 0 2px #c7d2fe;
+        }
+
+        /* --- 5. 解析段落卡樣式 --- */
+        .explain-card {
+            background-color: #f9fafb; /* 統一淺灰底 */
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .explain-title {
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 4px;
+            display: block;
+        }
+
+        /* --- 6. 容器規範 --- */
+        .main-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 主要容器：符合 max-width: 960px, width: 100%, margin: 0 auto -->
+    <div class="main-container section-gap">
+        
+        <!-- 1. Header：題號＋答題狀態 -->
+        <div class="bg-indigo-600 card-padding flex justify-between items-center text-white">
+            <h1 class="text-title">題號 33：風險管理</h1>
+            <span id="status-badge" class="text-small bg-indigo-800 px-3 py-1 rounded-full font-medium">尚未作答</span>
+        </div>
+
+        <!-- 2. Context：情境卡 -->
+        <div class="card-padding bg-gray-50 border-b border-gray-200">
+            <p class="text-small text-gray-500">本題無額外情境</p>
+        </div>
+
+        <!-- 3. Question：題目與選項 -->
+        <div class="card-padding flex flex-col gap-4">
+            <div class="text-title text-gray-900 leading-relaxed">
+                <span class="tag-base tag-mgm">風險管理</span>
+                關於<mark>風險處理</mark>的敘述，下列何者<span class="text-red-600 font-bold">錯誤</span>？
+            </div>
+            
+            <form id="quiz-form" class="flex flex-col gap-3">
+                <div class="relative">
+                    <input type="radio" name="option" id="opt-A" value="A" class="peer sr-only custom-radio">
+                    <label for="opt-A" class="block p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-all text-base">
+                        (A) 風險處理計畫是定義行動並實施所需的控制，以降低無法接受風險的管理文件
+                    </label>
+                </div>
+
+                <div class="relative">
+                    <input type="radio" name="option" id="opt-B" value="B" class="peer sr-only custom-radio">
+                    <label for="opt-B" class="block p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-all text-base">
+                        (B) 風險處理計畫中要考量風險處理之優先順序
+                    </label>
+                </div>
+
+                <div class="relative">
+                    <input type="radio" name="option" id="opt-C" value="C" class="peer sr-only custom-radio">
+                    <label for="opt-C" class="block p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-all text-base">
+                        (C) 風險處理計畫如果完成時間較長，如需導入工具，可以先以接受該高風險處理
+                    </label>
+                </div>
+
+                <div class="relative">
+                    <input type="radio" name="option" id="opt-D" value="D" class="peer sr-only custom-radio">
+                    <label for="opt-D" class="block p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-all text-base">
+                        (D) 風險處理計畫中，所需資源及交付事項，皆須完整計畫考量
+                    </label>
+                </div>
+
+                <button type="submit" id="submit-btn" class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors text-base">
+                    送出答案
+                </button>
+            </form>
+        </div>
+
+        <!-- 4. Feedback：判定結果與理由 -->
+        <div id="feedback-section" class="hidden card-padding border-t border-b border-gray-100 bg-gray-50">
+            <div id="feedback-content" class="text-base font-medium"></div>
+        </div>
+
+        <!-- 5. Explain：詳解卡（預設收合） -->
+        <details class="group border-b border-gray-200">
+            <summary class="flex justify-between items-center card-padding cursor-pointer bg-white hover:bg-gray-50 select-none">
+                <span class="text-title text-gray-800">解析與觀念說明</span>
+                <svg class="w-5 h-5 text-gray-500 transform group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </summary>
+            
+            <div class="card-padding space-y-4 text-base text-gray-700">
+                
+                <!-- 1. 第一步：找關鍵字 -->
+                <div class="explain-card">
+                    <span class="explain-title">第一步：找關鍵字</span>
+                    <div class="flex flex-wrap gap-2 text-small">
+                        <span class="bg-gray-200 px-2 py-1 rounded text-gray-700">風險處理計畫</span>
+                        <span class="bg-gray-200 px-2 py-1 rounded text-gray-700">降低無法接受風險</span>
+                        <span class="bg-gray-200 px-2 py-1 rounded text-gray-700">優先順序</span>
+                        <span class="bg-gray-200 px-2 py-1 rounded text-gray-700">接受高風險</span>
+                    </div>
+                </div>
+
+                <!-- 2. 第二步：白話翻譯 -->
+                <div class="explain-card">
+                    <span class="explain-title">第二步：白話翻譯</span>
+                    <p>這一題在問：當組織發現風險後，規劃風險處理計畫時，下列哪一個說法的觀念是錯的？</p>
+                </div>
+
+                <!-- 3. 第三步：解題思路 -->
+                <div class="explain-card">
+                    <span class="explain-title">第三步：解題思路</span>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>步驟一：</strong>確認風險處理計畫的目的是「將不可接受風險轉為可接受」。</li>
+                        <li><strong>步驟二：</strong>分辨「高風險」與「可接受風險」的差異。</li>
+                        <li><strong>步驟三：</strong>找出違反「高風險不可直接接受」原則的敘述。</li>
+                    </ul>
+                </div>
+
+                <!-- 4. 第四步：選項分析 -->
+                <div class="explain-card">
+                    <span class="explain-title">第四步：選項分析</span>
+                    <div class="space-y-3">
+                        <p><strong>(A) 正確：</strong>風險處理計畫是用來定義行動，目的在於<mark>降低無法接受的風險</mark>。</p>
+                        <p><strong>(B) 正確：</strong>資源有限，必須依照風險高低排定<mark>優先順序</mark>，先處理重要風險。</p>
+                        <p><strong>(C) 錯誤：</strong>此選項違反原則。高風險屬於<mark>不可接受風險</mark>，不能因為處理困難或需要較長時間就先行接受。</p>
+                        <p><strong>(D) 正確：</strong>計畫中必須完整考量所需資源、人力、預算與交付成果，確保措施能實際執行。</p>
+                    </div>
+                </div>
+
+                <!-- 5. 觀念補充與延伸 -->
+                <div class="explain-card">
+                    <span class="explain-title">觀念補充與延伸</span>
+                    <p>風險處理計畫的本質是一份說明如何把「不可接受風險」轉變為「可接受風險」的行動計畫。</p>
+                    <p class="mt-2 text-sm text-gray-600">常見考試變形包括：</p>
+                    <ul class="list-disc pl-5 text-sm text-gray-600">
+                        <li>將「高風險」改寫為「超過風險容忍度」。</li>
+                        <li>詢問誰有權決定風險是否可被接受？答案通常是「風險擁有者」。</li>
+                    </ul>
+                </div>
+
+                <!-- 6. 觸類旁通（舉一反三） -->
+                <div class="explain-card">
+                    <span class="explain-title">觸類旁通（舉一反三）</span>
+                    <p>以日常生活中的「居家安全」為例：</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>避免風險：</strong>不住在治安不好的區域。</li>
+                        <li><strong>降低風險：</strong>安裝監視器或防盜門（類似風險處理計畫中的控制措施）。</li>
+                        <li><strong>移轉風險：</strong>購買竊盜險。</li>
+                        <li><strong>接受風險：</strong>門口地墊被踩髒（影響小，可接受）。但如果大門壞掉（高風險），你不會因為「修理要很久」就決定「先接受大門壞掉」而不處理，這就是本題的邏輯。</li>
+                    </ul>
+                </div>
+
+                <!-- 7. 記憶口訣 -->
+                <div class="explain-card">
+                    <span class="explain-title">記憶口訣</span>
+                    <p class="font-bold text-indigo-700 text-lg text-center bg-indigo-50 p-2 rounded">「高風險不能拖，接受一定錯」</p>
+                </div>
+
+                <!-- 8. 常見陷阱 -->
+                <div class="explain-card">
+                    <span class="explain-title">常見陷阱</span>
+                    <p>學生容易誤以為只要「處理時間很長」或「需要導入工具」，就可以暫時先「接受」風險。這是將現實工作中的便宜行事，錯誤套用到考試規則。考試中，高風險絕對不能在未處理前直接接受。</p>
+                </div>
+
+            </div>
+        </details>
+
+        <!-- 6. SelfCheck：自我檢測（預設收合） -->
+        <details class="group">
+            <summary class="flex justify-between items-center card-padding cursor-pointer bg-white hover:bg-gray-50 select-none">
+                <span class="text-title text-gray-800">自我檢測</span>
+                <svg class="w-5 h-5 text-gray-500 transform group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </summary>
+            <div class="card-padding space-y-4">
+                
+                <div class="explain-card">
+                    <p class="font-medium text-base mb-2">Q1：如果題目中的「高風險」改成「低風險」，選項 C 會不會變成正確？</p>
+                    <details class="text-small">
+                        <summary class="cursor-pointer text-indigo-600 hover:underline">點擊查看答案</summary>
+                        <div class="mt-2 p-2 bg-white border border-gray-200 rounded text-gray-800">
+                            答案：有可能，前提是該風險已在組織定義的「可接受範圍」內。
+                        </div>
+                    </details>
+                </div>
+
+                <div class="explain-card">
+                    <p class="font-medium text-base mb-2">Q2：誰有權力決定是否接受風險？</p>
+                    <details class="text-small">
+                        <summary class="cursor-pointer text-indigo-600 hover:underline">點擊查看答案</summary>
+                        <div class="mt-2 p-2 bg-white border border-gray-200 rounded text-gray-800">
+                            答案：風險擁有者 (Risk Owner)。
+                        </div>
+                    </details>
+                </div>
+
+                <div class="explain-card">
+                    <p class="font-medium text-base mb-2">Q3：已接受的風險是否仍需文件化與定期檢視？</p>
+                    <details class="text-small">
+                        <summary class="cursor-pointer text-indigo-600 hover:underline">點擊查看答案</summary>
+                        <div class="mt-2 p-2 bg-white border border-gray-200 rounded text-gray-800">
+                            答案：需要，所有的風險處理決策都必須文件化，並且定期審查風險是否發生變化。
+                        </div>
+                    </details>
+                </div>
+
+            </div>
+        </details>
+
+    </div>
+
+    <script>
+        const correctAnswer = 'C';
+        const form = document.getElementById('quiz-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const feedbackSection = document.getElementById('feedback-section');
+        const feedbackContent = document.getElementById('feedback-content');
+        const statusBadge = document.getElementById('status-badge');
+        const inputs = document.querySelectorAll('input[name="option"]');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 取得選取的值
+            const selectedOption = document.querySelector('input[name="option"]:checked');
+            
+            if (!selectedOption) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            const userAnswer = selectedOption.value;
+            const isCorrect = userAnswer === correctAnswer;
+
+            // 顯示 Feedback
+            feedbackSection.classList.remove('hidden');
+            
+            if (isCorrect) {
+                // 正確回饋
+                feedbackContent.innerHTML = `
+                    <div class="flex items-start gap-3 text-green-700">
+                        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div>
+                            <span class="font-bold">判定：正確</span><br>
+                            <span class="text-small">高風險屬於不可接受風險，不能先行接受。</span>
+                        </div>
+                    </div>
+                `;
+                feedbackSection.classList.add('bg-green-50', 'border-green-200');
+                feedbackSection.classList.remove('bg-red-50', 'border-red-200');
+                
+                statusBadge.textContent = '答對';
+                statusBadge.className = 'text-small bg-green-600 px-3 py-1 rounded-full font-medium';
+            } else {
+                // 錯誤回饋
+                feedbackContent.innerHTML = `
+                    <div class="flex items-start gap-3 text-red-700">
+                        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div>
+                            <span class="font-bold">判定：錯誤</span><br>
+                            <span class="text-small">正確答案：(C)</span><br>
+                            <span class="text-small">理由：高風險屬於不可接受風險，不能先行接受。</span>
+                        </div>
+                    </div>
+                `;
+                feedbackSection.classList.add('bg-red-50', 'border-red-200');
+                feedbackSection.classList.remove('bg-green-50', 'border-green-200');
+
+                statusBadge.textContent = '答錯';
+                statusBadge.className = 'text-small bg-red-600 px-3 py-1 rounded-full font-medium';
+            }
+
+            // 鎖定選項與按鈕
+            inputs.forEach(input => input.disabled = true);
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            submitBtn.textContent = '已作答';
+
+            // 自動展開解析
+            document.querySelector('details').open = true;
+        });
+    </script>
+</body>
+</html>
