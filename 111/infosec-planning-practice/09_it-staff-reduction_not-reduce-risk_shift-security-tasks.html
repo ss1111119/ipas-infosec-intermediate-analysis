@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q9: 人力縮減下的資安風險管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --base-font-size: 16px;
+            --title-font-size: 18px;
+            --small-font-size: 14px;
+            --spacing-unit: 12px;
+            --card-padding: 16px;
+            --primary-color: #34495e;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --section-bg: #f8f9fa;
+            
+            /* Tag Colors - Fixed Standard */
+            --tag-law: #7f8c8d;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: #2c3e50;
+            line-height: 1.6;
+            font-size: var(--base-font-size);
+            padding: 20px;
+        }
+
+        /* 2. 整體版型與寬度規範 */
+        .container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: var(--card-padding);
+            margin-bottom: var(--spacing-unit);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        /* 3. UI 固定骨架 - Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-unit);
+        }
+
+        .header-title {
+            font-size: var(--title-font-size);
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .status-badge {
+            font-size: var(--small-font-size);
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: #e0e0e0;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* 3. UI 固定骨架 - Context */
+        .context-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 4px;
+            display: inline-block;
+        }
+
+        /* 3. UI 固定骨架 - Question */
+        .question-text {
+            font-size: var(--base-font-size);
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover {
+            background-color: #f9f9f9;
+            border-color: #bdc3c7;
+        }
+
+        .option-input {
+            margin-top: 4px;
+            margin-right: 12px;
+            accent-color: var(--primary-color);
+        }
+
+        /* 3. UI 固定骨架 - Feedback */
+        .feedback-card {
+            display: none; /* Default hidden */
+            border-left: 5px solid transparent;
+        }
+
+        .feedback-card.correct {
+            display: block;
+            border-color: var(--success-color);
+            background-color: #e8f8f5;
+        }
+
+        .feedback-card.wrong {
+            display: block;
+            border-color: var(--error-color);
+            background-color: #fdedec;
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .correct .feedback-title { color: var(--success-color); }
+        .wrong .feedback-title { color: var(--error-color); }
+
+        /* 3. UI 固定骨架 - Explain */
+        details {
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: var(--spacing-unit);
+            overflow: hidden;
+        }
+
+        summary {
+            padding: var(--card-padding);
+            font-weight: 700;
+            cursor: pointer;
+            background-color: #f1f2f6;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .explain-content {
+            padding: var(--card-padding);
+        }
+
+        /* 11. 解析區塊之小主題分段規範 */
+        .explain-section {
+            background-color: var(--section-bg);
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border-left: 3px solid #bdc3c7;
+        }
+
+        .explain-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* 修正列表縮排問題 */
+        .explain-section ul, 
+        .explain-section ol {
+            padding-left: 24px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+
+        .explain-section li {
+            margin-bottom: 4px;
+        }
+
+        .section-title {
+            font-weight: 700;
+            font-size: var(--base-font-size);
+            margin-bottom: 8px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 6. 標籤顏色規範 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt  { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        /* Self Check Styles */
+        .check-item {
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 12px;
+        }
+
+        .check-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .check-question {
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        /* 內層 details 樣式重置 (針對自我檢測答案) */
+        .answer-details {
+            background: none;
+            border: none;
+            margin: 0;
+        }
+
+        .answer-details summary {
+            background: none;
+            padding: 0;
+            color: #0984e3;
+            font-size: var(--small-font-size);
+            justify-content: flex-start;
+            gap: 8px;
+        }
+
+        .answer-details summary::after {
+            content: '▼';
+            font-size: 12px;
+            margin-left: 4px;
+        }
+
+        .answer-details[open] summary::after {
+            content: '▲';
+        }
+
+        .check-answer {
+            color: #666;
+            font-size: var(--base-font-size);
+            padding: 8px 12px;
+            background-color: #f1f2f6;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+
+        /* Highlight styles */
+        mark {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container { padding: 0; }
+            body { padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- 3. Header -->
+    <div class="header">
+        <div class="header-title">Q9. 人力縮減下的資安風險管理</div>
+        <div class="status-badge" id="statusBadge">未作答</div>
+    </div>
+
+    <!-- 3. Context -->
+    <div class="card">
+        <div class="context-title">情境描述</div>
+        <p>某中小企業資訊部門之業務執掌包含程式開發、程式上線、應用程式管理以及資料庫管理等，該公司因故必須縮減資訊部門人力。</p>
+    </div>
+
+    <!-- 3. Question -->
+    <div class="card">
+        <div class="question-text">
+            若您是該企業之資訊部門主管，下列何種處理<mark>較無法降低</mark>資安風險的發生？
+        </div>
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A" class="option-input" onclick="checkAnswer(this)">
+                <span>(A) 將部分資安工作移轉至其他業務單位</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B" class="option-input" onclick="checkAnswer(this)">
+                <span>(B) 增加業務活動之監視紀錄</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C" class="option-input" onclick="checkAnswer(this)">
+                <span>(C) 增加資安稽核頻率</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D" class="option-input" onclick="checkAnswer(this)">
+                <span>(D) 導入自動化資料庫稽核管理工具</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 3. Feedback -->
+    <div id="feedbackCard" class="card feedback-card">
+        <div class="feedback-title" id="feedbackTitle"></div>
+        <div id="feedbackContent"></div>
+    </div>
+
+    <!-- 3. Explain (Collapsed by default) -->
+    <details>
+        <summary>點擊查看詳細解析</summary>
+        <div class="explain-content">
+            
+            <!-- 第一步：找關鍵字 -->
+            <div class="explain-section">
+                <div class="section-title"><span class="tag tag-mgm">第一步</span> 找關鍵字</div>
+                <ul>
+                    <li><strong>縮減資訊部門人力</strong>：人少會造成「一人多工」，容易違反職責分離（Separation of Duties），且降低管控品質。</li>
+                    <li><strong>業務包含開發、上線、應用程式管理、資料庫管理</strong>：這是典型高風險組合：同一單位掌握「做（開發）」「上（部署）」「管（維運）」「存（資料庫）」。</li>
+                    <li><strong>較無法降低資安風險</strong>：反向題，找「看起來像在處理，但其實不太能降低風險」的作法。</li>
+                </ul>
+            </div>
+
+            <!-- 第二步：白話翻譯 -->
+            <div class="explain-section">
+                <div class="section-title"><span class="tag tag-mgm">第二步</span> 白話翻譯</div>
+                <p>公司 IT 人變少，但工作還是一堆，而且很多工作都很敏感。現在要選出一個做法：它做了之後，對降低資安風險的效果最差（最不管用）。</p>
+            </div>
+
+            <!-- 第三步：解題思路 -->
+            <div class="explain-section">
+                <div class="section-title"><span class="tag tag-mgm">第三步</span> 解題思路</div>
+                <p>這題在考「人力縮減下的風險控制」。<br>
+                用「監控、稽核、工具化」補強，而不是把資安責任丟給不具專業與權限的單位。</p>
+                <ol>
+                    <li>先判斷哪些作法會讓行為可追溯（事後能查到誰做了什麼）。</li>
+                    <li>判斷哪些作法能提高被發現機率（稽核頻率、監視紀錄）。</li>
+                    <li>判斷哪些作法能用工具降低人為疏漏（自動化稽核）。</li>
+                    <li>找出那個「表面分散工作，但實際上資安風險不會因此下降」的選項。</li>
+                </ol>
+            </div>
+
+            <!-- 第四步：選項分析 -->
+            <div class="explain-section">
+                <div class="section-title"><span class="tag tag-mgm">第四步</span> 選項分析</div>
+                <p><strong>(A) 將部分資安工作移轉至其他業務單位（正確選項）：</strong><br>
+                資安工作需要專業能力、權限與一致流程；移轉到其他業務單位常導致：能力不足、權限不足、責任與流程變模糊。結果反而可能形成「有做但做錯」或「以為有人做其實沒做」的風險。</p>
+                
+                <hr style="margin: 8px 0; border: 0; border-top: 1px dashed #ccc;">
+                
+                <p><strong>(B) 增加業務活動之監視紀錄：</strong><br>
+                可降低風險。紀錄越完整，越能追查與嚇阻內部濫權，也能在事件發生時快速釐清責任。</p>
+                
+                <p><strong>(C) 增加資安稽核頻率：</strong><br>
+                可降低風險。稽核更頻繁能更早發現違規、弱點與流程破口，提高被發現機率，降低舞弊空間。</p>
+                
+                <p><strong>(D) 導入自動化資料庫稽核管理工具：</strong><br>
+                可降低風險。人力少時，用工具自動檢測與告警，可減少人工漏看、漏查，並提供一致的稽核基準。</p>
+            </div>
+
+            <!-- 觀念補充與延伸 -->
+            <div class="explain-section">
+                <div class="section-title"><span class="tag tag-mgm">觀念補充</span> 觀念補充與延伸</div>
+                <ul>
+                    <li><strong>核心觀念定位</strong>：本題屬於「資安治理、人員與流程控制、職責分離與稽核」章節。</li>
+                    <li><strong>稽核 (Audit)</strong>：對控制措施與作業流程是否符合要求所做的檢查與評估。（白話：定期查帳，看看有沒有照規矩做。）</li>
+                    <li><strong>監視紀錄 (Log)</strong>：記錄系統與使用者行為，用於追蹤、鑑識與責任釐清。（白話：系統的「行車紀錄器」。）</li>
+                </ul>
+            </div>
+
+            <!-- 觸類旁通（舉一反三） -->
+            <div class="explain-section">
+                <div class="section-title"><span class="tag tag-mgm">觸類旁通</span> 舉一反三</div>
+                <ul>
+                    <li><strong>正向補強</strong>：增加 Log、增加稽核、工具化（讓少人也能持續控管）。</li>
+                    <li><strong>反向風險</strong>：把資安責任丟給非專業單位（責任不清、品質下降）。</li>
+                    <li><strong>變化題 1</strong>：若題目改成「下列何者最能補足職責分離不足？」常見答案：強化監控與稽核、雙人覆核。</li>
+                    <li><strong>變化題 2</strong>：若題目改成「人力不足但要降低資料庫管理風險」常見答案：自動化稽核、最小權限、操作留痕。</li>
+                </ul>
+            </div>
+
+            <!-- 記憶口訣 -->
+            <div class="explain-section">
+                <div class="section-title"><span class="tag tag-mgm">記憶口訣</span> 簡單記法</div>
+                <p>「人少別亂丟，資安靠留痕、靠稽核、靠工具。」</p>
+            </div>
+
+            <!-- 常見陷阱 -->
+            <div class="explain-section">
+                <div class="section-title"><span class="tag tag-mgm">常見陷阱</span> 避坑指南</div>
+                <ul>
+                    <li><strong>學生最容易搞混</strong>：以為把工作分給別人就能分散風險，但資安不是一般行政工作，分出去可能變成失控。</li>
+                    <li><strong>心理盲點</strong>：把「分工」誤以為一定等於「職責分離」。職責分離是把關鍵權限分開並受控，而不是把資安丟給不相關單位。</li>
+                    <li><strong>避坑指南</strong>：看到「把資安工作移轉到其他業務單位」→ 先問：對方有沒有專業、權限、流程與責任？若沒有，多半是風險上升而非下降。</li>
+                </ul>
+            </div>
+
+        </div>
+    </details>
+
+    <!-- 3. SelfCheck (Collapsed by default, Answers hidden initially) -->
+    <details>
+        <summary>自我檢測</summary>
+        <div class="explain-content">
+            
+            <div class="check-item">
+                <div class="check-question">1. 在人力縮減時，為什麼「增加監視紀錄」能降低風險？</div>
+                <details class="answer-details">
+                    <summary>顯示答案</summary>
+                    <div class="check-answer">提升可追溯性與嚇阻，並利於事件調查。</div>
+                </details>
+            </div>
+            
+            <div class="check-item">
+                <div class="check-question">2. 「增加稽核頻率」主要提升的是哪一種效果：預防、偵測、回復？</div>
+                <details class="answer-details">
+                    <summary>顯示答案</summary>
+                    <div class="check-answer">偵測（Detective Control）。</div>
+                </details>
+            </div>
+            
+            <div class="check-item">
+                <div class="check-question">3. 自動化資料庫稽核工具最適合補強哪個弱點？</div>
+                <details class="answer-details">
+                    <summary>顯示答案</summary>
+                    <div class="check-answer">人工檢核不足與漏查、無法持續監控。</div>
+                </details>
+            </div>
+
+        </div>
+    </details>
+
+</div>
+
+<script>
+    function checkAnswer(input) {
+        const selectedValue = input.value;
+        const correctValue = 'A'; // 正確答案
+        const feedbackCard = document.getElementById('feedbackCard');
+        const feedbackTitle = document.getElementById('feedbackTitle');
+        const feedbackContent = document.getElementById('feedbackContent');
+        const statusBadge = document.getElementById('statusBadge');
+
+        // Reset classes
+        feedbackCard.classList.remove('correct', 'wrong');
+
+        if (selectedValue === correctValue) {
+            // Correct
+            feedbackCard.classList.add('correct');
+            feedbackTitle.textContent = '判定：正確';
+            feedbackContent.innerHTML = '一句話理由：將資安工作移轉至非專業業務單位容易造成能力不足與責任不清，對降低風險效果最差。';
+            statusBadge.textContent = '答對';
+            statusBadge.style.background = '#27ae60';
+            statusBadge.style.color = '#fff';
+        } else {
+            // Wrong
+            feedbackCard.classList.add('wrong');
+            feedbackTitle.textContent = '判定：錯誤';
+            feedbackContent.innerHTML = `正確答案：(A)<br>一句話理由：將資安工作移轉至非專業業務單位容易造成能力不足與責任不清，對降低風險效果最差。`;
+            statusBadge.textContent = '答錯';
+            statusBadge.style.background = '#c0392b';
+            statusBadge.style.color = '#fff';
+        }
+    }
+</script>
+
+</body>
+</html>

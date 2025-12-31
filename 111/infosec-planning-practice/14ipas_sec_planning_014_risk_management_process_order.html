@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS 資訊安全規劃實務 - 風險管理流程排序</title>
+    <!-- 引入外部 CSS 框架 (Tailwind CSS via CDN) 以加速開發，並輔以自定義 CSS 覆寫以符合規範 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入外部字體 Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* [二、整體版型與寬度規範] */
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .page-container {
+            max-width: 960px; /* 強制最大寬度 */
+            width: 100%;      /* 寬度 100% */
+            margin: 0 auto;   /* 水平置中 */
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* [四、樣式 tokens 固定] */
+        :root {
+            --base-font-size: 16px;
+            --title-font-size: 18px;
+            --small-font-size: 14px;
+            --card-padding: 16px;
+            --block-gap: 12px;
+            
+            /* [六、標籤顏色規範] */
+            --tag-law-color: #7f8c8d;
+            --tag-iso-color: #27ae60;
+            --tag-zt-color: #8e44ad;
+            --tag-net-color: #2980b9;
+            --tag-sec-color: #c0392b;
+            --tag-mgm-color: #d35400;
+        }
+
+        .text-base { font-size: var(--base-font-size); }
+        .text-title { font-size: var(--title-font-size); font-weight: 700; }
+        .text-small { font-size: var(--small-font-size); }
+        
+        .p-card { padding: var(--card-padding); }
+        .gap-block { margin-bottom: var(--block-gap); }
+
+        /* [六、標籤顏色規範] 實作 class */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 4px;
+        }
+        .tag-law { background-color: var(--tag-law-color); }
+        .tag-iso { background-color: var(--tag-iso-color); }
+        .tag-zt  { background-color: var(--tag-zt-color); }
+        .tag-net { background-color: var(--tag-net-color); }
+        .tag-sec { background-color: var(--tag-sec-color); }
+        .tag-mgm { background-color: var(--tag-mgm-color); }
+
+        /* [五、重點字與標籤標註] */
+        mark {
+            background-color: #fff3cd;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* UI 元件樣式 */
+        .header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .context-card {
+            background-color: #eef2f5;
+            border-left: 4px solid #6c757d;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start; /* 讓 radio 對齊文字頂部 */
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 8px;
+        }
+        .option-label:hover {
+            background-color: #f8f9fa;
+        }
+        .option-input {
+            margin-top: 5px; /* 微調對齊 */
+            margin-right: 10px;
+        }
+
+        .btn-submit {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+        .btn-submit:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* [十一、解析區塊樣式] */
+        .explain-section {
+            background-color: #f8f9fa; /* 淺色底 */
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #e9ecef;
+        }
+        .explain-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 4px;
+            display: inline-block;
+        }
+
+        /* 自我檢測樣式 */
+        details {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #fff;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: 500;
+            color: #007bff;
+        }
+        details[open] summary {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .answer-hidden {
+            color: #28a745;
+            font-weight: 700;
+            padding: 4px 8px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        /* Feedback 樣式 */
+        .feedback-box {
+            display: none; /* 預設隱藏 */
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            border: 1px solid transparent;
+        }
+        .feedback-correct {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <!-- [三、UI 固定骨架] Header -->
+        <div class="header p-card">
+            <div class="text-title">題號：14</div>
+            <div id="status-badge" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-small">未作答</div>
+        </div>
+
+        <!-- [三、UI 固定骨架] Context -->
+        <div class="p-card gap-block context-card">
+            <div class="text-small text-gray-600 mb-1">情境：</div>
+            <div class="text-base">本題無額外情境</div>
+        </div>
+
+        <!-- [三、UI 固定骨架] Question -->
+        <div class="p-card gap-block">
+            <div class="mb-4">
+                <span class="tag tag-mgm">風險管理</span>
+                <h2 class="text-title mt-2 mb-2">關於風險管理步驟由先至後，下列排序何者正確？</h2>
+                <div class="text-base text-gray-700 leading-relaxed bg-gray-50 p-3 rounded border border-gray-200">
+                    （1）全景建立<br>
+                    （2）風險處理<br>
+                    （3）風險識別<br>
+                    （4）監控風險處理<br>
+                    （5）風險評估
+                </div>
+            </div>
+
+            <form id="quiz-form">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A" class="option-input">
+                    <span class="text-base">A. （1）（2）（3）（4）（5）</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B" class="option-input">
+                    <span class="text-base">B. （1）（3）（5）（2）（4）</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C" class="option-input">
+                    <span class="text-base">C. （1）（5）（3）（2）（4）</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D" class="option-input">
+                    <span class="text-base">D. （3）（5）（2）（1）（4）</span>
+                </label>
+
+                <button type="button" id="submit-btn" class="btn-submit">送出答案</button>
+            </form>
+        </div>
+
+        <!-- [三、UI 固定骨架] Feedback -->
+        <div class="p-card gap-block">
+            <div id="feedback-display" class="feedback-box">
+                <!-- JS 填充內容 -->
+            </div>
+        </div>
+
+        <!-- [三、UI 固定骨架] Explain -->
+        <div class="p-card gap-block">
+            <details id="explain-details">
+                <summary class="text-title text-blue-600 mb-2">顯示解析 / 隱藏解析</summary>
+                
+                <div class="mt-4">
+                    <!-- [十一、解析區塊之小主題分段] -->
+                    
+                    <!-- 1. 找關鍵字與白話翻譯 -->
+                    <div class="explain-section">
+                        <div class="explain-title">【第一步：找關鍵字】&【第二步：白話翻譯】</div>
+                        <p class="text-base leading-relaxed">
+                            <ul class="list-disc pl-5">
+                                <li><strong>關鍵字</strong>：「風險管理步驟由先至後」、「全景建立」、「風險識別」、「風險評估」、「風險處理」、「監控」。</li>
+                                <li><strong>白話翻譯</strong>：做風險管理時，正確流程應該像「先訂遊戲規則與範圍 → 找問題 → 判斷嚴重程度 → 想辦法處理 → 持續追蹤」那樣。請從選項中挑出正確排序。</li>
+                            </ul>
+                        </p>
+                    </div>
+
+                    <!-- 2. 解題思路 -->
+                    <div class="explain-section">
+                        <div class="explain-title">【第三步：解題思路】</div>
+                        <p class="text-base leading-relaxed">
+                            這題在考風險管理標準流程（ISO 31000/27005）。
+                            <br><br>
+                            <strong>解題邏輯：</strong>
+                            <ol class="list-decimal pl-5">
+                                <li><strong>先判斷起點</strong>：你不可能在「不知道範圍與目標」時就評估風險，所以<strong>(1)全景建立</strong>一定是第一步。</li>
+                                <li><strong>中間順序</strong>：不可能在「沒找到風險」前就處理風險，也不可能在識別前就評估。順序必然是：<strong>(3)風險識別 → (5)風險評估 → (2)風險處理</strong>。</li>
+                                <li><strong>最後一步</strong>：處理完之後要看效果，所以<strong>(4)監控風險處理</strong>通常在最後或貫穿全程的結尾。</li>
+                            </ol>
+                            <br>
+                            <strong>日常比喻（整理房間防蟑螂）：</strong>
+                            全景建立（決定整理哪間房）→ 識別（找蟑螂在哪）→ 評估（哪邊最嚴重）→ 處理（殺蟑封洞）→ 監控（過幾天看還有沒有）。
+                        </p>
+                    </div>
+
+                    <!-- 3. 選項分析 -->
+                    <div class="explain-section">
+                        <div class="explain-title">【第四步：選項分析】</div>
+                        <ul class="list-disc pl-5 text-base leading-relaxed">
+                            <li><strong>(A)</strong> <span class="text-red-600 font-bold">錯誤</span>。把「風險處理(2)」放在「風險識別(3)」前面，等於還沒找出風險就先處理，流程不合理。</li>
+                            <li><strong>(B)</strong> <span class="text-green-600 font-bold">正確</span>。順序為：(1)全景建立 → (3)風險識別 → (5)風險評估 → (2)風險處理 → (4)監控風險處理。符合標準作業程序。</li>
+                            <li><strong>(C)</strong> <span class="text-red-600 font-bold">錯誤</span>。把「風險評估(5)」放在「風險識別(3)」前面，還沒找出風險清單就想評估它，邏輯顛倒。</li>
+                            <li><strong>(D)</strong> <span class="text-red-600 font-bold">錯誤</span>。「全景建立(1)」不可能在中後段才做，因為它是設定範圍與背景的起點。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 4. 觀念補充與延伸 -->
+                    <div class="explain-section">
+                        <div class="explain-title">【觀念補充與延伸】</div>
+                        <p class="text-base leading-relaxed">
+                            <strong>核心觀念：</strong><br>
+                            風險管理（Risk Management）是一個「循環」過程，而非一次性工作。雖然題目考的是線性順序，但在實務上，「監控」與「溝通」是貫穿每一個步驟的持續性活動。
+                            <br><br>
+                            <strong>重要定義（ISO 27005）：</strong>
+                            <ul class="list-disc pl-5">
+                                <li><strong>全景建立 (Context Establishment)</strong>：定義範圍、風險胃納量、評估準則。</li>
+                                <li><strong>風險評估 (Risk Assessment)</strong>：包含三個子步驟——識別、分析、評估（Evaluation）。</li>
+                            </ul>
+                        </p>
+                    </div>
+
+                    <!-- 5. 觸類旁通 -->
+                    <div class="explain-section">
+                        <div class="explain-title">【觸類旁通（舉一反三）】</div>
+                        <p class="text-base leading-relaxed">
+                            <strong>1. 對比概念：</strong><br>
+                            <ul>
+                                <li><strong>風險識別</strong>：產出「風險清單」（有哪些壞事？）。</li>
+                                <li><strong>風險評估</strong>：產出「風險等級排序」（哪件事最嚴重？）。</li>
+                            </ul>
+                            <br>
+                            <strong>2. 變化題型：</strong><br>
+                            如果題目問「風險處理」有哪些策略？答案通常是：<strong>規避 (Avoid)、降低 (Mitigate/Reduce)、移轉 (Transfer/Share)、接受 (Accept)</strong>。
+                        </p>
+                    </div>
+
+                    <!-- 6. 記憶口訣 -->
+                    <div class="explain-section">
+                        <div class="explain-title">【記憶口訣】</div>
+                        <p class="text-base font-bold text-center text-indigo-700 bg-indigo-50 p-2 rounded">
+                            「全—識—評—處—監」
+                        </p>
+                        <p class="text-base text-center mt-1 text-gray-600">
+                            全景建立 → 風險識別 → 風險評估 → 風險處理 → 監控
+                        </p>
+                    </div>
+
+                    <!-- 7. 常見陷阱 -->
+                    <div class="explain-section">
+                        <div class="explain-title">【常見陷阱】</div>
+                        <ul class="list-disc pl-5 text-base leading-relaxed">
+                            <li><strong>陷阱一</strong>：把「識別」和「評估」順序搞反。記住：先有點名（識別），才能打分數（評估）。</li>
+                            <li><strong>陷阱二</strong>：誤以為可以一邊處理一邊再來識別。雖然實務上可能發生，但標準流程（SOP）要求先謀定而後動。</li>
+                            <li><strong>心理盲點</strong>：看到「評估」就直覺想先算分數，但其實要先有「風險清單」才算得出來。</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </details>
+        </div>
+
+        <!-- [三、UI 固定骨架] SelfCheck -->
+        <div class="p-card gap-block">
+            <h3 class="text-title mb-4 border-l-4 border-blue-500 pl-3">自我檢測</h3>
+            
+            <details>
+                <summary>1. 如果題目把「監控風險處理」改成「風險溝通與諮詢」，它通常會放在流程的哪個位置？</summary>
+                <div class="mt-2 ml-4">
+                    <span class="answer-hidden">貫穿全程（每一步都需要溝通），不是只放在某一個固定步驟。</span>
+                </div>
+            </details>
+
+            <details>
+                <summary>2. 「風險識別」產出的是什麼？「風險評估」產出的是什麼？</summary>
+                <div class="mt-2 ml-4">
+                    <span class="answer-hidden">識別產出風險清單；評估產出風險等級/排序與優先處理順序。</span>
+                </div>
+            </details>
+
+            <details>
+                <summary>3. 如果你已經選定控制措施並開始導入，代表你正在做哪一步？</summary>
+                <div class="mt-2 ml-4">
+                    <span class="answer-hidden">風險處理（2）；若開始追蹤導入成效才是監控（4）。</span>
+                </div>
+            </details>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const submitBtn = document.getElementById('submit-btn');
+            const feedbackBox = document.getElementById('feedback-display');
+            const statusBadge = document.getElementById('status-badge');
+            const explainDetails = document.getElementById('explain-details');
+            const options = document.querySelectorAll('input[name="answer"]');
+
+            const correctAnswer = 'B';
+            const correctReason = '風險管理標準流程是「全景建立→識別→評估→處理→監控」。';
+
+            // 監聽選項變更，當使用者選擇時啟用按鈕（可選）
+            options.forEach(opt => {
+                opt.addEventListener('change', () => {
+                    submitBtn.disabled = false;
+                });
+            });
+
+            submitBtn.addEventListener('click', () => {
+                const selectedOption = document.querySelector('input[name="answer"]:checked');
+                
+                if (!selectedOption) {
+                    alert('請先選擇一個答案！');
+                    return;
+                }
+
+                const userAnswer = selectedOption.value;
+                let feedbackHTML = '';
+                
+                feedbackBox.style.display = 'block';
+
+                if (userAnswer === correctAnswer) {
+                    // 答對處理
+                    statusBadge.textContent = '答對';
+                    statusBadge.className = 'px-3 py-1 bg-green-100 text-green-800 rounded-full text-small';
+                    
+                    feedbackBox.className = 'feedback-box feedback-correct';
+                    feedbackHTML = `
+                        <div class="text-title mb-2">判定：正確</div>
+                        <div class="text-base">${correctReason}</div>
+                    `;
+                    // 自動展開解析
+                    explainDetails.open = true;
+                } else {
+                    // 答錯處理
+                    statusBadge.textContent = '答錯';
+                    statusBadge.className = 'px-3 py-1 bg-red-100 text-red-800 rounded-full text-small';
+                    
+                    feedbackBox.className = 'feedback-box feedback-incorrect';
+                    feedbackHTML = `
+                        <div class="text-title mb-2">判定：錯誤</div>
+                        <div class="text-base mb-1"><strong>正確答案：</strong> (${correctAnswer})</div>
+                        <div class="text-base">${correctReason}</div>
+                    `;
+                }
+
+                feedbackBox.innerHTML = feedbackHTML;
+                
+                // 鎖定選項避免重複作答（可選，依需求決定是否保留重試機會）
+                // 這裡選擇不鎖定，讓使用者可以重選，但 UI 上已有明確回饋
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安考題解析：網站存取控制模型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #fdfbf7; /* Warm neutral background */
+            color: #2d3748;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 350px;
+            margin: 0 auto;
+        }
+        .step-card {
+            transition: all 0.3s ease;
+        }
+        .step-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Professional - Background #fdfbf7, Text #2d3748, Accents Blue/Indigo. -->
+    <!-- Application Structure Plan:
+        1. **Step 1 & 2: Scenario & Translation**: Interactive keyword highlighting + Plain text translation card.
+        2. **Step 3: Logic Flow**: A vertical stepper showing the 3-step decision process.
+        3. **Step 4: Option Analysis**: The interactive Model Comparator (Radar Chart).
+        4. **Deep Dive (Extensions/Pitfalls)**: A grid section for "Concept Extension", "Analogy", and "Common Pitfalls".
+        5. **Visual Concept & Mnemonic**: RBAC visualization with the specific mnemonic.
+        6. **Self Check**: Quiz with hidden answers (click to reveal).
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl">🛡️</span>
+                <h1 class="text-xl font-bold text-gray-800 tracking-tight">資安觀念實驗室：存取控制模型</h1>
+            </div>
+            <div class="text-sm text-gray-500 hidden sm:block">互動式考題解析</div>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- SECTION 1 & 2: Keywords & Translation -->
+        <section id="step1-2" class="max-w-5xl mx-auto">
+            <div class="flex items-center space-x-2 mb-4">
+                <span class="bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded">Step 1 & 2</span>
+                <h2 class="text-2xl font-bold text-gray-900">題目拆解與白話翻譯</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Question Analysis -->
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
+                    <div class="bg-indigo-50 px-6 py-4 border-b border-indigo-100 flex justify-between items-center">
+                        <h3 class="font-bold text-indigo-900">原始題目 (點擊關鍵字)</h3>
+                    </div>
+                    <div class="p-6 text-lg leading-loose text-gray-700 flex-grow">
+                        「某網站伺服器經常有 <button class="border-b-2 border-dashed border-gray-400 hover:bg-yellow-100 hover:border-yellow-500 hover:text-yellow-800 transition-colors px-1 font-medium" onclick="toggleAnalysis('keyword1')">大量的使用者</button> 來進行異動，且常會定義 <button class="border-b-2 border-dashed border-gray-400 hover:bg-indigo-100 hover:border-indigo-500 hover:text-indigo-800 transition-colors px-1 font-medium" onclick="toggleAnalysis('keyword2')">不同的使用者身份</button>，例如會員、非會員或系統管理者。」
+                    </div>
+                    <div id="keyword-feedback" class="bg-gray-50 p-4 text-sm text-gray-500 border-t border-gray-100 min-h-[80px]">
+                        點擊上方畫線文字查看分析...
+                    </div>
+                </div>
+
+                <!-- Plain Translation -->
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
+                    <div class="bg-green-50 px-6 py-4 border-b border-green-100">
+                        <h3 class="font-bold text-green-900">🗣️ 白話翻譯</h3>
+                    </div>
+                    <div class="p-6 flex-grow flex items-center">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            這題在問：<br>
+                            網站使用者很多，而且身份類型很固定（像會員/非會員/管理者），又常常有人加入或離開、權限要改來改去。<br><br>
+                            <span class="font-bold text-green-700 bg-green-50 px-1">請問用哪一種權限管理方式，會最省事、最好管？</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Problem Solving Logic -->
+        <section id="step3" class="max-w-4xl mx-auto">
+             <div class="flex items-center space-x-2 mb-6">
+                <span class="bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded">Step 3</span>
+                <h2 class="text-2xl font-bold text-gray-900">解題思路路徑</h2>
+            </div>
+            <div class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm relative">
+                <!-- Connecting Line -->
+                <div class="absolute left-10 top-12 bottom-12 w-1 bg-gray-100"></div>
+
+                <div class="space-y-8 relative">
+                    <!-- Step 1 -->
+                    <div class="flex items-start step-card p-4 rounded-lg bg-gray-50 border border-gray-100">
+                        <div class="flex-shrink-0 bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold z-10 text-sm">1</div>
+                        <div class="ml-6">
+                            <h4 class="font-bold text-gray-900">判斷情境</h4>
+                            <p class="text-gray-600 mt-1">是否「人多且常變動」？ ➡ <span class="text-indigo-600 font-bold">是</span></p>
+                        </div>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="flex items-start step-card p-4 rounded-lg bg-gray-50 border border-gray-100">
+                        <div class="flex-shrink-0 bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold z-10 text-sm">2</div>
+                        <div class="ml-6">
+                            <h4 class="font-bold text-gray-900">判斷分類</h4>
+                            <p class="text-gray-600 mt-1">是否能用「身份類型」把人分組？ ➡ <span class="text-indigo-600 font-bold">是</span> (會員/管理者)</p>
+                        </div>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="flex items-start step-card p-4 rounded-lg bg-indigo-50 border border-indigo-200">
+                        <div class="flex-shrink-0 bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold z-10 text-sm">3</div>
+                        <div class="ml-6">
+                            <h4 class="font-bold text-indigo-900">得出結論</h4>
+                            <p class="text-indigo-800 mt-1">能分組就選能用「角色」統一授權的模型 ➡ <span class="font-bold text-xl ml-2">RBAC</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Option Analysis (Model Comparator) -->
+        <section id="step4" class="max-w-6xl mx-auto">
+            <div class="flex items-center justify-center space-x-2 mb-6">
+                <span class="bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded">Step 4</span>
+                <h2 class="text-2xl font-bold text-gray-900">選項分析與比較</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left: Interactive Selector -->
+                <div class="lg:col-span-5 space-y-3">
+                    <p class="text-sm text-gray-500 mb-2">點擊選項查看詳細分析：</p>
+                    <button onclick="selectModel('ACL')" id="btn-ACL" class="model-btn w-full text-left p-4 rounded-lg border bg-white border-gray-200 shadow-sm hover:bg-gray-50 transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold">(A) 存取控制清單 (ACL)</span>
+                        </div>
+                    </button>
+                    <button onclick="selectModel('MAC')" id="btn-MAC" class="model-btn w-full text-left p-4 rounded-lg border bg-white border-gray-200 shadow-sm hover:bg-gray-50 transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold">(B) 強制存取控制 (MAC)</span>
+                        </div>
+                    </button>
+                    <button onclick="selectModel('DAC')" id="btn-DAC" class="model-btn w-full text-left p-4 rounded-lg border bg-white border-gray-200 shadow-sm hover:bg-gray-50 transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold">(C) 自主性存取控制 (DAC)</span>
+                        </div>
+                    </button>
+                    <button onclick="selectModel('RBAC')" id="btn-RBAC" class="model-btn w-full text-left p-4 rounded-lg border-2 border-indigo-600 bg-indigo-50 shadow-md ring-2 ring-indigo-100 transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-indigo-700">(D) 角色基礎存取控制 (RBAC)</span>
+                            <span class="text-xs bg-indigo-200 text-indigo-800 px-2 py-1 rounded-full">正確答案</span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Right: Details & Chart -->
+                <div class="lg:col-span-7 bg-white rounded-xl shadow-lg border border-gray-200 p-6 flex flex-col">
+                    <div id="model-details" class="mb-4 min-h-[160px]">
+                        <!-- Content populated by JS -->
+                    </div>
+                    <div class="flex-grow flex items-center justify-center bg-gray-50 rounded-lg border border-gray-100 p-4">
+                        <div class="chart-container">
+                            <canvas id="modelRadarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mastery Section: Extensions, Analogies, Pitfalls -->
+        <section id="mastery" class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Concept Extension -->
+                <div class="bg-blue-50 rounded-xl p-6 border border-blue-100">
+                    <div class="flex items-center space-x-2 mb-3 text-blue-800">
+                        <span class="text-xl">📚</span>
+                        <h3 class="font-bold">觀念補充與延伸</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm text-blue-900">
+                        <li>
+                            <span class="font-bold block">RBAC 定義精神：</span>
+                            以「角色」為授權核心。先管角色，再把人放進去。
+                        </li>
+                        <li>
+                            <span class="font-bold block">ABAC (屬性基礎)：</span>
+                            如果題目提到「時間」、「地點」、「部門」、「設備狀態」等動態條件，那就是 ABAC，比 RBAC 更細但更複雜。
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Analogy (Touch By Analogy) -->
+                <div class="bg-purple-50 rounded-xl p-6 border border-purple-100">
+                    <div class="flex items-center space-x-2 mb-3 text-purple-800">
+                        <span class="text-xl">🔄</span>
+                        <h3 class="font-bold">觸類旁通 (舉一反三)</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm text-purple-900">
+                        <li>
+                            <span class="font-bold">對比題型：</span><br>
+                            如果題目變成「每個檔案都要列誰可讀寫」，那就是在考 ACL。
+                        </li>
+                        <li>
+                            <span class="font-bold">變化題型：</span><br>
+                            如果是「依上班時間決定能不能存取」，偏向 ABAC 或 Policy-based。
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Common Pitfalls -->
+                <div class="bg-orange-50 rounded-xl p-6 border border-orange-100">
+                    <div class="flex items-center space-x-2 mb-3 text-orange-800">
+                        <span class="text-xl">⚠️</span>
+                        <h3 class="font-bold">常見陷阱</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm text-orange-900">
+                        <li>
+                            <span class="font-bold block">誤選 ACL：</span>
+                            最直覺的選項，但忘了 ACL 在「人多、資源多」時維護成本極高。
+                        </li>
+                        <li>
+                            <span class="font-bold block">忽略關鍵字：</span>
+                            只想到「控管」，沒看到題目問的是「管理效率」。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visual Concept & Mnemonic -->
+        <section class="max-w-4xl mx-auto bg-gray-900 rounded-xl text-white p-8 shadow-xl text-center">
+            <h2 class="text-2xl font-bold mb-4">記憶口訣</h2>
+            <div class="inline-block border-2 border-yellow-400 rounded-lg p-6 bg-gray-800 relative">
+                <p class="text-3xl font-bold text-yellow-400 tracking-wide">「人多常變動，角色最好用」</p>
+                <p class="mt-4 text-gray-300">看到「會員/管理者」這種固定身份，先想 RBAC。</p>
+            </div>
+        </section>
+
+        <!-- SECTION: Self Check (Visible Questions, Hidden Answers) -->
+        <section id="self-check" class="max-w-3xl mx-auto pb-12">
+            <div class="flex items-center justify-center space-x-2 mb-6">
+                <span class="bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded">Check</span>
+                <h2 class="text-2xl font-bold text-gray-900">自我檢測</h2>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- Q1 -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-5 border-b border-gray-100 bg-gray-50">
+                        <h4 class="font-bold text-gray-800">Q1：如果公司有「主管、一般員工、實習生」三類身份，且常有人進出，最適合哪種模型？</h4>
+                    </div>
+                    <div class="p-5">
+                        <details class="group">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none text-indigo-600 hover:text-indigo-800">
+                                <span>點擊查看答案解析</span>
+                                <span class="transition group-open:rotate-180">
+                                    <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="text-gray-600 mt-3 group-open:animate-fade-in bg-indigo-50 p-4 rounded border border-indigo-100">
+                                <span class="font-bold text-indigo-900">答案：RBAC</span><br>
+                                因為用角色集中管理權限，異動時只需調整角色指派。
+                            </div>
+                        </details>
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-5 border-b border-gray-100 bg-gray-50">
+                        <h4 class="font-bold text-gray-800">Q2：如果題目強調「依上班時間、地點、裝置是否合規」來決定能不能存取，會更像哪種模型？</h4>
+                    </div>
+                    <div class="p-5">
+                        <details class="group">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none text-indigo-600 hover:text-indigo-800">
+                                <span>點擊查看答案解析</span>
+                                <span class="transition group-open:rotate-180">
+                                    <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="text-gray-600 mt-3 group-open:animate-fade-in bg-indigo-50 p-4 rounded border border-indigo-100">
+                                <span class="font-bold text-indigo-900">答案：ABAC (屬性為基礎存取控制)</span><br>
+                                用條件/屬性動態決策。
+                            </div>
+                        </details>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-5 border-b border-gray-100 bg-gray-50">
+                        <h4 class="font-bold text-gray-800">Q3：為什麼 ACL 在人多、資源多時管理效率差？</h4>
+                    </div>
+                    <div class="p-5">
+                        <details class="group">
+                            <summary class="flex justify-between items-center font-medium cursor-pointer list-none text-indigo-600 hover:text-indigo-800">
+                                <span>點擊查看答案解析</span>
+                                <span class="transition group-open:rotate-180">
+                                    <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                                </span>
+                            </summary>
+                            <div class="text-gray-600 mt-3 group-open:animate-fade-in bg-indigo-50 p-4 rounded border border-indigo-100">
+                                <span class="font-bold text-indigo-900">答案：因為權限分散</span><br>
+                                權限分散在每個資源的清單上，使用者或權限一變更，就要到很多資源逐一修改。
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-gray-300 py-8 text-center text-sm">
+        <p>© 2025 資安觀念實驗室 | Based on Source Report</p>
+    </footer>
+
+    <script>
+        // --- Logic: Step 1 Keyword Analysis ---
+        function toggleAnalysis(keyword) {
+            const feedback = document.getElementById('keyword-feedback');
+            if (keyword === 'keyword1') {
+                feedback.innerHTML = `<span class="font-bold text-yellow-700">【大量的使用者】</span>：代表帳號數很多，管理會很吃重。若用 ACL 會改到手軟，暗示需要高效率方法。`;
+                feedback.className = "bg-yellow-50 p-4 text-sm text-yellow-900 border-t border-yellow-200 min-h-[80px] animate-fade-in";
+            } else if (keyword === 'keyword2') {
+                feedback.innerHTML = `<span class="font-bold text-indigo-700">【不同的使用者身份】</span>：例如會員、管理者。這代表「群組/角色」很明確，適合用角色 (Role) 統一管理。`;
+                feedback.className = "bg-indigo-50 p-4 text-sm text-indigo-900 border-t border-indigo-200 min-h-[80px] animate-fade-in";
+            }
+        }
+
+        // --- Logic: Step 4 Option Analysis ---
+        const models = {
+            'ACL': {
+                name: '存取控制清單 (ACL)',
+                reason: '❌ 錯誤。ACL 是針對每個資源列清單。人多變動大時，維護成本太高，效率差。',
+                scores: [3, 4, 8, 2]
+            },
+            'MAC': {
+                name: '強制存取控制 (MAC)',
+                reason: '❌ 錯誤。MAC 由系統強制規則（如機密等級），通常用於軍方。太僵化，不適合一般網站會員管理。',
+                scores: [4, 9, 2, 5]
+            },
+            'DAC': {
+                name: '自主性存取控制 (DAC)',
+                reason: '❌ 錯誤。DAC 由擁有者決定。人多時權限太分散，難以統一管理與稽核。',
+                scores: [5, 3, 9, 6]
+            },
+            'RBAC': {
+                name: '角色基礎存取控制 (RBAC)',
+                reason: '✅ 正確。權限綁定「角色」。人來了給角色，人走了拔角色，不用動底層資源，效率最高。',
+                scores: [9, 7, 7, 8]
+            }
+        };
+
+        let radarChart;
+
+        function selectModel(modelKey) {
+            const data = models[modelKey];
+            const container = document.getElementById('model-details');
+            
+            // Reset Styles
+            document.querySelectorAll('.model-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-indigo-100', 'border-indigo-600', 'bg-indigo-50');
+                btn.classList.add('border-gray-200', 'bg-white');
+                const title = btn.querySelector('.font-bold');
+                if(title) { title.classList.remove('text-indigo-700'); }
+            });
+
+            // Active Style
+            const activeBtn = document.getElementById(`btn-${modelKey}`);
+            activeBtn.classList.remove('border-gray-200', 'bg-white');
+            activeBtn.classList.add('ring-2', 'ring-indigo-100', 'border-indigo-600', 'bg-indigo-50');
+            activeBtn.querySelector('.font-bold').classList.add('text-indigo-700');
+
+            // Update Content
+            container.innerHTML = `
+                <div class="animate-fade-in">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">${data.name}</h3>
+                    <div class="p-3 rounded-lg ${modelKey === 'RBAC' ? 'bg-green-50 text-green-900 border border-green-200' : 'bg-red-50 text-red-900 border border-red-200'}">
+                        ${data.reason}
+                    </div>
+                </div>
+            `;
+
+            updateChart(data.scores, data.name);
+        }
+
+        // --- Chart Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            selectModel('RBAC');
+        });
+
+        function initChart() {
+            const ctx = document.getElementById('modelRadarChart').getContext('2d');
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['效率', '安全性', '彈性', '細緻度'],
+                    datasets: [{
+                        label: '能力值',
+                        data: [0, 0, 0, 0],
+                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        pointBackgroundColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            suggestedMin: 0,
+                            suggestedMax: 10,
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateChart(scores, label) {
+            if (radarChart) {
+                radarChart.data.datasets[0].data = scores;
+                radarChart.data.datasets[0].label = label;
+                radarChart.update();
+            }
+        }
+    </script>
+    <style>
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</body>
+</html>

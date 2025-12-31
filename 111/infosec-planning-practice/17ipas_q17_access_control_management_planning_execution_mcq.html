@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q17 系統存取控制管理規劃與執行</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS (for layout and utility) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Tokens & Base Styles */
+        :root {
+            --font-base: "Noto Sans TC", system-ui, sans-serif;
+            --text-base: 16px;
+            --text-title: 18px;
+            --text-sm: 14px;
+            --spacing-card: 16px;
+            --spacing-block: 12px;
+        }
+
+        body {
+            font-family: var(--font-base);
+            font-size: var(--text-base);
+            background-color: #f3f4f6;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Tag Colors (Strictly enforced) */
+        .tag-law { background-color: #7f8c8d; color: white; }
+        .tag-iso { background-color: #27ae60; color: white; }
+        .tag-zt  { background-color: #8e44ad; color: white; }
+        .tag-net { background-color: #2980b9; color: white; }
+        .tag-sec { background-color: #c0392b; color: white; }
+        .tag-mgm { background-color: #d35400; color: white; }
+
+        /* General Tag Style */
+        .tag-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        /* Highlight */
+        mark {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Main Container */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Section Styling */
+        .section-card {
+            padding: var(--spacing-card);
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .section-card:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: var(--text-title);
+            font-weight: 700;
+            margin-bottom: var(--spacing-block);
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Explanation Sub-cards */
+        .explain-sub-card {
+            background-color: #f9fafb;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid #d1d5db;
+        }
+
+        .explain-sub-title {
+            font-weight: 700;
+            font-size: var(--text-base);
+            margin-bottom: 6px;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Interactive Elements */
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .option-input {
+            margin-top: 5px;
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .btn-submit {
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Feedback Styles */
+        .feedback-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .feedback-correct {
+            background-color: #d1fae5;
+            border: 1px solid #34d399;
+            color: #065f46;
+        }
+
+        .feedback-incorrect {
+            background-color: #fee2e2;
+            border: 1px solid #f87171;
+            color: #991b1b;
+        }
+
+        /* Details/Summary */
+        details summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: #4b5563;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details summary::after {
+            content: '\f078';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        <!-- Header -->
+        <div class="section-card bg-gray-800 text-white">
+            <div class="flex justify-between items-center">
+                <h1 class="text-lg font-bold">Q17 系統存取控制管理規劃與執行</h1>
+                <span id="status-badge" class="bg-gray-600 px-3 py-1 rounded text-sm">未作答</span>
+            </div>
+        </div>
+
+        <!-- Context -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-info-circle text-blue-500"></i> 情境描述</h2>
+            <p class="text-gray-600">本題無額外情境</p>
+        </div>
+
+        <!-- Question -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-question-circle text-blue-500"></i> 題目（複選）</h2>
+            <p class="mb-4 font-medium">關於系統存取控制管理規劃與執行，下列哪些項目適當可行？</p>
+            
+            <form id="quiz-form">
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="A" class="option-input">
+                    <span>(A) 公司企業資源規劃系統（ERP System）的權限申請，依照不同部門業務面向，須先經由負責部門主管審核。（例如：採購類權限申請須經採購主管審核）</span>
+                </label>
+                
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="B" class="option-input">
+                    <span>(B) 公司依照各個基本職能於預先規劃其企業資源規劃系統使用權限，新進人員待用人部門主管確認後，通知權限管理人賦予其預設之權限，無須額外填單申請</span>
+                </label>
+                
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="C" class="option-input">
+                    <span>(C) 公司所有系統原預設每半年進行權限檢核，本次風險評估後，其中某個系統因其重要性降低，經權責主管核准後，變更為每年進行權限檢核</span>
+                </label>
+                
+                <label class="option-label">
+                    <input type="checkbox" name="option" value="D" class="option-input">
+                    <span>(D) 公司規定委外廠商於外部連入公司內部網路，須申請以虛擬專用網路（Virtual Private Network, VPN）方式為之，申請者使用完畢後，不需告知管理單位關閉其權限</span>
+                </label>
+
+                <button type="button" class="btn-submit" onclick="checkAnswer()">送出作答</button>
+            </form>
+
+            <!-- Feedback -->
+            <div id="feedback-container" class="feedback-box">
+                <h3 id="feedback-title" class="font-bold text-lg mb-2"></h3>
+                <p id="feedback-content"></p>
+            </div>
+        </div>
+
+        <!-- Explain -->
+        <div class="section-card">
+            <details id="explain-details">
+                <summary class="text-lg text-blue-600 hover:text-blue-800">
+                    <span><i class="fas fa-lightbulb mr-2"></i> 顯示詳解與分析</span>
+                </summary>
+                <div class="mt-4">
+                    
+                    <!-- 第一步：找關鍵字 -->
+                    <div class="explain-sub-card">
+                        <div class="explain-sub-title">
+                            <i class="fas fa-key text-yellow-600"></i> 第一步：找關鍵字
+                        </div>
+                        <p>
+                            <span class="tag-badge tag-mgm">存取控制</span>
+                            <span class="tag-badge tag-sec">ERP系統</span>
+                            <span class="tag-badge tag-mgm">風險評估</span>
+                            <span class="tag-badge tag-net">VPN</span>
+                        </p>
+                        <p class="mt-2 text-sm text-gray-700">
+                            這題考的是「權限生命週期」：從申請、核准、發放、定期檢核到回收。關鍵字對應重點：
+                            <br>• <strong>主管審核/預設權限</strong> → 授權前審核與入職賦權。
+                            <br>• <strong>權限檢核</strong> → 定期複查。
+                            <br>• <strong>VPN 連線</strong> → 委外遠端存取管理。
+                        </p>
+                    </div>
+
+                    <!-- 第二步：白話翻譯 -->
+                    <div class="explain-sub-card">
+                        <div class="explain-sub-title">
+                            <i class="fas fa-language text-green-600"></i> 第二步：白話翻譯
+                        </div>
+                        <p class="text-sm text-gray-700">
+                            這題其實在問：<strong>公司要管好系統帳號，哪些做法是「合乎邏輯」且「做得到」的？</strong>
+                            <br>你要挑出符合資安原則的做法：要有人審核、流程要有效率但不能失控、要定期檢查、<strong>用完要把權限收回</strong>。
+                        </p>
+                    </div>
+
+                    <!-- 第三步：解題思路 -->
+                    <div class="explain-sub-card">
+                        <div class="explain-sub-title">
+                            <i class="fas fa-road text-blue-600"></i> 第三步：解題思路
+                        </div>
+                        <div class="text-sm text-gray-700 space-y-2">
+                            <p><strong>1. 解題步驟：</strong></p>
+                            <ul class="list-disc list-inside ml-2">
+                                <li>看是否符合「最小權限」與「職務區隔」原則。</li>
+                                <li>檢查是否有「核准流程」與「可追溯性」。</li>
+                                <li>特別檢查遠端/委外權限是否有「回收機制」。</li>
+                            </ul>
+                            
+                            <p><strong>2. 原理與規則：</strong></p>
+                            <p class="ml-2">權限生命週期 = 申請 → 審核 → 發放 → 使用 → 檢核 → <strong>回收</strong>。缺一不可，尤其是「回收」。</p>
+
+                            <p><strong>3. 生活例子：</strong></p>
+                            <p class="ml-2 bg-blue-50 p-2 rounded">
+                                就像把家中鑰匙交給裝修師傅（委外廠商），裝修完畢後（任務結束），你一定會把鑰匙收回來（關閉權限），而不是讓師傅一直留著鑰匙。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 第四步：選項分析 -->
+                    <div class="explain-sub-card">
+                        <div class="explain-sub-title">
+                            <i class="fas fa-search text-purple-600"></i> 第四步：選項分析
+                        </div>
+                        <ul class="list-none space-y-3 text-sm text-gray-700">
+                            <li class="pl-2 border-l-2 border-green-500">
+                                <strong>(A) 正確：</strong>符合「權責一致」。採購權限由採購主管審核，落實職務區隔。
+                            </li>
+                            <li class="pl-2 border-l-2 border-green-500">
+                                <strong>(B) 正確：</strong>這是「RBAC（角色存取控制）」的應用。職務權限預先規劃好，並經主管確認，兼顧效率與控管。
+                            </li>
+                            <li class="pl-2 border-l-2 border-green-500">
+                                <strong>(C) 正確：</strong>符合「風險導向（Risk-based）」管理。經風險評估確認重要性降低，經主管核准後調降檢查頻率是合理的。
+                            </li>
+                            <li class="pl-2 border-l-2 border-red-500">
+                                <strong>(D) 錯誤：</strong>違反「權限回收」原則。VPN 用完不告知關閉，會形成殭屍帳號，容易被駭客利用。
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 觀念補充與延伸 -->
+                    <div class="explain-sub-card">
+                        <div class="explain-sub-title">
+                            <i class="fas fa-book-open text-indigo-600"></i> 觀念補充與延伸
+                        </div>
+                        <div class="text-sm text-gray-700 space-y-2">
+                            <p><strong><i class="fas fa-gavel text-gray-400"></i> 法條或定義（白話）：</strong></p>
+                            <ul class="list-disc list-inside ml-2">
+                                <li><strong>最小權限 (Least Privilege)：</strong>只給剛好夠用的權限，不多給。</li>
+                                <li><strong>定期檢核 (Access Review)：</strong>時間到就把所有人權限拿出來看一遍，不該有的就刪掉。</li>
+                            </ul>
+                            
+                            <p><strong><i class="fas fa-project-diagram text-gray-400"></i> 觸類旁通（舉一反三）：</strong></p>
+                            <p class="ml-2">
+                                如果題目改成「新進人員先給最大權限，之後再調整」→ <strong>錯</strong>（違反最小權限）。<br>
+                                如果題目改成「委外 VPN 設定 7 天有效期，到期自動停用」→ <strong>對</strong>（有回收機制）。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 記憶口訣 -->
+                    <div class="explain-sub-card">
+                        <div class="explain-sub-title">
+                            <i class="fas fa-brain text-pink-600"></i> 記憶口訣
+                        </div>
+                        <p class="text-sm text-gray-700 font-bold text-center bg-pink-50 p-2 rounded">
+                            「權限四步：審、給、查、收」
+                        </p>
+                        <p class="text-sm text-gray-600 text-center mt-1">
+                            審（主管審核）→ 給（依職務給）→ 查（定期檢核）→ 收（用完要回收）
+                        </p>
+                    </div>
+
+                    <!-- 常見陷阱 -->
+                    <div class="explain-sub-card">
+                        <div class="explain-sub-title">
+                            <i class="fas fa-exclamation-triangle text-orange-600"></i> 常見陷阱
+                        </div>
+                        <div class="text-sm text-gray-700">
+                            <p><strong><i class="fas fa-eye-slash text-gray-400"></i> 心理盲點：</strong></p>
+                            <p class="ml-2 mb-2">看到 "VPN" 就覺得很安全，忽略了重點是「用完沒關閉」。技術安全（VPN）不代表管理安全（帳號回收）。</p>
+                            
+                            <p><strong><i class="fas fa-shield-alt text-gray-400"></i> 避坑指南：</strong></p>
+                            <p class="ml-2">
+                                只要題目出現「委外」、「遠端」、「臨時」這三個詞，立刻檢查：
+                                <br>1. 有沒有期限？
+                                <br>2. 用完會不會撤？
+                                <br>3. 管理單位知不知道？
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </details>
+        </div>
+
+        <!-- Self Check -->
+        <div class="section-card">
+            <h2 class="section-title"><i class="fas fa-check-double text-green-600"></i> 自我檢測</h2>
+            <div class="space-y-3">
+                
+                <details class="group">
+                    <summary class="p-3 bg-gray-50 rounded hover:bg-gray-100 transition">
+                        <span><span class="font-bold text-blue-600">Q1.</span> 如果委外 VPN 帳號改成「到期自動停用，需續用再重新申請」，D 會變成正確嗎？</span>
+                    </summary>
+                    <div class="p-3 mt-2 text-sm text-gray-700 bg-white border border-gray-200 rounded">
+                        會更接近正確；因為加入期限與自動停用等同於用完/到期即回收，可降低殭屍權限風險。
+                    </div>
+                </details>
+
+                <details class="group">
+                    <summary class="p-3 bg-gray-50 rounded hover:bg-gray-100 transition">
+                        <span><span class="font-bold text-blue-600">Q2.</span> 選項 B 的「預設權限」設太大（例如新人直接有財務核准權），違反哪個核心原則？</span>
+                    </summary>
+                    <div class="p-3 mt-2 text-sm text-gray-700 bg-white border border-gray-200 rounded">
+                        最小權限（Least Privilege），也可能踩到職務區隔（Segregation of Duties）。
+                    </div>
+                </details>
+
+                <details class="group">
+                    <summary class="p-3 bg-gray-50 rounded hover:bg-gray-100 transition">
+                        <span><span class="font-bold text-blue-600">Q3.</span> 權限檢核頻率能不能隨便改？需要什麼條件才合理？</span>
+                    </summary>
+                    <div class="p-3 mt-2 text-sm text-gray-700 bg-white border border-gray-200 rounded">
+                        不能隨便改；要有風險評估依據，並經權責主管核准，且留下紀錄可追溯。
+                    </div>
+                </details>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function checkAnswer() {
+            // Get all checked values
+            const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+            const selectedValues = Array.from(checkboxes).map(cb => cb.value).sort();
+            
+            // Correct Answer Set
+            const correctAnswers = ['A', 'B', 'C'];
+            
+            // Logic Check
+            const isCorrect = JSON.stringify(selectedValues) === JSON.stringify(correctAnswers);
+            
+            // UI Update
+            const feedbackContainer = document.getElementById('feedback-container');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackContent = document.getElementById('feedback-content');
+            const statusBadge = document.getElementById('status-badge');
+            const explainDetails = document.getElementById('explain-details');
+
+            feedbackContainer.style.display = 'block';
+
+            if (isCorrect) {
+                feedbackContainer.className = 'feedback-box feedback-correct';
+                feedbackTitle.innerHTML = '<i class="fas fa-check-circle"></i> 判定：正確';
+                feedbackContent.innerText = '理由：A 符合權責一致審核、B 屬職務權限預設效率化、C 屬風險導向管理；D 違反權限回收原則，故排除。';
+                statusBadge.innerText = '答對';
+                statusBadge.className = 'bg-green-600 px-3 py-1 rounded text-sm text-white';
+            } else {
+                feedbackContainer.className = 'feedback-box feedback-incorrect';
+                feedbackTitle.innerHTML = '<i class="fas fa-times-circle"></i> 判定：錯誤';
+                feedbackContent.innerHTML = `正確答案：<strong>A、B、C</strong><br>理由：A 有權責主管審核、B 用職務預設權限提升效率且有主管確認、C 依風險調整檢核頻率並經核准；D 缺少用後回收，風險過高。`;
+                statusBadge.innerText = '答錯';
+                statusBadge.className = 'bg-red-600 px-3 py-1 rounded text-sm text-white';
+            }
+
+            // Auto-open explanation
+            explainDetails.open = true;
+            
+            // Scroll to feedback
+            feedbackContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>

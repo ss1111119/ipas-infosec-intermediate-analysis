@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第16題_ISO27001風險評鑑步驟</title>
+    <!-- 引入 Tailwind CSS 進行快速樣式設定，輔以自定義 CSS 確保符合規範 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* * 全域樣式設定 
+         * 符合規範：字體 system-ui, "Noto Sans TC", sans-serif
+         * Base size: 16px
+         */
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            font-size: 16px;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* * 主要容器版型規則 
+         * max-width: 960px, width: 100%, margin: 0 auto 
+         */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* * UI 區塊間距規範 
+         * 區塊間距: 12px 
+         * 卡片 padding: 16px
+         */
+        .section {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .gap-12px {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* * 字級規範 
+         * 標題字級: 18px
+         * 小字字級: 14px 
+         */
+        h1, h2, .title-text {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+        }
+
+        .small-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* * 標籤顏色規範 (強制完全一致) 
+         */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            margin-right: 4px;
+            font-weight: normal;
+        }
+        .tag-law { background-color: #7f8c8d; }
+        .tag-iso { background-color: #27ae60; }
+        .tag-zt  { background-color: #8e44ad; }
+        .tag-net { background-color: #2980b9; }
+        .tag-sec { background-color: #c0392b; }
+        .tag-mgm { background-color: #d35400; }
+
+        /* * 解析段落卡樣式 
+         * 使用同一底色（淺色系），具備清楚小標題
+         */
+        .explain-card {
+            background-color: #f8fafc; /* 淺藍灰底色 */
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid #3b82f6; /* 裝飾線 */
+        }
+        
+        .explain-title {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .explain-subtitle {
+            font-weight: 600;
+            color: #475569;
+            margin-top: 8px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        /* 重點標註樣式 */
+        mark {
+            background-color: #fef08a;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* 按鈕樣式 */
+        .btn-submit {
+            background-color: #3b82f6;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 12px;
+        }
+        .btn-submit:hover {
+            background-color: #2563eb;
+        }
+
+        /* 選項樣式 */
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .option-label:hover {
+            background-color: #f1f5f9;
+        }
+        .option-input {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+        }
+
+        /* 回饋區塊樣式 */
+        #feedback-area {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 4px;
+        }
+        .feedback-correct {
+            background-color: #dcfce7;
+            border: 1px solid #86efac;
+            color: #166534;
+        }
+        .feedback-error {
+            background-color: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+        }
+
+        /* Details/Summary 樣式 */
+        details {
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+        summary {
+            padding: 12px;
+            cursor: pointer;
+            background-color: #f8fafc;
+            font-weight: 500;
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        summary::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+        }
+        details[open] summary::after {
+            content: '-';
+        }
+        .details-content {
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+            background-color: white;
+        }
+        
+        /* 隱藏原生 checkbox 以美化（選用，此處保持原生但調整大小） */
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <!-- UI 骨架 1: Header -->
+        <div class="section" style="background-color: #1e293b; color: white;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 18px; font-weight: 700;">第 16 題</span>
+                <span id="status-badge" style="background-color: #64748b; padding: 2px 8px; border-radius: 12px; font-size: 14px;">未作答</span>
+            </div>
+        </div>
+
+        <!-- UI 骨架 2: Context -->
+        <div class="section">
+            <div class="title-text">情境</div>
+            <div class="small-text" style="color: #64748b; font-style: italic;">
+                本題無額外情境
+            </div>
+        </div>
+
+        <!-- UI 骨架 3: Question -->
+        <div class="section">
+            <div class="title-text">題目 <span class="tag tag-iso">ISO 27001</span><span class="tag tag-mgm">風險管理</span></div>
+            <p style="margin-bottom: 16px;">
+                16. ISO/IEC 27001 中所採用的風險評鑑（Risk Assessment）主要包含下列哪些步驟？（複選）
+            </p>
+            <div class="gap-12px" id="options-container">
+                <!-- 選項 A -->
+                <label class="option-label">
+                    <input type="checkbox" name="answer" value="A" class="option-input">
+                    <span>(A) 風險評估（Risk Evaluation）</span>
+                </label>
+                <!-- 選項 B -->
+                <label class="option-label">
+                    <input type="checkbox" name="answer" value="B" class="option-input">
+                    <span>(B) 風險分析（Risk Analysis）</span>
+                </label>
+                <!-- 選項 C -->
+                <label class="option-label">
+                    <input type="checkbox" name="answer" value="C" class="option-input">
+                    <span>(C) 風險分類（Risk Classification）</span>
+                </label>
+                <!-- 選項 D -->
+                <label class="option-label">
+                    <input type="checkbox" name="answer" value="D" class="option-input">
+                    <span>(D) 風險識別（Risk Identification）</span>
+                </label>
+            </div>
+
+            <button class="btn-submit" onclick="checkAnswer()">送出答案</button>
+        </div>
+
+        <!-- UI 骨架 4: Feedback -->
+        <div class="section" id="feedback-section" style="display: none;">
+            <div id="feedback-area"></div>
+        </div>
+
+        <!-- UI 骨架 5: Explain -->
+        <div class="section">
+            <details>
+                <summary>點擊查看詳細解析</summary>
+                <div class="details-content">
+                    
+                    <!-- 解析段落卡 1: 關鍵字與白話翻譯 -->
+                    <div class="explain-card">
+                        <span class="explain-title">【第一步：找關鍵字】＆【第二步：白話翻譯】</span>
+                        <div style="margin-bottom: 12px;">
+                            <span class="explain-subtitle">找關鍵字</span>
+                            <p><strong>ISO/IEC 27001</strong>（ISMS 制度）、<strong>風險評鑑 (Risk Assessment)</strong>（核心流程）、<strong>主要包含哪些步驟</strong>（複選）。</p>
+                        </div>
+                        <div>
+                            <span class="explain-subtitle">白話翻譯</span>
+                            <p>
+                                題目在問：在 ISO 27001 標準裡，「做風險評鑑」這件事包含哪幾個標準動作？<br>
+                                也就是：先把風險找出來、再分析它的大小、再判斷它嚴不嚴重，這些流程中哪些是標準步驟？
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 解析段落卡 2: 解題思路 -->
+                    <div class="explain-card">
+                        <span class="explain-title">【第三步：解題思路】</span>
+                        
+                        <span class="explain-subtitle">解題步驟</span>
+                        <ol style="margin-left: 20px; list-style-type: decimal;">
+                            <li>記住 ISO 27001 風險評鑑的核心流程三部曲。</li>
+                            <li>對照選項，找出這三個步驟的英文或中文名稱。</li>
+                            <li>刪除不屬於核心步驟的選項（如分類）。</li>
+                        </ol>
+
+                        <span class="explain-subtitle">原理與規則</span>
+                        <p>風險評鑑（Risk Assessment）是系統化決定「風險是什麼、大小多少、要不要處理」的過程，包含：</p>
+                        <ul style="margin-left: 20px; list-style-type: disc;">
+                            <li><strong>識別 (Identification)</strong>：把可能出事的點列出來。</li>
+                            <li><strong>分析 (Analysis)</strong>：分析發生機率與影響程度。</li>
+                            <li><strong>評估 (Evaluation)</strong>：把分析結果拿去跟標準比較，決定是否處理。</li>
+                        </ul>
+
+                        <span class="explain-subtitle">生活例子</span>
+                        <p>
+                            就像評估「下雨天騎車上學」：<br>
+                            1. <strong>識別</strong>：會打滑、視線差、車多。<br>
+                            2. <strong>分析</strong>：打滑機率多大？摔倒會多嚴重？<br>
+                            3. <strong>評估</strong>：如果風險太高（超過可接受標準），就改搭捷運。
+                        </p>
+                    </div>
+
+                    <!-- 解析段落卡 3: 選項分析 -->
+                    <div class="explain-card">
+                        <span class="explain-title">【第四步：選項分析】</span>
+                        <ul style="list-style-type: none; padding-left: 0;">
+                            <li style="margin-bottom: 8px;">
+                                <span class="tag tag-mgm">A</span> <strong>風險評估 (Evaluation)</strong>：<span style="color: #166534; font-weight: bold;">正確</span>。<br>這是最後一步，用分析結果判定風險是否可接受。
+                            </li>
+                            <li style="margin-bottom: 8px;">
+                                <span class="tag tag-mgm">B</span> <strong>風險分析 (Analysis)</strong>：<span style="color: #166534; font-weight: bold;">正確</span>。<br>這是中間步驟，算出風險的「大小」（機率 x 衝擊）。
+                            </li>
+                            <li style="margin-bottom: 8px;">
+                                <span class="tag tag-mgm">C</span> <strong>風險分類 (Classification)</strong>：<span style="color: #991b1b; font-weight: bold;">錯誤</span>。<br>雖然實務上會做資產或風險分類，但在標準定義的「評鑑核心三步驟」中，這不是標準用語。
+                            </li>
+                            <li>
+                                <span class="tag tag-mgm">D</span> <strong>風險識別 (Identification)</strong>：<span style="color: #166534; font-weight: bold;">正確</span>。<br>這是第一步，先把風險找出來。
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 解析段落卡 4: 觀念補充與延伸 -->
+                    <div class="explain-card">
+                        <span class="explain-title">【觀念補充與延伸】</span>
+                        
+                        <span class="explain-subtitle">法條或定義（白話）</span>
+                        <p>Risk Assessment 的精神就是：<strong>「找出來 -> 算清楚 -> 決定要不要救」</strong>。</p>
+                        
+                        <span class="explain-subtitle">觸類旁通（舉一反三）</span>
+                        <p>
+                            <strong>考點延伸 1：風險處理 (Risk Treatment)</strong><br>
+                            如果題目問「評鑑完之後要做什麼？」，答案就是風險處理。選項通常有四種：<br>
+                            1. 降低 (Reduce/Mitigate)<br>
+                            2. 避免 (Avoid)<br>
+                            3. 移轉 (Transfer/Share)<br>
+                            4. 接受 (Accept)
+                        </p>
+                        <p style="margin-top: 8px;">
+                            <strong>考點延伸 2：分析 vs 評估</strong><br>
+                            分析是「算數學」（量化或質化計算）；評估是「做裁判」（判定Pass或Fail）。
+                        </p>
+                    </div>
+
+                    <!-- 解析段落卡 5: 記憶口訣與常見陷阱 -->
+                    <div class="explain-card">
+                        <span class="explain-title">【記憶口訣】＆【常見陷阱】</span>
+                        
+                        <span class="explain-subtitle">記憶口訣</span>
+                        <p style="font-size: 1.1em; color: #d35400;"><strong>「先識別、再分析、後評估」</strong></p>
+                        <p>三段式：找（識別）→ 算（分析）→ 判（評估）。</p>
+
+                        <span class="explain-subtitle">常見陷阱</span>
+                        <div style="margin-top: 4px;">
+                            <strong>心理盲點：</strong>看到「分類 (Classification)」覺得很合理就選了，但題目問的是 ISO 標準流程，分類不是主要步驟。<br>
+                            <strong>避坑指南：</strong>看到 Risk Assessment，腦中直接套用三字訣，不要被其他看起來合理的動詞混淆。
+                        </div>
+                    </div>
+
+                </div>
+            </details>
+        </div>
+
+        <!-- UI 骨架 6: SelfCheck -->
+        <div class="section">
+            <details>
+                <summary>自我檢測 (Self Check)</summary>
+                <div class="details-content">
+                    <div class="gap-12px">
+                        <div>
+                            <p style="font-weight: 700; margin-bottom: 4px;">Q1: 風險分析 (Risk Analysis) 與風險評估 (Risk Evaluation) 最大的差別是什麼？</p>
+                            <details style="margin-top: 0; border: none; background: #f1f5f9;">
+                                <summary style="padding: 8px; font-size: 14px; color: #475569;">顯示答案</summary>
+                                <div style="padding: 8px 12px; font-size: 14px;">
+                                    分析是用數據或質性方法算出風險的「大小」（機率與影響）；評估則是把分析結果跟「可接受標準」比較，決定是否要處理。
+                                </div>
+                            </details>
+                        </div>
+
+                        <div>
+                            <p style="font-weight: 700; margin-bottom: 4px;">Q2: 如果題目改成問「Risk Treatment（風險處理）的常見策略」，你會答哪四種？</p>
+                            <details style="margin-top: 0; border: none; background: #f1f5f9;">
+                                <summary style="padding: 8px; font-size: 14px; color: #475569;">顯示答案</summary>
+                                <div style="padding: 8px 12px; font-size: 14px;">
+                                    降低（Mitigate/Reduce）、避免（Avoid）、移轉（Transfer/Share）、接受（Accept）。
+                                </div>
+                            </details>
+                        </div>
+
+                        <div>
+                            <p style="font-weight: 700; margin-bottom: 4px;">Q3: 為什麼一定要先做風險識別？</p>
+                            <details style="margin-top: 0; border: none; background: #f1f5f9;">
+                                <summary style="padding: 8px; font-size: 14px; color: #475569;">顯示答案</summary>
+                                <div style="padding: 8px 12px; font-size: 14px;">
+                                    因為如果不先把風險列出來（識別），就沒有對象可以進行後續的分析大小與評估是否可接受。
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+    </div>
+
+    <script>
+        function checkAnswer() {
+            // 定義正確答案
+            const correctAnswers = ['A', 'B', 'D'];
+            
+            // 取得使用者選的答案
+            const checkedInputs = document.querySelectorAll('input[name="answer"]:checked');
+            const userAnswers = Array.from(checkedInputs).map(input => input.value).sort();
+
+            // UI 元素
+            const feedbackSection = document.getElementById('feedback-section');
+            const feedbackArea = document.getElementById('feedback-area');
+            const statusBadge = document.getElementById('status-badge');
+
+            feedbackSection.style.display = 'block';
+
+            // 判斷邏輯：複選題必須全對才算正確
+            // 1. 數量必須相同
+            // 2. 內容必須完全一致
+            const isCorrect = userAnswers.length === correctAnswers.length && 
+                              userAnswers.every((val, index) => val === correctAnswers[index]);
+
+            if (isCorrect) {
+                // 正確回饋
+                feedbackArea.className = 'feedback-correct';
+                feedbackArea.innerHTML = `
+                    <strong>判定：正確</strong><br>
+                    一句話理由：ISO 27001 的風險評鑑核心流程就是風險識別、風險分析、風險評估。
+                `;
+                statusBadge.textContent = '答對';
+                statusBadge.style.backgroundColor = '#22c55e'; // green-500
+                statusBadge.style.color = 'white';
+            } else {
+                // 錯誤回饋
+                feedbackArea.className = 'feedback-error';
+                feedbackArea.innerHTML = `
+                    <strong>判定：錯誤</strong><br>
+                    正確答案：A、B、D<br>
+                    一句話理由：ISO 27001 的風險評鑑核心流程就是風險識別、風險分析、風險評估。
+                `;
+                statusBadge.textContent = '答錯';
+                statusBadge.style.backgroundColor = '#ef4444'; // red-500
+                statusBadge.style.color = 'white';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題號 18 - NIST CSF 組成元素</title>
+    <style>
+        :root {
+            --font-main: system-ui, "Noto Sans TC", sans-serif;
+            --color-bg: #f5f7fa;
+            --color-card-bg: #ffffff;
+            --color-text-main: #333333;
+            --color-text-secondary: #666666;
+            --color-border: #e0e0e0;
+            --color-primary: #3498db;
+            --color-success: #2ecc71;
+            --color-error: #e74c3c;
+            
+            /* Tag Colors */
+            --tag-law: #7f8c8d;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+
+            --spacing-base: 16px;
+            --spacing-gap: 12px;
+            --radius-card: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--color-bg);
+            color: var(--color-text-main);
+            line-height: 1.6;
+            font-size: 16px;
+            padding: 20px;
+        }
+
+        /* ---------------------------------------------------------
+           LAYOUT CONTAINER RULES (FIXED)
+           Max-width 960px, Centered, No adaptive width
+        --------------------------------------------------------- */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-gap);
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--color-card-bg);
+            border-radius: var(--radius-card);
+            padding: var(--spacing-base);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--color-border);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .question-number {
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--color-primary);
+        }
+        .status-badge {
+            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background-color: #eee;
+            color: #777;
+        }
+        .status-badge.correct {
+            background-color: #d5f5e3;
+            color: #196f3d;
+        }
+        .status-badge.wrong {
+            background-color: #fadbd8;
+            color: #922b21;
+        }
+
+        /* Context */
+        .context-text {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        /* Question */
+        .question-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: var(--spacing-base);
+        }
+        
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-item:hover {
+            background-color: #f8f9fa;
+            border-color: var(--color-primary);
+        }
+        .option-item input {
+            margin-top: 5px;
+            margin-right: 12px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+        .option-text {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        /* Action Button */
+        .submit-btn {
+            margin-top: var(--spacing-base);
+            padding: 10px 24px;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+        .submit-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Feedback */
+        #feedback-section {
+            display: none; /* Hidden by default */
+        }
+        .feedback-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        .feedback-correct {
+            color: var(--color-success);
+        }
+        .feedback-wrong {
+            color: var(--color-error);
+        }
+        .feedback-reason {
+            color: var(--color-text-secondary);
+        }
+
+        /* Explain */
+        details.explain-container {
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-card);
+            background-color: #fff;
+            overflow: hidden;
+        }
+        summary.explain-summary {
+            padding: var(--spacing-base);
+            cursor: pointer;
+            font-weight: bold;
+            background-color: #f8f9fa;
+            list-style: none; /* Hide default arrow in some browsers */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        summary.explain-summary::-webkit-details-marker {
+            display: none;
+        }
+        summary.explain-summary::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+        }
+        details[open] summary.explain-summary::after {
+            content: '-';
+        }
+        .explain-content {
+            padding: var(--spacing-base);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-gap);
+        }
+
+        /* Explain Segment Cards */
+        .explain-segment {
+            background-color: #fdfdfd; /* Very light gray/white */
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 12px;
+            border-left: 4px solid var(--color-primary);
+        }
+        .segment-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+            color: #2c3e50;
+        }
+        
+        /* Fix: Restore list indentation in explain segments */
+        .explain-segment ul {
+            padding-left: 24px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        .explain-segment li {
+            margin-bottom: 6px;
+        }
+
+        /* Self Check */
+        .self-check-item {
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 12px;
+        }
+        .self-check-item:last-child {
+            border-bottom: none;
+        }
+        .self-check-question {
+            font-weight: 500;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            margin-right: 6px;
+            font-weight: normal;
+            vertical-align: middle;
+        }
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt  { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        mark {
+            background-color: #fff3cd;
+            padding: 0 2px;
+            border-radius: 2px;
+            color: #856404;
+        }
+        
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    
+    <!-- 1. HEADER -->
+    <div class="card header">
+        <div class="question-number">第 18 題</div>
+        <div class="status-badge" id="status-badge">未作答</div>
+    </div>
+
+    <!-- 2. CONTEXT -->
+    <div class="card context">
+        <div class="context-text">本題無額外情境</div>
+    </div>
+
+    <!-- 3. QUESTION -->
+    <div class="card question">
+        <h1 class="question-title">
+            <span class="tag tag-mgm">風險管理</span>
+            網路安全框架（Cybersecurity Framework, CSF）為美國國家標準暨技術研究院（NIST）彙整後所提出，作為整體網路安全架構之規劃藍圖參考，請問該 CSF 之組成元素包含下列哪些項目？（複選）
+        </h1>
+        <div class="options-list">
+            <label class="option-item">
+                <input type="checkbox" name="option" value="A">
+                <span class="option-text">(A) 框架核心（Framework Core）</span>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" name="option" value="B">
+                <span class="option-text">(B) 框架設定檔（Framework Profile）</span>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" name="option" value="C">
+                <span class="option-text">(C) 實施程序（Framework Procedure）</span>
+            </label>
+            <label class="option-item">
+                <input type="checkbox" name="option" value="D">
+                <span class="option-text">(D) 實施層級（Implementation Tiers）</span>
+            </label>
+        </div>
+        <button class="submit-btn" id="submit-btn" onclick="checkAnswer()">提交答案</button>
+    </div>
+
+    <!-- 4. FEEDBACK -->
+    <div class="card" id="feedback-section">
+        <div class="feedback-title" id="feedback-title"></div>
+        <div class="feedback-content">
+            <p id="feedback-text"></p>
+            <p class="feedback-reason" id="feedback-reason"></p>
+        </div>
+    </div>
+
+    <!-- 5. EXPLAIN -->
+    <details class="explain-container" id="explain-container">
+        <summary class="explain-summary">點擊查看詳細解析</summary>
+        <div class="explain-content">
+            
+            <!-- 第一步：找關鍵字 -->
+            <div class="explain-segment">
+                <span class="segment-title">第一步：找關鍵字</span>
+                <p>請圈出題目中的關鍵字來定位考點：</p>
+                <ul>
+                    <li><b>NIST / CSF</b>：鎖定考點為 NIST 的網路安全框架。</li>
+                    <li><b>組成元素 (Components)</b>：題目問的是框架的「構成部件」，而非內部的具體功能（Functions）。</li>
+                    <li><b>Core / Profile / Tiers</b>：腦中搜尋 CSF 的三大支柱。</li>
+                </ul>
+            </div>
+
+            <!-- 第二步：白話翻譯 -->
+            <div class="explain-segment">
+                <span class="segment-title">第二步：白話翻譯</span>
+                <p>這題在問：NIST CSF 這套「資安大藍圖」本身是由哪幾個主要零件組成的？</p>
+                <p>你要選出 CSF 的「三大構成」：核心（Core）、設定檔（Profile）、實施層級（Tiers），並排除掉聽起來很像但其實不是官方元件的字眼（如 Procedure）。</p>
+            </div>
+
+            <!-- 第三步：解題思路 -->
+            <div class="explain-segment">
+                <span class="segment-title">第三步：解題思路</span>
+                <p><b>1. 解題邏輯與規則：</b></p>
+                <ul>
+                    <li><b>框架核心 (Core)</b>：告訴你要做什麼（What to do）。包含 Identify, Protect, Detect, Respond, Recover 等功能。</li>
+                    <li><b>框架設定檔 (Profile)</b>：告訴你現在在哪、要去哪裡（Current vs Target）。用來找出差距。</li>
+                    <li><b>實施層級 (Tiers)</b>：告訴你做得多成熟（Maturity）。描述風險管理的嚴謹度。</li>
+                </ul>
+                <br>
+                <p><b>2. 生活例子比喻：</b></p>
+                <ul>
+                    <li><b>Core (核心)</b> 就像「學校課綱」：規定了大家都要學國英數（標準活動）。</li>
+                    <li><b>Profile (設定檔)</b> 就像「你的成績單 vs 目標分數」：對照你現在考幾分，目標要考幾分，找出要加強哪一科。</li>
+                    <li><b>Tiers (層級)</b> 就像「讀書方法的成熟度」：你是臨時抱佛腳 (Tier 1)，還是有排讀書計畫 (Tier 3)？</li>
+                </ul>
+            </div>
+
+            <!-- 第四步：選項分析 -->
+            <div class="explain-segment">
+                <span class="segment-title">第四步：選項分析</span>
+                <ul>
+                    <li><mark>(A) 框架核心（Framework Core）</mark>：<b>正確</b>。這是 CSF 的骨架與共通語言。</li>
+                    <li><mark>(B) 框架設定檔（Framework Profile）</mark>：<b>正確</b>。這是連結標準與業務需求的橋樑。</li>
+                    <li>(C) 實施程序（Framework Procedure）：<b>錯誤</b>。「Procedure」通常指內部的操作流程，並非 NIST CSF 定義的頂層三大元素名稱。</li>
+                    <li><mark>(D) 實施層級（Implementation Tiers）</mark>：<b>正確</b>。這是衡量風險管理視角與成熟度的工具。</li>
+                </ul>
+            </div>
+
+            <!-- 觀念補充與延伸 -->
+            <div class="explain-segment">
+                <span class="segment-title">觀念補充與延伸</span>
+                <ul>
+                    <li><b>CSF 2.0 更新</b>：雖然組成元素仍維持這三大類，但 CSF 2.0 在 Core 中新增了 <b>"Govern" (治理)</b> 功能，變成 6 大功能。</li>
+                    <li><b>Tiers 的誤區</b>：Implementation Tiers 不是「成熟度模型 (Maturity Model)」，NIST 強調它是用來描述風險管理實務的特性，雖然概念很像，但官方用語較為謹慎。</li>
+                </ul>
+            </div>
+
+            <!-- 觸類旁通（舉一反三） -->
+            <div class="explain-segment">
+                <span class="segment-title">觸類旁通（舉一反三）</span>
+                <p>考試若改問「CSF Core 的結構層次」，答案則會是：</p>
+                <ul>
+                    <li>Function (功能) → Category (類別) → Subcategory (子類別)</li>
+                </ul>
+                <p>考試若問「用來溝通資安現況與目標差距的是哪個元素？」，答案則是：</p>
+                <ul>
+                    <li>Framework Profile (設定檔)</li>
+                </ul>
+            </div>
+
+            <!-- 記憶口訣 -->
+            <div class="explain-segment">
+                <span class="segment-title">記憶口訣</span>
+                <p style="font-size: 1.2em; text-align: center; color: var(--color-primary); font-weight: bold;">「核、檔、層」</p>
+                <ul>
+                    <li><b>核</b>：Core（核心）</li>
+                    <li><b>檔</b>：Profile（設定檔）</li>
+                    <li><b>層</b>：Tiers（實施層級）</li>
+                </ul>
+            </div>
+
+            <!-- 常見陷阱 -->
+            <div class="explain-segment">
+                <span class="segment-title">常見陷阱與避坑指南</span>
+                <p><b>心理盲點：</b></p>
+                <ul>
+                    <li>考生常把「CSF 三大元素 (Elements)」和「Core 五大/六大功能 (Functions)」搞混。看到 Identify, Protect 會想選，但題目問的是「組成元素」。</li>
+                    <li>看到「Procedure (程序)」這類專業名詞覺得很合理就選了，但它不是 CSF 的專有名詞。</li>
+                </ul>
+                <p><b>避坑指南：</b></p>
+                <ul>
+                    <li>看到「組成元素」或「Components」，先默念「Core, Profile, Tiers」這三個單字，找不到的一律刪除。</li>
+                </ul>
+            </div>
+
+        </div>
+    </details>
+
+    <!-- 6. SELF CHECK -->
+    <div class="card self-check">
+        <h3 style="margin-bottom: 12px;">自我檢測</h3>
+        <p style="font-size: 14px; color: #666; margin-bottom: 12px;">點擊題目即可查看答案</p>
+        
+        <div class="self-check-item">
+            <details>
+                <summary class="self-check-question">Q1. CSF Core 內部結構通常分為哪三層（由大到小）？</summary>
+                <p style="margin-top: 8px; color: #555;">Function（功能）→ Category（類別）→ Subcategory（子類別）。</p>
+            </details>
+        </div>
+
+        <div class="self-check-item">
+            <details>
+                <summary class="self-check-question">Q2. 用來描述組織風險管理「成熟度」與「嚴謹度」（Tier 1 ~ Tier 4）的是哪個元素？</summary>
+                <p style="margin-top: 8px; color: #555;">實施層級（Implementation Tiers）。</p>
+            </details>
+        </div>
+
+        <div class="self-check-item">
+            <details>
+                <summary class="self-check-question">Q3. 組織想要比較「Current Profile」與「Target Profile」是為了找出什麼？</summary>
+                <p style="margin-top: 8px; color: #555;">差距（Gaps），進而制定改善計畫。</p>
+            </details>
+        </div>
+
+        <div class="self-check-item">
+            <details>
+                <summary class="self-check-question">Q4. 「實施程序 (Procedure)」是 NIST CSF 的三大組成元素之一嗎？</summary>
+                <p style="margin-top: 8px; color: #555;">不是。CSF 三大元素只有 Core、Profile、Tiers。</p>
+            </details>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function checkAnswer() {
+        // Correct answers set
+        const correctAnswers = new Set(['A', 'B', 'D']);
+        
+        // Get user selection
+        const checkboxes = document.querySelectorAll('input[name="option"]:checked');
+        const userSelection = new Set();
+        checkboxes.forEach((checkbox) => {
+            userSelection.add(checkbox.value);
+        });
+
+        const feedbackSection = document.getElementById('feedback-section');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+        const feedbackReason = document.getElementById('feedback-reason');
+        const statusBadge = document.getElementById('status-badge');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // Logic Comparison for Multiple Choice
+        // Must select ALL correct answers and NO incorrect answers
+        let isCorrect = false;
+        
+        // Check if size matches first
+        if (userSelection.size === correctAnswers.size) {
+            isCorrect = true;
+            // Check if every selected item is in the correct set
+            for (let val of userSelection) {
+                if (!correctAnswers.has(val)) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+        }
+
+        // Show Feedback
+        feedbackSection.style.display = 'block';
+        submitBtn.disabled = true;
+
+        if (isCorrect) {
+            feedbackTitle.textContent = '判定：正確';
+            feedbackTitle.className = 'feedback-title feedback-correct';
+            feedbackText.innerHTML = ''; // No need to show correct answer text if correct
+            feedbackReason.textContent = '理由：NIST CSF 的三大組成元素就是框架核心（Core）、框架設定檔（Profiles）與實施層級（Implementation Tiers）。';
+            
+            statusBadge.textContent = '答對';
+            statusBadge.className = 'status-badge correct';
+        } else {
+            feedbackTitle.textContent = '判定：錯誤';
+            feedbackTitle.className = 'feedback-title feedback-wrong';
+            feedbackText.innerHTML = '正確答案：<strong>A、B、D</strong>';
+            feedbackReason.textContent = '理由：NIST CSF 的三大組成元素為 Core、Profiles 與 Tiers；「Procedure」並非官方定義的三大元素之一。';
+            
+            statusBadge.textContent = '答錯';
+            statusBadge.className = 'status-badge wrong';
+        }
+
+        // Auto-open explanation
+        document.getElementById('explain-container').open = true;
+    }
+</script>
+
+</body>
+</html>

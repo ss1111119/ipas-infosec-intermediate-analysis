@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q4 主動式攻擊辨析</title>
+    <style>
+        /* Reset & Base Styles */
+        :root {
+            --font-main: system-ui, "Noto Sans TC", sans-serif;
+            --color-text: #333;
+            --color-bg-page: #f5f5f5;
+            --color-bg-card: #ffffff;
+            --color-border: #ddd;
+            --color-primary: #2c3e50;
+            --color-success: #27ae60;
+            --color-error: #c0392b;
+            --color-sub-card-bg: #f8f9fa; /* 解析段落卡底色 */
+            
+            /* Tag Colors - Fixed */
+            --tag-law: #7f8c8d;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+
+            /* Spacing & Sizing */
+            --spacing-base: 12px;
+            --padding-card: 16px;
+            --font-size-base: 16px;
+            --font-size-title: 18px;
+            --font-size-small: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--color-bg-page);
+            color: var(--color-text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            font-size: var(--font-size-base);
+        }
+
+        /* Container Layout */
+        .page {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: transparent;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--color-bg-card);
+            padding: var(--padding-card);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: var(--spacing-base);
+            border: 1px solid var(--color-border);
+        }
+
+        /* Header */
+        header.card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: var(--font-size-title);
+        }
+
+        .status-badge {
+            background-color: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: var(--font-size-small);
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: var(--font-size-small);
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt  { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        /* Highlight */
+        mark {
+            background-color: #fff3cd;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Question & Options */
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f0f0;
+        }
+
+        .option-label input {
+            margin-right: 12px;
+        }
+
+        /* Feedback */
+        .feedback-card {
+            display: none; /* Hidden by default */
+            border-left: 5px solid transparent;
+        }
+
+        .feedback-card.correct {
+            border-left-color: var(--color-success);
+            background-color: #f0fff4;
+        }
+
+        .feedback-card.error {
+            border-left-color: var(--color-error);
+            background-color: #fff5f5;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            font-size: var(--font-size-title);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Explain Section */
+        details.card {
+            padding: 0; /* Let summary and content handle padding */
+            overflow: hidden;
+        }
+
+        summary {
+            padding: var(--padding-card);
+            cursor: pointer;
+            font-weight: bold;
+            background-color: #f8f9fa;
+            list-style: none; /* Remove default triangle in some browsers */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .details-content {
+            padding: var(--padding-card);
+            border-top: 1px solid var(--color-border);
+        }
+
+        /* Explain Sub-cards (解析段落卡) */
+        .explain-sub-card {
+            background-color: var(--color-sub-card-bg);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--tag-sec); /* Default theme color for section */
+        }
+
+        .explain-sub-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .explain-sub-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--color-primary);
+            display: block;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 4px;
+        }
+
+        /* Self Check */
+        .self-check-item {
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 12px;
+        }
+        .self-check-item:last-child {
+            border-bottom: none;
+        }
+        .self-check-q {
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        .self-check-a {
+            color: var(--color-success);
+            font-size: var(--font-size-small);
+            margin-top: 4px;
+        }
+
+        /* Button */
+        .btn-submit {
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--font-size-base);
+            margin-top: 16px;
+            width: 100%;
+        }
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+
+        .disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="page">
+    
+    <!-- UI Block 1: Header -->
+    <header class="card">
+        <h1>第 4 題</h1>
+        <span class="status-badge" id="status-badge">尚未作答</span>
+    </header>
+
+    <!-- UI Block 2: Context -->
+    <section class="card context">
+        本題無額外情境
+    </section>
+
+    <!-- UI Block 3: Question -->
+    <section class="card question">
+        <div>
+            4. 下列何者「<mark>不</mark>」屬於 <span class="tag tag-sec">主動式攻擊（Active Attack）</span>？
+        </div>
+        <div class="option-group" id="option-group">
+            <label class="option-label">
+                <input type="radio" name="q4" value="A">
+                (A) DDoS Attack（分散式阻斷服務攻擊）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q4" value="B">
+                (B) Buffer Overflow（緩衝區溢位）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q4" value="C">
+                (C) Typosquatting Attack（誤植域名攻擊）
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q4" value="D">
+                (D) Brute Force（暴力破解）
+            </label>
+        </div>
+        <button class="btn-submit" id="btn-submit" onclick="submitAnswer()">送出答案</button>
+    </section>
+
+    <!-- UI Block 4: Feedback -->
+    <section id="feedback-card" class="card feedback-card">
+        <span class="feedback-title" id="feedback-title"></span>
+        <div id="feedback-content"></div>
+    </section>
+
+    <!-- UI Block 5: Explain -->
+    <details class="card explain">
+        <summary>顯示解析</summary>
+        <div class="details-content">
+            
+            <!-- 1. 第一步：找關鍵字 -->
+            <div class="explain-sub-card">
+                <span class="explain-sub-title">第一步：找關鍵字</span>
+                <p>關鍵字一：「<mark>不</mark>」屬於（反向題，要找例外、不是那一類的選項）。</p>
+                <p>關鍵字二：<span class="tag tag-sec">主動式攻擊（Active Attack）</span>（攻擊者會主動改變系統狀態或影響服務運作）。</p>
+            </div>
+
+            <!-- 2. 第二步：白話翻譯 -->
+            <div class="explain-sub-card">
+                <span class="explain-sub-title">第二步：白話翻譯</span>
+                <p>題目在問：下面四種攻擊中，哪一個<mark>不屬於</mark>「直接去動你的系統、讓系統出事」的那種主動攻擊？</p>
+            </div>
+
+            <!-- 3. 第三步：解題思路 -->
+            <div class="explain-sub-card">
+                <span class="explain-sub-title">第三步：解題思路</span>
+                <ol>
+                    <li>先記主動式攻擊的特徵：會干擾、破壞、竄改、嘗試登入或讓服務不可用。</li>
+                    <li>看每個選項是否符合「直接影響系統/服務」的特徵。</li>
+                    <li>找出比較像「誘騙/引導使用者」而不是直接動系統的那個選項。</li>
+                </ol>
+            </div>
+
+            <!-- 4. 第四步：選項分析 -->
+            <div class="explain-sub-card">
+                <span class="explain-sub-title">第四步：選項分析</span>
+                <ul>
+                    <li><strong>(A) DDoS Attack：</strong><span class="tag tag-sec">主動</span>。直接用大量流量把服務打到不能用，明顯影響可用性。</li>
+                    <li><strong>(B) Buffer Overflow：</strong><span class="tag tag-sec">主動</span>。利用程式記憶體漏洞，可能造成當機或執行任意程式碼，會改變系統狀態。</li>
+                    <li><strong>(C) Typosquatting Attack：</strong><span class="tag tag-mgm">非主動</span>。主要是「設計一個很像的網域」等人打錯去上當，本質偏向社交工程，並非直接對目標系統發動破壞。</li>
+                    <li><strong>(D) Brute Force：</strong><span class="tag tag-sec">主動</span>。用大量嘗試登入去猜密碼，直接對身分驗證機制施壓。</li>
+                </ul>
+            </div>
+
+            <!-- 5. 觀念補充與延伸 -->
+            <div class="explain-sub-card">
+                <span class="explain-sub-title">觀念補充與延伸</span>
+                <p><strong>主動式攻擊（Active Attack）：</strong>攻擊者「動手做事」讓系統狀態改變，例如阻斷服務、植入惡意程式、嘗試破解登入。</p>
+                <p><strong>Typosquatting（誤植域名）：</strong>利用使用者打字習慣或拼字錯誤，註冊相似網域誘導到假網站。關鍵在於「被動等待使用者犯錯」。</p>
+            </div>
+
+            <!-- 6. 觸類旁通（舉一反三） -->
+            <div class="explain-sub-card">
+                <span class="explain-sub-title">觸類旁通（舉一反三）</span>
+                <p><strong>對比概念：</strong></p>
+                <ul>
+                    <li><strong>被動式攻擊：</strong>攻擊者「偷看或蒐集」但不改變系統運作，例如竊聽（Eavesdropping）、流量分析（Traffic Analysis）。</li>
+                </ul>
+                <p><strong>變化題型：</strong></p>
+                <ul>
+                    <li>問「下列何者屬於被動式攻擊？」答案常是竊聽、封包嗅探。</li>
+                    <li>把 Typosquatting 換成 Phishing（釣魚）問分類：通常歸在社交工程類，也是非直接破壞系統。</li>
+                </ul>
+            </div>
+
+            <!-- 7. 記憶口訣 -->
+            <div class="explain-sub-card">
+                <span class="explain-sub-title">記憶口訣</span>
+                <p>「主動會動手：打、塞、炸、猜；誤植像導流：等你自己來」</p>
+            </div>
+
+            <!-- 8. 常見陷阱 -->
+            <div class="explain-sub-card">
+                <span class="explain-sub-title">常見陷阱</span>
+                <p><strong>盲點：</strong>看到「Attack」就以為全部都是主動式，忽略它其實是「誘騙導向」。</p>
+                <p><strong>避坑指南：</strong>先問自己一句話：「攻擊者有沒有直接讓系統運作改變或服務被影響？」有才是主動式；只是引誘或蒐集，多半不是。</p>
+            </div>
+
+        </div>
+    </details>
+
+    <!-- UI Block 6: SelfCheck -->
+    <details class="card self-check">
+        <summary>自我檢測 (Self Check)</summary>
+        <div class="details-content">
+            <div class="self-check-item">
+                <div class="self-check-q">1. 如果題目把 (C) 改成「封包嗅探（Packet Sniffing）」，它屬於主動還是被動？</div>
+                <details>
+                    <summary style="background:none; padding:0; display:inline; color: #666; font-size: 14px;">(點擊看答案)</summary>
+                    <div class="self-check-a">答案：被動。因為它只是單純竊聽流量，不會改變系統資料或運作狀態。</div>
+                </details>
+            </div>
+            <div class="self-check-item">
+                <div class="self-check-q">2. 為什麼暴力破解（Brute Force）算主動式攻擊？</div>
+                <details>
+                    <summary style="background:none; padding:0; display:inline; color: #666; font-size: 14px;">(點擊看答案)</summary>
+                    <div class="self-check-a">答案：因為它會主動發送大量登入請求，直接對系統的驗證機制造成負擔與互動，意圖改變系統的存取權限狀態。</div>
+                </details>
+            </div>
+            <div class="self-check-item">
+                <div class="self-check-q">3. DDoS 主要衝擊資訊安全 CIA 三性中的哪一個？</div>
+                <details>
+                    <summary style="background:none; padding:0; display:inline; color: #666; font-size: 14px;">(點擊看答案)</summary>
+                    <div class="self-check-a">答案：可用性（Availability）。</div>
+                </details>
+            </div>
+        </div>
+    </details>
+
+</div>
+
+<script>
+    function submitAnswer() {
+        const selected = document.querySelector('input[name="q4"]:checked');
+        const feedbackCard = document.getElementById('feedback-card');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackContent = document.getElementById('feedback-content');
+        const statusBadge = document.getElementById('status-badge');
+        const btn = document.getElementById('btn-submit');
+
+        if (!selected) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // Disable inputs after submit
+        const inputs = document.querySelectorAll('input[name="q4"]');
+        inputs.forEach(input => input.disabled = true);
+        btn.disabled = true;
+        btn.classList.add('disabled');
+        btn.innerText = '已作答';
+
+        // Show feedback section
+        feedbackCard.style.display = 'block';
+
+        if (selected.value === 'C') {
+            // Correct
+            statusBadge.innerText = '答對';
+            statusBadge.style.backgroundColor = '#27ae60';
+            statusBadge.style.color = 'white';
+            
+            feedbackCard.className = 'card feedback-card correct';
+            feedbackTitle.innerText = '判定：正確';
+            feedbackContent.innerHTML = 'Typosquatting 主要是利用相似網域誘騙使用者導流，並非直接對系統進行破壞或干擾的主動式攻擊。';
+        } else {
+            // Incorrect
+            statusBadge.innerText = '答錯';
+            statusBadge.style.backgroundColor = '#c0392b';
+            statusBadge.style.color = 'white';
+
+            feedbackCard.className = 'card feedback-card error';
+            feedbackTitle.innerText = '判定：錯誤';
+            feedbackContent.innerHTML = `
+                <p>正確答案：<strong>(C) Typosquatting Attack（誤植域名攻擊）</strong></p>
+                <p>一句話理由：Typosquatting 主要是利用相似網域誘騙使用者導流，並非直接對系統進行破壞或干擾的主動式攻擊。</p>
+            `;
+        }
+    }
+</script>
+
+</body>
+</html>

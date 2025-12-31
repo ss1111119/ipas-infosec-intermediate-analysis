@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISO 27000 系列標準測驗</title>
+    <!-- Google Fonts: Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS (External Resource) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Base Styles */
+        body {
+            font-family: "Noto Sans TC", system-ui, sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Layout Constraint - Mandatory */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 40px auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+            overflow: hidden;
+            padding: 0; /* Interior padding handled by sections */
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-weight: 700;
+        }
+        .header-title {
+            font-size: 18px;
+        }
+        .text-small {
+            font-size: 14px;
+        }
+
+        /* Section Spacing */
+        .section-block {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .section-block:last-child {
+            border-bottom: none;
+        }
+        .gap-standard {
+            gap: 12px;
+        }
+
+        /* Mandatory Tag Colors */
+        .tag-base {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+
+        .tag-law { background-color: #7f8c8d; }
+        .tag-iso { background-color: #27ae60; }
+        .tag-zt { background-color: #8e44ad; }
+        .tag-net { background-color: #2980b9; }
+        .tag-sec { background-color: #c0392b; }
+        .tag-mgm { background-color: #d35400; }
+
+        /* Explain Section Card Style */
+        .explain-card {
+            background-color: #f9fafb;
+            border-left: 4px solid #d1d5db; /* Default border color, can be customized per card */
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border-radius: 0 4px 4px 0;
+        }
+        .explain-title {
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Highlights */
+        mark {
+            background-color: #fef3c7;
+            color: #92400e;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Details/Summary Animation */
+        details > summary {
+            cursor: pointer;
+            list-style: none;
+            font-weight: 600;
+            color: #4b5563;
+            transition: color 0.2s;
+        }
+        details > summary:hover {
+            color: #111827;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] > summary {
+            margin-bottom: 12px;
+        }
+        
+        /* Interactive Elements */
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+        }
+        .option-label:hover {
+            background-color: #f9fafb;
+            border-color: #9ca3af;
+        }
+        .option-input {
+            margin-top: 5px;
+            margin-right: 12px;
+            accent-color: #2563eb;
+        }
+        
+        .btn-submit {
+            display: inline-block;
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
+            margin-top: 12px;
+        }
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
+        .btn-submit:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Feedback Styles */
+        .feedback-box {
+            display: none; /* Hidden by default */
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 16px;
+        }
+        .feedback-correct {
+            background-color: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+        }
+        .feedback-incorrect {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <!-- 1. Header -->
+        <div class="section-block bg-white flex justify-between items-center border-b border-gray-200">
+            <div class="header-title flex items-center">
+                <span class="tag-base tag-iso">標準</span>
+                <span>ISO 27000 系列標準</span>
+            </div>
+            <div id="status-badge" class="text-small font-bold text-gray-500 px-3 py-1 bg-gray-100 rounded-full">
+                未作答
+            </div>
+        </div>
+
+        <!-- 2. Context -->
+        <div class="section-block bg-gray-50">
+            <p class="text-gray-600 text-small">本題無額外情境</p>
+        </div>
+
+        <!-- 3. Question -->
+        <div class="section-block">
+            <div class="mb-6">
+                <p class="text-lg text-gray-800 font-medium mb-4">
+                    在 ISO 27000 系列標準中，下列何者為<mark>建置資訊安全管理系統的實作指引</mark>（Information Security Management Systems — Guidance）？
+                </p>
+                
+                <div class="flex flex-col">
+                    <label class="option-label">
+                        <input type="radio" name="question" value="A" class="option-input">
+                        <span>(A) ISO/IEC 27001</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="question" value="B" class="option-input">
+                        <span>(B) ISO/IEC 27002</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="question" value="C" class="option-input">
+                        <span>(C) ISO/IEC 27003</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="question" value="D" class="option-input">
+                        <span>(D) ISO/IEC 27004</span>
+                    </label>
+                </div>
+
+                <button id="submit-btn" class="btn-submit">提交答案</button>
+            </div>
+        </div>
+
+        <!-- 4. Feedback -->
+        <div id="feedback-section" class="section-block" style="display: none;">
+            <!-- Content injected by JS -->
+        </div>
+
+        <!-- 5. Explain (Collapsed by default) -->
+        <div class="section-block">
+            <details class="group">
+                <summary class="flex items-center text-blue-600 hover:text-blue-800">
+                    <svg class="w-5 h-5 mr-2 transform group-open:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    查看詳細解析
+                </summary>
+                
+                <div class="mt-4 text-gray-700">
+                    
+                    <!-- 第一步：找關鍵字 -->
+                    <div class="explain-card border-l-purple-500">
+                        <span class="explain-title text-purple-700">第一步：找關鍵字</span>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>ISO 27000 系列：</strong> 表示題目在考「資訊安全管理國際標準家族」，不是單一技術。</li>
+                            <li><strong>建置資訊安全管理系統：</strong> 重點在「建立 ISMS 的過程」，而非驗證或績效衡量。</li>
+                            <li><strong>實作指引（Guidance）：</strong> 「指引」代表教你怎麼做，不是規定你一定要符合的條文。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 第二步：白話翻譯 -->
+                    <div class="explain-card border-l-blue-500">
+                        <span class="explain-title text-blue-700">第二步：白話翻譯</span>
+                        <p>這一題在問：在 ISO 27000 這一整套資安標準裡，哪一個標準是「一步一步教你怎麼建立資訊安全管理系統（ISMS）」的操作說明書？</p>
+                    </div>
+
+                    <!-- 第三步：解題思路 -->
+                    <div class="explain-card border-l-indigo-500">
+                        <span class="explain-title text-indigo-700">第三步：解題思路</span>
+                        <ol class="list-decimal pl-5 space-y-1">
+                            <li>先分清楚「規範（要求）」跟「指引（教學）」的差別。</li>
+                            <li>對照每個 ISO 標準的用途（定義用、要求用、教學用、衡量用）。</li>
+                            <li>題目寫「Guidance（指引）」，就是要找「教學用途」的那一本。</li>
+                        </ol>
+                    </div>
+
+                    <!-- 第四步：選項分析 -->
+                    <div class="explain-card border-l-red-500">
+                        <span class="explain-title text-red-700">第四步：選項分析</span>
+                        <ul class="space-y-2">
+                            <li>
+                                <span class="text-red-600 font-bold">(A) ISO/IEC 27001 (錯誤)</span><br>
+                                這是「驗證標準」，告訴你 ISMS 必須符合哪些要求，用來申請認證，不是教你怎麼一步步建。
+                            </li>
+                            <li>
+                                <span class="text-red-600 font-bold">(B) ISO/IEC 27002 (錯誤)</span><br>
+                                這是「資安控制措施的實務守則」，在講有哪些控制項可以選，不是整體 ISMS 建置流程。
+                            </li>
+                            <li>
+                                <span class="text-green-600 font-bold">(C) ISO/IEC 27003 (正確)</span><br>
+                                27003 專門就是 ISMS <mark>建置指引</mark>，從規劃、設計到導入，完整教你怎麼做。
+                            </li>
+                            <li>
+                                <span class="text-red-600 font-bold">(D) ISO/IEC 27004 (錯誤)</span><br>
+                                這是「績效與量測」，在教你怎麼評估 ISMS 成效，不是建置階段。
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 觀念補充與延伸 -->
+                    <div class="explain-card border-l-teal-500">
+                        <span class="explain-title text-teal-700">觀念補充與延伸</span>
+                        <p class="mb-1"><strong>法條或定義：</strong></p>
+                        <p>ISO/IEC 27003：提供資訊安全管理系統（ISMS）建置與導入的實作指引。</p>
+                        <p class="text-sm text-gray-500 mt-1">白話：就是「教你怎麼從零開始把 ISMS 建起來」。</p>
+                    </div>
+
+                    <!-- 觸類旁通 -->
+                    <div class="explain-card border-l-cyan-500">
+                        <span class="explain-title text-cyan-700">觸類旁通（舉一反三）</span>
+                        <p>變化題型思考：</p>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>問「哪一個是用來申請認證？」 → 答：<strong>27001</strong></li>
+                            <li>問「哪一個是講控制措施有哪些？」 → 答：<strong>27002</strong></li>
+                            <li>問「哪一個是績效衡量？」 → 答：<strong>27004</strong></li>
+                        </ul>
+                    </div>
+
+                    <!-- 記憶口訣 -->
+                    <div class="explain-card border-l-orange-500">
+                        <span class="explain-title text-orange-700">記憶口訣</span>
+                        <p class="font-bold text-lg text-center text-gray-600 py-2">
+                            「01 要求、02 控制、03 教你做、04 量成果」
+                        </p>
+                    </div>
+
+                    <!-- 常見陷阱 -->
+                    <div class="mt-4 p-4 bg-yellow-50 rounded text-sm text-yellow-800 border border-yellow-200">
+                        <strong>常見陷阱：</strong> 
+                        學生容易把 27001 和 27003 都當成「建置標準」。因為 27001 最有名，看到「建置」就直覺選它。請記住：<br>
+                        27001 是「考試卷」（驗證標準），27003 才是「教科書」（建置指引）。
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <!-- 6. SelfCheck -->
+        <div class="section-block bg-gray-50">
+            <details>
+                <summary class="text-sm font-semibold text-gray-600">自我檢測（點擊展開）</summary>
+                <div class="mt-3 space-y-4">
+                    <div class="border-l-4 border-gray-300 pl-4 py-2 bg-white">
+                        <p class="font-medium text-gray-800">Q1：若題目改成「哪一個是用來申請 ISMS 認證的標準？」答案會是什麼？</p>
+                        <div class="mt-2 text-sm text-gray-600">
+                            <details>
+                                <summary class="cursor-pointer text-blue-500 hover:text-blue-700">顯示答案</summary>
+                                <p class="mt-1 font-bold text-green-600">答案：ISO/IEC 27001</p>
+                            </details>
+                        </div>
+                    </div>
+                    <div class="border-l-4 border-gray-300 pl-4 py-2 bg-white">
+                        <p class="font-medium text-gray-800">Q2：如果題目問「哪一個是在講控制措施有哪些可以選？」答案是？</p>
+                        <div class="mt-2 text-sm text-gray-600">
+                            <details>
+                                <summary class="cursor-pointer text-blue-500 hover:text-blue-700">顯示答案</summary>
+                                <p class="mt-1 font-bold text-green-600">答案：ISO/IEC 27002</p>
+                            </details>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const submitBtn = document.getElementById('submit-btn');
+            const feedbackSection = document.getElementById('feedback-section');
+            const statusBadge = document.getElementById('status-badge');
+            const inputs = document.querySelectorAll('input[name="question"]');
+
+            const CORRECT_ANSWER = 'C';
+            const ONE_SENTENCE_REASON = "ISO/IEC 27003 是專門提供 ISMS 建置實作指引的標準。";
+
+            submitBtn.addEventListener('click', () => {
+                // 1. Get selected value
+                let selectedValue = null;
+                inputs.forEach(input => {
+                    if (input.checked) {
+                        selectedValue = input.value;
+                    }
+                });
+
+                if (!selectedValue) {
+                    alert('請先選擇一個答案！');
+                    return;
+                }
+
+                // 2. Disable inputs after submit
+                inputs.forEach(input => input.disabled = true);
+                submitBtn.disabled = true;
+                submitBtn.textContent = '已提交';
+
+                // 3. Check answer
+                const isCorrect = selectedValue === CORRECT_ANSWER;
+                
+                // 4. Render Feedback
+                feedbackSection.style.display = 'block';
+                
+                if (isCorrect) {
+                    // Update Status
+                    statusBadge.textContent = '答對';
+                    statusBadge.className = 'text-small font-bold text-white px-3 py-1 bg-green-500 rounded-full';
+                    
+                    // Show Correct Feedback
+                    feedbackSection.innerHTML = `
+                        <div class="feedback-correct p-4 rounded">
+                            <h3 class="font-bold text-lg mb-2">判定：正確</h3>
+                            <p>${ONE_SENTENCE_REASON}</p>
+                        </div>
+                    `;
+                } else {
+                    // Update Status
+                    statusBadge.textContent = '答錯';
+                    statusBadge.className = 'text-small font-bold text-white px-3 py-1 bg-red-500 rounded-full';
+
+                    // Show Incorrect Feedback
+                    feedbackSection.innerHTML = `
+                        <div class="feedback-incorrect p-4 rounded">
+                            <h3 class="font-bold text-lg mb-2">判定：錯誤</h3>
+                            <p class="mb-2"><strong>正確答案：</strong> (C) ISO/IEC 27003</p>
+                            <p>${ONE_SENTENCE_REASON}</p>
+                        </div>
+                    `;
+                }
+
+                // Auto-expand explanation for better learning flow
+                const explainDetails = document.querySelector('details.group');
+                if(explainDetails) {
+                    explainDetails.open = true;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

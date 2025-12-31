@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS 資安練習題 013 - 網站風險降低實務</title>
+    <!-- 引入 Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入 Tailwind CSS (用於快速佈局與 utility classes) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* * 樣式 Tokens 固定規範 
+         */
+        :root {
+            --font-main: "Noto Sans TC", system-ui, sans-serif;
+            --base-size: 16px;
+            --title-size: 18px;
+            --small-size: 14px;
+            --padding-card: 16px;
+            --gap-block: 12px;
+            
+            /* 標籤顏色規範 */
+            --color-law: #7f8c8d;
+            --color-iso: #27ae60;
+            --color-zt: #8e44ad;
+            --color-net: #2980b9;
+            --color-sec: #c0392b;
+            --color-mgm: #d35400;
+        }
+
+        body {
+            font-family: var(--font-main);
+            font-size: var(--base-size);
+            background-color: #f3f4f6;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* * 整體版型與寬度規範 
+         */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* * UI 區塊通用樣式 
+         */
+        .section-block {
+            padding: var(--padding-card);
+            border-bottom: 1px solid #eee;
+        }
+
+        .section-block:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: var(--title-size);
+            font-weight: 700;
+            margin-bottom: var(--gap-block);
+            color: #111;
+        }
+
+        /* * Header 
+         */
+        .header {
+            background-color: #2c3e50;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            font-size: var(--small-size);
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* * Context 
+         */
+        .context-text {
+            color: #666;
+            font-style: italic;
+        }
+
+        /* * Question & Options 
+         */
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f9fafb;
+            border-color: #cbd5e1;
+        }
+
+        .option-input {
+            margin-top: 5px;
+            margin-right: 12px;
+            accent-color: #2c3e50;
+        }
+
+        /* * Feedback 
+         */
+        .feedback {
+            display: none; /* 預設隱藏 */
+            background-color: #f8fafc;
+            border-left: 4px solid transparent;
+        }
+
+        .feedback.correct {
+            border-left-color: #27ae60;
+            background-color: #f0fdf4;
+        }
+
+        .feedback.incorrect {
+            border-left-color: #c0392b;
+            background-color: #fef2f2;
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .feedback-content {
+            margin-bottom: 8px;
+        }
+
+        .feedback-reason {
+            font-size: var(--small-size);
+            color: #555;
+        }
+
+        /* * Explain (詳解卡) 
+         */
+        details.explain-container {
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        details.explain-container summary {
+            background-color: #f3f4f6;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            list-style: none; /* 移除預設箭頭，可選 */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        details.explain-container summary::after {
+            content: '+';
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        details.explain-container[open] summary::after {
+            content: '-';
+        }
+
+        .explain-content {
+            padding: var(--padding-card);
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-block);
+        }
+
+        /* 解析段落卡 */
+        .explain-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .explain-card-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #2d3748;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 4px;
+            display: inline-block;
+        }
+
+        /* * SelfCheck 
+         */
+        .self-check-item {
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 12px;
+        }
+
+        .self-check-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .self-check-question {
+            font-weight: 500;
+            color: #2c3e50;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .self-check-question::before {
+            content: 'Q.';
+            margin-right: 8px;
+            font-weight: bold;
+            color: var(--color-net);
+        }
+
+        .self-check-answer {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background-color: #fff;
+            border-left: 3px solid var(--color-iso);
+            color: #555;
+            font-size: var(--small-size);
+        }
+
+        /* * Tags 
+         */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .tag-law { background-color: var(--color-law); }
+        .tag-iso { background-color: var(--color-iso); }
+        .tag-zt { background-color: var(--color-zt); }
+        .tag-net { background-color: var(--color-net); }
+        .tag-sec { background-color: var(--color-sec); }
+        .tag-mgm { background-color: var(--color-mgm); }
+
+        /* Highlight */
+        mark {
+            background-color: #fef08a; /* yellow-200 */
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        
+        /* Check button */
+        .btn-submit {
+            margin-top: 20px;
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+        
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
+        
+        .btn-submit:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <!-- Header: 題號＋答題狀態 -->
+        <header class="section-block header">
+            <div class="text-lg font-bold">IPAS 資訊安全 練習題 013</div>
+            <div class="status-badge" id="status-badge">未作答</div>
+        </header>
+
+        <!-- Context: 情境卡 -->
+        <section class="section-block context">
+            <div class="section-title">情境描述</div>
+            <p class="context-text">本題無額外情境</p>
+        </section>
+
+        <!-- Question: 題目與選項 -->
+        <section class="section-block question">
+            <div class="section-title">
+                <span class="tag tag-mgm">風險管理</span>
+                <span class="tag tag-sec">網站安全</span>
+                題目
+            </div>
+            <p class="mb-4 text-gray-800 font-medium">
+                13. AAA 公司網站常受駭客入侵，網站風險問題一直居高不下，關於<mark>降低網站風險問題處理實務</mark>，下列做法何者較為正確？
+            </p>
+
+            <form id="quiz-form">
+                <div class="option-group">
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="A" class="option-input">
+                        <span>(A) 連線至後台管理系統的帳號密碼<mark>不需要區隔</mark>讀取與寫入刪除資料庫權限區隔</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="B" class="option-input">
+                        <span>(B) 公司網站應定期進行<mark>網站黑箱檢測</mark>以及<mark>系統弱點掃描</mark>，對程式碼應進行 <mark>Code Review</mark></span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="C" class="option-input">
+                        <span>(C) 工程師在系統上直接更新新版程式，可先將舊版程式改名成 <mark>bak</mark> 作為歷史留存在官網系統中，以便日後改錯後有原始程式碼做修正使用</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="answer" value="D" class="option-input">
+                        <span>(D) 網站已經建立網站應用程式防火牆（Web Application Firewall, WAF）系統，其主機作業系統則<mark>不需要再升級更新</mark></span>
+                    </label>
+                </div>
+                <button type="submit" class="btn-submit" id="submit-btn">送出答案</button>
+            </form>
+        </section>
+
+        <!-- Feedback: 判定結果與一句話理由 -->
+        <section class="section-block feedback" id="feedback-section">
+            <div class="feedback-title" id="feedback-title"></div>
+            <div class="feedback-content" id="feedback-correct-ans"></div>
+            <div class="feedback-reason" id="feedback-reason"></div>
+        </section>
+
+        <!-- Explain: 詳解卡（預設收合） -->
+        <section class="section-block" id="explain-section" style="display: none;">
+            <details class="explain-container">
+                <summary>查看詳細解析</summary>
+                <div class="explain-content">
+                    
+                    <!-- 解析段落 1: 解題思路 -->
+                    <div class="explain-card">
+                        <div class="explain-card-title">解題思路</div>
+                        <p class="text-sm text-gray-600 mb-2">本題關鍵字：<span class="font-bold text-gray-800">降低風險實務、檢測、修補</span></p>
+                        <p>網站風險問題居高不下，代表現有防護不足。降低風險的最佳實務（Best Practice）必須包含「主動發現問題」與「預防問題發生」的流程。</p>
+                        <ul class="list-disc list-inside text-sm mt-2 space-y-1">
+                            <li><strong>發現問題：</strong>透過弱點掃描（工具掃描）與黑箱檢測（模擬外部攻擊）找出已知與未知的漏洞。</li>
+                            <li><strong>預防問題：</strong>透過原始碼審查（Code Review）在開發階段就修正邏輯與安全錯誤。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 解析段落 2: 選項分析 -->
+                    <div class="explain-card">
+                        <div class="explain-card-title">選項分析</div>
+                        <ul class="space-y-3 text-sm">
+                            <li>
+                                <span class="font-bold text-red-600">(A) 錯誤：</span>
+                                違反<strong>最小權限原則（Least Privilege）</strong>。若帳號被盜，不區分讀寫權限將導致攻擊者能輕易刪除或竄改資料庫，擴大損害範圍。
+                            </li>
+                            <li>
+                                <span class="font-bold text-green-600">(B) 正確：</span>
+                                定期掃描與檢測能持續找出漏洞，Code Review 則能從源頭減少弱點，是完整的風險管理循環（PDCA）。
+                            </li>
+                            <li>
+                                <span class="font-bold text-red-600">(C) 錯誤：</span>
+                                這是典型的<strong>敏感資訊洩漏</strong>風險。備份檔（.bak, .old）常被駭客掃描下載，若留在正式主機上，等於直接把原始碼送給駭客分析。應使用版本控制系統（Git）管理。
+                            </li>
+                            <li>
+                                <span class="font-bold text-red-600">(D) 錯誤：</span>
+                                <strong>縱深防禦（Defense in Depth）</strong>觀念不足。WAF 只能防禦應用層攻擊，無法修補作業系統（OS）底層漏洞。若 OS 不更新，駭客可繞過 WAF 利用 OS 漏洞取得主機控制權。
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 解析段落 3: 核心觀念 -->
+                    <div class="explain-card">
+                        <div class="explain-card-title">核心觀念：網站安全開發生命週期 (SSDLC)</div>
+                        <p class="text-sm mt-2">
+                            單純依賴設備（如 WAF）是被動防禦。主動防禦需要將安全性整合到開發流程中：
+                            <br>
+                            1. <strong>設計時：</strong>權限最小化、威脅建模。<br>
+                            2. <strong>開發時：</strong>安全編碼、Code Review。<br>
+                            3. <strong>測試時：</strong>弱點掃描、滲透測試（黑箱）。<br>
+                            4. <strong>維運時：</strong>修補 OS/套件漏洞、監控。
+                        </p>
+                    </div>
+
+                </div>
+            </details>
+        </section>
+
+        <!-- SelfCheck: 自我檢測 -->
+        <section class="section-block self-check">
+            <div class="section-title">自我檢測</div>
+            
+            <div class="self-check-item">
+                <details>
+                    <summary class="self-check-question">如果公司只做弱點掃描但完全不做修補與追蹤，風險會下降嗎？為什麼？</summary>
+                    <div class="self-check-answer">
+                        不會。掃描只是在「找問題」（發現風險），如果不進行修補（Remediation）與後續追蹤驗證，漏洞依然存在，風險並未實質降低。
+                    </div>
+                </details>
+            </div>
+
+            <div class="self-check-item">
+                <details>
+                    <summary class="self-check-question">為什麼「最小權限」可以降低被駭後的損害？</summary>
+                    <div class="self-check-answer">
+                        當帳號僅擁有完成工作所需的最低權限時，即使該帳號被攻擊者竊取，攻擊者能做的破壞也被限制在該權限範圍內（例如只能讀取而無法刪除資料），從而降低整體損害。
+                    </div>
+                </details>
+            </div>
+
+            <div class="self-check-item">
+                <details>
+                    <summary class="self-check-question">WAF 能擋住所有入侵嗎？請舉一個可能繞過 WAF 的方向。</summary>
+                    <div class="self-check-answer">
+                        不能。WAF 主要防禦常見的 Web 攻擊（如 SQL Injection, XSS）。攻擊者可能透過作業系統漏洞（OS Vulnerabilities）、伺服器設定錯誤、內部人員威脅或直接對 API 邏輯進行攻擊來繞過 WAF。
+                    </div>
+                </details>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const correctAnswer = 'B';
+            const form = document.getElementById('quiz-form');
+            const submitBtn = document.getElementById('submit-btn');
+            const feedbackSection = document.getElementById('feedback-section');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackCorrectAns = document.getElementById('feedback-correct-ans');
+            const feedbackReason = document.getElementById('feedback-reason');
+            const explainSection = document.getElementById('explain-section');
+            const statusBadge = document.getElementById('status-badge');
+            const optionInputs = document.querySelectorAll('.option-input');
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // 取得使用者選擇
+                const selectedOption = document.querySelector('input[name="answer"]:checked');
+                
+                if (!selectedOption) {
+                    alert('請先選擇一個答案！');
+                    return;
+                }
+
+                const userAnswer = selectedOption.value;
+                const isCorrect = userAnswer === correctAnswer;
+
+                // 鎖定表單
+                optionInputs.forEach(input => input.disabled = true);
+                submitBtn.disabled = true;
+                submitBtn.textContent = '已作答';
+
+                // 更新狀態
+                statusBadge.textContent = isCorrect ? '答對' : '答錯';
+                statusBadge.style.backgroundColor = isCorrect ? '#27ae60' : '#c0392b';
+                statusBadge.style.color = '#fff';
+
+                // 顯示 Feedback
+                feedbackSection.style.display = 'block';
+                feedbackSection.className = `section-block feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+                
+                if (isCorrect) {
+                    feedbackTitle.textContent = '判定：正確';
+                    feedbackTitle.style.color = '#27ae60';
+                    feedbackCorrectAns.textContent = ''; // 正確時不需重複顯示答案，除非設計要求
+                } else {
+                    feedbackTitle.textContent = '判定：錯誤';
+                    feedbackTitle.style.color = '#c0392b';
+                    feedbackCorrectAns.innerHTML = `正確答案：<strong>(${correctAnswer})</strong>`;
+                }
+
+                feedbackReason.textContent = '一句話理由：降低網站風險要靠定期檢測（黑箱/掃描）加上安全開發控制（Code Review），才能持續找出並修補漏洞。';
+
+                // 顯示 Explain 區塊
+                explainSection.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 3 題 - 金鑰分配安全性比較</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 樣式 tokens */
+            --font-main: system-ui, "Noto Sans TC", sans-serif;
+            --font-size-base: 16px;
+            --font-size-title: 18px;
+            --font-size-small: 14px;
+            --padding-card: 16px;
+            --spacing-gap: 12px;
+            
+            /* 顏色規範 */
+            --color-bg: #f4f6f8;
+            --color-card-bg: #ffffff;
+            --color-text: #2c3e50;
+            --color-border: #dfe6e9;
+            
+            /* 標籤顏色 */
+            --tag-law: #7f8c8d;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+
+            /* 狀態顏色 */
+            --color-success: #27ae60;
+            --color-error: #c0392b;
+            --color-correct-bg: #eafaf1;
+            --color-error-bg: #fdedec;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            font-size: var(--font-size-base);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        /* 2. 整體版型與寬度規範 */
+        .page {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-gap);
+        }
+
+        /* 卡片通用樣式 */
+        .card {
+            background-color: var(--color-card-bg);
+            border-radius: 8px;
+            padding: var(--padding-card);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--color-border);
+        }
+
+        /* 3. UI 固定骨架 */
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .question-number {
+            font-size: var(--font-size-title);
+            font-weight: 700;
+        }
+        .status-badge {
+            font-size: var(--font-size-small);
+            padding: 4px 12px;
+            border-radius: 12px;
+            background-color: #e0e0e0;
+            color: #7f8c8d;
+        }
+
+        /* Context */
+        .context-text {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        /* Question */
+        .question-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid var(--color-border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+            border-color: #b2bec3;
+        }
+
+        .option-input {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--tag-net);
+        }
+
+        /* 互動後的選項樣式 */
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .option-label.selected-correct {
+            border-color: var(--color-success);
+            background-color: var(--color-correct-bg);
+            color: var(--color-success);
+            font-weight: bold;
+        }
+        .option-label.selected-wrong {
+            border-color: var(--color-error);
+            background-color: var(--color-error-bg);
+            color: var(--color-error);
+        }
+
+        /* Feedback */
+        .feedback {
+            display: none; /* 初始隱藏 */
+            border-left: 5px solid transparent;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback.correct {
+            border-left-color: var(--color-success);
+            background-color: var(--color-correct-bg);
+        }
+        .feedback.wrong {
+            border-left-color: var(--color-error);
+            background-color: var(--color-error-bg);
+        }
+        .feedback-title {
+            font-weight: bold;
+            font-size: var(--font-size-title);
+            margin-bottom: 8px;
+        }
+        .feedback-content {
+            font-size: var(--font-size-base);
+        }
+
+        /* Explain */
+        .explain {
+            /* 預設收合在 HTML 中使用 details 處理 */
+        }
+        
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: var(--font-size-title);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        summary::before {
+            content: "▶";
+            font-size: 12px;
+            margin-right: 8px;
+            transition: transform 0.2s;
+        }
+        
+        details[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        /* 11. 解析小主題分段規範 */
+        .explain-block {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--color-border);
+        }
+        
+        .explain-block-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 5. 標籤與重點標註 */
+        mark {
+            background-color: #ffeaa7;
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+        
+        /* 6. 標籤顏色規範 */
+        .tag {
+            display: inline-block;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        /* Self Check */
+        .self-check-list {
+            list-style: none;
+        }
+        .self-check-item {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--color-border);
+        }
+        .self-check-item:last-child {
+            border-bottom: none;
+        }
+        .check-q {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        /* 自我檢測隱藏答案樣式 */
+        .check-details summary {
+            font-size: 14px;
+            color: var(--tag-net);
+            margin-bottom: 0;
+            font-weight: normal;
+        }
+        .check-details summary::before {
+            content: "▼";
+            margin-right: 4px;
+        }
+        .check-details[open] summary::before {
+            transform: rotate(180deg);
+        }
+        .check-a {
+            color: #2c3e50;
+            font-size: 14px;
+            margin-top: 8px;
+            padding: 8px 12px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            line-height: 1.5;
+        }
+        .check-a strong {
+            color: var(--tag-sec);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="page">
+        <!-- 1. Header -->
+        <div class="card header">
+            <div class="question-number">第 3 題</div>
+            <div class="status-badge" id="statusBadge">未作答</div>
+        </div>
+
+        <!-- 2. Context -->
+        <div class="card context">
+            <p class="context-text">本題無額外情境</p>
+        </div>
+
+        <!-- 3. Question -->
+        <div class="card question">
+            <div class="question-text">
+                下列選項何者作為<mark>金鑰分配（Key Distribution）</mark>的安全性較佳？
+            </div>
+            <div class="options-group" id="optionsGroup">
+                <label class="option-label" data-value="A">
+                    <input type="radio" name="answer" value="A" class="option-input">
+                    <span>(A) 3DES</span>
+                </label>
+                <label class="option-label" data-value="B">
+                    <input type="radio" name="answer" value="B" class="option-input">
+                    <span>(B) MD5</span>
+                </label>
+                <label class="option-label" data-value="C">
+                    <input type="radio" name="answer" value="C" class="option-input">
+                    <span>(C) Blowfish</span>
+                </label>
+                <label class="option-label" data-value="D">
+                    <input type="radio" name="answer" value="D" class="option-input">
+                    <span>(D) ECC</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 4. Feedback -->
+        <div class="card feedback" id="feedbackCard">
+            <div class="feedback-title" id="feedbackTitle"></div>
+            <div class="feedback-content" id="feedbackContent"></div>
+        </div>
+
+        <!-- 5. Explain -->
+        <details class="card explain">
+            <summary>解析</summary>
+            
+            <!-- 第一步：找關鍵字 -->
+            <div class="explain-block" style="border-left-color: var(--tag-sec);">
+                <div class="explain-block-title">
+                    <span class="tag tag-sec">第一步</span>
+                    找關鍵字
+                </div>
+                <p><strong>1. 金鑰分配（Key Distribution）：</strong><br>
+                重點不是「加密資料」，而是「怎麼安全地把金鑰交給對方」。</p>
+                <br>
+                <p><strong>2. 安全性較佳：</strong><br>
+                表示要選「最適合做金鑰交換／分配」的技術，而非一般用途的演算法。</p>
+            </div>
+
+            <!-- 第二步：白話翻譯 -->
+            <div class="explain-block" style="border-left-color: var(--tag-iso);">
+                <div class="explain-block-title">
+                    <span class="tag tag-iso">第二步</span>
+                    白話翻譯
+                </div>
+                <p>這一題其實在問：<br>
+                如果我要把「加密用的鑰匙」安全地交給別人，下面哪一種技術最適合、也最安全？</p>
+            </div>
+
+            <!-- 第三步：解題思路 -->
+            <div class="explain-block" style="border-left-color: var(--tag-net);">
+                <div class="explain-block-title">
+                    <span class="tag tag-net">第三步</span>
+                    解題思路
+                </div>
+                <p><strong>1. 這題在考什麼觀念？</strong><br>
+                對稱式加密、雜湊函數、非對稱式加密在「金鑰分配」上的角色差異。</p>
+                <br>
+                <p><strong>2. 解題步驟：</strong><br>
+                (1) 先排除「不是用來分配金鑰」的技術（如雜湊、對稱式加密）。<br>
+                (2) 再找出「可以在不安全網路上安全交換金鑰」的方法。</p>
+                <br>
+                <p><strong>3. 原理與規則：</strong><br>
+                金鑰分配需要<mark>非對稱式加密（Public Key Cryptography）</mark>。因為對稱式加密本身無法安全解決「鑰匙怎麼先給對方」的問題。</p>
+            </div>
+
+            <!-- 第四步：選項分析 -->
+            <div class="explain-block" style="border-left-color: var(--tag-sec);">
+                <div class="explain-block-title">
+                    <span class="tag tag-sec">第四步</span>
+                    選項分析
+                </div>
+                <ul>
+                    <li><strong>(A) 3DES (錯誤)：</strong> 對稱式加密演算法，本身就需要先有共同金鑰，不適合拿來做金鑰分配。</li>
+                    <li><strong>(B) MD5 (錯誤)：</strong> 雜湊函數，用來做完整性驗證，不是加密，也不能用來交換金鑰。</li>
+                    <li><strong>(C) Blowfish (錯誤)：</strong> 對稱式加密演算法，仍然有「金鑰要怎麼先給」的問題。</li>
+                    <li><strong>(D) ECC (正確)：</strong> 即<mark>橢圓曲線密碼學</mark>。是非對稱式加密技術，能在不安全的網路中安全進行金鑰交換，且金鑰長度短、安全性高。</li>
+                </ul>
+            </div>
+
+            <!-- 觀念補充與延伸 -->
+            <div class="explain-block" style="border-left-color: var(--tag-law);">
+                <div class="explain-block-title">
+                    <span class="tag tag-law">補充</span>
+                    觀念補充與延伸
+                </div>
+                <p><strong>ECC（Elliptic Curve Cryptography）：</strong><br>
+                一種非對稱式加密技術，利用橢圓曲線數學特性，在較短金鑰長度下提供高安全性。<br>
+                <span style="color:#7f8c8d;">白話：用比較短的鑰匙，就能達到很高的安全等級，常用來做金鑰交換（如 ECDH）。</span></p>
+            </div>
+
+            <!-- 觸類旁通 -->
+            <div class="explain-block" style="border-left-color: var(--tag-zt);">
+                <div class="explain-block-title">
+                    <span class="tag tag-zt">延伸</span>
+                    觸類旁通（舉一反三）
+                </div>
+                <p><strong>對比概念：</strong><br>
+                1. 對稱式加密（3DES、Blowfish）：快，但金鑰難分配。<br>
+                2. 非對稱式加密（RSA、ECC）：慢一點，但可以安全分配金鑰。</p>
+                <br>
+                <p><strong>變化題型：</strong><br>
+                • 問「哪一個適合用於 TLS 金鑰交換？」→ 選 RSA 或 ECC (ECDH)。<br>
+                • 問「行動裝置常用的金鑰交換技術為何？」→ 選 ECC (省電、短金鑰)。</p>
+            </div>
+
+            <!-- 記憶口訣 -->
+            <div class="explain-block" style="border-left-color: var(--tag-mgm);">
+                <div class="explain-block-title">
+                    <span class="tag tag-mgm">口訣</span>
+                    記憶口訣
+                </div>
+                <p>「分鑰匙，用公鑰；要又快又短，選 ECC」</p>
+            </div>
+
+            <!-- 常見陷阱 -->
+            <div class="explain-block" style="border-left-color: var(--tag-sec);">
+                <div class="explain-block-title">
+                    <span class="tag tag-sec">陷阱</span>
+                    常見陷阱
+                </div>
+                <p><strong>學生最容易搞混的地方：</strong><br>
+                把「加密演算法」都當成可以拿來分配金鑰。</p>
+                <p><strong>心理盲點：</strong><br>
+                看到 3DES、Blowfish 很有名，就直覺選它們。</p>
+                <p><strong>避坑指南：</strong><br>
+                題目只要出現「金鑰分配、金鑰交換」→ 優先找<mark>非對稱式加密</mark>。</p>
+            </div>
+        </details>
+
+        <!-- 6. SelfCheck -->
+        <details class="card self-check">
+            <summary>自我檢測</summary>
+            <ul class="self-check-list">
+                <li class="self-check-item">
+                    <div class="check-q">1. 如果選項中出現 RSA，是否也適合金鑰分配？為什麼？</div>
+                    <details class="check-details">
+                        <summary>點擊查看答案</summary>
+                        <div class="check-a"><strong>適合</strong>。因為 RSA 也是非對稱式加密技術，擁有公鑰與私鑰的特性，非常適合作為金鑰交換使用。</div>
+                    </details>
+                </li>
+                <li class="self-check-item">
+                    <div class="check-q">2. 為什麼對稱式加密不適合直接做金鑰分配？</div>
+                    <details class="check-details">
+                        <summary>點擊查看答案</summary>
+                        <div class="check-a">因為對稱式加密需要雙方預先持有<strong>相同的金鑰</strong>。如果通訊通道不安全，你無法安全地將這把鑰匙傳給對方，這就是所謂的「金鑰分配問題」。</div>
+                    </details>
+                </li>
+                <li class="self-check-item">
+                    <div class="check-q">3. 為什麼在行動裝置上，ECC 通常比 RSA 更受歡迎？</div>
+                    <details class="check-details">
+                        <summary>點擊查看答案</summary>
+                        <div class="check-a">因為 ECC 在提供相同安全強度的情況下，所需的<strong>金鑰長度遠小於 RSA</strong>，運算負擔較輕，能減少電力消耗與計算時間。</div>
+                    </details>
+                </li>
+            </ul>
+        </details>
+    </div>
+
+    <script>
+        // 定義正確答案
+        const CORRECT_ANSWER = "D";
+        const CORRECT_REASON = "ECC 是非對稱式加密技術，最適合在不安全環境中進行金鑰分配。";
+
+        // DOM 元素
+        const optionsGroup = document.getElementById('optionsGroup');
+        const options = document.querySelectorAll('.option-input');
+        const feedbackCard = document.getElementById('feedbackCard');
+        const feedbackTitle = document.getElementById('feedbackTitle');
+        const feedbackContent = document.getElementById('feedbackContent');
+        const statusBadge = document.getElementById('statusBadge');
+        const explainDetails = document.querySelector('.explain');
+
+        // 監聽選項點擊
+        options.forEach(option => {
+            option.addEventListener('change', function() {
+                const selectedValue = this.value;
+                const parentLabel = this.closest('.option-label');
+                
+                // 1. 鎖定所有選項
+                options.forEach(opt => {
+                    opt.disabled = true;
+                    opt.closest('.option-label').classList.add('disabled');
+                });
+
+                // 2. 判斷對錯並顯示樣式
+                if (selectedValue === CORRECT_ANSWER) {
+                    // 答對
+                    parentLabel.classList.add('selected-correct');
+                    showFeedback(true, CORRECT_REASON);
+                    statusBadge.textContent = "答對";
+                    statusBadge.style.backgroundColor = "var(--color-success)";
+                    statusBadge.style.color = "white";
+                } else {
+                    // 答錯
+                    parentLabel.classList.add('selected-wrong');
+                    // 標示出正確答案
+                    const correctOption = document.querySelector(`input[value="${CORRECT_ANSWER}"]`);
+                    correctOption.closest('.option-label').classList.add('selected-correct'); // 視覺提示正確答案
+                    
+                    showFeedback(false, CORRECT_REASON);
+                    statusBadge.textContent = "答錯";
+                    statusBadge.style.backgroundColor = "var(--color-error)";
+                    statusBadge.style.color = "white";
+                }
+
+                // 3. 自動展開解析（可選，這裡保持預設收合，讓使用者自己點）
+                // explainDetails.open = true; 
+            });
+        });
+
+        function showFeedback(isCorrect, reason) {
+            feedbackCard.classList.remove('correct', 'wrong');
+            feedbackCard.classList.add('show');
+            
+            if (isCorrect) {
+                feedbackCard.classList.add('correct');
+                feedbackTitle.textContent = "判定：正確";
+                feedbackContent.textContent = reason;
+            } else {
+                feedbackCard.classList.add('wrong');
+                feedbackTitle.textContent = "判定：錯誤";
+                feedbackContent.innerHTML = `正確答案：(D) ECC<br>${reason}`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第11題：資通安全維護計畫應包括事項</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* [四、樣式 tokens 固定] */
+        :root {
+            --font-family: system-ui, "Noto Sans TC", sans-serif;
+            --base-size: 16px;
+            --title-size: 18px;
+            --small-size: 14px;
+            --card-padding: 16px;
+            --gap: 12px;
+            
+            /* [六、標籤顏色規範] */
+            --tag-law-color: #7f8c8d;
+            --tag-iso-color: #27ae60;
+            --tag-zt-color: #8e44ad;
+            --tag-net-color: #2980b9;
+            --tag-sec-color: #c0392b;
+            --tag-mgm-color: #d35400;
+
+            /* UI Colors */
+            --primary-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-secondary: #666666;
+            --border-color: #e0e0e0;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --highlight-bg: #fff3cd;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            font-size: var(--base-size);
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--primary-bg);
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* [二、整體版型與寬度規範] */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap);
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: var(--card-padding);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Header */
+        header.card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: var(--title-size);
+        }
+
+        .status-badge {
+            font-size: var(--small-size);
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            color: var(--text-secondary);
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: var(--small-size);
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        
+        .tag-law { background-color: var(--tag-law-color); }
+        .tag-iso { background-color: var(--tag-iso-color); }
+        .tag-zt  { background-color: var(--tag-zt-color); }
+        .tag-net { background-color: var(--tag-net-color); }
+        .tag-sec { background-color: var(--tag-sec-color); }
+        .tag-mgm { background-color: var(--tag-mgm-color); }
+
+        /* Highlight */
+        mark {
+            background-color: var(--highlight-bg);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Question & Options */
+        .question-text {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f1f3f5;
+        }
+
+        .option-input {
+            margin-top: 5px;
+            margin-right: 12px;
+        }
+
+        .submit-btn {
+            margin-top: 20px;
+            padding: 10px 24px;
+            background-color: var(--tag-net-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--base-size);
+            font-family: inherit;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Feedback */
+        .feedback-card {
+            display: none; /* Hidden by default */
+            border-left: 5px solid transparent;
+        }
+
+        .feedback-correct {
+            border-left-color: var(--success-color);
+            background-color: #f0fff4;
+        }
+
+        .feedback-wrong {
+            border-left-color: var(--error-color);
+            background-color: #fff5f5;
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: var(--title-size);
+        }
+
+        .feedback-content {
+            font-size: var(--base-size);
+        }
+
+        /* Explain & SelfCheck (Details) */
+        details {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: var(--card-bg);
+        }
+
+        summary {
+            padding: var(--card-padding);
+            background-color: #f8f9fa;
+            cursor: pointer;
+            font-weight: 700;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 1.2em;
+            font-weight: normal;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .details-content {
+            padding: var(--card-padding);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Explain Section Sub-cards */
+        .explain-section {
+            background-color: #fcfcfc;
+            border: 1px solid #eeeeee;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .explain-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .explain-title {
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Converted MD to HTML styles */
+        .explain-text {
+            color: var(--text-secondary);
+        }
+        
+        .explain-text ul, .explain-text ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .explain-text li {
+            margin-bottom: 4px;
+        }
+
+        .explain-text strong {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* SelfCheck Specifics */
+        .check-item {
+            margin-bottom: 16px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 16px;
+        }
+        
+        .check-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .check-q {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .check-a {
+            background-color: #f1f3f5;
+            padding: 8px 12px;
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: var(--small-size);
+            margin-top: 8px;
+        }
+        
+        /* Utility */
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    
+    <!-- [三、UI 固定骨架] Header -->
+    <header class="card">
+        <div>題號：11</div>
+        <div class="status-badge" id="status-badge">未作答</div>
+    </header>
+
+    <!-- [三、UI 固定骨架] Context -->
+    <div class="card context">
+        本題無額外情境
+    </div>
+
+    <!-- [三、UI 固定骨架] Question -->
+    <div class="card question">
+        <div class="question-text">
+            依據我國<mark class="tag-law">《資通安全管理法施行細則》</mark>條文中規定，下列何者<mark>「不」是</mark>資通安全維護計畫<mark>應（或強制要求）</mark>包括的事項？
+        </div>
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="q1" value="A" class="option-input">
+                <span>(A) 核心業務及其重要性</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q1" value="B" class="option-input">
+                <span>(B) 資通安全稽核組織</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q1" value="C" class="option-input">
+                <span>(C) 資通安全政策及目標</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="q1" value="D" class="option-input">
+                <span>(D) 專責人力及經費之配置</span>
+            </label>
+        </div>
+        <button class="submit-btn" onclick="checkAnswer()">送出答案</button>
+    </div>
+
+    <!-- [三、UI 固定骨架] Feedback -->
+    <div id="feedback-card" class="card feedback-card">
+        <div id="feedback-title" class="feedback-title"></div>
+        <div id="feedback-content" class="feedback-content"></div>
+    </div>
+
+    <!-- [三、UI 固定骨架] Explain -->
+    <details class="card explain">
+        <summary>顯示詳解</summary>
+        <div class="details-content">
+            
+            <!-- [十一、解析區塊之小主題分段] -->
+            <div class="explain-section">
+                <div class="explain-title"><span class="tag tag-law">法規</span>第一步：找關鍵字</div>
+                <div class="explain-text">
+                    <ul>
+                        <li><strong>《資通安全管理法施行細則》</strong>：題目明確指定法規依據，答案要以條文列舉事項為準。</li>
+                        <li><strong>資通安全維護計畫</strong>：問的是「維護計畫」依法規必須包含哪些內容。</li>
+                        <li><strong>「不」是 / 不包括</strong>：是否定題，目標是找「條文沒有強制列入」的那一項。</li>
+                        <li><strong>應（或強制要求）包括</strong>：代表題目在考「法規的必備項目清單」。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="explain-section">
+                <div class="explain-title">第二步：白話翻譯</div>
+                <div class="explain-text">
+                    這題在問：依照法規規定，你寫「資通安全維護計畫（就是一份把資安怎麼做、誰來做、資源怎麼配寫清楚的計畫書）」時，下面四個選項裡，哪一個不是法律規定一定要寫進去的內容？
+                </div>
+            </div>
+
+            <div class="explain-section">
+                <div class="explain-title"><span class="tag tag-mgm">管理</span>第三步：解題思路</div>
+                <div class="explain-text">
+                    <ol>
+                        <li><strong>先抓題幹</strong>：「依施行細則」＋「資通安全維護計畫」＝考條文明列項目。</li>
+                        <li><strong>再看問法</strong>：「不包括」＝挑出不是條文必備清單的內容。</li>
+                        <li><strong>對照選項屬性</strong>：哪些是計畫內容（政策/核心業務/人力經費），哪些比較像「稽核組織」這種獨立治理機制。</li>
+                    </ol>
+                    <p>
+                        <strong>原理與規則</strong>：<br>
+                        「資通安全維護計畫」通常會要求：要保護什麼（核心業務/資產）、要達成什麼（政策與目標）、靠什麼資源做（人力與經費）、怎麼做（管理與技術措施等）。<br>
+                        但「資通安全稽核組織（就是專門做稽核/查核的組織架構）」屬於稽核體系或治理安排，並非維護計畫在施行細則中被強制列為必備項目。
+                    </p>
+                </div>
+            </div>
+
+            <div class="explain-section">
+                <div class="explain-title">第四步：選項分析</div>
+                <div class="explain-text">
+                    <ul>
+                        <li>(A) <strong>核心業務及其重要性</strong>：<span style="color:var(--text-secondary)">錯（不是答案）。</span>核心業務（就是組織最不能停擺的關鍵服務）及其重要性，常被要求納入計畫，用來決定保護優先順序。</li>
+                        <li>(B) <strong>資通安全稽核組織</strong>：<span style="color:var(--success-color); font-weight:bold;">對（是答案）。</span>資通安全稽核組織（就是負責稽核查核的組織單位/編制）不屬於施行細則對「資通安全維護計畫」強制要求必備列入的事項。</li>
+                        <li>(C) <strong>資通安全政策及目標</strong>：<span style="color:var(--text-secondary)">錯（不是答案）。</span>資通安全政策及目標（就是資安要達成的方向與標準）屬於計畫的核心骨幹，通常屬必備內容。</li>
+                        <li>(D) <strong>專責人力及經費之配置</strong>：<span style="color:var(--text-secondary)">錯（不是答案）。</span>專責人力及經費之配置（就是要有人、要有錢才能做資安）屬於可執行性的基本要求，常被列為必備項目。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="explain-section">
+                <div class="explain-title">觀念補充與延伸</div>
+                <div class="explain-text">
+                    <strong>核心觀念定位</strong><br>
+                    章節：資安治理與法規遵循／資通安全管理法體系（施行細則）<br>
+                    考試地位：常見必考題型（考「條文明列內容」與「否定題」）。
+                    <br><br>
+                    <strong>法條或定義</strong><br>
+                    資通安全維護計畫：可理解為依規定撰寫並持續維護的資安計畫書，用來說明保護重點、策略、資源與執行方式。白話來說，就是把「我要保護什麼、怎麼保護、誰負責、錢從哪來」寫成可落地的文件。
+                </div>
+            </div>
+
+            <div class="explain-section">
+                <div class="explain-title">觸類旁通（舉一反三）</div>
+                <div class="explain-text">
+                    <strong>1) 對比概念</strong>
+                    <ul>
+                        <li><strong>維護計畫（Plan）</strong>：偏「要做什麼、怎麼做、資源如何配置」。</li>
+                        <li><strong>稽核組織（Audit Org）</strong>：偏「誰來查你做得對不對」。</li>
+                    </ul>
+                    <p>兩者容易混在一起，但考題常用來設陷阱。</p>
+                    <br>
+                    <strong>2) 變化題型</strong>
+                    <ul>
+                        <li>把題目改成「下列何者屬於資通安全維護計畫應包括事項？」（變成正向題）。</li>
+                        <li>把選項換成「風險評估、事件通報、教育訓練、持續改善」等，考你是否知道哪些屬計畫必備框架。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="explain-section">
+                <div class="explain-title">記憶口訣</div>
+                <div class="explain-text">
+                    「計畫三件事：<strong>事（核心業務）— 方（政策目標）— 人錢（人力經費）</strong>；<br>
+                    稽核是來查的，<strong>不是計畫必備條列</strong>。」
+                </div>
+            </div>
+
+            <div class="explain-section">
+                <div class="explain-title">常見陷阱</div>
+                <div class="explain-text">
+                    <strong>學生最容易搞混的地方</strong>：<br>
+                    把「稽核」直覺當成一定要寫進每一份計畫的必備項目。<br><br>
+                    <strong>避坑指南</strong>：<br>
+                    看到「依○○法（或施行細則）」＋「何者不包括」：先把選項分成「計畫內容（做事）」與「監督查核（查事）」兩類，通常否定題的答案多落在「查事」類。
+                </div>
+            </div>
+
+        </div>
+    </details>
+
+    <!-- [三、UI 固定骨架] SelfCheck -->
+    <details class="card self-check">
+        <summary>自我檢測</summary>
+        <div class="details-content">
+            <div class="check-item">
+                <div class="check-q">1. 如果題目改成「下列何者屬於資通安全維護計畫應包括事項？」你會選哪幾個？</div>
+                <details>
+                    <summary style="padding: 4px; background: none; font-size: var(--small-size); color: var(--tag-net-color);">查看參考答案</summary>
+                    <div class="check-a">A、C、D</div>
+                </details>
+            </div>
+            <div class="check-item">
+                <div class="check-q">2. 為什麼「稽核」很重要，卻可能不是「維護計畫」必備條列？</div>
+                <details>
+                    <summary style="padding: 4px; background: none; font-size: var(--small-size); color: var(--tag-net-color);">查看參考答案</summary>
+                    <div class="check-a">稽核偏監督/查核機制，與計畫文件必備欄位不一定相同；題目是考法規列舉項目。</div>
+                </details>
+            </div>
+            <div class="check-item">
+                <div class="check-q">3. 遇到「不包括」的法規題，你的檢查流程是什麼？</div>
+                <details>
+                    <summary style="padding: 4px; background: none; font-size: var(--small-size); color: var(--tag-net-color);">查看參考答案</summary>
+                    <div class="check-a">先抓法規依據與名詞→確認是否定題→把選項分成計畫執行類與稽核監督類→優先懷疑不屬列舉清單者。</div>
+                </details>
+            </div>
+        </div>
+    </details>
+
+</div>
+
+<script>
+    function checkAnswer() {
+        // Get selected option
+        const selected = document.querySelector('input[name="q1"]:checked');
+        const feedbackCard = document.getElementById('feedback-card');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackContent = document.getElementById('feedback-content');
+        const statusBadge = document.getElementById('status-badge');
+        
+        if (!selected) {
+            alert("請選擇一個答案！");
+            return;
+        }
+
+        const answer = selected.value;
+        const correctAnswer = "B";
+
+        feedbackCard.style.display = 'block';
+        
+        // Remove previous classes
+        feedbackCard.classList.remove('feedback-correct', 'feedback-wrong');
+
+        if (answer === correctAnswer) {
+            // Correct
+            feedbackCard.classList.add('feedback-correct');
+            feedbackTitle.textContent = "判定：正確";
+            feedbackContent.innerHTML = "施行細則要求維護計畫要寫清楚核心業務、政策目標與人力經費等，但「資通安全稽核組織」不屬其強制列入事項。";
+            statusBadge.textContent = "答對";
+            statusBadge.style.backgroundColor = "var(--success-color)";
+            statusBadge.style.color = "white";
+        } else {
+            // Incorrect
+            feedbackCard.classList.add('feedback-wrong');
+            feedbackTitle.textContent = "判定：錯誤";
+            feedbackContent.innerHTML = `正確答案：(B) <br>施行細則要求維護計畫要寫清楚核心業務、政策目標與人力經費等，但「資通安全稽核組織」不屬其強制列入事項。`;
+            statusBadge.textContent = "答錯";
+            statusBadge.style.backgroundColor = "var(--error-color)";
+            statusBadge.style.color = "white";
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS 題組：混合式加密流程與架構</title>
+    <!-- 引入 Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入 Tailwind CSS (用於快速排版) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome (用於圖示) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* [二、整體版型與寬度規範] & [四、樣式 tokens] */
+        body {
+            font-family: 'Noto Sans TC', sans-serif, system-ui;
+            background-color: #f3f4f6; /* Gray-100 */
+            color: #1f2937; /* Gray-800 */
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* 限制最大寬度 960px，水平置中 */
+        .page {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* [六、標籤顏色規範] 強制固定 */
+        .tag-law { background-color: #7f8c8d; color: white; }
+        .tag-iso { background-color: #27ae60; color: white; }
+        .tag-zt  { background-color: #8e44ad; color: white; }
+        .tag-net { background-color: #2980b9; color: white; }
+        .tag-sec { background-color: #c0392b; color: white; }
+        .tag-mgm { background-color: #d35400; color: white; }
+
+        /* 通用 Tag 樣式 */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        /* 重點標註樣式 */
+        mark {
+            background-color: #fef3c7; /* Amber-100 */
+            color: #92400e; /* Amber-800 */
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+
+        /* Tabs 樣式 (已強化視覺效果) */
+        .tab-btn {
+            padding: 14px 24px; /* 加大點擊區域 */
+            font-size: 1rem;
+            font-weight: 500;
+            color: #64748b; /* Slate-500 */
+            background-color: transparent;
+            border: none;
+            border-bottom: 3px solid transparent; /* 預留底線空間 */
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .tab-btn:hover {
+            color: #1e293b; /* Slate-800 */
+            background-color: #e2e8f0; /* Slate-200 淺灰背景 */
+        }
+        .tab-btn.active {
+            color: #2563eb; /* Blue-600 */
+            background-color: #ffffff; /* 亮白背景，與內容區塊融合 */
+            border-bottom-color: #2563eb; /* 藍色粗底線 */
+            font-weight: 700;
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.02); /* 微微浮起感 */
+        }
+
+        /* 解析區塊樣式 - 針對完整模板優化 */
+        .explain-block {
+            background-color: #f8fafc; /* Slate-50 */
+            border-left: 4px solid #3b82f6; /* Blue-500 */
+            padding: 16px;
+            margin-top: 12px;
+            border-radius: 0 4px 4px 0;
+        }
+        .explain-title {
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            color: #1e40af; /* Blue-800 */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+        /* 解析步驟小標題 */
+        .explain-subtitle {
+            font-weight: 700;
+            color: #2563eb; /* Blue-600 */
+            margin-top: 16px;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .explain-subtitle:first-of-type {
+            margin-top: 0;
+        }
+        .explain-text {
+            font-size: 0.95em;
+            color: #4b5563; /* Gray-600 */
+            margin-bottom: 8px;
+        }
+
+        /* 選項樣式 */
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+        }
+        .option-label:hover {
+            background-color: #f9fafb;
+        }
+        .option-input {
+            margin-top: 5px;
+            margin-right: 12px;
+        }
+        /* 禁用狀態 */
+        .option-label.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            background-color: #f3f4f6;
+        }
+
+        /* 自我檢測樣式 */
+        .self-check-container {
+            margin-top: 16px;
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .self-check-summary {
+            padding: 12px 16px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #374151;
+            background-color: #f9fafb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .self-check-summary:hover {
+            background-color: #f3f4f6;
+        }
+        .self-check-content {
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.95em;
+        }
+        .answer-reveal {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background-color: #ecfdf5; /* Green-50 */
+            color: #065f46; /* Green-800 */
+            border-radius: 6px;
+            border: 1px solid #d1fae5;
+        }
+
+        /* 隱藏/顯示控制 */
+        .hidden-tab { display: none; }
+        .block-tab { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="page">
+    <!-- [三-1] Header (題組頁專用) -->
+    <header class="bg-gray-800 text-white p-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-xl font-bold">題組 5：混合式加密系統流程與架構</h1>
+                <p class="text-sm text-gray-400 mt-1">IPAS 資訊安全工程師 - 密碼學應用</p>
+            </div>
+            <div class="w-full md:w-1/3">
+                <div class="flex justify-between text-xs mb-1">
+                    <span id="progress-text">進度：0/4</span>
+                    <span id="completion-status" class="font-bold text-yellow-400">尚未完成</span>
+                </div>
+                <div class="w-full bg-gray-600 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-blue-400 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- [三-2] Group Context (題組情境) -->
+    <section class="p-6 border-b border-gray-200 bg-white">
+        <h2 class="text-lg font-bold mb-4 border-l-4 border-gray-800 pl-3">題組背景</h2>
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <p class="mb-4 text-gray-700">
+                下圖為密碼學中常見的一種加密系統架構，描述傳送者（Sender）與接收者（Receiver）之間，如何同時結合：
+                <span class="badge tag-sec">對稱式加密</span>、<span class="badge tag-sec">非對稱式加密</span>與<span class="badge tag-sec">雜湊</span>。
+            </p>
+            <div class="flex justify-center my-4">
+                <img src="https://i.meee.com.tw/hHHlalw.jpg" alt="混合式加密流程圖" class="max-w-full h-auto rounded shadow-sm border border-gray-300">
+            </div>
+            <p class="text-sm text-gray-600">
+                流程簡述：系統使用對稱金鑰加密訊息本體，並利用接收者的公鑰來保護這把對稱金鑰，同時結合雜湊值與傳送者的私鑰進行數位簽章，以達到機密性、完整性與不可否認性。
+            </p>
+        </div>
+    </section>
+
+    <!-- [三-3] Tabs (切題機制) -->
+    <div class="flex overflow-x-auto border-b border-gray-200 bg-gray-50 hide-scrollbar">
+        <button class="tab-btn active" onclick="switchTab('q37')">第37題</button>
+        <button class="tab-btn" onclick="switchTab('q38')">第38題</button>
+        <button class="tab-btn" onclick="switchTab('q39')">第39題</button>
+        <button class="tab-btn" onclick="switchTab('q40')">第40題 (複選)</button>
+    </div>
+
+    <!-- [三-4] Tab 內容區塊 -->
+    <main class="p-6">
+
+        <!-- ==================== Q37 ==================== -->
+        <div id="q37" class="tab-content block-tab">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-bold text-gray-500">第 37 題</span>
+                <span id="status-q37" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-600">未作答</span>
+            </div>
+
+            <!-- Context (本題無額外情境，不顯示) -->
+
+            <!-- Question -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <span class="badge tag-sec">觀念</span>請問圖中所使用的架構是何種加密系統？
+                </h3>
+                <div class="space-y-2">
+                    <label class="option-label">
+                        <input type="radio" name="q37" value="A" class="option-input">
+                        <span>(A) 對稱式加密</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q37" value="B" class="option-input">
+                        <span>(B) 非對稱式加密</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q37" value="C" class="option-input">
+                        <span>(C) 混合式加密</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q37" value="D" class="option-input">
+                        <span>(D) 雜湊演算法</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-4 mb-6">
+                <button onclick="submitAnswer('q37', 'single')" id="btn-submit-q37" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded transition-colors">提交</button>
+                <button onclick="retryQuestion('q37')" id="btn-retry-q37" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded transition-colors">重作</button>
+            </div>
+
+            <!-- Feedback -->
+            <div id="feedback-q37" class="hidden mb-6 p-4 rounded-md"></div>
+
+            <!-- Explain -->
+            <details class="group bg-white border border-gray-200 rounded-lg open:shadow-sm">
+                <summary class="flex justify-between items-center cursor-pointer p-4 font-medium text-gray-700 hover:bg-gray-50">
+                    <span>查看詳解</span>
+                    <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="p-4 border-t border-gray-200 text-sm text-gray-600">
+                    <div class="explain-block">
+                        <div class="explain-title"><span class="badge tag-sec">解題核心</span> 混合式加密判定</div>
+                        
+                        <span class="explain-subtitle">【第一步：找關鍵字】</span>
+                        <div class="explain-text">
+                            <ul class="list-disc pl-5">
+                                <li><mark>Symmetric Key (對稱金鑰)</mark>：代表訊息內容是用單一金鑰加密。</li>
+                                <li><mark>Public/Private Key (公鑰/私鑰)</mark>：代表使用非對稱技術傳遞金鑰或簽章。</li>
+                                <li><mark>Hash (雜湊)</mark>：代表有完整性驗證。</li>
+                            </ul>
+                        </div>
+
+                        <span class="explain-subtitle">【第二步：白話翻譯】</span>
+                        <div class="explain-text">
+                            「真正加密資料時，用的是速度快的對稱金鑰；但為了安全把這把鑰匙傳給對方，會用慢但安全的非對稱金鑰包起來。」
+                        </div>
+
+                        <span class="explain-subtitle">【第三步：解題思路】</span>
+                        <div class="explain-text">
+                            單純使用對稱加密有「金鑰傳遞困難」問題，單純使用非對稱加密有「運算速度太慢」問題。圖中同時出現兩者，取長補短，即為標準的「混合式加密系統」。
+                        </div>
+
+                        <span class="explain-subtitle">【第四步：選項分析】</span>
+                        <div class="explain-text">
+                            <ul class="list-disc pl-5">
+                                <li>(A) 錯，圖中有公鑰/私鑰，不只對稱。</li>
+                                <li>(B) 錯，訊息本體是用對稱金鑰加密的。</li>
+                                <li>(C) 對，結合兩者優點。</li>
+                                <li>(D) 錯，雜湊只是其中一個安全元件。</li>
+                            </ul>
+                        </div>
+
+                        <span class="explain-subtitle">【記憶口訣】</span>
+                        <div class="explain-text">
+                            <strong>「內容對稱快，鑰匙公鑰傳」</strong>（內容用快的對稱加密，金鑰用安全的公鑰傳遞）。
+                        </div>
+
+                        <span class="explain-subtitle">【常見陷阱】</span>
+                        <div class="explain-text">
+                            不要看到 Public Key 就選非對稱加密，要看它「主要加密了什麼」。若只是用來交換鑰匙，而主資料是用 Symmetric Key，那就是混合式。
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- SelfCheck -->
+            <details class="self-check-container group">
+                <summary class="self-check-summary">
+                    <span>自我檢測</span>
+                    <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="self-check-content">
+                    <p class="mb-2 font-bold text-gray-800">Q: 現今網路最常見的 HTTPS (TLS) 協定，屬於哪一種加密？</p>
+                    <details class="mt-2">
+                        <summary class="text-blue-600 cursor-pointer text-sm hover:underline">點擊查看答案</summary>
+                        <div class="answer-reveal">
+                            混合式加密。在握手階段（Handshake）使用非對稱加密交換金鑰，後續資料傳輸階段（Record Protocol）使用對稱加密。
+                        </div>
+                    </details>
+                </div>
+            </details>
+        </div>
+
+        <!-- ==================== Q38 ==================== -->
+        <div id="q38" class="tab-content hidden-tab">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-bold text-gray-500">第 38 題</span>
+                <span id="status-q38" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-600">未作答</span>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <span class="badge tag-sec">流程</span>關於附圖中所標示的數字 1.~6. 之執行順序，下列排序何者最為合理？
+                </h3>
+                <div class="space-y-2">
+                    <label class="option-label">
+                        <input type="radio" name="q38" value="A" class="option-input">
+                        <span>(A) 2→1→5→3→4→6</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q38" value="B" class="option-input">
+                        <span>(B) 3→5→6→4→1→2</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q38" value="C" class="option-input">
+                        <span>(C) 6→1→4→3→5→2</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q38" value="D" class="option-input">
+                        <span>(D) 3→1→5→4→6→2</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex gap-4 mb-6">
+                <button onclick="submitAnswer('q38', 'single')" id="btn-submit-q38" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded transition-colors">提交</button>
+                <button onclick="retryQuestion('q38')" id="btn-retry-q38" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded transition-colors">重作</button>
+            </div>
+
+            <div id="feedback-q38" class="hidden mb-6 p-4 rounded-md"></div>
+
+            <details class="group bg-white border border-gray-200 rounded-lg open:shadow-sm">
+                <summary class="flex justify-between items-center cursor-pointer p-4 font-medium text-gray-700 hover:bg-gray-50">
+                    <span>查看詳解</span>
+                    <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="p-4 border-t border-gray-200 text-sm text-gray-600">
+                    <div class="explain-block">
+                        <div class="explain-title"><span class="badge tag-sec">邏輯</span> 解密與驗證順序</div>
+                        
+                        <span class="explain-subtitle">【第三步：解題思路（生活例子）】</span>
+                        <div class="explain-text">
+                            想像你收到一個「上鎖的保險箱（加密訊息）」和一個「信封（加密的鑰匙）」。
+                            <br>正常順序是：
+                            1. 先打開信封拿到鑰匙（Step 3）。
+                            2. 用鑰匙打開保險箱拿出文件（Step 1，對應接收端解密）。
+                            3. 檢查文件上的簽名和指紋是否正確（Step 4, 6）。
+                        </div>
+
+                        <span class="explain-subtitle">【第四步：選項分析】</span>
+                        <div class="explain-text">
+                            <ul class="list-disc pl-5">
+                                <li><strong>(3) 取鑰匙</strong>：接收者必須先用自己的私鑰解出 Symmetric Key。</li>
+                                <li><strong>(1) 解訊息</strong>：有了 Symmetric Key 才能解開訊息本體。</li>
+                                <li><strong>(5) 傳輸</strong>：發生在中間。</li>
+                                <li><strong>(4, 6) 驗證</strong>：解出明文後，計算雜湊並驗證簽章。</li>
+                                <li><strong>(2) 結束</strong>。</li>
+                            </ul>
+                            選項 D 的 <strong>3→1</strong> 是最關鍵的邏輯（先拿鑰匙→再開鎖）。
+                        </div>
+
+                        <span class="explain-subtitle">【觸類旁通】</span>
+                        <div class="explain-text">
+                            就像網購收貨：先簽收拿刀片（金鑰）→ 割開箱子（解密）→ 檢查商品有沒有壞（驗雜湊）。
+                        </div>
+
+                         <span class="explain-subtitle">【避坑指南】</span>
+                        <div class="explain-text">
+                            題目圖片中的箭頭 1 是指向「加密」，但在接收端對應的動作是「解密」。解題時要切換成「接收者視角」來思考流程。
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+             <!-- SelfCheck -->
+             <details class="self-check-container group">
+                <summary class="self-check-summary">
+                    <span>自我檢測</span>
+                    <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="self-check-content">
+                    <p class="mb-2 font-bold text-gray-800">Q: 如果先執行步驟 1 (處理訊息) 再執行步驟 3 (處理金鑰)，會發生什麼事？</p>
+                    <details class="mt-2">
+                        <summary class="text-blue-600 cursor-pointer text-sm hover:underline">點擊查看答案</summary>
+                        <div class="answer-reveal">
+                            會無法執行。因為步驟 1 需要對稱金鑰才能解密，而對稱金鑰被鎖在步驟 3 的信封裡，不先解開步驟 3 就拿不到鑰匙。
+                        </div>
+                    </details>
+                </div>
+            </details>
+        </div>
+
+        <!-- ==================== Q39 ==================== -->
+        <div id="q39" class="tab-content hidden-tab">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-bold text-gray-500">第 39 題</span>
+                <span id="status-q39" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-600">未作答</span>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <span class="badge tag-sec">機制</span>在步驟 3 中，接收者應使用何種 Key 來解密以獲得共享金鑰（symmetric key）？
+                </h3>
+                <div class="space-y-2">
+                    <label class="option-label">
+                        <input type="radio" name="q39" value="A" class="option-input">
+                        <span>(A) 傳送者的公開金鑰</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q39" value="B" class="option-input">
+                        <span>(B) 傳送者的私密金鑰</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q39" value="C" class="option-input">
+                        <span>(C) 接收者的公開金鑰</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q39" value="D" class="option-input">
+                        <span>(D) 接收者的私密金鑰</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex gap-4 mb-6">
+                <button onclick="submitAnswer('q39', 'single')" id="btn-submit-q39" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded transition-colors">提交</button>
+                <button onclick="retryQuestion('q39')" id="btn-retry-q39" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded transition-colors">重作</button>
+            </div>
+
+            <div id="feedback-q39" class="hidden mb-6 p-4 rounded-md"></div>
+
+            <details class="group bg-white border border-gray-200 rounded-lg open:shadow-sm">
+                <summary class="flex justify-between items-center cursor-pointer p-4 font-medium text-gray-700 hover:bg-gray-50">
+                    <span>查看詳解</span>
+                    <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="p-4 border-t border-gray-200 text-sm text-gray-600">
+                    <div class="explain-block">
+                        <div class="explain-title"><span class="badge tag-sec">原理</span> 金鑰封裝機制</div>
+                        
+                        <span class="explain-subtitle">【第三步：解題思路】</span>
+                        <div class="explain-text">
+                            非對稱加密的核心規則是：
+                            <br>1. <strong>要給誰看，就用誰的公鑰鎖。</strong>（機密性）
+                            <br>2. <strong>只有擁有私鑰的人（接收者本人）才能開。</strong>
+                            <br>既然是要傳給 Receiver 的鑰匙，傳送者一定是用 Receiver Public Key 加密，所以接收者必須用自己的 <mark>Receiver Private Key</mark> 解密。
+                        </div>
+
+                        <span class="explain-subtitle">【第四步：選項分析】</span>
+                        <div class="explain-text">
+                            <ul class="list-disc pl-5">
+                                <li>(A)(B) 與傳送者的鑰匙無關（除非是驗簽章）。</li>
+                                <li>(C) 公鑰是用來加密的，不能解密。</li>
+                                <li>(D) 正確，私鑰是用來解密的。</li>
+                            </ul>
+                        </div>
+
+                        <span class="explain-subtitle">【記憶口訣】</span>
+                        <div class="explain-text">
+                            <strong>「公鑰鎖給別人看，私鑰簽給別人驗」</strong>。
+                            <br>本題是「鎖給別人看」（傳遞金鑰），所以用對方公鑰鎖，對方私鑰開。
+                        </div>
+
+                        <span class="explain-subtitle">【常見陷阱】</span>
+                        <div class="explain-text">
+                            容易搞混「加密傳輸」與「數位簽章」。
+                            <br>加密傳輸（保密）：用接收方公鑰。
+                            <br>數位簽章（證明身份）：用發送方私鑰。
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+             <!-- SelfCheck -->
+             <details class="self-check-container group">
+                <summary class="self-check-summary">
+                    <span>自我檢測</span>
+                    <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="self-check-content">
+                    <p class="mb-2 font-bold text-gray-800">Q: 如果駭客攔截了步驟 3 的封包，他能拿到對稱金鑰嗎？為什麼？</p>
+                    <details class="mt-2">
+                        <summary class="text-blue-600 cursor-pointer text-sm hover:underline">點擊查看答案</summary>
+                        <div class="answer-reveal">
+                            不能。因為該封包是用接收者的公鑰加密的，駭客沒有接收者的「私密金鑰」，所以無法解開取得裡面的對稱金鑰。
+                        </div>
+                    </details>
+                </div>
+            </details>
+        </div>
+
+        <!-- ==================== Q40 ==================== -->
+        <div id="q40" class="tab-content hidden-tab">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-bold text-gray-500">第 40 題</span>
+                <span id="status-q40" class="text-xs px-2 py-1 rounded bg-gray-200 text-gray-600">未作答</span>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <span class="badge tag-sec">應用</span>（複選）請問下列關於此種加密系統的敘述，哪些正確？
+                </h3>
+                <div class="space-y-2">
+                    <label class="option-label">
+                        <input type="checkbox" name="q40" value="A" class="option-input">
+                        <span>(A) 使用對稱金鑰對訊息進行加解密</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q40" value="B" class="option-input">
+                        <span>(B) 將對稱金鑰以接收者的公開金鑰加密後再進行傳送</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q40" value="C" class="option-input">
+                        <span>(C) 使用私密金鑰將訊息進行加解密</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q40" value="D" class="option-input">
+                        <span>(D) 此種加密方式可應用於 TLS 與 SSH</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex gap-4 mb-6">
+                <button onclick="submitAnswer('q40', 'multiple')" id="btn-submit-q40" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded transition-colors">提交</button>
+                <button onclick="retryQuestion('q40')" id="btn-retry-q40" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded transition-colors">重作</button>
+            </div>
+
+            <div id="feedback-q40" class="hidden mb-6 p-4 rounded-md"></div>
+
+            <details class="group bg-white border border-gray-200 rounded-lg open:shadow-sm">
+                <summary class="flex justify-between items-center cursor-pointer p-4 font-medium text-gray-700 hover:bg-gray-50">
+                    <span>查看詳解</span>
+                    <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="p-4 border-t border-gray-200 text-sm text-gray-600">
+                    <div class="explain-block">
+                        <div class="explain-title"><span class="badge tag-sec">觀念</span> 綜合應用分析</div>
+                        
+                        <span class="explain-subtitle">【第四步：選項分析】</span>
+                        <div class="explain-text">
+                            <ul class="list-disc pl-5">
+                                <li><strong>(A) 正確</strong>：混合加密的基礎，效率高。</li>
+                                <li><strong>(B) 正確</strong>：即 Key Encapsulation，保護鑰匙傳輸的安全。</li>
+                                <li><strong>(C) 錯誤</strong>：<mark>私密金鑰不直接加密訊息</mark>。私鑰運算慢，只用來「解密對稱金鑰」或「數位簽章（加密雜湊值）」。</li>
+                                <li><strong>(D) 正確</strong>：TLS/SSL、SSH、PGP 都是此架構的經典應用。</li>
+                            </ul>
+                        </div>
+
+                        <span class="explain-subtitle">【觀念補充與延伸】</span>
+                        <div class="explain-text">
+                            <strong>數位信封 (Digital Envelope)</strong>：指的就是「用接收者公鑰加密對稱金鑰」這個技術，它就像一個信封，保護著裡面的對稱金鑰。
+                        </div>
+
+                         <span class="explain-subtitle">【心理盲點】</span>
+                        <div class="explain-text">
+                            看到「私密金鑰加密」直覺想選？要注意受詞！私鑰加密「雜湊」是對的（簽章），私鑰加密「整個訊息」通常是錯的（效率太差）。
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+             <!-- SelfCheck -->
+             <details class="self-check-container group">
+                <summary class="self-check-summary">
+                    <span>自我檢測</span>
+                    <span class="transition group-open:rotate-180"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="self-check-content">
+                    <p class="mb-2 font-bold text-gray-800">Q: 選項 C 改成怎樣敘述才是正確的？</p>
+                    <details class="mt-2">
+                        <summary class="text-blue-600 cursor-pointer text-sm hover:underline">點擊查看答案</summary>
+                        <div class="answer-reveal">
+                            「使用私密金鑰對『訊息摘要（Hash）』進行加密（即簽章）」或是「接收者使用私密金鑰對『加密的對稱金鑰』進行解密」。
+                        </div>
+                    </details>
+                </div>
+            </details>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    // 題目資料與正解
+    const answers = {
+        'q37': { correct: ['C'], reason: '同時結合對稱與非對稱加密，即為混合式加密系統。' },
+        'q38': { correct: ['D'], reason: '依接收端邏輯：先解金鑰(3)→解訊息(1)→過程(5)→驗雜湊與簽章(4,6)→完成(2)。' },
+        'q39': { correct: ['D'], reason: '被接收者公鑰加密的資料，唯有接收者的私鑰能解開。' },
+        'q40': { correct: ['A', 'B', 'D'], reason: '混合加密核心：內容用對稱(A)，鑰匙用非對稱(B)，廣泛用於TLS/SSH(D)。私鑰不直接加密本文。' }
+    };
+
+    // 狀態追蹤
+    const userStatus = {
+        'q37': 'unanswered',
+        'q38': 'unanswered',
+        'q39': 'unanswered',
+        'q40': 'unanswered'
+    };
+
+    // 切換 Tab
+    function switchTab(tabId) {
+        // 隱藏所有內容
+        document.querySelectorAll('.tab-content').forEach(el => {
+            el.classList.remove('block-tab');
+            el.classList.add('hidden-tab');
+        });
+        // 顯示選中內容
+        const target = document.getElementById(tabId);
+        target.classList.remove('hidden-tab');
+        target.classList.add('block-tab');
+
+        // 更新按鈕樣式
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    // 提交答案
+    function submitAnswer(qId, type) {
+        const inputs = document.querySelectorAll(`input[name="${qId}"]:checked`);
+        const feedbackEl = document.getElementById(`feedback-${qId}`);
+        const statusEl = document.getElementById(`status-${qId}`);
+        const btnSubmit = document.getElementById(`btn-submit-${qId}`);
+        const btnRetry = document.getElementById(`btn-retry-${qId}`);
+        
+        let userSelection = Array.from(inputs).map(i => i.value);
+
+        // 未作答檢核
+        if (userSelection.length === 0) {
+            alert("請先選擇答案！");
+            return;
+        }
+
+        let isCorrect = false;
+        const correctAns = answers[qId].correct;
+
+        // 判分邏輯
+        if (type === 'single') {
+            isCorrect = (userSelection[0] === correctAns[0]);
+        } else { // multiple
+            // 複選：長度相同 且 所有選項都在正解中 (全對才給分)
+            isCorrect = userSelection.length === correctAns.length && 
+                        userSelection.every(val => correctAns.includes(val));
+        }
+
+        // 更新 UI
+        feedbackEl.classList.remove('hidden');
+        if (isCorrect) {
+            feedbackEl.className = "mb-6 p-4 rounded-md bg-green-100 text-green-800 border border-green-200";
+            feedbackEl.innerHTML = `<strong>判定：正確</strong><br>${answers[qId].reason}`;
+            statusEl.textContent = "已提交：正確";
+            statusEl.className = "text-xs px-2 py-1 rounded bg-green-100 text-green-700 font-bold";
+            userStatus[qId] = 'correct';
+        } else {
+            feedbackEl.className = "mb-6 p-4 rounded-md bg-red-100 text-red-800 border border-red-200";
+            feedbackEl.innerHTML = `<strong>判定：錯誤</strong><br>正確答案：${correctAns.join('、')}<br>${answers[qId].reason}`;
+            statusEl.textContent = "已提交：錯誤";
+            statusEl.className = "text-xs px-2 py-1 rounded bg-red-100 text-red-700 font-bold";
+            userStatus[qId] = 'wrong';
+        }
+
+        // 鎖定選項
+        document.querySelectorAll(`input[name="${qId}"]`).forEach(input => {
+            input.disabled = true;
+            input.parentElement.classList.add('disabled');
+        });
+
+        // 按鈕切換
+        btnSubmit.classList.add('hidden');
+        btnRetry.classList.remove('hidden');
+
+        // 更新 Tab 標記與總進度
+        markTabComplete(qId);
+        updateProgress();
+    }
+
+    // 重作
+    function retryQuestion(qId) {
+        // 重置狀態
+        userStatus[qId] = 'unanswered';
+        
+        // UI 重置
+        const feedbackEl = document.getElementById(`feedback-${qId}`);
+        feedbackEl.classList.add('hidden');
+        feedbackEl.innerHTML = '';
+
+        const statusEl = document.getElementById(`status-${qId}`);
+        statusEl.textContent = "未作答";
+        statusEl.className = "text-xs px-2 py-1 rounded bg-gray-200 text-gray-600";
+
+        // 解鎖選項
+        document.querySelectorAll(`input[name="${qId}"]`).forEach(input => {
+            input.disabled = false;
+            input.checked = false;
+            input.parentElement.classList.remove('disabled');
+        });
+
+        // 按鈕切換
+        document.getElementById(`btn-submit-${qId}`).classList.remove('hidden');
+        document.getElementById(`btn-retry-${qId}`).classList.add('hidden');
+
+        // 移除 Tab 標記
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        let index = parseInt(qId.replace('q', '')) - 37; // 37->0
+        if (tabBtns[index].textContent.includes('✓')) {
+             // 簡易移除勾選符號，這裡假設格式固定
+             let originalText = tabBtns[index].textContent.replace(' ✓', '');
+             tabBtns[index].textContent = originalText;
+        }
+
+        updateProgress();
+    }
+
+    // 標記 Tab 完成
+    function markTabComplete(qId) {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        // Q37是第一個(index 0), Q38(1)...
+        let index = parseInt(qId.replace('q', '')) - 37;
+        
+        // 避免重複加勾
+        if (!tabBtns[index].textContent.includes('✓')) {
+            tabBtns[index].textContent += ' ✓';
+        }
+    }
+
+    // 更新進度條
+    function updateProgress() {
+        const total = 4;
+        // 計算已提交 (correct 或 wrong) 的數量
+        const completed = Object.values(userStatus).filter(s => s !== 'unanswered').length;
+        
+        const pct = (completed / total) * 100;
+        document.getElementById('progress-bar').style.width = `${pct}%`;
+        document.getElementById('progress-text').textContent = `進度：${completed}/${total}`;
+
+        const statusText = document.getElementById('completion-status');
+        if (completed === total) {
+            statusText.textContent = "本題組已完成";
+            statusText.className = "font-bold text-green-500";
+        } else {
+            statusText.textContent = "尚未完成";
+            statusText.className = "font-bold text-yellow-500";
+        }
+    }
+</script>
+
+</body>
+</html>

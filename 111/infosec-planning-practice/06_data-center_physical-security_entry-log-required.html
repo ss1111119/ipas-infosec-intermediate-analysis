@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第6題：機房實體安全管理</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --bg-color: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            
+            /* Tag Colors - Fixed Specification */
+            --tag-law: #7f8c8d;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 16px;
+            padding: 20px;
+        }
+
+        /* Container Layout Specification */
+        .container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Header */
+        header.card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .status-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* Context */
+        .context-box {
+            background-color: #f8f9fa;
+            color: #666;
+            font-style: italic;
+            border-left: 4px solid #bdc3c7;
+        }
+
+        /* Question & Options */
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f1f2f6;
+        }
+
+        .option-input {
+            margin-top: 4px;
+            margin-right: 12px;
+            accent-color: var(--primary-color);
+        }
+
+        .submit-btn {
+            margin-top: 20px;
+            padding: 10px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .submit-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Feedback */
+        .feedback-card {
+            display: none; /* Hidden by default */
+            border-left: 5px solid transparent;
+        }
+
+        .feedback-card.correct {
+            border-left-color: var(--success-color);
+            background-color: #eafaf1;
+        }
+
+        .feedback-card.incorrect {
+            border-left-color: var(--error-color);
+            background-color: #fdedec;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .feedback-reason {
+            font-size: 16px;
+        }
+
+        /* Explanation & Tags */
+        details.main-details {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            overflow: hidden;
+        }
+
+        summary.main-summary {
+            padding: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: #f8f9fa;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary.main-summary::after {
+            content: '\f078';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.2s;
+        }
+
+        details[open] summary.main-summary::after {
+            transform: rotate(180deg);
+        }
+
+        .explain-content {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .analysis-section {
+            background-color: #fafafa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border-left: 3px solid #dfe6e9;
+        }
+
+        .analysis-title {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Tag Styles (Strictly Enforced) */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            margin-right: 6px;
+            margin-bottom: 4px;
+        }
+
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt  { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        mark {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Self Check Specific Styles */
+        .qa-pair {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .qa-pair:last-child {
+            border-bottom: none;
+        }
+
+        .qa-question {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: baseline;
+        }
+
+        .qa-question::before {
+            content: '\f059';
+            font-family: "Font Awesome 6 Free";
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+
+        /* Inner details for answers */
+        details.answer-reveal {
+            margin-top: 4px;
+        }
+        
+        details.answer-reveal summary {
+            cursor: pointer;
+            color: #7f8c8d;
+            font-size: 14px;
+            user-select: none;
+            display: inline-block;
+        }
+        
+        details.answer-reveal[open] summary {
+            margin-bottom: 4px;
+        }
+
+        .qa-answer {
+            color: #27ae60;
+            background: #f0fdf4;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 1. Header -->
+    <header class="card">
+        <div>題號：6</div>
+        <div class="status-badge" id="status-badge">尚未作答</div>
+    </header>
+
+    <!-- 2. Context -->
+    <div class="card context-box">
+        本題無額外情境
+    </div>
+
+    <!-- 3. Question -->
+    <div class="card">
+        <div class="question-text">
+            機房區域屬於防範基本設備操作直接存取的重要防護區域，下列敘述何者「不」正確？
+        </div>
+        <div class="options-group" id="options-container">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A" class="option-input">
+                <span>(A) 限制具拍照或錄影功能之裝置攜帶進入機房</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B" class="option-input">
+                <span>(B) 外包商只能在工作檯使用電腦遠距操作主機，相關隨身碟（USB Disk）資料匯入，需要經過掃毒後由機房管理人員協助使用</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C" class="option-input">
+                <span>(C) 只有資訊人員可以自由進出機房，不用填寫出入登記表</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D" class="option-input">
+                <span>(D) 機房 Level 5 硬體安全模組（Hardware Security Module, HSM）設備需要另外實體隔離保護</span>
+            </label>
+        </div>
+        <button class="submit-btn" id="submit-btn" onclick="checkAnswer()">送出答案</button>
+    </div>
+
+    <!-- 4. Feedback -->
+    <div class="card feedback-card" id="feedback-card">
+        <div class="feedback-title" id="feedback-title"></div>
+        <div class="feedback-reason" id="feedback-content"></div>
+    </div>
+
+    <!-- 5. Explain -->
+    <details class="card main-details">
+        <summary class="main-summary">顯示詳解與觀念分析</summary>
+        <div class="explain-content">
+            
+            <!-- Step 1 -->
+            <div class="analysis-section">
+                <div class="analysis-title">第一步：找關鍵字</div>
+                <p>1. <span class="tag tag-mgm">機房區域</span>：屬於高度敏感的實體安全管制區域。</p>
+                <p>2. <mark>「不」正確</mark>：反向題，必須找出違反資安實體安全原則的敘述。</p>
+                <p>3. <mark>防範直接存取</mark>：代表要重視「進出控管、紀錄、隔離」。</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="analysis-section">
+                <div class="analysis-title">第二步：白話翻譯</div>
+                <p>題目在問：關於機房這種超重要、不能隨便進出的地方，下面哪一個說法是錯的？</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="analysis-section">
+                <div class="analysis-title">第三步：解題思路</div>
+                <p>這題在考實體安全（Physical Security）與機房管理規範。核心原則如下：</p>
+                <ol style="margin-left: 20px; margin-top: 8px;">
+                    <li>記住機房一定要「誰進來、何時進來、做什麼」都可被追蹤。</li>
+                    <li>檢查每個選項是否符合「最小存取、全程可稽核」原則。</li>
+                    <li>找出「沒有留下紀錄」或「過度放寬」的敘述。</li>
+                </ol>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="analysis-section">
+                <div class="analysis-title">第四步：選項分析</div>
+                <p>(A) <strong>正確</strong>。限制拍照或錄影裝置，可避免設備配置圖、螢幕畫面或敏感資訊被側錄外洩。</p>
+                <p>(B) <strong>正確</strong>。符合「最小權限」與「媒體控管」原則，隨身碟由管理員協助掃毒，避免惡意程式直接接觸核心主機。</p>
+                <p>(C) <strong style="color: var(--error-color);">不正確</strong>。<strong>這是本題答案</strong>。即使是權限最高的資訊人員，也必須填寫出入紀錄，否則無法達成事後稽核與責任追蹤（Accountability）。</p>
+                <p>(D) <strong>正確</strong>。HSM 存放的是最核心的加密金鑰，必須提供更高等級的實體防護（如放置於獨立保險箱或專屬機櫃）。</p>
+            </div>
+
+            <!-- Concepts -->
+            <div class="analysis-section">
+                <div class="analysis-title">觀念補充與延伸</div>
+                <div><span class="tag tag-iso">ISO 27001</span> <span class="tag tag-sec">實體安全</span></div>
+                <p style="margin-top: 8px;">
+                    <strong>實體安全控制精神：</strong><br>
+                    確保只有經授權人員，才能在受控條件下進入關鍵設施，且所有進出行為必須可被記錄與追蹤。<br>
+                    白話來說：不是不能進，而是「進了要留痕跡」。
+                </p>
+            </div>
+
+            <!-- Comparison / Extension -->
+            <div class="analysis-section">
+                <div class="analysis-title">觸類旁通（舉一反三）</div>
+                <p><strong>對比概念：</strong></p>
+                <ul>
+                    <li>機房：所有人（含員工、廠商、訪客）都要登記管制。</li>
+                    <li>一般辦公室：視風險等級決定，但通常較寬鬆。</li>
+                </ul>
+                <br>
+                <p><strong>變化題型：</strong></p>
+                <p>1. 問「哪一項屬於不當的實體安全管理？」常見陷阱是「主管或資訊人員免登記」。</p>
+                <p>2. 問「為什麼機房要限制拍照？」重點在於防範社交工程資訊蒐集與機密外洩。</p>
+            </div>
+
+            <!-- Mnemonics -->
+            <div class="analysis-section">
+                <div class="analysis-title">記憶口訣</div>
+                <p style="font-size: 1.1em; font-weight: bold; color: var(--primary-color);">
+                    「機房再自己人，也要留紀錄」
+                </p>
+            </div>
+
+            <!-- Traps -->
+            <div class="analysis-section">
+                <div class="analysis-title">常見陷阱</div>
+                <p><strong>學生最容易搞混的地方：</strong></p>
+                <p>以為「資訊人員」或「主管」是自己人，權限很大，所以進出機房就可以不用麻煩去登記。</p>
+                <br>
+                <p><strong>避坑指南：</strong></p>
+                <p>只要看到題目寫「不用登記」、「自由進出」、「刷臉免紀錄」等，幾乎百分之百是錯誤選項（也就是本題要選的答案）。</p>
+            </div>
+
+        </div>
+    </details>
+
+    <!-- 6. SelfCheck (Visible Questions, Hidden Answers) -->
+    <div class="card">
+        <div class="question-text" style="font-size: 16px; margin-bottom: 12px;">自我檢測 (Self Check)</div>
+        
+        <div class="qa-pair">
+            <div class="qa-question">1. 為什麼資訊人員也必須填寫機房出入紀錄？</div>
+            <details class="answer-reveal">
+                <summary>點擊查看答案</summary>
+                <div class="qa-answer">答案：為了稽核、追蹤與責任釐清。</div>
+            </details>
+        </div>
+
+        <div class="qa-pair">
+            <div class="qa-question">2. USB 媒體控管主要是為了防範哪一類風險？</div>
+            <details class="answer-reveal">
+                <summary>點擊查看答案</summary>
+                <div class="qa-answer">答案：惡意程式與資料外洩。</div>
+            </details>
+        </div>
+
+        <div class="qa-pair">
+            <div class="qa-question">3. HSM 為何需要更高等級的實體隔離？</div>
+            <details class="answer-reveal">
+                <summary>點擊查看答案</summary>
+                <div class="qa-answer">答案：因其保存核心加密金鑰，風險最高。</div>
+            </details>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const CORRECT_ANSWER = 'C';
+    const ONE_LINE_REASON = '任何人進出機房都必須留下紀錄，不能因身分而免除控管。';
+
+    function checkAnswer() {
+        const selectedOption = document.querySelector('input[name="answer"]:checked');
+        const feedbackCard = document.getElementById('feedback-card');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackContent = document.getElementById('feedback-content');
+        const statusBadge = document.getElementById('status-badge');
+        const submitBtn = document.getElementById('submit-btn');
+        const options = document.querySelectorAll('.option-input');
+
+        if (!selectedOption) {
+            alert('請選擇一個答案！');
+            return;
+        }
+
+        // Disable inputs after submission
+        options.forEach(opt => opt.disabled = true);
+        submitBtn.disabled = true;
+        submitBtn.textContent = '已作答';
+
+        // Show feedback
+        feedbackCard.style.display = 'block';
+
+        if (selectedOption.value === CORRECT_ANSWER) {
+            // Correct Case
+            feedbackCard.className = 'card feedback-card correct';
+            feedbackTitle.textContent = '判定：正確';
+            feedbackTitle.style.color = 'var(--success-color)';
+            feedbackContent.textContent = ONE_LINE_REASON;
+            statusBadge.textContent = '答對';
+            statusBadge.style.backgroundColor = 'var(--success-color)';
+        } else {
+            // Incorrect Case
+            feedbackCard.className = 'card feedback-card incorrect';
+            feedbackTitle.textContent = '判定：錯誤';
+            feedbackTitle.style.color = 'var(--error-color)';
+            feedbackContent.innerHTML = `正確答案：(${CORRECT_ANSWER})<br>${ONE_LINE_REASON}`;
+            statusBadge.textContent = '答錯';
+            statusBadge.style.backgroundColor = 'var(--error-color)';
+        }
+    }
+</script>
+
+</body>
+</html>

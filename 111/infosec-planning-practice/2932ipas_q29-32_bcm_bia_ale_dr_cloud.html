@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS 題組：業務持續管理 (BCM) 與災難復原</title>
+    <!-- 引入 Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* 基礎設定 */
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6; /* gray-100 */
+            color: #374151; /* gray-700 */
+            line-height: 1.6;
+        }
+
+        /* 嚴格版型寬度規範 */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #ffffff;
+            min-height: 100vh;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* 標籤顏色規範 (強制) */
+        .tag-law { background-color: #7f8c8d; color: white; }
+        .tag-iso { background-color: #27ae60; color: white; }
+        .tag-zt  { background-color: #8e44ad; color: white; }
+        .tag-net { background-color: #2980b9; color: white; }
+        .tag-sec { background-color: #c0392b; color: white; }
+        .tag-mgm { background-color: #d35400; color: white; }
+
+        /* UI 元件樣式 */
+        .section-card {
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .tab-btn {
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active {
+            color: #2563eb; /* blue-600 */
+            border-bottom-color: #2563eb;
+            font-weight: 700;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 8px;
+        }
+        .option-label:hover {
+            background-color: #f9fafb;
+        }
+        .option-input {
+            margin-top: 5px;
+            margin-right: 12px;
+        }
+
+        /* 解析段落卡 */
+        .explain-segment {
+            background-color: #f8fafc; /* slate-50 */
+            border-left: 4px solid #94a3b8;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 0 4px 4px 0;
+        }
+        .explain-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1e293b;
+        }
+
+        /* 自我檢測 details */
+        details > summary {
+            cursor: pointer;
+            padding: 8px;
+            background-color: #eff6ff;
+            border-radius: 4px;
+            color: #1d4ed8;
+            font-weight: 500;
+            list-style: none; /* 隱藏預設箭頭 (部分瀏覽器) */
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details > summary::after {
+            content: '+';
+            float: right;
+            font-weight: bold;
+        }
+        details[open] > summary::after {
+            content: '-';
+        }
+        
+        /* 隱藏答案直到展開 */
+        .answer-reveal {
+            margin-top: 8px;
+            padding: 12px;
+            background-color: #fff;
+            border: 1px dashed #cbd5e1;
+            border-radius: 4px;
+        }
+
+        /* 重點標註 */
+        mark {
+            background-color: #fef3c7;
+            color: #92400e;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        
+        .step-badge {
+            display: inline-block;
+            background-color: #e2e8f0;
+            color: #475569;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container p-4">
+    
+    <!-- 1. Header (題組頁專用) -->
+    <header class="mb-6 border-b pb-4">
+        <h1 class="text-xl font-bold text-gray-800 mb-3">IPAS 題組：業務持續管理 (BCM) 與災難復原</h1>
+        
+        <!-- 進度條 -->
+        <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
+            <span id="progress-text">進度：0 / 4</span>
+            <span id="completion-status" class="font-bold text-orange-600">尚未完成</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+    </header>
+
+    <!-- 2. 題組情境 (Group Context) -->
+    <section class="section-card bg-gray-50 border-l-4 border-blue-500">
+        <h3 class="font-bold text-lg mb-2 text-gray-700"><i class="fas fa-building mr-2"></i>題組背景：常青公司災難復原規劃</h3>
+        <p class="mb-2">常青公司主要的營運系統建置於北部舊有廠房內，包含：</p>
+        <ul class="list-disc list-inside mb-2 pl-4 text-sm">
+            <li><mark>200 萬元</mark>的伺服器主機、儲存媒體、網路設備</li>
+            <li>先前採購的 <mark>800 萬元</mark>可重覆安裝資訊系統軟體（可理解成「授權可再裝」，不是每次災害都要重買）</li>
+        </ul>
+        <p class="mb-2">因原廠區周邊環境不夠完善，最近 5 年因颱風與豪雨：</p>
+        <ul class="list-disc list-inside mb-2 pl-4 text-sm">
+            <li>發生 3 次系統運作中斷（停機但設備沒全毀）</li>
+            <li>發生 <mark>1 次</mark>淹水損壞所有資訊系統設備（硬體設備整批報銷）</li>
+        </ul>
+        <p>公司於南科建置的新廠年底落成，總經理要求資訊部門主管規劃長期<strong>業務持續管理 (BCM)</strong>，並評估未來若再發生障礙，<strong>復原時間目標 (RTO)</strong> 不大於 <mark>4 小時</mark>的可行方案。</p>
+    </section>
+
+    <!-- 3. Tabs 切題機制 -->
+    <div class="mb-4 border-b border-gray-200">
+        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="tabs-nav">
+            <li class="mr-2">
+                <button onclick="switchTab('q29')" class="tab-btn active inline-block p-4 rounded-t-lg" id="tab-q29">第 29 題 (BIA)</button>
+            </li>
+            <li class="mr-2">
+                <button onclick="switchTab('q30')" class="tab-btn inline-block p-4 rounded-t-lg hover:text-gray-600 hover:border-gray-300" id="tab-q30">第 30 題 (ALE)</button>
+            </li>
+            <li class="mr-2">
+                <button onclick="switchTab('q31')" class="tab-btn inline-block p-4 rounded-t-lg hover:text-gray-600 hover:border-gray-300" id="tab-q31">第 31 題 (DR)</button>
+            </li>
+            <li>
+                <button onclick="switchTab('q32')" class="tab-btn inline-block p-4 rounded-t-lg hover:text-gray-600 hover:border-gray-300" id="tab-q32">第 32 題 (Cloud)</button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 4. Tab 內容區塊 -->
+    <div id="tab-contents">
+        
+        <!-- Q29 -->
+        <div id="q29-content" class="tab-pane block">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-3">
+                <span class="inline-block px-2 py-1 text-xs font-semibold tag-mgm rounded">風險管理</span>
+                <span id="q29-status" class="text-sm text-gray-500">未作答</span>
+            </div>
+            
+            <!-- Question -->
+            <div class="mb-4">
+                <h3 class="text-lg font-bold mb-3">29. 業務持續管理的一大重點是業務衝擊分析 (BIA)，下列何者「並非」BIA 後能達成的目標？</h3>
+                <form id="form-q29">
+                    <label class="option-label">
+                        <input type="radio" name="q29" value="A" class="option-input">
+                        <span>(A) 計算失能可能造成的衝擊和損失，評估可能的損失幫助爭取改進預算</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q29" value="B" class="option-input">
+                        <span>(B) 分析出外部攻擊威脅與內部系統弱點，以供研擬後續的防護機制</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q29" value="C" class="option-input">
+                        <span>(C) 記錄下使用哪些流程/活動對組織產生衝擊，以及如何快速恢復</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q29" value="D" class="option-input">
+                        <span>(D) 採用風險分擔 (Risk sharing) 時，讓公司知道需要買什麼保險與額度才能安心</span>
+                    </label>
+                </form>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-2 mb-4">
+                <button onclick="submitAnswer('q29')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow">提交</button>
+                <button onclick="resetQuestion('q29')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded shadow">重作</button>
+            </div>
+
+            <!-- Feedback -->
+            <div id="feedback-q29" class="hidden p-4 rounded mb-4"></div>
+
+            <!-- Explain -->
+            <div id="explain-q29" class="hidden border-t pt-4 mt-4">
+                <h4 class="font-bold text-lg mb-2 text-gray-800">解析與詳解</h4>
+                
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="step-badge">第一步</span> 找關鍵字</div>
+                    <ul class="list-disc list-inside text-sm">
+                        <li><strong>BCM（業務持續管理）</strong>：題組主軸是「公司遇到災害怎麼不中斷」。</li>
+                        <li><strong>BIA（業務衝擊分析）</strong>：題目問 BIA 的目的。</li>
+                        <li><strong>並非</strong>：要選出「不是」BIA 在做的事。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="step-badge">第二步</span> 白話翻譯</div>
+                    <p class="text-sm">BIA 就像是做體檢問：「如果你的手斷了，會對工作造成什麼影響？多久要接回去？」而不是在問：「這把刀是誰拿的？為什麼會有刀？」（那是威脅分析）。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="step-badge">第三步</span> 解題思路與法條定義</div>
+                    <p class="text-sm mb-1"><strong>BIA 定義：</strong>識別關鍵業務流程，評估其中斷帶來的衝擊（Impact），並設定恢復目標（RTO/RPO）。</p>
+                    <p class="text-sm"><strong>風險評估 (Risk Assessment) 定義：</strong>識別資產的威脅 (Threats) 與弱點 (Vulnerabilities)，計算發生機率。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="step-badge">第四步</span> 選項分析</div>
+                    <ul class="list-disc list-inside text-sm">
+                        <li>(A) <span class="text-green-600">正確</span>：計算衝擊與損失是 BIA 核心。</li>
+                        <li>(B) <span class="text-red-600">錯誤（選這個）</span>：分析「攻擊威脅」與「系統弱點」是<strong>風險評估</strong>或弱點掃描的工作，不是 BIA。</li>
+                        <li>(C) <span class="text-green-600">正確</span>：記錄流程衝擊與恢復順序是 BIA 產出。</li>
+                        <li>(D) <span class="text-green-600">正確</span>：損失估算可協助決定保險額度（風險轉移/分擔）。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="tag-mgm px-1 rounded text-xs mr-1">記憶口訣</span></div>
+                    <p class="text-sm font-bold text-blue-700">BIA 兩件事：停了賠多少？要多快救回？</p>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="tag-sec px-1 rounded text-xs mr-1">常見陷阱與心理盲點</span></div>
+                    <p class="text-sm">
+                        考生容易把「所有跟資安有關的分析」都混在一起。記得：看到<strong>「弱點」、「攻擊」、「駭客」</strong>，通常是風險評估；看到<strong>「損失金額」、「恢復時間」、「優先順序」</strong>，才是 BIA。
+                    </p>
+                </div>
+            </div>
+
+            <!-- SelfCheck -->
+            <div id="check-q29" class="hidden mt-4">
+                <details>
+                    <summary>自我檢測：一句話釐清</summary>
+                    <div class="answer-reveal text-sm">
+                        <strong>問：</strong>BIA 最關注哪兩個指標？<br>
+                        <strong>答：</strong>損失金額（衝擊程度）與恢復時間 (RTO/RPO)。
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- Q30 -->
+        <div id="q30-content" class="tab-pane hidden">
+            <div class="flex justify-between items-center mb-3">
+                <span class="inline-block px-2 py-1 text-xs font-semibold tag-mgm rounded">風險量化</span>
+                <span id="q30-status" class="text-sm text-gray-500">未作答</span>
+            </div>
+            
+            <div class="mb-4">
+                <h3 class="text-lg font-bold mb-3">30. 針對近年來的系統服務障礙記錄，原廠房資訊系統的預期年度損失 (ALE) 為多少？</h3>
+                <form id="form-q30">
+                    <label class="option-label">
+                        <input type="radio" name="q30" value="A" class="option-input">
+                        <span>(A) $10,000,000</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q30" value="B" class="option-input">
+                        <span>(B) $2,500,000</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q30" value="C" class="option-input">
+                        <span>(C) $1,600,000</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q30" value="D" class="option-input">
+                        <span>(D) $400,000</span>
+                    </label>
+                </form>
+            </div>
+
+            <div class="flex gap-2 mb-4">
+                <button onclick="submitAnswer('q30')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow">提交</button>
+                <button onclick="resetQuestion('q30')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded shadow">重作</button>
+            </div>
+
+            <div id="feedback-q30" class="hidden p-4 rounded mb-4"></div>
+
+            <div id="explain-q30" class="hidden border-t pt-4 mt-4">
+                <h4 class="font-bold text-lg mb-2 text-gray-800">解析與詳解</h4>
+                
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="step-badge">第一步</span> 找關鍵字</div>
+                    <ul class="list-disc list-inside text-sm">
+                        <li><strong>ALE</strong>：預期年度損失。</li>
+                        <li><strong>設備 200 萬</strong>：硬體損失。</li>
+                        <li><strong>軟體 800 萬</strong>：可重覆安裝（不會損失）。</li>
+                        <li><strong>5 年 1 次</strong>：發生頻率。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="step-badge">第二步</span> 原理與規則（公式）</div>
+                    <p class="text-sm">ALE (年損失) = SLE (單次損失) × ARO (年發生率)</p>
+                    <p class="text-sm bg-gray-100 p-2 rounded mt-1">生活例子：你每 5 年會掉一支 2 萬塊的手機。平均一年損失多少？<br>20,000 ÷ 5 = 4,000 元/年。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="step-badge">第三步</span> 解題步驟</div>
+                    <ol class="list-decimal list-inside text-sm">
+                        <li><strong>算 ARO</strong>：5 年發生 1 次 → 1 ÷ 5 = <mark>0.2 次/年</mark>。</li>
+                        <li><strong>算 SLE</strong>：軟體可重裝不賠，只賠硬體 → <mark>2,000,000 元</mark>。</li>
+                        <li><strong>算 ALE</strong>：2,000,000 × 0.2 = <mark>400,000 元</mark>。</li>
+                    </ol>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="tag-sec px-1 rounded text-xs mr-1">常見陷阱與避坑指南</span></div>
+                    <ul class="list-disc list-inside text-sm">
+                        <li><strong>陷阱一</strong>：把 800 萬軟體也加進去算（變成 1000 萬 × 0.2 = 200 萬）。<br>→ <strong>避坑</strong>：題目說「可重覆安裝」就是暗示不要算錢。</li>
+                        <li><strong>陷阱二</strong>：忘記把 5 年 1 次除開，直接用 1 次算。<br>→ <strong>避坑</strong>：ALE 的 A 是 Annual（每年），一定要除以年數。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="check-q30" class="hidden mt-4">
+                <details>
+                    <summary>自我檢測：舉一反三（先想再看答案）</summary>
+                    <div class="answer-reveal text-sm">
+                        <strong>問：</strong>若變成 10 年發生 1 次，ALE 變多少？<br>
+                        <strong>答：</strong>ARO = 0.1，ALE = 200萬 × 0.1 = 20 萬元。
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- Q31 -->
+        <div id="q31-content" class="tab-pane hidden">
+            <div class="flex justify-between items-center mb-3">
+                <span class="inline-block px-2 py-1 text-xs font-semibold tag-sec rounded">災難復原技術</span>
+                <span id="q31-status" class="text-sm text-gray-500">未作答</span>
+            </div>
+            
+            <div class="mb-4">
+                <h3 class="text-lg font-bold mb-3">31. 為符合持續營業需求，考量增建異地備援；在不考量建置成本下，何者最佳？</h3>
+                <form id="form-q31">
+                    <label class="option-label">
+                        <input type="radio" name="q31" value="A" class="option-input">
+                        <span>(A) 冷備援 (Cold Site)</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q31" value="B" class="option-input">
+                        <span>(B) 暖備援 (Warm Site)</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q31" value="C" class="option-input">
+                        <span>(C) 熱備援 (Hot Site)</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q31" value="D" class="option-input">
+                        <span>(D) 全備援 (Mirrored Site)</span>
+                    </label>
+                </form>
+            </div>
+
+            <div class="flex gap-2 mb-4">
+                <button onclick="submitAnswer('q31')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow">提交</button>
+                <button onclick="resetQuestion('q31')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded shadow">重作</button>
+            </div>
+
+            <div id="feedback-q31" class="hidden p-4 rounded mb-4"></div>
+
+            <div id="explain-q31" class="hidden border-t pt-4 mt-4">
+                <h4 class="font-bold text-lg mb-2 text-gray-800">解析與詳解</h4>
+                
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="step-badge">第一步</span> 找關鍵字</div>
+                    <ul class="list-disc list-inside text-sm">
+                        <li><strong>RTO 不大於 4 小時</strong>：要求恢復速度極快。</li>
+                        <li><strong>不考量成本</strong>：選最強的就對了。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="step-badge">第二步</span> 白話翻譯與生活例子</div>
+                    <p class="text-sm mb-2"><strong>冷備援 (Cold)</strong>：只租了一個空倉庫，出事了才去買電腦、拉網路。（像買空屋，要裝潢才能住）</p>
+                    <p class="text-sm mb-2"><strong>暖備援 (Warm)</strong>：倉庫裡有舊電腦和網路，但資料要從備份倒進去。（像有家具的房子，但要打掃整理）</p>
+                    <p class="text-sm mb-2"><strong>熱備援 (Hot)</strong>：電腦開著等你，資料有定時同步，人來就能用。（像飯店，隨時入住）</p>
+                    <p class="text-sm"><strong>全備援 (Mirrored)</strong>：兩邊一模一樣同步運作，一邊掛了另一邊無縫接軌。（像雙胞胎替身）</p>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="step-badge">第三步</span> 選項分析</div>
+                    <p class="text-sm">
+                        題目要求 RTO ≤ 4 小時且不計成本。雖然 (C) 熱備援通常也能達到，但 (D) <strong>全備援 (Mirrored)</strong> 幾乎是零中斷，恢復能力最佳，最符合題目「最佳」的要求。
+                    </p>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="tag-mgm px-1 rounded text-xs mr-1">記憶口訣</span></div>
+                    <p class="text-sm font-bold text-blue-700">冷慢、暖中、熱快、鏡像最快。</p>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="tag-sec px-1 rounded text-xs mr-1">觸類旁通（舉一反三）</span></div>
+                    <p class="text-sm">如果題目改成「預算有限，但希望一週內恢復」，那就選 (A) 冷備援。如果題目是「RTO 24 小時」，(B) 暖備援通常是 CP 值最高的選擇。</p>
+                </div>
+            </div>
+
+            <div id="check-q31" class="hidden mt-4">
+                <details>
+                    <summary>自我檢測：RTO 對應（先想再看答案）</summary>
+                    <div class="answer-reveal text-sm">
+                        <strong>問：</strong>如果公司沒預算，只能接受 RTO = 1 週，該選什麼？<br>
+                        <strong>答：</strong>冷備援 (Cold Site)。
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <!-- Q32 -->
+        <div id="q32-content" class="tab-pane hidden">
+            <div class="flex justify-between items-center mb-3">
+                <div class="flex gap-1">
+                    <span class="inline-block px-2 py-1 text-xs font-semibold tag-iso rounded">ISO/CNS</span>
+                    <span class="inline-block px-2 py-1 text-xs font-semibold tag-net rounded">雲端安全</span>
+                </div>
+                <span id="q32-status" class="text-sm text-gray-500">未作答</span>
+            </div>
+            
+            <div class="mb-4">
+                <h3 class="text-lg font-bold mb-3">32. (複選) 選用雲服務商 (CSP) 作為備援時，必須考量哪些安全要素？</h3>
+                <div class="text-sm text-gray-500 mb-2">* 請勾選所有正確選項</div>
+                <form id="form-q32">
+                    <label class="option-label">
+                        <input type="checkbox" name="q32" value="A" class="option-input">
+                        <span>(A) 評估哪家 CSP 的 SaaS (Software as a Service) 最符合需求與效益</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q32" value="B" class="option-input">
+                        <span>(B) 評估 CSP 的 SLO、RTO、RPO 是否符合災難復原計畫</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q32" value="C" class="option-input">
+                        <span>(C) 確認 CSP 的安全過程及控制措施可符合實體與環境安全要求</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="checkbox" name="q32" value="D" class="option-input">
+                        <span>(D) 確認 CSP 的網路及通訊通道安全，並可預防不同雲端客戶 (CSC) 間未授權通訊</span>
+                    </label>
+                </form>
+            </div>
+
+            <div class="flex gap-2 mb-4">
+                <button onclick="submitAnswer('q32')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow">提交</button>
+                <button onclick="resetQuestion('q32')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded shadow">重作</button>
+            </div>
+
+            <div id="feedback-q32" class="hidden p-4 rounded mb-4"></div>
+
+            <div id="explain-q32" class="hidden border-t pt-4 mt-4">
+                <h4 class="font-bold text-lg mb-2 text-gray-800">解析與詳解</h4>
+                
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="step-badge">第一步</span> 找關鍵字</div>
+                    <ul class="list-disc list-inside text-sm">
+                        <li><strong>安全規範</strong>：CNS 19086, CNS 27018, CNS 27002。</li>
+                        <li><strong>必須考量</strong>：針對「災難復原」與「安全」。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="step-badge">第二步</span> 選項分析</div>
+                    <ul class="list-disc list-inside text-sm">
+                        <li>(A) <span class="text-red-600">錯誤</span>：這是「軟體好不好用」、「划不划算」的採購效益評估，不是安全規範重點。</li>
+                        <li>(B) <span class="text-green-600">正確</span>：SLO/RTO/RPO 是災難復原的核心指標（SLA 相關）。</li>
+                        <li>(C) <span class="text-green-600">正確</span>：實體安全（機房會不會進水、失火）是 CSP 的責任，客戶必須確認。</li>
+                        <li>(D) <span class="text-green-600">正確</span>：雲端是共用的，必須確認「多租戶隔離」，別讓其他客戶（隔壁鄰居）偷連過來。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="tag-sec px-1 rounded text-xs mr-1">心理盲點</span></div>
+                    <p class="text-sm">
+                        看到雲端題目，直覺容易去選「哪個服務最好用」(A)，但題目問的是「安全要素」。考試時要切換成「資安稽核員」的腦袋，而不是「採購經理」。
+                    </p>
+                </div>
+
+                <div class="explain-segment">
+                    <div class="explain-title"><span class="tag-iso px-1 rounded text-xs mr-1">法條與標準補充</span></div>
+                    <p class="text-sm">
+                        <strong>CNS 19086</strong>：雲端服務水準協議 (SLA) 架構。<br>
+                        <strong>ISO/IEC 27018</strong>：雲端個人資料 (PII) 保護。
+                    </p>
+                </div>
+            </div>
+            
+            <div id="check-q32" class="hidden mt-4">
+                <details>
+                    <summary>自我檢測：雲端關鍵字（先想再看答案）</summary>
+                    <div class="answer-reveal text-sm">
+                        <strong>問：</strong>ISO/IEC 27018 主要是在保護雲端的什麼？<br>
+                        <strong>答：</strong>公有雲上的個人資料 (PII)。
+                    </div>
+                </details>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // 題目資料與正確答案
+    const correctAnswers = {
+        q29: ['B'],
+        q30: ['D'],
+        q31: ['D'],
+        q32: ['B', 'C', 'D']
+    };
+
+    // 狀態追蹤
+    const userStatus = {
+        q29: { submitted: false, isCorrect: false },
+        q30: { submitted: false, isCorrect: false },
+        q31: { submitted: false, isCorrect: false },
+        q32: { submitted: false, isCorrect: false }
+    };
+
+    // Tab 切換功能
+    function switchTab(tabId) {
+        // 隱藏所有內容
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('block'));
+        
+        // 顯示選中內容
+        document.getElementById(tabId + '-content').classList.remove('hidden');
+        document.getElementById(tabId + '-content').classList.add('block');
+
+        // 更新 Tab 樣式
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active', 'text-blue-600', 'border-blue-600'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.add('hover:text-gray-600', 'hover:border-gray-300'));
+        
+        const activeBtn = document.getElementById('tab-' + tabId);
+        activeBtn.classList.add('active', 'text-blue-600', 'border-blue-600');
+        activeBtn.classList.remove('hover:text-gray-600', 'hover:border-gray-300');
+    }
+
+    // 提交答案邏輯
+    function submitAnswer(qId) {
+        const form = document.getElementById('form-' + qId);
+        const feedback = document.getElementById('feedback-' + qId);
+        const explain = document.getElementById('explain-' + qId);
+        const check = document.getElementById('check-' + qId);
+        const statusSpan = document.getElementById(qId + '-status');
+        
+        // 獲取使用者選擇
+        const formData = new FormData(form);
+        const userSelection = formData.getAll(qId);
+
+        if (userSelection.length === 0) {
+            alert("請先選擇答案！");
+            return;
+        }
+
+        // 判斷對錯 (陣列比對)
+        const correct = correctAnswers[qId];
+        // 排序後轉字串比對，確保複選順序不影響結果
+        const isCorrect = JSON.stringify(userSelection.sort()) === JSON.stringify(correct.sort());
+
+        // 更新狀態
+        userStatus[qId].submitted = true;
+        userStatus[qId].isCorrect = isCorrect;
+
+        // 顯示回饋
+        feedback.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+        
+        let reason = "";
+        if (qId === 'q29') reason = "BIA 分析的是業務衝擊與恢復優先順序，而非攻擊與弱點。";
+        if (qId === 'q30') reason = "ALE = 200萬 × 0.2 (5年1次) = 40萬。";
+        if (qId === 'q31') reason = "不考量成本下，鏡像全備援 (Mirrored) 恢復最快，符合 RTO 需求。";
+        if (qId === 'q32') reason = "雲端備援需重視 SLA 指標、實體環境控制與多租戶隔離安全。";
+
+        if (isCorrect) {
+            feedback.classList.add('bg-green-100', 'text-green-800');
+            feedback.innerHTML = `<strong><i class="fas fa-check-circle"></i> 判定：正確</strong><br>${reason}`;
+            statusSpan.textContent = "已提交：正確";
+            statusSpan.className = "text-sm text-green-600 font-bold";
+            // 標記 Tab 完成
+            document.getElementById('tab-' + qId).innerHTML += ' <i class="fas fa-check text-green-500 text-xs"></i>';
+        } else {
+            feedback.classList.add('bg-red-100', 'text-red-800');
+            feedback.innerHTML = `<strong><i class="fas fa-times-circle"></i> 判定：錯誤</strong><br>正確答案：${correct.join('、')}<br>${reason}`;
+            statusSpan.textContent = "已提交：錯誤";
+            statusSpan.className = "text-sm text-red-600 font-bold";
+        }
+
+        // 顯示解析
+        explain.classList.remove('hidden');
+        check.classList.remove('hidden');
+
+        // 鎖定表單
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach(input => input.disabled = true);
+
+        // 更新全域進度
+        updateProgress();
+    }
+
+    // 重作邏輯
+    function resetQuestion(qId) {
+        const form = document.getElementById('form-' + qId);
+        const feedback = document.getElementById('feedback-' + qId);
+        const explain = document.getElementById('explain-' + qId);
+        const check = document.getElementById('check-' + qId);
+        const statusSpan = document.getElementById(qId + '-status');
+
+        // 重置表單
+        form.reset();
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach(input => input.disabled = false);
+
+        // 隱藏區塊
+        feedback.classList.add('hidden');
+        explain.classList.add('hidden');
+        check.classList.add('hidden');
+        
+        // 隱藏自我檢測答案 (如果已展開)
+        check.querySelector('details').removeAttribute('open');
+
+        // 重置狀態
+        statusSpan.textContent = "未作答";
+        statusSpan.className = "text-sm text-gray-500";
+        
+        // 移除 Tab 完成標記 (保持原文字)
+        const tabBtn = document.getElementById('tab-' + qId);
+        // 簡單處理：把 innerHTML 設回原始文字
+        if (qId === 'q29') tabBtn.textContent = "第 29 題 (BIA)";
+        if (qId === 'q30') tabBtn.textContent = "第 30 題 (ALE)";
+        if (qId === 'q31') tabBtn.textContent = "第 31 題 (DR)";
+        if (qId === 'q32') tabBtn.textContent = "第 32 題 (Cloud)";
+
+        userStatus[qId].submitted = false;
+        userStatus[qId].isCorrect = false;
+
+        // 更新全域進度
+        updateProgress();
+    }
+
+    // 更新進度條
+    function updateProgress() {
+        const total = 4;
+        const submittedCount = Object.values(userStatus).filter(s => s.submitted).length;
+        const percent = (submittedCount / total) * 100;
+
+        document.getElementById('progress-bar').style.width = percent + '%';
+        document.getElementById('progress-text').textContent = `進度：${submittedCount} / ${total}`;
+
+        const statusText = document.getElementById('completion-status');
+        if (submittedCount === total) {
+            statusText.textContent = "本題組已完成";
+            statusText.className = "font-bold text-green-600";
+        } else {
+            statusText.textContent = "尚未完成";
+            statusText.className = "font-bold text-orange-600";
+        }
+    }
+
+    // 初始化：預設開啟第一題
+    window.onload = function() {
+        switchTab('q29');
+    };
+</script>
+
+</body>
+</html>

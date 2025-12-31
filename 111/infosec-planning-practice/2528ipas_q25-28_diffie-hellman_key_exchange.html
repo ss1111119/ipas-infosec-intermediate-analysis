@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS 題組：Diffie-Hellman 金鑰交換 (Q25-Q28)</title>
+    <!-- 使用 Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 基礎設定 --- */
+        :root {
+            --primary-bg: #f9f9f9;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-secondary: #666666;
+            --border-color: #dddddd;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --highlight-bg: #f0f4f8;
+            
+            /* Tag Colors (Fixed) */
+            --tag-law: #7f8c8d;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            font-size: 16px; /* Base font size */
+            line-height: 1.6;
+        }
+
+        /* --- 版型規範 (Max-width 960px, Centered) --- */
+        .container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header --- */
+        .group-header {
+            padding: 20px;
+            background-color: #fff;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .group-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #2c3e50;
+        }
+
+        .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 120px;
+        }
+
+        .progress-bar-bg {
+            flex-grow: 1;
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--tag-net);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .completion-status {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+        .completion-status.done {
+            color: var(--success-color);
+        }
+
+        /* --- Context (Global & Local) --- */
+        .context-block {
+            padding: 16px;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--tag-net);
+            margin: 0 20px 20px 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .context-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--tag-net);
+            display: block;
+        }
+
+        .context-content img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+
+        /* --- Tabs --- */
+        .tabs-nav {
+            display: flex;
+            background-color: #eee;
+            padding: 0 20px;
+            gap: 4px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background-color: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            border-radius: 8px 8px 0 0;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .tab-btn:hover {
+            background-color: #d0d0d0;
+        }
+
+        .tab-btn.active {
+            background-color: #fff;
+            color: var(--tag-net);
+            font-weight: 700;
+            border-bottom: 3px solid var(--tag-net);
+        }
+
+        .tab-content {
+            display: none; /* JS toggles this */
+            padding: 20px;
+            min-height: 400px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* --- Question Layout --- */
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .q-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .q-status {
+            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            background-color: #eee;
+            color: #666;
+        }
+        .q-status.correct { background-color: #d5f5e3; color: var(--success-color); }
+        .q-status.wrong { background-color: #fadbd8; color: var(--error-color); }
+
+        .question-text {
+            font-size: 16px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            border-color: #bdc3c7;
+            background-color: #fbfbfb;
+        }
+
+        .option-input {
+            margin-top: 4px;
+            margin-right: 12px;
+            accent-color: var(--tag-net);
+            transform: scale(1.2);
+        }
+
+        /* --- Buttons --- */
+        .action-area {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit {
+            background-color: var(--tag-net);
+            color: #fff;
+        }
+        
+        .btn-retry {
+            background-color: #95a5a6;
+            color: #fff;
+            display: none; /* Hidden by default */
+        }
+
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- Feedback --- */
+        .feedback-box {
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            display: none; /* JS toggles */
+        }
+        .feedback-box.correct { background-color: #d5f5e3; border: 1px solid var(--success-color); }
+        .feedback-box.wrong { background-color: #fadbd8; border: 1px solid var(--error-color); }
+
+        .fb-title { font-weight: 700; margin-bottom: 4px; display: block; }
+        .fb-content { font-size: 16px; }
+
+        /* --- Explain & SelfCheck --- */
+        details {
+            margin-bottom: 16px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 12px 16px;
+            background-color: #f1f2f6;
+            cursor: pointer;
+            font-weight: 700;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        summary::after {
+            content: '+';
+            font-size: 20px;
+        }
+        
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .details-content {
+            padding: 16px;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+        }
+
+        /* 解析段落卡 */
+        .explain-section {
+            background-color: #f8f9fa; /* 淺色系 */
+            padding: 12px;
+            margin-bottom: 12px;
+            border-left: 3px solid #ccc;
+            border-radius: 4px;
+        }
+        .explain-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 16px;
+        }
+        
+        /* 標籤規範 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 12px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt  { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        mark {
+            background-color: #fff3cd;
+            color: inherit;
+            padding: 0 2px;
+        }
+        
+        /* Self Check specific styles */
+        .self-check-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .self-check-list li {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .answer-reveal {
+            margin-top: 8px;
+            padding: 8px;
+            background-color: #f0f4f8;
+            border-radius: 4px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 1. Header -->
+    <header class="group-header">
+        <div class="group-title">題組：Diffie-Hellman 金鑰交換流程與攻擊防禦</div>
+        <div class="progress-section">
+            <div class="progress-text">進度：<span id="progress-count">0</span> / 4 題</div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+            </div>
+            <div class="completion-status" id="completion-status">尚未完成</div>
+        </div>
+    </header>
+
+    <!-- 2. Group Context (Always Visible in Group View logic, but here inside body as shared context) -->
+    <div class="context-block">
+        <span class="context-title">【題組背景】</span>
+        <div class="context-content">
+            <p>迪菲-赫爾曼密鑰交換（Diffie-Hellman Key Exchange, D-H）（一種讓雙方在公開通道也能「協議出同一把密鑰」的方法）可以讓通訊雙方在公開通道上建立共同金鑰 K，並在後續通訊中作為共同金鑰來加密訊息內容。</p>
+            <p><strong>核心關係式：(g^a mod p)^b mod p = (g^b mod p)^a mod p</strong></p>
+            <ul>
+                <li><strong>g</strong>：根數（base）（大家都知道的起始數）</li>
+                <li><strong>p</strong>：質數（prime）（用來取餘數的尺）</li>
+                <li><strong>a、b</strong>：私鑰（秘密正整數值）（各自偷偷選的數字）</li>
+                <li><strong>mod</strong>：取餘數（modulus）</li>
+            </ul>
+            <p>下圖為 Diffie-Hellman 金鑰交換流程示意圖：</p>
+            <img src="https://i.meee.com.tw/j1YdvXZ.jpg" alt="Diffie-Hellman 流程圖" style="max-width:100%; border-radius: 4px;">
+        </div>
+    </div>
+
+    <!-- 3. Tabs -->
+    <nav class="tabs-nav">
+        <button class="tab-btn active" onclick="switchTab(0)">第25題</button>
+        <button class="tab-btn" onclick="switchTab(1)">第26題</button>
+        <button class="tab-btn" onclick="switchTab(2)">第27題</button>
+        <button class="tab-btn" onclick="switchTab(3)">第28題</button>
+    </nav>
+
+    <!-- 4. Tab Contents -->
+
+    <!-- Q25 -->
+    <div id="tab-0" class="tab-content active">
+        <div class="q-header">
+            <span class="q-title">第 25 題</span>
+            <span class="q-status" id="status-q25">未作答</span>
+        </div>
+        <!-- 本題無額外情境，不顯示 Context -->
+        
+        <div class="question-text">
+            假設小美和小明協議使用 <span class="tag-sec">g=5</span>、<span class="tag-sec">p=11</span>，小美私鑰 <span class="tag-sec">a=3</span>，小明私鑰 <span class="tag-sec">b=4</span>。請問共同金鑰 K 為何？
+        </div>
+
+        <div class="options-group">
+            <label class="option-label"><input type="radio" name="q25" value="A" class="option-input"> (A) K=1</label>
+            <label class="option-label"><input type="radio" name="q25" value="B" class="option-input"> (B) K=2</label>
+            <label class="option-label"><input type="radio" name="q25" value="C" class="option-input"> (C) K=3</label>
+            <label class="option-label"><input type="radio" name="q25" value="D" class="option-input"> (D) K=4</label>
+        </div>
+
+        <div class="action-area">
+            <button class="btn btn-submit" onclick="submitAnswer('q25')">提交</button>
+            <button class="btn btn-retry" id="retry-q25" onclick="resetQuestion('q25')">重作本題</button>
+        </div>
+
+        <div id="feedback-q25" class="feedback-box">
+            <span class="fb-title" id="fb-title-q25"></span>
+            <span class="fb-content" id="fb-content-q25"></span>
+        </div>
+
+        <details>
+            <summary>顯示解析</summary>
+            <div class="details-content">
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-sec">第一步</span>找關鍵字</span>
+                    <p><strong>Diffie-Hellman / D-H</strong>：考「公開通道協議出共同秘密」。<br>
+                    <strong>g、p、a、b、mod</strong>：必須會做「次方取餘數」計算。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-sec">第二步</span>白話翻譯</span>
+                    <p>兩個人用 D-H，大家知道 g=5、p=11，但各自偷偷選私鑰（小美3、小明4）。他們會先算「公開值」交換，最後各自再算一次，就會得到同一個秘密數字 K。題目要你把 K 算出來。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-sec">第三步</span>解題思路（計算步驟）</span>
+                    <p>
+                        <strong>Step 1：算公開值</strong><br>
+                        小美公開值 $A = g^a \mod p = 5^3 \mod 11 = 125 \mod 11 = 4$<br>
+                        小明公開值 $B = g^b \mod p = 5^4 \mod 11 = 625 \mod 11 = 9$
+                    </p>
+                    <p>
+                        <strong>Step 2：算共同金鑰 K</strong><br>
+                        小美算：$K = B^a \mod p = 9^3 \mod 11$<br>
+                        ($9^2 = 81 \rightarrow 81 \mod 11 = 4$; $4 \times 9 = 36 \rightarrow 36 \mod 11 = 3$)<br>
+                        故 <strong>K = 3</strong>
+                    </p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-sec">第四步</span>選項分析</span>
+                    <p>(A) 錯，算出來是 3。<br>
+                    (B) 錯。<br>
+                    (C) <strong>正確</strong>。<br>
+                    (D) 錯。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-sec">常見陷阱</span>心理盲點</span>
+                    <p><strong>陷阱</strong>：以為算出公開值 A 或 B 就是答案。其實還需要用對方的公開值加上自己的私鑰，才能算出最終的 K。</p>
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>自我檢測</summary>
+            <div class="details-content">
+                <ul class="self-check-list">
+                    <li>
+                        若 $g=5, p=11$ 不變，但 $a=2, b=4$，K 為多少？
+                        <div class="answer-reveal">
+                            <details><summary>點擊查看答案</summary>
+                            A=3, B=9, K=4 (計算：9^2 mod 11 = 81 mod 11 = 4)
+                            </details>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <!-- Q26 -->
+    <div id="tab-1" class="tab-content">
+        <div class="q-header">
+            <span class="q-title">第 26 題</span>
+            <span class="q-status" id="status-q26">未作答</span>
+        </div>
+
+        <div class="question-text">
+            若第三人小華獲知公開通道中的通訊內容，在私鑰未外洩且內容未遭攻擊/竄改下，關於三人可獲取的資訊，下列何者正確？
+        </div>
+
+        <div class="options-group">
+            <label class="option-label"><input type="radio" name="q26" value="A" class="option-input"> (A) g 和 p：小美知道、小明知道、小華不知道</label>
+            <label class="option-label"><input type="radio" name="q26" value="B" class="option-input"> (B) a：小美知道、小明知道、小華不知道</label>
+            <label class="option-label"><input type="radio" name="q26" value="C" class="option-input"> (C) b：小美不知道、小明知道、小華不知道</label>
+            <label class="option-label"><input type="radio" name="q26" value="D" class="option-input"> (D) K：小美知道、小明不知道、小華知道</label>
+        </div>
+
+        <div class="action-area">
+            <button class="btn btn-submit" onclick="submitAnswer('q26')">提交</button>
+            <button class="btn btn-retry" id="retry-q26" onclick="resetQuestion('q26')">重作本題</button>
+        </div>
+
+        <div id="feedback-q26" class="feedback-box">
+            <span class="fb-title" id="fb-title-q26"></span>
+            <span class="fb-content" id="fb-content-q26"></span>
+        </div>
+
+        <details>
+            <summary>顯示解析</summary>
+            <div class="details-content">
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-net">第一步</span>找關鍵字</span>
+                    <p><strong>公開通道 / 第三人</strong>：考「攻擊者能看到什麼、看不到什麼」。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-net">第二步</span>白話翻譯</span>
+                    <p>如果旁邊有第三個人只能「偷看公開通道」，而且沒有人把私鑰洩漏，那第三個人到底能知道哪些？題目要你判斷資訊可得性。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-net">第三步</span>解題思路（原理與規則）</span>
+                    <p><strong>公開資訊</strong>：g、p、A、B（在公開通道交換的內容）。<br>
+                    <strong>私密資訊</strong>：a、b（各自私鑰）、K（共同金鑰，理想狀態下攻擊者無法推算）。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-net">第四步</span>選項分析</span>
+                    <p>(A) 錯，g 和 p 是公開的，小華知道。<br>
+                    (B) 錯，a 是小美私鑰，小明不該知道。<br>
+                    (C) <strong>正確</strong>，b 是小明私鑰，只在小明手上。<br>
+                    (D) 錯，K 是協議結果，雙方皆知，小華不知。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-net">記憶口訣</span></span>
+                    <p><strong>g、p 公開；a、b 私藏；K 兩邊同樣</strong>。</p>
+                </div>
+            </div>
+        </details>
+        
+        <details>
+            <summary>自我檢測</summary>
+            <div class="details-content">
+                <ul class="self-check-list">
+                    <li>
+                        在 D-H 中，公開通道「一定」會出現哪些值？
+                        <div class="answer-reveal">
+                            <details><summary>點擊查看答案</summary>g, p, A, B</details>
+                        </div>
+                    </li>
+                    <li>
+                        哪些值絕對不該出現在公開通道？
+                        <div class="answer-reveal">
+                            <details><summary>點擊查看答案</summary>a, b, K</details>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <!-- Q27 -->
+    <div id="tab-2" class="tab-content">
+        <div class="q-header">
+            <span class="q-title">第 27 題</span>
+            <span class="q-status" id="status-q27">未作答</span>
+        </div>
+
+        <div class="question-text">
+            若小華想要得知共同金鑰 K，他可以透過何種攻擊方式得知？
+        </div>
+
+        <div class="options-group">
+            <label class="option-label"><input type="radio" name="q27" value="A" class="option-input"> (A) 跨網站指令碼攻擊（XSS）</label>
+            <label class="option-label"><input type="radio" name="q27" value="B" class="option-input"> (B) 分散式阻斷服務（DDoS）</label>
+            <label class="option-label"><input type="radio" name="q27" value="C" class="option-input"> (C) SQL 注入（SQL Injection）</label>
+            <label class="option-label"><input type="radio" name="q27" value="D" class="option-input"> (D) 中間人攻擊（MitM）</label>
+        </div>
+
+        <div class="action-area">
+            <button class="btn btn-submit" onclick="submitAnswer('q27')">提交</button>
+            <button class="btn btn-retry" id="retry-q27" onclick="resetQuestion('q27')">重作本題</button>
+        </div>
+
+        <div id="feedback-q27" class="feedback-box">
+            <span class="fb-title" id="fb-title-q27"></span>
+            <span class="fb-content" id="fb-content-q27"></span>
+        </div>
+
+        <details>
+            <summary>顯示解析</summary>
+            <div class="details-content">
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-sec">第一步</span>找關鍵字</span>
+                    <p><strong>中間人攻擊（MitM）</strong>：考 D-H 的典型弱點（若不驗證身分，會被插隊冒充）。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-sec">第二步</span>白話翻譯</span>
+                    <p>第三個人如果真的想拿到 K，需要做哪種攻擊？題目要你抓到 D-H 面對的典型攻擊型態。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-sec">第三步</span>解題思路</span>
+                    <p><strong>原理</strong>：D-H 本身只負責「協議出鑰匙」，不負責「確認你是誰」。如果攻擊者插在兩人中間，分別跟小美建立鑰匙 K1，跟小明建立鑰匙 K2，他就能解密並轉傳所有訊息。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-sec">第四步</span>選項分析</span>
+                    <p>(A) XSS：針對瀏覽器腳本，非密鑰交換協定層。<br>
+                    (B) DDoS：破壞可用性，無法竊取 K。<br>
+                    (C) SQL Injection：針對資料庫。<br>
+                    (D) <strong>正確</strong>：MitM 可讓攻擊者分別與雙方建立不同 K，進而解密通訊。</p>
+                </div>
+            </div>
+        </details>
+        
+        <details>
+            <summary>自我檢測</summary>
+            <div class="details-content">
+                <ul class="self-check-list">
+                    <li>
+                        如果不驗證身分，D-H 最容易遭遇哪種攻擊？
+                        <div class="answer-reveal">
+                            <details><summary>點擊查看答案</summary>中間人攻擊 (Man-in-the-Middle, MitM)</details>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <!-- Q28 (Multi-select) -->
+    <div id="tab-3" class="tab-content">
+        <div class="q-header">
+            <span class="q-title">第 28 題</span>
+            <span class="q-status" id="status-q28">未作答</span>
+        </div>
+
+        <div class="question-text">
+            （複選）小美和小明<mark>「無法」</mark>使用哪些方式來防止此類型的攻擊（指 MitM）？
+        </div>
+
+        <div class="options-group">
+            <label class="option-label"><input type="checkbox" name="q28" value="A" class="option-input"> (A) 交換前先驗證對方身分</label>
+            <label class="option-label"><input type="checkbox" name="q28" value="B" class="option-input"> (B) 公開雙方私鑰（a 和 b）</label>
+            <label class="option-label"><input type="checkbox" name="q28" value="C" class="option-input"> (C) 改採用 RSA 加密演算法</label>
+            <label class="option-label"><input type="checkbox" name="q28" value="D" class="option-input"> (D) 使用端點偵測及回應系統（EDR）</label>
+        </div>
+
+        <div class="action-area">
+            <button class="btn btn-submit" onclick="submitAnswer('q28')">提交</button>
+            <button class="btn btn-retry" id="retry-q28" onclick="resetQuestion('q28')">重作本題</button>
+        </div>
+
+        <div id="feedback-q28" class="feedback-box">
+            <span class="fb-title" id="fb-title-q28"></span>
+            <span class="fb-content" id="fb-content-q28"></span>
+        </div>
+
+        <details>
+            <summary>顯示解析</summary>
+            <div class="details-content">
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-mgm">第一步</span>找關鍵字</span>
+                    <p><strong>無法防止</strong>：要分辨「真正針對 MitM 的控制」vs「看起來很安全但其實不對題」。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-mgm">第二步</span>白話翻譯</span>
+                    <p>要防 MitM，哪些作法「不管用」或「方向錯了」？</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-mgm">第三步</span>解題思路（生活例子）</span>
+                    <p>生活比喻：像兩個人各自把「同一份麵糰」揉一遍（私鑰），最後都會揉成「同一種口感」（K），但旁邊看的人看不出各自揉的力道。<br>
+                    <strong>防 MitM 核心</strong>：確認對方真的是對方（例如憑證/簽章）。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-mgm">第四步</span>選項分析</span>
+                    <p>(A) 驗證身分：這是<strong>有效</strong>的防禦手段，故不選。<br>
+                    (B) <strong>無效</strong>：公開私鑰等於直接洩漏秘密，完全錯。<br>
+                    (C) <strong>無效</strong>：RSA 若不搭配憑證/簽章進行身分驗證，依然會遇到假公鑰問題。<br>
+                    (D) <strong>無效</strong>：EDR 是端點防護，不解決協定層認證問題。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-mgm">觀念補充與延伸</span></span>
+                    <p><strong>D-H vs AES</strong>：D-H 用來「協議」密鑰，AES 用來「使用」密鑰。<br>
+                    <strong>D-H vs TLS</strong>：TLS 會搭配 CA 憑證鏈來解決 D-H 的認證問題。</p>
+                </div>
+
+                <div class="explain-section">
+                    <span class="explain-title"><span class="tag tag-mgm">記憶口訣</span></span>
+                    <p><strong>防 MitM 只記一句：先驗身分，再談交換</strong>。</p>
+                </div>
+            </div>
+        </details>
+        
+        <details>
+            <summary>自我檢測</summary>
+            <div class="details-content">
+                <ul class="self-check-list">
+                    <li>
+                        若要真正防 MitM，你會在 D-H 流程上加哪一個機制？
+                        <div class="answer-reveal">
+                            <details><summary>點擊查看答案</summary>身分驗證（例如數位憑證、數位簽章）</details>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+</div>
+
+<script>
+    // --- Data & State ---
+    const questions = {
+        'q25': { type: 'single', correct: 'C', feedbackCorrect: '計算正確：9^3 mod 11 = 3。', feedbackWrong: '按 D-H 計算 K = 9^3 mod 11 = 3。' },
+        'q26': { type: 'single', correct: 'C', feedbackCorrect: '正確，私鑰 b 僅小明持有。', feedbackWrong: 'b 是小明私鑰，只有小明知道。' },
+        'q27': { type: 'single', correct: 'D', feedbackCorrect: '正確，MitM 是無驗證時的典型弱點。', feedbackWrong: '不驗證身分的 D-H 會被中間人插隊。' },
+        'q28': { type: 'multi', correct: ['B', 'C', 'D'], feedbackCorrect: '正確，這些方式皆無法防範 MitM。', feedbackWrong: '公開私鑰、單換演算法或 EDR 皆無法對症解決身分驗證問題。' }
+    };
+
+    const status = {
+        'q25': { submitted: false, isCorrect: false },
+        'q26': { submitted: false, isCorrect: false },
+        'q27': { submitted: false, isCorrect: false },
+        'q28': { submitted: false, isCorrect: false }
+    };
+
+    // --- Tab Logic ---
+    function switchTab(index) {
+        // Update Buttons
+        document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+            btn.classList.toggle('active', i === index);
+        });
+        // Update Content
+        document.querySelectorAll('.tab-content').forEach((content, i) => {
+            content.classList.toggle('active', i === index);
+        });
+    }
+
+    // --- Submission Logic ---
+    function submitAnswer(qId) {
+        const qData = questions[qId];
+        let userAns = [];
+        
+        // Get Inputs
+        if (qData.type === 'single') {
+            const selected = document.querySelector(`input[name="${qId}"]:checked`);
+            if (selected) userAns.push(selected.value);
+        } else {
+            const checked = document.querySelectorAll(`input[name="${qId}"]:checked`);
+            checked.forEach(c => userAns.push(c.value));
+        }
+
+        // Check if empty
+        if (userAns.length === 0) {
+            alert('請先選擇答案');
+            return;
+        }
+
+        // Determine Correctness
+        let isCorrect = false;
+        if (qData.type === 'single') {
+            isCorrect = userAns[0] === qData.correct;
+        } else {
+            // Multi check: Arrays must be identical (sort first)
+            const sortedUser = [...userAns].sort();
+            const sortedCorrect = [...qData.correct].sort();
+            isCorrect = JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
+        }
+
+        // Update State
+        status[qId].submitted = true;
+        status[qId].isCorrect = isCorrect;
+
+        // Render UI
+        renderFeedback(qId, isCorrect, qData);
+        updateStatusLabel(qId, isCorrect);
+        toggleInputs(qId, true); // Disable inputs
+        document.getElementById(`retry-${qId}`).style.display = 'inline-block';
+        
+        // Update Progress
+        updateProgress();
+    }
+
+    // --- Reset Logic ---
+    function resetQuestion(qId) {
+        // Reset Inputs
+        const inputs = document.querySelectorAll(`input[name="${qId}"]`);
+        inputs.forEach(input => input.checked = false);
+        
+        // Reset State
+        status[qId].submitted = false;
+        status[qId].isCorrect = false;
+
+        // Reset UI
+        toggleInputs(qId, false); // Enable inputs
+        document.getElementById(`feedback-${qId}`).style.display = 'none';
+        document.getElementById(`feedback-${qId}`).className = 'feedback-box';
+        document.getElementById(`retry-${qId}`).style.display = 'none';
+        
+        // Reset Label
+        const label = document.getElementById(`status-${qId}`);
+        label.textContent = '未作答';
+        label.className = 'q-status';
+
+        // Update Progress
+        updateProgress();
+    }
+
+    // --- Helper UI Functions ---
+    function renderFeedback(qId, isCorrect, qData) {
+        const box = document.getElementById(`feedback-${qId}`);
+        const title = document.getElementById(`fb-title-${qId}`);
+        const content = document.getElementById(`fb-content-${qId}`);
+
+        box.style.display = 'block';
+        box.className = `feedback-box ${isCorrect ? 'correct' : 'wrong'}`;
+        
+        if (isCorrect) {
+            title.textContent = '判定：正確';
+            content.textContent = qData.feedbackCorrect;
+        } else {
+            title.textContent = '判定：錯誤';
+            const ansText = Array.isArray(qData.correct) ? qData.correct.join('、') : qData.correct;
+            content.textContent = `正確答案：${ansText}。${qData.feedbackWrong}`;
+        }
+    }
+
+    function updateStatusLabel(qId, isCorrect) {
+        const label = document.getElementById(`status-${qId}`);
+        if (isCorrect) {
+            label.textContent = '已提交：正確';
+            label.classList.add('correct');
+            label.classList.remove('wrong');
+        } else {
+            label.textContent = '已提交：錯誤';
+            label.classList.add('wrong');
+            label.classList.remove('correct');
+        }
+    }
+
+    function toggleInputs(qId, disabled) {
+        const inputs = document.querySelectorAll(`input[name="${qId}"]`);
+        inputs.forEach(input => input.disabled = disabled);
+        
+        // Also disable submit button
+        const submitBtn = document.querySelector(`#tab-${getTabIndex(qId)} .btn-submit`);
+        if(submitBtn) submitBtn.disabled = disabled;
+    }
+
+    function getTabIndex(qId) {
+        const map = { 'q25': 0, 'q26': 1, 'q27': 2, 'q28': 3 };
+        return map[qId];
+    }
+
+    // --- Progress Bar ---
+    function updateProgress() {
+        const total = 4;
+        let submittedCount = 0;
+        
+        Object.values(status).forEach(s => {
+            if (s.submitted) submittedCount++;
+        });
+
+        // Update Text
+        document.getElementById('progress-count').textContent = submittedCount;
+        
+        // Update Bar
+        const percentage = (submittedCount / total) * 100;
+        document.getElementById('progress-bar').style.width = `${percentage}%`;
+
+        // Update Global Status
+        const statusText = document.getElementById('completion-status');
+        if (submittedCount === total) {
+            statusText.textContent = '本題組已完成';
+            statusText.classList.add('done');
+        } else {
+            statusText.textContent = '尚未完成';
+            statusText.classList.remove('done');
+        }
+    }
+</script>
+
+</body>
+</html>

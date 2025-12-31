@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 12 題 - ERP 系統安全評估範圍</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --base-font-size: 16px;
+            --title-font-size: 18px;
+            --small-font-size: 14px;
+            --card-padding: 16px;
+            --block-gap: 12px;
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --text-color: #333;
+            --bg-color: #f4f6f7;
+            --card-bg: #fff;
+            
+            /* Tag Colors */
+            --tag-law: #7f8c8d;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: var(--base-font-size);
+            padding: 20px;
+        }
+
+        /* Layout Container */
+        .container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--block-gap);
+        }
+
+        /* Card Style */
+        .card {
+            background: var(--card-bg);
+            padding: var(--card-padding);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--title-font-size);
+            font-weight: 700;
+        }
+
+        .status-badge {
+            font-size: var(--small-font-size);
+            padding: 4px 12px;
+            border-radius: 12px;
+            background-color: #ecf0f1;
+            color: #7f8c8d;
+        }
+
+        /* Context */
+        .context-text {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        /* Question */
+        .question-content {
+            font-size: 1.1em;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .question-list {
+            margin-bottom: 16px;
+            padding-left: 20px;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover {
+            border-color: var(--primary-color);
+            background-color: #ebf5fb;
+        }
+
+        .option-input {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Feedback */
+        .feedback {
+            display: none;
+            border-left: 5px solid;
+        }
+
+        .feedback.correct {
+            border-color: var(--success-color);
+            background-color: #e8f8f5;
+        }
+
+        .feedback.error {
+            border-color: var(--error-color);
+            background-color: #fdedec;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        /* Explain */
+        .explain-toggle {
+            cursor: pointer;
+            color: var(--primary-color);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+        
+        .explain-content {
+            display: none;
+            margin-top: 16px;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .explain-content.show {
+            display: flex;
+        }
+
+        /* Explain Segment Cards */
+        .explain-segment {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        /* Fix for lists inside explain segments */
+        .explain-segment ul {
+            padding-left: 24px;
+            margin-left: 4px;
+        }
+        
+        .explain-segment li {
+            margin-bottom: 6px;
+        }
+
+        .segment-title {
+            font-size: var(--small-font-size);
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 8px;
+        }
+
+        .segment-content p {
+            margin-bottom: 12px;
+        }
+        
+        .segment-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            font-size: 12px;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: normal;
+        }
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        /* Highlights */
+        mark {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Self Check */
+        details {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .check-answer {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            color: #2c3e50;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1. Header -->
+        <header class="card header">
+            <h1>第 12 題 - ERP 系統安全評估範圍</h1>
+            <span class="status-badge" id="statusBadge">未作答</span>
+        </header>
+
+        <!-- 2. Context -->
+        <section class="card context">
+            <p class="context-text">本題無額外情境</p>
+        </section>
+
+        <!-- 3. Question -->
+        <main class="card question">
+            <div class="question-content">
+                12. 資訊單位導入新企業資源規劃系統（ERP System）進行系統安全評估時，應評估下列哪些項目？
+            </div>
+            <div class="question-list">
+                1. 系統安全性評估<br>
+                2. 容量管制評估<br>
+                3. 實體環境安全<br>
+                4. 使用者功能性需求評估
+            </div>
+            <div class="options-group">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A" class="option-input" onclick="checkAnswer(this)">
+                    (A) 13
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B" class="option-input" onclick="checkAnswer(this)">
+                    (B) 123
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C" class="option-input" onclick="checkAnswer(this)">
+                    (C) 134
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D" class="option-input" onclick="checkAnswer(this)">
+                    (D) 1234
+                </label>
+            </div>
+        </main>
+
+        <!-- 4. Feedback -->
+        <section class="card feedback" id="feedbackArea">
+            <div id="feedbackContent"></div>
+        </section>
+
+        <!-- 5. Explain -->
+        <section class="card explain">
+            <div class="explain-toggle" onclick="toggleExplain()">
+                <span>📝 查看解析</span>
+                <span id="explainArrow">▼</span>
+            </div>
+            <div class="explain-content" id="explainContent">
+                
+                <!-- 1. 解題步驟：關鍵字、翻譯、思路 -->
+                <div class="explain-segment">
+                    <div class="segment-title">
+                        <span class="tag tag-mgm">解題步驟</span>
+                        關鍵字、翻譯與思路
+                    </div>
+                    <div class="segment-content">
+                        <p><strong>【第一步：找關鍵字】</strong></p>
+                        <ul>
+                            <li><strong>導入新系統（ERP）</strong>：代表系統上線前的準備與驗收階段。</li>
+                            <li><strong>系統安全評估</strong>：題目限定在<mark>安全（Security）</mark>範疇。</li>
+                            <li><strong>應評估項目</strong>：需選出與「安全」及「可用性」相關的項目。</li>
+                        </ul>
+                        <br>
+                        <p><strong>【第二步：白話翻譯】</strong></p>
+                        <p>公司要上線一套新系統，要做「安全檢查」。請問下面 1 到 4 哪幾項是「安全檢查」要看的？（提示：安全不只看程式碼，也看會不會被塞爆、主機是否會被偷）。</p>
+                        <br>
+                        <p><strong>【第三步：解題思路】</strong></p>
+                        <p>將 1~4 項分類：</p>
+                        <ul>
+                            <li><strong>安全評估範圍</strong>：1. 系統安全性（防駭）、2. 容量管制（防當機/可用性）、3. 實體環境（防物理破壞）。</li>
+                            <li><strong>功能需求範圍</strong>：4. 使用者功能性需求（好不好用、流程對不對）。</li>
+                        </ul>
+                        <p><strong>結論</strong>：只要跟 CIA（機密性、完整性、可用性）有關的都要選，跟「好用」有關的排除。</p>
+                    </div>
+                </div>
+
+                <!-- 2. 選項分析 -->
+                <div class="explain-segment">
+                    <div class="segment-title">
+                        <span class="tag tag-sec">選項分析</span>
+                        【第四步：選項分析】
+                    </div>
+                    <div class="segment-content">
+                        <ul>
+                            <li>(A) <strong>13</strong>：錯誤。缺漏了「容量管制」。若無容量規劃，ERP 可能因資源不足而服務中斷（違反可用性）。</li>
+                            <li>(B) <strong>123</strong>：<mark>正確</mark>。涵蓋了資安防護的三個重要層面：邏輯（系統安全）、運作（容量可用性）、物理（實體環境）。</li>
+                            <li>(C) <strong>134</strong>：錯誤。納入了非資安重點的「功能性需求」（4），且漏掉了重要的「容量管制」（2）。</li>
+                            <li>(D) <strong>1234</strong>：錯誤。雖然實務上導入專案都會做功能驗收，但題目問的是「安全評估」，功能需求（4）屬於業務驗收，不應歸類於此。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 3. 觀念與延伸 -->
+                <div class="explain-segment">
+                    <div class="segment-title">
+                        <span class="tag tag-mgm">觀念進階</span>
+                        補充、觸類旁通
+                    </div>
+                    <div class="segment-content">
+                        <p><strong>【觀念補充與延伸】</strong></p>
+                        <p><strong>系統安全評估 (Security Assessment)：</strong>目標是確保 CIA（機密性、完整性、可用性）。不僅包含弱點掃描，還包含壓力測試（容量評估）與機房檢視。</p>
+                        <p><strong>功能性需求評估 (Functional Requirement Assessment)：</strong>目標是確保系統流程符合使用者作業需求，屬於 SDLC 的需求與驗收階段。</p>
+                        <br>
+                        <p><strong>【觸類旁通（舉一反三）】</strong></p>
+                        <ul>
+                            <li><strong>對比概念</strong>：安全評估看「穩不穩」（Availability, Security）；功能評估看「對不對」（Functionality）。</li>
+                            <li><strong>變化題型</strong>：若把第 4 項換成「權限控管」、「日誌稽核」或「加密機制」，則該項也必須納入安全評估範圍。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 4. 記憶與陷阱 -->
+                <div class="explain-segment">
+                    <div class="segment-title">
+                        <span class="tag tag-mgm">考試技巧</span>
+                        口訣與陷阱
+                    </div>
+                    <div class="segment-content">
+                        <p><strong>【記憶口訣】</strong></p>
+                        <p>「安全評估看三件：<mark>系統（1）＋容量（2）＋環境（3）</mark>；功能需求（4）是好不好用，不是安全必備。」</p>
+                        <br>
+                        <p><strong>【常見陷阱】</strong></p>
+                        <ul>
+                            <li><strong>混淆詞彙</strong>：看到「評估」就以為所有評估都要選，忘了題目限定是「安全」評估。</li>
+                            <li><strong>直覺盲點</strong>：直覺認為「功能符合需求」就是「好系統」，所以應該也要評估。其實「功能正確」不等於「系統安全」。</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 6. SelfCheck -->
+        <section class="card self-check">
+            <h3>🚀 自我檢測</h3>
+            
+            <details>
+                <summary>Q1. 如果把第 4 項改成「權限控管與帳號管理評估」，那答案會變成哪一個？</summary>
+                <div class="check-answer">
+                    <strong>答案：(D) 1234</strong><br>
+                    理由：權限控管（Access Control）是系統安全評估的核心項目之一，因此必須納入。
+                </div>
+            </details>
+
+            <details>
+                <summary>Q2. 為什麼「容量管制評估」屬於安全評估的一環？</summary>
+                <div class="check-answer">
+                    <strong>答案：涉及可用性 (Availability)</strong><br>
+                    理由：資安鐵三角包含可用性。若容量不足導致系統在尖峰時刻崩潰或無法服務，即屬於資安事故（DoS 風險）。
+                </div>
+            </details>
+
+            <details>
+                <summary>Q3. 請用一句話區分「安全評估」與「功能性需求評估」。</summary>
+                <div class="check-answer">
+                    <strong>安全評估看「穩不穩、安不安全」；功能評估看「好不好用、對不對」。</strong>
+                </div>
+            </details>
+        </section>
+
+    </div>
+
+    <script>
+        const correctAnswer = "B";
+
+        function checkAnswer(input) {
+            const selectedValue = input.value;
+            const feedbackArea = document.getElementById('feedbackArea');
+            const feedbackContent = document.getElementById('feedbackContent');
+            const statusBadge = document.getElementById('statusBadge');
+            const allOptions = document.querySelectorAll('.option-label');
+
+            // Reset styles
+            allOptions.forEach(label => {
+                label.style.borderColor = '#ecf0f1';
+                label.style.backgroundColor = 'transparent';
+            });
+            feedbackArea.classList.remove('correct', 'error');
+            feedbackArea.style.display = 'block';
+
+            // Highlight selected
+            input.parentElement.style.borderColor = '#3498db';
+            input.parentElement.style.backgroundColor = '#ebf5fb';
+
+            if (selectedValue === correctAnswer) {
+                // Correct
+                statusBadge.textContent = "答對";
+                statusBadge.style.backgroundColor = "#2ecc71";
+                statusBadge.style.color = "white";
+                
+                feedbackArea.classList.add('correct');
+                feedbackContent.innerHTML = `
+                    <div class="feedback-title">判定：正確</div>
+                    <div>一句話理由：系統安全評估應涵蓋系統安全性、容量管制與實體環境安全，不包含功能性需求評估。</div>
+                `;
+            } else {
+                // Incorrect
+                statusBadge.textContent = "答錯";
+                statusBadge.style.backgroundColor = "#e74c3c";
+                statusBadge.style.color = "white";
+
+                feedbackArea.classList.add('error');
+                feedbackContent.innerHTML = `
+                    <div class="feedback-title">判定：錯誤</div>
+                    <div>正確答案：(B) 123</div>
+                    <div>一句話理由：系統安全評估應涵蓋系統安全性、容量管制與實體環境安全，不包含功能性需求評估。</div>
+                `;
+            }
+        }
+
+        function toggleExplain() {
+            const content = document.getElementById('explainContent');
+            const arrow = document.getElementById('explainArrow');
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                arrow.textContent = '▼';
+            } else {
+                content.classList.add('show');
+                arrow.textContent = '▲';
+            }
+        }
+    </script>
+</body>
+</html>

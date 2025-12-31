@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q10 服務可用性策略</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            
+            /* Tag Colors */
+            --tag-law: #7f8c8d;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 0;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .question-number {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            background-color: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* Common Section Styles */
+        section {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-top: 0;
+            margin-bottom: 16px;
+            color: var(--primary-color);
+        }
+
+        /* Context */
+        .context-box {
+            background-color: #f1f3f5;
+            padding: 16px;
+            border-radius: 6px;
+            color: #555;
+            font-style: italic;
+        }
+
+        /* Question & Options */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+            border-color: #bdc3c7;
+        }
+
+        .option-input {
+            margin-right: 12px;
+            margin-top: 4px;
+            transform: scale(1.2);
+        }
+
+        /* Feedback */
+        #feedback-section {
+            display: none;
+            background-color: #f8f9fa;
+        }
+
+        .feedback-card {
+            padding: 16px;
+            border-radius: 6px;
+        }
+
+        .feedback-correct {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .feedback-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Explain (Collapsible) */
+        details.explain-details {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        details.explain-details summary {
+            padding: 16px 24px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            font-weight: bold;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        details.explain-details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details.explain-details summary::after {
+            content: '+';
+            font-size: 20px;
+        }
+
+        details.explain-details[open] summary::after {
+            content: '-';
+        }
+
+        .explain-content {
+            padding: 24px;
+            background-color: #fff;
+        }
+
+        .explain-segment {
+            background-color: #fafafa;
+            border-left: 4px solid var(--primary-color);
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .explain-segment h3 {
+            font-size: 16px;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .explain-segment p {
+            margin: 0;
+            font-size: 14px;
+            color: #444;
+        }
+
+        .explain-segment ul {
+            margin: 8px 0 0 20px;
+            padding: 0;
+            font-size: 14px;
+            color: #444;
+        }
+        
+        .explain-segment li {
+            margin-bottom: 6px;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            margin-right: 6px;
+            font-weight: normal;
+        }
+        
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt  { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        /* Highlights */
+        mark {
+            background-color: #fff3cd;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Self Check */
+        .self-check-item {
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .self-check-item summary {
+            padding: 12px 16px;
+            cursor: pointer;
+            font-weight: 500;
+            background-color: #fff;
+            border-radius: 6px;
+        }
+
+        .self-check-item p {
+            padding: 12px 16px;
+            margin: 0;
+            background-color: #f8f9fa;
+            border-top: 1px solid var(--border-color);
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Button */
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #34495e;
+        }
+
+        .submit-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="question-number">Q10. 服務可用性策略</div>
+        <div class="status-badge" id="status-badge">未作答</div>
+    </header>
+
+    <!-- Context Section -->
+    <section>
+        <div class="context-box">
+            本題無額外情境
+        </div>
+    </section>
+
+    <!-- Question Section -->
+    <section>
+        <h2>10. 下列何者「不」是提升服務可用性（Availability）的有效策略？</h2>
+        <div class="options-group" id="options-form">
+            <label class="option-label">
+                <input type="radio" name="answer" value="A" class="option-input">
+                <span>(A) 導入內容遞送網路（Content Delivery Network, CDN）服務</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="B" class="option-input">
+                <span>(B) 建置應用程式防火牆（Web Application Firewall, WAF）</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="C" class="option-input">
+                <span>(C) 設計自動擴展機制（Auto Scaling）</span>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="answer" value="D" class="option-input">
+                <span>(D) 規劃伺服器負載平衡架構（Load Balancing）</span>
+            </label>
+        </div>
+        <button class="submit-btn" id="submit-btn" onclick="checkAnswer()">提交答案</button>
+    </section>
+
+    <!-- Feedback Section -->
+    <section id="feedback-section">
+        <div class="feedback-card" id="feedback-content">
+            <!-- Dynamic Content -->
+        </div>
+    </section>
+
+    <!-- Explain Section -->
+    <section>
+        <details class="explain-details">
+            <summary>查看詳細解析</summary>
+            <div class="explain-content">
+                
+                <!-- Step 1 -->
+                <div class="explain-segment">
+                    <h3><span class="tag tag-sec">第一步</span>找關鍵字</h3>
+                    <p>
+                        <strong>關鍵字一：</strong>「不」是 <mark>反向題</mark>，找「例外、不是主要用來提升可用性」的選項。<br>
+                        <strong>關鍵字二：</strong>服務可用性（Availability）→ 重點是「抗流量、抗故障、抗尖峰、不中斷」。<br>
+                        <strong>關鍵字三：</strong>有效策略 → 指「主要目的」是提升可用性的架構或機制。
+                    </p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="explain-segment">
+                    <h3><span class="tag tag-sec">第二步</span>白話翻譯</h3>
+                    <p>
+                        題目在問：下面哪一個做法，並不是用來讓網站或服務更不容易掛掉、更能扛流量、更加穩定的主要策略？
+                    </p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="explain-segment">
+                    <h3><span class="tag tag-sec">第三步</span>解題思路</h3>
+                    <p>
+                        <strong>原理與規則：</strong><br>
+                        1. 提升可用性通常靠架構能力：把流量分散、把資源拉高、把故障點隔離。<br>
+                        2. 防火牆類工具主要是在做「過濾與防護」，不是可用性架構的核心手段。<br><br>
+                        <strong>可用性常見策略：</strong>CDN（分散內容）、Load Balancing（分散流量）、Auto Scaling（增加資源）。
+                    </p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="explain-segment">
+                    <h3><span class="tag tag-sec">第四步</span>選項分析</h3>
+                    <p>
+                        <strong>(A) 導入 CDN 服務：</strong><br>
+                        <span class="tag tag-net">網路</span> 正確的可用性策略。CDN 會把內容分散到多個節點，使用者就近存取，也能分攤源站壓力。<br><br>
+                        
+                        <strong>(B) 建置應用程式防火牆（WAF）：</strong><br>
+                        <span class="tag tag-sec">資安</span> <mark>本題正確答案</mark>。WAF 主要功能是防護 Web 攻擊（如 SQL Injection、XSS），屬於安全控制；它不等同於負載分散或擴展。<br><br>
+                        
+                        <strong>(C) 設計自動擴展機制：</strong><br>
+                        <span class="tag tag-net">架構</span> 正確的可用性策略。流量變大時自動加機器，降低資源不足造成服務掛掉的機率。<br><br>
+                        
+                        <strong>(D) 規劃伺服器負載平衡架構：</strong><br>
+                        <span class="tag tag-net">網路</span> 正確的可用性策略。把請求分散到多台伺服器，避免單台過載。
+                    </p>
+                </div>
+
+                <!-- Concept Supplement & Extension -->
+                <div class="explain-segment">
+                    <h3><span class="tag tag-sec">觀念補充與延伸</span></h3>
+                    <p>
+                        <strong>核心觀念定位：</strong>本題屬於「資安三性（CIA）中的可用性與基礎架構設計」章節，常用來考你分辨架構面（可用性）與安全面（防護）的策略差異。<br><br>
+                        <strong>法條或定義：</strong>
+                        <ul>
+                            <li><strong>可用性（Availability）：</strong>確保系統與服務在需要時可被使用，且維持在可接受的中斷時間內。</li>
+                            <li><strong>WAF（應用程式防火牆）：</strong>用來過濾、監控與阻擋 Web 應用程式攻擊的安全設備，是網站前的「保全」。</li>
+                        </ul>
+                    </p>
+                </div>
+
+                <!-- Analogy/Application -->
+                <div class="explain-segment">
+                    <h3><span class="tag tag-sec">觸類旁通</span>舉一反三</h3>
+                    <p>
+                        <strong>對比概念：</strong>
+                        <ul>
+                            <li><strong>可用性（Availability）手段：</strong>CDN、Load Balancing、Auto Scaling、備援、多區部署。</li>
+                            <li><strong>安全性（Security）手段：</strong>WAF、IDS/IPS、端點防護、存取控制。</li>
+                        </ul>
+                        <strong>變化題型：</strong>
+                        <ul>
+                            <li>問「哪一個主要提升可用性？」→ 選負載平衡、自動擴展。</li>
+                            <li>問「哪一個主要提升機密性或完整性？」→ 選 WAF、加密、存取控制。</li>
+                        </ul>
+                    </p>
+                </div>
+
+                <!-- Mnemonic -->
+                <div class="explain-segment">
+                    <h3><span class="tag tag-sec">記憶口訣</span></h3>
+                    <p>
+                        「可用靠分散與擴展；WAF 主要是擋攻擊」
+                    </p>
+                </div>
+
+                <!-- Common Pitfalls -->
+                <div class="explain-segment">
+                    <h3><span class="tag tag-sec">常見陷阱</span></h3>
+                    <p>
+                        <strong>學生最容易搞混的地方：</strong>以為「能減少中斷」就一定是可用性策略，忽略題目要的是「主要用途」。<br>
+                        <strong>心理盲點：</strong>看到 DDoS 或攻擊情境就會把 WAF 當成可用性解法，但真正提升可用性更常靠流量分散與擴展。<br>
+                        <strong>避坑指南：</strong>題目如果只問「提升可用性策略」，優先找 CDN、負載平衡、擴展；防火牆類多半不是主角。
+                    </p>
+                </div>
+
+            </div>
+        </details>
+    </section>
+
+    <!-- Self Check Section -->
+    <section>
+        <h2>自我檢測</h2>
+        <div class="self-check-item">
+            <details>
+                <summary>1. CDN 主要是如何提升可用性與效能的？</summary>
+                <p>答案：內容分散到多節點，就近服務並分攤源站壓力。</p>
+            </details>
+        </div>
+        <div class="self-check-item">
+            <details>
+                <summary>2. 負載平衡在可用性上的兩個好處是什麼？</summary>
+                <p>答案：分散流量避免過載、降低單點故障影響。</p>
+            </details>
+        </div>
+        <div class="self-check-item">
+            <details>
+                <summary>3. 自動擴展主要解決哪一種可用性問題？</summary>
+                <p>答案：尖峰流量造成資源不足、服務當機或延遲。</p>
+            </details>
+        </div>
+    </section>
+</div>
+
+<script>
+    const correctAnswer = 'B';
+    const submitBtn = document.getElementById('submit-btn');
+    const options = document.getElementsByName('answer');
+    const statusBadge = document.getElementById('status-badge');
+    const feedbackSection = document.getElementById('feedback-section');
+    const feedbackContent = document.getElementById('feedback-content');
+
+    function checkAnswer() {
+        let selectedValue = null;
+        for (const option of options) {
+            if (option.checked) {
+                selectedValue = option.value;
+                break;
+            }
+        }
+
+        if (!selectedValue) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        // Disable inputs after submit
+        submitBtn.disabled = true;
+        for (const option of options) {
+            option.disabled = true;
+        }
+
+        feedbackSection.style.display = 'block';
+
+        if (selectedValue === correctAnswer) {
+            // Correct
+            statusBadge.innerText = '答對';
+            statusBadge.style.backgroundColor = '#27ae60';
+            feedbackContent.className = 'feedback-card feedback-correct';
+            feedbackContent.innerHTML = `
+                <span class="feedback-title">判定：正確</span>
+                <p>WAF 主要是安全防護工具，核心用途在阻擋 Web 攻擊，並非可用性架構提升的主要策略。</p>
+            `;
+        } else {
+            // Incorrect
+            statusBadge.innerText = '答錯';
+            statusBadge.style.backgroundColor = '#c0392b';
+            feedbackContent.className = 'feedback-card feedback-error';
+            feedbackContent.innerHTML = `
+                <span class="feedback-title">判定：錯誤</span>
+                <p><strong>正確答案：(B)</strong></p>
+                <p>WAF 主要是安全防護工具，核心用途在阻擋 Web 攻擊，並非可用性架構提升的主要策略。</p>
+            `;
+        }
+
+        // Auto scroll to feedback
+        feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+</script>
+
+</body>
+</html>

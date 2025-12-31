@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q08. 自動化風險分析工具主要原因</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* 基礎設定 */
+        :root {
+            --base-font-size: 16px;
+            --title-font-size: 18px;
+            --small-font-size: 14px;
+            --card-padding: 16px;
+            --gap-size: 12px;
+            --primary-bg: #f3f4f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            font-size: var(--base-font-size);
+            background-color: var(--primary-bg);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px 10px;
+        }
+
+        /* 規範二：版型與寬度 */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-size);
+        }
+
+        /* 卡片共用樣式 */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: var(--card-padding);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: var(--title-font-size);
+            font-weight: 700;
+            margin: 0;
+            color: #1f2937;
+        }
+        .status-badge {
+            font-size: var(--small-font-size);
+            padding: 4px 12px;
+            border-radius: 9999px;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        /* Context */
+        .context-text {
+            color: #6b7280;
+            font-size: var(--small-font-size);
+            font-style: italic;
+        }
+
+        /* Question */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #111827;
+        }
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-label:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+        .option-input {
+            margin-top: 5px;
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: #2563eb;
+        }
+        .option-text {
+            flex: 1;
+        }
+
+        /* Feedback */
+        .feedback-section {
+            display: none; /* 預設隱藏 */
+            border-left: 5px solid transparent;
+        }
+        .feedback-correct {
+            border-color: #22c55e;
+            background-color: #f0fdf4;
+        }
+        .feedback-incorrect {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Explain & SelfCheck */
+        details {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        details summary {
+            padding: var(--card-padding);
+            font-weight: 600;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8fafc;
+        }
+        details summary:hover {
+            background-color: #f1f5f9;
+        }
+        details summary::after {
+            content: '\f107';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+        .details-content {
+            padding: var(--card-padding);
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Explain Sub-blocks (解析段落卡) */
+        .explain-block {
+            background-color: #f8fafc;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-left: 4px solid #cbd5e1;
+        }
+        .explain-block h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .explain-block p, .explain-block li {
+            font-size: 15px;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+        .explain-block ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+
+        /* 標籤規範 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .tag-law { background-color: #7f8c8d; }
+        .tag-iso { background-color: #27ae60; }
+        .tag-zt  { background-color: #8e44ad; }
+        .tag-net { background-color: #2980b9; }
+        .tag-sec { background-color: #c0392b; }
+        .tag-mgm { background-color: #d35400; }
+
+        /* 重點標註 */
+        mark {
+            background-color: #fef08a;
+            padding: 0 4px;
+            border-radius: 2px;
+            color: #854d0e;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        <!-- 1. Header -->
+        <header class="card header">
+            <h1><span class="tag tag-mgm">Risk Analysis</span> Q08</h1>
+            <span id="status-badge" class="status-badge">未作答</span>
+        </header>
+
+        <!-- 2. Context -->
+        <section class="card context">
+            <p class="context-text">本題無額外情境</p>
+        </section>
+
+        <!-- 3. Question -->
+        <section class="card question">
+            <p class="question-text">8. 下列何者為使用自動化風險分析工具主要的原因？</p>
+            <div class="options-group" id="options-container">
+                <label class="option-label">
+                    <input type="radio" name="q08" value="A" class="option-input">
+                    <span class="option-text">(A) 可將大量資訊收容於工具中</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q08" value="B" class="option-input">
+                    <span class="option-text">(B) 在審查期間收集的大部分數據不能重新用於後續分析</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q08" value="C" class="option-input">
+                    <span class="option-text">(C) 自動化方法對於風險分析訓練和知識的需要最少</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="q08" value="D" class="option-input">
+                    <span class="option-text">(D) 大多數軟體工具有易於使用且不需要任何訓練的使用者操作界面</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 4. Feedback -->
+        <section id="feedback-card" class="card feedback-section">
+            <div id="feedback-content">
+                <!-- Javascript will inject content here -->
+            </div>
+        </section>
+
+        <!-- 5. Explain -->
+        <details class="explain">
+            <summary>顯示詳解與觀念剖析</summary>
+            <div class="details-content">
+                
+                <div class="explain-block">
+                    <h3><i class="fas fa-search"></i> 第一步：找關鍵字</h3>
+                    <p>1. <mark>自動化風險分析工具</mark>：工具的價值通常在「大量資料處理、彙整、追蹤、重複使用」。</p>
+                    <p>2. <mark>主要原因</mark>：不是「可能的好處」都算，要挑最核心、最普遍的理由。</p>
+                    <p>3. <mark>大量資訊</mark>：風險分析會牽涉很多資產（Asset）、威脅（Threat）、弱點（Vulnerability）、控制措施（Control）與證據資料，容易爆量。</p>
+                </div>
+
+                <div class="explain-block">
+                    <h3><i class="fas fa-language"></i> 第二步：白話翻譯</h3>
+                    <p>題目在問：</p>
+                    <p>公司為什麼要用「自動化」工具來做風險分析？<strong>最主要的理由</strong>是什麼？</p>
+                </div>
+
+                <div class="explain-block">
+                    <h3><i class="fas fa-lightbulb"></i> 第三步：解題思路</h3>
+                    <ul>
+                        <li><strong>想像不用工具時：</strong>資料散在 Excel、Email、文件、會議紀錄，很難控管。</li>
+                        <li><strong>用工具後：</strong>可以把大量資料集中存放、版本控管、持續更新、後續重複使用。</li>
+                        <li><strong>因此：</strong>最主要的原因是「能收容並管理大量資訊」。</li>
+                        <li><strong>核心原理：</strong>風險分析不是一次性的作業，而是要持續更新（例如每年、每季或系統變更後），因此資料能否集中、可追溯、可重用，是自動化工具的最大價值。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-block">
+                    <h3><i class="fas fa-check-double"></i> 第四步：選項分析</h3>
+                    <ul>
+                        <li><span class="tag tag-mgm">正確</span> <strong>(A) 可將大量資訊收容於工具中</strong><br>風險分析資料量很大，工具可集中存放、結構化管理、方便追蹤與報表輸出。</li>
+                        <li><span class="tag tag-mgm">錯誤</span> <strong>(B) 在審查期間收集的大部分數據不能重新用於後續分析</strong><br>恰好相反。使用工具的好處之一就是「可以重複使用」前次資料，做年度更新與趨勢比較。</li>
+                        <li><span class="tag tag-mgm">錯誤</span> <strong>(C) 自動化方法對於風險分析訓練和知識的需要最少</strong><br>工具只能協助整理與計算，判斷風險仍需要專業知識，不可能「訓練需要最少」。</li>
+                        <li><span class="tag tag-mgm">錯誤</span> <strong>(D) 大多數軟體工具有易於使用且不需要任何訓練的使用者操作界面</strong><br>多數風險工具需要基本訓練與方法論（例如如何定義衝擊、可能性、風險準則），不可能完全不用訓練。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-block">
+                    <h3><i class="fas fa-book-open"></i> 觀念補充與延伸</h3>
+                    <p><strong>風險分析工具的四大價值（PDCA 循環支援）：</strong></p>
+                    <ul>
+                        <li><strong>集中化：</strong>資料庫統一管理資產與威脅。</li>
+                        <li><strong>一致性：</strong>強制使用同一套風險準則與計算公式。</li>
+                        <li><strong>可追溯：</strong>Audit Trail，知道誰改了什麼。</li>
+                        <li><strong>可重用：</strong>去年的評估結果自動帶入今年，只修改變更部分。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-block">
+                    <h3><i class="fas fa-exchange-alt"></i> 觸類旁通（舉一反三）</h3>
+                    <p><strong>對比概念：</strong></p>
+                    <ul>
+                        <li><strong>工具能做：</strong>集中資料、流程化、版本控管、產出報表。</li>
+                        <li><strong>工具不能取代：</strong>風險判斷、資產價值理解、商業衝擊分析（BIA）的決策。</li>
+                    </ul>
+                    <p><strong>常見變化題型：</strong></p>
+                    <ol>
+                        <li>問「導入風險工具對管理層最大的好處？」→ 答案多為：報表化與可追溯性。</li>
+                        <li>問「為何風險資料需要可重用？」→ 答案多為：風險管理是持續循環（PDCA）。</li>
+                    </ol>
+                </div>
+
+                <div class="explain-block">
+                    <h3><i class="fas fa-key"></i> 記憶口訣</h3>
+                    <p class="text-lg font-bold text-center text-blue-800 my-2">「風險資料會爆量，用工具好收納」</p>
+                </div>
+
+                <div class="explain-block">
+                    <h3><i class="fas fa-exclamation-triangle"></i> 常見陷阱</h3>
+                    <ul>
+                        <li><strong>心理盲點：</strong>看到「自動化」就以為等於「全自動」、「不用人腦」、「不用訓練」。</li>
+                        <li><strong>避坑指南：</strong>風險分析的核心仍是「人的判斷」與「治理流程」，工具只是輔助手段。若選項提到「不需要訓練」或「完全取代人工」，通常是錯誤的。</li>
+                    </ul>
+                </div>
+
+            </div>
+        </details>
+
+        <!-- 6. SelfCheck -->
+        <details class="self-check">
+            <summary>自我檢測（點擊展開）</summary>
+            <div class="details-content">
+                <div class="explain-block">
+                    <h3>Q1. 為什麼選項 (B) 的說法與工具導入目的相反？</h3>
+                    <details>
+                        <summary class="cursor-pointer text-blue-600 hover:text-blue-800">顯示答案</summary>
+                        <p class="mt-2 text-gray-700">因為工具的價值之一就是讓資料可重用於後續分析（例如年度複審），如果不能重用，工具的效益就大打折扣。</p>
+                    </details>
+                </div>
+                
+                <div class="explain-block">
+                    <h3>Q2. 自動化工具無法取代人做的哪一件事？</h3>
+                    <details>
+                        <summary class="cursor-pointer text-blue-600 hover:text-blue-800">顯示答案</summary>
+                        <p class="mt-2 text-gray-700">判斷資產價值、決定風險接受程度等涉及專業判斷與商業決策的行為。</p>
+                    </details>
+                </div>
+
+                <div class="explain-block">
+                    <h3>Q3. 如果公司每年要更新風險評估，使用工具最直接省下的是什麼成本？</h3>
+                    <details>
+                        <summary class="cursor-pointer text-blue-600 hover:text-blue-800">顯示答案</summary>
+                        <p class="mt-2 text-gray-700">資料彙整與重建的時間成本（不用每次都從頭開始填 Excel）。</p>
+                    </details>
+                </div>
+            </div>
+        </details>
+
+    </div>
+
+    <script>
+        // 定義標準答案
+        const CORRECT_ANSWER = 'A';
+        const CORRECT_REASON = "風險分析涉及大量且需長期維護的資料，自動化工具能集中收容並管理這些資訊。";
+        
+        // DOM 元素
+        const options = document.querySelectorAll('input[name="q08"]');
+        const feedbackCard = document.getElementById('feedback-card');
+        const feedbackContent = document.getElementById('feedback-content');
+        const statusBadge = document.getElementById('status-badge');
+        const optionsContainer = document.getElementById('options-container');
+
+        // 綁定事件
+        options.forEach(option => {
+            option.addEventListener('change', function() {
+                checkAnswer(this.value);
+            });
+        });
+
+        function checkAnswer(selectedValue) {
+            // 鎖定選項（避免重複作答）
+            const allInputs = optionsContainer.querySelectorAll('input');
+            allInputs.forEach(input => input.disabled = true);
+            optionsContainer.style.opacity = '0.7';
+
+            let isCorrect = (selectedValue === CORRECT_ANSWER);
+            
+            // 更新 Badge
+            if (isCorrect) {
+                statusBadge.textContent = "答對";
+                statusBadge.style.backgroundColor = "#dcfce7";
+                statusBadge.style.color = "#166534";
+                showFeedback(true);
+            } else {
+                statusBadge.textContent = "答錯";
+                statusBadge.style.backgroundColor = "#fee2e2";
+                statusBadge.style.color = "#991b1b";
+                showFeedback(false);
+            }
+        }
+
+        function showFeedback(isCorrect) {
+            feedbackCard.style.display = 'block';
+            
+            if (isCorrect) {
+                feedbackCard.className = "card feedback-section feedback-correct";
+                feedbackContent.innerHTML = `
+                    <div class="feedback-title">
+                        <i class="fas fa-check-circle text-green-600"></i>
+                        <span class="text-green-800">判定：正確</span>
+                    </div>
+                    <p class="text-green-700 mb-0"><strong>一句話理由：</strong>${CORRECT_REASON}</p>
+                `;
+            } else {
+                feedbackCard.className = "card feedback-section feedback-incorrect";
+                feedbackContent.innerHTML = `
+                    <div class="feedback-title">
+                        <i class="fas fa-times-circle text-red-600"></i>
+                        <span class="text-red-800">判定：錯誤</span>
+                    </div>
+                    <p class="text-red-700 mb-1"><strong>正確答案：</strong>(${CORRECT_ANSWER})</p>
+                    <p class="text-red-700 mb-0"><strong>一句話理由：</strong>${CORRECT_REASON}</p>
+                `;
+            }
+
+            // 自動展開詳解（可選）
+            // document.querySelector('.explain').open = true;
+        }
+    </script>
+</body>
+</html>

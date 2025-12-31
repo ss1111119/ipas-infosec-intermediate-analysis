@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題目 2：RTO 與 RPO 概念辨析</title>
+    <style>
+        /* --- 基礎設定 & Tokens --- */
+        :root {
+            --font-family: system-ui, "Noto Sans TC", sans-serif;
+            --base-size: 16px;
+            --heading-size: 18px;
+            --small-size: 14px;
+            --card-padding: 16px;
+            --gap: 12px;
+            
+            --color-bg: #f4f6f8;
+            --color-card-bg: #ffffff;
+            --color-text: #333333;
+            --color-border: #e0e0e0;
+            --color-primary: #3498db;
+            --color-success: #2ecc71;
+            --color-error: #e74c3c;
+            
+            /* 標籤顏色規範 */
+            --tag-law: #7f8c8d;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400; /* 風險管理/營運持續 */
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: var(--font-family);
+            font-size: var(--base-size);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        /* --- 版型規範 (必須遵守) --- */
+        .page {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap);
+        }
+
+        /* --- 卡片通用樣式 --- */
+        .card {
+            background-color: var(--color-card-bg);
+            padding: var(--card-padding);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--color-border);
+        }
+
+        h2 {
+            font-size: var(--heading-size);
+            margin: 0 0 12px 0;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        h3 {
+            font-size: 1rem;
+            margin: 0 0 8px 0;
+            font-weight: 600;
+            color: #555;
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .status-badge {
+            font-size: var(--small-size);
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #ecf0f1;
+            font-weight: bold;
+        }
+
+        /* --- Context (情境) --- */
+        .context-content {
+            font-style: italic;
+            color: #555;
+            background-color: #f9f9f9;
+            padding: 12px;
+            border-left: 4px solid var(--color-primary);
+            border-radius: 4px;
+        }
+
+        /* --- Question & Options --- */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f0f8ff;
+        }
+
+        .option-input {
+            margin-top: 5px;
+            margin-right: 12px;
+        }
+
+        .submit-btn {
+            margin-top: 16px;
+            padding: 10px 20px;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            font-weight: bold;
+        }
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+        .submit-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* --- Feedback --- */
+        .feedback-area {
+            display: none; /* 預設隱藏 */
+            margin-top: 0;
+        }
+        .feedback-content {
+            font-weight: bold;
+        }
+        .feedback-reason {
+            margin-top: 8px;
+            font-size: 0.95em;
+            color: #444;
+        }
+        .feedback-correct {
+            border-left: 5px solid var(--color-success);
+            background-color: #e8f8f5;
+        }
+        .feedback-error {
+            border-left: 5px solid var(--color-error);
+            background-color: #fdedec;
+        }
+
+        /* --- Explain (解析區塊) --- */
+        .explain-area {
+            display: none; /* 預設隱藏 */
+        }
+        
+        /* 解析小主題分段卡 */
+        .explain-segment {
+            background-color: #f8f9fa; /* 淺色系底色 */
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+        .explain-segment:last-child {
+            margin-bottom: 0;
+        }
+        .explain-segment-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- SelfCheck --- */
+        details {
+            cursor: pointer;
+        }
+        summary {
+            font-weight: bold;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+        .check-content {
+            padding: 12px;
+            background-color: #f1f2f6;
+            border-radius: 6px;
+        }
+
+        /* --- Tags & Mark --- */
+        mark {
+            background-color: #fff3cd;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            color: white;
+            font-size: 12px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        
+        /* 標籤顏色規範實作 */
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt  { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+    </style>
+</head>
+<body>
+
+    <div class="page">
+        <!-- 1. Header -->
+        <div class="card header">
+            <h2>題目 2</h2>
+            <div class="status-badge" id="status-badge">未作答</div>
+        </div>
+
+        <!-- 2. Context -->
+        <div class="card context">
+            <h3>情境描述</h3>
+            <div class="context-content">
+                M 公司的資訊系統，每週均有進行系統與資料備份，且有異地備份，而近期公司增加了新多重加密機制，讓資料安全可以進一步確保。然近期進行系統之復原測試時，發現<mark>復原作業時間共需要 6 小時</mark>，與<mark>公司的規定 4 小時</mark>，明顯不符。
+            </div>
+        </div>
+
+        <!-- 3. Question -->
+        <div class="card question">
+            <h3>問題</h3>
+            <p>關於上述案例中，「不」符合下列何者要求？</p>
+            
+            <div class="options-group" id="options-container">
+                <label class="option-label">
+                    <input type="radio" name="quiz" value="A" class="option-input">
+                    <span>(A) 復原時間目標（Recovery Time Objective, RTO）</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="quiz" value="B" class="option-input">
+                    <span>(B) 復原點目標（Recovery Point Objective, RPO）</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="quiz" value="C" class="option-input">
+                    <span>(C) 平均復原時間（Mean Time to Recovery, MTTR）</span>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="quiz" value="D" class="option-input">
+                    <span>(D) 平均失效時間（Mean Time to Failure, MTTF）</span>
+                </label>
+            </div>
+
+            <button class="submit-btn" id="submit-btn" onclick="checkAnswer()">送出答案</button>
+        </div>
+
+        <!-- 4. Feedback -->
+        <div class="card feedback-area" id="feedback-card">
+            <div class="feedback-content" id="feedback-title"></div>
+            <div class="feedback-reason" id="feedback-reason"></div>
+        </div>
+
+        <!-- 5. Explain -->
+        <details class="card explain-area" id="explain-area">
+            <summary>顯示詳解與觀念剖析</summary>
+            
+            <!-- 第一步：找關鍵字 -->
+            <div class="explain-segment">
+                <div class="explain-segment-title">
+                    <span class="tag tag-mgm">Step 1</span>
+                    第一步：找關鍵字
+                </div>
+                <p><strong>關鍵字一：復原作業時間需要 6 小時</strong><br>→ 代表「實際花費的復原時間」。</p>
+                <p><strong>關鍵字二：公司規定 4 小時</strong><br>→ 代表「公司事先訂好的目標時間（Target）」。</p>
+                <p><strong>關鍵字三：「明顯不符」</strong><br>→ 表示實際狀況「超過規定標準」，一定有一個指標被違反。</p>
+            </div>
+
+            <!-- 第二步：白話翻譯 -->
+            <div class="explain-segment">
+                <div class="explain-segment-title">
+                    <span class="tag tag-mgm">Step 2</span>
+                    第二步：白話翻譯
+                </div>
+                <p>這家公司有備份、也有異地備援，資料看起來很安全。<br>但實際做系統復原測試時，發現「系統修好要 6 小時」，可是公司規定「最多只能 4 小時內要修好」。</p>
+                <p>所以題目在問：「哪一個復原或可靠度指標，被這個狀況違反了？」</p>
+            </div>
+
+            <!-- 第三步：解題思路 -->
+            <div class="explain-segment">
+                <div class="explain-segment-title">
+                    <span class="tag tag-mgm">Step 3</span>
+                    第三步：解題思路
+                </div>
+                <p>1. 找出「公司規定的目標」是什麼。<br>2. 比對「實際發生的時間」。<br>3. 判斷是哪一個指標「沒有達標」。</p>
+                <p><strong>原理與規則：</strong>只要「實際復原時間 > 公司允許的時間」，就代表「復原時間目標（RTO）沒有被滿足」。</p>
+            </div>
+
+            <!-- 第四步：選項分析 -->
+            <div class="explain-segment">
+                <div class="explain-segment-title">
+                    <span class="tag tag-iso">Step 4</span>
+                    第四步：選項分析
+                </div>
+                <ul>
+                    <li><strong>(A) 復原時間目標（RTO） <span style="color:var(--color-success)">[正確]</span></strong><br>RTO 是「公司規定最多能停多久」。公司規定 4 小時，但實際花了 6 小時，明顯超過 → 不符合。</li>
+                    <li><strong>(B) 復原點目標（RPO）</strong><br>RPO 在看的是「資料最多可以遺失多久」，題目完全沒提資料遺失時間，也沒有提到資料找不回來。</li>
+                    <li><strong>(C) 平均復原時間（MTTR）</strong><br>MTTR 是長期統計的平均值。題目只描述一次復原測試，無法直接判定是否不符合統計值。</li>
+                    <li><strong>(D) 平均失效時間（MTTF）</strong><br>MTTF 是設備多久會壞一次（可靠度），與復原測試時間無關。</li>
+                </ul>
+            </div>
+
+            <!-- 觀念補充與延伸 -->
+            <div class="explain-segment">
+                <div class="explain-segment-title">
+                    <span class="tag tag-mgm">Step 5</span>
+                    觀念補充與延伸
+                </div>
+                <p><strong>復原時間目標（RTO）：</strong><br>系統中斷後，組織可以接受的「最長復原時間」。(白話：系統最多可以停多久)</p>
+                <p><strong>復原點目標（RPO）：</strong><br>系統復原時，最多可以接受「資料回到多久以前」。(白話：資料最多可以不見多久)</p>
+            </div>
+
+             <!-- 觸類旁通（舉一反三） -->
+             <div class="explain-segment">
+                <div class="explain-segment-title">
+                    <span class="tag tag-sec">Step 6</span>
+                    觸類旁通（舉一反三）
+                </div>
+                <p><strong>變化題型 1：</strong><br>如果題目說「資料庫毀損，我們只能救回早上 8 點的備份，早上 8 點到 10 點的資料都不見了，這違反了什麼？」<br>→ 答案是 RPO（資料遺失）。</p>
+                <p><strong>變化題型 2：</strong><br>如果題目說「網站掛掉，客戶兩小時無法下單，損失慘重。」<br>→ 這是在討論 RTO（中斷時間）。</p>
+            </div>
+
+            <!-- 記憶口訣 -->
+            <div class="explain-segment">
+                <div class="explain-segment-title">
+                    <span class="tag tag-mgm">Step 7</span>
+                    記憶口訣
+                </div>
+                <p style="font-size: 1.1em; font-weight: bold; color: var(--color-primary); text-align: center;">
+                    「RTO 看多久、RPO 看多舊」
+                </p>
+            </div>
+
+            <!-- 常見陷阱 -->
+            <div class="explain-segment">
+                <div class="explain-segment-title">
+                    <span class="tag tag-sec">Step 8</span>
+                    常見陷阱
+                </div>
+                <p><strong>1. 混淆備份與復原：</strong><br>看到「有備份」、「有加密」就以為是考資料安全或 RPO。其實重點在後面的「時間不符」。</p>
+                <p><strong>2. 看到時間就選 RTO：</strong><br>要注意題目寫的是「復原作業時間」（RTO 相關）還是「資料落後時間」（RPO 相關）。</p>
+            </div>
+        </details>
+
+        <!-- 6. SelfCheck -->
+        <div class="card self-check">
+            <h3>自我檢測</h3>
+            <details>
+                <summary>點擊展開練習題</summary>
+                <div class="check-content">
+                    <p><strong>Q1：如果題目改成「資料最多只能遺失 30 分鐘內的數據」，考的是哪一個？</strong><br><span style="filter: blur(4px); transition: 0.3s;" onclick="this.style.filter='none'">答案：(B) RPO</span> （點擊查看）</p>
+                    <hr style="border: 0; border-top: 1px solid #ddd; margin: 10px 0;">
+                    <p><strong>Q2：如果公司規定 RTO 為 8 小時，而實際修復 6 小時，是否符合？為什麼？</strong><br><span style="filter: blur(4px); transition: 0.3s;" onclick="this.style.filter='none'">答案：符合，因為未超過 RTO 的時間上限。</span> （點擊查看）</p>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <script>
+        // 定義正確答案
+        const CORRECT_ANSWER = 'A';
+
+        function checkAnswer() {
+            // 取得使用者選擇
+            const options = document.getElementsByName('quiz');
+            let selectedValue = null;
+            for (const option of options) {
+                if (option.checked) {
+                    selectedValue = option.value;
+                    break;
+                }
+            }
+
+            // 若未作答則提示
+            if (!selectedValue) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            // 鎖定按鈕與選項
+            document.getElementById('submit-btn').disabled = true;
+            options.forEach(opt => opt.disabled = true);
+
+            // 顯示回饋區塊與詳解
+            const feedbackCard = document.getElementById('feedback-card');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackReason = document.getElementById('feedback-reason');
+            const explainArea = document.getElementById('explain-area');
+            const statusBadge = document.getElementById('status-badge');
+
+            feedbackCard.style.display = 'block';
+            explainArea.style.display = 'block'; // 自動顯示詳解區塊（但不一定展開）
+            explainArea.open = true; // 自動展開詳解內容方便閱讀
+
+            if (selectedValue === CORRECT_ANSWER) {
+                // 答對
+                feedbackCard.className = 'card feedback-area feedback-correct';
+                feedbackTitle.textContent = '判定：正確';
+                feedbackReason.textContent = '理由：實際復原時間 6 小時，超過公司規定的 4 小時復原時間目標 (RTO)。';
+                statusBadge.textContent = '答對';
+                statusBadge.style.backgroundColor = '#d4edda';
+                statusBadge.style.color = '#155724';
+            } else {
+                // 答錯
+                feedbackCard.className = 'card feedback-area feedback-error';
+                feedbackTitle.textContent = '判定：錯誤';
+                feedbackReason.innerHTML = `正確答案：(A)<br>理由：題目問的是「復原作業時間」超過規定，這是 RTO (時間目標) 的範疇，而非資料遺失量 (RPO)。`;
+                statusBadge.textContent = '答錯';
+                statusBadge.style.backgroundColor = '#f8d7da';
+                statusBadge.style.color = '#721c24';
+            }
+        }
+    </script>
+</body>
+</html>
