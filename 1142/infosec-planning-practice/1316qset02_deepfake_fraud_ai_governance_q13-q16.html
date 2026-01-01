@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題組 2：防範 AI 深度偽造詐騙與 AI 治理</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 核心色彩 */
+            --body-bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #546e7a;
+            --primary: #2980b9;
+            --primary-light: #e3f2fd;
+            --primary-hover: #3498db;
+            --highlight: #f1c40f;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            --border-color: #e0e0e0;
+
+            /* 標籤色彩 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 版型容器 */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 16px;
+                padding: 20px;
+                width: calc(100% - 32px);
+                border-radius: 12px;
+            }
+        }
+
+        /* 題組 Header */
+        .group-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .group-header h1 {
+            font-size: 24px;
+            color: var(--primary);
+            margin: 0 0 16px 0;
+        }
+
+        @media (max-width: 768px) {
+            .group-header h1 { font-size: 20px; }
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-hover));
+            width: 0%;
+            transition: width 400ms ease;
+        }
+
+        .completion-status {
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .status-pending { color: var(--text-secondary); }
+        .status-done { color: var(--success-text); font-weight: bold; }
+
+        /* Context */
+        .group-context {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid var(--tag-mgm);
+            margin-bottom: 30px;
+        }
+
+        .group-context h3 {
+            margin-top: 0;
+            color: var(--text-primary);
+            font-size: 18px;
+        }
+
+        .group-context p, .group-context ol {
+            margin-bottom: 0;
+            font-size: 15px;
+        }
+
+        .group-context ol {
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+
+        .group-context li {
+            margin-bottom: 4px;
+        }
+
+        /* Tabs */
+        .tabs-nav {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            margin-bottom: 24px;
+            scrollbar-width: none; /* Firefox */
+        }
+        .tabs-nav::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+        .tab-btn {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 15px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            transition: all 200ms ease;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tab-btn:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            border-color: var(--primary-light);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 8px rgba(41,128,185,0.3);
+        }
+
+        .tab-status {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Question Content */
+        .question-block {
+            display: none; /* 預設隱藏，透過 JS 切換 */
+            animation: fadeIn 300ms ease;
+        }
+
+        .question-block.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .q-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .q-tag {
+            background-color: var(--text-secondary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .q-tag.correct { background-color: var(--success-text); }
+        .q-tag.wrong { background-color: var(--error-text); }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .highlight {
+            background-color: var(--highlight);
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+
+        /* Options */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start; /* 為了多行文字對齊 */
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 150ms ease;
+            background-color: #fff;
+        }
+
+        .option-label:hover {
+            background-color: var(--primary-light);
+            border-color: #b3e5fc;
+        }
+
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        .option-label.disabled:hover {
+            background-color: #fff;
+            border-color: var(--border-color);
+        }
+
+        .option-input {
+            margin-top: 4px; /* 對齊第一行文字 */
+            margin-right: 12px;
+            accent-color: var(--primary);
+            width: 18px;
+            height: 18px;
+        }
+
+        .option-text {
+            flex: 1;
+            word-break: break-word;
+            font-size: 16px;
+        }
+
+        /* Action Area */
+        .action-area {
+            margin-bottom: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 200ms ease;
+            min-height: 44px;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(41,128,185,0.3);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-reset {
+            background-color: var(--text-secondary);
+        }
+        .btn-reset:hover {
+            background-color: #455a64;
+        }
+
+        /* Feedback */
+        .feedback {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: none; /* JS 控制顯示 */
+            animation: fadeInUp 300ms ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.success {
+            background-color: var(--success-bg);
+            border-left: 5px solid var(--success-text);
+            color: var(--success-text);
+        }
+
+        .feedback.error {
+            background-color: var(--error-bg);
+            border-left: 5px solid var(--error-text);
+            color: var(--error-text);
+        }
+
+        /* Explanation & Self Check */
+        details.explain-toggle {
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        summary {
+            padding: 16px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        summary::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .details-content {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .explain-section {
+            border-left: 4px solid var(--primary);
+            background-color: #f8f9fa;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .explain-section h4 {
+            margin: 0 0 12px 0;
+            color: var(--primary);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explain-section p, .explain-section ul, .explain-section ol {
+            margin: 0 0 8px 0;
+            font-size: 15px;
+            color: #444;
+        }
+        
+        .explain-section ul, .explain-section ol {
+            padding-left: 20px;
+        }
+        
+        .explain-section li {
+            margin-bottom: 6px;
+        }
+
+        /* Self Check Specifics */
+        .self-check-container {
+            display: none; /* 初始隱藏，作答後顯示 */
+            margin-top: 20px;
+            border: 2px dashed var(--highlight);
+            border-radius: 12px;
+            padding: 20px;
+            background-color: #fffbf0;
+        }
+
+        .self-check-header {
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .check-question {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        details.answer-reveal {
+            border: none;
+            background: transparent;
+            margin: 0;
+        }
+
+        details.answer-reveal summary {
+            background-color: #fff;
+            border: 1px solid var(--highlight);
+            border-radius: 20px;
+            display: inline-flex;
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        details.answer-reveal .details-content {
+            border-top: none;
+            padding: 16px 0 0 0;
+            color: var(--success-text);
+            font-weight: 500;
+        }
+
+        .tag-pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: white;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    
+    <!-- Header -->
+    <header class="group-header">
+        <h1>題組 2：防範 AI 深度偽造詐騙與 AI 治理</h1>
+        <div class="progress-info">
+            <span id="progress-text">已完成：0 / 4</span>
+            <span id="completion-status" class="status-pending">📝 尚未完成</span>
+        </div>
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+    </header>
+
+    <!-- Context -->
+    <section class="group-context">
+        <h3>【題組背景】</h3>
+        <p>企業面臨結合 AI <span class="highlight">深度偽造（Deepfake）</span>的語音與影像詐騙風險，攻擊者可模仿高階主管指示員工進行匯款。資安部門提出以下控制措施：</p>
+        <ol>
+            <li>阻擋深度偽造工具或相關不良內容網站</li>
+            <li>導入影像辨識、聲音辨識或 AI 模組</li>
+            <li>教育員工辨識深度偽造攻擊</li>
+            <li>財務與會計系統導入多因子認證（MFA）</li>
+            <li>電子郵件系統導入資料儲存加密</li>
+            <li>加強職務區隔（SoD），高額匯款需主管複核</li>
+            <li>專用視訊會議系統導入多因子認證（MFA）</li>
+        </ol>
+    </section>
+
+    <!-- Tabs Navigation -->
+    <nav class="tabs-nav" id="tabs-nav">
+        <!-- JS Generated Tabs -->
+    </nav>
+
+    <!-- Questions Content -->
+    <main id="tab-content-container">
+        <!-- JS Generated Questions -->
+    </main>
+
+</div>
+
+<script>
+    // --- Data ---
+    const quizData = {
+        groupName: "題組 2",
+        questions: [
+            {
+                id: 13,
+                type: "single",
+                tabLabel: "第 13 題",
+                question: "請問為了有效防範 AI 深度偽造技術的語音與影像攻擊，降低組織同仁受騙將公司的<span class='highlight'>款項匯出</span>造成組織的營運損失，下列何項推動組合較為有效？",
+                options: [
+                    { id: "A", text: "(A) (2)(5)" },
+                    { id: "B", text: "(B) (1)(3)" },
+                    { id: "C", text: "(C) (6)(7)" },
+                    { id: "D", text: "(D) (4)(5)" }
+                ],
+                correctAnswer: ["C"],
+                reason: "SoD 複核直接阻斷匯款，視訊會議 MFA 強化指令來源驗證，最能降低被騙匯款風險。",
+                explanation: `
+                    <!-- 第一步：找關鍵字 -->
+                    <div class="explain-section">
+                        <h4>🔍 第一步：找關鍵字</h4>
+                        <p><strong>深度偽造（Deepfake）語音與影像詐騙</strong>：攻擊重點是「冒充主管」。<br>
+                        <strong>匯款、營運損失</strong>：真正的風險是「錢被匯出去」。<br>
+                        <strong>推動組合較為有效</strong>：要選能「真正阻斷匯款風險」的組合，而不是只做偵測或周邊保護。</p>
+                    </div>
+
+                    <!-- 第二步：白話翻譯 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-law);">
+                        <h4>🗣️ 第二步：白話翻譯</h4>
+                        <p>有人用假聲音/假影片冒充主管叫你匯款，你要做哪兩個措施的組合，最能讓「錢不會被匯走」？</p>
+                        <p><strong>🍎 生活例子：</strong>就像你去銀行轉帳，行員一定要主管刷卡（複核）才能放行大額款項，光靠你自己說是沒用的。</p>
+                    </div>
+
+                    <!-- 第三步：解題思路 & 步驟 & 原理 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                        <h4>💡 第三步：解題思路與原理</h4>
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li>先抓住攻擊目標：攻擊者要「讓員工照指示匯款」。</li>
+                            <li>想最有效的阻斷點：把匯款流程變成「一個人不能決定、需要複核」＋「會議/指令來源要能驗證」。</li>
+                            <li>對照選項：哪個組合直接強化「匯款決策與指令來源」的可信度。</li>
+                        </ol>
+                        <p><strong>原理與規則：</strong></p>
+                        <ul>
+                            <li><strong>SoD（職務區隔）：</strong>把「提出匯款」與「核准匯款」拆開（白話：轉帳不是你一個人說了算）。</li>
+                            <li><strong>MFA（多因子認證）：</strong>即使帳密被騙或被偷，還需要第二把鑰匙（白話：密碼外再加手機或指紋）。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 第四步：選項分析 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                        <h4>⚖️ 第四步：選項分析</h4>
+                        <ul>
+                            <li>(A) <strong>(2) AI辨識可能誤判</strong>；<strong>(5) 郵件加密偏保密</strong>，不直接阻止匯款詐騙。</li>
+                            <li>(B) <strong>(1)(3) 阻擋網站＋教育訓練</strong>是「降低機率」，但遇到高壓情境（主管催）仍可能失守，且不直接卡住匯款流程。</li>
+                            <li>(C) <strong>(6) 高額匯款主管複核</strong>：直接卡住「錢出去」；<strong>(7) 視訊會議 MFA</strong>：降低冒充/盜用會議身分，強化指令來源可信度。</li>
+                            <li>(D) <strong>(4) 財務系統 MFA</strong> 有效，但 <strong>(5) 郵件加密</strong>仍不對焦（詐騙不一定走郵件、且加密不等於防詐）。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 觀念補充、延伸、法條 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-iso);">
+                        <h4>📘 觀念補充與延伸</h4>
+                        <p><strong>核心觀念定位：</strong>資安防護實務：詐騙/社交工程＋交易流程控制。</p>
+                        <p><strong>法條或定義 (白話)：</strong>SoD (職務區隔)：避免單一角色同時擁有「發起＋核准」權限。</p>
+                        <p><strong>觸類旁通（舉一反三）：</strong>題目若改成「高層來電催款」，最有效通常仍是「雙人覆核/電話回撥確認」。</p>
+                    </div>
+
+                    <!-- 記憶口訣與陷阱 -->
+                    <div class="explain-section" style="border-left-color: var(--error-text);">
+                        <h4>⚡ 記憶口訣與常見陷阱</h4>
+                        <p><strong>記憶口訣：</strong>「要防匯款騙，先卡流程權」：複核（SoD）是關鍵。</p>
+                        <p><strong>心理盲點：</strong>覺得有導入 AI 工具就萬無一失，忽略了流程控制才是最後防線。</p>
+                        <p><strong>避坑指南：</strong>看到 AI 深度偽造就直覺選 AI 模組，但 AI 模組可能誤判，且不一定卡得住匯款流程。</p>
+                    </div>
+                `,
+                selfCheck: {
+                    question: "1) 如果公司只有教育訓練(3)，沒有複核(6)，最大風險是什麼？<br>2) 為什麼 (5) 郵件加密不等於防止詐騙匯款？",
+                    answer: "1) 員工一旦被騙仍可直接匯款成功（因為權限在一人手上）。<br>2) 它保護資料機密性（不被偷看），不保證交易流程不被話術操控。"
+                }
+            },
+            {
+                id: 14,
+                type: "single",
+                tabLabel: "第 14 題",
+                question: "請問為了有效防範 AI 深度偽造的語音與影像攻擊，降低組織同仁受到詐騙將公司的款項匯出造成組織的營運損失，下列何項推動組合<span class='highlight'>最為無效</span>？",
+                options: [
+                    { id: "A", text: "(A) (1)(2)" },
+                    { id: "B", text: "(B) (2)(3)" },
+                    { id: "C", text: "(C) (3)(4)" },
+                    { id: "D", text: "(D) (4)(5)" }
+                ],
+                correctAnswer: ["D"],
+                reason: "郵件加密偏保護機密性，對深偽詐騙匯款風險最不對焦，使組合整體最無效。",
+                explanation: `
+                    <!-- 第一步：找關鍵字 -->
+                    <div class="explain-section">
+                        <h4>🔍 第一步：找關鍵字</h4>
+                        <p><strong>最為無效</strong>：選「跟匯款防詐最不對焦」的組合。<br>
+                        <strong>匯款、營運損失</strong>：要能影響「匯款流程」才算有效。<br>
+                        <strong>深度偽造語音/影像</strong>：重點是「冒充指令」而非資料被竊讀。</p>
+                    </div>
+
+                    <!-- 第二步：白話翻譯 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-law);">
+                        <h4>🗣️ 第二步：白話翻譯</h4>
+                        <p>哪兩個措施湊在一起，對防止員工被騙匯款最沒幫助？</p>
+                        <p><strong>🍎 生活例子：</strong>就像你家遭小偷（詐騙），結果你只有把日記本鎖在保險箱（郵件加密），這對防止小偷搬走電視（匯款）完全沒用。</p>
+                    </div>
+
+                    <!-- 第三步：解題思路 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                        <h4>💡 第三步：解題思路與原理</h4>
+                        <p><strong>這題在考什麼？</strong>考你能否辨識「控制措施與風險目標是否對齊」。</p>
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li>把每個措施對應到它主要保護的風險：防詐？防帳號盜用？防資料外洩？</li>
+                            <li>找出那組主要保護的是「郵件資料機密性」而不是「匯款詐騙」。</li>
+                            <li>判斷最不對焦者為答案。</li>
+                        </ol>
+                        <p><strong>原理與規則：</strong>風險對齊 (Risk Alignment)：控制措施必須直接降低特定風險發生的可能性或衝擊。</p>
+                    </div>
+
+                    <!-- 第四步：選項分析 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                        <h4>⚖️ 第四步：選項分析</h4>
+                        <ul>
+                            <li>(A) (1)(2) 阻擋工具/網站＋AI辨識，至少在「降低深偽素材產生與辨識」上有幫助。</li>
+                            <li>(B) (2)(3) AI辨識＋教育訓練，屬於「偵測＋人防」，仍與深偽風險相關。</li>
+                            <li>(C) (3)(4) 教育訓練＋財務系統 MFA，可同時降低受騙與帳號被盜後直接操作匯款的風險。</li>
+                            <li>(D) <strong>(4)(5) 最無效</strong>：(4)雖有幫助，但(5)郵件資料儲存加密主要解決「郵件資料被偷看」，對「深偽指令騙匯款」最不對焦。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 觀念補充與延伸 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-iso);">
+                        <h4>📘 觀念補充與延伸</h4>
+                        <p><strong>核心觀念定位：</strong>風險管理與控制措施選擇。</p>
+                        <p><strong>法條或定義 (白話)：</strong>資料儲存加密 (Encryption at Rest)：保護儲存在硬碟上的資料不被未授權讀取。</p>
+                        <p><strong>觸類旁通（舉一反三）：</strong>如果題目改問「防止公司機密配方外洩」，那郵件加密就是最有效的。</p>
+                    </div>
+
+                    <!-- 記憶口訣與陷阱 -->
+                    <div class="explain-section" style="border-left-color: var(--error-text);">
+                        <h4>⚡ 記憶口訣與常見陷阱</h4>
+                        <p><strong>記憶口訣：</strong>「防匯款騙，不是鎖郵件」：加密偏機密，不是防詐主力。</p>
+                        <p><strong>心理盲點：</strong>看到「加密」就覺得很安全，但要看它在保護哪個風險。</p>
+                        <p><strong>避坑指南：</strong>題目若提「匯款損失」，優先找「驗證/複核/授權」相關控制。</p>
+                    </div>
+                `,
+                selfCheck: {
+                    question: "1) 如果詐騙主要走視訊會議而非電子郵件，(5) 還有幫助嗎？<br>2) MFA 能防止哪些風險？不能防止哪些風險？",
+                    answer: "1) 幫助更小，因為風險通道不在郵件。<br>2) 能防帳密被盜直接登入；不能保證員工不被話術騙去「自己操作」。"
+                }
+            },
+            {
+                id: 15,
+                type: "single",
+                tabLabel: "第 15 題",
+                question: "資安長要求導入 ISO 42001 <span class='highlight'>人工智慧管理系統 (AIMS)</span>，請問在導入 AIMS 過程中，下列何項組合與 AI 治理較具關聯？",
+                options: [
+                    { id: "A", text: "(A) (1)(5)" },
+                    { id: "B", text: "(B) (2)(3)" },
+                    { id: "C", text: "(C) (3)(4)" },
+                    { id: "D", text: "(D) (5)(6)" }
+                ],
+                correctAnswer: ["B"],
+                reason: "AI 治理強調管理 AI 的導入與使用能力，(2)導入 AI 模組與 (3)教育訓練最直接相關。",
+                explanation: `
+                    <!-- 第一步：找關鍵字 -->
+                    <div class="explain-section">
+                        <h4>🔍 第一步：找關鍵字</h4>
+                        <p><strong>ISO 42001 / AIMS</strong>：AI 管理系統（用制度管理 AI 的風險與流程）。<br>
+                        <strong>AI 治理</strong>：重點在「管理與流程」，不是單純資安工具。<br>
+                        <strong>較具關聯</strong>：要選與 AI 系統生命週期管理、監督、使用規範有關的措施。</p>
+                    </div>
+
+                    <!-- 第二步：白話翻譯 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-law);">
+                        <h4>🗣️ 第二步：白話翻譯</h4>
+                        <p>你要導入一套「管理 AI 的制度」，哪兩項措施最像是在做 AI 治理？</p>
+                        <p><strong>🍎 生活例子：</strong>就像買車（導入AI）除了車子本身，還要考駕照（教育訓練）跟交通規則（治理制度），才算完整的管理體系。</p>
+                    </div>
+
+                    <!-- 第三步：解題思路 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                        <h4>💡 第三步：解題思路與原理</h4>
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li>先看哪些選項跟「AI」本身最直接相關：導入 AI 模組(2)、教育訓練(3)。</li>
+                            <li>AIMS 會要求你對 AI 的使用、風險、責任分工、能力訓練做制度化。</li>
+                            <li>因此與 (2)(3) 的關聯最高。</li>
+                        </ol>
+                        <p><strong>原理與規則：</strong>AIMS 像 ISO 27001，但它是管 AI。不是買工具就算治理，而是有規範、有管理、有稽核。</p>
+                    </div>
+
+                    <!-- 第四步：選項分析 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                        <h4>⚖️ 第四步：選項分析</h4>
+                        <ul>
+                            <li>(A) (1)(5) 阻擋網站＋郵件加密偏傳統資安控制，與「AI 管理制度」關聯較弱。</li>
+                            <li>(B) <strong>(2)(3) 正確</strong>：(2) AI 模組導入涉及模型選型、驗證；(3) 教育訓練屬於治理要求的一部分（人員能力）。</li>
+                            <li>(C) (3)(4) MFA 是傳統身分驗證，與 AIMS 核心治理較不直接。</li>
+                            <li>(D) (5)(6) SoD 與加密都重要，但不是「AI 系統治理」的核心組件。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 觀念補充與延伸 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-iso);">
+                        <h4>📘 觀念補充與延伸</h4>
+                        <p><strong>核心觀念定位：</strong>AI 治理/管理系統。</p>
+                        <p><strong>法條或定義 (白話)：</strong>AIMS (ISO 42001)：人工智慧管理系統，確保組織負責任地開發或使用 AI。</p>
+                        <p><strong>觸類旁通（舉一反三）：</strong>對比概念：ISMS (資安 ISO 27001) vs. AIMS (AI ISO 42001)。</p>
+                    </div>
+
+                    <!-- 記憶口訣與陷阱 -->
+                    <div class="explain-section" style="border-left-color: var(--error-text);">
+                        <h4>⚡ 記憶口訣與常見陷阱</h4>
+                        <p><strong>記憶口訣：</strong>「管 AI：工具＋人」：導入 AI（2）與訓練人（3）是治理最直接。</p>
+                        <p><strong>心理盲點：</strong>把 AIMS 當成「買一套 AI 安全工具」；其實重點是管理制度。</p>
+                        <p><strong>避坑指南：</strong>看到「治理/管理系統」優先選「流程、訓練、監督、責任」相關措施。</p>
+                    </div>
+                `,
+                selfCheck: {
+                    question: "1) AIMS 最像哪一種既有管理系統？<br>2) 為什麼「教育訓練」會被視為治理的一部分？",
+                    answer: "1) 像 ISMS（ISO 27001）但管理對象是 AI。<br>2) 治理要確保人員理解規範與風險，避免誤用。"
+                }
+            },
+            {
+                id: 16,
+                type: "multiple",
+                tabLabel: "第 16 題",
+                question: "在導入影像辨識、聲音辨識或 AI 模組，為了確保導入系統的<span class='highlight'>可信任性 (Trustworthiness)</span>，應考量下列哪些項目？(複選)",
+                options: [
+                    { id: "A", text: "(A) AI 強韌度 (AI Robustness)" },
+                    { id: "B", text: "(B) AI 可靠度 (AI Reliability)" },
+                    { id: "C", text: "(C) AI 可控性 (AI Controllability)" },
+                    { id: "D", text: "(D) AI 系統速度 (AI System Speed)" }
+                ],
+                correctAnswer: ["A", "B", "C"],
+                reason: "可信任 AI 重點在抗干擾、穩定可靠、可被控制，速度僅為效能指標。",
+                explanation: `
+                    <!-- 第一步：找關鍵字 -->
+                    <div class="explain-section">
+                        <h4>🔍 第一步：找關鍵字</h4>
+                        <p><strong>可信任性（Trustworthiness）</strong>：不是快不快，而是「可不可以信」。<br>
+                        <strong>應考量哪些項目</strong>：通常是可信任 AI 的核心三要素類型。</p>
+                    </div>
+
+                    <!-- 第二步：白話翻譯 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-law);">
+                        <h4>🗣️ 第二步：白話翻譯</h4>
+                        <p>你要用 AI 來判斷真偽，哪些特性會決定這套 AI 能不能被信任？</p>
+                        <p><strong>🍎 生活例子：</strong>就像你挑選保鑣，你會選「很耐打、很穩定、聽指揮」的（可信任），而不是只選「跑得快」但可能隨時倒戈或亂打人的（速度）。</p>
+                    </div>
+
+                    <!-- 第三步：解題思路與原理 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                        <h4>💡 第三步：解題思路與原理</h4>
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li>理解可信任性 (Trustworthiness) 定義：安全、準確、可解釋。</li>
+                            <li>排除單純的「效能」指標（如速度）。</li>
+                            <li>選出與「安全性、穩定性」相關的選項。</li>
+                        </ol>
+                        <p><strong>原理與規則 - 可信任 AI 核心：</strong></p>
+                        <ul>
+                            <li><strong>Robustness（強韌度）：</strong>遇到雜訊、對抗攻擊仍不容易被騙（白話：抗干擾）。</li>
+                            <li><strong>Reliability（可靠度）：</strong>同樣條件下結果穩定、錯誤率可控（白話：不會一下準一下不準）。</li>
+                            <li><strong>Controllability（可控性）：</strong>能設定邊界、有人可介入（白話：出事能煞車）。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 第四步：選項分析 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                        <h4>⚖️ 第四步：選項分析</h4>
+                        <ul>
+                            <li>(A) <strong>強韌度</strong>：對抗深偽攻擊刻意設計的雜訊，必須要強韌。</li>
+                            <li>(B) <strong>可靠度</strong>：決定能否用在流程上，避免誤判造成損失。</li>
+                            <li>(C) <strong>可控性</strong>：確保誤判時可調整或人工覆核。</li>
+                            <li>(D) <strong>速度</strong>：跑得快是效能，但若容易被騙，仍不可信。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 觀念補充與延伸 -->
+                    <div class="explain-section" style="border-left-color: var(--tag-iso);">
+                        <h4>📘 觀念補充與延伸</h4>
+                        <p><strong>核心觀念定位：</strong>可信任 AI (Trustworthy AI)。</p>
+                        <p><strong>法條或定義 (白話)：</strong>Trustworthiness：系統在預期使用期間能維持正確、安全、可靠的特性。</p>
+                        <p><strong>觸類旁通（舉一反三）：</strong>變化題：若問「可用性 (Availability)」，則需考量系統不當機。</p>
+                    </div>
+
+                    <!-- 記憶口訣與陷阱 -->
+                    <div class="explain-section" style="border-left-color: var(--error-text);">
+                        <h4>⚡ 記憶口訣與常見陷阱</h4>
+                        <p><strong>記憶口訣：</strong>「可信任三件事：扛得住、穩得住、煞得住」。</p>
+                        <p><strong>心理盲點：</strong>以為「越快越好」就等於可信任；其實快只是效率，不是可信。</p>
+                        <p><strong>避坑指南：</strong>看到 Trustworthiness：先找「抗攻擊、穩定、可控」；速度通常不在核心清單。</p>
+                    </div>
+                `,
+                selfCheck: {
+                    question: "1) 若 AI 很快但常誤判，你敢用它做高額匯款決策嗎？<br>2) 若攻擊者故意用特殊噪音讓模型判斷錯，這是在打哪個面向？",
+                    answer: "1) 不敢，因為可靠度不足會造成重大損失。<br>2) 強韌度（Robustness）。"
+                }
+            }
+        ]
+    };
+
+    // --- State ---
+    const quizState = {
+        questions: quizData.questions.map(q => ({
+            id: q.id,
+            status: 'pending', // pending, correct, wrong
+            selected: []
+        })),
+        completedCount: 0
+    };
+
+    // --- DOM Elements ---
+    const tabsNav = document.getElementById('tabs-nav');
+    const contentContainer = document.getElementById('tab-content-container');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const completionStatus = document.getElementById('completion-status');
+
+    // --- Initialization ---
+    function init() {
+        renderTabs();
+        renderQuestions();
+        switchTab(0); // Show first tab
+        updateProgressUI();
+    }
+
+    // --- Render Functions ---
+    function renderTabs() {
+        tabsNav.innerHTML = '';
+        quizData.questions.forEach((q, index) => {
+            const btn = document.createElement('button');
+            btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+            btn.dataset.index = index;
+            btn.innerHTML = `${q.tabLabel} <span class="tab-status" id="tab-status-${q.id}"></span>`;
+            btn.onclick = () => switchTab(index);
+            tabsNav.appendChild(btn);
+        });
+    }
+
+    function renderQuestions() {
+        contentContainer.innerHTML = '';
+        quizData.questions.forEach((q, index) => {
+            const container = document.createElement('div');
+            container.className = `question-block ${index === 0 ? 'active' : ''}`;
+            container.id = `q-block-${index}`;
+            
+            const inputType = q.type === 'single' ? 'radio' : 'checkbox';
+            
+            let optionsHTML = '';
+            q.options.forEach(opt => {
+                optionsHTML += `
+                    <label class="option-label" id="opt-label-${q.id}-${opt.id}">
+                        <input type="${inputType}" 
+                               name="q-${q.id}" 
+                               class="option-input" 
+                               value="${opt.id}"
+                               onchange="handleOptionSelect(${q.id}, '${opt.id}', '${q.type}')">
+                        <span class="option-text">${opt.text}</span>
+                    </label>
+                `;
+            });
+
+            container.innerHTML = `
+                <div class="q-header">
+                    <span class="q-tag" id="q-status-tag-${q.id}">未作答</span>
+                    ${q.type === 'multiple' ? '<span class="tag-pill" style="background:#546e7a">複選題</span>' : ''}
+                </div>
+                
+                <div class="question-text">${q.question}</div>
+                
+                <div class="options-group">
+                    ${optionsHTML}
+                </div>
+
+                <div class="feedback" id="feedback-${q.id}">
+                    <!-- JS Injected -->
+                </div>
+
+                <div class="action-area">
+                    <button class="btn-primary" id="btn-action-${q.id}" onclick="handleSubmit(${q.id})">送出答案</button>
+                </div>
+
+                <!-- Explanation Toggle -->
+                <details class="explain-toggle" id="explain-${q.id}" style="display:none">
+                    <summary>查看詳細解析（含解題步驟與避坑指南）</summary>
+                    <div class="details-content">
+                        ${q.explanation}
+                    </div>
+                </details>
+
+                <!-- Self Check (Modified Structure) -->
+                <div class="self-check-container" id="selfcheck-${q.id}">
+                    <div class="self-check-header">
+                        <span>🧠 自我檢測</span>
+                    </div>
+                    <div class="check-question">
+                        ${q.selfCheck.question}
+                    </div>
+                    <details class="answer-reveal">
+                        <summary>點擊查看參考答案</summary>
+                        <div class="details-content">
+                            <p>${q.selfCheck.answer}</p>
+                        </div>
+                    </details>
+                </div>
+            `;
+            contentContainer.appendChild(container);
+        });
+    }
+
+    // --- Logic ---
+    function switchTab(index) {
+        // Update Tabs UI
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.tab-btn[data-index="${index}"]`).classList.add('active');
+
+        // Update Content UI
+        document.querySelectorAll('.question-block').forEach(block => {
+            block.style.display = 'none';
+            block.classList.remove('active');
+        });
+        const targetBlock = document.getElementById(`q-block-${index}`);
+        targetBlock.style.display = 'block';
+        
+        // Small timeout to allow display:block to apply before adding class for animation
+        setTimeout(() => {
+            targetBlock.classList.add('active');
+            targetBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 10);
+    }
+
+    function handleOptionSelect(qId, optId, type) {
+        const state = quizState.questions.find(q => q.id === qId);
+        if (state.status !== 'pending') return; // Prevent change if submitted
+
+        if (type === 'single') {
+            state.selected = [optId];
+        } else {
+            const idx = state.selected.indexOf(optId);
+            if (idx > -1) state.selected.splice(idx, 1);
+            else state.selected.push(optId);
+        }
+        
+        // UI Update: Highlight selected
+        updateOptionsUI(qId, state.selected);
+    }
+
+    function updateOptionsUI(qId, selectedIds) {
+        const labels = document.querySelectorAll(`label[id^="opt-label-${qId}-"]`);
+        labels.forEach(lbl => {
+            lbl.style.backgroundColor = '#fff';
+            lbl.style.borderColor = '#e0e0e0';
+            const input = lbl.querySelector('input');
+            if (selectedIds.includes(input.value)) {
+                lbl.style.backgroundColor = '#e3f2fd';
+                lbl.style.borderColor = '#2980b9';
+            }
+        });
+    }
+
+    function handleSubmit(qId) {
+        const state = quizState.questions.find(q => q.id === qId);
+        const qData = quizData.questions.find(q => q.id === qId);
+        const btn = document.getElementById(`btn-action-${qId}`);
+
+        // Prevent double submission or submit without selection
+        if (state.status !== 'pending') {
+            resetQuestion(qId);
+            return;
+        }
+
+        if (state.selected.length === 0) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // Logic Check
+        const userSet = [...state.selected].sort().toString();
+        const ansSet = [...qData.correctAnswer].sort().toString();
+        const isCorrect = userSet === ansSet;
+
+        // Update State
+        state.status = isCorrect ? 'correct' : 'wrong';
+        if (isCorrect) quizState.completedCount++;
+
+        // UI Updates
+        disableOptions(qId);
+        showFeedback(qId, isCorrect, qData);
+        updateStatusTag(qId, isCorrect);
+        updateTabStatus(qId, isCorrect);
+        updateProgressUI();
+
+        // Reveal Details & Self Check
+        document.getElementById(`explain-${qId}`).style.display = 'block';
+        document.getElementById(`selfcheck-${qId}`).style.display = 'block';
+
+        // Button Change
+        btn.textContent = '重新作答';
+        btn.className = 'btn-primary btn-reset';
+    }
+
+    function resetQuestion(qId) {
+        const state = quizState.questions.find(q => q.id === qId);
+        
+        if (state.status === 'correct') {
+            quizState.completedCount--;
+        }
+
+        // Reset State
+        state.status = 'pending';
+        state.selected = [];
+
+        // Reset UI
+        const inputs = document.querySelectorAll(`input[name="q-${qId}"]`);
+        inputs.forEach(input => {
+            input.checked = false;
+            input.disabled = false;
+        });
+        
+        const labels = document.querySelectorAll(`label[id^="opt-label-${qId}-"]`);
+        labels.forEach(lbl => {
+            lbl.classList.remove('disabled');
+            lbl.style.backgroundColor = '#fff';
+            lbl.style.borderColor = '#e0e0e0';
+        });
+
+        // Hide Feedback & Details
+        document.getElementById(`feedback-${qId}`).style.display = 'none';
+        
+        const explain = document.getElementById(`explain-${qId}`);
+        explain.style.display = 'none';
+        explain.open = false;
+        
+        // Hide Self Check & Reset its internal state (close answer)
+        const selfcheck = document.getElementById(`selfcheck-${qId}`);
+        selfcheck.style.display = 'none';
+        selfcheck.querySelector('details.answer-reveal').open = false;
+
+        // Reset Tags
+        const tag = document.getElementById(`q-status-tag-${qId}`);
+        tag.className = 'q-tag';
+        tag.textContent = '未作答';
+        
+        document.getElementById(`tab-status-${qId}`).textContent = '';
+
+        // Reset Button
+        const btn = document.getElementById(`btn-action-${qId}`);
+        btn.textContent = '送出答案';
+        btn.className = 'btn-primary';
+
+        updateProgressUI();
+        
+        // Scroll to top of question
+        const container = document.getElementById(`q-block-${quizData.questions.findIndex(q => q.id === qId)}`);
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function disableOptions(qId) {
+        const inputs = document.querySelectorAll(`input[name="q-${qId}"]`);
+        inputs.forEach(input => input.disabled = true);
+        const labels = document.querySelectorAll(`label[id^="opt-label-${qId}-"]`);
+        labels.forEach(lbl => lbl.classList.add('disabled'));
+    }
+
+    function showFeedback(qId, isCorrect, qData) {
+        const fbDiv = document.getElementById(`feedback-${qId}`);
+        fbDiv.style.display = 'block';
+        fbDiv.className = `feedback ${isCorrect ? 'success' : 'error'}`;
+        
+        let content = '';
+        if (isCorrect) {
+            content = `<strong>✓ 答對了！</strong><p>${qData.reason}</p>`;
+        } else {
+            const correctStr = qData.correctAnswer.join('、');
+            content = `<strong>✗ 答錯了</strong><p>正確答案：${correctStr}</p><p>${qData.reason}</p>`;
+        }
+        fbDiv.innerHTML = content;
+    }
+
+    function updateStatusTag(qId, isCorrect) {
+        const tag = document.getElementById(`q-status-tag-${qId}`);
+        tag.textContent = isCorrect ? '已答對' : '已答錯';
+        tag.className = `q-tag ${isCorrect ? 'correct' : 'wrong'}`;
+    }
+
+    function updateTabStatus(qId, isCorrect) {
+        const span = document.getElementById(`tab-status-${qId}`);
+        span.textContent = isCorrect ? '✓' : '✗';
+    }
+
+    function updateProgressUI() {
+        const total = quizData.questions.length;
+        const current = quizState.completedCount;
+        const percent = (current / total) * 100;
+
+        progressFill.style.width = `${percent}%`;
+        progressText.innerHTML = `已完成：<strong>${current}</strong> / ${total}`;
+
+        if (current === total) {
+            completionStatus.textContent = '✅ 本題組已完成';
+            completionStatus.className = 'status-done';
+        } else {
+            completionStatus.textContent = '📝 尚未完成';
+            completionStatus.className = 'status-pending';
+        }
+    }
+
+    // Start
+    init();
+
+</script>
+</body>
+</html>

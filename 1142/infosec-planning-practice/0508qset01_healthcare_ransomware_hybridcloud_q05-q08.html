@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題組 1｜資安事件應變與管理</title>
+    <!-- 引入 Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* 核心色彩系統 */
+            --body-bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #546e7a;
+            --primary: #2980b9;
+            --primary-hover: #21618c;
+            --primary-light: #e3f2fd;
+            --highlight: #f1c40f;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            --border-color: #e0e0e0;
+            
+            /* 功能性標籤色彩 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* 版面容器 */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 16px;
+                padding: 20px;
+                width: calc(100% - 32px);
+                border-radius: 12px;
+            }
+        }
+
+        /* 1. Header */
+        .group-header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .group-header h1 {
+            font-size: 24px;
+            margin: 0 0 16px 0;
+            color: var(--primary);
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #3498db);
+            width: 0%;
+            transition: width 400ms ease;
+        }
+
+        .completion-status {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-pending { color: var(--text-secondary); }
+        .status-done { color: var(--success-text); }
+
+        /* 2. Context (Shared) */
+        .group-context {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid var(--primary);
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .group-context h3 {
+            margin-top: 0;
+            color: var(--text-primary);
+            font-size: 18px;
+        }
+
+        /* 3. Tabs */
+        .tabs-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 4px; /* Scrollbar space */
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            color: var(--text-secondary);
+            transition: all 200ms ease;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 8px rgba(41,128,185,0.3);
+        }
+
+        .tab-status {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* 4. Question Content */
+        .question-block {
+            animation: fadeIn 300ms ease;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .q-tag {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #eee;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .tag-law { background-color: var(--tag-law); color: white; }
+        .tag-zt { background-color: var(--tag-zt); color: white; }
+        .tag-mgm { background-color: var(--tag-mgm); color: white; }
+        .tag-sec { background-color: var(--tag-sec); color: white; }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option {
+            display: flex;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 150ms ease;
+            align-items: flex-start;
+        }
+
+        .option:hover:not(.disabled) {
+            background-color: var(--primary-light);
+        }
+
+        .option.selected {
+            background-color: #bbdefb;
+            border: 2px solid var(--primary);
+            padding: 15px; /* Adjust for border width */
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+            background-color: #f5f5f5;
+        }
+        
+        .option input {
+            margin-top: 4px;
+            margin-right: 12px;
+        }
+
+        .option-text {
+            width: 100%;
+            word-break: break-word;
+        }
+
+        /* Actions */
+        .action-area {
+            margin-bottom: 24px;
+        }
+
+        .btn-primary, .btn-reset {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 200ms ease;
+            min-height: 44px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(41,128,185,0.3);
+        }
+
+        .btn-reset {
+            background-color: #fff;
+            color: var(--text-secondary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-reset:hover {
+            background-color: #f5f5f5;
+            border-color: var(--text-secondary);
+        }
+
+        /* Feedback */
+        .feedback {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: fadeInUp 300ms ease;
+        }
+
+        .feedback.success {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            border-left: 4px solid var(--success-text);
+        }
+
+        .feedback.error {
+            background-color: var(--error-bg);
+            color: var(--error-text);
+            border-left: 4px solid var(--error-text);
+        }
+
+        /* Detailed Explanation Styles */
+        .explanation-container {
+            display: none; /* Initially hidden */
+            margin-top: 24px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .exp-card {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .exp-header {
+            background-color: #f8f9fa;
+            padding: 12px 16px;
+            font-weight: 700;
+            color: var(--primary);
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .exp-header::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background-color: var(--primary);
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+
+        .exp-body {
+            padding: 16px;
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+
+        .exp-body ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+        
+        .exp-body li {
+            margin-bottom: 6px;
+        }
+
+        /* Special Sections Colors */
+        .section-keywords .exp-header { color: #d35400; }
+        .section-keywords .exp-header::before { background-color: #d35400; }
+
+        .section-logic .exp-header { color: #2980b9; }
+        .section-logic .exp-header::before { background-color: #2980b9; }
+
+        .section-trap .exp-header { color: #c0392b; }
+        .section-trap .exp-header::before { background-color: #c0392b; }
+
+        .section-mnemonic .exp-header { color: #27ae60; }
+        .section-mnemonic .exp-header::before { background-color: #27ae60; }
+
+        /* Self Check Styles */
+        .self-check-container {
+            background-color: #fff8e1; /* Light yellow bg */
+            border: 1px solid #ffe082;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .self-check-title {
+            margin: 0 0 16px 0;
+            color: #f57f17;
+            font-weight: 700;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .self-check-item {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px dashed #ffe082;
+        }
+
+        .self-check-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .sc-question {
+            font-weight: 500;
+            margin: 0 0 8px 0;
+            color: #333;
+        }
+
+        .sc-answer-details summary {
+            color: #f57f17;
+            font-size: 14px;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+        
+        .sc-answer-details summary::after {
+            content: ''; /* Remove default + */
+        }
+        
+        .sc-answer-details[open] summary {
+            border-bottom: none;
+            background: none;
+        }
+
+        .sc-answer-text {
+            background-color: #fff;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #444;
+            border: 1px solid #ffe082;
+        }
+
+        mark {
+            background-color: var(--highlight);
+            color: #000;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    <!-- 1. Header -->
+    <header class="group-header">
+        <h1>題組 1｜完整教學模板</h1>
+        <div class="progress-info">
+            <span id="progress-text">已完成：<strong>0</strong> / 4</span>
+            <span id="completion-text" class="status-pending">📝 尚未完成</span>
+        </div>
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+    </header>
+
+    <!-- 2. Context -->
+    <section class="group-context">
+        <h3>📄 題組背景</h3>
+        <p>一家被政府依《資通安全管理法》（台灣規範政府機關與關鍵基礎設施資安管理與通報的法律）核定為「關鍵基礎設施提供者」（影響民生或國家運作的重要單位，例如醫院、電力）的區域醫療中心，其資訊環境為混合雲架構。院內核心的「電子病歷系統（EHR，電子化病歷管理系統）」部署於本地資料中心，而新推出的「遠距醫療諮詢平台」（線上看診與諮詢系統）採用雲端原生技術（以雲端環境為主要設計目標的開發方式），並整合第三方開發的預約排程模組。為提升效率，開發團隊被允許在配發的公務筆電上使用生成式 AI（會自動產生文字/程式碼的 AI）輔助開發。</p>
+        <p>某日上午，資安監控中心（SOC，負責監控與應變的資安中心）的 AI 驅動偵測系統發出警報，顯示 EHR 主機出現「勒索軟體」（把檔案加密再要你付錢才能解鎖的惡意程式）加密行為，同時發現攻擊源頭來自一台開發人員的筆電；該筆電因執行了含有惡意程式碼的 AI 輔助工具而遭入侵。</p>
+    </section>
+
+    <!-- 3. Tabs -->
+    <nav class="tabs-container" id="tabs-container">
+        <!-- Generated by JS -->
+    </nav>
+
+    <!-- 4. Main Content Area -->
+    <main id="quiz-content">
+        <!-- Generated by JS -->
+    </main>
+</div>
+
+<script>
+    /**
+     * Data Structure with Full Teaching Template
+     */
+    const quizData = {
+        questions: [
+            {
+                id: 5,
+                type: "single",
+                tag: { text: "資通安全管理法", class: "tag-law" },
+                question: "身為該醫療中心的資安長(CISO)，情境在發現勒索軟體活動的當下，根據台灣《資通安全管理法》的規定，您的團隊第一小時內最優先的法定應辦事項為下列何項？",
+                options: [
+                    { id: "A", text: "立即支付勒索贖金以最快速度回復系統，避免影響病患照護" },
+                    { id: "B", text: "全面斷開醫院對外網路，阻止威脅擴散並進行內部損害評估" },
+                    { id: "C", text: "依據事件分級，完成初步損害評估與判斷，並於一小時內通報主管機關" },
+                    { id: "D", text: "召集所有資訊人員，優先搶救被加密的電子病歷資料庫" }
+                ],
+                correctAnswer: ["C"],
+                reason: "法律第一優先是完成事件分級與初步評估，並在一小時內通報主管機關。",
+                
+                // 完整教學模板資料
+                teachingData: {
+                    keywords: "<strong>資安長(CISO)</strong>：負責法遵與通報。<br><strong>發現勒索軟體活動的當下</strong>：事件剛發生的緊急階段。<br><strong>第一小時內</strong>：鎖定「時限」。<br><strong>法定應辦事項</strong>：非僅最佳實務，是法律規定必做。<br><strong>資通安全管理法</strong>：指向通報、分級流程。",
+                    vernacular: "你現在抓到醫院正在被勒索軟體攻擊，法律要求你在「最一開始的一小時」先做哪件一定要做的事？",
+                    logic: {
+                        steps: ["先確認題目問的是「法定、第一小時內」：優先想到通報與分級。", "排除「看似很急但不是法規第一順位」的選項（如付贖金、先搶救資料）。", "尋找同時包含「事件分級 + 初步評估 + 一小時內通報主管機關」的選項。"],
+                        principles: "依法規治理邏輯：先「判定事件等級（分級）」與「做初步損害評估」，才能「依規定時限通報」。通報是法律責任；技術處置（斷網/復原）是手段，但不一定是「法定第一順位」。",
+                        example: "生活例子：就像看到大樓失火，法律（和SOP）規定第一件事是「報警（通報）」和「確認火勢（分級）」，而不是你自己先衝進去救財物（搶救資料）或試圖跟火商量（付贖金）。"
+                    },
+                    optionAnalysis: [
+                        { opt: "A", text: "<strong>錯在哪？</strong>付贖金屬於「復原策略」甚至可能衍生法律與道德風險，且不屬於法定第一小時的必做事項。" },
+                        { opt: "B", text: "<strong>為什麼不選？</strong>斷外網是可能的技術手段，但題目問「法定應辦事項」，斷網不等於完成法定通報義務。" },
+                        { opt: "C", text: "<strong>為什麼對？</strong>同時包含「事件分級、初步損害評估與判斷、且一小時內通報主管機關」—完全命中「法定＋時限」。" },
+                        { opt: "D", text: "<strong>為什麼錯？</strong>優先搶救資料是技術面應變，但法律面的第一順位通常是分級與通報要求。" }
+                    ],
+                    extension: {
+                        concepts: "<strong>資安事件通報</strong>：依規定時限向主管機關或上級機關回報事件狀況。<br><strong>事件分級</strong>：依影響範圍/嚴重性把事件分成不同等級。",
+                        analogy: "觸類旁通：通報（對外/對上回報） vs. 應變（技術處理、隔離、復原）。變化題型常考不同等級事件的通報時限差異。"
+                    },
+                    mnemonic: "「先分級、再評估、限時通報」：分、估、報。",
+                    traps: {
+                        blindSpot: "直覺會先做技術處置（如斷網、救資料），但題目問的是「法定應辦」。",
+                        guide: "看到「法定、時限（第一小時）」直接優先找「分級＋通報」字樣。"
+                    },
+                    selfChecks: [
+                        { q: "如果題目改成「第一小時內最優先的技術處置」，你會偏向選哪一個？為什麼？", a: "偏向 (B)。隔離與阻斷擴散是常見的技術優先動作，防止災害擴大。" },
+                        { q: "「分級」與「通報」誰先？為什麼不能顛倒？", a: "分級先。因為通報內容與通報對象/層級會受事件等級（1級至4級）影響。" },
+                        { q: "付贖金為什麼常被視為不建議？", a: "可能鼓勵犯罪、無法保證解密、且可能違反某些國家的反資助恐怖主義法規。" }
+                    ]
+                }
+            },
+            {
+                id: 6,
+                type: "single",
+                tag: { text: "零信任架構", class: "tag-zt" },
+                question: "身為該醫療中心的資安長(CISO)，為有效控制損害並避免攻擊者在混合雲環境內部橫向移動，下列何種安全架構規劃原則在此情境下最能發揮作用？",
+                options: [
+                    { id: "A", text: "強化邊界防火牆規則，嚴格過濾所有進出醫院網路的流量" },
+                    { id: "B", text: "導入零信任安全架構(Zero Trust Architecture, ZTA)，在內網實施微切分(Micro-segmentation)" },
+                    { id: "C", text: "要求所有員工每三十天更換一次高強度密碼，並進行資安教育訓練" },
+                    { id: "D", text: "集中所有伺服器日誌至本地的資安訊息與事件管理系統(SIEM)進行分析" }
+                ],
+                correctAnswer: ["B"],
+                reason: "零信任配合微切分能把內部擴散面切小，最有效限制橫向移動。",
+                
+                teachingData: {
+                    keywords: "<strong>混合雲</strong>：有內網也有雲端，邊界模糊。<br><strong>內部橫向移動</strong>：攻擊者已在內部亂竄。<br><strong>架構規劃原則</strong>：找架構層級對策。",
+                    vernacular: "攻擊者已經入侵一台筆電了，你要怎麼設計整體架構，讓他很難在內部到處亂跑、越打越大？",
+                    logic: {
+                        steps: ["看到「橫向移動」：優先想到內網分段、最小信任。", "混合雲下「只靠邊界」通常不夠。", "找到能在內部把網路切小塊、每次存取都要驗證授權的選項。"],
+                        principles: "<strong>零信任</strong>：預設不信任，任何存取都要驗證。<br><strong>微切分</strong>：把內網像隔間一樣切成很多小區域。",
+                        example: "生活例子：就像船艙設計成很多「水密隔艙」（微切分），就算鐵達尼號撞破一個洞（被入侵），水也不會馬上灌滿整艘船導致沉沒，因為隔艙門會關起來（零信任驗證）。"
+                    },
+                    optionAnalysis: [
+                        { opt: "A", text: "<strong>錯在哪？</strong>邊界防火牆守大門，但攻擊者已在屋內，對內部橫向移動無效。" },
+                        { opt: "B", text: "<strong>為什麼對？</strong>零信任配合微切分，正是用來限制內部移動、降低單點失守造成的擴散面。" },
+                        { opt: "C", text: "<strong>為什麼不選？</strong>密碼更換與教育訓練是管理措施，非「架構」上阻止橫向移動的關鍵手段。" },
+                        { opt: "D", text: "<strong>為什麼不選？</strong>SIEM 偏「偵測與分析」，能發現但不一定能「立即限制」移動。" }
+                    ],
+                    extension: {
+                        concepts: "<strong>零信任 (Zero Trust)</strong>：不因為在內網就信任。<br><strong>微切分 (Micro-segmentation)</strong>：細粒度的網路隔離技術。",
+                        analogy: "對比：邊界防禦 (Perimeter, 城堡護城河) vs. 零信任 (Inside-out, 到處都要刷卡)。"
+                    },
+                    mnemonic: "「橫向移動，切小再信」：先微切分，再零信任控管。",
+                    traps: {
+                        blindSpot: "以為防火牆越強就能解決全部問題（只守大門，屋內沒隔間仍會燒整棟）。",
+                        guide: "看到「內部橫向移動」就優先想到「分段/切分/最小信任」。"
+                    },
+                    selfChecks: [
+                        { q: "如果已做微切分，但帳號權限過大，還會有什麼風險？", a: "攻擊者拿到高權限帳號後，仍可合法地跨區操作，微切分擋不住合法憑證的濫用。" },
+                        { q: "SIEM 的主要價值偏「防止」還是偏「偵測」？", a: "偏偵測與合規分析。" },
+                        { q: "「只靠邊界」在混合雲為何不夠？", a: "資源分散，內部與雲端互通多，攻擊可能從內部（釣魚）或供應鏈直接進來，繞過邊界。" }
+                    ]
+                }
+            },
+            {
+                id: 7,
+                type: "single",
+                tag: { text: "供應鏈安全", class: "tag-mgm" },
+                question: "在事件後的改善會議上，考量到醫院的預算限制與營運持續性，下列何項針對「供應鏈安全」的長期風險處理策略最為務實且具成本效益？",
+                options: [
+                    { id: "A", text: "要求所有第三方軟體供應商提供其產品的完整原始碼進行原始碼掃描" },
+                    { id: "B", text: "建立軟體物料清單(SBOM)管理機制，並導入工具持續監控已知漏洞" },
+                    { id: "C", text: "全面禁止使用任何開源軟體與第三方模組，所有系統均自行開發" },
+                    { id: "D", text: "要求第三方軟體供應商皆簽署最高額度資安保險" }
+                ],
+                correctAnswer: ["B"],
+                reason: "SBOM 能掌握第三方元件組成，再用工具持續監控已知漏洞，最可落地且成本效益高。",
+                
+                teachingData: {
+                    keywords: "<strong>供應鏈安全</strong>：第三方風險。<br><strong>長期、預算限制</strong>：要務實、可持續。<br><strong>成本效益</strong>：投入合理且有效。",
+                    vernacular: "醫院錢有限又不能停業，你要用哪種方法，長期管理第三方軟體與套件的風險最划算？",
+                    logic: {
+                        steps: ["把選項分成：理想但不切實際 / 成本過高 / 可落地可持續。", "供應鏈長期管理核心是「你用了什麼」與「它有沒有已知漏洞」。", "最符合的是 SBOM + 持續監控。"],
+                        principles: "<strong>SBOM</strong>：軟體成分表。<br><strong>持續監控</strong>：自動比對漏洞資料庫。",
+                        example: "生活例子：就像食品管理，你不可能要求每一家供應商公開獨家配方（原始碼），但你可以要求他們提供「食品成分表（SBOM）」，這樣當某種原料（如蘇丹紅）出問題時，你能馬上查出哪些產品受影響。"
+                    },
+                    optionAnalysis: [
+                        { opt: "A", text: "<strong>為什麼不務實？</strong>要求完整原始碼常遇到商業機密與合約阻力，且審查成本極高。" },
+                        { opt: "B", text: "<strong>為什麼對？</strong>SBOM 讓你掌握依賴元件，配合工具自動比對，成本可控且可長期運作。" },
+                        { opt: "C", text: "<strong>為什麼錯？</strong>全禁第三方會使開發成本暴增、時程延宕，不符合營運持續性。" },
+                        { opt: "D", text: "<strong>為什麼不選？</strong>保險是「風險移轉」，不能降低被駭風險，且保費可能很高。" }
+                    ],
+                    extension: {
+                        concepts: "<strong>供應鏈安全</strong>：不是你寫的程式也會害你出事。<br><strong>SBOM</strong>：軟體組成清單（Software Bill of Materials）。",
+                        analogy: "SBOM = 食品成分表。原始碼審查 = 查驗工廠配方。"
+                    },
+                    mnemonic: "「先列清單，再盯漏洞」：SBOM 先盤點，監控再管理。",
+                    traps: {
+                        blindSpot: "以為「拿到原始碼掃描」一定最安全，但忽略了可行性與後續維護成本。",
+                        guide: "題目提「預算限制＋長期」通常指向「可制度化」的作法（SBOM）。"
+                    },
+                    selfChecks: [
+                        { q: "SBOM 最像生活中的什麼文件？", a: "食品成分表。" },
+                        { q: "為什麼「持續監控」比「一次性掃描」更符合長期？", a: "因為新漏洞每天都會被發現，今天沒問題的軟體，明天可能就爆出 Log4j 漏洞。" },
+                        { q: "如果供應商不給 SBOM 怎麼辦？", a: "可使用 SCA (軟體成分分析) 工具自行掃描與盤點，或在合約中逐步加入要求。" }
+                    ]
+                }
+            },
+            {
+                id: 8,
+                type: "multiple",
+                tag: { text: "分層防禦 (複選)", class: "tag-sec" },
+                question: "為了建構一個同時兼具彈性與韌性的安全防護體系，防止此類結合供應鏈與內部人員的攻擊再次發生，下列哪些安全架構與管理措施應被納入改善計畫？(複選)",
+                options: [
+                    { id: "A", text: "在所有端點(包含開發者筆電)部署端點偵測與應變(Endpoint Detection and Response, EDR)系統" },
+                    { id: "B", text: "制定並落實嚴格的特權存取管理(Privileged Access Management, PAM)政策，採最小權限原則" },
+                    { id: "C", text: "為所有關鍵系統(如 EHR)的存取啟用基於風險評估的適應性多因子認證(Adaptive MFA)" },
+                    { id: "D", text: "要求所有遠端工作模式，均需配置單向閘道傳輸器，以確保作業安全" }
+                ],
+                correctAnswer: ["A", "B", "C"],
+                reason: "此攻擊由端點入侵並擴散到關鍵系統，應以 EDR、PAM、Adaptive MFA 形成分層防護。",
+                
+                teachingData: {
+                    keywords: "<strong>彈性與韌性</strong>：分層防禦。<br><strong>供應鏈＋內部人員</strong>：攻擊來源。<br><strong>端點、權限、存取</strong>：防禦重點。",
+                    vernacular: "你要防止「第三方工具帶毒＋內部筆電被入侵」再發生，哪一些措施最該列進改善計畫？",
+                    logic: {
+                        steps: ["從攻擊鏈反推：先入侵端點（筆電）→ 再拿權限 → 再碰關鍵系統。", "對應控制：端點 EDR（抓異常）、PAM（管權限）、Adaptive MFA（強驗證）。", "排除過度極端或無彈性的措施（單向閘道）。"],
+                        principles: "<strong>縱深防禦 (Defense in Depth)</strong>：多層次防護，不依賴單一防線。",
+                        example: "生活例子：就像機場安檢（分層防禦）。<br>1. 入口檢查（EDR）：像X光機檢查行李。<br>2. 權限控管（PAM）：只有機師能進駕駛艙。<br>3. 身分驗證（MFA）：登機前要看護照和臉部辨識。"
+                    },
+                    optionAnalysis: [
+                        { opt: "A", text: "<strong>為什麼對？</strong>攻擊從開發者筆電來，EDR 能在第一線偵測與阻擋。" },
+                        { opt: "B", text: "<strong>為什麼對？</strong>橫向移動常靠竊取權限，PAM 採最小權限原則可降低擴散風險。" },
+                        { opt: "C", text: "<strong>為什麼對？</strong>EHR 是關鍵資產，Adaptive MFA 能依情境（如異常地點）加強驗證。" },
+                        { opt: "D", text: "<strong>為什麼不選？</strong>單向閘道通常用於極高機密區（如電廠），會導致無法雙向通訊，嚴重影響開發與行政效率（缺乏彈性）。" }
+                    ],
+                    extension: {
+                        concepts: "<strong>最小權限</strong>：只給完成工作所需的最低權限。<br><strong>多因子認證</strong>：知道的(密碼) + 擁有的(手機) + 生物特徵。",
+                        analogy: "MFA vs Adaptive MFA：固定鎖 vs 智慧鎖（平常刷卡，深夜或陌生人開門要多按密碼）。"
+                    },
+                    mnemonic: "「端點抓、權限鎖、關鍵再驗」：EDR 抓異常、PAM 鎖高權、EHR 存取再加驗。",
+                    traps: {
+                        blindSpot: "看到「安全」就想選最硬的設備（單向閘道），忽略題目要求「彈性」與「務實」。",
+                        guide: "複選題先抓攻擊鏈三段：端點 → 權限 → 關鍵系統；能各段對應到控制措施的通常是正解。"
+                    },
+                    selfChecks: [
+                        { q: "EDR 與傳統防毒（AV）最大的差別在哪？", a: "AV 比對已知特徵碼（抓現行犯）；EDR 重視行為偵測與關聯分析（抓可疑舉動）。" },
+                        { q: "如果沒有 PAM，只做 MFA，風險在哪？", a: "駭客一旦通過 MFA 拿到權限，就能長期潛伏並濫用特權；PAM 能控管「拿到權限後能做什麼、做多久」。" },
+                        { q: "為什麼關鍵系統用 Adaptive MFA 很合適？", a: "兼顧安全與便利。平常快速通關，異常時才嚴格檢查。" }
+                    ]
+                }
+            }
+        ]
+    };
+
+    /**
+     * State Management
+     */
+    const userState = {
+        currentTabIndex: 0,
+        answers: {}, // { questionId: { selected: [], status: 'correct'/'error' } }
+        completedCount: 0
+    };
+
+    // DOM Elements
+    const tabsContainer = document.getElementById('tabs-container');
+    const contentContainer = document.getElementById('quiz-content');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const completionText = document.getElementById('completion-text');
+
+    /**
+     * Initialization
+     */
+    function init() {
+        renderTabs();
+        renderQuestion(0);
+        updateProgress();
+    }
+
+    /**
+     * Render Tabs
+     */
+    function renderTabs() {
+        tabsContainer.innerHTML = '';
+        quizData.questions.forEach((q, index) => {
+            const btn = document.createElement('button');
+            btn.className = `tab-btn ${index === userState.currentTabIndex ? 'active' : ''}`;
+            
+            // Check status for icon
+            let statusIcon = '';
+            if (userState.answers[q.id]?.status === 'correct') statusIcon = '<span class="tab-status">✓</span>';
+            else if (userState.answers[q.id]?.status === 'error') statusIcon = '<span class="tab-status" style="color:#e74c3c">✗</span>';
+
+            btn.innerHTML = `第 ${q.id} 題 ${statusIcon}`;
+            btn.onclick = () => switchTab(index);
+            tabsContainer.appendChild(btn);
+        });
+    }
+
+    /**
+     * Switch Tab
+     */
+    function switchTab(index) {
+        userState.currentTabIndex = index;
+        renderTabs();
+        renderQuestion(index);
+        
+        // Scroll to top of content
+        contentContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /**
+     * Render Question Content
+     */
+    function renderQuestion(index) {
+        const q = quizData.questions[index];
+        const userAnswer = userState.answers[q.id];
+        const isSubmitted = !!userAnswer;
+        const td = q.teachingData;
+        
+        // Input type
+        const inputType = q.type === 'single' ? 'radio' : 'checkbox';
+        
+        // Options Generation
+        let optionsHtml = q.options.map(opt => {
+            const isSelected = userAnswer?.selected.includes(opt.id);
+            const selectedClass = isSelected ? 'selected' : '';
+            const disabledClass = isSubmitted ? 'disabled' : '';
+            const checkedAttr = isSelected ? 'checked' : '';
+            const disabledAttr = isSubmitted ? 'disabled' : '';
+
+            return `
+                <label class="option ${selectedClass} ${disabledClass}" onclick="handleOptionClick('${q.id}', '${opt.id}', '${inputType}', ${isSubmitted}, this)">
+                    <input type="${inputType}" name="q${q.id}" value="${opt.id}" ${checkedAttr} ${disabledAttr}>
+                    <span class="option-text">(${opt.id}) ${opt.text}</span>
+                </label>
+            `;
+        }).join('');
+
+        // Button State
+        let btnText = '送出答案';
+        let btnClass = 'btn-primary';
+        let btnAction = `submitAnswer(${index})`;
+        
+        if (isSubmitted) {
+            btnText = '重新作答';
+            btnClass = 'btn-reset';
+            btnAction = `resetQuestion(${index})`;
+        }
+
+        // Feedback
+        const feedbackDisplay = isSubmitted ? 'block' : 'none';
+        const feedbackClass = userAnswer?.status === 'correct' ? 'success' : 'error';
+        const feedbackTitle = userAnswer?.status === 'correct' ? '✓ 答對了！' : '✗ 答錯了';
+        const feedbackContent = userAnswer?.status === 'error' ? `<p>正確答案：${q.correctAnswer.join('、')}</p>` : '';
+        
+        // === Detailed Explanation Generation (The Template) ===
+        
+        let logicSteps = td.logic.steps.map(s => `<li>${s}</li>`).join('');
+        let optAnalysis = td.optionAnalysis.map(o => `<li>${o.text}</li>`).join('');
+        
+        let selfCheckItems = td.selfChecks.map(sc => `
+            <div class="self-check-item">
+                <p class="sc-question">Q: ${sc.q}</p>
+                <details class="sc-answer-details">
+                    <summary>查看解析</summary>
+                    <div class="sc-answer-text">A: ${sc.a}</div>
+                </details>
+            </div>
+        `).join('');
+
+        const explanationHtml = `
+            <div class="explanation-container" id="explanation-container-${q.id}" style="display: ${isSubmitted ? 'block' : 'none'}">
+                
+                <!-- 1. 找關鍵字 -->
+                <div class="exp-card section-keywords">
+                    <div class="exp-header">第一步：找關鍵字</div>
+                    <div class="exp-body">${td.keywords}</div>
+                </div>
+
+                <!-- 2. 白話翻譯 -->
+                <div class="exp-card">
+                    <div class="exp-header">第二步：白話翻譯</div>
+                    <div class="exp-body">${td.vernacular}</div>
+                </div>
+
+                <!-- 3. 解題思路 -->
+                <div class="exp-card section-logic">
+                    <div class="exp-header">第三步：解題思路</div>
+                    <div class="exp-body">
+                        <strong>解題步驟：</strong>
+                        <ul>${logicSteps}</ul>
+                        <p><strong>原理與規則：</strong><br>${td.logic.principles}</p>
+                        <p style="margin-top:10px; background:#e3f2fd; padding:8px; border-radius:4px;">💡 <strong>${td.logic.example}</strong></p>
+                    </div>
+                </div>
+
+                <!-- 4. 選項分析 -->
+                <div class="exp-card">
+                    <div class="exp-header">第四步：選項分析</div>
+                    <div class="exp-body">
+                        <ul style="list-style: none; padding-left: 0;">${optAnalysis}</ul>
+                    </div>
+                </div>
+
+                <!-- 5. 觀念補充 -->
+                <div class="exp-card">
+                    <div class="exp-header">觀念補充與延伸</div>
+                    <div class="exp-body">
+                        <p>${td.extension.concepts}</p>
+                        <p style="margin-top:8px;">🧩 <strong>${td.extension.analogy}</strong></p>
+                    </div>
+                </div>
+
+                <!-- 6. 記憶口訣 -->
+                <div class="exp-card section-mnemonic">
+                    <div class="exp-header">記憶口訣</div>
+                    <div class="exp-body" style="font-size: 1.1em; font-weight: bold; text-align: center; color: #2e7d32;">
+                        ${td.mnemonic}
+                    </div>
+                </div>
+
+                <!-- 7. 常見陷阱 -->
+                <div class="exp-card section-trap">
+                    <div class="exp-header">常見陷阱</div>
+                    <div class="exp-body">
+                        <p>🙈 <strong>心理盲點：</strong>${td.traps.blindSpot}</p>
+                        <p>🚧 <strong>避坑指南：</strong>${td.traps.guide}</p>
+                    </div>
+                </div>
+
+                <!-- 8. 自我檢測 -->
+                <div class="self-check-container">
+                    <h4 class="self-check-title">🎯 自我檢測 (點擊查看答案)</h4>
+                    ${selfCheckItems}
+                </div>
+
+            </div>
+        `;
+
+        // Assemble Final HTML
+        const html = `
+            <div class="question-block">
+                <div class="question-header">
+                    <span class="q-tag ${q.tag.class}">${q.tag.text}</span>
+                    <span style="color: var(--text-secondary); font-size: 14px;">${q.type === 'multiple' ? '(複選題)' : '(單選題)'}</span>
+                </div>
+                
+                <h2 class="question-text">${q.question}</h2>
+                
+                <div class="options-list" id="options-list-${q.id}">
+                    ${optionsHtml}
+                </div>
+
+                <div class="action-area">
+                    <button class="${btnClass}" onclick="${btnAction}">${btnText}</button>
+                </div>
+
+                <div class="feedback ${feedbackClass}" style="display: ${feedbackDisplay}">
+                    <strong>${feedbackTitle}</strong>
+                    ${feedbackContent}
+                    <p>${q.reason}</p>
+                    <p style="font-size: 0.9em; margin-top: 8px; color: #666;">(下方已展開完整解析)</p>
+                </div>
+
+                ${explanationHtml}
+            </div>
+        `;
+
+        contentContainer.innerHTML = html;
+    }
+
+    /**
+     * Handle Option Click
+     */
+    function handleOptionClick(qId, optId, type, isSubmitted, labelEl) {
+        if (isSubmitted) return;
+        const container = document.getElementById(`options-list-${qId}`);
+        if (type === 'radio') {
+            container.querySelectorAll('.option').forEach(el => el.classList.remove('selected'));
+            labelEl.classList.add('selected');
+            labelEl.querySelector('input').checked = true;
+        } else {
+            setTimeout(() => {
+                container.querySelectorAll('.option').forEach(opt => {
+                    const inp = opt.querySelector('input');
+                    if (inp.checked) opt.classList.add('selected');
+                    else opt.classList.remove('selected');
+                });
+            }, 0);
+        }
+    }
+
+    /**
+     * Submit Answer
+     */
+    function submitAnswer(index) {
+        const q = quizData.questions[index];
+        const container = document.getElementById(`options-list-${q.id}`);
+        const inputs = container.querySelectorAll('input:checked');
+        const selectedValues = Array.from(inputs).map(input => input.value);
+
+        if (selectedValues.length === 0) {
+            alert("請先選擇答案");
+            return;
+        }
+
+        const sortedSelected = [...selectedValues].sort().toString();
+        const sortedCorrect = [...q.correctAnswer].sort().toString();
+        const isCorrect = sortedSelected === sortedCorrect;
+
+        userState.answers[q.id] = {
+            selected: selectedValues,
+            status: isCorrect ? 'correct' : 'error'
+        };
+
+        if (isCorrect) userState.completedCount++;
+
+        updateProgress();
+        renderTabs();
+        renderQuestion(index);
+        
+        // Auto-scroll to feedback if needed
+        setTimeout(() => {
+            const feedback = document.querySelector('.feedback');
+            if (feedback) feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    }
+
+    /**
+     * Reset Question
+     */
+    function resetQuestion(index) {
+        const q = quizData.questions[index];
+        const wasCorrect = userState.answers[q.id]?.status === 'correct';
+        if (wasCorrect) userState.completedCount--;
+        delete userState.answers[q.id];
+        updateProgress();
+        renderTabs();
+        renderQuestion(index);
+    }
+
+    /**
+     * Update Progress
+     */
+    function updateProgress() {
+        const total = quizData.questions.length;
+        const current = userState.completedCount;
+        const percent = (current / total) * 100;
+
+        progressFill.style.width = `${percent}%`;
+        progressText.innerHTML = `已完成：<strong>${current}</strong> / ${total}`;
+
+        if (current === total) {
+            completionText.className = 'status-done';
+            completionText.innerHTML = '✅ 本題組已完成';
+        } else {
+            completionText.className = 'status-pending';
+            completionText.innerHTML = '📝 尚未完成';
+        }
+    }
+
+    // Start
+    init();
+
+</script>
+
+</body>
+</html>

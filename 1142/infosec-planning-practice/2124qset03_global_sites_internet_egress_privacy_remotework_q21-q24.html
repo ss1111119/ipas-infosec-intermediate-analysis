@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題組 3｜完整教學模板</title>
+    <style>
+        /* --- 認知友善配色系統 (Cognitive Tokens) --- */
+        :root {
+            --body-bg: #f4f7f6;       /* 冷灰調背景 */
+            --card-bg: #ffffff;       /* 卡片底色 */
+            --text-primary: #2c3e50;  /* 深藍灰文字 */
+            --text-secondary: #546e7a;/* 次要文字 */
+            --primary: #2980b9;       /* 主要藍色 */
+            --primary-light: #e3f2fd; /* 淺藍互動色 */
+            --primary-dark: #1f618d;  /* 深藍按鈕 */
+            --highlight: #f1c40f;     /* 記憶黃標記 */
+            --success-bg: #e8f5e9;    /* 正確背景 */
+            --success-text: #2e7d32;  /* 正確文字 */
+            --error-bg: #fce4ec;      /* 錯誤背景 */
+            --error-text: #c62828;    /* 錯誤文字 */
+            --border-radius: 12px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --transition: all 200ms ease;
+        }
+
+        /* --- 基礎設定 --- */
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* --- 版型容器 --- */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+            border-radius: 16px;
+        }
+
+        /* --- 1. Header (題組專用) --- */
+        .group-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+        .group-header h1 {
+            font-size: 24px;
+            margin: 0 0 16px 0;
+            color: var(--primary);
+        }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        .progress-bar {
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2980b9, #3498db);
+            width: 0%;
+            transition: width 400ms ease;
+        }
+        .completion-status {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .status-pending { color: var(--text-secondary); }
+        .status-done { color: var(--success-text); display: none; }
+
+        /* --- 2. Context (題組背景) --- */
+        .group-context {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border-left: 5px solid var(--primary);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .group-context h3 { margin-top: 0; color: var(--primary); font-size: 18px; }
+
+        /* --- 3. Tabs (切題入口) --- */
+        .tabs-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            min-height: 48px; /* 觸控友善 */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-btn:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 8px rgba(41,128,185,0.3);
+        }
+        .tab-status {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* --- 4. Tab 內容 (單題母版) --- */
+        .tab-pane {
+            display: none; /* 預設隱藏，由 JS 控制 */
+            animation: fadeIn 300ms ease;
+        }
+        .tab-pane.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 單題 Header */
+        .question-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .q-badge {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .q-status-icon {
+            font-size: 18px;
+        }
+
+        /* 題內額外 Context */
+        .question-specific-context {
+            background-color: #fff8e1; /* 淺黃底區分 */
+            border: 1px solid #ffe082;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            color: #5d4037;
+        }
+
+        /* 題目與選項 */
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: #fff;
+        }
+        .option-label:hover {
+            background-color: var(--primary-light);
+        }
+        /* 隱藏原生 radio/checkbox 但保留可訪問性 */
+        .option-input {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #bdc3c7;
+            border-radius: 50%; /* Radio style */
+            margin-right: 12px;
+            margin-top: 2px;
+            flex-shrink: 0;
+            position: relative;
+        }
+        /* Checkbox style override */
+        input[type="checkbox"].option-input {
+            border-radius: 4px;
+        }
+        /* Selected State */
+        .option-input:checked {
+            border-color: var(--primary);
+            background-color: var(--primary);
+            box-shadow: inset 0 0 0 3px #fff;
+        }
+        /* Checkbox checkmark simulation */
+        input[type="checkbox"].option-input:checked {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+            box-shadow: none;
+        }
+        /* Option Container Selected Style */
+        .option-label.selected {
+            background-color: #e3f2fd;
+            border-color: var(--primary);
+        }
+        /* Disabled State (After Submit) */
+        .option-input:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .option-label.disabled {
+            cursor: default;
+            pointer-events: none;
+        }
+
+        /* --- 5. Action Area --- */
+        .action-area {
+            margin-bottom: 30px;
+        }
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            min-height: 44px;
+        }
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        .btn-redo {
+            background-color: #fff;
+            color: var(--text-primary);
+            border: 2px solid #bdc3c7;
+        }
+        .btn-redo:hover {
+            background-color: #f5f5f5;
+            border-color: #95a5a6;
+        }
+
+        /* --- 6. Feedback --- */
+        .feedback {
+            display: none; /* JS Toggle */
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 24px;
+            animation: fadeInUp 300ms ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .feedback.success {
+            background-color: var(--success-bg);
+            border-left: 5px solid var(--success-text);
+            color: #1b5e20;
+        }
+        .feedback.error {
+            background-color: var(--error-bg);
+            border-left: 5px solid var(--error-text);
+            color: #b71c1c;
+        }
+        .feedback-title {
+            font-size: 18px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        /* --- 7. Explain & Self Check (Details) --- */
+        details {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        details[open] {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        summary {
+            padding: 16px;
+            background-color: #fafafa;
+            cursor: pointer;
+            font-weight: bold;
+            list-style: none; /* Hide default arrow */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::after {
+            content: '+';
+            font-size: 20px;
+            color: var(--primary);
+            transition: transform 0.2s;
+        }
+        details[open] summary::after {
+            transform: rotate(45deg);
+        }
+        
+        .details-content {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            background-color: #fff;
+        }
+
+        /* 解析分段樣式 */
+        .explain-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            margin-bottom: 16px;
+            border-radius: 0 8px 8px 0;
+        }
+        .explain-section h4 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+        }
+        .highlight {
+            background-color: var(--highlight);
+            padding: 0 4px;
+            border-radius: 2px;
+            color: #000;
+        }
+        
+        /* 自我檢測問答樣式 */
+        .sc-item {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px dashed #eee;
+        }
+        .sc-item:last-child { border-bottom: none; }
+        .sc-question { font-weight: bold; margin-bottom: 8px; display: block; }
+        .sc-answer-details summary {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
+            width: fit-content;
+        }
+        .sc-answer-details summary::after { content: '👉'; transform: none; font-size: 14px; }
+        .sc-answer-details[open] summary::after { content: '👇'; }
+        .sc-answer-text {
+            margin-top: 8px;
+            padding: 10px;
+            background-color: #fff;
+            border-left: 3px solid #2980b9;
+            color: #455a64;
+        }
+
+        /* 標籤 Tag 樣式 */
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .tag-law { background-color: #607d8b; }
+        .tag-iso { background-color: #27ae60; }
+        .tag-zt  { background-color: #8e44ad; }
+        .tag-net { background-color: #2980b9; }
+        .tag-sec { background-color: #c0392b; }
+        .tag-mgm { background-color: #d35400; }
+
+        /* 行動版 RWD */
+        @media (max-width: 768px) {
+            .page-container { margin: 16px; padding: 20px; width: auto; }
+            .group-header h1 { font-size: 20px; }
+            .tab-btn { flex: 1 1 45%; justify-content: center; }
+            .option-label { padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    <!-- 1. Header -->
+    <header class="group-header">
+        <h1>題組 3｜完整教學模板</h1>
+        <div class="progress-info">
+            <span id="progress-text">已完成：<strong>0</strong> / 4</span>
+        </div>
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="completion-status">
+            <span id="status-pending" class="status-pending">📝 尚未完成</span>
+            <span id="status-done" class="status-done">✅ 本題組已完成</span>
+        </div>
+    </header>
+
+    <!-- 2. Context (共用題組背景) -->
+    <section class="group-context">
+        <h3>📄 題組背景</h3>
+        <p>某上市公司因國內市場趨於飽和，為降低生產成本並提升競爭力，於國內設有公司總部，並於附近與東南亞設有生產基地，同時於美國與歐洲設有營業據點。公司希望在國內能<mark>「統一控管對外連線」</mark>，確保所有網際網路流量皆可被集中監控與稽核。</p>
+    </section>
+
+    <!-- 3. Tabs -->
+    <nav class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab(1)" data-tab="1">第 21 題 <span class="tab-status" id="tab-status-1"></span></button>
+        <button class="tab-btn" onclick="switchTab(2)" data-tab="2">第 22 題 <span class="tab-status" id="tab-status-2"></span></button>
+        <button class="tab-btn" onclick="switchTab(3)" data-tab="3">第 23 題 <span class="tab-status" id="tab-status-3"></span></button>
+        <button class="tab-btn" onclick="switchTab(4)" data-tab="4">第 24 題 <span class="tab-status" id="tab-status-4"></span></button>
+    </nav>
+
+    <div class="tab-content-container">
+
+        <!-- 第 21 題 -->
+        <div class="tab-pane active" id="q1-pane">
+            <header class="question-header">
+                <span class="q-badge">單選題</span>
+                <span class="q-status-icon" id="q1-icon"></span>
+            </header>
+            
+            <div class="question-body">
+                <div class="question-text">21. 公司於國內希望統一控管對外連線，所有的網際網路流量可以被監控，下列何項方案最「不」適切？</div>
+                <div class="options-group" id="q1-options">
+                    <label class="option-label" onclick="selectOption(1, 'A')">
+                        <input type="radio" name="q1" value="A" class="option-input">
+                        <span>(A) 於總部及生產基地各自佈署防火牆並集中管理規則與日誌</span>
+                    </label>
+                    <label class="option-label" onclick="selectOption(1, 'B')">
+                        <input type="radio" name="q1" value="B" class="option-input">
+                        <span>(B) 總部及生產基地各自租賃網際網路服務存取網際網路直接對外連線</span>
+                    </label>
+                    <label class="option-label" onclick="selectOption(1, 'C')">
+                        <input type="radio" name="q1" value="C" class="option-input">
+                        <span>(C) 租用專線(Leased Line，企業專用點對點連線)連接總部與生產基地，對外連線統一從總部出口</span>
+                    </label>
+                    <label class="option-label" onclick="selectOption(1, 'D')">
+                        <input type="radio" name="q1" value="D" class="option-input">
+                        <span>(D) 生產基地透過站台對站台虛擬私人網路(Site-to-Site VPN，兩個據點間建立加密隧道)，將流量全部導向公司總部</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="action-area">
+                <button class="btn btn-primary" id="q1-btn" onclick="submitAnswer(1)">送出答案</button>
+            </div>
+
+            <div class="feedback" id="q1-feedback"></div>
+
+            <details class="explain" id="q1-explain">
+                <summary>💡 查看詳細解析</summary>
+                <div class="details-content">
+                    <!-- 1. 關鍵字與翻譯 -->
+                    <div class="explain-section" style="border-color: #2980b9;">
+                        <h4>🔍 【第一步：找關鍵字】 & 【第二步：白話翻譯】</h4>
+                        <p><strong>找關鍵字：</strong><span class="highlight">統一控管對外連線</span>（所有上網出口要集中）、<span class="highlight">集中監控與稽核</span>（流量要能集中看得到、留得到紀錄）、<span class="highlight">最不適切</span>（要找「會破壞集中出口」的方案）。</p>
+                        <p><strong>白話翻譯：</strong>公司希望所有上網都走總部，方便統一監控。哪個方案最不符合這個目標？</p>
+                    </div>
+
+                    <!-- 2. 解題思路 -->
+                    <div class="explain-section" style="border-color: #27ae60;">
+                        <h4>🧠 【第三步：解題思路】</h4>
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li>先定目標：所有對外流量要集中從總部出去。</li>
+                            <li>找出會讓據點「自己直接上網」的選項。</li>
+                            <li>直接上網會造成監控與稽核分散、管控變難 → 判定為最不適切。</li>
+                        </ol>
+                        <p><strong>原理與規則：</strong><br>
+                        <strong>集中出口（Centralized Internet Egress）：</strong>總部像「唯一大門」，所有分公司走內部通道回總部再出去。<br>
+                        <strong>分散直出（Local Breakout）：</strong>每個據點自己有「小門」直接出去。</p>
+                        <p><strong>生活例子：</strong>就像規定全家人出門只能走正門（集中），警衛才知道誰出去了。如果每個人房間都有窗戶直接跳出去（各自上網），警衛就沒辦法統一管理了。</p>
+                    </div>
+
+                    <!-- 3. 選項分析 -->
+                    <div class="explain-section" style="border-color: #c0392b;">
+                        <h4>⚖️ 【第四步：選項分析】</h4>
+                        <ul>
+                            <li><strong>(A) 適切性較高：</strong>各地都有防火牆並集中管理規則與日誌，雖然出口可能分散，但至少能集中管理與留存，仍可達到一定程度監控。</li>
+                            <li><strong>(B) 最不適切：</strong>各自直接租網際網路「直接對外連線」＝每個據點都自己出門，完全破壞「統一控管對外連線」的核心目標。</li>
+                            <li><strong>(C) 適切：</strong>專線把流量拉回總部，統一出口，最符合集中監控與稽核。</li>
+                            <li><strong>(D) 適切：</strong>Site-to-Site VPN 把流量導回總部（加密隧道），達到集中出口與監控。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 4. 觀念補充 -->
+                    <div class="explain-section" style="border-color: #8e44ad;">
+                        <h4>📚 【觀念補充與延伸】</h4>
+                        <p><strong>法條或定義（白話）：</strong><br>
+                        <strong>Leased Line (專線)：</strong>企業租用的專用線路（白話：包一條專屬道路）。<br>
+                        <strong>Site-to-Site VPN：</strong>兩個據點間建立加密隧道（白話：在公路上蓋一條有遮蔽的專用通道）。</p>
+                        <p><strong>【觸類旁通（舉一反三）】：</strong>
+                        <br>1. 題目若改成「希望海外也統一出口」：多會引導你談 SD-WAN、國際專線。
+                        <br>2. 問你集中出口的缺點：延遲（Latency）、單點故障（SPOF）。</p>
+                    </div>
+
+                    <!-- 5. 記憶與陷阱 -->
+                    <div class="explain-section" style="border-color: #f1c40f;">
+                        <h4>⚡ 【記憶口訣】 & 【常見陷阱】</h4>
+                        <p><strong>記憶口訣：</strong>「要統一出口，就別各自直出」：直出＝不統一。</p>
+                        <p><strong>心理盲點：</strong>直覺覺得各據點直接上網比較方便、比較快，但監控與稽核會散掉。</p>
+                        <p><strong>避坑指南：</strong>看到「統一控管對外連線」：先把「直接對外」的選項圈掉。</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="self-check" id="q1-check">
+                <summary>🧠 自我檢測</summary>
+                <div class="details-content">
+                    <div class="sc-item">
+                        <span class="sc-question">Q1: 若公司採集中出口，最需要加強哪兩件事避免單點故障？</span>
+                        <details class="sc-answer-details">
+                            <summary>顯示答案</summary>
+                            <div class="sc-answer-text">雙線路備援 ＋ 總部出口設備（防火牆/路由）高可用 (HA)。</div>
+                        </details>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-question">Q2: 為什麼 Site-to-Site VPN 能達到集中監控？</span>
+                        <details class="sc-answer-details">
+                            <summary>顯示答案</summary>
+                            <div class="sc-answer-text">因為流量會先通過加密隧道回到總部，總部防火牆就能統一看見與控管再放行出網。</div>
+                        </details>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-question">Q3: 各據點直出的最大管理痛點是什麼？</span>
+                        <details class="sc-answer-details">
+                            <summary>顯示答案</summary>
+                            <div class="sc-answer-text">政策與日誌分散，稽核與一致性管控困難。</div>
+                        </details>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <!-- 第 22 題 -->
+        <div class="tab-pane" id="q2-pane">
+            <header class="question-header">
+                <span class="q-badge">單選題</span>
+                <span class="q-status-icon" id="q2-icon"></span>
+            </header>
+
+            <div class="question-specific-context">
+                <strong>情境延伸：</strong> 國內總公司因應海外客戶的要求，其特別重視個資保護，故要求公司需要通過 <mark>ISO 27701 隱私資訊安全驗證</mark>。
+            </div>
+
+            <div class="question-body">
+                <div class="question-text">22. 請問下列何項措施最「不」適切？</div>
+                <div class="options-group" id="q2-options">
+                    <label class="option-label" onclick="selectOption(2, 'A')">
+                        <input type="radio" name="q2" value="A" class="option-input">
+                        <span>(A) 審視 ISO/IEC 27001 資訊安全管理驗證的範圍是否符合需求</span>
+                    </label>
+                    <label class="option-label" onclick="selectOption(2, 'B')">
+                        <input type="radio" name="q2" value="B" class="option-input">
+                        <span>(B) 積極尋求通過 BS 10012 個人資訊管理驗證</span>
+                    </label>
+                    <label class="option-label" onclick="selectOption(2, 'C')">
+                        <input type="radio" name="q2" value="C" class="option-input">
+                        <span>(C) 選擇業務部門優先導入 ISO/IEC 27701 資訊安全管理驗證</span>
+                    </label>
+                    <label class="option-label" onclick="selectOption(2, 'D')">
+                        <input type="radio" name="q2" value="D" class="option-input">
+                        <span>(D) 選擇生產基地優先導入 ISO/IEC 27701 資訊安全管理驗證</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="action-area">
+                <button class="btn btn-primary" id="q2-btn" onclick="submitAnswer(2)">送出答案</button>
+            </div>
+
+            <div class="feedback" id="q2-feedback"></div>
+
+            <details class="explain" id="q2-explain">
+                <summary>💡 查看詳細解析</summary>
+                <div class="details-content">
+                    <!-- 1. 關鍵字與翻譯 -->
+                    <div class="explain-section" style="border-color: #2980b9;">
+                        <h4>🔍 【第一步：找關鍵字】 & 【第二步：白話翻譯】</h4>
+                        <p><strong>找關鍵字：</strong><span class="highlight">海外客戶要求</span>、<span class="highlight">ISO 27701</span>（隱私資訊管理標準）、<span class="highlight">最不適切</span>（選跟目標不相干的）。</p>
+                        <p><strong>白話翻譯：</strong>客戶要求你做個資保護認證（ISO 27701），哪個做法最不對方向？</p>
+                    </div>
+
+                    <!-- 2. 解題思路 -->
+                    <div class="explain-section" style="border-color: #27ae60;">
+                        <h4>🧠 【第三步：解題思路】</h4>
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li>ISO 27701 通常建立在 ISO 27001 管理系統上（先有資安管理骨架）。</li>
+                            <li>(A) 檢視 27001 範圍是正確前置作業。</li>
+                            <li>(C)(D) 選導入範圍（先從哪個部門/場域）在實務可行。</li>
+                            <li>(B) 轉去追 BS 10012 不等於完成 ISO 27701，對「要通過 ISO 27701」最不對焦。</li>
+                        </ol>
+                        <p><strong>原理與規則：</strong>ISO 27701 屬於「隱私管理」的延伸（Privacy Extension）；通常會要求你已有或同步建立資訊安全管理系統（ISMS）。</p>
+                    </div>
+
+                    <!-- 3. 選項分析 -->
+                    <div class="explain-section" style="border-color: #c0392b;">
+                        <h4>⚖️ 【第四步：選項分析】</h4>
+                        <ul>
+                            <li><strong>(A) 適切：</strong>27701 需清楚界定管理系統範圍，檢視 27001 範圍是否涵蓋個資處理流程是必要步驟。</li>
+                            <li><strong>(B) 最不適切：</strong>BS 10012 是另一套個資管理標準，但題目目標是「通過 ISO 27701」，改追別套認證最不對焦。</li>
+                            <li><strong>(C) 適切：</strong>業務部門常涉及客戶個資（蒐集、使用、傳輸），優先導入很合理。</li>
+                            <li><strong>(D) 適切：</strong>生產基地若涉及員工個資、供應鏈資料或客戶資料，也可作為先導範圍，屬於導入策略選擇。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 4. 觀念補充 -->
+                    <div class="explain-section" style="border-color: #8e44ad;">
+                        <h4>📚 【觀念補充與延伸】</h4>
+                        <p><strong>法條或定義（白話）：</strong><br>
+                        <strong>ISO 27701：</strong>隱私資訊管理（PIMS，個資/隱私管理系統）擴充要求（白話：把個資保護寫進管理制度並能被稽核）。<br>
+                        <strong>Scope（範圍）：</strong>這套管理制度到底管哪些部門、流程、系統（白話：畫出你要管的邊界）。</p>
+                        <p><strong>【觸類旁通（舉一反三）】：</strong>
+                        <br>1. 問你「導入 27701 前置條件」：常見是先建立 27001 或以 27001 為基礎。
+                        <br>2. 問「哪個部門最適合先導入」：通常選個資處理最密集者（業務、人資、客服）。</p>
+                    </div>
+
+                    <!-- 5. 記憶與陷阱 -->
+                    <div class="explain-section" style="border-color: #f1c40f;">
+                        <h4>⚡ 【記憶口訣】 & 【常見陷阱】</h4>
+                        <p><strong>記憶口訣：</strong>「要 27701，別先跑別套」：目標是 27701 就別先改追 BS 10012。</p>
+                        <p><strong>心理盲點：</strong>看到「個資管理驗證」就以為哪個都一樣；但題目要的是 ISO 27701。</p>
+                        <p><strong>避坑指南：</strong>題目指定哪個標準，就選最能直接達成該標準的路徑。</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="self-check" id="q2-check">
+                <summary>🧠 自我檢測</summary>
+                <div class="details-content">
+                    <div class="sc-item">
+                        <span class="sc-question">Q1: ISO 27701 與 ISO 27001 的關係最像什麼？</span>
+                        <details class="sc-answer-details">
+                            <summary>顯示答案</summary>
+                            <div class="sc-answer-text">27701 像是 27001 的延伸加強版（加上隱私/個資治理）。</div>
+                        </details>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-question">Q2: 為什麼「範圍界定」在導入認證時很重要？</span>
+                        <details class="sc-answer-details">
+                            <summary>顯示答案</summary>
+                            <div class="sc-answer-text">稽核要知道你到底要管哪裡，避免漏管或亂管。</div>
+                        </details>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-question">Q3: 你認為業務部門常處理哪些個資？舉 2 例。</span>
+                        <details class="sc-answer-details">
+                            <summary>顯示答案</summary>
+                            <div class="sc-answer-text">客戶姓名/電話、寄送地址、付款資訊（視情境）。</div>
+                        </details>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <!-- 第 23 題 -->
+        <div class="tab-pane" id="q3-pane">
+            <header class="question-header">
+                <span class="q-badge">單選題</span>
+                <span class="q-status-icon" id="q3-icon"></span>
+            </header>
+
+            <div class="question-specific-context">
+                <strong>情境延伸：</strong> 因關稅考量，公司決定於美國增設一生產基地，以提高商品的競爭力，原營業據點將遷移至生產基地，<mark>相關業務人員採遠端辦公</mark>。
+            </div>
+
+            <div class="question-body">
+                <div class="question-text">23. 下列何者措施有助於公司「集中控管資訊系統」同時可以「符合遠端辦公的需求」？</div>
+                <div class="options-group" id="q3-options">
+                    <label class="option-label" onclick="selectOption(3, 'A')">
+                        <input type="radio" name="q3" value="A" class="option-input">
+                        <span>(A) 導入精簡用戶端配合虛擬桌面基礎架構(VDI，桌面在機房/雲端跑，使用者只連畫面)</span>
+                    </label>
+                    <label class="option-label" onclick="selectOption(3, 'B')">
+                        <input type="radio" name="q3" value="B" class="option-input">
+                        <span>(B) 導入零信任架構(ZTA，預設不信任，每次存取都要驗證與授權)</span>
+                    </label>
+                    <label class="option-label" onclick="selectOption(3, 'C')">
+                        <input type="radio" name="q3" value="C" class="option-input">
+                        <span>(C) 在所有筆電啟用 BitLocker 全磁碟加密（把整顆硬碟上鎖）</span>
+                    </label>
+                    <label class="option-label" onclick="selectOption(3, 'D')">
+                        <input type="radio" name="q3" value="D" class="option-input">
+                        <span>(D) 宣導員工使用私人電腦進行遠端連線</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="action-area">
+                <button class="btn btn-primary" id="q3-btn" onclick="submitAnswer(3)">送出答案</button>
+            </div>
+
+            <div class="feedback" id="q3-feedback"></div>
+
+            <details class="explain" id="q3-explain">
+                <summary>💡 查看詳細解析</summary>
+                <div class="details-content">
+                    <!-- 1. 關鍵字與翻譯 -->
+                    <div class="explain-section" style="border-color: #2980b9;">
+                        <h4>🔍 【第一步：找關鍵字】 & 【第二步：白話翻譯】</h4>
+                        <p><strong>找關鍵字：</strong><span class="highlight">集中控管資訊系統</span>（希望資料與系統不要分散在員工筆電上）、<span class="highlight">遠端辦公</span>（員工在外面也要能工作）、<span class="highlight">同時符合</span>。</p>
+                        <p><strong>白話翻譯：</strong>業務人員改遠端上班，你要怎麼做，才讓公司系統仍集中在公司端控管，又能讓員工在外面照用？</p>
+                    </div>
+
+                    <!-- 2. 解題思路 -->
+                    <div class="explain-section" style="border-color: #27ae60;">
+                        <h4>🧠 【第三步：解題思路】</h4>
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li>想一個做法：讓員工只連到公司桌面，不把資料存本機。</li>
+                            <li>VDI 正好符合：桌面與資料在資料中心/雲端，端點只看畫面。</li>
+                            <li>其他選項雖重要，但未必同時達成「集中控管＋遠端需求」的核心目標。</li>
+                        </ol>
+                        <p><strong>原理與規則：</strong>VDI：把「電腦桌面」放在公司機房或雲端，員工遠端連線只傳畫面與鍵鼠（白話：人在家用遙控器操作公司裡的電腦）。</p>
+                        <p><strong>生活例子：</strong>就像看 Netflix 串流影片，影片檔案（資料）都在 Netflix 的伺服器（總部），你家電視（端點）只負責播放畫面，沒有把影片下載下來。</p>
+                    </div>
+
+                    <!-- 3. 選項分析 -->
+                    <div class="explain-section" style="border-color: #c0392b;">
+                        <h4>⚖️ 【第四步：選項分析】</h4>
+                        <ul>
+                            <li><strong>(A) 適切：</strong>VDI 讓桌面與資料集中在公司端，端點可精簡，易管控且適合遠端。</li>
+                            <li><strong>(B) 不是最佳：</strong>零信任 (ZTA) 是架構原則，能強化存取控制，但題目核心是「集中控管資訊系統」；ZTA 不必然解決資料落地與桌面集中。</li>
+                            <li><strong>(C) 不選：</strong>全磁碟加密主要防筆電遺失資料外洩，但不等於集中控管系統。</li>
+                            <li><strong>(D) 錯誤：</strong>用私人電腦（BYOD）反而讓端點風險提高、控管困難，與集中控管背道而馳。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 4. 觀念補充 -->
+                    <div class="explain-section" style="border-color: #8e44ad;">
+                        <h4>📚 【觀念補充與延伸】</h4>
+                        <p><strong>法條或定義（白話）：</strong><br>
+                        <strong>Thin Client（精簡用戶端）：</strong>低運算、主要用來連線到遠端桌面（白話：像一台只負責顯示的終端機）。<br>
+                        <strong>VDI：</strong>桌面集中虛擬化（白話：電腦放公司，你在家遙控）。</p>
+                        <p><strong>【觸類旁通（舉一反三）】：</strong>
+                        <br>1. 問你 VDI 的缺點：成本高、伺服器資源需求大、高度依賴網路。
+                        <br>2. 問你如何搭配：VDI + MFA + 端點管控 可形成更完整方案。</p>
+                    </div>
+
+                    <!-- 5. 記憶與陷阱 -->
+                    <div class="explain-section" style="border-color: #f1c40f;">
+                        <h4>⚡ 【記憶口訣】 & 【常見陷阱】</h4>
+                        <p><strong>記憶口訣：</strong>「要集中控管，桌面就集中」：VDI 讓資料留在公司端。</p>
+                        <p><strong>心理盲點：</strong>看到 ZTA 就想選，但 ZTA 是架構原則，不是「集中桌面與資料」的直接手段。</p>
+                        <p><strong>避坑指南：</strong>題目若強調「集中控管系統/資料」，優先想 VDI、DaaS（桌面即服務）類。</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="self-check" id="q3-check">
+                <summary>🧠 自我檢測</summary>
+                <div class="details-content">
+                    <div class="sc-item">
+                        <span class="sc-question">Q1: VPN 與 VDI 最大差異是什麼？</span>
+                        <details class="sc-answer-details">
+                            <summary>顯示答案</summary>
+                            <div class="sc-answer-text">VPN是通道，資料可能會落地；VDI是桌面在公司端，資料不一定落地。</div>
+                        </details>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-question">Q2: VDI 最怕哪個資源不足？</span>
+                        <details class="sc-answer-details">
+                            <summary>顯示答案</summary>
+                            <div class="sc-answer-text">網路頻寬/延遲（畫面跑不動）以及後端運算與儲存資源。</div>
+                        </details>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-question">Q3: 若員工筆電遺失，VDI 相對降低哪個風險？</span>
+                        <details class="sc-answer-details">
+                            <summary>顯示答案</summary>
+                            <div class="sc-answer-text">機密資料落在本機被取走的風險。</div>
+                        </details>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <!-- 第 24 題 -->
+        <div class="tab-pane" id="q4-pane">
+            <header class="question-header">
+                <span class="q-badge" style="background-color: #8e44ad;">複選題</span>
+                <span class="q-status-icon" id="q4-icon"></span>
+            </header>
+
+            <div class="question-specific-context">
+                <strong>情境延伸：</strong> 歐洲地區的業務人員多採遠距辦公，由公司配發筆記型電腦供員工使用，主要採用 Windows 10 作業系統。
+            </div>
+
+            <div class="question-body">
+                <div class="question-text">24. 請問下列哪些措施最能降低公司機密外流的風險？(複選)</div>
+                <div class="options-group" id="q4-options">
+                    <label class="option-label" onclick="selectOption(4, 'A')">
+                        <input type="checkbox" name="q4" value="A" class="option-input">
+                        <span>(A) 為員工提供虛擬私人網路(VPN，加密連線通道)以加密存取內部資源</span>
+                    </label>
+                    <label class="option-label" onclick="selectOption(4, 'B')">
+                        <input type="checkbox" name="q4" value="B" class="option-input">
+                        <span>(B) 啟用 BitLocker 磁碟加密功能（Windows 的全磁碟加密）</span>
+                    </label>
+                    <label class="option-label" onclick="selectOption(4, 'C')">
+                        <input type="checkbox" name="q4" value="C" class="option-input">
+                        <span>(C) 作業系統禁止使用無線區域網路（Wi-Fi）</span>
+                    </label>
+                    <label class="option-label" onclick="selectOption(4, 'D')">
+                        <input type="checkbox" name="q4" value="D" class="option-input">
+                        <span>(D) 導入精簡用戶端配合雲端桌面（類似雲端 VDI）</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="action-area">
+                <button class="btn btn-primary" id="q4-btn" onclick="submitAnswer(4)">送出答案</button>
+            </div>
+
+            <div class="feedback" id="q4-feedback"></div>
+
+            <details class="explain" id="q4-explain">
+                <summary>💡 查看詳細解析</summary>
+                <div class="details-content">
+                    <!-- 1. 關鍵字與翻譯 -->
+                    <div class="explain-section" style="border-color: #8e44ad;">
+                        <h4>🔍 【第一步：找關鍵字】 & 【第二步：白話翻譯】</h4>
+                        <p><strong>找關鍵字：</strong><span class="highlight">遠距辦公</span>、<span class="highlight">公司配發筆電</span>（端點在外面跑，遺失/被偷風險高）、<span class="highlight">機密外流</span>、<span class="highlight">複選</span>。</p>
+                        <p><strong>白話翻譯：</strong>員工在歐洲到處跑拿公司筆電工作，你要用哪些方法最能避免機密資料被偷走或外流？</p>
+                    </div>
+
+                    <!-- 2. 解題思路 -->
+                    <div class="explain-section" style="border-color: #8e44ad;">
+                        <h4>🧠 【第三步：解題思路】</h4>
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li>從資料流向看：資料在傳輸中、在硬碟上、在桌面使用時。</li>
+                            <li>傳輸：VPN 加密。</li>
+                            <li>儲存：BitLocker。</li>
+                            <li>使用：雲端桌面降低資料落地。</li>
+                        </ol>
+                        <p><strong>原理與規則：</strong><br>
+                        <strong>VPN：</strong>防止傳輸被攔截（白話：把網路通道包成加密管）。<br>
+                        <strong>BitLocker：</strong>筆電遺失時，硬碟資料不易被讀（白話：硬碟上鎖）。<br>
+                        <strong>雲端桌面：</strong>資料集中，端點只顯示畫面（白話：資料留在公司雲端，不落地）。</p>
+                    </div>
+
+                    <!-- 3. 選項分析 -->
+                    <div class="explain-section" style="border-color: #c0392b;">
+                        <h4>⚖️ 【第四步：選項分析】</h4>
+                        <ul>
+                            <li><strong>(A) 選：</strong>加密連線降低傳輸被竊聽與攔截風險，遠端辦公常見必要措施。</li>
+                            <li><strong>(B) 選：</strong>筆電遺失或被偷時，磁碟加密可有效降低資料被直接讀取外流。</li>
+                            <li><strong>(C) 不選：</strong>禁 Wi-Fi 不是直接的機密外流控制，且仍可用其他網路；更重要的是「加密與控管」而不是「禁止介面」。</li>
+                            <li><strong>(D) 選：</strong>雲端桌面降低資料落地與端點外流風險，符合遠距情境的高效防護。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 4. 觀念補充 -->
+                    <div class="explain-section" style="border-color: #27ae60;">
+                        <h4>📚 【觀念補充與延伸】</h4>
+                        <p><strong>法條或定義（白話）：</strong><br>
+                        <strong>機密外流：</strong>未授權的人取得公司敏感資訊（白話：資料被拿走或被看到）。<br>
+                        <strong>全磁碟加密：</strong>整顆硬碟資料都加密（白話：就算拆硬碟也看不懂）。</p>
+                        <p><strong>【觸類旁通（舉一反三）】：</strong>
+                        <br>1. 題目改成手機/平板：會改考 MDM（行動裝置管理）與資料容器化。
+                        <br>2. 問「最有效但成本較高」：通常指向雲端桌面/VDI。</p>
+                    </div>
+
+                    <!-- 5. 記憶與陷阱 -->
+                    <div class="explain-section" style="border-color: #f1c40f;">
+                        <h4>⚡ 【記憶口訣】 & 【常見陷阱】</h4>
+                        <p><strong>記憶口訣：</strong>「傳輸包起來、硬碟鎖起來、桌面放雲端」：VPN、BitLocker、雲端桌面。</p>
+                        <p><strong>心理盲點：</strong>以為禁 Wi-Fi 就很安全；但資料外流的根本是「資料是否加密、是否落地、權限是否控管」。</p>
+                        <p><strong>避坑指南：</strong>外流三關：路上（VPN）、硬碟（加密）、使用（雲端/不落地）。</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="self-check" id="q4-check">
+                <summary>🧠 自我檢測</summary>
+                <div class="details-content">
+                    <div class="sc-item">
+                        <span class="sc-question">Q1: 如果只有 VPN，筆電遺失時還可能外流嗎？為什麼？</span>
+                        <details class="sc-answer-details">
+                            <summary>顯示答案</summary>
+                            <div class="sc-answer-text">可能，因為 VPN 只有保護連線傳輸；資料在硬碟上若未加密仍可被讀。</div>
+                        </details>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-question">Q2: BitLocker 主要保護的是資料的哪一個狀態？</span>
+                        <details class="sc-answer-details">
+                            <summary>顯示答案</summary>
+                            <div class="sc-answer-text">儲存狀態（Data at Rest）。</div>
+                        </details>
+                    </div>
+                    <div class="sc-item">
+                        <span class="sc-question">Q3: 雲端桌面為何能降低外流？最大代價可能是什麼？</span>
+                        <details class="sc-answer-details">
+                            <summary>顯示答案</summary>
+                            <div class="sc-answer-text">因為資料不落地；代價是高度網路依賴與建置成本/效能需求。</div>
+                        </details>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    /* --- 資料結構 --- */
+    const quizData = {
+        totalQuestions: 4,
+        questions: {
+            1: { 
+                type: 'single', 
+                correct: ['B'], 
+                reason: "各據點直接上網會造成出口分散，無法達到統一監控與稽核。" 
+            },
+            2: { 
+                type: 'single', 
+                correct: ['B'], 
+                reason: "BS 10012 不是題目要求的 ISO 27701，導向不同認證路線最不對焦。" 
+            },
+            3: { 
+                type: 'single', 
+                correct: ['A'], 
+                reason: "VDI 讓桌面與資料集中在公司端，員工遠端只連畫面，最符合集中控管。" 
+            },
+            4: { 
+                type: 'multiple', 
+                correct: ['A', 'B', 'D'], 
+                reason: "VPN保護傳輸、BitLocker保護儲存、雲端桌面降低資料落地，形成完整防護。" 
+            }
+        }
+    };
+
+    /* --- 狀態追蹤 --- */
+    let currentTab = 1;
+    let completedCount = 0;
+    const questionStatus = {
+        1: { status: 'pending', submitted: false },
+        2: { status: 'pending', submitted: false },
+        3: { status: 'pending', submitted: false },
+        4: { status: 'pending', submitted: false }
+    };
+
+    /* --- Tab 切換邏輯 --- */
+    function switchTab(tabIndex) {
+        currentTab = tabIndex;
+        
+        // UI 更新
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.tab-btn[data-tab="${tabIndex}"]`).classList.add('active');
+        
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        document.getElementById(`q${tabIndex}-pane`).classList.add('active');
+
+        // 平滑捲動回頂端
+        document.querySelector('.group-header').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /* --- 選項選擇視覺互動 --- */
+    function selectOption(qIndex, value) {
+        if (questionStatus[qIndex].submitted) return; // 已送出則不可選
+
+        const type = quizData.questions[qIndex].type;
+        const optionsContainer = document.getElementById(`q${qIndex}-options`);
+        
+        if (type === 'single') {
+            // 單選：清除其他樣式
+            optionsContainer.querySelectorAll('.option-label').forEach(label => label.classList.remove('selected'));
+            const input = optionsContainer.querySelector(`input[value="${value}"]`);
+            if(input) {
+                input.checked = true;
+                input.closest('.option-label').classList.add('selected');
+            }
+        } else {
+            // 複選：Toggle 樣式
+            const input = optionsContainer.querySelector(`input[value="${value}"]`);
+            if(input) {
+                const label = input.closest('.option-label');
+                // 注意：click event 觸發時 checked 狀態已經改變
+                if (input.checked) {
+                    label.classList.add('selected');
+                } else {
+                    label.classList.remove('selected');
+                }
+            }
+        }
+    }
+
+    /* --- 送出答案邏輯 --- */
+    function submitAnswer(qIndex) {
+        const qData = quizData.questions[qIndex];
+        const optionsContainer = document.getElementById(`q${qIndex}-options`);
+        
+        // 1. 取得使用者選擇
+        const inputs = optionsContainer.querySelectorAll('input:checked');
+        const userAnswers = Array.from(inputs).map(i => i.value).sort();
+
+        // 2. 驗證是否有作答
+        if (userAnswers.length === 0) {
+            alert("請先選擇答案！");
+            return;
+        }
+
+        // 3. 判定對錯
+        const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(qData.correct.sort());
+        
+        // 4. 更新狀態
+        questionStatus[qIndex].submitted = true;
+        questionStatus[qIndex].status = isCorrect ? 'correct' : 'error';
+
+        // 5. UI 鎖定與更新
+        const btn = document.getElementById(`q${qIndex}-btn`);
+        
+        // 禁用選項
+        optionsContainer.querySelectorAll('input').forEach(input => input.disabled = true);
+        optionsContainer.querySelectorAll('.option-label').forEach(label => label.classList.add('disabled'));
+
+        // 更新按鈕 -> 重新作答
+        btn.textContent = "重新作答";
+        btn.className = "btn btn-redo";
+        btn.onclick = () => resetQuestion(qIndex);
+
+        // 顯示回饋
+        const feedbackEl = document.getElementById(`q${qIndex}-feedback`);
+        feedbackEl.style.display = "block";
+        feedbackEl.className = `feedback ${isCorrect ? 'success' : 'error'}`;
+        
+        let feedbackHtml = `<span class="feedback-title">${isCorrect ? '✓ 答對了！' : '✗ 答錯了'}</span>`;
+        if (!isCorrect) {
+            feedbackHtml += `<p>正確答案：<strong>${qData.correct.join('、')}</strong></p>`;
+        }
+        feedbackHtml += `<p>${qData.reason}</p>`;
+        feedbackEl.innerHTML = feedbackHtml;
+
+        // 顯示解析與自我檢測
+        document.getElementById(`q${qIndex}-explain`).style.display = "block"; // 確保區塊可見
+        document.getElementById(`q${qIndex}-explain`).open = true; // 自動展開
+        document.getElementById(`q${qIndex}-check`).style.display = "block";
+
+        // 更新題號狀態 Icon
+        const iconEl = document.getElementById(`q${qIndex}-icon`);
+        iconEl.textContent = isCorrect ? '✅' : '❌';
+
+        // 更新 Tab 狀態
+        const tabStatus = document.getElementById(`tab-status-${qIndex}`);
+        tabStatus.textContent = '✓'; // 只要做完就打勾，不論對錯
+
+        // 更新總進度
+        updateProgress();
+    }
+
+    /* --- 重新作答邏輯 --- */
+    function resetQuestion(qIndex) {
+        // 1. 重置狀態
+        questionStatus[qIndex].submitted = false;
+        questionStatus[qIndex].status = 'pending';
+
+        // 2. 清空選項與樣式
+        const optionsContainer = document.getElementById(`q${qIndex}-options`);
+        optionsContainer.querySelectorAll('input').forEach(input => {
+            input.checked = false;
+            input.disabled = false;
+        });
+        optionsContainer.querySelectorAll('.option-label').forEach(label => {
+            label.classList.remove('selected', 'disabled');
+        });
+
+        // 3. 恢復按鈕
+        const btn = document.getElementById(`q${qIndex}-btn`);
+        btn.textContent = "送出答案";
+        btn.className = "btn btn-primary";
+        btn.onclick = () => submitAnswer(qIndex);
+
+        // 4. 隱藏回饋與解析
+        document.getElementById(`q${qIndex}-feedback`).style.display = "none";
+        const explain = document.getElementById(`q${qIndex}-explain`);
+        explain.open = false;
+        
+        const check = document.getElementById(`q${qIndex}-check`);
+        check.open = false;
+
+        // 5. 清除狀態 Icon
+        document.getElementById(`q${qIndex}-icon`).textContent = '';
+        document.getElementById(`tab-status-${qIndex}`).textContent = '';
+
+        // 6. 更新進度
+        updateProgress();
+    }
+
+    /* --- 進度條更新 --- */
+    function updateProgress() {
+        const completed = Object.values(questionStatus).filter(q => q.submitted).length;
+        const total = quizData.totalQuestions;
+        const percentage = (completed / total) * 100;
+
+        document.getElementById('progress-text').innerHTML = `已完成：<strong>${completed}</strong> / ${total}`;
+        document.getElementById('progress-fill').style.width = `${percentage}%`;
+
+        if (completed === total) {
+            document.getElementById('status-pending').style.display = 'none';
+            document.getElementById('status-done').style.display = 'inline';
+        } else {
+            document.getElementById('status-pending').style.display = 'inline';
+            document.getElementById('status-done').style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題組 5｜勒索攻擊與風險管理實務</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* 核心色彩系統 */
+            --body-bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #546e7a;
+            --primary: #2980b9;
+            --primary-light: #e3f2fd;
+            --primary-dark: #1c5980;
+            --highlight: #f1c40f;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            --border-color: #e0e0e0;
+            
+            /* 標籤色彩 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        * {
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 容器規範 */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 16px;
+                width: auto;
+                padding: 20px;
+                border-radius: 12px;
+            }
+            
+            body {
+                font-size: 14px;
+            }
+            
+            h2 { font-size: 20px; }
+            h3 { font-size: 16px; }
+        }
+
+        /* Header 區域 */
+        .group-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--body-bg);
+            padding-bottom: 20px;
+        }
+
+        .group-header h1 {
+            margin: 0 0 15px 0;
+            color: var(--primary);
+            font-size: 24px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), #3498db);
+            transition: width 400ms ease;
+        }
+
+        .completion-status span {
+            font-weight: bold;
+            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .status-pending { background-color: #fff3e0; color: #e65100; }
+        .status-done { background-color: var(--success-bg); color: var(--success-text); }
+
+        /* 題組情境 Context */
+        .group-context {
+            background-color: #f8f9fa;
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .group-context h3 {
+            margin-top: 0;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Tabs 切題導航 */
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 15px;
+            color: var(--text-secondary);
+            transition: all 200ms ease;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tab-btn:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 8px rgba(41,128,185,0.3);
+        }
+
+        .tab-status {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* 題目內容區 */
+        .question-content {
+            display: none;
+            animation: fadeIn 300ms ease;
+        }
+
+        .question-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .q-tag {
+            background-color: var(--text-secondary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .q-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 25px;
+            color: var(--text-primary);
+        }
+
+        /* 選項樣式 */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option-item {
+            display: flex;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 150ms ease;
+            align-items: flex-start;
+        }
+
+        .option-item:hover:not(.disabled) {
+            background-color: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+
+        .option-item.selected {
+            background-color: #e1f5fe;
+            border-color: var(--primary);
+        }
+
+        .option-item.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        /* 隱藏原生 radio/checkbox */
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        /* 自訂核取框/圓圈 */
+        .custom-check {
+            height: 20px;
+            width: 20px;
+            min-width: 20px;
+            border: 2px solid #b0bec5;
+            margin-right: 12px;
+            position: relative;
+            margin-top: 3px;
+        }
+
+        /* 單選圓圈 */
+        .type-single .custom-check {
+            border-radius: 50%;
+        }
+        
+        .type-single .option-item.selected .custom-check {
+            border-color: var(--primary);
+        }
+        
+        .type-single .option-item.selected .custom-check::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background-color: var(--primary);
+            border-radius: 50%;
+        }
+
+        /* 複選方塊 */
+        .type-multiple .custom-check {
+            border-radius: 4px;
+        }
+
+        .type-multiple .option-item.selected .custom-check {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .type-multiple .option-item.selected .custom-check::after {
+            content: "✓";
+            position: absolute;
+            color: white;
+            font-size: 14px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .option-text {
+            font-size: 16px;
+        }
+
+        /* 動作按鈕區 */
+        .action-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 200ms ease;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(41,128,185,0.3);
+        }
+        
+        .btn-reset {
+            background-color: #fff;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        
+        .btn-reset:hover {
+            background-color: var(--primary-light);
+        }
+
+        /* 回饋區 */
+        .feedback {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+            animation: fadeInUp 300ms ease;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.success {
+            background-color: var(--success-bg);
+            border-left: 5px solid var(--success-text);
+            color: var(--success-text);
+        }
+
+        .feedback.error {
+            background-color: var(--error-bg);
+            border-left: 5px solid var(--error-text);
+            color: var(--error-text);
+        }
+
+        /* 解析與自我檢測 */
+        details {
+            margin-top: 20px;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 15px 20px;
+            cursor: pointer;
+            background-color: #fafafa;
+            font-weight: bold;
+            color: var(--text-primary);
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .details-content {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .explain-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .explain-section h4 {
+            margin: 0 0 10px 0;
+            color: var(--primary-dark);
+            font-size: 16px;
+        }
+
+        .explain-section p, .explain-section ul {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 15px;
+        }
+        
+        .explain-section ul {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+
+        /* 重點標記 */
+        mark {
+            background-color: var(--highlight);
+            color: var(--text-primary);
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+        
+        /* 自我檢測題目樣式 */
+        .check-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        
+        .check-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        /* 自我檢測隱藏答案 */
+        .spoiler {
+            filter: blur(6px);
+            transition: filter 0.3s;
+            cursor: pointer;
+            background: #eee;
+            padding: 2px 8px;
+            border-radius: 4px;
+            user-select: none; /* 防止直接複製看到 */
+        }
+        .spoiler:hover, .spoiler:active {
+            filter: blur(0);
+            user-select: text;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    
+    <!-- 1. Header -->
+    <header class="group-header">
+        <h1>題組 5｜勒索攻擊與風險管理實務</h1>
+        <div class="progress-info">
+            <span>已完成：<strong id="progress-text">0</strong> / 4</span>
+        </div>
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <div class="completion-status">
+            <span id="status-badge" class="status-pending">📝 尚未完成</span>
+        </div>
+    </header>
+
+    <!-- 2. Context -->
+    <section class="group-context">
+        <h3>📖 題組背景</h3>
+        <p>2025 年 2 月時，A 公司及其關係企業遭受駭客組織發動的勒索攻擊。該攻擊發生於週末夜間，駭客成功潛入企業核心系統，<mark>刪除了所有備份</mark>，並聲稱竊取了 1TB 的機密資料。隔天清晨，企業官網首頁被竄改，發布了<mark>駭客的勒索訊息</mark>，要求在 <mark>24 小時內支付未公開的贖金</mark>，否則將外洩資料並摧毀企業聲譽。此次攻擊事件對 A 公司造成重大損失，公司核心系統 ERP、CRM 等業務系統全面癱瘓，生產與供應鏈亦因而停擺。</p>
+    </section>
+
+    <!-- 3. Tabs -->
+    <div class="tabs-container" id="tabs-container">
+        <!-- JS 動態生成按鈕 -->
+    </div>
+
+    <!-- 4. Questions Content -->
+    <div id="questions-container">
+        <!-- JS 動態生成題目 -->
+    </div>
+
+</div>
+
+<script>
+    // 題目資料結構
+    const quizData = [
+        {
+            id: 1,
+            displayId: "第 37 題",
+            type: "single",
+            tags: ["資安防護", "勒索軟體"],
+            question: "駭客刪除備份後發佈勒索訊息，請問下列何項行為的描述最為適切？",
+            options: [
+                { id: "A", text: "偽裝攻擊" },
+                { id: "B", text: "服務阻斷" },
+                { id: "C", text: "勒索攻擊" },
+                { id: "D", text: "社交工程" }
+            ],
+            correctAnswer: ["C"],
+            reason: "刪除備份並公開要求限時付贖金，這就是勒索攻擊的典型行為。",
+            explanation: `
+                <div class="explain-section">
+                    <h4>🔍 第一步：找關鍵字</h4>
+                    <ul>
+                        <li><b>刪除備份</b>：代表駭客要讓你「無法復原」，增加談判籌碼。</li>
+                        <li><b>發佈勒索訊息</b>：代表「要求付錢」並用威脅施壓。</li>
+                        <li><b>24 小時內支付贖金／否則外洩資料</b>：典型「勒索」的條件式威脅（不付就傷害你）。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                    <h4>🗣️ 第二步：白話翻譯</h4>
+                    <p>駭客把你能用來救回資料的備份也刪掉，然後在你網站貼公告說「限時付錢，不然就把資料公開」，這種行為最像哪一種攻擊？</p>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--primary);">
+                    <h4>💡 第三步：解題思路</h4>
+                    <p><b>考點：</b>勒索軟體與其典型行為特徵辨識。</p>
+                    <p><b>步驟：</b></p>
+                    <ul>
+                        <li>1) 先看有沒有「要錢」與「威脅」：有勒索訊息、限時付款。</li>
+                        <li>2) 再看是否「讓你更難復原」：刪除備份。</li>
+                        <li>3) 對照選項：符合「勒索攻擊」特徵者優先。</li>
+                    </ul>
+                    <p><b>原理與規則：</b></p>
+                    <p>勒索攻擊常見關鍵動作：破壞可用性（癱瘓系統）、破壞復原能力（刪備份）、施壓與談判（限時、威脅外洩）。</p>
+                    <p><b>生活例子：</b>像是有人先把你家門鎖弄壞（讓你回不了家），再貼字條說「24 小時內匯款，不然把你家值錢的東西丟出去」。</p>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--tag-law);">
+                    <h4>⚖️ 第四步：選項分析</h4>
+                    <ul>
+                        <li>(A) <b>偽裝攻擊</b>：錯。重點在「冒充」，題目重點是「要錢＋威脅」。</li>
+                        <li>(B) <b>服務阻斷</b>：錯。雖然會讓服務不能用，但核心是「勒索訊息＋要求付贖金」。</li>
+                        <li>(C) <b>勒索攻擊</b>：對。刪備份＋勒索訊息＋限時付款＋威脅外洩，完全命中。</li>
+                        <li>(D) <b>社交工程</b>：錯。著重在人心操控（如釣魚信），不是刪備份後公開勒索。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--highlight);">
+                    <h4>📚 觀念補充與延伸</h4>
+                    <p><b>核心觀念：</b>資訊安全防護實務常見攻擊型態。</p>
+                    <p><b>觸類旁通：</b></p>
+                    <ul>
+                        <li><b>DDoS vs 勒索型 DDoS</b>：普通 DDoS 只是塞爆流量；若同時要錢，才是勒索型 DDoS。</li>
+                        <li><b>變化題</b>：若題幹是「檔案被加密，桌面跳倒數視窗」，也是勒索攻擊。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                    <h4>🧠 記憶口訣</h4>
+                    <p>「要錢＋限時＋威脅」三件套 ＝ 勒索到。</p>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--error-text);">
+                    <h4>🚫 常見陷阱</h4>
+                    <p><b>心理盲點：</b>看到服務掛了就想到「阻斷 (DoS)」，但忽略了題幹更關鍵的「付錢」。</p>
+                    <p><b>避坑指南：</b>先問自己一句：「題目有沒有『要付錢』？」有就優先往勒索想。</p>
+                </div>
+            `,
+            selfCheck: [
+                {
+                    q: "如果題目只說「網站被塞爆 3 天不能用」，沒有提付款威脅，最像哪種攻擊？",
+                    a: "服務阻斷（DDoS / DoS）"
+                },
+                {
+                    q: "如果題目說「收到釣魚信騙你輸入帳密，結果被盜登入」，最像哪種攻擊？",
+                    a: "社交工程（釣魚）"
+                },
+                {
+                    q: "如果題目說「DDoS 攻擊同時寄信要求付款，否則持續攻擊」，該怎麼判？",
+                    a: "勒索型 DDoS（有勒索要素：要錢＋威脅）"
+                }
+            ]
+        },
+        {
+            id: 2,
+            displayId: "第 38 題",
+            type: "single",
+            tags: ["風險管理", "ISO 27005"],
+            question: "關於此事件之風險處理，下列何者最「不」合適？",
+            options: [
+                { id: "A", text: "風險降低 (Risk Reduction)" },
+                { id: "B", text: "風險避免 (Risk Avoidance)" },
+                { id: "C", text: "風險接受 (Risk Acceptance)" },
+                { id: "D", text: "風險轉移 (Risk Transfer)" }
+            ],
+            correctAnswer: ["C"],
+            reason: "面對核心系統癱瘓與重大勒索衝擊，直接選擇「風險接受」是最不負責任且危險的決策。",
+            explanation: `
+                <div class="explain-section">
+                    <h4>🔍 第一步：找關鍵字</h4>
+                    <ul>
+                        <li><b>勒索攻擊／核心系統癱瘓</b>：影響巨大，屬高衝擊風險。</li>
+                        <li><b>最「不」合適</b>：要找「最不應該做」的風險處理方式。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                    <h4>🗣️ 第二步：白話翻譯</h4>
+                    <p>公司遇到超嚴重勒索攻擊，下面哪一種處理方式最不應該採用？</p>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--primary);">
+                    <h4>💡 第三步：解題思路</h4>
+                    <p><b>考點：</b>風險處理策略（Risk Treatment）依風險等級決策。</p>
+                    <p><b>步驟：</b></p>
+                    <ul>
+                        <li>1) 判斷嚴重度：核心系統癱瘓＋刪備份＝高風險。</li>
+                        <li>2) 高風險通常不適合「直接接受」，代價太大。</li>
+                        <li>3) 對照選項，找最不合適的。</li>
+                    </ul>
+                    <p><b>原理與規則：</b></p>
+                    <ul>
+                        <li><b>風險降低</b>：做防護措施（降機率/衝擊）。</li>
+                        <li><b>風險避免</b>：不做這件事（讓風險不發生）。</li>
+                        <li><b>風險接受</b>：認了，不特別處理（僅適用低風險）。</li>
+                        <li><b>風險轉移</b>：找人扛（保險/外包）。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--tag-law);">
+                    <h4>⚖️ 第四步：選項分析</h4>
+                    <ul>
+                        <li>(A) <b>風險降低</b>：合適。可用備份隔離、端點防護等降低衝擊。</li>
+                        <li>(B) <b>風險避免</b>：合適。例如避免將備份放在同網段。</li>
+                        <li>(C) <b>風險接受</b>：最不合適。此事件損失過大，不可直接接受。</li>
+                        <li>(D) <b>風險轉移</b>：合適。可透過保險轉移財務損失。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--highlight);">
+                    <h4>📚 觀念補充與延伸</h4>
+                    <p><b>觸類旁通：</b></p>
+                    <ul>
+                        <li><b>降低 vs 避免</b>：降低是「繼續做但加防護」；避免是「不做或改做法」。</li>
+                        <li><b>轉移 vs 降低</b>：轉移是「賠償誰扛」；降低是「讓出事機率變小」。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                    <h4>🧠 記憶口訣</h4>
+                    <p>「高風險不接受，先降再轉再避」。（先想到降低與轉移；必要時避免）</p>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--error-text);">
+                    <h4>🚫 常見陷阱</h4>
+                    <p><b>心理盲點：</b>以為「接受」是冷靜的決策，但忽略了「可承受度」與「法規遵循」。</p>
+                    <p><b>避坑指南：</b>看到「核心系統癱瘓／重大損失」→ 先把「接受」列為不優先。</p>
+                </div>
+            `,
+            selfCheck: [
+                {
+                    q: "什麼情況下「風險接受」反而合理？",
+                    a: "低影響、低發生率，且處理成本遠大於可能損失時"
+                },
+                {
+                    q: "若法規要求必須保留稽核紀錄，卻不做任何措施，算哪種風險處理？",
+                    a: "多半是風險接受（但可能違反法遵，通常不可行）"
+                },
+                {
+                    q: "把高風險服務下架停止提供，屬於哪種策略？",
+                    a: "風險避免"
+                }
+            ]
+        },
+        {
+            id: 3,
+            displayId: "第 39 題",
+            type: "single",
+            tags: ["風險管理", "資安保險"],
+            question: "若 A 公司未來購買資安保險是屬於下列何種風險處理？",
+            options: [
+                { id: "A", text: "風險降低 (Risk Reduction)" },
+                { id: "B", text: "風險避免 (Risk Avoidance)" },
+                { id: "C", text: "風險接受 (Risk Acceptance)" },
+                { id: "D", text: "風險轉移 (Risk Transfer)" }
+            ],
+            correctAnswer: ["D"],
+            reason: "資安保險主要是將事件造成的「財務損失」轉由保險公司承擔。",
+            explanation: `
+                <div class="explain-section">
+                    <h4>🔍 第一步：找關鍵字</h4>
+                    <ul>
+                        <li><b>購買資安保險</b>：把「出事後的財務損失」交給保險公司分擔。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                    <h4>🗣️ 第二步：白話翻譯</h4>
+                    <p>公司去買資安保險，這件事在風險處理裡算哪一類？</p>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--primary);">
+                    <h4>💡 第三步：解題思路</h4>
+                    <p><b>考點：</b>風險轉移與其他策略的區辨。</p>
+                    <p><b>原理與規則：</b></p>
+                    <p>風險轉移（透過保險、合約、外包）通常：</p>
+                    <ul>
+                        <li>不會降低事件發生機率（你還是可能被打）。</li>
+                        <li>主要降低的是「財務衝擊」與「賠付壓力」。</li>
+                    </ul>
+                    <p><b>生活例子：</b>車險不是讓你不會出車禍，而是出事後理賠分攤損失。</p>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--tag-law);">
+                    <h4>⚖️ 第四步：選項分析</h4>
+                    <ul>
+                        <li>(A) <b>風險降低</b>：錯。買保險不等於技術防護，不直接降低機率。</li>
+                        <li>(B) <b>風險避免</b>：錯。避免是停止活動；保險沒有讓活動消失。</li>
+                        <li>(C) <b>風險接受</b>：錯。接受是自己扛；保險是分出去。</li>
+                        <li>(D) <b>風險轉移</b>：對。透過保險把財務損失轉給第三方。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--highlight);">
+                    <h4>📚 觀念補充與延伸</h4>
+                    <p><b>觸類旁通：</b></p>
+                    <ul>
+                        <li>「與供應商簽 SLA，若資安事件造成停機須賠償」→ 也是轉移（合約轉移）。</li>
+                        <li>「購買備援機房」→ 通常偏降低（降低可用性衝擊）。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                    <h4>🧠 記憶口訣</h4>
+                    <p>「保險就是轉移：出事理賠別自己扛。」</p>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--error-text);">
+                    <h4>🚫 常見陷阱</h4>
+                    <p><b>心理盲點：</b>把「降低損失」直覺當成「降低風險」。</p>
+                    <p><b>避坑指南：</b>問自己：「這措施是讓事件不發生，還是出事後有人賠？」有人賠 ＝ 轉移。</p>
+                </div>
+            `,
+            selfCheck: [
+                {
+                    q: "買 EDR（端點偵測與回應）屬於哪一類？",
+                    a: "風險降低"
+                },
+                {
+                    q: "跟雲端廠商簽約要求資安事件賠償屬於哪一類？",
+                    a: "風險轉移（合約）"
+                },
+                {
+                    q: "把高風險功能下線，屬於哪一類？",
+                    a: "風險避免"
+                }
+            ]
+        },
+        {
+            id: 4,
+            displayId: "第 40 題",
+            type: "multiple",
+            tags: ["資安防護", "複選題"],
+            question: "針對此事件，A 公司實施下列哪些的安全控制措施，可以協助有效降低風險？(複選)",
+            options: [
+                { id: "A", text: "實施多層備份策略" },
+                { id: "B", text: "使用零信任網路架構" },
+                { id: "C", text: "將備份系統與主網分離" },
+                { id: "D", text: "定期刪除備份檔案" }
+            ],
+            correctAnswer: ["A", "B", "C"],
+            reason: "多層備份與隔離可確保復原能力，零信任可防止駭客橫向擴散；刪除備份則會降低復原能力。",
+            explanation: `
+                <div class="explain-section">
+                    <h4>🔍 第一步：找關鍵字</h4>
+                    <ul>
+                        <li><b>有效降低風險</b>：選「能降低發生機率或降低衝擊」的措施。</li>
+                        <li><b>刪除了所有備份</b>：顯示「備份策略/隔離」是關鍵。</li>
+                        <li><b>成功潛入核心系統</b>：顯示橫向移動可能發生，零信任有幫助。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                    <h4>🗣️ 第二步：白話翻譯</h4>
+                    <p>公司被勒索還被刪光備份，下面哪些做法能真的讓以後比較不容易再被打爆，或就算被打也比較能救回來？</p>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--primary);">
+                    <h4>💡 第三步：解題思路</h4>
+                    <p><b>考點：</b>控制措施如何對應「入侵、擴散、破壞備份」痛點。</p>
+                    <p><b>解題步驟：</b></p>
+                    <ul>
+                        <li>1) 抓痛點：備份全滅、核心被入侵。</li>
+                        <li>2) 對應措施：提升復原（多層備份、隔離）、降低擴散（零信任）。</li>
+                        <li>3) 排除反效果選項（讓復原更差的）。</li>
+                    </ul>
+                    <p><b>原理與規則：</b></p>
+                    <ul>
+                        <li><b>多層備份</b>：3-2-1 原則，就算一層被打還有別層。</li>
+                        <li><b>零信任</b>：不因為在內網就信任，每次存取都要驗證。</li>
+                        <li><b>備份分離</b>：避免駭客進主網順手刪備份。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--tag-law);">
+                    <h4>⚖️ 第四步：選項分析</h4>
+                    <ul>
+                        <li>(A) <b>實施多層備份</b>：對。提高可復原性。</li>
+                        <li>(B) <b>零信任架構</b>：對。降低駭客在內網到處跑的風險。</li>
+                        <li>(C) <b>備份分離</b>：對。勒索防護重點，避免火燒連環船。</li>
+                        <li>(D) <b>定期刪除備份</b>：錯。你要的是「保留可復原版本」，刪除會提高風險。</li>
+                    </ul>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                    <h4>🧠 記憶口訣</h4>
+                    <p>「備份要三層，主網要不信；備份要隔離，別把救命刪。」</p>
+                </div>
+
+                <div class="explain-section" style="border-left-color: var(--error-text);">
+                    <h4>🚫 常見陷阱</h4>
+                    <p><b>心理盲點：</b>把「清理檔案」當成好習慣，但忘了備份是用來救命的。</p>
+                    <p><b>避坑指南：</b>勒索題抓兩點：1.能不能復原（備份/隔離） 2.能不能阻擴散（零信任）。</p>
+                </div>
+            `,
+            selfCheck: [
+                {
+                    q: "如果備份放在同一個網段、同一個管理帳號可刪除，最大的風險是什麼？",
+                    a: "主網被入侵時，備份會一起被刪除/加密，導致無法復原"
+                },
+                {
+                    q: "「最小權限」跟零信任有什麼關係？",
+                    a: "零信任要靠最小權限讓每次存取都只拿到必要權限，降低橫向移動與擴散"
+                },
+                {
+                    q: "若公司採用「離線備份」與「不可變備份」，主要是在降低哪一種攻擊後果？",
+                    a: "降低勒索攻擊造成的復原失敗（備份被刪/被加密）的衝擊"
+                }
+            ]
+        }
+    ];
+
+    // 狀態管理
+    let currentTabId = 1;
+    const userState = {}; // { 1: { status: 'pending'|'correct'|'wrong', selected: [] } }
+
+    // 初始化
+    function init() {
+        quizData.forEach(q => {
+            userState[q.id] = { status: 'pending', selected: [] };
+        });
+        renderTabs();
+        renderQuestions();
+        updateProgress();
+        switchTab(1);
+    }
+
+    // 渲染 Tabs
+    function renderTabs() {
+        const container = document.getElementById('tabs-container');
+        container.innerHTML = quizData.map(q => `
+            <button class="tab-btn" onclick="switchTab(${q.id})" id="tab-${q.id}">
+                ${q.displayId}
+                <span class="tab-status" id="tab-status-${q.id}"></span>
+            </button>
+        `).join('');
+    }
+
+    // 渲染題目內容
+    function renderQuestions() {
+        const container = document.getElementById('questions-container');
+        container.innerHTML = quizData.map(q => `
+            <div class="question-content" id="question-${q.id}">
+                <div class="question-header">
+                    ${q.tags.map(tag => `<span class="q-tag">${tag}</span>`).join('')}
+                    ${q.type === 'multiple' ? '<span class="q-tag" style="background-color: var(--primary);">複選</span>' : ''}
+                </div>
+                
+                <div class="q-text">${q.question}</div>
+                
+                <div class="options-list type-${q.type}" id="options-list-${q.id}">
+                    ${q.options.map(opt => `
+                        <label class="option-item" id="opt-${q.id}-${opt.id}">
+                            <input type="${q.type === 'single' ? 'radio' : 'checkbox'}" 
+                                   name="q${q.id}" 
+                                   value="${opt.id}" 
+                                   class="option-input"
+                                   onchange="handleSelect(${q.id}, '${opt.id}')">
+                            <div class="custom-check"></div>
+                            <span class="option-text">${opt.text}</span>
+                        </label>
+                    `).join('')}
+                </div>
+
+                <div class="action-area">
+                    <button class="btn btn-primary" id="btn-submit-${q.id}" onclick="handleSubmit(${q.id})">送出答案</button>
+                </div>
+
+                <div class="feedback" id="feedback-${q.id}"></div>
+
+                <details id="explain-${q.id}">
+                    <summary>💡 查看詳細解析</summary>
+                    <div class="details-content">
+                        ${q.explanation}
+                    </div>
+                </details>
+
+                <details id="selfcheck-${q.id}">
+                    <summary>🎯 自我檢測</summary>
+                    <div class="details-content">
+                        ${q.selfCheck.map((item, idx) => `
+                            <div class="check-item">
+                                <p style="margin:0 0 6px 0;"><b>Q${idx + 1}:</b> ${item.q}</p>
+                                <p style="margin:0;"><b>A:</b> <span class="spoiler">${item.a}</span></p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </details>
+            </div>
+        `).join('');
+    }
+
+    // 切換 Tab
+    window.switchTab = function(id) {
+        // 更新 Tab 樣式
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`tab-${id}`).classList.add('active');
+        
+        // 更新內容顯示
+        document.querySelectorAll('.question-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(`question-${id}`).classList.add('active');
+        
+        // 捲動到頂部
+        document.getElementById(`question-${id}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        currentTabId = id;
+    };
+
+    // 處理選項點擊
+    window.handleSelect = function(qId, optId) {
+        const qData = quizData.find(q => q.id === qId);
+        const state = userState[qId];
+        
+        // 若已提交則禁止修改
+        if (state.status !== 'pending') return;
+
+        if (qData.type === 'single') {
+            state.selected = [optId];
+            // UI 更新
+            document.querySelectorAll(`#options-list-${qId} .option-item`).forEach(el => el.classList.remove('selected'));
+            document.getElementById(`opt-${qId}-${optId}`).classList.add('selected');
+        } else {
+            // 複選邏輯
+            const index = state.selected.indexOf(optId);
+            if (index > -1) {
+                state.selected.splice(index, 1);
+                document.getElementById(`opt-${qId}-${optId}`).classList.remove('selected');
+            } else {
+                state.selected.push(optId);
+                document.getElementById(`opt-${qId}-${optId}`).classList.add('selected');
+            }
+        }
+    };
+
+    // 提交答案
+    window.handleSubmit = function(qId) {
+        const state = userState[qId];
+        const qData = quizData.find(q => q.id === qId);
+        
+        if (state.selected.length === 0) {
+            alert("請先選擇答案！");
+            return;
+        }
+
+        // 判定對錯 (陣列比對)
+        const sortedSelected = [...state.selected].sort();
+        const sortedCorrect = [...qData.correctAnswer].sort();
+        const isCorrect = JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
+
+        // 更新狀態
+        state.status = isCorrect ? 'correct' : 'wrong';
+
+        // 鎖定選項 UI
+        document.querySelectorAll(`#options-list-${qId} .option-input`).forEach(input => input.disabled = true);
+        document.querySelectorAll(`#options-list-${qId} .option-item`).forEach(item => item.classList.add('disabled'));
+
+        // 顯示回饋
+        const feedbackEl = document.getElementById(`feedback-${qId}`);
+        feedbackEl.className = `feedback ${isCorrect ? 'success' : 'error'}`;
+        feedbackEl.style.display = 'block';
+        feedbackEl.innerHTML = `
+            <strong>${isCorrect ? '✓ 答對了！' : '✗ 答錯了'}</strong>
+            ${!isCorrect ? `<p>正確答案：${qData.correctAnswer.join('、')}</p>` : ''}
+            <p>${qData.reason}</p>
+        `;
+
+        // 自動展開解析
+        document.getElementById(`explain-${qId}`).open = true;
+
+        // 更新按鈕
+        const btn = document.getElementById(`btn-submit-${qId}`);
+        btn.textContent = "重新作答";
+        btn.className = "btn btn-reset";
+        btn.onclick = () => handleReset(qId);
+
+        // 更新 Tab 狀態與進度
+        updateTabStatus(qId, isCorrect);
+        updateProgress();
+    };
+
+    // 重新作答
+    window.handleReset = function(qId) {
+        const state = userState[qId];
+        state.status = 'pending';
+        state.selected = [];
+
+        // 重置選項 UI
+        document.querySelectorAll(`#options-list-${qId} .option-input`).forEach(input => {
+            input.disabled = false;
+            input.checked = false;
+        });
+        document.querySelectorAll(`#options-list-${qId} .option-item`).forEach(item => {
+            item.classList.remove('disabled', 'selected');
+        });
+
+        // 隱藏回饋與解析
+        document.getElementById(`feedback-${qId}`).style.display = 'none';
+        document.getElementById(`explain-${qId}`).open = false;
+        document.getElementById(`selfcheck-${qId}`).open = false;
+
+        // 重置按鈕
+        const btn = document.getElementById(`btn-submit-${qId}`);
+        btn.textContent = "送出答案";
+        btn.className = "btn btn-primary";
+        btn.onclick = () => handleSubmit(qId);
+
+        // 清除 Tab 狀態
+        document.getElementById(`tab-status-${qId}`).textContent = "";
+        
+        updateProgress();
+    };
+
+    function updateTabStatus(qId, isCorrect) {
+        const statusSpan = document.getElementById(`tab-status-${qId}`);
+        statusSpan.textContent = isCorrect ? "✓" : "✗";
+        statusSpan.style.color = isCorrect ? "var(--success-text)" : "var(--error-text)";
+    }
+
+    function updateProgress() {
+        const completedCount = Object.values(userState).filter(s => s.status !== 'pending').length;
+        const total = quizData.length;
+        const percent = (completedCount / total) * 100;
+
+        document.getElementById('progress-text').textContent = completedCount;
+        document.getElementById('progress-fill').style.width = `${percent}%`;
+        
+        const badge = document.getElementById('status-badge');
+        if (completedCount === total) {
+            badge.className = 'status-done';
+            badge.textContent = '✅ 本題組已完成';
+        } else {
+            badge.className = 'status-pending';
+            badge.textContent = '📝 尚未完成';
+        }
+    }
+
+    // 啟動
+    init();
+
+</script>
+
+</body>
+</html>
