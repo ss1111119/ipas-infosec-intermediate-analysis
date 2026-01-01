@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q003：資安防禦機制選擇</title>
+    
+    <!-- 外部資源：Tailwind CSS (樣式) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 外部資源：Google Fonts (字體) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- 外部資源：FontAwesome (圖示) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- 認知友善配色系統 (Cognitive Friendly Palette) --- */
+        :root {
+            --body-bg: #f4f7f6;       /* 冷灰調背景 */
+            --card-bg: #ffffff;       /* 卡片底色 */
+            --text-primary: #2c3e50;  /* 深藍灰文字 */
+            --primary: #2980b9;       /* 主要藍色 */
+            --primary-hover: #2472a4; /* 藍色懸停 */
+            --highlight: #f1c40f;     /* 記憶黃標記 */
+            --success-bg: #e8f5e9;    /* 正確背景 */
+            --success-text: #2e7d32;  /* 正確文字 */
+            --error-bg: #fce4ec;      /* 錯誤背景 */
+            --error-text: #c62828;    /* 錯誤文字 */
+            --explain-bg: #f8f9fa;    /* 解析段落底色 */
+        }
+
+        /* --- 標籤色彩規範 --- */
+        .tag-law { background-color: #607d8b; color: white; }
+        .tag-iso { background-color: #27ae60; color: white; }
+        .tag-zt  { background-color: #8e44ad; color: white; }
+        .tag-net { background-color: #2980b9; color: white; }
+        .tag-sec { background-color: #c0392b; color: white; }
+        .tag-mgm { background-color: #d35400; color: white; }
+
+        /* --- 基礎設定 --- */
+        body {
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* --- 版型容器 --- */
+        .page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        /* 行動裝置適配 */
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 16px;
+                padding: 24px 20px;
+                width: auto;
+            }
+            h2 { font-size: 1.25rem; } /* 20px */
+            h3 { font-size: 1rem; }    /* 16px */
+        }
+
+        /* --- UI 元件與微互動 --- */
+        
+        /* 選項樣式 */
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .option-label:hover:not(.disabled) {
+            background-color: #e3f2fd;
+            border-color: #cbd5e1;
+            transform: translateX(4px);
+        }
+
+        .option-label.selected {
+            background-color: #bbdefb;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        /* 禁用狀態 */
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .option-label.disabled:hover {
+            transform: none;
+            background-color: white; /* 保持原色，避免誤導 */
+        }
+        /* 答對時的鎖定樣式 (可選) */
+        .option-label.disabled.correct-answer-style {
+            background-color: var(--success-bg);
+            border-color: var(--success-text);
+        }
+
+        /* 隱藏原生 Radio/Checkbox 但保持可訪問性 */
+        .option-input {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #94a3b8;
+            border-radius: 50%;
+            margin-right: 16px;
+            margin-top: 3px;
+            flex-shrink: 0;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .option-input:checked {
+            border-color: var(--primary);
+            background-color: var(--primary);
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+        }
+
+        /* 按鈕樣式 */
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 200ms ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background-color: #64748b;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #475569;
+            transform: translateY(-2px);
+        }
+
+        .btn-disabled {
+            background-color: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* 回饋區塊動畫 */
+        .feedback-area {
+            animation: fadeInUp 300ms ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 回饋樣式 */
+        .feedback-box {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border-left: 6px solid;
+        }
+
+        .feedback-success {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            border-color: var(--success-text);
+        }
+
+        .feedback-error {
+            background-color: var(--error-bg);
+            color: var(--error-text);
+            border-color: var(--error-text);
+        }
+
+        /* 解析區塊樣式 - 主層 */
+        details.main-details > summary {
+            cursor: pointer;
+            padding: 16px;
+            background-color: #f1f5f9;
+            border-radius: 12px;
+            font-weight: 600;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color 0.2s;
+        }
+        
+        details.main-details > summary:hover {
+            background-color: #e2e8f0;
+        }
+
+        details.main-details > summary::after {
+            content: '\f078'; /* FontAwesome chevron-down */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+
+        details.main-details[open] > summary::after {
+            transform: rotate(180deg);
+        }
+
+        /* 解析段落卡 */
+        .explain-section {
+            background-color: var(--explain-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 16px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .explain-section h4 {
+            margin-top: 0;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        /* 自我檢測內部的小細節 */
+        .self-check-item {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .self-check-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .self-check-answer {
+            margin-top: 8px;
+            padding: 12px;
+            background-color: #fff;
+            border-radius: 6px;
+            border: 1px dashed #cbd5e1;
+            color: var(--success-text);
+        }
+
+        /* 重點標記 */
+        mark {
+            background-color: var(--highlight);
+            color: #000;
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+        
+        .status-badge {
+            font-size: 0.875rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .status-badge.unanswered { background-color: #e2e8f0; color: #64748b; }
+        .status-badge.correct { background-color: var(--success-bg); color: var(--success-text); }
+        .status-badge.wrong { background-color: var(--error-bg); color: var(--error-text); }
+
+    </style>
+</head>
+<body>
+
+    <div class="page-container" id="quizContainer">
+        
+        <!-- 1. Header: 題號 ＋ 答題狀態 -->
+        <div class="flex justify-between items-center mb-6 border-b pb-4 border-slate-200">
+            <h1 class="text-xl font-bold text-slate-700">
+                <span class="text-blue-600 mr-2">Q003</span> 資安防禦機制
+            </h1>
+            <span id="statusBadge" class="status-badge unanswered">
+                <i class="fa-regular fa-circle"></i> 未作答
+            </span>
+        </div>
+
+        <!-- 2. Context: 情境卡 -->
+        <div class="bg-slate-50 p-4 rounded-lg mb-6 text-slate-600 text-sm border border-slate-200">
+            <i class="fa-solid fa-circle-info mr-2 text-blue-400"></i>
+            本題無額外情境
+        </div>
+
+        <!-- 3. Question: 題目 ＋ 選項 -->
+        <div class="mb-8" id="questionArea">
+            <h2 class="text-2xl font-bold mb-6 text-slate-800 leading-snug">
+                當企業遇到資安攻擊時，開發人員或資安維運人員必須選擇最合適的防禦機制。下列何種防禦手法的<mark>「效果最差」</mark>，很容易被攻擊者用其他方式繞過？
+            </h2>
+
+            <div class="space-y-3" id="optionsContainer">
+                <!-- Option A -->
+                <label class="option-label" id="label-A">
+                    <input type="radio" name="quizOption" value="A" class="option-input">
+                    <span class="option-text text-lg">
+                        (A) Filter Input and Escape Output（輸入過濾與輸出轉義），避免發生 XSS 攻擊
+                    </span>
+                </label>
+
+                <!-- Option B -->
+                <label class="option-label" id="label-B">
+                    <input type="radio" name="quizOption" value="B" class="option-input">
+                    <span class="option-text text-lg">
+                        (B) 實作上傳功能時，檢查檔案內容與路徑，限制副檔名並存放於專屬目錄，避免惡意程式碼執行
+                    </span>
+                </label>
+
+                <!-- Option C -->
+                <label class="option-label" id="label-C">
+                    <input type="radio" name="quizOption" value="C" class="option-input">
+                    <span class="option-text text-lg">
+                        (C) 撰寫資料庫查詢功能時，使用 Prepared Statement（預備式查詢）來防止 SQL Injection
+                    </span>
+                </label>
+
+                <!-- Option D -->
+                <label class="option-label" id="label-D">
+                    <input type="radio" name="quizOption" value="D" class="option-input">
+                    <span class="option-text text-lg">
+                        (D) 在需要串接系統指令的網頁應用程式中，僅在<mark>前端使用 JavaScript</mark> 過濾特殊字元，防止 Command Injection
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 4. Action Area: 主要按鈕 -->
+        <div class="mb-8">
+            <button id="submitBtn" onclick="checkAnswer()" class="btn-action btn-primary">
+                送出答案 <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+
+        <!-- 5. Feedback: 判定結果 (預設隱藏) -->
+        <div id="feedbackArea" class="feedback-area hidden">
+            <!-- 內容由 JS 動態生成 -->
+        </div>
+
+        <!-- 6. Explain: 詳解卡 (預設隱藏 + 收合) -->
+        <details id="explainArea" class="hidden mb-8 group main-details">
+            <summary class="text-lg text-slate-700">
+                <span><i class="fa-solid fa-book-open mr-2 text-blue-500"></i> 查看完整解析</span>
+            </summary>
+            
+            <div class="mt-4 space-y-4 text-slate-700">
+                
+                <!-- 第一步：找關鍵字 -->
+                <div class="explain-section" style="border-left-color: #2980b9;">
+                    <h4><i class="fa-solid fa-magnifying-glass text-blue-600"></i> 第一步：找關鍵字</h4>
+                    <p>
+                        <span class="bg-yellow-100 px-1 rounded">效果最差</span>、
+                        <span class="bg-yellow-100 px-1 rounded">很容易被攻擊者用其他方式繞過</span>、
+                        <span class="bg-yellow-100 px-1 rounded">前端 JavaScript</span>。
+                    </p>
+                    <p class="mt-2 text-sm text-slate-600">
+                        提示：題目問的不是「哪個安全」，而是「哪個最容易被繞過（無效）」。
+                    </p>
+                </div>
+
+                <!-- 第二步：白話翻譯 -->
+                <div class="explain-section" style="border-left-color: #8e44ad;">
+                    <h4><i class="fa-solid fa-language text-purple-600"></i> 第二步：白話翻譯</h4>
+                    <p>這題在問：下面這些選項看起來都像「有做防禦」，但哪一個其實是「紙老虎」，駭客只要換個方式（不走正門）就可以直接跳過、長驅直入？</p>
+                </div>
+
+                <!-- 第三步：解題思路 -->
+                <div class="explain-section" style="border-left-color: #c0392b;">
+                    <h4><i class="fa-solid fa-lightbulb text-red-600"></i> 第三步：解題思路</h4>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>核心觀念：</strong>防禦機制是否放在「正確的位置」（Server-side vs Client-side）。</li>
+                        <li><strong>原理與規則：</strong>
+                            <ul class="list-none pl-2 mt-1 border-l-2 border-slate-300">
+                                <li><i class="fa-solid fa-xmark text-red-500"></i> <strong>前端驗證 (Client-side)：</strong>程式碼在用戶瀏覽器執行，用戶完全可控（可修改、可關閉、可繞過），只能當作「提升體驗」，不能當作「安全防護」。</li>
+                                <li><i class="fa-solid fa-check text-green-500"></i> <strong>後端驗證 (Server-side)：</strong>程式碼在伺服器執行，用戶無法修改，才是真正的安全關卡。</li>
+                            </ul>
+                        </li>
+                        <li class="mt-2"><strong>生活例子：</strong>
+                            <p class="text-sm bg-white p-2 rounded mt-1 border border-slate-200">
+                                這就像去夜店，如果只是在家裡照鏡子（前端）確認自己有沒有帶武器，這叫自我檢查。如果夜店門口沒有保鏢與安檢門（後端），壞人只要在家把武器藏好，就能直接帶進去。
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 第四步：選項分析 -->
+                <div class="explain-section" style="border-left-color: #27ae60;">
+                    <h4><i class="fa-solid fa-list-check text-green-600"></i> 第四步：選項分析</h4>
+                    <ul class="space-y-3">
+                        <li>
+                            <span class="font-bold text-green-700">(A) 有效防禦：</span> 
+                            輸入過濾與輸出轉義（Filter Input/Escape Output）是防禦 XSS 的黃金準則，通常在後端實作。
+                        </li>
+                        <li>
+                            <span class="font-bold text-green-700">(B) 有效防禦：</span> 
+                            上傳檔案檢查內容、限制目錄執行權限，這是防禦 Web Shell 的正確「後端」作法。
+                        </li>
+                        <li>
+                            <span class="font-bold text-green-700">(C) 有效防禦：</span> 
+                            Prepared Statement 是資料庫層級的防護，能有效隔離 SQL 指令與資料，是防禦 SQL Injection 的最佳實務。
+                        </li>
+                        <li class="bg-red-50 p-2 rounded border border-red-200">
+                            <span class="font-bold text-red-700">(D) 效果最差（正解）：</span> 
+                            只在「前端」用 JavaScript 過濾。攻擊者可以使用 Postman、curl 或攔截代理伺服器（Proxy），直接發送不含過濾邏輯的 HTTP 請求給後端，完全無視你的 JavaScript 保護。
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 觀念補充與延伸 -->
+                <div class="explain-section" style="border-left-color: #16a085;">
+                    <h4><i class="fa-solid fa-book-medical text-teal-600"></i> 觀念補充與延伸</h4>
+                    <p><strong>法條或定義：</strong></p>
+                    <ul class="list-disc pl-5 mt-1 text-sm">
+                        <li><strong>Client-side Validation：</strong>主要目的是「使用者體驗」（UX），例如即時提示 Email 格式錯誤，減少等待伺服器回應的時間。</li>
+                        <li><strong>Server-side Validation：</strong>主要目的是「資訊安全」（Security），是系統的最後一道防線。</li>
+                    </ul>
+                    <p class="mt-3"><strong>觸類旁通（舉一反三）：</strong></p>
+                    <p class="text-sm">題目若改成「價格檢查只在前端做」，攻擊者也能直接修改 POST 封包中的價格參數（例如把 1000 元改成 1 元）送給後端。這也是常見的邏輯漏洞。</p>
+                </div>
+
+                <!-- 記憶口訣 -->
+                <div class="explain-section" style="border-left-color: #f39c12;">
+                    <h4><i class="fa-solid fa-star text-yellow-600"></i> 記憶口訣</h4>
+                    <div class="text-center font-bold text-lg text-slate-700 py-2 bg-yellow-50 rounded border border-yellow-200">
+                        「前端防君子，後端防小人」<br>
+                        「只信 JS，資安必死」
+                    </div>
+                </div>
+
+                <!-- 常見陷阱 -->
+                <div class="explain-section" style="border-left-color: #34495e;">
+                    <h4><i class="fa-solid fa-skull-crossbones text-slate-600"></i> 常見陷阱</h4>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>心理盲點：</strong>開發者常以為「我看不到網頁上有輸入框可以打指令，駭客就沒辦法打」。忽略了駭客根本不需要「看」網頁，他們直接對「介面（API）」溝通。</li>
+                        <li><strong>避坑指南：</strong>考試時只要看到關鍵字<mark>「只在前端」、「使用 JavaScript 過濾」</mark>，通常就是錯誤或最脆弱的選項。</li>
+                    </ul>
+                </div>
+
+            </div>
+        </details>
+
+        <!-- 7. SelfCheck: 自我檢測 (修正為題目可見，答案隱藏) -->
+        <details id="selfCheckArea" class="mb-4 main-details">
+            <summary class="text-md text-slate-600">
+                <span><i class="fa-solid fa-clipboard-check mr-2 text-green-600"></i> 自我檢測</span>
+            </summary>
+            <div class="p-4 bg-slate-50 rounded-b-lg border-t border-slate-200 mt-0">
+                
+                <!-- Q1 -->
+                <div class="self-check-item">
+                    <p class="font-bold text-slate-700"><i class="fa-regular fa-circle-question text-blue-500"></i> Q1：為什麼前端驗證不能當作唯一的安全防護？</p>
+                    <details class="mt-2">
+                        <summary class="text-sm text-blue-600 hover:text-blue-800 cursor-pointer select-none w-fit">
+                            <i class="fa-solid fa-eye mr-1"></i> 顯示答案
+                        </summary>
+                        <div class="self-check-answer">
+                            A1：因為攻擊者可以繞過瀏覽器 UI（使用者介面），直接使用工具（如 Postman、Proxy）對後端 API 發送請求，完全跳過前端的 JS 檢查邏輯。
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Q2 -->
+                <div class="self-check-item">
+                    <p class="font-bold text-slate-700"><i class="fa-regular fa-circle-question text-blue-500"></i> Q2：如果一定要防止 Command Injection，後端至少要做哪兩件事？</p>
+                    <details class="mt-2">
+                        <summary class="text-sm text-blue-600 hover:text-blue-800 cursor-pointer select-none w-fit">
+                            <i class="fa-solid fa-eye mr-1"></i> 顯示答案
+                        </summary>
+                        <div class="self-check-answer">
+                            A2：(1) 盡量避免使用系統指令（改用語言內建 API）。<br>
+                            (2) 若必須使用，應嚴格限制輸入範圍（白名單）並對參數進行嚴格過濾/轉義。
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Q3 -->
+                <div class="self-check-item">
+                    <p class="font-bold text-slate-700"><i class="fa-regular fa-circle-question text-blue-500"></i> Q3：Prepared Statement 為什麼比字元過濾更能防禦 SQL Injection？</p>
+                    <details class="mt-2">
+                        <summary class="text-sm text-blue-600 hover:text-blue-800 cursor-pointer select-none w-fit">
+                            <i class="fa-solid fa-eye mr-1"></i> 顯示答案
+                        </summary>
+                        <div class="self-check-answer">
+                            A3：因為它將 SQL 語法結構與資料參數分開處理（編譯），資料庫會把使用者輸入單純視為「值」，不會將其解釋為可執行的 SQL 指令。
+                        </div>
+                    </details>
+                </div>
+
+            </div>
+        </details>
+
+    </div>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        // 定義正確答案
+        const CORRECT_ANSWER = 'D';
+        
+        // 取得 DOM 元素
+        const submitBtn = document.getElementById('submitBtn');
+        const feedbackArea = document.getElementById('feedbackArea');
+        const explainArea = document.getElementById('explainArea');
+        const selfCheckArea = document.getElementById('selfCheckArea');
+        const statusBadge = document.getElementById('statusBadge');
+        const allOptions = document.querySelectorAll('input[name="quizOption"]');
+        const labels = document.querySelectorAll('.option-label');
+        const questionArea = document.getElementById('questionArea');
+
+        // 綁定選項點擊事件 (UX優化：選中時改變樣式)
+        allOptions.forEach(option => {
+            option.addEventListener('change', () => {
+                // 移除所有標籤的 selected 樣式
+                labels.forEach(l => l.classList.remove('selected'));
+                // 為當前選中的標籤添加 selected 樣式
+                if(option.checked) {
+                    option.parentElement.classList.add('selected');
+                }
+            });
+        });
+
+        // 檢查答案函數
+        function checkAnswer() {
+            // 1. 獲取選中值
+            const selectedOption = document.querySelector('input[name="quizOption"]:checked');
+
+            // 2. 防呆：未選時警告
+            if (!selectedOption) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            const userAnswer = selectedOption.value;
+            const isCorrect = userAnswer === CORRECT_ANSWER;
+
+            // 3. 鎖定所有選項與按鈕
+            allOptions.forEach(opt => {
+                opt.disabled = true;
+                opt.parentElement.classList.add('disabled');
+            });
+
+            // 4. 更新 Header 狀態
+            statusBadge.classList.remove('unanswered');
+            if (isCorrect) {
+                statusBadge.innerHTML = '<i class="fa-solid fa-check"></i> 答對了';
+                statusBadge.classList.add('correct');
+            } else {
+                statusBadge.innerHTML = '<i class="fa-solid fa-xmark"></i> 答錯了';
+                statusBadge.classList.add('wrong');
+            }
+
+            // 5. 生成 Feedback 內容
+            feedbackArea.classList.remove('hidden');
+            
+            if (isCorrect) {
+                feedbackArea.innerHTML = `
+                    <div class="feedback-box feedback-success">
+                        <h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-circle-check"></i> 答對了！</h3>
+                        <p>完全正確！前端驗證很容易被繞過，必須依賴後端檢查才是有效的資安防禦。</p>
+                    </div>
+                `;
+            } else {
+                feedbackArea.innerHTML = `
+                    <div class="feedback-box feedback-error">
+                        <h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-circle-xmark"></i> 答錯了</h3>
+                        <p class="mb-1"><strong>正確答案是：(D)</strong></p>
+                        <p>理由：只在前端用 JavaScript 過濾輸入，攻擊者可直接繞過，防禦效果最差。</p>
+                    </div>
+                `;
+                
+                // 標示正確選項樣式 (視覺輔助)
+                const correctLabel = document.getElementById(`label-${CORRECT_ANSWER}`);
+                if (correctLabel) {
+                    correctLabel.classList.add('correct-answer-style');
+                    // 為了強調，可以暫時移除 disabled 的灰色感，雖然功能仍禁用
+                    correctLabel.style.opacity = '1'; 
+                    correctLabel.style.borderColor = 'var(--success-text)';
+                }
+            }
+
+            // 6. 顯示詳解區塊 (設為 block 但保持 details 收合狀態，讓使用者自行點開，或者為了體驗可以直接 open)
+            explainArea.classList.remove('hidden');
+            explainArea.open = true; // UX優化：使用者作答後，通常希望直接看到詳解，故預設展開
+
+            // 7. 切換按鈕狀態為「重新作答」
+            submitBtn.innerHTML = '重新作答 <i class="fa-solid fa-rotate-right"></i>';
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-secondary');
+            submitBtn.onclick = resetQuiz;
+            
+            // 8. 展開 SelfCheck
+            selfCheckArea.open = true;
+        }
+
+        // 重新作答函數
+        function resetQuiz() {
+            // 1. 清空選項
+            allOptions.forEach(opt => {
+                opt.checked = false;
+                opt.disabled = false;
+                opt.parentElement.classList.remove('selected', 'disabled');
+                // 清除正確答案的高亮
+                opt.parentElement.style.opacity = '';
+                opt.parentElement.style.borderColor = '';
+                opt.parentElement.classList.remove('correct-answer-style');
+            });
+
+            // 2. 隱藏回饋與詳解
+            feedbackArea.classList.add('hidden');
+            feedbackArea.innerHTML = '';
+            
+            explainArea.classList.add('hidden');
+            explainArea.open = false; // 收合詳解
+
+            // 3. 收合自我檢測 (並收合內部的答案)
+            selfCheckArea.open = false;
+            const innerDetails = selfCheckArea.querySelectorAll('details');
+            innerDetails.forEach(d => d.open = false);
+
+            // 4. 重置 Header 狀態
+            statusBadge.innerHTML = '<i class="fa-regular fa-circle"></i> 未作答';
+            statusBadge.className = 'status-badge unanswered';
+
+            // 5. 重置按鈕
+            submitBtn.innerHTML = '送出答案 <i class="fa-solid fa-paper-plane"></i>';
+            submitBtn.classList.remove('btn-secondary');
+            submitBtn.classList.add('btn-primary');
+            submitBtn.onclick = checkAnswer;
+
+            // 6. 平滑捲動回題目頂端
+            // 稍微延遲以確保 DOM 渲染完成
+            setTimeout(() => {
+                document.getElementById('quizContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        // 初始化檢查：若為 Bootstrap 環境失敗則降級 (雖然這裡用 Tailwind，保留邏輯結構)
+        window.addEventListener('DOMContentLoaded', () => {
+           // 可以在此加入載入動畫結束的邏輯
+        });
+
+    </script>
+</body>
+</html>

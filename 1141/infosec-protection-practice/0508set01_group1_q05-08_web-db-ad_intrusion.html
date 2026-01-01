@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安事件調查題組：WEB、DB 與 AD 的連鎖攻擊</title>
+    <style>
+        /* --- 認知友善配色系統 --- */
+        :root {
+            --body-bg: #f4f7f6;       /* 冷灰調背景 */
+            --card-bg: #ffffff;       /* 卡片底色 */
+            --text-primary: #2c3e50;  /* 深藍灰文字 */
+            --text-secondary: #546e7a; /* 次要文字 */
+            --primary: #2980b9;       /* 主要藍色 */
+            --primary-hover: #1abc9c; /* 互動懸停色 */
+            --highlight: #f1c40f;     /* 記憶黃標記 */
+            --success-bg: #e8f5e9;    /* 正確背景 */
+            --success-text: #2e7d32;  /* 正確文字 */
+            --error-bg: #fce4ec;      /* 錯誤背景 */
+            --error-text: #c62828;    /* 錯誤文字 */
+            --border-color: #ecf0f1;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            
+            /* 標籤色彩 */
+            --tag-law: #607d8b;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        /* --- 基礎設定 --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* --- 版型與響應式 --- */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+            border-radius: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 16px;
+                padding: 20px;
+                border-radius: 12px;
+                width: auto;
+            }
+            
+            h1 { font-size: 24px; }
+            h2 { font-size: 20px; }
+            h3 { font-size: 18px; }
+        }
+
+        /* --- 1. Header (題組專用) --- */
+        .group-header {
+            margin-bottom: 32px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 24px;
+        }
+
+        .group-header h1 {
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), #3498db);
+            transition: width 400ms ease;
+        }
+
+        .completion-status {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .status-pending { color: var(--text-secondary); }
+        .status-done { color: var(--success-text); }
+
+        /* --- 2. Context (題組背景) --- */
+        .group-context {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 32px;
+            border-left: 4px solid var(--primary);
+        }
+
+        /* --- 3. Tabs (切題機制) --- */
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 4px; /* Scrollbar space */
+        }
+
+        .tab-btn {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 200ms ease;
+            min-height: 48px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            background-color: #e3f2fd;
+            transform: translateY(-2px);
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 8px rgba(41,128,185,0.3);
+        }
+
+        .tab-status {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* --- 4. Tab 內容 (單題母版) --- */
+        .question-content {
+            display: none; /* JS 切換 */
+            animation: fadeIn 300ms ease;
+        }
+        
+        .question-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 題內 Header */
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .q-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .q-badge.pending { background: #eee; color: #666; }
+        .q-badge.correct { background: var(--success-bg); color: var(--success-text); }
+        .q-badge.wrong { background: var(--error-bg); color: var(--error-text); }
+
+        /* 題內 Context & Image */
+        .q-context-box {
+            margin-bottom: 20px;
+        }
+        
+        .q-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px 0 20px 0;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* 題目敘述與選項 */
+        .question-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 150ms ease;
+            background: #fff;
+        }
+
+        .option-label:hover {
+            background-color: #e3f2fd;
+            border-color: #90caf9;
+        }
+
+        .option-label input {
+            margin-top: 4px;
+            margin-right: 12px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+        
+        /* 選中樣式 (由 JS 添加 class) */
+        .option-label.selected {
+            background-color: #bbdefb;
+            border-color: var(--primary);
+        }
+        
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .option-text {
+            width: 100%;
+            word-break: break-word;
+        }
+
+        /* Action Area */
+        .action-area {
+            margin-bottom: 24px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 200ms ease;
+            min-height: 44px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(41,128,185,0.3);
+            background-color: #2980b9;
+        }
+
+        .btn-retry {
+            background-color: #7f8c8d;
+        }
+        
+        .btn-retry:hover {
+            background-color: #95a5a6;
+            box-shadow: 0 4px 12px rgba(127,140,141,0.3);
+        }
+
+        /* Feedback Area */
+        .feedback {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: none; /* 預設隱藏 */
+            animation: fadeInUp 300ms ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.success {
+            background-color: var(--success-bg);
+            border-left: 4px solid var(--success-text);
+            color: var(--success-text);
+        }
+
+        .feedback.error {
+            background-color: var(--error-bg);
+            border-left: 4px solid var(--error-text);
+            color: var(--error-text);
+        }
+
+        /* Explain Area */
+        details {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            background-color: #f8f9fa;
+            list-style: none; /* Remove default triangle */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        summary::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .explain-content {
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        .explain-section {
+            margin-bottom: 20px;
+            padding: 16px;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* Specific style for Self Check section when not using details wrapper */
+        .self-check-area {
+            display: none; /* Hidden initially */
+            border-left-color: #8e44ad; /* Purple for Self Check */
+        }
+
+        .explain-section h4 {
+            margin-bottom: 12px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .self-check-area h4 {
+            color: #8e44ad;
+        }
+
+        /* Inner details for answers */
+        .self-check-area details {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+        }
+        
+        .self-check-area summary {
+            background-color: #f0f0f0;
+            font-size: 0.9em;
+            padding: 10px 16px;
+        }
+
+        mark {
+            background-color: var(--highlight);
+            color: var(--text-primary);
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+        
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        
+        .tag.sec { background-color: var(--tag-sec); }
+        .tag.mgm { background-color: var(--tag-mgm); }
+
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    <!-- 1. Header -->
+    <header class="group-header">
+        <h1>資安事件調查題組：WEB、DB 與 AD 的連鎖攻擊</h1>
+        <div class="progress-info">
+            <span id="progress-text">已完成：0 / 4</span>
+            <span id="progress-percent">0%</span>
+        </div>
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <div class="completion-status">
+            <span id="completion-msg" class="status-pending">📝 尚未完成</span>
+        </div>
+    </header>
+
+    <!-- 2. Context -->
+    <div class="group-context">
+        <h3>📂 案件背景</h3>
+        <p style="margin-top: 8px;">本題組模擬一次完整的企業入侵事件調查。你將扮演資安小組成員，依序檢視 <strong>WEB 主機</strong>、<strong>資料庫伺服器</strong>與 <strong>AD 主機</strong>的跡證，判斷攻擊者使用的手法（Log Injection、LFI、Persistence、Pass-the-Ticket）並提出防護建議。</p>
+    </div>
+
+    <!-- 3. Tabs -->
+    <div class="tabs-container" id="tabs-container">
+        <!-- JS generates buttons here -->
+    </div>
+
+    <!-- 4. Question Contents -->
+    <div id="questions-wrapper">
+        <!-- JS generates question contents here -->
+    </div>
+</div>
+
+<script>
+/**
+ * Data Structure
+ */
+const quizData = {
+    groupName: "資安事件調查題組：WEB、DB 與 AD 的連鎖攻擊",
+    questions: [
+        {
+            id: 5,
+            type: "single",
+            title: "第 5 題",
+            image: "https://i.meee.com.tw/McfwHw8.png",
+            question: "在進行例行性的檢查時，你發現在 WEB 主機上出現了附圖一的 log 記錄，這個 log 記錄中出現了登入錯誤的訊息，但這個訊息恐怕不是登入錯誤而已，這樣的 log 記錄內容，你可能已經遭受到下列何種攻擊？",
+            options: [
+                { id: "A", text: "修改網站的配置文件以獲得管理員權限" },
+                { id: "B", text: "利用 SQL 注入漏洞來控制資料庫，進而執行代碼" },
+                { id: "C", text: "通過注入惡意指令到 SSH 日誌文件中，然後通過 LFI（本機檔案包含）加載該日誌文件來執行惡意指令" },
+                { id: "D", text: "網站被發起了 XSS Server Side 的攻擊" }
+            ],
+            correctAnswer: ["C"],
+            reason: "日誌中出現惡意指令片段，符合「先污染 SSH 日誌，再透過 LFI 載入日誌觸發執行」的攻擊鏈。",
+            explanation: `
+                <div class="explain-section">
+                    <h4>🔍 第一步：找關鍵字</h4>
+                    <p><strong>附圖一 / auth.log / sshd</strong>：Linux 常見 SSH 驗證日誌，關鍵在「登入失敗內容」。<br>
+                    <strong>Failed password / invalid user</strong>：表面像爆破，但題目暗示「不只是登入錯誤」。<br>
+                    <strong>php system($_GET[...])</strong>：典型的惡意 PHP 程式碼片段。<br>
+                    <strong>LFI + log</strong>：把日誌當成可被網站載入的檔案，進而執行惡意指令。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>🗣️ 第二步：白話翻譯</h4>
+                    <p>你看到的是「SSH 登入失敗」的紀錄，但裡面居然混進了像 PHP 的惡意指令片段。這通常不是單純有人打錯密碼，而是攻擊者故意把惡意字串寫進日誌，接著利用網站的「讀檔漏洞（LFI）」去載入那個日誌，讓惡意字串被當作程式跑起來。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>💡 第三步：解題思路</h4>
+                    <p><strong>解題步驟：</strong><br>1. 先確認日誌類型：auth.log/sshd 是 SSH 登入事件記錄。<br>2. 看「可疑欄位」是否出現程式碼：例如把 code 當帳號輸入。<br>3. 推回攻擊鏈：Log Poisoning + LFI。</p>
+                    <p><strong>原理與規則：</strong>日誌本只是文字，但若網站有 LFI，攻擊者能指定載入「被污染的日誌」，使其被解析執行。</p>
+                    <p><strong>生活比喻：</strong>把「惡作劇紙條」塞進公司公告欄（寫入日誌），再利用「大家都會照著公告欄內容做事」的制度漏洞（LFI），間接指揮別人做壞事。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>⚖️ 第四步：選項分析</h4>
+                    <p>(A) 錯。不像改配置檔，那會有檔案變更線索。<br>(B) 錯。SQL 注入不會在 SSH log 出現 PHP 指令。<br>(C) 對。日誌混入惡意字串 + LFI 載入執行。<br>(D) 錯。XSS 影響瀏覽器，不會出現在 SSH log。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>📚 觀念補充與延伸</h4>
+                    <p><strong>法條或定義：</strong><br>LFI (Local File Inclusion)：利用網站缺陷讀取本機檔案。<br>Log Poisoning：把可執行字串寫進日誌。</p>
+                    <p><strong>觸類旁通：</strong>若題目是讀取 /var/log/access.log 且有 PHP tags，也是 Log Poisoning。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>🧠 記憶口訣</h4>
+                    <p>「日誌被塞碼，再用 LFI 把它載；不是登入錯，是日誌中招在。」</p>
+                </div>
+                <div class="explain-section">
+                    <h4>⚠️ 常見陷阱</h4>
+                    <p><strong>心理盲點：</strong>看到 "Failed password" 就選暴力破解。<br><strong>避坑指南：</strong>看到 log 裡有 &lt;?php、system(，優先往 Log Injection 想。</p>
+                </div>
+            `,
+            selfCheck: `
+                <h4>🧠 自我檢測</h4>
+                <p><strong>Q1：</strong>如果網站有 LFI，但日誌沒有被污染，攻擊者還可能讀到哪些敏感檔？</p>
+                <details><summary>顯示答案</summary><p>例：/etc/passwd、設定檔 (config.php)、金鑰檔、環境變數檔、網站原始碼等。</p></details>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                <p><strong>Q2：</strong>若要防止此類攻擊，針對「LFI」與「日誌」各說一個防護重點。</p>
+                <details><summary>顯示答案</summary><p>LFI：白名單限制載入路徑、禁用動態 include。日誌：避免可控輸入直接寫入、權限隔離。</p></details>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                <p><strong>Q3：</strong>如果日誌被載入就會執行，代表網站端可能用什麼方式處理被載入檔案？</p>
+                <details><summary>顯示答案</summary><p>可能是以可解析方式 include/require（如 PHP）或以模板引擎解析。</p></details>
+            `
+        },
+        {
+            id: 6,
+            type: "single",
+            title: "第 6 題",
+            image: "https://i.meee.com.tw/BzaceLK.png",
+            question: "在你自覺到公司的網站伺服器可能入侵的同時，你發現在資料庫伺服器的工作排程中出現了一個名為 windowsupdate 的工作，執行的內容如附圖二所示。請問對於 windowsupdate 的工作內容描述，下列何者正確？",
+            options: [
+                { id: "A", text: "這是段 PowerShell，它試圖在背景執行，且會產出一個名為 LSASS 的 Script" },
+                { id: "B", text: "就說明看來它應該 Windows 更新工作" },
+                { id: "C", text: "這是段 PowerShell，它試圖略過執行政策並且轉換 Script 為執行檔" },
+                { id: "D", text: "就說明看來它應該是會產生一支可進行 Windows 更新的檔案" }
+            ],
+            correctAnswer: ["C"],
+            reason: "指令包含 -ExecutionPolicy bypass 且將 .ps1 輸出為 .exe，屬明顯惡意偽裝行為。",
+            explanation: `
+                <div class="explain-section">
+                    <h4>🔍 第一步：找關鍵字</h4>
+                    <p><strong>排程名稱 windowsupdate</strong>：高風險偽裝（看起來很正常的名字）。<br>
+                    <strong>powershell.exe -ExecutionPolicy bypass</strong>：<mark>bypass</mark> 本身就是強烈惡意線索，意圖繞過政策。<br>
+                    <strong>inputFile 'LSASS.ps1' / outputFile 'Winupdate.exe'</strong>：把腳本轉成可執行檔，符合持久化 (Persistence) 作法。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>🗣️ 第二步：白話翻譯</h4>
+                    <p>你在資料庫伺服器看到一個叫「windowsupdate」的排程，但它其實在跑 PowerShell，還刻意跳過系統的執行政策，並把某個腳本輸出成 .exe。這不像更新，像是在把惡意腳本包成程式，方便以後一直跑。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>💡 第三步：解題思路</h4>
+                    <p><strong>解題步驟：</strong><br>1. 看有無「bypass/hidden/nop」等參數。<br>2. 看輸入/輸出：是否把 .ps1 產出 .exe（偽裝）。<br>3. 判斷合理性：真正的 Windows Update 不會這樣做。</p>
+                    <p><strong>原理與規則：</strong>Execution Policy 是防呆機制，bypass 是繞過。把腳本包成 exe 有助於躲避檢查。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>⚖️ 第四步：選項分析</h4>
+                    <p>(A) 錯。它不是產出 Script，而是將 ps1 轉為 exe。<br>(B) 錯。內容「bypass + 產 exe」不符合正常更新流程。<br>(C) 對。有 bypass 且輸出 exe。<br>(D) 錯。不能因為檔名就認為它能更新。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>📚 觀念補充與延伸</h4>
+                    <p><strong>法條或定義：</strong>Persistence (持久化)：留下可重複回來的機制。<br>ExecutionPolicy bypass：繞過 PowerShell 執行限制。</p>
+                    <p><strong>觸類旁通：</strong>排程名稱換成 GoogleUpdate/AdobeUpdate，本質仍是「看內容，不看名字」。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>🧠 記憶口訣</h4>
+                    <p>「名字叫更新不代表更新；看到 bypass 多半是壞心。」</p>
+                </div>
+                <div class="explain-section">
+                    <h4>⚠️ 常見陷阱</h4>
+                    <p><strong>心理盲點：</strong>太相信系統內建名稱 (windowsupdate)。<br><strong>避坑指南：</strong>先看指令列參數，特別是 bypass、hidden。</p>
+                </div>
+            `,
+            selfCheck: `
+                <h4>🧠 自我檢測</h4>
+                <p><strong>Q1：</strong>為什麼攻擊者喜歡用「windowsupdate」這種名字？</p>
+                <details><summary>顯示答案</summary><p>降低被管理員注意機率、混入正常維運工作清單。</p></details>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                <p><strong>Q2：</strong>你會用哪些方式驗證 Winupdate.exe 是否惡意？至少列 2 個。</p>
+                <details><summary>顯示答案</summary><p>檔案雜湊比對 (VirusTotal)、數位簽章檢查、沙箱行為分析。</p></details>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                <p><strong>Q3：</strong>若要降低此類風險，排程與 PowerShell 各做一個管控重點。</p>
+                <details><summary>顯示答案</summary><p>排程：限制建立權限與稽核；PowerShell：Script Block Logging、啟用 AMSI。</p></details>
+            `
+        },
+        {
+            id: 7,
+            type: "single",
+            title: "第 7 題",
+            image: "https://i.meee.com.tw/RaBrThA.png",
+            question: "當資安小組開始調查這個事件時，在 AD 主機上發現了附圖三的內容（大量 .kirbi 檔案與 mimikatz）。請問你遭受了什麼類型的攻擊？",
+            options: [
+                { id: "A", text: "Denial of Service 攻擊" },
+                { id: "B", text: "Pass the Ticket 攻擊" },
+                { id: "C", text: "Buffer Overflow 攻擊" },
+                { id: "D", text: "Directory Sync 攻擊" }
+            ],
+            correctAnswer: ["B"],
+            reason: ".kirbi 票證檔與 mimikatz 線索高度指向竊取並重放 Kerberos 票證的 Pass-the-Ticket。",
+            explanation: `
+                <div class="explain-section">
+                    <h4>🔍 第一步：找關鍵字</h4>
+                    <p><strong>AD 主機</strong>：身分驗證核心。<br>
+                    <strong>.kirbi 檔</strong>：常見是 <mark>Kerberos 票證 (Ticket)</mark> 的檔案形式。<br>
+                    <strong>mimikatz</strong>：常見用於抓取認證資料/票證的工具線索。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>🗣️ 第二步：白話翻譯</h4>
+                    <p>你在 AD 主機看到一堆 .kirbi（票證檔）跟 mimikatz。這代表攻擊者可能偷到了 Kerberos 票證，接著直接拿那張「通行證」去假冒使用者登入，不用知道密碼，這就是 Pass-the-Ticket。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>💡 第三步：解題思路</h4>
+                    <p><strong>解題步驟：</strong><br>1. 看到 .kirbi → 聯想到 Kerberos Ticket。<br>2. 看到 mimikatz → 聯想到擷取票證。<br>3. 兩者合一 → Pass-the-Ticket。</p>
+                    <p><strong>原理與規則：</strong>Kerberos 中票證一旦被偷走，可被重放 (Replay)。PtT 核心是不需密碼，靠票證就能冒用身分。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>⚖️ 第四步：選項分析</h4>
+                    <p>(A) 錯。DoS 會流量暴增，不會留下票證檔。<br>(B) 對。.kirbi + mimikatz 是典型票證被擷取並重放的組合。<br>(C) 錯。Buffer Overflow 是記憶體漏洞，無直接對應。<br>(D) 錯。Directory Sync 偏向權限濫用， .kirbi 更直接指向票證。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>📚 觀念補充與延伸</h4>
+                    <p><strong>法條或定義：</strong>Pass-the-Ticket：竊取並重放 Kerberos 票證以冒用身分。<br><strong>觸類旁通：</strong>若題目出現 TGT/TGS 字眼，也是票證攻擊。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>🧠 記憶口訣</h4>
+                    <p>「看到 kirbi 想票證；票證被偷就 PTT。」</p>
+                </div>
+                <div class="explain-section">
+                    <h4>⚠️ 常見陷阱</h4>
+                    <p><strong>心理盲點：</strong>搞混 Pass-the-Hash (偷雜湊) 與 Pass-the-Ticket (偷票證)。<br><strong>避坑指南：</strong>看到 .kirbi 就鎖定 Ticket。</p>
+                </div>
+            `,
+            selfCheck: `
+                <h4>🧠 自我檢測</h4>
+                <p><strong>Q1：</strong>Pass-the-Ticket 為什麼「不需要密碼」也能登入？</p>
+                <details><summary>顯示答案</summary><p>因為 Kerberos 使用票證作為身分憑證，票證被偷可被重放或注入。</p></details>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                <p><strong>Q2：</strong>若要降低票證被濫用，AD/端點層面可做哪些控管？</p>
+                <details><summary>顯示答案</summary><p>限制高權限帳號登入位置、啟用 Credential Guard、監控票證異常。</p></details>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                <p><strong>Q3：</strong>.kirbi 與密碼雜湊 (hash) 最大差異是什麼？</p>
+                <details><summary>顯示答案</summary><p>kirbi 是票證憑證 (Ticket)；hash 是密碼的指紋 (用於驗證)，屬不同認證材料。</p></details>
+            `
+        },
+        {
+            id: 8,
+            type: "multiple",
+            title: "第 8 題",
+            image: "https://i.meee.com.tw/Ja0BCik.png",
+            question: "針對上述情境，下列哪些措施可以有效降低類似攻擊再次發生的機率？（複選）",
+            options: [
+                { id: "A", text: "針對資料庫主機購置更強的資料庫稽核系統" },
+                { id: "B", text: "定期進行員工安全意識培訓" },
+                { id: "C", text: "加強對網路和系統的持續監控" },
+                { id: "D", text: "實施更嚴格的身份驗證和存取控制策略" }
+            ],
+            correctAnswer: ["A", "B", "C", "D"],
+            reason: "本案涉及多階段入侵，需以「縱深防禦」從人員、權限、監控、稽核四個面向全面防護。",
+            explanation: `
+                <div class="explain-section">
+                    <h4>🔍 第一步：找關鍵字</h4>
+                    <p><strong>針對上述情境</strong>：包含 Web 入侵、DB 排程、AD 票證，需多層防護。<br>
+                    <strong>降低再次發生機率</strong>：需包含預防、偵測、回應、稽核。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>🗣️ 第二步：白話翻譯</h4>
+                    <p>前面已經出現 Web 被利用、DB 被放排程、AD 有票證被偷。要避免下次再中，會需要「技術控管 + 監控稽核 + 人員教育 + 存取控制」一起上。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>💡 第三步：解題思路</h4>
+                    <p><strong>解題步驟：</strong>對照攻擊鏈 (Web/DB/AD) -> 檢查選項覆蓋面 (預防/偵測/稽核)。<br>
+                    <strong>原理與規則：</strong><mark>縱深防禦 (Defense in Depth)</mark>：多層控制同時存在，不把希望押在單一控制。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>⚖️ 第四步：選項分析</h4>
+                    <p>(A) 對。資料庫稽核強化偵測與事後追查。<br>(B) 對。意識培訓降低初始入侵 (釣魚/弱密碼) 風險。<br>(C) 對。持續監控能更早發現異常 (把半年縮短為即時)。<br>(D) 對。嚴格存取控制能降低權限被濫用後的擴散範圍。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>📚 觀念補充與延伸</h4>
+                    <p><strong>法條或定義：</strong>縱深防禦：即使一層被突破，其他層仍能攔截。<br><strong>觸類旁通：</strong>若題目問「哪個屬偵測」，選監控/稽核。</p>
+                </div>
+                <div class="explain-section">
+                    <h4>🧠 記憶口訣</h4>
+                    <p>「稽核要留證、教育降人禍、監控早發現、控權縮災害。」</p>
+                </div>
+                <div class="explain-section">
+                    <h4>⚠️ 常見陷阱</h4>
+                    <p><strong>心理盲點：</strong>只想選「買工具」，忽略 B 與 D 才是關鍵。<br><strong>避坑指南：</strong>APT 情境優先採「預防+偵測+權限+稽核」組合。</p>
+                </div>
+            `,
+            selfCheck: `
+                <h4>🧠 自我檢測</h4>
+                <p><strong>Q1：</strong>請把 (A)(B)(C)(D) 分別歸類為「預防 / 偵測 / 稽核 / 管理」。</p>
+                <details><summary>顯示答案</summary><p>A=稽核/偵測；B=管理/預防；C=偵測；D=預防/降低擴散。</p></details>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                <p><strong>Q2：</strong>若只能先做兩件事，你會先選哪兩項？理由？</p>
+                <details><summary>顯示答案</summary><p>C+D（先早偵測、再縮小權限）；或 B+D（先降低人為破口與特權濫用）。</p></details>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                <p><strong>Q3：</strong>針對「票證攻擊」你會加強監控哪些行為指標？</p>
+                <details><summary>顯示答案</summary><p>異常票證使用、特權帳號不合理時段登入、票證快取異常增長。</p></details>
+            `
+        }
+    ]
+};
+
+/**
+ * State Management
+ */
+const quizState = {
+    questions: quizData.questions.map(q => ({
+        id: q.id,
+        status: 'pending', // pending, correct, wrong
+        userAnswer: []
+    })),
+    currentTab: 0 // Index
+};
+
+/**
+ * Initialization
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    renderTabs();
+    renderQuestions();
+    updateProgress();
+    switchTab(0); // Show first tab
+});
+
+/**
+ * DOM Generators
+ */
+function renderTabs() {
+    const container = document.getElementById('tabs-container');
+    container.innerHTML = quizData.questions.map((q, index) => `
+        <button class="tab-btn" onclick="switchTab(${index})" id="tab-${index}">
+            ${q.title} <span class="tab-status" id="tab-status-${index}"></span>
+        </button>
+    `).join('');
+}
+
+function renderQuestions() {
+    const container = document.getElementById('questions-wrapper');
+    container.innerHTML = quizData.questions.map((q, index) => `
+        <div class="question-content" id="q-content-${index}">
+            <!-- Header -->
+            <div class="q-header">
+                <h3>問題 ${q.id}</h3>
+                <span class="q-badge pending" id="q-badge-${index}">尚未作答</span>
+            </div>
+
+            <!-- Question Context (Image) -->
+            ${q.image ? `
+            <div class="q-context-box">
+                <img src="${q.image}" alt="題目附圖" class="q-image" loading="lazy">
+            </div>
+            ` : ''}
+
+            <!-- Question & Options -->
+            <div class="question-text">
+                ${q.type === 'multiple' ? '<span class="tag mgm">複選</span>' : '<span class="tag sec">單選</span>'}
+                ${q.question}
+            </div>
+
+            <div class="options-list">
+                ${q.options.map(opt => `
+                    <label class="option-label" id="opt-label-${index}-${opt.id}" onclick="selectOption(${index}, '${opt.id}', '${q.type}')">
+                        <input type="${q.type === 'single' ? 'radio' : 'checkbox'}" 
+                               name="q${index}" 
+                               value="${opt.id}"
+                               id="opt-input-${index}-${opt.id}">
+                        <span class="option-text"><strong>(${opt.id})</strong> ${opt.text}</span>
+                    </label>
+                `).join('')}
+            </div>
+
+            <!-- Action -->
+            <div class="action-area">
+                <button class="btn-primary" id="btn-action-${index}" onclick="submitAnswer(${index})">送出答案</button>
+            </div>
+
+            <!-- Feedback -->
+            <div class="feedback" id="feedback-${index}">
+                <!-- Content injected by JS -->
+            </div>
+
+            <!-- Explain -->
+            <details id="explain-${index}" style="display:none">
+                <summary>查看詳細解析</summary>
+                <div class="explain-content">
+                    ${q.explanation}
+                </div>
+            </details>
+
+            <!-- SelfCheck (New Structure: Visible div, internal details) -->
+            <div id="selfcheck-${index}" class="explain-section self-check-area">
+                ${q.selfCheck}
+            </div>
+        </div>
+    `).join('');
+}
+
+/**
+ * Logic Functions
+ */
+function switchTab(index) {
+    // Update State
+    quizState.currentTab = index;
+
+    // UI: Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`tab-${index}`).classList.add('active');
+
+    // UI: Content
+    document.querySelectorAll('.question-content').forEach(content => content.classList.remove('active'));
+    const targetContent = document.getElementById(`q-content-${index}`);
+    targetContent.classList.add('active');
+    
+    // Smooth scroll to top of question
+    targetContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function selectOption(qIndex, optId, type) {
+    const qState = quizState.questions[qIndex];
+    if (qState.status !== 'pending') return; // Locked
+
+    const label = document.getElementById(`opt-label-${qIndex}-${optId}`);
+    const input = document.getElementById(`opt-input-${qIndex}-${optId}`);
+
+    // UI & State Update
+    if (type === 'single') {
+        // Clear previous selection
+        document.querySelectorAll(`#q-content-${qIndex} .option-label`).forEach(l => l.classList.remove('selected'));
+        qState.userAnswer = [optId];
+        label.classList.add('selected');
+        input.checked = true;
+    } else {
+        // Toggle
+        if (input.checked) { // Previously unchecked, now checked by click (event bubble)
+             if(!qState.userAnswer.includes(optId)) qState.userAnswer.push(optId);
+             label.classList.add('selected');
+        } else {
+            qState.userAnswer = qState.userAnswer.filter(id => id !== optId);
+            label.classList.remove('selected');
+        }
+    }
+}
+
+function submitAnswer(qIndex) {
+    const qState = quizState.questions[qIndex];
+    const qData = quizData.questions[qIndex];
+
+    if (qState.userAnswer.length === 0) {
+        alert("請先選擇答案！");
+        return;
+    }
+
+    // Check Logic
+    const isCorrect = arraysEqual(qState.userAnswer.sort(), qData.correctAnswer.sort());
+    
+    // Update State
+    qState.status = isCorrect ? 'correct' : 'wrong';
+
+    // UI Updates
+    disableOptions(qIndex);
+    showFeedback(qIndex, isCorrect, qData);
+    updateTabStatus(qIndex, isCorrect);
+    updateBadge(qIndex, isCorrect);
+    updateProgress();
+    
+    // Change Button
+    const btn = document.getElementById(`btn-action-${qIndex}`);
+    btn.textContent = "重新作答";
+    btn.className = "btn-primary btn-retry";
+    btn.onclick = () => resetQuestion(qIndex);
+
+    // Reveal Explain & SelfCheck
+    document.getElementById(`explain-${qIndex}`).style.display = 'block';
+    document.getElementById(`selfcheck-${qIndex}`).style.display = 'block';
+}
+
+function resetQuestion(qIndex) {
+    const qState = quizState.questions[qIndex];
+    
+    // Reset State
+    qState.status = 'pending';
+    qState.userAnswer = [];
+
+    // UI Reset
+    const container = document.getElementById(`q-content-${qIndex}`);
+    
+    // Options
+    container.querySelectorAll('input').forEach(inp => {
+        inp.checked = false;
+        inp.disabled = false;
+    });
+    container.querySelectorAll('.option-label').forEach(lbl => {
+        lbl.classList.remove('selected', 'disabled');
+        lbl.style.pointerEvents = 'auto'; // Re-enable clicks
+    });
+
+    // Feedback & Explain
+    document.getElementById(`feedback-${qIndex}`).style.display = 'none';
+    document.getElementById(`explain-${qIndex}`).style.display = 'none';
+    document.getElementById(`explain-${qIndex}`).removeAttribute('open');
+    document.getElementById(`selfcheck-${qIndex}`).style.display = 'none';
+    
+    // Reset internal details in selfcheck
+    const selfCheckArea = document.getElementById(`selfcheck-${qIndex}`);
+    if (selfCheckArea) {
+        selfCheckArea.querySelectorAll('details').forEach(d => d.removeAttribute('open'));
+    }
+
+    // Button
+    const btn = document.getElementById(`btn-action-${qIndex}`);
+    btn.textContent = "送出答案";
+    btn.className = "btn-primary";
+    btn.onclick = () => submitAnswer(qIndex);
+
+    // Badge & Tab
+    const badge = document.getElementById(`q-badge-${qIndex}`);
+    badge.className = "q-badge pending";
+    badge.textContent = "尚未作答";
+    
+    document.getElementById(`tab-status-${qIndex}`).textContent = "";
+    
+    updateProgress();
+}
+
+/**
+ * Helpers
+ */
+function arraysEqual(a, b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
+}
+
+function disableOptions(qIndex) {
+    const container = document.getElementById(`q-content-${qIndex}`);
+    container.querySelectorAll('.option-label').forEach(lbl => {
+        lbl.classList.add('disabled');
+        lbl.style.pointerEvents = 'none'; // Prevent clicks
+    });
+    container.querySelectorAll('input').forEach(inp => inp.disabled = true);
+}
+
+function showFeedback(qIndex, isCorrect, qData) {
+    const fbBox = document.getElementById(`feedback-${qIndex}`);
+    fbBox.className = `feedback ${isCorrect ? 'success' : 'error'}`;
+    fbBox.style.display = 'block';
+    
+    let html = '';
+    if (isCorrect) {
+        html = `<strong>✓ 答對了！</strong><p>${qData.reason}</p>`;
+    } else {
+        html = `<strong>✗ 答錯了</strong>
+                <p>正確答案：${qData.correctAnswer.join('、')}</p>
+                <p>${qData.reason}</p>`;
+    }
+    fbBox.innerHTML = html;
+}
+
+function updateTabStatus(qIndex, isCorrect) {
+    const statusSpan = document.getElementById(`tab-status-${qIndex}`);
+    statusSpan.textContent = isCorrect ? '✓' : '✗';
+}
+
+function updateBadge(qIndex, isCorrect) {
+    const badge = document.getElementById(`q-badge-${qIndex}`);
+    badge.className = `q-badge ${isCorrect ? 'correct' : 'wrong'}`;
+    badge.textContent = isCorrect ? '答對' : '答錯';
+}
+
+function updateProgress() {
+    const total = quizData.questions.length;
+    const completed = quizState.questions.filter(q => q.status !== 'pending').length;
+    const percent = Math.round((completed / total) * 100);
+
+    document.getElementById('progress-text').textContent = `已完成：${completed} / ${total}`;
+    document.getElementById('progress-percent').textContent = `${percent}%`;
+    document.getElementById('progress-fill').style.width = `${percent}%`;
+
+    const statusMsg = document.getElementById('completion-msg');
+    if (completed === total) {
+        statusMsg.textContent = "✅ 本題組已完成";
+        statusMsg.className = "completion-status status-done";
+    } else {
+        statusMsg.textContent = "📝 尚未完成";
+        statusMsg.className = "completion-status status-pending";
+    }
+}
+
+</script>
+</body>
+</html>

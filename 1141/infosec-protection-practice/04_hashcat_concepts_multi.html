@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式教學：Hashcat 密碼破解工具</title>
+    <!-- 引入 Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <!-- 引入 FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 認知友善配色系統 --- */
+        :root {
+            --body-bg: #f4f7f6;       /* 冷灰調背景 */
+            --card-bg: #ffffff;       /* 卡片底色 */
+            --text-primary: #2c3e50;  /* 深藍灰文字 */
+            --primary-color: #2980b9; /* 主要藍色 */
+            --primary-hover: #1f6391;
+            --highlight: #fff3cd;     /* 記憶黃標記 (柔和版) */
+            --highlight-text: #856404;
+            --success-bg: #e8f5e9;    /* 正確背景 */
+            --success-border: #2e7d32;/* 正確邊框 */
+            --success-text: #1b5e20;  /* 正確文字 */
+            --error-bg: #fce4ec;      /* 錯誤背景 */
+            --error-border: #c62828;  /* 錯誤邊框 */
+            --error-text: #b71c1c;    /* 錯誤文字 */
+            --shadow-card: 0 4px 20px rgba(0,0,0,0.08);
+            --radius-card: 16px;
+        }
+
+        /* --- 標籤色彩（功能性語意） --- */
+        .tag-law { background-color: #7f8c8d; color: white; }
+        .tag-iso { background-color: #27ae60; color: white; }
+        .tag-zt  { background-color: #8e44ad; color: white; }
+        .tag-net { background-color: #2980b9; color: white; }
+        .tag-sec { background-color: #c0392b; color: white; } /* 技術 */
+        .tag-mgm { background-color: #d35400; color: white; }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- 版型規範 --- */
+        .page-container {
+            max-width: 960px; /* 寬度優化 */
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-card);
+        }
+
+        /* 行動版適配 */
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 16px;
+                padding: 24px;
+                width: auto;
+            }
+            h2 { font-size: 20px; }
+            h3 { font-size: 18px; }
+            .btn-action { width: 100%; }
+        }
+
+        /* --- 標籤樣式 --- */
+        .badge-custom {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        /* --- 題目與選項 --- */
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #2c3e50;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start; /* 對齊頂部，適應長文字 */
+            padding: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background-color: #fff;
+        }
+
+        .option-label:hover {
+            background-color: #e3f2fd;
+            border-color: #bbdefb;
+            transform: translateY(-2px);
+        }
+
+        /* 選中狀態（透過 JS 添加 class） */
+        .option-label.selected {
+            background-color: #e3f2fd;
+            border-color: var(--primary-color);
+        }
+
+        /* 隱藏原生 checkbox/radio，改用自定義樣式或僅依賴外框 */
+        .form-check-input {
+            margin-top: 5px; /* 微調對齊 */
+            margin-right: 12px;
+            flex-shrink: 0; /* 防止被擠壓 */
+            width: 1.2em;
+            height: 1.2em;
+            cursor: pointer;
+        }
+        
+        /* 禁用狀態 */
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+            background-color: #f8f9fa;
+        }
+        .option-label.disabled:hover {
+            transform: none;
+            border-color: #e9ecef;
+        }
+
+        /* --- 按鈕區域 --- */
+        .action-area {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .btn-primary-custom {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 48px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            min-height: 48px; /* 觸控友善 */
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+        }
+
+        .btn-primary-custom:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+        }
+
+        .btn-primary-custom:active {
+            transform: translateY(0);
+        }
+
+        /* --- 回饋區域 --- */
+        .feedback-area {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .feedback-success {
+            background-color: var(--success-bg);
+            border-left: 5px solid var(--success-border);
+            color: var(--success-text);
+        }
+
+        .feedback-error {
+            background-color: var(--error-bg);
+            border-left: 5px solid var(--error-border);
+            color: var(--error-text);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 解析區塊 --- */
+        .explain-area {
+            margin-top: 24px;
+            display: none; /* 初始隱藏 */
+        }
+
+        .explain-details summary {
+            cursor: pointer;
+            padding: 16px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            list-style: none; /* 移除預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        
+        .explain-details summary:hover {
+            background-color: #e9ecef;
+        }
+
+        .explain-details summary::after {
+            content: '\f078'; /* FontAwesome Chevron Down */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+
+        .explain-details[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        .explain-content {
+            padding: 24px;
+            border: 1px solid #e9ecef;
+            border-top: none;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            background-color: #fff;
+        }
+
+        /* 解析分段卡片 */
+        .explain-section {
+            background-color: #fafafa;
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            margin-bottom: 24px;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .explain-section h4 {
+            font-size: 1.15rem;
+            color: #2c3e50;
+            margin-bottom: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .explain-section h4 i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .explain-sub-title {
+            font-weight: 700;
+            color: #555;
+            margin-top: 12px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        /* --- 自我檢測 --- */
+        .self-check-container {
+            margin-top: 32px;
+            border-top: 2px dashed #e9ecef;
+            padding-top: 24px;
+        }
+        
+        .self-check-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #d35400;
+            margin-bottom: 16px;
+        }
+
+        .self-check-item {
+            margin-bottom: 12px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .self-check-item summary {
+            padding: 12px 16px;
+            background-color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            color: #2c3e50;
+            list-style: none;
+            position: relative;
+        }
+        
+        .self-check-item summary::marker {
+            display: none;
+        }
+
+        .self-check-item summary::after {
+            content: '+';
+            position: absolute;
+            right: 16px;
+            font-weight: bold;
+            color: #999;
+        }
+        
+        .self-check-item[open] summary::after {
+            content: '-';
+        }
+        
+        .self-check-item summary:hover {
+            background-color: #f8f9fa;
+        }
+
+        .self-check-answer {
+            padding: 16px;
+            background-color: #fef9e7; /* 淺黃底 */
+            border-top: 1px solid #eee;
+            color: #5d4037;
+        }
+
+        /* 關鍵字高亮 */
+        mark {
+            background-color: var(--highlight);
+            color: var(--highlight-text);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        /* Code 樣式 */
+        code {
+            background-color: #f1f2f6;
+            color: #c7254e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        .keyword-badge {
+            display: inline-block;
+            background: #e8f4f8;
+            color: #2980b9;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-right: 4px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    <!-- 1. Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <span class="badge badge-custom tag-sec">Q4</span>
+            <span class="badge badge-custom bg-secondary" id="statusBadge">未作答</span>
+        </div>
+        <span class="text-muted small"><i class="far fa-clock me-1"></i>資訊安全防護實務</span>
+    </div>
+
+    <!-- 2. Context -->
+    <div class="alert alert-light border mb-4">
+        <i class="fas fa-info-circle text-primary me-2"></i>本題無額外情境
+    </div>
+
+    <!-- 3. Question Area -->
+    <div id="questionArea">
+        <h2 class="question-text">
+            關於知名密碼破解工具 <mark>Hashcat</mark> 的說明，下列哪些描述正確？（複選）
+        </h2>
+
+        <div class="option-group" id="optionGroup">
+            <!-- Option A -->
+            <label class="option-label">
+                <input type="checkbox" name="quizOption" value="A" class="form-check-input">
+                <span class="option-text">
+                    <strong>(A)</strong> 可以破解的密碼種類超過 10 種
+                </span>
+            </label>
+
+            <!-- Option B -->
+            <label class="option-label">
+                <input type="checkbox" name="quizOption" value="B" class="form-check-input">
+                <span class="option-text">
+                    <strong>(B)</strong> 可以使用 <code>?u?l?d?d?d?d?d?d</code> 這種 Mask Attack Mode（遮罩攻擊模式，就是用「規格」去枚舉可能密碼）來進行暴力破解，破解出來的密碼內容範例是 <code>aB123456</code>
+                </span>
+            </label>
+
+            <!-- Option C -->
+            <label class="option-label">
+                <input type="checkbox" name="quizOption" value="C" class="form-check-input">
+                <span class="option-text">
+                    <strong>(C)</strong> 如果使用參數 <code>-a1</code> 的話，可以同時使用兩個字典檔一起組合破解
+                </span>
+            </label>
+
+            <!-- Option D -->
+            <label class="option-label">
+                <input type="checkbox" name="quizOption" value="D" class="form-check-input">
+                <span class="option-text">
+                    <strong>(D)</strong> 進行 <code>-a0</code> 字典檔攻擊時，如果使用參數 <code>-r</code> 的話，可以載入一組規則以便進行 Rule-based Attack（規則式攻擊，就是對字典字做變形），例如在所有字典的後面加上 1234 組合成新的密碼
+                </span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 4. Action Area -->
+    <div class="action-area">
+        <button id="submitBtn" class="btn btn-primary-custom" onclick="handleSubmit()">
+            送出答案 <i class="fas fa-paper-plane ms-2"></i>
+        </button>
+    </div>
+
+    <!-- 5. Feedback Area -->
+    <div id="feedbackArea" class="feedback-area">
+        <!-- JS 動態填入內容 -->
+    </div>
+
+    <!-- 6. Explain Area -->
+    <div id="explainArea" class="explain-area">
+        <details class="explain-details">
+            <summary>
+                <span><i class="fas fa-book-open me-2"></i>查看詳細教學解析</span>
+            </summaryACC>
+            <div class="explain-content">
+                
+                <!-- Step 1 & 2: 找關鍵字 & 白話翻譯 -->
+                <div class="explain-section" style="border-left-color: #34495e;">
+                    <h4><i class="fas fa-search"></i> 第一、二步：找關鍵字 & 白話翻譯</h4>
+                    <div class="mb-3">
+                        <span class="keyword-badge">Hashcat</span> 常見的密碼/雜湊驗證測試工具；考模式與參數概念。<br>
+                        <span class="keyword-badge">Mask Attack / ?u ?l ?d</span> 考你是否看得懂遮罩（字元集合規格）。<br>
+                        <span class="keyword-badge">-a0 / -a1 / -r</span> 考你是否知道攻擊模式與規則檔用途。
+                    </div>
+                    <p class="mb-0"><strong>白話翻譯：</strong>這題在問你是否理解 Hashcat 的能力與常見模式。特別是<strong>遮罩的字元規格是否能產生範例密碼</strong>，以及 <strong>-a0/-a1/-r</strong> 這些參數的概念是否正確。</p>
+                </div>
+
+                <!-- Step 3: 解題思路 -->
+                <div class="explain-section" style="border-left-color: #2980b9;">
+                    <h4><i class="fas fa-brain"></i> 第三步：解題思路 & 原理</h4>
+                    <span class="explain-sub-title">生活例子：</span>
+                    <p>遮罩 (Mask) 就像是「身分證格式」的檢查：第一碼一定是英文字母、後面是數字。如果不符合這個格式，就不可能是正確答案。</p>
+                    
+                    <span class="explain-sub-title">原理與規則：</span>
+                    <ul class="mb-2">
+                        <li><code>?u</code>：大寫英文字母 (Upper)</li>
+                        <li><code>?l</code>：小寫英文字母 (Lower)</li>
+                        <li><code>?d</code>：數字 (Digit)</li>
+                        <li><code>-a0</code>：字典攻擊 (Dictionary Attack)</li>
+                        <li><code>-a1</code>：組合攻擊 (Combination Attack)</li>
+                        <li><code>-r</code>：規則 (Rules)，用於對字典做變形。</li>
+                    </ul>
+                    
+                    <span class="explain-sub-title">解題步驟：</span>
+                    <p class="mb-0">先判斷 (A) 是否符合常識 -> 再逐格翻譯 (B) 的遮罩規格 -> 最後判斷 (C)(D) 的攻擊模式描述。</p>
+                </div>
+
+                <!-- Step 4: 選項分析 -->
+                <div class="explain-section" style="border-left-color: #27ae60;">
+                    <h4><i class="fas fa-list-check"></i> 第四步：選項分析</h4>
+                    
+                    <div class="mb-3">
+                        <strong>(A) 正確：</strong> Hashcat 支援的雜湊類型非常多（MD5, SHA1, WPA...），遠超 10 種。
+                    </div>
+                    
+                    <div class="mb-3 p-2 bg-light rounded border-start border-4 border-danger">
+                        <strong>(B) 錯誤（關鍵陷阱）：</strong>
+                        <p class="mb-0 mt-1">
+                            題目遮罩：<code>?u?l...</code> = <strong>先大寫，後小寫</strong>。<br>
+                            範例密碼：<code>aB...</code> = <strong>先小寫 (a)，後大寫 (B)</strong>。<br>
+                            <span class="text-danger fw-bold">順序相反，不符合規格！</span>
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>(C) 正確：</strong> <code>-a1</code> 是組合模式，確實是將兩個字典檔的字串組合（例如：字典1 + 字典2）。
+                    </div>
+
+                    <div class="mb-0">
+                        <strong>(D) 正確：</strong> <code>-a0</code> 是字典攻擊，配合 <code>-r</code> (Rule) 可以對字典字進行變形（如字尾加 1234），這是規則式攻擊的典型應用。
+                    </div>
+                </div>
+
+                <!-- 觀念補充與延伸 -->
+                <div class="explain-section" style="border-left-color: #8e44ad;">
+                    <h4><i class="fas fa-rocket"></i> 觀念補充 & 觸類旁通</h4>
+                    <span class="explain-sub-title">核心觀念定位：</span>
+                    <p>這題屬於《資訊安全防護實務》的「密碼安全與攻擊手法」。</p>
+
+                    <span class="explain-sub-title">觸類旁通（舉一反三）：</span>
+                    <ul class="mb-0">
+                        <li><strong>字典攻擊</strong>：靠「常見字」（用大家愛用的密碼先猜）。</li>
+                        <li><strong>遮罩攻擊</strong>：靠「格式規則」（知道密碼長相，照格式枚舉）。</li>
+                        <li><strong>規則式攻擊</strong>：靠「變形字典」（在常見密碼上做變化）。</li>
+                    </ul>
+                </div>
+
+                <!-- 記憶與避坑 -->
+                <div class="explain-section" style="border-left-color: #d35400;">
+                    <h4><i class="fas fa-bolt"></i> 記憶口訣 & 避坑指南</h4>
+                    
+                    <span class="explain-sub-title">記憶口訣：</span>
+                    <div class="p-2 bg-light rounded mb-2">
+                        「字典找常見，遮罩看格式；規則做變形，組合拼兩本。」<br>
+                        「?u 先大寫、?l 再小寫、?d 後面全數字。」
+                    </div>
+
+                    <span class="explain-sub-title">常見陷阱與心理盲點：</span>
+                    <ul class="mb-2">
+                        <li><strong>盲點</strong>：看到「有遮罩、有範例」就直覺相信，忽略了<strong>逐位比對</strong>。</li>
+                        <li><strong>陷阱</strong>：把 <code>?u</code> (Upper) 和 <code>?l</code> (Lower) 的順序看反。</li>
+                    </ul>
+
+                    <span class="explain-sub-title">避坑指南：</span>
+                    <p class="mb-0">做遮罩題一律：<strong>第 1 位 → 第 2 位 → 逐位對照範例字串</strong>，不要整體憑感覺看。</p>
+                </div>
+
+            </div>
+        </details>
+    </div>
+
+    <!-- 7. Self Check -->
+    <div class="self-check-container">
+        <h3 class="self-check-title"><i class="fas fa-clipboard-check me-2"></i>自我檢測（點擊展開答案）</h3>
+        
+        <!-- Q1 -->
+        <details class="self-check-item">
+            <summary>Q1. 若遮罩是「第一位小寫、第二位大寫、後面 6 位數字」，範例 aB123456 才可能被產生；請問此時前兩位應該用哪兩種集合描述？</summary>
+            <div class="self-check-answer">
+                <strong>答案：</strong><br>
+                第 1 位用小寫集合 (<code>?l</code>)，第 2 位用大寫集合 (<code>?u</code>)。<br>
+                完整寫法應為：<code>?l?u?d?d?d?d?d?d</code>。
+            </div>
+        </details>
+
+        <!-- Q2 -->
+        <details class="self-check-item">
+            <summary>Q2. 字典攻擊、遮罩攻擊、規則式攻擊，哪一種最依賴你是否「知道密碼格式」？為什麼？</summary>
+            <div class="self-check-answer">
+                <strong>答案：</strong><br>
+                <strong>遮罩攻擊 (Mask Attack)。</strong><br>
+                因為它是完全依照「格式規則」去產生候選密碼。格式猜得越準，枚舉空間越小，效率越高。
+            </div>
+        </details>
+
+        <!-- Q3 -->
+        <details class="self-check-item">
+            <summary>Q3. 企業防禦面，為什麼「弱密碼與可預測格式」會讓攻擊更容易成功？</summary>
+            <div class="self-check-answer">
+                <strong>答案：</strong><br>
+                因為這會讓候選空間變小（攻擊者可猜測的範圍縮小），攻擊者更容易在較少嘗試次數內命中密碼。
+            </div>
+        </details>
+    </div>
+
+</div>
+
+<script>
+    // 定義正確答案
+    const CORRECT_ANSWERS = ['A', 'C', 'D'];
+    
+    // DOM 元素
+    const submitBtn = document.getElementById('submitBtn');
+    const optionGroup = document.getElementById('optionGroup');
+    const allOptions = document.querySelectorAll('input[name="quizOption"]');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const explainArea = document.getElementById('explainArea');
+    const explainDetails = document.querySelector('.explain-details');
+    const statusBadge = document.getElementById('statusBadge');
+
+    // 處理點擊選項時的樣式變化
+    allOptions.forEach(opt => {
+        opt.addEventListener('change', function() {
+            // 切換父層 label 的 selected class
+            const label = this.closest('.option-label');
+            if (this.checked) {
+                label.classList.add('selected');
+            } else {
+                label.classList.remove('selected');
+            }
+        });
+    });
+
+    // 送出答案處理
+    function handleSubmit() {
+        // 1. 取得使用者選擇
+        const selected = Array.from(allOptions)
+            .filter(opt => opt.checked)
+            .map(opt => opt.value)
+            .sort(); // 排序以便比對
+
+        // 2. 防呆：未選則提示
+        if (selected.length === 0) {
+            alert('請先選擇答案！');
+            return;
+        }
+
+        // 3. 判定正誤 (陣列比對)
+        const isCorrect = JSON.stringify(selected) === JSON.stringify(CORRECT_ANSWERS);
+
+        // 4. 鎖定選項
+        allOptions.forEach(opt => {
+            opt.disabled = true;
+            opt.closest('.option-label').classList.add('disabled');
+        });
+
+        // 5. 顯示回饋
+        feedbackArea.style.display = 'block';
+        if (isCorrect) {
+            // 正確樣式
+            feedbackArea.className = 'feedback-area feedback-success';
+            feedbackArea.innerHTML = `
+                <strong><i class="fas fa-check-circle me-2"></i>答對了！</strong>
+                <p class="mb-0 mt-1">A、C、D 皆為正確描述；選項 B 的遮罩格式與範例大小寫順序相反。</p>
+            `;
+            statusBadge.textContent = '答對';
+            statusBadge.className = 'badge badge-custom bg-success';
+        } else {
+            // 錯誤樣式
+            feedbackArea.className = 'feedback-area feedback-error';
+            feedbackArea.innerHTML = `
+                <strong><i class="fas fa-times-circle me-2"></i>答錯了</strong>
+                <p class="mb-1 mt-1"><strong>正確答案：A、C、D</strong></p>
+                <p class="mb-0">選項 B 的遮罩 <code>?u?l</code> 代表「先大寫後小寫」，但範例 <code>aB</code> 是「先小寫後大寫」。</p>
+            `;
+            statusBadge.textContent = '答錯';
+            statusBadge.className = 'badge badge-custom bg-danger';
+        }
+
+        // 6. 顯示詳解 (展開)
+        explainArea.style.display = 'block';
+        explainDetails.open = true;
+
+        // 7. 轉換按鈕為「重新作答」
+        submitBtn.innerHTML = '重新作答 <i class="fas fa-redo ms-2"></i>';
+        submitBtn.classList.remove('btn-primary-custom');
+        submitBtn.classList.add('btn-secondary'); // 改為次要樣式
+        submitBtn.setAttribute('onclick', 'resetQuiz()');
+    }
+
+    // 重置機制
+    function resetQuiz() {
+        // 1. 清空選項與樣式
+        allOptions.forEach(opt => {
+            opt.checked = false;
+            opt.disabled = false;
+            opt.closest('.option-label').classList.remove('selected', 'disabled');
+        });
+
+        // 2. 隱藏回饋與詳解
+        feedbackArea.style.display = 'none';
+        explainArea.style.display = 'none';
+        explainDetails.open = false; // 收合詳解
+        
+        // 收合所有自我檢測
+        document.querySelectorAll('.self-check-item').forEach(el => el.open = false);
+
+        // 3. 還原按鈕
+        submitBtn.innerHTML = '送出答案 <i class="fas fa-paper-plane ms-2"></i>';
+        submitBtn.classList.add('btn-primary-custom');
+        submitBtn.classList.remove('btn-secondary');
+        submitBtn.setAttribute('onclick', 'handleSubmit()');
+
+        // 4. 還原 Header 狀態
+        statusBadge.textContent = '未作答';
+        statusBadge.className = 'badge badge-custom bg-secondary';
+
+        // 5. 平滑捲動回頂端
+        document.querySelector('.page-container').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

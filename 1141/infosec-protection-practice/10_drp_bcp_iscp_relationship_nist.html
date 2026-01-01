@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIST SP 800: DRP, BCP, ISCP 關聯性測驗</title>
+    <!-- 引入 Google Fonts: Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入 FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- 核心變數系統 --- */
+        :root {
+            --body-bg: #f4f7f6;       /* 冷灰調背景 */
+            --card-bg: #ffffff;       /* 卡片底色 */
+            --text-primary: #2c3e50;  /* 深藍灰文字 */
+            --text-secondary: #546e7a; /* 次要文字 */
+            --primary: #2980b9;       /* 主要藍色 */
+            --primary-hover: #1f6391; /* 藍色懸停 */
+            --highlight: #f1c40f;     /* 記憶黃標記 */
+            --success-bg: #e8f5e9;    /* 正確背景 */
+            --success-border: #a5d6a7;
+            --success-text: #2e7d32;  /* 正確文字 */
+            --error-bg: #fce4ec;      /* 錯誤背景 */
+            --error-border: #ef9a9a;
+            --error-text: #c62828;    /* 錯誤文字 */
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-card: 0 4px 20px rgba(0,0,0,0.08);
+            --transition-fast: 200ms ease;
+        }
+
+        /* --- 標籤色彩系統 --- */
+        .tag-law { background: #607d8b; color: white; }
+        .tag-iso { background: #27ae60; color: white; }
+        .tag-zt  { background: #8e44ad; color: white; }
+        .tag-net { background: #2980b9; color: white; }
+        .tag-sec { background: #c0392b; color: white; }
+        .tag-mgm { background: #d35400; color: white; }
+
+        /* --- 基礎設定 --- */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- 佈局容器 --- */
+        .page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow-card);
+            border-radius: var(--radius-lg);
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                max-width: 100%;
+                margin: 16px;
+                padding: 24px 20px;
+                border-radius: var(--radius-md);
+            }
+        }
+
+        /* --- UI 元件：標頭 --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 16px;
+        }
+
+        .question-id {
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background-color: #ecf0f1;
+            color: var(--text-secondary);
+            transition: var(--transition-fast);
+        }
+
+        .status-badge.correct { background-color: var(--success-bg); color: var(--success-text); }
+        .status-badge.wrong { background-color: var(--error-bg); color: var(--error-text); }
+
+        /* --- UI 元件：情境卡 --- */
+        .context-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--text-secondary);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 32px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* --- UI 元件：題目與選項 --- */
+        h2.question-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .tag-inline {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            vertical-align: middle;
+            transform: translateY(-2px);
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px;
+            border: 2px solid #ecf0f1;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 150ms ease;
+            position: relative;
+        }
+
+        .option-label:hover {
+            background-color: #e3f2fd;
+            border-color: #bbdefb;
+            transform: translateY(-2px);
+        }
+
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none !important;
+        }
+        
+        .option-label.disabled:hover {
+            background-color: transparent;
+            border-color: #ecf0f1;
+        }
+
+        .option-input {
+            margin-top: 4px;
+            margin-right: 16px;
+            accent-color: var(--primary);
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .option-text {
+            font-size: 1rem;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        /* 選中狀態 */
+        .option-input:checked + .option-text {
+            font-weight: 500;
+        }
+        
+        .option-label:has(.option-input:checked) {
+            border-color: var(--primary);
+            background-color: #eaf6fc;
+        }
+
+        /* --- UI 元件：按鈕 --- */
+        .btn-action {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: white;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 200ms ease;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-action:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+        }
+
+        .btn-action:active {
+            transform: translateY(0);
+        }
+
+        .btn-action.btn-retry {
+            background-color: #607d8b;
+            box-shadow: 0 4px 6px rgba(96, 125, 139, 0.2);
+        }
+
+        .btn-action.btn-retry:hover {
+            background-color: #455a64;
+        }
+
+        /* --- UI 元件：回饋區 --- */
+        .feedback-area {
+            margin-top: 30px;
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 300ms ease forwards;
+        }
+
+        .feedback-card {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .feedback-card.success {
+            background-color: var(--success-bg);
+            border: 2px solid var(--success-border);
+            color: var(--success-text);
+        }
+
+        .feedback-card.error {
+            background-color: var(--error-bg);
+            border: 2px solid var(--error-border);
+            color: var(--error-text);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- UI 元件：解析與自我檢測 --- */
+        details {
+            margin-top: 20px;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        details[open] {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-color: var(--primary);
+        }
+
+        summary {
+            padding: 16px 20px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--text-primary);
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary:after {
+            content: '\f107';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.2s;
+        }
+
+        details[open] summary:after {
+            transform: rotate(180deg);
+        }
+
+        .details-content {
+            padding: 24px;
+            background-color: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .explain-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .explain-section h4 {
+            margin: 0 0 12px 0;
+            color: var(--primary);
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .explain-section p {
+            margin-bottom: 12px;
+        }
+        
+        .explain-section ul {
+            padding-left: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .explain-section li {
+            margin-bottom: 6px;
+        }
+
+        .highlight {
+            background-color: var(--highlight);
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: 500;
+        }
+
+        /* 標記 */
+        mark {
+            background-color: var(--highlight);
+            color: var(--text-primary);
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+        
+        /* 自我檢測特殊樣式 */
+        .self-check-item {
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #e0e0e0;
+            padding-bottom: 20px;
+        }
+        
+        .self-check-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .self-check-question {
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+        
+        details.answer-reveal {
+            margin-top: 8px;
+            border: 1px solid #b3e5fc;
+            background-color: #e1f5fe;
+            box-shadow: none;
+        }
+        
+        details.answer-reveal summary {
+            background-color: #e1f5fe;
+            color: #0277bd;
+            font-size: 0.9rem;
+            padding: 10px 16px;
+        }
+        
+        details.answer-reveal .details-content {
+            background-color: #fff;
+            color: var(--text-primary);
+            padding: 16px;
+        }
+
+        /* 動畫 */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 響應式字體調整 */
+        @media (max-width: 768px) {
+            h2.question-text { font-size: 1.25rem; }
+            .option-text { font-size: 0.95rem; }
+            .btn-action { font-size: 1rem; padding: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    <!-- 1. Header -->
+    <header>
+        <div class="question-id"><span class="tag-inline tag-mgm">NIST SP 800</span> 題號：10</div>
+        <div id="statusBadge" class="status-badge">未作答</div>
+    </header>
+
+    <!-- 2. Context -->
+    <div class="context-card">
+        <i class="fa-solid fa-circle-info"></i> 本題無額外情境
+    </div>
+
+    <!-- 3. Question Area -->
+    <div id="questionArea">
+        <h2 class="question-text">
+            據 NIST SP 800 系列標準，關於災難復原計畫（Disaster Recovery Plan，DRP）、業務持續性計畫（Business Continuity Plan，BCP）和資訊系統應急準備計畫（Information System Contingency Plan，ISCP）的關聯性，下列何項描述正確？
+        </h2>
+
+        <div class="options-group">
+            <label class="option-label">
+                <input type="radio" name="quizOption" value="A" class="option-input">
+                <span class="option-text">(A) 災難復原計畫（DRP）專注於資訊技術系統的恢復，而業務持續性計畫（BCP）和資訊系統應急準備計畫（ISCP）則專注於組織的整體運營恢復</span>
+            </label>
+
+            <label class="option-label">
+                <input type="radio" name="quizOption" value="B" class="option-input">
+                <span class="option-text">(B) 資訊系統應急準備計畫（ISCP）涵蓋整個組織的業務和資訊系統恢復策略，而災難復原計畫（DRP）和業務持續性計畫（BCP）則關注於特定技術解決方案</span>
+            </label>
+
+            <label class="option-label">
+                <input type="radio" name="quizOption" value="C" class="option-input">
+                <span class="option-text">(C) 業務持續性計畫（BCP）專注於資訊技術系統的恢復，而災難復原計畫（DRP）和資訊系統應急準備計畫（ISCP）則專注於組織的整體運營恢復</span>
+            </label>
+
+            <label class="option-label">
+                <input type="radio" name="quizOption" value="D" class="option-input">
+                <span class="option-text">(D) 災難復原計畫（DRP）專注於資訊技術系統的恢復，業務持續性計畫（BCP）涵蓋組織整體的業務運營持續性，而資訊系統應急準備計畫（ISCP）則專注於特定資訊系統的應急反應</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 4. Action Area -->
+    <button id="submitBtn" class="btn-action" onclick="checkAnswer()">
+        <i class="fa-solid fa-paper-plane"></i> 送出答案
+    </button>
+
+    <!-- 5. Feedback Area (預設隱藏) -->
+    <div id="feedbackArea" class="feedback-area">
+        <div id="feedbackCard" class="feedback-card">
+            <!-- 內容由 JS 動態填入 -->
+        </div>
+
+        <!-- 6. Explain Area (預設隱藏) -->
+        <details id="explainDetails">
+            <summary><i class="fa-solid fa-book-open"></i> 查看詳細解析</summary>
+            <div class="details-content">
+                
+                <!-- 第一步 -->
+                <div class="explain-section" style="border-left-color: #3498db;">
+                    <h4><i class="fa-solid fa-magnifying-glass"></i> 第一步：找關鍵字</h4>
+                    <ul>
+                        <li><strong>NIST SP 800</strong>：表示題目在考「資安標準中的定義與分工」。</li>
+                        <li><strong>DRP / BCP / ISCP</strong>：三個名詞要分清楚「範圍」與「對象」。</li>
+                        <li><strong>關聯性</strong>：重點在於誰管「整體」、誰管「資訊系統」、誰管「特定系統」。</li>
+                        <li><strong>專注（focus）/ 涵蓋（cover）</strong>：這兩個字決定它是「大範圍」還是「小範圍」。</li>
+                    </ul>
+                </div>
+
+                <!-- 第二步 -->
+                <div class="explain-section" style="border-left-color: #9b59b6;">
+                    <h4><i class="fa-solid fa-language"></i> 第二步：白話翻譯</h4>
+                    <p>題目在問：發生災難或重大事故時，三種計畫各自負責什麼？</p>
+                    <ul>
+                        <li><strong>DRP</strong>：偏「IT 怎麼把系統救回來」。</li>
+                        <li><strong>BCP</strong>：偏「公司業務怎麼不中斷」（包含人、紙本作業等）。</li>
+                        <li><strong>ISCP</strong>：偏「某一個資訊系統遇到事件時怎麼應急」。</li>
+                    </ul>
+                </div>
+
+                <!-- 第三步 -->
+                <div class="explain-section" style="border-left-color: #f39c12;">
+                    <h4><i class="fa-solid fa-lightbulb"></i> 第三步：解題思路</h4>
+                    <p><strong>解題步驟：</strong></p>
+                    <ol>
+                        <li>先判斷哪個是「組織整體」：<strong>BCP</strong>。</li>
+                        <li>再判斷哪個是「IT/系統恢復」：<strong>DRP</strong>。</li>
+                        <li>最後判斷哪個是「特定資訊系統的應急計畫」：<strong>ISCP</strong>。</li>
+                    </ol>
+                    <hr style="border:0; border-top:1px dashed #ddd; margin:10px 0;">
+                    <p><strong>生活例子：</strong></p>
+                    <ul>
+                        <li><strong>BCP</strong>：像「公司遇到停電怎麼繼續營業」（人員怎麼調度、改用手寫單、改到分店作業）。</li>
+                        <li><strong>DRP</strong>：像「資訊部怎麼把 POS/ERP/Email 系統救回來」。</li>
+                        <li><strong>ISCP</strong>：像「針對『教務系統』這一套系統，寫一份專屬應急操作手冊」。</li>
+                    </ul>
+                </div>
+
+                <!-- 第四步 -->
+                <div class="explain-section" style="border-left-color: #e74c3c;">
+                    <h4><i class="fa-solid fa-list-check"></i> 第四步：選項分析</h4>
+                    <ul>
+                        <li><strong>(A) 錯誤</strong>：ISCP 不是「組織整體運營恢復」，它是偏「特定資訊系統」層級的應急準備。</li>
+                        <li><strong>(B) 錯誤</strong>：把 ISCP 說成涵蓋「整個組織」，這是 BCP 的工作，此選項把 ISCP 範圍放太大了。</li>
+                        <li><strong>(C) 錯誤</strong>：BCP 不只管 IT，它管的是整體業務（含非 IT）；DRP 才是專注於 IT。</li>
+                        <li><strong>(D) 正確</strong>：DRP 救 IT、BCP 管整體、ISCP 管單一系統，完全符合分工邏輯。</li>
+                    </ul>
+                </div>
+
+                <!-- 觀念補充 -->
+                <div class="explain-section" style="border-left-color: #1abc9c;">
+                    <h4><i class="fa-solid fa-book"></i> 觀念補充與延伸</h4>
+                    <p><strong>法條或定義：</strong></p>
+                    <ul>
+                        <li><strong>BCP (Business Continuity Plan)</strong>：組織層級的業務持續策略與作法。（白話：公司怎麼活下去。）</li>
+                        <li><strong>DRP (Disaster Recovery Plan)</strong>：資訊技術與資訊系統在災難後的恢復計畫。（白話：系統怎麼救回來。）</li>
+                        <li><strong>ISCP (Information System Contingency Plan)</strong>：針對「單一資訊系統」的應急準備與處置流程。（白話：某一套系統出事的專屬SOP。）</li>
+                    </ul>
+                    <p><strong>觸類旁通（舉一反三）：</strong></p>
+                    <ul>
+                        <li><strong>事故應變 (Incident Response)</strong>：偏向偵測、隔離、清除（處理當下）。</li>
+                        <li><strong>災難復原 (DR)</strong>：偏向重建與恢復服務（處理災後）。</li>
+                    </ul>
+                </div>
+
+                <!-- 記憶口訣 -->
+                <div class="explain-section" style="border-left-color: #27ae60;">
+                    <h4><i class="fa-solid fa-comment-dots"></i> 記憶口訣</h4>
+                    <p><strong>「BCP 管全局，DRP 救 IT，ISCP 管單一系統 SOP。」</strong></p>
+                </div>
+
+                <!-- 常見陷阱 -->
+                <div class="explain-section" style="border-left-color: #7f8c8d;">
+                    <h4><i class="fa-solid fa-triangle-exclamation"></i> 常見陷阱與避坑</h4>
+                    <ul>
+                        <li><strong>心理盲點</strong>：看到 "Information System" 就以為它包含所有系統與業務，實際上 ISCP 是「某一特定系統」層級。</li>
+                        <li><strong>避坑指南</strong>：做題時先用範圍排序：<strong>BCP（最大） > DRP（IT恢復） > ISCP（特定系統）</strong>。只要選項排序不符合這個邏輯，多半就是錯的。</li>
+                    </ul>
+                </div>
+
+            </div>
+        </details>
+
+        <!-- 7. Self Check (預設隱藏) -->
+        <details id="selfCheckDetails">
+            <summary><i class="fa-solid fa-clipboard-check"></i> 自我檢測</summary>
+            <div class="details-content">
+                
+                <div class="self-check-item">
+                    <div class="self-check-question">Q1：如果「全校停電，教務系統不能用，但學校仍要維持基本作業」，哪一份計畫是主軸？為什麼？</div>
+                    <details class="answer-reveal">
+                        <summary>點擊查看答案</summary>
+                        <div class="details-content">
+                            <strong>答案：BCP（業務持續性計畫）</strong><br>
+                            理由：因為要維持「整體業務運作」，這包含人員調度與替代方案（如紙本），不只 IT 恢復。
+                        </div>
+                    </details>
+                </div>
+
+                <div class="self-check-item">
+                    <div class="self-check-question">Q2：如果只針對「教務系統資料庫故障」寫應急處置與恢復步驟，這屬於哪一種計畫？</div>
+                    <details class="answer-reveal">
+                        <summary>點擊查看答案</summary>
+                        <div class="details-content">
+                            <strong>答案：ISCP（資訊系統應急準備計畫）</strong><br>
+                            理由：因為這是針對「特定資訊系統」的應急準備與處置。
+                        </div>
+                    </details>
+                </div>
+
+                <div class="self-check-item">
+                    <div class="self-check-question">Q3：DRP 與 Incident Response（事件應變）最大的差別是什麼？</div>
+                    <details class="answer-reveal">
+                        <summary>點擊查看答案</summary>
+                        <div class="details-content">
+                            <strong>答案：目標不同</strong><br>
+                            Incident Response 偏向「偵測、隔離、清除攻擊」；DRP 偏向災後的「重建與服務恢復」。
+                        </div>
+                    </details>
+                </div>
+
+            </div>
+        </details>
+    </div>
+
+</div>
+
+<script>
+    // 定義正確答案
+    const CORRECT_ANSWER = "D";
+    
+    // 獲取 DOM 元素
+    const submitBtn = document.getElementById('submitBtn');
+    const questionArea = document.getElementById('questionArea');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const feedbackCard = document.getElementById('feedbackCard');
+    const statusBadge = document.getElementById('statusBadge');
+    const explainDetails = document.getElementById('explainDetails');
+    const selfCheckDetails = document.getElementById('selfCheckDetails');
+    const allOptions = document.querySelectorAll('.option-input');
+    const allLabels = document.querySelectorAll('.option-label');
+
+    // 檢查答案函式
+    function checkAnswer() {
+        // 1. 取得使用者選擇
+        let selectedValue = null;
+        allOptions.forEach(option => {
+            if (option.checked) {
+                selectedValue = option.value;
+            }
+        });
+
+        // 2. 防呆：未選則提示
+        if (!selectedValue) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        // 3. 鎖定選項與按鈕
+        allOptions.forEach(opt => opt.disabled = true);
+        allLabels.forEach(label => label.classList.add('disabled'));
+        
+        // 4. 判定對錯並顯示回饋
+        const isCorrect = (selectedValue === CORRECT_ANSWER);
+        
+        // 顯示回饋區塊
+        feedbackArea.style.display = 'block';
+        explainDetails.open = true; // 自動展開詳解，方便閱讀
+
+        if (isCorrect) {
+            // --- 答對處理 ---
+            statusBadge.textContent = "答對";
+            statusBadge.className = "status-badge correct";
+            
+            feedbackCard.className = "feedback-card success";
+            feedbackCard.innerHTML = `
+                <div class="feedback-title"><i class="fa-solid fa-circle-check"></i> 答對了！</div>
+                <p>理由：正確！BCP 負責組織整體業務持續，DRP 負責 IT 基礎設施恢復，而 ISCP 則是針對特定單一系統的應急反應。</p>
+            `;
+        } else {
+            // --- 答錯處理 ---
+            statusBadge.textContent = "答錯";
+            statusBadge.className = "status-badge wrong";
+            
+            feedbackCard.className = "feedback-card error";
+            feedbackCard.innerHTML = `
+                <div class="feedback-title"><i class="fa-solid fa-circle-xmark"></i> 答錯了</div>
+                <p><strong>正確答案是：(D)</strong></p>
+                <p>理由：ISCP 是針對「特定系統」而非「組織整體」；BCP 才是涵蓋組織整體業務。</p>
+            `;
+        }
+
+        // 5. 按鈕變更為「重新作答」
+        submitBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> 重新作答';
+        submitBtn.classList.add('btn-retry');
+        submitBtn.onclick = resetQuiz;
+        
+        // 6. 平滑捲動至回饋區 (可選，視螢幕高度而定，這裡微調捲動)
+        feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // 重新作答函式
+    function resetQuiz() {
+        // 1. 清空選項
+        allOptions.forEach(opt => opt.checked = false);
+        
+        // 2. 解除禁用
+        allOptions.forEach(opt => opt.disabled = false);
+        allLabels.forEach(label => label.classList.remove('disabled'));
+        
+        // 3. 隱藏回饋與詳解
+        feedbackArea.style.display = 'none';
+        explainDetails.open = false;
+        selfCheckDetails.open = false;
+
+        // 3.1 關閉自我檢測的所有答案
+        const allAnswerReveals = document.querySelectorAll('.answer-reveal');
+        allAnswerReveals.forEach(details => details.open = false);
+        
+        // 4. 恢復按鈕狀態
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> 送出答案';
+        submitBtn.classList.remove('btn-retry');
+        submitBtn.onclick = checkAnswer;
+        
+        // 5. 恢復 Header 狀態
+        statusBadge.textContent = "未作答";
+        statusBadge.className = "status-badge";
+        
+        // 6. 捲回頂部
+        questionArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+</script>
+
+</body>
+</html>

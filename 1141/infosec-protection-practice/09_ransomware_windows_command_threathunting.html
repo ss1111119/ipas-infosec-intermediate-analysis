@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式教學：勒索軟體與威脅獵補</title>
+    <!-- 外部資源：Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- 外部資源：FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- 字體載入策略 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* 核心色彩 */
+            --body-bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --primary-color: #2980b9;
+            --primary-hover: #21618c;
+            --highlight-color: #f1c40f;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            
+            /* 標籤色彩 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        body {
+            background-color: var(--body-bg);
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* 版型容器規範 */
+        .page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 767.98px) {
+            .page-container {
+                margin: 16px;
+                padding: 24px;
+                border-radius: 12px;
+            }
+            h2 { font-size: 20px; }
+            h3 { font-size: 18px; }
+        }
+
+        /* 標籤樣式 */
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: white;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        /* 答題狀態標籤 */
+        .status-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            background-color: #e0e0e0;
+            color: #666;
+        }
+        .status-badge.correct { background-color: var(--success-bg); color: var(--success-text); }
+        .status-badge.wrong { background-color: var(--error-bg); color: var(--error-text); }
+
+        /* 情境卡與通用卡片 */
+        .context-card, .explain-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* 選項樣式 */
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-label:hover:not(.disabled) {
+            background-color: #e3f2fd;
+            border-color: #bbdefb;
+            transform: translateY(-2px);
+        }
+
+        .option-label.selected {
+            background-color: #e3f2fd;
+            border-color: var(--primary-color);
+        }
+
+        .option-input {
+            margin-right: 16px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-color);
+        }
+        
+        /* 禁用狀態 */
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .option-label.disabled:hover {
+            transform: none;
+            background-color: transparent;
+        }
+
+        /* 按鈕樣式 */
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 10px;
+            border: none;
+            margin-top: 24px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary-custom {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+        }
+
+        .btn-primary-custom:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+        }
+
+        .btn-reset {
+            background-color: #607d8b;
+            color: white;
+        }
+        .btn-reset:hover {
+            background-color: #455a64;
+        }
+
+        /* 回饋區域動畫 */
+        .feedback-area {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none; /* 預設隱藏 */
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .feedback-success {
+            background-color: var(--success-bg);
+            border: 1px solid #c8e6c9;
+            color: var(--success-text);
+        }
+
+        .feedback-error {
+            background-color: var(--error-bg);
+            border: 1px solid #ffcdd2;
+            color: var(--error-text);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 詳解與自我檢測 */
+        details {
+            margin-top: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+        }
+
+        summary {
+            padding: 16px 20px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            font-weight: 600;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        .details-content {
+            padding: 24px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        /* 自我檢測內部的小細節 */
+        .check-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        .check-item:last-child {
+            border-bottom: none;
+        }
+        .check-answer-reveal summary {
+            background-color: #e3f2fd;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            padding: 10px 15px;
+            border-radius: 6px;
+        }
+        .check-answer-reveal .details-content {
+            padding: 15px;
+            background-color: #f1f8ff;
+            font-size: 0.95rem;
+            color: #333;
+        }
+
+        mark {
+            background-color: var(--highlight-color);
+            padding: 0 4px;
+            border-radius: 2px;
+            color: #333;
+        }
+
+        .explain-section h5 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .explain-section h5 i {
+            margin-right: 8px;
+        }
+
+        /* 步驟標籤樣式 */
+        .step-badge {
+            background: #2c3e50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    <!-- 1. Header -->
+    <header class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <span class="tag tag-sec">資訊安全防護實務</span>
+            <span class="tag tag-mgm">威脅獵補</span>
+        </div>
+        <div id="statusBadge" class="status-badge">未作答</div>
+    </header>
+
+    <!-- 2. Context -->
+    <div class="context-card">
+        <h5 class="mb-2"><i class="fas fa-info-circle me-2"></i>情境背景</h5>
+        <p class="mb-0">勒索軟體與資料外洩攻擊之準備、預防、緩解與應變之實務上，可透過分析系統執行特定指令來進行威脅獵補（Threat Hunting，就是主動在系統中找尋「可能尚未被發現的攻擊行為」），以即早偵測並發現異常行為。</p>
+    </div>
+
+    <!-- 3. Question -->
+    <div id="questionArea" class="mb-4">
+        <h4 class="fw-bold mb-3">Q9. 下列何種 Windows 指令「非」勒索軟體常用於竄改系統檔案／備份之目的？</h4>
+        
+        <div class="option-group">
+            <label class="option-label" for="optA">
+                <input type="radio" name="answer" id="optA" value="A" class="option-input">
+                <span class="option-text fw-bold">A. fsutil.exe</span>
+            </label>
+            
+            <label class="option-label" for="optB">
+                <input type="radio" name="answer" id="optB" value="B" class="option-input">
+                <span class="option-text fw-bold">B. ntfsbackup.exe</span>
+            </label>
+            
+            <label class="option-label" for="optC">
+                <input type="radio" name="answer" id="optC" value="C" class="option-input">
+                <span class="option-text fw-bold">C. vssadmin.exe</span>
+            </label>
+            
+            <label class="option-label" for="optD">
+                <input type="radio" name="answer" id="optD" value="D" class="option-input">
+                <span class="option-text fw-bold">D. wbadmin.exe</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 4. Action Area -->
+    <button id="submitBtn" class="btn-action btn-primary-custom">
+        送出答案 <i class="fas fa-paper-plane ms-2"></i>
+    </button>
+
+    <!-- 5. Feedback -->
+    <div id="feedbackArea" class="feedback-area">
+        <!-- 內容由 JS 動態生成 -->
+    </div>
+
+    <!-- 6. Explain (預設隱藏) -->
+    <details id="explainArea" style="display: none;">
+        <summary>查看詳細解析</summary>
+        <div class="details-content">
+            
+            <!-- 第一步：找關鍵字 -->
+            <div class="explain-section">
+                <h5><span class="step-badge">Step 1</span>找關鍵字</h5>
+                <ul class="mb-0">
+                    <li><strong>勒索軟體（Ransomware）</strong>：加密資料勒索贖金的惡意程式。</li>
+                    <li><strong>資料外洩（Data Exfiltration）</strong>：把資料偷偷傳出去。</li>
+                    <li><strong>威脅獵補（Threat Hunting）</strong>：主動找「可疑行為指令」，不是等警報。</li>
+                    <li><strong>竄改系統檔案 / 備份</strong>：勒索軟體最愛先「破壞備份」，讓你沒得還原。</li>
+                    <li><strong>Windows 指令</strong>：考的是「哪些是勒索軟體常濫用的內建工具（LOLBins）」。</li>
+                </ul>
+            </div>
+
+            <!-- 第二步：白話翻譯 -->
+            <div class="explain-section" style="border-left-color: var(--tag-iso);">
+                <h5><span class="step-badge">Step 2</span>白話翻譯</h5>
+                <p class="mb-0">勒索軟體在動手加密之前，通常會先把 Windows 裡的「備份、還原點」刪掉或破壞。題目在問：下面這些 Windows 指令中，哪一個<mark>「不是」</mark>勒索軟體常拿來做這種壞事的？</p>
+            </div>
+
+            <!-- 第三步：解題思路 -->
+            <div class="explain-section" style="border-left-color: var(--tag-zt);">
+                <h5><span class="step-badge">Step 3</span>解題思路</h5>
+                <p><strong>原理與規則：</strong>勒索軟體最怕你做什麼？→「從備份還原」。所以它們會優先執行刪除 Volume Shadow Copy（磁碟陰影複本）或 Windows Backup 的指令。</p>
+                <div class="alert alert-light border mt-2">
+                    <strong><i class="fas fa-lightbulb text-warning me-2"></i>生活例子</strong>
+                    <p class="mb-0 small">就像綁匪綁架前，會先把你的備用鑰匙扔掉（刪除備份），讓你進不去家門（無法還原），只能乖乖交出贖金。</p>
+                </div>
+                <p class="mt-2 mb-0"><strong>解題步驟：</strong>找出選項中那些指令是「刪除/破壞備份」的常客，剩下那個「幾乎沒聽過、也不常見於攻擊行為的」，通常就是答案。</p>
+            </div>
+
+            <!-- 第四步：選項分析 -->
+            <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                <h5><span class="step-badge">Step 4</span>選項分析</h5>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <strong>(A) fsutil.exe <span class="badge bg-danger">可疑</span></strong><br>
+                        檔案系統管理工具。攻擊者常用它刪除 USN Journal，藉此隱藏檔案修改痕跡。
+                    </li>
+                    <li class="mb-2">
+                        <strong>(B) ntfsbackup.exe <span class="badge bg-success">正確答案</span></strong><br>
+                        這個指令並<strong>非</strong> Windows 常見或實務上被勒索軟體濫用的標準工具，也不是威脅獵補中常監控的指令。
+                    </li>
+                    <li class="mb-2">
+                        <strong>(C) vssadmin.exe <span class="badge bg-danger">極度危險</span></strong><br>
+                        勒索軟體經典指令。常見行為：<code>vssadmin delete shadows /all /quiet</code>（安靜刪除所有備份陰影）。
+                    </li>
+                    <li>
+                        <strong>(D) wbadmin.exe <span class="badge bg-danger">高風險</span></strong><br>
+                        Windows 備份管理工具。常用於刪除 Catalog（目錄）或停止備份服務。
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 觀念補充與延伸 -->
+            <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                <h5><i class="fas fa-book-open"></i> 觀念補充與延伸</h5>
+                <p><strong>LOLBins (Living off the Land Binaries)</strong>：</p>
+                <p class="mb-0">指攻擊者「就地取材」，直接使用受害電腦裡本來就有的合法工具（如 PowerShell, Certutil, Vssadmin）來幹壞事。這樣可以降低被防毒軟體偵測到的機率，因為這些工具本身是合法的。</p>
+            </div>
+
+            <!-- 觸類旁通 -->
+            <div class="explain-section" style="border-left-color: var(--tag-net);">
+                <h5><i class="fas fa-exchange-alt"></i> 觸類旁通（舉一反三）</h5>
+                <p>除了題目提到的，還有哪些指令要盯緊？</p>
+                <ul class="mb-0">
+                    <li><code>bcdedit</code>：修改開機設定，關閉自動修復。</li>
+                    <li><code>wevtutil</code>：清除 Windows 事件紀錄（Event Logs），以此湮滅證據。</li>
+                    <li><code>net stop</code>：停止防毒軟體或備份服務。</li>
+                </ul>
+            </div>
+
+            <!-- 記憶口訣 -->
+            <div class="explain-section" style="border-left-color: #6c757d;">
+                <h5><i class="fas fa-star text-warning"></i> 記憶口訣</h5>
+                <div class="p-3 bg-white border rounded text-center fw-bold text-primary">
+                    「勒索先刪備份，VSS 跟 WB 要盯緊；<br>
+                    沒聽過的那一個，考試多半就是你。」
+                </div>
+            </div>
+
+            <!-- 常見陷阱 -->
+            <div class="explain-section" style="border-left-color: var(--error-text);">
+                <h5><i class="fas fa-exclamation-triangle text-danger"></i> 常見陷阱</h5>
+                <p><strong>心理盲點：</strong>看到選項裡有 "backup" 字樣（如 ntfsbackup），就直覺以為它一定跟備份有關，肯定會被勒索軟體攻擊。</p>
+                <p class="mb-0"><strong>避坑指南：</strong>題目問的是「非」常用指令。你要選的是那個在資安報告、威脅獵補清單中「最生面孔」的選項。</p>
+            </div>
+
+        </div>
+    </details>
+
+    <!-- 7. SelfCheck -->
+    <details id="selfCheckArea" class="mt-4">
+        <summary>自我檢測與反思</summary>
+        <div class="details-content">
+            
+            <!-- Q1 -->
+            <div class="check-item">
+                <p class="fw-bold mb-2">Q1: 為什麼勒索軟體攻擊前，常會先刪除 Volume Shadow Copy？</p>
+                <details class="check-answer-reveal">
+                    <summary>點擊查看答案</summary>
+                    <div class="details-content">
+                        因為只要磁碟陰影複本（還原點）還在，使用者就有機會不付贖金直接還原資料。刪除它，勒索才能構成最大威脅。
+                    </div>
+                </details>
+            </div>
+
+            <!-- Q2 -->
+            <div class="check-item">
+                <p class="fw-bold mb-2">Q2: 若在端點監控中看到 <code>vssadmin delete shadows</code> 指令，資安人員應立即做什麼？</p>
+                <details class="check-answer-reveal">
+                    <summary>點擊查看答案</summary>
+                    <div class="details-content">
+                        這屬於高風險指標（IOC）。應立即通報、隔離該主機網路（斷網），保全現有記錄，並啟動事件應變（IR）流程。
+                    </div>
+                </details>
+            </div>
+
+            <!-- Q3 -->
+            <div class="check-item">
+                <p class="fw-bold mb-2">Q3: 為什麼威脅獵補會特別關注「系統內建工具」而不是只找陌生惡意程式？</p>
+                <details class="check-answer-reveal">
+                    <summary>點擊查看答案</summary>
+                    <div class="details-content">
+                        因為內建工具（LOLBins）本身是合法的，較不易被傳統防毒軟體直接攔截，且常被攻擊者用於隱蔽攻擊行為。
+                    </div>
+                </details>
+            </div>
+
+        </div>
+    </details>
+
+</div>
+
+<script>
+    // 定義正確答案
+    const CORRECT_ANSWER = 'B';
+    const CORRECT_REASON = "ntfsbackup.exe 並非勒索軟體實務上常用來刪除或破壞系統備份的 Windows 指令。";
+
+    // 取得 DOM 元素
+    const submitBtn = document.getElementById('submitBtn');
+    const options = document.querySelectorAll('input[name="answer"]');
+    const optionLabels = document.querySelectorAll('.option-label');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const explainArea = document.getElementById('explainArea');
+    const selfCheckArea = document.getElementById('selfCheckArea');
+    const statusBadge = document.getElementById('statusBadge');
+    const questionArea = document.getElementById('questionArea');
+
+    // 選項點擊互動效果
+    options.forEach(opt => {
+        opt.addEventListener('change', () => {
+            // 移除所有選取樣式
+            optionLabels.forEach(label => label.classList.remove('selected'));
+            // 加上當前選取樣式
+            opt.parentElement.classList.add('selected');
+        });
+    });
+
+    // 提交按鈕監聽
+    submitBtn.addEventListener('click', () => {
+        // 判斷按鈕狀態：如果是「重新作答」
+        if (submitBtn.classList.contains('btn-reset')) {
+            resetQuiz();
+            return;
+        }
+
+        // 取得使用者選擇
+        let selectedValue = null;
+        options.forEach(opt => {
+            if (opt.checked) selectedValue = opt.value;
+        });
+
+        // 防呆：未選答案
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // 執行判定邏輯
+        processSubmission(selectedValue);
+    });
+
+    function processSubmission(userAnswer) {
+        const isCorrect = userAnswer === CORRECT_ANSWER;
+
+        // 1. 鎖定選項
+        options.forEach(opt => opt.disabled = true);
+        optionLabels.forEach(label => label.classList.add('disabled'));
+
+        // 2. 更新 Header 狀態
+        if (isCorrect) {
+            statusBadge.textContent = "答對了 ✓";
+            statusBadge.className = "status-badge correct";
+        } else {
+            statusBadge.textContent = "答錯了 ✗";
+            statusBadge.className = "status-badge wrong";
+        }
+
+        // 3. 顯示回饋區域
+        feedbackArea.style.display = 'block';
+        if (isCorrect) {
+            feedbackArea.className = 'feedback-area feedback-success';
+            feedbackArea.innerHTML = `
+                <h5 class="fw-bold"><i class="fas fa-check-circle me-2"></i>完全正確！</h5>
+                <p class="mb-0">${CORRECT_REASON}</p>
+            `;
+        } else {
+            feedbackArea.className = 'feedback-area feedback-error';
+            feedbackArea.innerHTML = `
+                <h5 class="fw-bold"><i class="fas fa-times-circle me-2"></i>可惜答錯了...</h5>
+                <p class="mb-1"><strong>正確答案是：(B) ntfsbackup.exe</strong></p>
+                <p class="mb-0">${CORRECT_REASON}</p>
+            `;
+        }
+
+        // 4. 顯示詳解區域並自動展開
+        explainArea.style.display = 'block';
+        explainArea.open = true;
+
+        // 5. 按鈕變更為「重新作答」
+        submitBtn.textContent = '重新作答';
+        submitBtn.innerHTML = '重新作答 <i class="fas fa-redo ms-2"></i>';
+        submitBtn.classList.remove('btn-primary-custom');
+        submitBtn.classList.add('btn-reset');
+    }
+
+    function resetQuiz() {
+        // 1. 清空選項
+        options.forEach(opt => {
+            opt.checked = false;
+            opt.disabled = false;
+        });
+        
+        // 2. 移除樣式
+        optionLabels.forEach(label => {
+            label.classList.remove('selected');
+            label.classList.remove('disabled');
+        });
+
+        // 3. 隱藏回饋與詳解
+        feedbackArea.style.display = 'none';
+        explainArea.style.display = 'none';
+        explainArea.open = false;
+        
+        // 4. 收合自我檢測
+        selfCheckArea.open = false;
+        // 額外收合所有自我檢測的答案
+        document.querySelectorAll('.check-answer-reveal').forEach(el => el.open = false);
+
+        // 5. 重置 Header 狀態
+        statusBadge.textContent = "未作答";
+        statusBadge.className = "status-badge";
+
+        // 6. 重置按鈕
+        submitBtn.textContent = '送出答案';
+        submitBtn.innerHTML = '送出答案 <i class="fas fa-paper-plane ms-2"></i>';
+        submitBtn.classList.remove('btn-reset');
+        submitBtn.classList.add('btn-primary-custom');
+
+        // 7. 平滑捲動回題目頂端
+        window.scrollTo({
+            top: document.querySelector('.page-container').offsetTop - 20,
+            behavior: 'smooth'
+        });
+    }
+</script>
+
+</body>
+</html>
