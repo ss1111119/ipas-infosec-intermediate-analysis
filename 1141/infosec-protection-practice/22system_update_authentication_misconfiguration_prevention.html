@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安管理：系統上線與變更管理</title>
+    
+    <!-- 引入 Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- 引入 FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 引入 Tailwind CSS (用於快速佈局) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 自定義樣式配置 -->
+    <style>
+        :root {
+            --body-bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --primary-color: #2980b9;
+            --highlight: #f1c40f;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            
+            /* 標籤顏色規範 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* 容器與版型 */
+        .page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                max-width: 100%;
+                margin: 16px;
+                padding: 20px;
+                border-radius: 12px;
+            }
+        }
+
+        /* 標籤樣式 */
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: white;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        /* 選項樣式 */
+        .option-label {
+            display: flex;
+            align-items: flex-start; /* 頂對齊以適應長文字 */
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-label:hover:not(.disabled) {
+            background-color: #e3f2fd;
+            border-color: #bbdefb;
+            transform: translateY(-2px);
+        }
+
+        .option-label.selected {
+            background-color: #e3f2fd;
+            border-color: var(--primary-color);
+        }
+
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* 隱藏原生 Radio，使用自定義樣式 */
+        input[type="radio"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #bdc3c7;
+            border-radius: 50%;
+            margin-right: 12px;
+            margin-top: 3px; /* 微調對齊 */
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        input[type="radio"]:checked {
+            border-color: var(--primary-color);
+            background-color: white;
+        }
+
+        input[type="radio"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+        }
+
+        /* 按鈕樣式 */
+        .btn-action {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+            margin-top: 20px;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+            background-color: #2471a3;
+        }
+
+        .btn-action:active {
+            transform: translateY(0);
+        }
+
+        .btn-action.reset {
+            background-color: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        /* 回饋區域動畫 */
+        .feedback-area {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 12px;
+            animation: fadeInUp 0.4s ease;
+            display: none; /* 預設隱藏 */
+        }
+
+        .feedback-success {
+            background-color: var(--success-bg);
+            border-left: 5px solid var(--success-text);
+            color: #1b5e20;
+        }
+
+        .feedback-error {
+            background-color: var(--error-bg);
+            border-left: 5px solid var(--error-text);
+            color: #b71c1c;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 解析卡片 */
+        .explain-card {
+            margin-top: 24px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none; /* 預設隱藏 */
+        }
+
+        .explain-summary {
+            padding: 16px 20px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .explain-summary:hover {
+            background-color: #e9ecef;
+        }
+
+        .explain-content {
+            padding: 20px;
+            background-color: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* 解析段落卡 */
+        .explain-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--tag-net); /* 預設使用網路標籤色 */
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .explain-section h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .explain-list li {
+            margin-bottom: 6px;
+            padding-left: 4px;
+        }
+
+        /* 自我檢測區 */
+        .self-check {
+            margin-top: 24px;
+            border: 2px dashed #bdc3c7;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+        
+        .self-check summary {
+            padding: 16px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #555;
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .self-check summary::after {
+            content: '\f078'; /* FontAwesome Chevron Down */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+        
+        .self-check[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        .self-check-content {
+            padding: 0 16px 16px 16px;
+            color: var(--text-primary);
+            background-color: #f9fafb;
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* 圖片容器 */
+        .img-container {
+            width: 100%;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+        .img-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* 重點標記 */
+        mark {
+            background-color: var(--highlight);
+            color: var(--text-primary);
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+        
+        .highlight-text {
+            color: #c0392b;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <!-- 1. Header -->
+        <div id="quizHeader" class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+                <h2 class="text-2xl font-bold text-gray-800">Q001</h2>
+                <span class="tag tag-mgm">資安管理</span>
+                <span class="tag tag-net">存取控制</span>
+            </div>
+            <div id="statusBadge" class="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-sm font-bold">
+                未作答
+            </div>
+        </div>
+
+        <!-- 2. Context (情境卡) -->
+        <div class="mb-6">
+            <div class="img-container">
+                <img src="https://i.meee.com.tw/a0nreiR.png" alt="題目附圖：系統登入介面與資安疏失示意圖" loading="lazy">
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500 text-gray-700">
+                <h3 class="font-bold mb-2"><i class="fas fa-info-circle mr-2"></i>情境描述</h3>
+                <p>某機關系統維運商系統更新作業疏失，未發現<mark>網頁驗證功能關閉</mark>，而導致學員無需身分驗證即可登入系統，使有心人士可查看或取得敏感資料而有外洩之虞。</p>
+            </div>
+        </div>
+
+        <!-- 3. Question (題目與選項) -->
+        <div id="questionArea" class="mb-6">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">
+                下列何者是<span class="text-red-600 font-extrabold underline decoration-2 underline-offset-4">最「不」建議</span>之防範措施？
+            </h3>
+            
+            <form id="quizForm">
+                <label class="option-label" onclick="selectOption(this)">
+                    <input type="radio" name="answer" value="A">
+                    <span class="option-text">
+                        (A) 機關建立資通安全緊急應變機制
+                    </span>
+                </label>
+
+                <label class="option-label" onclick="selectOption(this)">
+                    <input type="radio" name="answer" value="B">
+                    <span class="option-text">
+                        (B) 應完整確認系統相關檢核驗證功能均正常啟用始可對外開放網站
+                    </span>
+                </label>
+
+                <label class="option-label" onclick="selectOption(this)">
+                    <input type="radio" name="answer" value="C">
+                    <span class="option-text">
+                        (C) 透過敏感資料加密儲存、查詢過程遮蔽及最少揭露來降低外洩風險
+                    </span>
+                </label>
+
+                <label class="option-label" onclick="selectOption(this)">
+                    <input type="radio" name="answer" value="D">
+                    <span class="option-text">
+                        (D) 落實系統版本更新檢核作業，應於測試機完成各角色、各帳號測試後再上版
+                    </span>
+                </label>
+            </form>
+        </div>
+
+        <!-- 4. Action Area -->
+        <button id="submitBtn" onclick="checkAnswer()" class="btn-action">
+            送出答案
+        </button>
+
+        <!-- 5. Feedback (判定結果) -->
+        <div id="feedbackArea" class="feedback-area">
+            <!-- 內容由 JS 動態填入 -->
+        </div>
+
+        <!-- 6. Explain (解析卡) -->
+        <details id="explainArea" class="explain-card">
+            <summary class="explain-summary">
+                <span><i class="fas fa-book-open mr-2 text-blue-600"></i>查看完整教學解析</span>
+                <i class="fas fa-chevron-down text-gray-400"></i>
+            </summary>
+            <div class="explain-content">
+                
+                <!-- 第一步：找關鍵字 -->
+                <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                    <h4><i class="fas fa-search"></i> 第一步：找關鍵字</h4>
+                    <p>請注意下列關鍵字，它們直接指出題目在考什麼：</p>
+                    <ul class="list-disc ml-5 mt-2 text-gray-700 explain-list">
+                        <li><strong>系統更新作業疏失</strong>：問題的「起因」，不是外部攻擊。</li>
+                        <li><strong>網頁驗證功能關閉</strong>（登入驗證被關掉）：核心資安缺失點。</li>
+                        <li><strong>無需身分驗證即可登入</strong>：代表「存取控制」完全失效。</li>
+                        <li><strong>敏感資料外洩之虞</strong>：後果與風險影響。</li>
+                        <li><strong>最「不」建議之防範措施</strong>：要選「看起來很重要，但其實治標不治本」的選項。</li>
+                    </ul>
+                </div>
+
+                <!-- 第二步：白話翻譯 -->
+                <div class="explain-section" style="border-left-color: var(--tag-net);">
+                    <h4><i class="fas fa-language"></i> 第二步：白話翻譯</h4>
+                    <p>白話說就是：系統在更新時出包，把「登入檢查」關掉了，結果任何人都不用帳號密碼就能進系統看資料。</p>
+                    <p class="mt-2 text-blue-800 font-bold">現在要問：哪一個做法，對「避免這種事情再發生」最沒幫助？</p>
+                </div>
+
+                <!-- 第三步：解題思路 -->
+                <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                    <h4><i class="fas fa-brain"></i> 第三步：解題思路</h4>
+                    
+                    <h5 class="font-bold mt-2 text-gray-800">1. 解題步驟</h5>
+                    <ul class="list-decimal ml-5 mb-3 text-gray-700">
+                        <li>先確認「問題本質」：是設定錯誤 / 上線檢核不足，不是已發生重大外部攻擊事故。</li>
+                        <li>再看選項分類：是<strong>預防措施</strong>（避免再發生）還是<strong>事後應變措施</strong>（出事後才用）。</li>
+                        <li>題目問「最不建議」，通常是<strong>無法解決這次問題根本原因</strong>的那個。</li>
+                    </ul>
+
+                    <h5 class="font-bold mt-2 text-gray-800">2. 原理與規則（白話版）</h5>
+                    <p><strong>系統上線前的安全檢核（驗證、測試）</strong>與<strong>事後應變</strong>是完全不同的階段。</p>
+
+                    <h5 class="font-bold mt-2 text-gray-800">3. 生活例子</h5>
+                    <div class="bg-white p-3 rounded border border-gray-200 mt-2">
+                        <ul class="list-none text-gray-700">
+                            <li>🚪 <strong>驗證機制</strong>就像「大樓門禁」。</li>
+                            <li>🗝️ <strong>門禁沒開</strong> → 再多監視器也沒用。</li>
+                            <li>✅ <strong>版本上線前測試</strong>就是「開門前先試鑰匙是不是好的」。</li>
+                            <li>🚒 <strong>緊急應變機制</strong>是「已經失火時怎麼滅火」，不是防止門一開始就沒鎖。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 第四步：選項分析 -->
+                <div class="explain-section" style="border-left-color: var(--tag-iso);">
+                    <h4><i class="fas fa-list-check"></i> 第四步：選項分析</h4>
+                    <div class="space-y-3">
+                        <div class="border-b pb-2">
+                            <p class="font-bold text-red-600">(A) 機關建立資通安全緊急應變機制（正確答案）</p>
+                            <p class="text-sm text-gray-600">錯（但這題要選它）。緊急應變機制是「事件已經發生」時才啟動。這次問題是更新疏失 + 驗證沒開，對「防止再次發生同樣錯誤」幫助最小，屬於事後補救，不是事前預防。</p>
+                        </div>
+                        <div class="border-b pb-2">
+                            <p class="font-bold text-green-700">(B) 應完整確認系統相關檢核驗證功能均正常啟用始可對外開放網站</p>
+                            <p class="text-sm text-gray-600">正確作法。直接命中問題核心，驗證功能沒開，就是這次事故的根本原因。</p>
+                        </div>
+                        <div class="border-b pb-2">
+                            <p class="font-bold text-green-700">(C) 透過敏感資料加密儲存、查詢過程遮蔽及最少揭露來降低外洩風險</p>
+                            <p class="text-sm text-gray-600">正確作法。就算真的被看到，也能「降低傷害」，屬於「縱深防禦」（多層保護）概念。</p>
+                        </div>
+                        <div>
+                            <p class="font-bold text-green-700">(D) 落實系統版本更新檢核作業，應於測試機完成各角色、各帳號測試後再上版</p>
+                            <p class="text-sm text-gray-600">正確作法。明確對應「更新作業疏失」，能避免驗證被誤關卻沒人發現。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 觀念補充與延伸 -->
+                <div class="explain-section" style="border-left-color: var(--tag-law);">
+                    <h4><i class="fas fa-book"></i> 觀念補充與延伸</h4>
+                    <ul class="list-disc ml-5 text-gray-700">
+                        <li><strong>核心觀念定位</strong>：資安管理 → 系統上線管理 / 變更管理 / 存取控制。</li>
+                        <li><strong>考試地位</strong>：高頻常考題型，尤其愛考「最不建議 / 最不適當」。</li>
+                        <li><strong>法條或定義（白話）</strong>：
+                            <ul class="list-circle ml-5 mt-1 text-sm">
+                                <li><strong>存取控制（Access Control）</strong>：系統必須確認「你是誰，能不能進來」。</li>
+                                <li><strong>變更管理（Change Management）</strong>：系統改版前後要有檢核、測試、確認流程。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 觸類旁通 -->
+                <div class="explain-section" style="border-left-color: var(--tag-zt);">
+                    <h4><i class="fas fa-exchange-alt"></i> 觸類旁通（舉一反三）</h4>
+                    <ul class="list-disc ml-5 text-gray-700">
+                        <li><strong>對比概念</strong>：驗證沒開（Authentication） ≠ 權限沒設（Authorization）。</li>
+                        <li><strong>常見變化題型</strong>：
+                            <ul class="list-none mt-1 text-sm bg-gray-100 p-2 rounded">
+                                <li>🔹 題目改成「測試機正常、正式機異常」？</li>
+                                <li>🔹 改成「API 驗證被關閉」？</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 記憶口訣 -->
+                <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                    <h4><i class="fas fa-lightbulb"></i> 記憶口訣</h4>
+                    <p class="font-bold text-lg text-center my-2 text-blue-800 bg-yellow-50 p-2 rounded border border-yellow-200">「門沒鎖，不是消防隊的錯」</p>
+                    <p class="text-center text-sm text-gray-600">→ 登入驗證沒開，先檢核、先測試，不是先談應變。</p>
+                </div>
+
+                <!-- 常見陷阱 -->
+                <div class="explain-section" style="border-left-color: var(--error-text);">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 常見陷阱</h4>
+                    <ul class="list-disc ml-5 text-gray-700">
+                        <li><strong>學生最容易搞混的地方</strong>：看到「資通安全緊急應變機制」就直覺選（因為名字聽起來很厲害）。</li>
+                        <li><strong>心理盲點</strong>：把「資安」全部混在一起，忘記分清 <strong>事前預防</strong> 與 <strong>事後處理</strong>。</li>
+                        <li><strong>避坑指南</strong>：問自己一句話：「如果當初有做這件事，事情還會發生嗎？」
+                            <br><span class="text-green-600 font-bold">不會 → 好選項</span>
+                            <br><span class="text-red-600 font-bold">仍然會 → 通常就是答案</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </details>
+
+        <!-- 7. Self Check (自我檢測 - 題目顯示/答案隱藏) -->
+        <!-- 第一題 -->
+        <details class="self-check">
+            <summary>
+                <span><i class="fas fa-question-circle mr-2 text-blue-600"></i>自我檢測 1：如果題目改成...</span>
+            </summary>
+            <div class="self-check-content">
+                <p class="font-bold mb-2 text-gray-800">Q: 如果題目改成「系統已被大量下載資料」，哪個選項就可能變成好答案？</p>
+                <div class="bg-blue-50 p-3 rounded text-blue-800 border-l-4 border-blue-400">
+                    <strong>參考答案：A</strong>
+                    <p class="text-sm mt-1">因為此時已進入「事件應變階段」，必須立即止血（斷網、保存證據）。</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- 第二題 -->
+        <details class="self-check">
+            <summary>
+                <span><i class="fas fa-question-circle mr-2 text-purple-600"></i>自我檢測 2：關於驗證與權限</span>
+            </summary>
+            <div class="self-check-content">
+                <p class="font-bold mb-2 text-gray-800">Q: 如果驗證正常（確認了你是誰），但一般員工卻能看到總經理的薪資單，這問題落在哪個控制？</p>
+                <div class="bg-purple-50 p-3 rounded text-purple-800 border-l-4 border-purple-400">
+                    <strong>參考答案：授權（Authorization）</strong>
+                    <p class="text-sm mt-1">這是「權限設定」錯誤，而非「身分驗證」錯誤。</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- 第三題 -->
+        <details class="self-check">
+            <summary>
+                <span><i class="fas fa-question-circle mr-2 text-green-600"></i>自我檢測 3：關於測試</span>
+            </summary>
+            <div class="self-check-content">
+                <p class="font-bold mb-2 text-gray-800">Q: 為什麼測試機一定要「不同角色、不同帳號」都測？</p>
+                <div class="bg-green-50 p-3 rounded text-green-800 border-l-4 border-green-400">
+                    <strong>參考答案：避免盲點</strong>
+                    <p class="text-sm mt-1">避免只測管理者帳號（通常權限最大，什麼都看得到），卻忽略了一般使用者可能繞過權限的風險。</p>
+                </div>
+            </div>
+        </details>
+
+    </div>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        const correctAnswer = "A"; // 正確答案是 A (因為題目問"最不建議")
+        
+        // DOM 元素
+        const form = document.getElementById('quizForm');
+        const options = document.querySelectorAll('input[type="radio"]');
+        const optionLabels = document.querySelectorAll('.option-label');
+        const submitBtn = document.getElementById('submitBtn');
+        const feedbackArea = document.getElementById('feedbackArea');
+        const explainArea = document.getElementById('explainArea');
+        const statusBadge = document.getElementById('statusBadge');
+        const selfChecks = document.querySelectorAll('.self-check');
+        const questionArea = document.getElementById('questionArea');
+
+        // 選項點擊效果 UI 同步
+        function selectOption(label) {
+            if (label.classList.contains('disabled')) return;
+            
+            // 移除所有選中樣式
+            optionLabels.forEach(l => l.classList.remove('selected'));
+            // 添加當前選中樣式
+            label.classList.add('selected');
+            // 觸發 radio 點擊
+            const radio = label.querySelector('input');
+            radio.checked = true;
+        }
+
+        // 檢查答案主邏輯
+        function checkAnswer() {
+            // 1. 防呆檢查
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (!selectedOption) {
+                alert("請先選擇一個答案！");
+                return;
+            }
+
+            const userAnswer = selectedOption.value;
+            const isCorrect = userAnswer === correctAnswer;
+
+            // 2. 鎖定選項
+            disableOptions();
+
+            // 3. 顯示回饋
+            showFeedback(isCorrect, userAnswer);
+
+            // 4. 更新按鈕狀態
+            updateButtonToReset();
+
+            // 5. 顯示解析 (自動展開)
+            explainArea.style.display = 'block';
+            setTimeout(() => {
+                explainArea.open = true;
+            }, 300);
+
+            // 6. 更新標頭狀態
+            updateHeaderStatus(isCorrect);
+
+            // 7. 滾動到回饋區
+            feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // 鎖定所有選項
+        function disableOptions() {
+            optionLabels.forEach(label => {
+                label.classList.add('disabled');
+                label.querySelector('input').disabled = true;
+            });
+        }
+
+        // 顯示回饋內容
+        function showFeedback(isCorrect, userAnswer) {
+            feedbackArea.style.display = 'block';
+            feedbackArea.className = 'feedback-area ' + (isCorrect ? 'feedback-success' : 'feedback-error');
+            
+            let htmlContent = '';
+            if (isCorrect) {
+                htmlContent = `
+                    <div class="flex items-start">
+                        <i class="fas fa-check-circle text-2xl mr-3 mt-1"></i>
+                        <div>
+                            <h4 class="font-bold text-lg mb-1">答對了！</h4>
+                            <p>緊急應變是「事後補救」，無法預防「驗證功能被關閉」這類作業疏失的發生。</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                htmlContent = `
+                    <div class="flex items-start">
+                        <i class="fas fa-times-circle text-2xl mr-3 mt-1"></i>
+                        <div>
+                            <h4 class="font-bold text-lg mb-1">答錯了</h4>
+                            <p class="mb-2">正確答案是 <strong>(A)</strong></p>
+                            <p>您選擇的選項是有效的預防措施。題目問的是「最不建議」（最無效）的措施。緊急應變無法在事前防止疏失發生。</p>
+                        </div>
+                    </div>
+                `;
+            }
+            feedbackArea.innerHTML = htmlContent;
+        }
+
+        // 更新按鈕為重作模式
+        function updateButtonToReset() {
+            submitBtn.textContent = "重新作答";
+            submitBtn.classList.add('reset');
+            submitBtn.onclick = resetQuiz;
+        }
+
+        // 更新標頭狀態標籤
+        function updateHeaderStatus(isCorrect) {
+            if (isCorrect) {
+                statusBadge.textContent = "✓ 答對";
+                statusBadge.className = "bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold";
+            } else {
+                statusBadge.textContent = "✗ 答錯";
+                statusBadge.className = "bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-bold";
+            }
+        }
+
+        // 重置測驗
+        function resetQuiz() {
+            // 1. 清空選項
+            options.forEach(opt => opt.checked = false);
+            optionLabels.forEach(l => {
+                l.classList.remove('selected', 'disabled');
+                l.querySelector('input').disabled = false;
+            });
+
+            // 2. 隱藏回饋與解析
+            feedbackArea.style.display = 'none';
+            explainArea.style.display = 'none';
+            explainArea.open = false;
+            
+            // 收合所有自我檢測
+            selfChecks.forEach(detail => detail.open = false);
+
+            // 3. 恢復按鈕
+            submitBtn.textContent = "送出答案";
+            submitBtn.classList.remove('reset');
+            submitBtn.onclick = checkAnswer;
+
+            // 4. 恢復標頭
+            statusBadge.textContent = "未作答";
+            statusBadge.className = "bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-sm font-bold";
+
+            // 5. 滾動回頂部
+            questionArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動試題：Syslog Severity 篩選設定</title>
+    <!-- 引入 Bootstrap 5 (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <!-- 引入 FontAwesome (CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <style>
+        /* --- 核心變數與字體 --- */
+        :root {
+            --body-bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --primary: #2980b9;
+            --primary-hover: #21618c;
+            --highlight: #f1c40f;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --success-border: #a5d6a7;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            --error-border: #ef9a9a;
+            --font-main: system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            
+            /* 標籤顏色 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        body {
+            background-color: var(--body-bg);
+            font-family: var(--font-main);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* --- 版型容器 --- */
+        .page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            position: relative;
+        }
+
+        @media (max-width: 767.98px) {
+            .page-container {
+                margin: 16px;
+                padding: 24px;
+                width: auto;
+            }
+        }
+
+        /* --- Typography --- */
+        h2 { font-size: 24px; font-weight: 700; margin-bottom: 0.5rem; }
+        h3 { font-size: 18px; font-weight: 600; margin-bottom: 1rem; color: var(--primary); }
+        h4 { font-size: 16px; font-weight: 600; margin-bottom: 0.5rem; }
+        
+        @media (max-width: 767.98px) {
+            h2 { font-size: 20px; }
+            h3 { font-size: 16px; }
+        }
+
+        /* --- 標籤樣式 --- */
+        .badge-custom {
+            padding: 0.35em 0.65em;
+            font-size: 0.85em;
+            font-weight: 500;
+            border-radius: 4px;
+            color: white;
+            display: inline-block;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .tag-law { background: var(--tag-law); }
+        .tag-iso { background: var(--tag-iso); }
+        .tag-zt  { background: var(--tag-zt); }
+        .tag-net { background: var(--tag-net); }
+        .tag-sec { background: var(--tag-sec); }
+        .tag-mgm { background: var(--tag-mgm); }
+
+        /* --- UI 元件：Header --- */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            background-color: #e0e0e0;
+            color: #666;
+        }
+        .status-badge.correct { background-color: var(--success-bg); color: var(--success-text); }
+        .status-badge.wrong { background-color: var(--error-bg); color: var(--error-text); }
+
+        /* --- UI 元件：Context --- */
+        .context-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid #bdc3c7;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        /* --- UI 元件：Question & Options --- */
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 25px;
+        }
+        
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background: white;
+            min-height: 44px; /* 觸控友善 */
+        }
+
+        .option-label:hover:not(.disabled) {
+            background-color: #e3f2fd;
+            border-color: #90caf9;
+            transform: translateY(-2px);
+        }
+
+        .option-label.selected {
+            background-color: #e3f2fd;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        .option-label input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+            accent-color: var(--primary);
+        }
+
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+            background-color: #fafafa;
+        }
+        .option-label.disabled:hover {
+            transform: none;
+            background-color: #fafafa;
+        }
+
+        /* --- UI 元件：Action Area --- */
+        .action-area {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .btn-submit {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+            font-weight: 600;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+        
+        .btn-retry {
+            background-color: #fff;
+            color: var(--text-primary);
+            border: 2px solid #bdc3c7;
+        }
+        .btn-retry:hover {
+            background-color: #f8f9fa;
+            border-color: #95a5a6;
+        }
+
+        /* --- UI 元件：Feedback --- */
+        .feedback-area {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .feedback-area.success {
+            background-color: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: var(--success-text);
+        }
+
+        .feedback-area.error {
+            background-color: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: var(--text-primary);
+        }
+        
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- UI 元件：Explain --- */
+        .explain-area {
+            margin-top: 30px;
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .explain-area summary {
+            font-weight: 700;
+            cursor: pointer;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        
+        .explain-area summary:hover {
+            background-color: #e9ecef;
+        }
+        
+        .explain-area summary::after {
+            content: '\f078';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+        
+        .explain-area[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        .explain-content {
+            padding: 20px 0;
+        }
+
+        .explain-section {
+            background-color: #fff;
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+            background: #f8f9fa;
+        }
+
+        .explain-section h4 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 8px;
+        }
+        
+        .highlight-text {
+            background-color: var(--highlight);
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: 600;
+        }
+        
+        .syslog-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.9em;
+            background: white;
+        }
+        .syslog-table th, .syslog-table td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .syslog-table th {
+            background-color: #f1f1f1;
+            font-weight: 600;
+        }
+        .syslog-table tr.target-row {
+            background-color: #fff3cd;
+            font-weight: bold;
+        }
+
+        /* --- UI 元件：Self Check --- */
+        .self-check-container {
+            margin-top: 30px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+        
+        .self-check-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .self-check-item {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .self-check-question {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+
+        .self-check-answer-toggle {
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            user-select: none;
+            font-weight: 500;
+        }
+
+        .self-check-answer-toggle:hover {
+            text-decoration: underline;
+        }
+
+        /* 隱藏原生 summary 箭頭 */
+        details.check-details > summary {
+            list-style: none;
+        }
+        details.check-details > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .check-answer-box {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: var(--success-bg);
+            border-radius: 4px;
+            color: var(--success-text);
+            font-weight: 500;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    
+    <!-- 1. Header -->
+    <div class="quiz-header">
+        <div>
+            <span class="badge-custom tag-iso">RFC 5424</span>
+            <span class="badge-custom tag-sec">SIEM</span>
+        </div>
+        <div id="statusBadge" class="status-badge">未作答</div>
+    </div>
+
+    <!-- 2. Context -->
+    <div class="context-card">
+        本題無額外情境
+    </div>
+
+    <!-- 3. Question -->
+    <div class="question-section" id="questionArea">
+        <div class="question-text">
+            某「安全性資訊與事件管理」（簡稱 SIEM）系統依照 The Syslog Protocol（RFC 5424） 標準設計，因事件眾多，希望<span class="highlight-text">只顯示必須立即採取行動或系統無法使用</span>，這類極為嚴重的訊息在特定的畫面上，請問其篩選條件下列何者最為合適？
+        </div>
+
+        <div class="option-group">
+            <label class="option-label" onclick="selectOption(this)">
+                <input type="radio" name="quizOption" value="A">
+                <span>(A) Severity ≤ 1</span>
+            </label>
+            <label class="option-label" onclick="selectOption(this)">
+                <input type="radio" name="quizOption" value="B">
+                <span>(B) Severity ≤ 3</span>
+            </label>
+            <label class="option-label" onclick="selectOption(this)">
+                <input type="radio" name="quizOption" value="C">
+                <span>(C) Severity ≤ 5</span>
+            </label>
+            <label class="option-label" onclick="selectOption(this)">
+                <input type="radio" name="quizOption" value="D">
+                <span>(D) Severity ≤ 7</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 4. Action Area -->
+    <div class="action-area">
+        <button id="submitBtn" class="btn-submit" onclick="checkAnswer()">送出答案</button>
+    </div>
+
+    <!-- 5. Feedback -->
+    <div id="feedbackArea" class="feedback-area">
+        <!-- 內容由 JS 動態生成 -->
+    </div>
+
+    <!-- 6. Explain -->
+    <details id="explainArea" class="explain-area">
+        <summary>查看詳細解析</summary>
+        <div class="explain-content">
+            
+            <!-- Step 1: 找關鍵字 -->
+            <div class="explain-section" style="border-left-color: #2980b9;">
+                <h4>【第一步：找關鍵字】</h4>
+                <ul class="mb-0">
+                    <li><strong>SIEM 系統</strong>：集中收集、分析、顯示資安事件。</li>
+                    <li><strong>RFC 5424</strong>：Syslog 標準，Severity 有固定定義。</li>
+                    <li><strong><span class="highlight-text">只顯示</span></strong>：要「篩選」，不是全部顯示。</li>
+                    <li><strong>必須立即採取行動 / 系統無法使用</strong>：這類「極為嚴重」的訊息。</li>
+                </ul>
+            </div>
+
+            <!-- Step 2: 白話翻譯 -->
+            <div class="explain-section" style="border-left-color: #8e44ad;">
+                <h4>【第二步：白話翻譯】</h4>
+                <p>公司用一套 SIEM 系統在看日誌，但訊息太多了。老闆只想在一個「緊急畫面」上看到：<br>
+                「<strong>現在不處理會出大事、系統可能已經掛掉</strong>」的那種訊息。<br>
+                請問在 Syslog 的嚴重程度設定中，要怎麼篩選才對？</p>
+            </div>
+
+            <!-- Step 3: 解題思路 & 原理 -->
+            <div class="explain-section" style="border-left-color: #27ae60;">
+                <h4>【第三步：解題思路】原理與規則</h4>
+                <p><strong>核心觀念</strong>：RFC 5424 定義，Severity 數值<strong>越小越嚴重</strong>。</p>
+                <p><strong>生活例子（醫院急診分級）</strong>：</p>
+                <ul>
+                    <li>Severity 0、1：<strong>急救室病人</strong>（心跳停止、內出血，立刻處理）。</li>
+                    <li>Severity 6、7：<strong>健康檢查</strong>（量血壓、一般資訊）。</li>
+                </ul>
+                <p>題目要的是「必須立即採取行動 (Alert, 1)」與「系統無法使用 (Emergency, 0)」。</p>
+            </div>
+
+            <!-- Step 4: 選項分析 -->
+            <div class="explain-section" style="border-left-color: #e67e22;">
+                <h4>【第四步：選項分析】</h4>
+                <table class="syslog-table">
+                    <thead>
+                        <tr>
+                            <th>選項</th>
+                            <th>包含等級</th>
+                            <th>分析結果</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="target-row">
+                            <td>(A) ≤ 1</td>
+                            <td>0 (Emergency)<br>1 (Alert)</td>
+                            <td><strong>正確</strong>。完全符合題目描述的「最嚴重」狀況。</td>
+                        </tr>
+                        <tr>
+                            <td>(B) ≤ 3</td>
+                            <td>0 ~ 3</td>
+                            <td><strong>錯誤</strong>。包含了 Critical(2) 與 Error(3)，範圍太廣。</td>
+                        </tr>
+                        <tr>
+                            <td>(C) ≤ 5</td>
+                            <td>0 ~ 5</td>
+                            <td><strong>錯誤</strong>。連 Warning、Notice 都進來，雜訊太多。</td>
+                        </tr>
+                        <tr>
+                            <td>(D) ≤ 7</td>
+                            <td>0 ~ 7</td>
+                            <td><strong>錯誤</strong>。全部顯示，等於沒篩選。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 觀念補充與陷阱 -->
+            <div class="explain-section" style="border-left-color: #c0392b;">
+                <h4>【記憶口訣與陷阱】</h4>
+                <p><strong>📢 記憶口訣</strong>：<span class="highlight-text">「零一最慘，七最閒」</span></p>
+                <ul>
+                    <li><strong>0、1</strong>：最慘，立刻處理（Emergency / Alert）。</li>
+                    <li><strong>7</strong>：最閒，除錯用（Debug）。</li>
+                </ul>
+                <hr style="border-top: 1px dashed #ccc;">
+                <p><strong>⚠️ 常見陷阱（心理盲點）</strong>：</p>
+                <p>學生常以為「數字越大越嚴重」（像地震級數），但 Syslog <strong>相反</strong>。<br>
+                看到題目請默念：<span class="text-danger fw-bold">「小的是大事，大的是小事」</span>。</p>
+            </div>
+
+            <!-- 觸類旁通 -->
+            <div class="explain-section" style="border-left-color: #607d8b;">
+                <h4>【觸類旁通：舉一反三】</h4>
+                <ul>
+                    <li><strong>Q: SOC 例行監控畫面？</strong><br>Ans: 通常設為 Severity ≤ 3 或 4 (不漏掉 Error/Warning)。</li>
+                    <li><strong>Q: 除錯用日誌 (Debug)？</strong><br>Ans: Severity = 7。</li>
+                    <li><strong>Q: Severity vs Facility？</strong><br>Severity 是「多嚴重」，Facility 是「誰出事」（如 kernel, mail）。不要搞混。</li>
+                </ul>
+            </div>
+
+        </div>
+    </details>
+
+    <!-- 7. SelfCheck (Visible Questions, Hidden Answers) -->
+    <div class="self-check-container">
+        <div class="self-check-title"><i class="fas fa-tasks me-2"></i>自我檢測</div>
+        
+        <!-- Q1 -->
+        <div class="self-check-item">
+            <div class="self-check-question">Q1：如果 SOC 的例行監控畫面不希望漏掉任何 Error 等級以上的事件，篩選條件應設為？</div>
+            <details class="check-details">
+                <summary class="self-check-answer-toggle">👉 點擊查看答案</summary>
+                <div class="check-answer-box">
+                    參考答案：Severity ≤ 3 (包含 0, 1, 2, 3)
+                </div>
+            </details>
+        </div>
+
+        <!-- Q2 -->
+        <div class="self-check-item">
+            <div class="self-check-question">Q2：開發人員想要查看程式的詳細除錯資訊，應將 Log Level 設為？</div>
+            <details class="check-details">
+                <summary class="self-check-answer-toggle">👉 點擊查看答案</summary>
+                <div class="check-answer-box">
+                    參考答案：Severity = 7 (Debug)
+                </div>
+            </details>
+        </div>
+
+        <!-- Q3 -->
+        <div class="self-check-item">
+            <div class="self-check-question">Q3：為什麼 Severity ≤ 7 等於「沒篩選」？</div>
+            <details class="check-details">
+                <summary class="self-check-answer-toggle">👉 點擊查看答案</summary>
+                <div class="check-answer-box">
+                    參考答案：因為標準定義只有 0~7 級，≤ 7 代表包含所有可能的日誌等級。
+                </div>
+            </details>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    // 定義正確答案
+    const CORRECT_ANSWER = 'A';
+    
+    // DOM 元素引用
+    const submitBtn = document.getElementById('submitBtn');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const explainArea = document.getElementById('explainArea');
+    const statusBadge = document.getElementById('statusBadge');
+    const questionArea = document.getElementById('questionArea');
+    
+    // 選擇選項時的視覺處理
+    function selectOption(labelElement) {
+        // 如果已經禁用（已作答），則不動作
+        if (labelElement.classList.contains('disabled')) return;
+
+        // 移除其他選項的 selected 樣式
+        document.querySelectorAll('.option-label').forEach(el => {
+            el.classList.remove('selected');
+        });
+        
+        // 加上當前選項的 selected 樣式
+        labelElement.classList.add('selected');
+        
+        // 確保 radio 被選中
+        const radio = labelElement.querySelector('input[type="radio"]');
+        radio.checked = true;
+    }
+
+    // 檢查答案邏輯
+    function checkAnswer() {
+        const selectedOption = document.querySelector('input[name="quizOption"]:checked');
+        
+        // 防呆：未選答案
+        if (!selectedOption) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        const userAnswer = selectedOption.value;
+        const isCorrect = (userAnswer === CORRECT_ANSWER);
+        const allOptions = document.querySelectorAll('.option-label');
+        const inputs = document.querySelectorAll('input[name="quizOption"]');
+
+        // 1. 鎖定選項
+        allOptions.forEach(label => label.classList.add('disabled'));
+        inputs.forEach(input => input.disabled = true);
+
+        // 2. 更新 Header 狀態
+        if (isCorrect) {
+            statusBadge.textContent = '答對了 ✓';
+            statusBadge.className = 'status-badge correct';
+            
+            // 顯示正確回饋
+            feedbackArea.className = 'feedback-area success';
+            feedbackArea.innerHTML = `
+                <div class="feedback-title"><i class="fas fa-check-circle"></i> 答對了！</div>
+                <p>Severity 0 (Emergency) 與 1 (Alert) 正好代表「系統無法使用」與「必須立即處理」的最高嚴重事件。</p>
+            `;
+        } else {
+            statusBadge.textContent = '答錯了 ✗';
+            statusBadge.className = 'status-badge wrong';
+            
+            // 顯示錯誤回饋
+            feedbackArea.className = 'feedback-area error';
+            feedbackArea.innerHTML = `
+                <div class="feedback-title"><i class="fas fa-times-circle"></i> 答錯了</div>
+                <p>正確答案是 <strong>(A)</strong>。</p>
+                <p>原因：Syslog 數字越小越嚴重。題目要求「立即行動(1)」與「無法使用(0)」，故應篩選 Severity ≤ 1。</p>
+            `;
+        }
+        
+        feedbackArea.style.display = 'block';
+
+        // 3. 顯示詳解區
+        explainArea.style.display = 'block';
+        explainArea.open = true; // 自動展開詳解方便閱讀
+
+        // 4. 按鈕變更為重作
+        submitBtn.textContent = '重新作答';
+        submitBtn.className = 'btn-submit btn-retry';
+        submitBtn.onclick = resetQuiz; // 切換事件綁定
+    }
+
+    // 重新作答邏輯
+    function resetQuiz() {
+        // 1. 清空選項
+        const inputs = document.querySelectorAll('input[name="quizOption"]');
+        inputs.forEach(input => {
+            input.checked = false;
+            input.disabled = false;
+        });
+
+        // 2. 恢復選項樣式
+        const labels = document.querySelectorAll('.option-label');
+        labels.forEach(label => {
+            label.classList.remove('selected', 'disabled');
+        });
+
+        // 3. 隱藏回饋與詳解
+        feedbackArea.style.display = 'none';
+        explainArea.style.display = 'none';
+        explainArea.open = false; // 收合詳解
+        
+        // 4. 收合所有自我檢測答案
+        document.querySelectorAll('.check-details').forEach(el => el.open = false);
+
+        // 5. 重置 Header 狀態
+        statusBadge.textContent = '未作答';
+        statusBadge.className = 'status-badge';
+
+        // 6. 重置按鈕
+        submitBtn.textContent = '送出答案';
+        submitBtn.className = 'btn-submit';
+        submitBtn.onclick = checkAnswer; // 恢復事件綁定
+
+        // 7. 平滑捲動回題目區
+        questionArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+</script>
+
+</body>
+</html>

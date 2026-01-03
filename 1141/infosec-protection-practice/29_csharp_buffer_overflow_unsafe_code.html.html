@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 29 題｜C# 緩衝區溢位解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        .gradient-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        }
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .highlight-box {
+            border-left: 4px solid #3498db;
+            background-color: #eaf6ff;
+        }
+        .danger-box {
+            border-left: 4px solid #e74c3c;
+            background-color: #fdeaea;
+        }
+        .success-box {
+            border-left: 4px solid #2ecc71;
+            background-color: #e8f8f5;
+        }
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .option-item {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-item:hover {
+            background-color: #f8fafc;
+        }
+        .option-item.correct {
+            background-color: #d1fae5;
+            border-color: #10b981;
+        }
+        .option-item.wrong {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- Header -->
+    <header class="gradient-header text-white p-6 shadow-lg mb-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-white/20 px-3 py-1 rounded-full text-sm backdrop-blur-sm">資安防護實務</span>
+                <span class="bg-white/20 px-3 py-1 rounded-full text-sm backdrop-blur-sm">C# 源碼檢測</span>
+            </div>
+            <h1 class="text-3xl font-bold mb-2">第 29 題：緩衝區溢位與不安全代碼</h1>
+            <p class="text-blue-100 opacity-90"><i class="fas fa-search mr-2"></i>針對 C# 語言特性的記憶體安全漏洞分析</p>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 space-y-8">
+
+        <!-- 題目區塊 -->
+        <section class="bg-white rounded-xl shadow-md overflow-hidden p-6 md:p-8 card border-t-4 border-blue-500">
+            <h2 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-question-circle text-blue-500 mr-2"></i> 題目內容
+            </h2>
+            <p class="text-lg text-gray-800 font-medium mb-6 leading-relaxed">
+                29. 在 C# 源碼檢測中，下列何種方法最有可能引起緩衝區溢位（Buffer Overflow）？
+            </p>
+            
+            <div class="space-y-3" id="options-container">
+                <div class="option-item border-2 border-gray-100 rounded-lg p-4 flex items-start group" onclick="checkAnswer(this, false)">
+                    <span class="font-bold mr-3 text-gray-500 group-hover:text-blue-500">(A)</span>
+                    <span>使用 List&lt;T&gt; 類型的集合並頻繁添加元素</span>
+                </div>
+                <div class="option-item border-2 border-gray-100 rounded-lg p-4 flex items-start group" onclick="checkAnswer(this, false)">
+                    <span class="font-bold mr-3 text-gray-500 group-hover:text-blue-500">(B)</span>
+                    <span>在遞迴函數中未設置適當的退出條件</span>
+                </div>
+                <div class="option-item border-2 border-gray-100 rounded-lg p-4 flex items-start group" onclick="checkAnswer(this, true)">
+                    <span class="font-bold mr-3 text-gray-500 group-hover:text-blue-500">(C)</span>
+                    <span>使用不安全的程式模組並直接操作指標</span>
+                </div>
+                <div class="option-item border-2 border-gray-100 rounded-lg p-4 flex items-start group" onclick="checkAnswer(this, false)">
+                    <span class="font-bold mr-3 text-gray-500 group-hover:text-blue-500">(D)</span>
+                    <span>進行大量的非同步操作和多執行緒存取</span>
+                </div>
+            </div>
+
+            <div id="feedback-area" class="hidden mt-6 p-4 rounded-lg bg-gray-50">
+                <p id="feedback-text" class="font-bold"></p>
+                <button onclick="document.getElementById('analysis-section').scrollIntoView({behavior: 'smooth'})" class="mt-2 text-blue-600 underline text-sm hover:text-blue-800">
+                    查看詳細解析 <i class="fas fa-arrow-down"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- 解題三步驟 -->
+        <section id="analysis-section" class="grid md:grid-cols-3 gap-6">
+            <!-- 步驟一：找關鍵字 -->
+            <div class="bg-white rounded-xl shadow-md p-6 card">
+                <div class="flex items-center mb-4">
+                    <div class="step-number">1</div>
+                    <h3 class="font-bold text-lg">找關鍵字</h3>
+                </div>
+                <ul class="space-y-3 text-gray-600 text-sm">
+                    <li class="flex items-start">
+                        <i class="fas fa-tag text-blue-400 mt-1 mr-2"></i>
+                        <span><strong>C# 源碼檢測</strong>：<br>考的是程式碼層級的風險。</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-tag text-blue-400 mt-1 mr-2"></i>
+                        <span><strong>緩衝區溢位</strong>：<br>記憶體邊界被破壞。</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-tag text-blue-400 mt-1 mr-2"></i>
+                        <span><strong>最有可能</strong>：<br>尋找最貼近該弱點本質的選項。</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 步驟二：白話翻譯 -->
+            <div class="bg-white rounded-xl shadow-md p-6 card">
+                <div class="flex items-center mb-4">
+                    <div class="step-number">2</div>
+                    <h3 class="font-bold text-lg">白話翻譯</h3>
+                </div>
+                <p class="text-gray-600 text-sm leading-relaxed">
+                    用白話說就是：<br><br>
+                    在 C# 程式裡，哪一種寫法「最有可能」造成資料寫超過記憶體界線，導致記憶體被破壞？
+                </p>
+            </div>
+
+            <!-- 步驟三：解題思路 -->
+            <div class="bg-white rounded-xl shadow-md p-6 card">
+                <div class="flex items-center mb-4">
+                    <div class="step-number">3</div>
+                    <h3 class="font-bold text-lg">解題思路</h3>
+                </div>
+                <ol class="list-decimal pl-5 space-y-2 text-gray-600 text-sm">
+                    <li>C# 本身是「記憶體安全語言」(Managed)。</li>
+                    <li>找哪個選項「跳過了 C# 的安全保護」。</li>
+                    <li>那個跳過保護的選項，就是答案。</li>
+                </ol>
+                <div class="mt-4 p-2 bg-yellow-50 text-yellow-800 text-xs rounded border border-yellow-200">
+                    <strong>核心觀念：</strong><br>只要能自己碰記憶體，就有溢位風險。
+                </div>
+            </div>
+        </section>
+
+        <!-- 原理與生活例子 -->
+        <section class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="grid md:grid-cols-2">
+                <div class="p-8 border-b md:border-b-0 md:border-r border-gray-100">
+                    <h3 class="text-xl font-bold mb-4 text-blue-800"><i class="fas fa-book-open mr-2"></i>原理說明</h3>
+                    <div class="space-y-4">
+                        <div class="highlight-box p-4 rounded">
+                            <h4 class="font-bold text-blue-900 mb-1">受控語言 (Managed Language)</h4>
+                            <p class="text-sm text-blue-800">C# 預設是受控的。陣列邊界檢查、記憶體配置與回收（GC）都有 CLR (Common Language Runtime) 幫你管，很難發生溢位。</p>
+                        </div>
+                        <div class="danger-box p-4 rounded">
+                            <h4 class="font-bold text-red-900 mb-1">緩衝區溢位 (Buffer Overflow)</h4>
+                            <p class="text-sm text-red-800">通常發生在可以「直接操作記憶體位址」的情境。如果程式碼繞過了 CLR 的檢查，直接寫入記憶體，就可能寫過頭。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-8 bg-gray-50 flex flex-col justify-center">
+                    <h3 class="text-xl font-bold mb-4 text-gray-700"><i class="fas fa-lightbulb mr-2 text-yellow-500"></i>生活例子</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="bg-green-100 p-3 rounded-full mr-4 shrink-0">
+                                <i class="fas fa-shield-alt text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">一般 C# (Managed)</h4>
+                                <p class="text-sm text-gray-600">像是「有護欄的樓梯」，走錯腳步會被護欄擋住（拋出 Exception），不會摔死。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-red-100 p-3 rounded-full mr-4 shrink-0">
+                                <i class="fas fa-skull-crossbones text-red-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">Unsafe + Pointer</h4>
+                                <p class="text-sm text-gray-600">像是「自己把護欄拆掉」，雖然走得快一點（效能高），但一步踩空就直接摔下去（記憶體損毀）。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 選項深度分析 -->
+        <section class="bg-white rounded-xl shadow-md p-6 md:p-8 card">
+            <h3 class="text-xl font-bold mb-6 text-gray-800 border-b pb-2">選項深度分析</h3>
+            <div class="space-y-4">
+                <!-- Option A -->
+                <div class="flex flex-col md:flex-row gap-4 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div class="md:w-1/4 font-bold text-gray-500 flex items-center">
+                        <i class="fas fa-times-circle text-gray-400 mr-2"></i> (A) List&lt;T&gt;
+                    </div>
+                    <div class="md:w-3/4">
+                        <p class="text-gray-800 mb-1">使用 List&lt;T&gt; 類型的集合並頻繁添加元素</p>
+                        <p class="text-sm text-gray-500">List&lt;T&gt; 是 .NET 的安全集合，容量不足時會自動擴充，且有嚴格的邊界檢查，不會造成 Buffer Overflow。</p>
+                    </div>
+                </div>
+
+                <!-- Option B -->
+                <div class="flex flex-col md:flex-row gap-4 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div class="md:w-1/4 font-bold text-gray-500 flex items-center">
+                        <i class="fas fa-times-circle text-gray-400 mr-2"></i> (B) 遞迴無退出
+                    </div>
+                    <div class="md:w-3/4">
+                        <p class="text-gray-800 mb-1">在遞迴函數中未設置適當的退出條件</p>
+                        <p class="text-sm text-gray-500">這會造成 <span class="font-bold text-red-500">Stack Overflow (堆疊溢位)</span>，雖然名字像，但原理不同（是呼叫層數過多，而非寫入越界）。</p>
+                    </div>
+                </div>
+
+                <!-- Option C -->
+                <div class="flex flex-col md:flex-row gap-4 p-4 rounded-lg bg-green-50 border border-green-200 shadow-sm">
+                    <div class="md:w-1/4 font-bold text-green-700 flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i> (C) Unsafe/Pointer
+                    </div>
+                    <div class="md:w-3/4">
+                        <p class="text-gray-800 font-bold mb-1">使用不安全的程式模組並直接操作指標</p>
+                        <p class="text-sm text-green-800">使用 <code>unsafe</code> 關鍵字和指標 (Pointer) 會繞過 CLR 的記憶體安全機制。如果指標運算錯誤，就會直接寫入錯誤的記憶體位址，是 Buffer Overflow 的主要來源。</p>
+                    </div>
+                </div>
+
+                <!-- Option D -->
+                <div class="flex flex-col md:flex-row gap-4 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div class="md:w-1/4 font-bold text-gray-500 flex items-center">
+                        <i class="fas fa-times-circle text-gray-400 mr-2"></i> (D) 非同步/多執行緒
+                    </div>
+                    <div class="md:w-3/4">
+                        <p class="text-gray-800 mb-1">進行大量的非同步操作和多執行緒存取</p>
+                        <p class="text-sm text-gray-500">這容易導致 Race Condition (競爭條件) 或 Deadlock (死結)，與記憶體緩衝區溢位無直接必然關係。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 總結與記憶區 -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- 記憶口訣 -->
+            <section class="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl shadow-md p-6 text-white card">
+                <h3 class="text-xl font-bold mb-4"><i class="fas fa-magic mr-2"></i>記憶口訣</h3>
+                <div class="text-center py-6">
+                    <p class="text-2xl font-bold mb-2">「C# 會溢位，<br>八成是你自己拆護欄」</p>
+                    <div class="w-16 h-1 bg-white/30 mx-auto my-4 rounded"></div>
+                    <p class="text-indigo-100 text-sm">看到 <strong>unsafe</strong>、<strong>pointer</strong>、<strong>直接操作記憶體</strong></p>
+                    <p class="text-yellow-300 font-bold mt-2">→ 立刻聯想到 Buffer Overflow</p>
+                </div>
+            </section>
+
+            <!-- 自我檢測 -->
+            <section class="bg-white rounded-xl shadow-md p-6 card">
+                <h3 class="text-xl font-bold mb-4 text-gray-800"><i class="fas fa-clipboard-check mr-2 text-blue-500"></i>自我檢測</h3>
+                <div class="space-y-4">
+                    <details class="group bg-gray-50 rounded-lg">
+                        <summary class="list-none flex flex-wrap items-center cursor-pointer focus:outline-none p-4 font-medium text-gray-700">
+                            <span class="flex-1">1. 為什麼一般 C# 陣列不容易發生 Buffer Overflow？</span>
+                            <span class="ml-auto text-blue-500 group-open:rotate-180 transition-transform"><i class="fas fa-chevron-down"></i></span>
+                        </summary>
+                        <div class="p-4 pt-0 text-sm text-gray-600">
+                            因為有 CLR (Common Language Runtime) 進行嚴格的邊界檢查與記憶體管理。
+                        </div>
+                    </details>
+                    <details class="group bg-gray-50 rounded-lg">
+                        <summary class="list-none flex flex-wrap items-center cursor-pointer focus:outline-none p-4 font-medium text-gray-700">
+                            <span class="flex-1">2. Stack Overflow 與 Buffer Overflow 的差異？</span>
+                            <span class="ml-auto text-blue-500 group-open:rotate-180 transition-transform"><i class="fas fa-chevron-down"></i></span>
+                        </summary>
+                        <div class="p-4 pt-0 text-sm text-gray-600">
+                            Stack Overflow 是因為函式呼叫過深（如無限遞迴）導致堆疊空間耗盡；Buffer Overflow 是因為資料寫入超過了分配的記憶體邊界。
+                        </div>
+                    </details>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <footer class="max-w-4xl mx-auto mt-12 mb-8 text-center text-gray-400 text-sm">
+        <p>資安防護實務教學模組 © 2025</p>
+    </footer>
+
+    <script>
+        function checkAnswer(element, isCorrect) {
+            // 重置所有選項樣式
+            const options = document.querySelectorAll('.option-item');
+            options.forEach(opt => {
+                opt.classList.remove('correct', 'wrong', 'ring-2', 'ring-blue-500');
+                opt.querySelector('span:first-child').classList.remove('text-blue-500', 'text-red-500', 'text-green-500');
+            });
+
+            const feedbackArea = document.getElementById('feedback-area');
+            const feedbackText = document.getElementById('feedback-text');
+            const feedbackIcon = element.querySelector('i');
+
+            feedbackArea.classList.remove('hidden');
+
+            if (isCorrect) {
+                element.classList.add('correct', 'ring-2', 'ring-green-500');
+                element.querySelector('span:first-child').classList.add('text-green-600');
+                feedbackArea.classList.remove('bg-red-50', 'text-red-800');
+                feedbackArea.classList.add('bg-green-50', 'text-green-800');
+                feedbackText.innerHTML = '<i class="fas fa-check-circle mr-2"></i>回答正確！正是 (C)。';
+            } else {
+                element.classList.add('wrong', 'ring-2', 'ring-red-500');
+                element.querySelector('span:first-child').classList.add('text-red-600');
+                feedbackArea.classList.remove('bg-green-50', 'text-green-800');
+                feedbackArea.classList.add('bg-red-50', 'text-red-800');
+                feedbackText.innerHTML = '<i class="fas fa-times-circle mr-2"></i>回答錯誤，請再想一下「不安全代碼」的定義。';
+            }
+        }
+    </script>
+</body>
+</html>

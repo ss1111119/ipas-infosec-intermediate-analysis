@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安防護實務：蜜罐與欺敵技術</title>
+    <!-- 引入 Bootstrap 5 (CSS) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <!-- 引入 FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入 Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* 核心色彩系統 */
+            --body-bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #546e7a;
+            --primary-color: #2980b9;
+            --primary-hover: #1f618d;
+            --highlight-color: #f1c40f;
+            
+            /* 狀態色彩 */
+            --success-bg: #e8f5e9;
+            --success-border: #a5d6a7;
+            --success-text: #2e7d32;
+            
+            --error-bg: #fce4ec;
+            --error-border: #ef9a9a;
+            --error-text: #c62828;
+
+            /* 標籤色彩 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-bottom: 40px;
+        }
+
+        /* 容器規範 */
+        .page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        /* 行動版適配 */
+        @media (max-width: 768px) {
+            .page-container {
+                max-width: 100%;
+                margin: 16px;
+                padding: 24px;
+                border-radius: 12px;
+            }
+            h2 { font-size: 20px; }
+            h3 { font-size: 18px; }
+        }
+
+        /* 1. Header 區域 */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .status-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            background-color: #eceff1;
+            color: #78909c;
+        }
+        .status-badge.correct { background-color: var(--success-bg); color: var(--success-text); }
+        .status-badge.wrong { background-color: var(--error-bg); color: var(--error-text); }
+
+        /* 2. Context 區域 */
+        .context-card {
+            background-color: #f8f9fa;
+            border-left: 5px solid var(--text-secondary);
+            padding: 16px 20px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* 3. Question 區域 */
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .question-image-container {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .question-image {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* 選項樣式 */
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background-color: #fff;
+        }
+
+        .option-label:hover:not(.disabled) {
+            background-color: #e3f2fd;
+            border-color: #90caf9;
+            transform: translateY(-2px);
+        }
+
+        .option-label.selected {
+            background-color: #e3f2fd;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 1px var(--primary-color);
+        }
+
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+            background-color: #f9f9f9;
+        }
+        
+        /* 正確答案標示 (在詳解模式下) */
+        .option-label.correct-answer-highlight {
+            border-color: var(--success-text);
+            background-color: var(--success-bg);
+        }
+
+        .option-input {
+            margin-top: 5px;
+            margin-right: 12px;
+            accent-color: var(--primary-color);
+            transform: scale(1.2);
+        }
+
+        .option-text {
+            width: 100%;
+            word-break: break-word;
+        }
+
+        /* 4. Action 區域 */
+        .action-area {
+            margin-top: 32px;
+            text-align: center;
+        }
+
+        .btn-custom {
+            padding: 12px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+            min-width: 200px;
+        }
+
+        .btn-custom:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+        }
+
+        .btn-custom:active {
+            transform: translateY(0);
+        }
+
+        .btn-custom:disabled {
+            background-color: #b0bec5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-reset {
+            background-color: #607d8b;
+        }
+        .btn-reset:hover {
+            background-color: #455a64;
+        }
+
+        /* 5. Feedback 區域 */
+        .feedback-card {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .feedback-success {
+            background-color: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: var(--success-text);
+        }
+
+        .feedback-error {
+            background-color: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: var(--error-text);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 6. Explain 區域 */
+        .explain-area {
+            margin-top: 24px;
+            display: none; /* 初始隱藏 */
+        }
+
+        details {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+
+        details[open] {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-color: #b0bec5;
+        }
+
+        summary {
+            padding: 16px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-primary);
+            background-color: #fafafa;
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '\f078'; /* FontAwesome chevron-down */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        .explain-content {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            background-color: #fff;
+        }
+
+        /* 解析小卡片 */
+        .explain-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .explain-section h4 {
+            font-size: 1rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explain-section h5 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #455a64;
+            margin-top: 12px;
+            margin-bottom: 4px;
+        }
+
+        .explain-section p, .explain-section li {
+            font-size: 0.95rem;
+            color: #37474f;
+        }
+
+        /* 7. SelfCheck 區域 */
+        .self-check-area {
+            margin-top: 24px;
+        }
+        
+        .self-check-content {
+            padding: 20px;
+            background-color: #f1f8e9; /* 淺綠色背景區隔 */
+        }
+        
+        .self-check-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #c8e6c9;
+        }
+
+        /* 標籤樣式 */
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.8rem;
+            margin-right: 6px;
+            font-weight: 500;
+            vertical-align: middle;
+        }
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        mark {
+            background-color: var(--highlight-color);
+            color: #000;
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+        
+        /* 隱藏/顯示答案的細節 */
+        details.answer-reveal summary {
+            background-color: transparent;
+            padding: 4px 0;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            border-top: none;
+        }
+        details.answer-reveal summary::after {
+            content: none;
+        }
+        details.answer-reveal summary:hover {
+            text-decoration: underline;
+        }
+        details.answer-reveal[open] summary {
+            display: none;
+        }
+        .answer-content {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            color: #2e7d32;
+            font-weight: 500;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    
+    <!-- 1. Header -->
+    <div class="quiz-header" id="header-area">
+        <div>
+            <span class="tag tag-sec">偵測技術</span>
+            <span class="tag tag-net">網路防禦</span>
+            <span style="font-weight: 700; color: #546e7a;">Q-SEC-039</span>
+        </div>
+        <div id="status-badge" class="status-badge">未作答</div>
+    </div>
+
+    <!-- 2. Context -->
+    <div class="context-card" id="context-area">
+        <i class="fas fa-info-circle me-2"></i><strong>情境：</strong>企業為了偵測、吸引與分析網路攻擊，並達成提前預警，部署了誘餌環境。
+    </div>
+
+    <!-- 3. Question -->
+    <div id="question-area">
+        <div class="question-image-container">
+            <img src="https://i.meee.com.tw/VGCQir6.png" alt="誘餌環境架構圖" class="question-image" loading="lazy" onerror="this.style.display='none'; document.getElementById('img-fallback').style.display='block';">
+            <p id="img-fallback" style="display:none; color:#777; font-size:0.9rem; margin-top:8px;">(圖片載入失敗，請參考題目敘述)</p>
+        </div>
+        
+        <p class="question-text">
+            <span class="badge bg-secondary mb-2">單選題</span><br>
+            關於誘餌環境（Decoys Environment，或稱蜜罐 Honeypot）的相關敘述，下列何者<mark>「最不正確」</mark>？
+        </p>
+
+        <div class="option-group" id="options-container">
+            <!-- Options will be rendered by JS -->
+        </div>
+    </div>
+
+    <!-- 4. Action Area -->
+    <div class="action-area" id="action-area">
+        <button class="btn-custom" id="submit-btn" onclick="checkAnswer()">送出答案</button>
+    </div>
+
+    <!-- 5. Feedback -->
+    <div class="feedback-card" id="feedback-area">
+        <!-- Content injected by JS -->
+    </div>
+
+    <!-- 6. Explain -->
+    <div class="explain-area" id="explain-area">
+        <details>
+            <summary>
+                <span><i class="fas fa-book-open me-2"></i> 查看詳細解析</span>
+            </summary>
+            <div class="explain-content">
+                
+                <!-- Step 1: 找關鍵字 -->
+                <div class="explain-section" style="border-left-color: #c0392b;">
+                    <h4><i class="fas fa-key"></i> 第一步：找關鍵字</h4>
+                    <ul>
+                        <li><strong>誘餌環境 / 蜜罐 (Honeypot)</strong>：本題主角，考「資安欺敵與偵測技術」。</li>
+                        <li><strong>整合式 / 連接式 / 獨立式</strong>：考「不同部署方式的風險與能力差異」。</li>
+                        <li><strong>最不正確</strong>：尋找一個說法「太過理想化」或「過度保證」的選項。</li>
+                    </ul>
+                </div>
+
+                <!-- Step 2: 白話翻譯 -->
+                <div class="explain-section" style="border-left-color: #2980b9;">
+                    <h4><i class="fas fa-language"></i> 第二步：白話翻譯</h4>
+                    <p>蜜罐是用來「故意騙駭客」的假系統，不同架構風險不同。請找出哪一個說法把蜜罐講得<strong>太神、太安全、太萬能</strong>，因此是錯的。</p>
+                </div>
+
+                <!-- Step 3: 解題思路 (NEW) -->
+                <div class="explain-section" style="border-left-color: #8e44ad;">
+                    <h4><i class="fas fa-brain"></i> 第三步：解題思路</h4>
+                    <h5>解題步驟</h5>
+                    <p>先確認每個選項有沒有「過度保證安全或效果」。看到「可完整偵測」、「可識別零日漏洞」要特別警覺。</p>
+                    <h5>原理與規則</h5>
+                    <p>資安考試原則：沒有任何機制是「完整」或「保證」的。</p>
+                    <h5>生活例子</h5>
+                    <p>蜜罐像是<strong>「釣魚用的假餌」</strong>。假餌能吸引魚，但不代表所有魚都會來吃，更不代表用了假餌就能抓光池塘裡所有的魚。</p>
+                </div>
+
+                <!-- Step 4: 選項分析 -->
+                <div class="explain-section" style="border-left-color: #f1c40f;">
+                    <h4><i class="fas fa-list-ul"></i> 第四步：選項分析</h4>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li class="mb-3">
+                            <strong>(A) 正確：</strong> 誘餌本來就是假的（仿真）數位物件，如假文件、假帳號，目的是欺騙。
+                        </li>
+                        <li class="mb-3">
+                            <strong>(B) 正確：</strong> 「整合式蜜網」放在生產環境內，雖然真實度高，但若被攻破，攻擊者確實可能竊聽生產環境的流量，風險較高。
+                        </li>
+                        <li class="mb-3 p-2 bg-light border rounded">
+                            <strong style="color: #c62828;">(C) 錯誤（本題答案）：</strong> <br>
+                            錯在<strong>「可完整偵測」</strong>與<strong>「識別零日漏洞」</strong>。蜜罐只能偵測「針對該蜜罐」的行為，無法保證「完整」偵測所有新攻擊。
+                        </li>
+                        <li>
+                            <strong>(D) 正確：</strong> 「獨立式蜜網」與生產環境隔離，就算被攻破也只壞在沙箱裡，不影響正式系統，因此風險相對最低。
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Extension (NEW) -->
+                <div class="explain-section" style="border-left-color: #27ae60;">
+                    <h4><i class="fas fa-project-diagram"></i> 觀念補充與延伸</h4>
+                    <h5>法條或定義（白話）</h5>
+                    <p><strong>Honeypot（蜜罐）</strong>：單一的誘捕系統。<br><strong>Honeynet（蜜網）</strong>：多個蜜罐組成的誘捕網路環境。</p>
+                    <h5>觸類旁通（舉一反三）</h5>
+                    <p><strong>對比概念：</strong>蜜罐偏向「偵測與分析」；防火牆 / WAF 偏向「阻擋與防禦」。<br><strong>變化題型：</strong>若問「哪一種蜜網風險最低」？選獨立式。若問「哪一種最貼近真實攻擊」？選整合式。</p>
+                </div>
+
+                <!-- Traps (NEW) -->
+                <div class="explain-section" style="border-left-color: #d35400;">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 常見陷阱</h4>
+                    <h5>心理盲點</h5>
+                    <p>容易被「零日漏洞」四個字嚇到，以為功能寫得很高級就是對的。</p>
+                    <h5>避坑指南</h5>
+                    <p>考試看到這些絕對詞彙要小心：<strong>完整、完全、保證、一定</strong>，在資安領域中通常是錯誤選項。</p>
+                </div>
+
+                <!-- Mnemonic -->
+                <div class="explain-section" style="border-left-color: #7f8c8d;">
+                    <h4><i class="fas fa-feather-alt"></i> 記憶口訣</h4>
+                    <p>「蜜罐能釣魚，但不能保證全釣到。」看到<strong>「完整偵測」、「完全防護」</strong>，九成是錯的。</p>
+                </div>
+
+            </div>
+        </details>
+    </div>
+
+    <!-- 7. Self Check -->
+    <div class="self-check-area" id="self-check-area">
+        <details>
+            <summary>
+                <span><i class="fas fa-clipboard-check me-2"></i> 自我檢測</span>
+            </summary>
+            <div class="self-check-content">
+                
+                <div class="self-check-item">
+                    <p class="mb-1 fw-bold">Q1：為什麼獨立式蜜網 (Standalone) 風險最低？</p>
+                    <details class="answer-reveal">
+                        <summary><i class="fas fa-eye me-1"></i> 顯示答案</summary>
+                        <div class="answer-content">因為它不連接正式生產系統，攻擊影響被隔離在獨立環境中。</div>
+                    </details>
+                </div>
+
+                <div class="self-check-item">
+                    <p class="mb-1 fw-bold">Q2：蜜罐能不能取代防火牆？</p>
+                    <details class="answer-reveal">
+                        <summary><i class="fas fa-eye me-1"></i> 顯示答案</summary>
+                        <div class="answer-content">不能。蜜罐是「誘捕與偵測」，防火牆是「阻擋與防禦」，角色不同。</div>
+                    </details>
+                </div>
+
+                <div class="self-check-item">
+                    <p class="mb-1 fw-bold">Q3：如果題目問「最貼近真實攻擊行為」的蜜網會選哪種？</p>
+                    <details class="answer-reveal">
+                        <summary><i class="fas fa-eye me-1"></i> 顯示答案</summary>
+                        <div class="answer-content">通常是「整合式」或「連接式」，因為它們與真實環境有互動，較能誘騙高階駭客。</div>
+                    </details>
+                </div>
+
+            </div>
+        </details>
+    </div>
+
+</div>
+
+<script>
+    // 題目資料設定
+    const quizData = {
+        id: "Q-SEC-039",
+        correctAnswer: "C",
+        options: [
+            { id: "A", text: "誘餌（Decoys）是一種仿真的數位人造物、物件或現象，旨在欺騙攻擊者的監控設備或誤導其評估。例如：假的文件、帳戶、主機和網段等" },
+            { id: "B", text: "整合式蜜網（Integrated Honeynet）於生產環境中設置誘餌以吸引攻擊者互動，但攻擊者有機會利用其位置進行網路流量竊聽" },
+            { id: "C", text: "連接式蜜網（Connected Honeynet）連接到生產環境的誘餌服務、系統或環境，模擬特定功能而不暴露系統完全存取權，可完整偵測新攻擊模式與識別零日漏洞攻擊" },
+            { id: "D", text: "獨立式蜜網（Standalone Honeynet）為吸引攻擊者並引出其行為而創建的環境，該環境不連接到任何生產系統，相較於整合式蜜網與連接式蜜網的風險更低" }
+        ]
+    };
+
+    // DOM 元素引用
+    const optionsContainer = document.getElementById('options-container');
+    const submitBtn = document.getElementById('submit-btn');
+    const feedbackArea = document.getElementById('feedback-area');
+    const statusBadge = document.getElementById('status-badge');
+    const explainArea = document.getElementById('explain-area');
+    const selfCheckArea = document.getElementById('self-check-area');
+    const questionArea = document.getElementById('question-area');
+
+    // 初始化題目
+    function initQuiz() {
+        optionsContainer.innerHTML = '';
+        quizData.options.forEach(opt => {
+            const label = document.createElement('label');
+            label.className = 'option-label';
+            label.innerHTML = `
+                <input type="radio" name="quizOption" value="${opt.id}" class="option-input">
+                <span class="option-text"><strong>(${opt.id})</strong> ${opt.text}</span>
+            `;
+            // 選項點擊互動效果
+            label.addEventListener('click', () => {
+                if (submitBtn.disabled) return; // 已作答後不可選
+                // 移除其他 highlight
+                document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+                label.classList.add('selected');
+                // 選中 radio
+                const radio = label.querySelector('input');
+                radio.checked = true;
+            });
+            optionsContainer.appendChild(label);
+        });
+    }
+
+    // 檢查答案邏輯
+    function checkAnswer() {
+        // 1. 獲取使用者選擇
+        const selectedOption = document.querySelector('input[name="quizOption"]:checked');
+        
+        // 2. 防呆機制
+        if (!selectedOption) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        const userVal = selectedOption.value;
+        const isCorrect = userVal === quizData.correctAnswer;
+
+        // 3. 鎖定介面
+        document.querySelectorAll('.option-input').forEach(el => el.disabled = true);
+        document.querySelectorAll('.option-label').forEach(el => el.classList.add('disabled'));
+        submitBtn.textContent = '重新作答';
+        submitBtn.className = 'btn-custom btn-reset';
+        submitBtn.onclick = resetQuiz;
+
+        // 4. 顯示回饋
+        feedbackArea.style.display = 'block';
+        if (isCorrect) {
+            feedbackArea.className = 'feedback-card feedback-success';
+            feedbackArea.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-check-circle fa-2x me-3"></i>
+                    <div>
+                        <h5 class="fw-bold mb-1">答對了！</h5>
+                        <p class="mb-0">觀念正確。蜜罐無法保證「完整偵測」或「識別所有零日漏洞」，選項 (C) 過度誇大其能力。</p>
+                    </div>
+                </div>
+            `;
+            statusBadge.textContent = '答對 (✓)';
+            statusBadge.className = 'status-badge correct';
+        } else {
+            feedbackArea.className = 'feedback-card feedback-error';
+            feedbackArea.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-times-circle fa-2x me-3"></i>
+                    <div>
+                        <h5 class="fw-bold mb-1">答錯了</h5>
+                        <p class="mb-0">正確答案是 <strong>(${quizData.correctAnswer})</strong>。<br>理由：選項 (C) 聲稱可以「完整偵測」並識別零日漏洞，這是過度理想化的說法，資安實務上沒有絕對保證。</p>
+                    </div>
+                </div>
+            `;
+            statusBadge.textContent = '答錯 (✗)';
+            statusBadge.className = 'status-badge wrong';
+            
+            // 標記正確答案
+            const correctInput = document.querySelector(`input[value="${quizData.correctAnswer}"]`);
+            if(correctInput) {
+                correctInput.closest('.option-label').classList.add('correct-answer-highlight');
+            }
+        }
+
+        // 5. 顯示詳解與自我檢測
+        explainArea.style.display = 'block';
+        // 自動展開詳解 (可選，依偏好)
+        const details = explainArea.querySelector('details');
+        if(details) details.open = true;
+
+        // 滾動到回饋區
+        feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // 重置邏輯
+    function resetQuiz() {
+        // 1. 清空選項狀態
+        initQuiz();
+        
+        // 2. 隱藏回饋與詳解
+        feedbackArea.style.display = 'none';
+        explainArea.style.display = 'none';
+        const details = explainArea.querySelector('details');
+        if(details) details.open = false; // 收合詳解
+        
+        const selfCheckDetails = selfCheckArea.querySelector('details');
+        if(selfCheckDetails) selfCheckDetails.open = false; // 收合自我檢測
+
+        // 3. 重置 Header 狀態
+        statusBadge.textContent = '未作答';
+        statusBadge.className = 'status-badge';
+
+        // 4. 重置按鈕
+        submitBtn.textContent = '送出答案';
+        submitBtn.className = 'btn-custom';
+        submitBtn.disabled = false;
+        submitBtn.onclick = checkAnswer;
+
+        // 5. 滾動回頂端
+        questionArea.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 啟動
+    window.addEventListener('DOMContentLoaded', initQuiz);
+
+</script>
+
+</body>
+</html>

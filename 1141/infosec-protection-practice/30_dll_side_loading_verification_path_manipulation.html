@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 30 題｜DLL Side Loading 漏洞驗證</title>
+    <!-- 外部資源：Bootstrap 5, FontAwesome, Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* 認知友善配色系統 */
+            --body-bg: #f4f7f6;       /* 冷灰調背景 */
+            --card-bg: #ffffff;       /* 卡片底色 */
+            --text-primary: #2c3e50;  /* 深藍灰文字 */
+            --primary-color: #2980b9; /* 主要藍色 */
+            --primary-hover: #21618c;
+            --highlight: #f1c40f;     /* 記憶黃標記 */
+            --success-bg: #e8f5e9;    /* 正確背景 */
+            --success-text: #2e7d32;  /* 正確文字 */
+            --success-border: #a5d6a7;
+            --error-bg: #fce4ec;      /* 錯誤背景 */
+            --error-text: #c62828;    /* 錯誤文字 */
+            --error-border: #ef9a9a;
+            --gray-light: #f8f9fa;
+        }
+
+        /* 標籤色彩規範 */
+        .tag-law { background-color: #607d8b; color: white; }
+        .tag-iso { background-color: #27ae60; color: white; }
+        .tag-zt  { background-color: #8e44ad; color: white; }
+        .tag-net { background-color: #2980b9; color: white; }
+        .tag-sec { background-color: #c0392b; color: white; } /* 本題主要使用：技術 */
+        .tag-mgm { background-color: #d35400; color: white; }
+
+        body {
+            background-color: var(--body-bg);
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* 版型容器 */
+        .page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            position: relative;
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 16px;
+                padding: 20px;
+                border-radius: 12px;
+            }
+            h2 { font-size: 20px; }
+            h3 { font-size: 18px; }
+        }
+
+        /* 元件樣式 */
+        h2 {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background-color: #e0e0e0;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* 情境卡 */
+        .context-card {
+            background-color: #eef2f3;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+        }
+
+        .context-list li {
+            margin-bottom: 8px;
+        }
+
+        /* 選項互動 */
+        .option-label {
+            display: block;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-label:hover {
+            background-color: #e3f2fd;
+            border-color: #90caf9;
+            transform: translateY(-2px);
+        }
+
+        .option-input:checked + .option-label {
+            background-color: #bbdefb;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 1px var(--primary-color);
+        }
+
+        .option-input:disabled + .option-label {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-input:disabled + .option-label:hover {
+            transform: none;
+            background-color: inherit;
+        }
+
+        .option-input {
+            display: none;
+        }
+
+        /* 按鈕樣式 */
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 10px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .btn-action:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(41,128,185,0.3);
+        }
+
+        .btn-action:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary-action {
+            background-color: #7f8c8d;
+        }
+        .btn-secondary-action:hover {
+            background-color: #616a6b;
+        }
+
+        /* 回饋區域動畫 */
+        .feedback-area {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .feedback-success {
+            background-color: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: var(--success-text);
+        }
+
+        .feedback-error {
+            background-color: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: var(--error-text);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 解析區塊 */
+        .explain-area {
+            margin-top: 30px;
+            display: none; /* 初始隱藏 */
+        }
+        
+        .explain-area > summary {
+            font-weight: 700;
+            cursor: pointer;
+            padding: 15px;
+            background-color: #f1f2f6;
+            border-radius: 8px;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .explain-area > summary::after {
+            content: '\f078';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+        
+        .explain-area[open] > summary::after {
+            transform: rotate(180deg);
+        }
+
+        .explain-content {
+            padding: 0 5px;
+        }
+
+        .explain-section {
+            background-color: var(--gray-light);
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .explain-section h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 重點標記 */
+        mark {
+            background-color: var(--highlight);
+            padding: 0 4px;
+            border-radius: 2px;
+            color: var(--text-primary);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        /* 自我檢測 (新設計) */
+        .self-check-container {
+            margin-top: 30px;
+            border: 2px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            background-color: #fffcf5;
+        }
+
+        .self-check-title {
+            font-weight: 700;
+            color: #d35400;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qa-item {
+            margin-bottom: 15px;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .qa-question {
+            padding: 15px;
+            font-weight: 600;
+            color: #444;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            list-style: none; /* Remove default marker */
+        }
+        
+        .qa-question::after {
+            content: '看答案';
+            font-size: 0.8rem;
+            background-color: #e0e0e0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #555;
+        }
+
+        details[open] .qa-question::after {
+            content: '收起';
+            background-color: #eee;
+        }
+
+        .qa-answer {
+            padding: 15px;
+            background-color: #fff3e0;
+            color: #d35400;
+            border-top: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <!-- 1. Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <span class="badge bg-primary rounded-pill">第 30 題</span>
+                DLL Side Loading 漏洞驗證
+            </h2>
+            <span class="status-badge" id="statusBadge">未作答</span>
+        </div>
+
+        <!-- 2. Context -->
+        <div class="context-card">
+            <h3 class="section-title"><i class="fas fa-search me-2"></i>情境描述</h3>
+            <p>滲透測試中發現 <strong>ExampleApp.exe</strong> 疑似存在 <span class="tag tag-sec">DLL Side Loading</span> 漏洞。已知行為與條件如下：</p>
+            <ul class="context-list">
+                <li><i class="fas fa-check-circle text-success me-2"></i><strong>載入行為：</strong>啟動時會自動載入 <code>ExampleLib.dll</code>。</li>
+                <li><i class="fas fa-list-ol text-primary me-2"></i><strong>搜尋順序：</strong>
+                    <ol class="ms-4 mb-2">
+                        <li>應用程式執行目錄</li>
+                        <li><code>C:\Windows\System32</code> (系統目錄)</li>
+                        <li><strong>環境變數 PATH</strong> 指定的路徑</li>
+                    </ol>
+                </li>
+                <li><i class="fas fa-unlock-alt text-danger me-2"></i><strong>權限條件：</strong>攻擊者僅能寫入 <code>C:\Temp\</code> 底下的資料夾。</li>
+            </ul>
+        </div>
+
+        <!-- 3. Question -->
+        <div class="question-area" id="questionArea">
+            <h4 class="mb-3 fw-bold">下面何項行為，最有可能成功驗證該程式存在 DLL Side Loading 漏洞？</h4>
+            
+            <div class="options-group">
+                <!-- Option A -->
+                <input type="radio" name="quizOption" id="optA" class="option-input" value="A">
+                <label class="option-label" for="optA">
+                    <span class="fw-bold me-2">(A)</span> 在 <code>C:\Windows\System32\</code> 資料夾放置惡意 <code>ExampleLib.dll</code>，觀察是否被載入
+                </label>
+
+                <!-- Option B -->
+                <input type="radio" name="quizOption" id="optB" class="option-input" value="B">
+                <label class="option-label" for="optB">
+                    <span class="fw-bold me-2">(B)</span> 在 <code>C:\Temp\</code> 資料夾放置惡意 <code>ExampleLib.dll</code>，並修改環境變數 PATH 指向該路徑
+                </label>
+
+                <!-- Option C -->
+                <input type="radio" name="quizOption" id="optC" class="option-input" value="C">
+                <label class="option-label" for="optC">
+                    <span class="fw-bold me-2">(C)</span> 在 <code>C:\ProgramFiles\ExampleApp\</code> 資料夾放置惡意 <code>ExampleLib.dll</code>，並檢查是否覆蓋合法 DLL
+                </label>
+
+                <!-- Option D -->
+                <input type="radio" name="quizOption" id="optD" class="option-input" value="D">
+                <label class="option-label" for="optD">
+                    <span class="fw-bold me-2">(D)</span> 在 <code>C:\Temp\</code> 資料夾放置惡意 <code>ExampleLib.dll</code>，觀察是否被載入（不修改 PATH）
+                </label>
+            </div>
+        </div>
+
+        <!-- 4. Action Area -->
+        <button id="submitBtn" class="btn-action" onclick="checkAnswer()">送出答案</button>
+
+        <!-- 5. Feedback (Hidden by default) -->
+        <div id="feedbackArea" class="feedback-area">
+            <!-- JS will inject content here -->
+        </div>
+
+        <!-- 6. Explain (Hidden by default) -->
+        <details id="explainArea" class="explain-area">
+            <summary>查看完整詳解與觀念剖析</summary>
+            <div class="explain-content">
+                
+                <!-- 1. 找關鍵字 -->
+                <div class="explain-section" style="border-left-color: #f1c40f;">
+                    <h4><i class="fas fa-key"></i> 第一步：找關鍵字</h4>
+                    <ul>
+                        <li><mark>DLL Side Loading 漏洞</mark></li>
+                        <li><mark>DLL 搜尋順序 (1 → 2 → 3)</mark></li>
+                        <li><mark>C:\Temp 可寫入</mark></li>
+                        <li>驗證漏洞是否存在</li>
+                    </ul>
+                </div>
+
+                <!-- 2. 白話翻譯 -->
+                <div class="explain-section" style="border-left-color: #3498db;">
+                    <h4><i class="fas fa-language"></i> 第二步：白話翻譯</h4>
+                    <p>
+                        這個程式在啟動時，會照順序找 DLL。駭客只能在 <code>C:\Temp\</code> 放檔案，那要怎麼做，才能讓程式「真的去載入」駭客放的假 DLL，藉此證明它有漏洞？
+                    </p>
+                </div>
+
+                <!-- 3. 解題思路 -->
+                <div class="explain-section" style="border-left-color: #9b59b6;">
+                    <h4><i class="fas fa-lightbulb"></i> 第三步：解題思路</h4>
+                    <p><strong>這題在考：DLL Side Loading 的「搜尋順序」與「可控路徑」。</strong></p>
+                    <ol>
+                        <li><strong>對照順序：</strong>程式目錄 → System32 → PATH。</li>
+                        <li><strong>檢查權限：</strong>攻擊者只能寫入 C:\Temp。</li>
+                        <li><strong>選出策略：</strong>必須選一個「既符合搜尋順序，又可被攻擊者控制」的做法。</li>
+                    </ol>
+                </div>
+
+                <!-- 4. 原理與規則 -->
+                <div class="explain-section" style="border-left-color: #e67e22;">
+                    <h4><i class="fas fa-book"></i> 原理與規則</h4>
+                    <p>
+                        Windows 載入 DLL 時，若未指定完整路徑，會照固定順序找檔案。只要攻擊者能在「搜尋順序內的路徑」放 DLL，又能讓程式優先找到該 DLL（或者原本那個位置沒有 DLL），就可能觸發 Side Loading。
+                    </p>
+                </div>
+
+                <!-- 5. 生活例子 -->
+                <div class="explain-section" style="border-left-color: #1abc9c;">
+                    <h4><i class="fas fa-coffee"></i> 生活例子</h4>
+                    <p>
+                        就像你出門找鑰匙，習慣順序是：<strong>桌上 → 抽屜 → 包包</strong>。
+                        <br>攻擊者（小偷）進不了你家（桌上、抽屜），但可以偷偷把假鑰匙放進你隨身帶的<strong>包包（PATH）</strong>。當你在前兩個地方找不到時，就會用到包包裡的假鑰匙。
+                    </p>
+                </div>
+
+                <!-- 6. 選項分析 -->
+                <div class="explain-section" style="border-left-color: #2c3e50;">
+                    <h4><i class="fas fa-check-double"></i> 第四步：選項分析</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <span class="text-danger fw-bold"><i class="fas fa-times"></i> (A) System32</span><br>
+                            錯。System32 需要系統管理員權限，一般攻擊者無法寫入。
+                        </li>
+                        <li class="mb-3">
+                            <span class="text-success fw-bold"><i class="fas fa-check"></i> (B) Temp + 修改 PATH</span><br>
+                            <strong>正確。</strong>C:\Temp 可寫入，且 PATH 在搜尋順序中。修改 PATH 後，程式就會去那裡找檔案。
+                        </li>
+                        <li class="mb-3">
+                            <span class="text-danger fw-bold"><i class="fas fa-times"></i> (C) 程式安裝目錄</span><br>
+                            錯。這通常也需要高權限，題目未提供可寫入條件。
+                        </li>
+                        <li class="mb-3">
+                            <span class="text-danger fw-bold"><i class="fas fa-times"></i> (D) 僅放 Temp</span><br>
+                            錯。若不把 C:\Temp 加入 PATH，它根本不在搜尋名單內，程式不會去那裡找。
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 7. 觀念補充與延伸 -->
+                <div class="explain-section" style="border-left-color: #8e44ad;">
+                    <h4><i class="fas fa-plus-circle"></i> 觀念補充與延伸</h4>
+                    <p><strong>科目定位：</strong>資安防護實務 → 惡意程式與系統弱點。</p>
+                    <p>這類題型是高頻情境題，通常綁定「搜尋順序」一起考。</p>
+                </div>
+
+                <!-- 8. 法條或定義 -->
+                <div class="explain-section" style="border-left-color: #7f8c8d;">
+                    <h4><i class="fas fa-balance-scale"></i> 定義（白話）</h4>
+                    <p><strong>DLL Side Loading：</strong>應用程式載入 DLL 時，因為沒有講清楚完整路徑（例如只說要載入 "lib.dll" 而沒說 "C:\App\lib.dll"），導致被攻擊者放置在搜尋路徑上的惡意 DLL 搶先載入。</p>
+                </div>
+
+                <!-- 9. 觸類旁通 -->
+                <div class="explain-section" style="border-left-color: #2980b9;">
+                    <h4><i class="fas fa-random"></i> 觸類旁通（舉一反三）</h4>
+                    <ul>
+                        <li><strong>對比概念：</strong>DLL Hijacking（劫持） vs DLL Side Loading（側載）。兩者原理相似，都是利用載入順序。</li>
+                        <li><strong>變化題型：</strong>如果題目說「目前工作目錄（Current Directory）」也在搜尋順序中，那攻擊者只要讓使用者在惡意資料夾執行程式即可。</li>
+                    </ul>
+                </div>
+
+                <!-- 10. 常見陷阱 -->
+                <div class="explain-section" style="border-left-color: #c0392b; background-color: #fdf2f2;">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 常見陷阱 & 避坑指南</h4>
+                    <ul>
+                        <li><strong>學生誤區：</strong>以為只要把 DLL 放在任意資料夾（如 C:\Temp）程式就會自己找到。
+                            <br><span class="text-muted">→ <i class="fas fa-arrow-right"></i> 錯！程式只會找「清單上」的地方。</span>
+                        </li>
+                        <li><strong>心理盲點：</strong>容易忽略 PATH 環境變數也是搜尋順序的一部分。</li>
+                        <li><strong>避坑指南：</strong>解題時先畫出搜尋順序 1-2-3，再把攻擊者能去的地方圈起來，看兩者有沒有交集。</li>
+                    </ul>
+                </div>
+
+                <!-- 11. 記憶口訣 -->
+                <div class="explain-section" style="border-left-color: #d35400; background-color: #fff3e0;">
+                    <h4><i class="fas fa-brain"></i> 記憶口訣</h4>
+                    <p class="mb-0 fw-bold fs-5 text-center">「DLL 會被偷，順序最重要；<br>找得到、放得進，就可能被載入。」</p>
+                </div>
+
+            </div>
+        </details>
+
+        <!-- 7. Self Check (Visible Questions, Hidden Answers) -->
+        <div class="self-check-container" id="selfCheckSection" style="display:none;">
+            <div class="self-check-title">
+                <i class="fas fa-clipboard-check fa-lg"></i>
+                <h4 class="mb-0">自我檢測：延伸思考</h4>
+            </div>
+            
+            <!-- Q1 -->
+            <details class="qa-item">
+                <summary class="qa-question">
+                    1. 如果 C:\Temp 已在 PATH 中，還需要修改 PATH 嗎？
+                </summary>
+                <div class="qa-answer">
+                    <strong>不需要。</strong><br>
+                    若路徑已在 PATH 中，攻擊者直接放置檔案即可被程式搜尋到。這也是為什麼重要系統不應將 Temp 目錄放入 PATH 的原因。
+                </div>
+            </details>
+
+            <!-- Q2 -->
+            <details class="qa-item">
+                <summary class="qa-question">
+                    2. 為什麼 System32 放 DLL 不適合作為驗證手法？
+                </summary>
+                <div class="qa-answer">
+                    因為 System32 目錄受到嚴格保護，通常需要<strong>系統管理員（Administrator）</strong>權限才能寫入，不符合一般外部攻擊者或低權限惡意程式的情境。
+                </div>
+            </details>
+
+            <!-- Q3 -->
+            <details class="qa-item">
+                <summary class="qa-question">
+                    3. 若程式明確使用「完整 DLL 路徑」，是否仍有 Side Loading 漏洞？
+                </summary>
+                <div class="qa-answer">
+                    <strong>幾乎不會。</strong><br>
+                    使用絕對路徑（如 LoadLibrary("C:\Windows\System32\user32.dll")）會強制 Windows 只去該位置讀取，攻擊者無法利用搜尋順序進行欺騙。
+                </div>
+            </details>
+        </div>
+
+    </div>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        const correctAnswer = "B";
+        const submitBtn = document.getElementById('submitBtn');
+        const feedbackArea = document.getElementById('feedbackArea');
+        const explainArea = document.getElementById('explainArea');
+        const selfCheckSection = document.getElementById('selfCheckSection');
+        const statusBadge = document.getElementById('statusBadge');
+        const allOptions = document.querySelectorAll('.option-input');
+        const questionArea = document.getElementById('questionArea');
+
+        function checkAnswer() {
+            // 檢查是否處於「重作」狀態
+            if (submitBtn.textContent === "重新作答") {
+                resetQuiz();
+                return;
+            }
+
+            // 1. 取得使用者選擇
+            let selectedValue = null;
+            allOptions.forEach(opt => {
+                if (opt.checked) selectedValue = opt.value;
+            });
+
+            // 防呆：未選答案
+            if (!selectedValue) {
+                alert("請先選擇一個答案！");
+                return;
+            }
+
+            // 2. 鎖定選項
+            allOptions.forEach(opt => opt.disabled = true);
+
+            // 3. 判定邏輯
+            const isCorrect = (selectedValue === correctAnswer);
+
+            // 4. 顯示回饋
+            feedbackArea.style.display = "block";
+            if (isCorrect) {
+                feedbackArea.className = "feedback-area feedback-success";
+                feedbackArea.innerHTML = `
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-check-circle fa-2x me-3"></i>
+                        <div>
+                            <h4 class="mb-0">答對了！</h4>
+                            <p class="mb-0">修改 PATH 是為了將攻擊者可控的路徑加入搜尋清單。</p>
+                        </div>
+                    </div>
+                `;
+                statusBadge.textContent = "答對";
+                statusBadge.style.backgroundColor = "#e8f5e9";
+                statusBadge.style.color = "#2e7d32";
+            } else {
+                feedbackArea.className = "feedback-area feedback-error";
+                feedbackArea.innerHTML = `
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-times-circle fa-2x me-3"></i>
+                        <div>
+                            <h4 class="mb-0">答錯了</h4>
+                            <p class="mb-0">正確答案是 <strong>(B)</strong>。</p>
+                            <small>未修改 PATH，程式不會去 Temp 資料夾找 DLL。</small>
+                        </div>
+                    </div>
+                `;
+                statusBadge.textContent = "答錯";
+                statusBadge.style.backgroundColor = "#fce4ec";
+                statusBadge.style.color = "#c62828";
+            }
+
+            // 5. 顯示詳解 & 自我檢測
+            explainArea.style.display = "block";
+            explainArea.open = true; // 自動展開詳解
+            
+            selfCheckSection.style.display = "block"; // 顯示自我檢測區塊
+
+            // 6. 按鈕變更
+            submitBtn.textContent = "重新作答";
+            submitBtn.className = "btn-action btn-secondary-action";
+        }
+
+        function resetQuiz() {
+            // 1. 清空選項
+            allOptions.forEach(opt => {
+                opt.checked = false;
+                opt.disabled = false;
+            });
+
+            // 2. 隱藏回饋、詳解與自我檢測
+            feedbackArea.style.display = "none";
+            explainArea.style.display = "none";
+            explainArea.open = false;
+            
+            selfCheckSection.style.display = "none";
+            // 關閉所有自我檢測的答案
+            document.querySelectorAll('.qa-item').forEach(el => el.open = false);
+
+            // 4. 恢復按鈕
+            submitBtn.textContent = "送出答案";
+            submitBtn.className = "btn-action";
+
+            // 5. 恢復 Badge
+            statusBadge.textContent = "未作答";
+            statusBadge.style.backgroundColor = "#e0e0e0";
+            statusBadge.style.color = "#555";
+
+            // 6. 平滑捲動回頂部
+            questionArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    </script>
+</body>
+</html>

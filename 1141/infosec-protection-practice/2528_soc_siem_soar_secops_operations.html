@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題組 3｜完整教學模板 - 資安監控維運中心</title>
+    <style>
+        /* --- 1. 基礎設定與變數 --- */
+        :root {
+            --body-bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #546e7a;
+            --primary: #2980b9;
+            --primary-light: #e3f2fd;
+            --primary-hover: #3498db;
+            --highlight: #f1c40f;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            --border-color: #e0e0e0;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* --- 2. 佈局容器 (響應式) --- */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: var(--radius-lg);
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                max-width: 100%;
+                margin: 16px;
+                padding: 20px;
+                border-radius: var(--radius-md);
+            }
+            body { font-size: 14px; }
+            h2 { font-size: 20px; }
+            h3 { font-size: 16px; }
+        }
+
+        /* --- 3. 題組 Header --- */
+        .group-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--body-bg);
+            padding-bottom: 20px;
+        }
+
+        .group-header h1 {
+            color: var(--primary);
+            margin: 0 0 15px 0;
+            font-size: 1.5rem;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-hover));
+            width: 0%;
+            transition: width 400ms ease;
+        }
+
+        .completion-status {
+            font-size: 0.9rem;
+        }
+
+        .status-pending { color: var(--text-secondary); }
+        .status-done { color: var(--success-text); font-weight: bold; }
+
+        /* --- 4. Context 區域 --- */
+        .group-context {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            border-left: 5px solid var(--primary);
+            margin-bottom: 30px;
+        }
+        .group-context h3 { margin-top: 0; color: var(--text-secondary); }
+
+        /* --- 5. Tabs 導航 --- */
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            scrollbar-width: none; /* Firefox */
+        }
+        .tabs-container::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            background: #f1f1f1;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            transition: all 200ms ease;
+            min-height: 48px; /* 觸控友善 */
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tab-btn:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 8px rgba(41,128,185,0.3);
+        }
+
+        .tab-status {
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        /* --- 6. 題目內容區 --- */
+        .tab-content {
+            display: none;
+            animation: fadeIn 300ms ease;
+        }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .q-badge {
+            background: var(--text-primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .q-badge.status-correct { background: var(--success-text); }
+        .q-badge.status-wrong { background: var(--error-text); }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        /* --- 7. 選項樣式 --- */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .option {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px;
+            border: 2px solid #eee;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 150ms ease;
+            position: relative;
+        }
+
+        .option:hover:not(.disabled) {
+            background-color: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+
+        .option.selected {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .option input {
+            margin-top: 5px;
+            margin-right: 12px;
+            accent-color: var(--primary);
+            transform: scale(1.2);
+        }
+
+        .option.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* --- 8. 按鈕區域 --- */
+        .action-area {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 200ms ease;
+            min-height: 44px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(41,128,185,0.3);
+            background-color: var(--primary-hover);
+        }
+
+        .btn-reset {
+            background-color: var(--text-secondary);
+            color: white;
+        }
+        .btn-reset:hover {
+            background-color: #34495e;
+        }
+
+        /* --- 9. 回饋與解析 --- */
+        .feedback {
+            margin-top: 20px;
+            padding: 15px 20px;
+            border-radius: var(--radius-sm);
+            display: none; /* JS 切換 */
+            animation: fadeInUp 300ms ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.success { background-color: var(--success-bg); color: var(--success-text); border: 1px solid #c8e6c9; }
+        .feedback.error { background-color: var(--error-bg); color: var(--error-text); border: 1px solid #ffcdd2; }
+
+        details {
+            margin-top: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: white;
+        }
+
+        summary {
+            padding: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            background-color: #fafafa;
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        summary::after {
+            content: '+';
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .details-content {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* 解析分段卡 */
+        .explain-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+        .explain-section h4 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.05rem;
+            margin-bottom: 10px;
+        }
+        
+        /* 解析內容的小標題 (例如：原理與規則、生活例子) */
+        .sub-header {
+            font-weight: bold;
+            color: var(--text-secondary);
+            margin-top: 10px;
+            display: block;
+        }
+
+        .explain-section p { margin-bottom: 8px; }
+        .explain-section ul { margin: 8px 0 8px 20px; padding: 0; }
+
+        /* 自我檢測區塊 */
+        .self-check-container {
+            margin-top: 20px;
+            border: 2px dashed var(--primary);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            background-color: var(--primary-light);
+            display: none; /* 預設隱藏，送出後顯示 */
+        }
+        .self-check-q {
+            font-weight: bold;
+            color: var(--text-primary);
+            margin: 0 0 10px 0;
+        }
+        .self-check-details {
+            margin-top: 0;
+            border: none;
+            background: rgba(255,255,255,0.5);
+        }
+        .self-check-details summary {
+            background: transparent;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+        .self-check-details .details-content {
+            padding: 10px;
+            border-top: 1px dashed var(--primary);
+            color: var(--success-text);
+            font-weight: bold;
+        }
+
+        /* --- 10. 標籤顏色系統 --- */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            font-weight: normal;
+        }
+        .tag-law { background-color: #607d8b; color: white; }
+        .tag-iso { background-color: #27ae60; color: white; }
+        .tag-zt  { background-color: #8e44ad; color: white; }
+        .tag-net { background-color: #2980b9; color: white; }
+        .tag-sec { background-color: #c0392b; color: white; } /* 技術 */
+        .tag-mgm { background-color: #d35400; color: white; } /* 風險/管理 */
+
+        mark {
+            background-color: var(--highlight);
+            color: var(--text-primary);
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    <!-- 1. Header -->
+    <header class="group-header">
+        <h1>題組 3｜完整教學模板</h1>
+        <div class="progress-info">
+            <span id="progress-text">已完成：<strong>0</strong> / 4</span>
+        </div>
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <div class="completion-status">
+            <span id="status-text" class="status-pending">📝 尚未完成</span>
+        </div>
+    </header>
+
+    <!-- 2. Context -->
+    <div class="group-context">
+        <h3>📖 題組背景</h3>
+        <p>某公司為因應潛在的資安威脅，而設立<mark>資安監控維運中心（SOC）</mark>，並擬採購相關軟硬體及資安解決方案，以提升整體資安防護與應變能力。</p>
+    </div>
+
+    <!-- 3. Tabs -->
+    <div class="tabs-container" id="tabs-container">
+        <!-- JS 生成 Tabs -->
+    </div>
+
+    <!-- 4. Tab Contents -->
+    <div id="questions-container">
+        <!-- JS 生成題目內容 -->
+    </div>
+</div>
+
+<script>
+    // --- 資料結構 ---
+    const quizData = {
+        groupName: "題組 3｜完整教學模板",
+        questions: [
+            {
+                id: 1,
+                originalNum: 25,
+                type: "single",
+                tags: ["tag-mgm"],
+                question: "該公司評估團隊針對資安監控維運中心（SOC）先進行初步的任務界定，試問下列關於資安監控維運中心的敘述何者最「不」適切？",
+                options: [
+                    { id: "A", text: "持續監控企業的資訊系統、網路和應用" },
+                    { id: "B", text: "負責對識別到的安全事件進行及時回應和管理" },
+                    { id: "C", text: "提供有關資訊安全事件的報告、紀錄、追蹤、分析和統計" },
+                    { id: "D", text: "可以透過導入單一產品的方式來達成所設定的目標" }
+                ],
+                correctAnswer: ["D"],
+                reason: "SOC 是一個「人＋流程＋技術」的營運中心，絕非單一產品可取代。",
+                explanation: `
+                    <!-- 1. 找關鍵字 -->
+                    <div class="explain-section">
+                        <h4>🔍 第一步：找關鍵字</h4>
+                        <p>資安監控維運中心（SOC）、初步任務界定、最「不」適切、單一產品。</p>
+                        <p>→ 關鍵在<strong>「SOC 的角色定位」</strong>與<strong>「是不是能靠一個產品完成」</strong>。</p>
+                    </div>
+
+                    <!-- 2. 白話翻譯 -->
+                    <div class="explain-section">
+                        <h4>💡 第二步：白話翻譯</h4>
+                        <p>公司要成立 SOC，請問下面哪一個說法<strong>「最不像真正的 SOC 會做的事」</strong>？</p>
+                    </div>
+
+                    <!-- 3. 解題思路 (包含步驟、原理、生活例子) -->
+                    <div class="explain-section">
+                        <h4>🧠 第三步：解題思路</h4>
+                        <span class="sub-header">【解題步驟】</span>
+                        <p>1. 先想 SOC 平常在幹嘛（看、分析、處理資安事件）。</p>
+                        <p>2. 再看哪個選項把 SOC 說得「太簡單、太工具化」。</p>
+                        
+                        <span class="sub-header">【原理與規則】</span>
+                        <p>SOC (Security Operations Center) 是一個負責持續監控、分析與回應資安事件的<strong>組織與流程</strong>，不是單一軟體。</p>
+                        
+                        <span class="sub-header">【生活例子】</span>
+                        <p>SOC 就像<strong>醫院急診室</strong>。醫院不可能只買一台「超級檢查機」就當作急診室運作，還需要醫生（人）、檢傷分類SOP（流程）才能救人。</p>
+                    </div>
+
+                    <!-- 4. 選項分析 -->
+                    <div class="explain-section">
+                        <h4>⚖️ 第四步：選項分析</h4>
+                        <ul>
+                            <li><strong>(A) 正確：</strong>持續監控是 SOC 的核心工作。</li>
+                            <li><strong>(B) 正確：</strong>回應與管理事件是 SOC 的存在價值。</li>
+                            <li><strong>(C) 正確：</strong>SOC 也負責管理紀錄與回溯報告。</li>
+                            <li><strong>(D) 錯誤：</strong>SOC 需要「人＋流程＋技術」整合，不可能只靠導入單一產品就達成。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 5. 觀念補充與延伸 (全餐) -->
+                    <div class="explain-section">
+                        <h4>🛡️ 觀念補充與延伸</h4>
+                        
+                        <span class="sub-header">【觸類旁通（舉一反三）】</span>
+                        <p>SOC ≠ SIEM。SIEM 是工具，SOC 是使用工具的團隊。</p>
+
+                        <span class="sub-header">【記憶口訣】</span>
+                        <p>「SOC 不是一套軟體，是一個團隊。」</p>
+
+                        <span class="sub-header">【常見陷阱】</span>
+                        <p>把 SOC 當成某一套資安產品（如防毒軟體或防火牆）。</p>
+
+                        <span class="sub-header">【心理盲點】</span>
+                        <p>看到高價工具就以為問題解決了，忽略了「人」的重要性。</p>
+
+                        <span class="sub-header">【避坑指南】</span>
+                        <p>題目看到<strong>「單一產品完成全部」</strong>，請高度警覺，通常是錯的。</p>
+                    </div>
+                `,
+                selfCheck: {
+                    q: "SOC 能不能外包？",
+                    a: "可以（MSSP），但流程與監控的最終責任仍在組織本身。"
+                }
+            },
+            {
+                id: 2,
+                originalNum: 26,
+                type: "single",
+                tags: ["tag-sec"],
+                question: "關於安全資訊與事件管理（SIEM）的功能敘述，何項最「不」適切？",
+                options: [
+                    { id: "A", text: "監控企業內外的資安事件，如 logs、alerts、events" },
+                    { id: "B", text: "匯聚多來源資料並依規則進行分析與告警" },
+                    { id: "C", text: "缺乏關聯分析、行為分析與異常偵測技術" },
+                    { id: "D", text: "提供事件查詢、報表、調查與取證功能" }
+                ],
+                correctAnswer: ["C"],
+                reason: "SIEM 的核心強項正是「關聯分析（Correlation）」與異常偵測，選項 C 說缺乏與事實相反。",
+                explanation: `
+                    <!-- 1. 找關鍵字 -->
+                    <div class="explain-section">
+                        <h4>🔍 第一步：找關鍵字</h4>
+                        <p>SIEM、功能敘述、最「不」適切、缺乏關聯分析。</p>
+                        <p>→ 關鍵在<strong>「SIEM 的核心能力」</strong>。</p>
+                    </div>
+
+                    <!-- 2. 白話翻譯 -->
+                    <div class="explain-section">
+                        <h4>💡 第二步：白話翻譯</h4>
+                        <p>哪一個選項<strong>「不是 SIEM 真正的能力描述」</strong>？（要把 SIEM 最厲害的地方說成沒有，那肯定錯。）</p>
+                    </div>
+
+                    <!-- 3. 解題思路 -->
+                    <div class="explain-section">
+                        <h4>🧠 第三步：解題思路</h4>
+                        <span class="sub-header">【原理與規則】</span>
+                        <p>SIEM (Security Information and Event Management) 的最大價值就是把分散的 Log 集中起來，進行<strong>「關聯分析」</strong>（例如：門禁卡刷卡 + 電腦登入 = 異常）。</p>
+                        
+                        <span class="sub-header">【生活例子】</span>
+                        <p>想像一個<strong>社區警衛室（SIEM）</strong>。如果它只會收信（Log），那沒用。它的價值在於發現「3號住戶明明出國了（Log A），為什麼他家燈卻亮了（Log B）？」這就是關聯分析。</p>
+                    </div>
+
+                    <!-- 4. 選項分析 -->
+                    <div class="explain-section">
+                        <h4>⚖️ 第四步：選項分析</h4>
+                        <ul>
+                            <li><strong>(A) 正確：</strong>SIEM 本來就蒐集 logs、alerts。</li>
+                            <li><strong>(B) 正確：</strong>匯聚資料並分析是核心功能。</li>
+                            <li><strong>(C) 錯誤：</strong>SIEM 恰恰就是做這些分析的，說它「缺乏」就像說跑車缺乏引擎一樣。</li>
+                            <li><strong>(D) 正確：</strong>屬於 SIEM 的標準調查取證功能。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 5. 觀念補充與延伸 -->
+                    <div class="explain-section">
+                        <h4>🛡️ 觀念補充與延伸</h4>
+                        
+                        <span class="sub-header">【觸類旁通】</span>
+                        <p>Log Server 只是倉庫（存資料），SIEM 是大腦（分析資料）。</p>
+
+                        <span class="sub-header">【記憶口訣】</span>
+                        <p>「SIEM 最會做的，就是關聯分析。」</p>
+
+                        <span class="sub-header">【常見陷阱】</span>
+                        <p>以為 SIEM 只是用來存 Log 應付稽核的（那是 Log Management）。</p>
+
+                        <span class="sub-header">【避坑指南】</span>
+                        <p>看到選項說某個專業工具<strong>「缺乏它的核心功能」</strong>，那通常就是答案。</p>
+                    </div>
+                `,
+                selfCheck: {
+                    q: "SIEM 跟 Log Server 最大的差別是什麼？",
+                    a: "Log Server 只是存日誌；SIEM 能做「關聯分析」與「即時告警」。"
+                }
+            },
+            {
+                id: 3,
+                originalNum: 27,
+                type: "single",
+                tags: ["tag-sec", "tag-mgm"],
+                question: "關於 SOAR，下列何項最「不」是其具備的功能？",
+                options: [
+                    { id: "A", text: "安全編排（Orchestration）" },
+                    { id: "B", text: "安全設計（Security Design）" },
+                    { id: "C", text: "自動化（Automation）" },
+                    { id: "D", text: "即時回應（Response）" }
+                ],
+                correctAnswer: ["B"],
+                reason: "SOAR = Security Orchestration, Automation and Response。設計（Design）屬於架構階段，非 SOAR 功能。",
+                explanation: `
+                    <!-- 1. 找關鍵字 -->
+                    <div class="explain-section">
+                        <h4>🔍 第一步：找關鍵字</h4>
+                        <p>SOAR、最「不」是、編排、自動化、回應、設計。</p>
+                    </div>
+
+                    <!-- 2. 白話翻譯 -->
+                    <div class="explain-section">
+                        <h4>💡 第二步：白話翻譯</h4>
+                        <p>SOAR 這個工具<strong>不負責「哪一件事」</strong>？</p>
+                    </div>
+
+                    <!-- 3. 解題思路 -->
+                    <div class="explain-section">
+                        <h4>🧠 第三步：解題思路</h4>
+                        <span class="sub-header">【原理與規則】</span>
+                        <p>SOAR 的全名直接告訴你答案：Security <strong>Orchestration</strong>, <strong>Automation</strong> and <strong>Response</strong>。裡面沒有 Design。</p>
+                        
+                        <span class="sub-header">【生活例子】</span>
+                        <p>SOAR 像是<strong>「智慧家庭中控」</strong>（有人闖入 -> 自動鎖門 -> 自動報警）。但它不負責「蓋房子（Design）」。</p>
+                    </div>
+
+                    <!-- 4. 選項分析 -->
+                    <div class="explain-section">
+                        <h4>⚖️ 第四步：選項分析</h4>
+                        <ul>
+                            <li><strong>(A) 編排 (Orchestration)：</strong>正確，把防火牆、防毒等工具串起來（像樂團指揮）。</li>
+                            <li><strong>(B) 設計 (Design)：</strong>錯誤，這是架構師在系統開發前做的事。</li>
+                            <li><strong>(C) 自動化 (Automation)：</strong>正確，自動執行重複工作（像機器人）。</li>
+                            <li><strong>(D) 回應 (Response)：</strong>正確，對事件做出反應（如自動封鎖 IP）。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 5. 觀念補充與延伸 -->
+                    <div class="explain-section">
+                        <h4>🛡️ 觀念補充與延伸</h4>
+                        
+                        <span class="sub-header">【記憶口訣】</span>
+                        <p>「SOAR 三兄弟：編排（O）、自動化（A）、回應（R）。」</p>
+
+                        <span class="sub-header">【心理盲點】</span>
+                        <p>看到 Security 開頭的字就覺得都相關，忽略了英文縮寫的定義。</p>
+
+                        <span class="sub-header">【避坑指南】</span>
+                        <p>縮寫題型，請務必還原英文全文，答案通常就在名字裡。</p>
+                    </div>
+                `,
+                selfCheck: {
+                    q: "SOAR 主要是為了解決什麼問題？",
+                    a: "資安人力不足（告警疲勞 Alert Fatigue）與回應速度太慢。"
+                }
+            },
+            {
+                id: 4,
+                originalNum: 28,
+                type: "multiple",
+                tags: ["tag-mgm"],
+                question: "【複選題】現代化安全維運模式（SecOps）的關鍵元素為何？",
+                options: [
+                    { id: "A", text: "SIEM" },
+                    { id: "B", text: "SOAR" },
+                    { id: "C", text: "SSDLC" },
+                    { id: "D", text: "威脅情資（Threat Intelligence）" }
+                ],
+                correctAnswer: ["A", "B", "D"],
+                reason: "SecOps 強調維運中的偵測（SIEM）、回應（SOAR）與預警（情資）。SSDLC 屬於開發流程。",
+                explanation: `
+                    <!-- 1. 找關鍵字 -->
+                    <div class="explain-section">
+                        <h4>🔍 第一步：找關鍵字</h4>
+                        <p>SecOps、現代化、關鍵元素、複選。</p>
+                    </div>
+
+                    <!-- 2. 白話翻譯 -->
+                    <div class="explain-section">
+                        <h4>💡 第二步：白話翻譯</h4>
+                        <p>現代化的資安維運中心，通常會靠哪些<strong>「核心拼圖」</strong>來運作？</p>
+                    </div>
+
+                    <!-- 3. 解題思路 -->
+                    <div class="explain-section">
+                        <h4>🧠 第三步：解題思路</h4>
+                        <span class="sub-header">【原理與規則】</span>
+                        <p>SecOps 的黃金三角：</p>
+                        <ol>
+                            <li><strong>看得見（偵測）：</strong>SIEM（整合與分析）。</li>
+                            <li><strong>動得快（回應）：</strong>SOAR（自動化回應）。</li>
+                            <li><strong>早知道（預警）：</strong>威脅情資（外部情報）。</li>
+                        </ol>
+                        
+                        <span class="sub-header">【生活例子】</span>
+                        <p>現代化戰爭指揮中心：需要<strong>雷達（SIEM）</strong>、<strong>自動防禦系統（SOAR）</strong>以及<strong>敵軍情報（情資）</strong>。至於「製造武器的流程（SSDLC）」則屬於後勤工廠，不在戰場指揮中心內。</p>
+                    </div>
+
+                    <!-- 4. 選項分析 -->
+                    <div class="explain-section">
+                        <h4>⚖️ 第四步：選項分析</h4>
+                        <ul>
+                            <li><strong>(A) SIEM：</strong>正確，負責偵測與分析。</li>
+                            <li><strong>(B) SOAR：</strong>正確，負責自動化應變。</li>
+                            <li><strong>(C) SSDLC：</strong>不選，這是「安全軟體開發生命週期」，屬於 DevSecOps 的開發階段，非維運核心。</li>
+                            <li><strong>(D) 威脅情資：</strong>正確，提供外部攻擊情報。</li>
+                        </ul>
+                    </div>
+
+                    <!-- 5. 觀念補充與延伸 -->
+                    <div class="explain-section">
+                        <h4>🛡️ 觀念補充與延伸</h4>
+                        
+                        <span class="sub-header">【記憶口訣】</span>
+                        <p>「SecOps：看得見（SIEM）、動得快（SOAR）、早知道（情資）。」</p>
+
+                        <span class="sub-header">【常見陷阱】</span>
+                        <p>混淆 SecOps（維運）與 DevSecOps（開發）。SSDLC 是開發的事。</p>
+
+                        <span class="sub-header">【自我檢測與反思】</span>
+                        <p>沒有情資的 SOC 會有什麼問題？只能被動挨打，不知道外面流行什麼新病毒。</p>
+                    </div>
+                `,
+                selfCheck: {
+                    q: "沒有情資（Intel）的 SOC 會有什麼問題？",
+                    a: "只能被動挨打，不知道外面流行什麼攻擊手法，無法提前防禦。"
+                }
+            }
+        ]
+    };
+
+    // --- 狀態管理 ---
+    const appState = {
+        answers: {}, // { 1: ['A'], 2: ['B', 'C'] }
+        status: {},  // { 1: 'correct', 2: 'wrong' }
+        completed: new Set()
+    };
+
+    // --- 初始化與渲染 ---
+    function initApp() {
+        renderTabs();
+        renderQuestions();
+        updateProgress();
+        
+        // 預設顯示第一題
+        if (quizData.questions.length > 0) {
+            switchTab(0);
+        }
+    }
+
+    function renderTabs() {
+        const container = document.getElementById('tabs-container');
+        container.innerHTML = quizData.questions.map((q, index) => `
+            <button class="tab-btn" onclick="switchTab(${index})" id="tab-${index}">
+                Q${q.originalNum || index + 1}
+                <span class="tab-status" id="tab-status-${q.id}"></span>
+            </button>
+        `).join('');
+    }
+
+    function renderQuestions() {
+        const container = document.getElementById('questions-container');
+        container.innerHTML = quizData.questions.map((q, index) => {
+            const inputType = q.type === 'single' ? 'radio' : 'checkbox';
+            const tagSpan = q.tags ? `<span class="tag ${q.tags[0]}">觀念題</span>` : '';
+            
+            return `
+            <div class="tab-content" id="content-${index}">
+                <!-- 單題 Header -->
+                <div class="question-header">
+                    <span class="q-badge" id="q-badge-${q.id}">未作答</span>
+                    ${tagSpan}
+                </div>
+
+                <!-- 題目敘述 -->
+                <div class="question-text">
+                    ${q.originalNum}. ${q.question}
+                </div>
+
+                <!-- 選項區域 -->
+                <div class="options-list" id="options-list-${q.id}">
+                    ${q.options.map(opt => `
+                        <div class="option" onclick="handleOptionClick(${q.id}, '${opt.id}', '${q.type}')" id="opt-${q.id}-${opt.id}">
+                            <input type="${inputType}" name="q${q.id}" value="${opt.id}">
+                            <div class="option-text">
+                                <strong>(${opt.id})</strong> ${opt.text}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <!-- 按鈕區域 -->
+                <div class="action-area">
+                    <button class="btn btn-primary" id="btn-submit-${q.id}" onclick="submitAnswer(${q.id})">送出答案</button>
+                </div>
+
+                <!-- 回饋區域 (預設隱藏) -->
+                <div class="feedback" id="feedback-${q.id}"></div>
+
+                <!-- 詳細解析 (預設隱藏) -->
+                <details id="explain-${q.id}" style="display:none">
+                    <summary>📖 查看詳細解析</summary>
+                    <div class="details-content">
+                        ${q.explanation}
+                    </div>
+                </details>
+
+                <!-- 自我檢測 (題目顯示，答案隱藏) -->
+                <div id="selfcheck-${q.id}" class="self-check-container">
+                    <p class="self-check-q">🤔 自我檢測：${q.selfCheck.q}</p>
+                    <details class="self-check-details">
+                        <summary>點擊查看參考解答</summary>
+                        <div class="details-content">
+                            ${q.selfCheck.a}
+                        </div>
+                    </details>
+                </div>
+            </div>
+            `;
+        }).join('');
+    }
+
+    // --- 互動邏輯 ---
+
+    function switchTab(index) {
+        // 1. 隱藏所有內容
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+        // 2. 顯示目標
+        document.getElementById(`content-${index}`).classList.add('active');
+        document.getElementById(`tab-${index}`).classList.add('active');
+
+        // 3. 平滑捲動回頂端 (UX)
+        const container = document.getElementById(`content-${index}`);
+        if(container) {
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    function handleOptionClick(qId, optId, type) {
+        // 如果已提交，禁止修改
+        if (appState.completed.has(qId)) return;
+
+        const container = document.getElementById(`options-list-${qId}`);
+        const inputs = container.querySelectorAll('input');
+        const options = container.querySelectorAll('.option');
+
+        if (type === 'single') {
+            // 單選：清除其他，選中當前
+            inputs.forEach(input => input.checked = false);
+            options.forEach(opt => opt.classList.remove('selected'));
+            
+            const targetInput = container.querySelector(`input[value="${optId}"]`);
+            const targetDiv = document.getElementById(`opt-${qId}-${optId}`);
+            
+            targetInput.checked = true;
+            targetDiv.classList.add('selected');
+        } else {
+            // 複選：切換狀態
+            const targetInput = container.querySelector(`input[value="${optId}"]`);
+            const targetDiv = document.getElementById(`opt-${qId}-${optId}`);
+            
+            targetInput.checked = !targetInput.checked;
+            if (targetInput.checked) {
+                targetDiv.classList.add('selected');
+            } else {
+                targetDiv.classList.remove('selected');
+            }
+        }
+    }
+
+    function submitAnswer(qId) {
+        // 1. 獲取用戶選擇
+        const container = document.getElementById(`options-list-${qId}`);
+        const checkedInputs = Array.from(container.querySelectorAll('input:checked'));
+        
+        if (checkedInputs.length === 0) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        const userAnswers = checkedInputs.map(input => input.value).sort();
+        const questionData = quizData.questions.find(q => q.id === qId);
+        const correctAnswers = questionData.correctAnswer.sort();
+
+        // 2. 判定對錯
+        const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctAnswers);
+
+        // 3. 更新狀態與 UI
+        appState.completed.add(qId);
+        appState.status[qId] = isCorrect ? 'correct' : 'wrong';
+
+        // 禁用選項
+        container.querySelectorAll('.option').forEach(opt => {
+            opt.classList.add('disabled');
+            opt.onclick = null; // 移除點擊事件
+        });
+        container.querySelectorAll('input').forEach(inp => inp.disabled = true);
+
+        // 顯示 Badge
+        const badge = document.getElementById(`q-badge-${qId}`);
+        badge.className = `q-badge ${isCorrect ? 'status-correct' : 'status-wrong'}`;
+        badge.textContent = isCorrect ? '答對' : '答錯';
+
+        // Tab 狀態標記
+        const tabStatus = document.getElementById(`tab-status-${qId}`);
+        tabStatus.textContent = isCorrect ? '✓' : '✗';
+        tabStatus.style.color = isCorrect ? 'var(--success-text)' : 'var(--error-text)';
+
+        // 顯示回饋
+        const feedbackDiv = document.getElementById(`feedback-${qId}`);
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.className = `feedback ${isCorrect ? 'success' : 'error'}`;
+        
+        if (isCorrect) {
+            feedbackDiv.innerHTML = `<strong>✓ 答對了！</strong><p>${questionData.reason}</p>`;
+        } else {
+            feedbackDiv.innerHTML = `
+                <strong>✗ 答錯了</strong>
+                <p>正確答案：${correctAnswers.join('、')}</p>
+                <p>${questionData.reason}</p>
+            `;
+        }
+
+        // 顯示解析與自檢 (Q 顯示, A 需點擊)
+        document.getElementById(`explain-${qId}`).style.display = 'block';
+        document.getElementById(`selfcheck-${qId}`).style.display = 'block';
+
+        // 按鈕變為重新作答
+        const btn = document.getElementById(`btn-submit-${qId}`);
+        btn.textContent = '重新作答';
+        btn.className = 'btn btn-reset';
+        btn.onclick = () => resetQuestion(qId);
+
+        updateProgress();
+    }
+
+    function resetQuestion(qId) {
+        // 1. 清除狀態
+        appState.completed.delete(qId);
+        delete appState.status[qId];
+
+        const questionData = quizData.questions.find(q => q.id === qId);
+
+        // 2. UI 重置
+        const container = document.getElementById(`options-list-${qId}`);
+        container.querySelectorAll('.option').forEach(opt => {
+            opt.classList.remove('disabled', 'selected');
+            // 恢復點擊事件
+            const val = opt.querySelector('input').value;
+            opt.setAttribute('onclick', `handleOptionClick(${qId}, '${val}', '${questionData.type}')`);
+        });
+        container.querySelectorAll('input').forEach(inp => {
+            inp.disabled = false;
+            inp.checked = false;
+        });
+
+        // 隱藏回饋與解析
+        document.getElementById(`feedback-${qId}`).style.display = 'none';
+        const explain = document.getElementById(`explain-${qId}`);
+        explain.style.display = 'none';
+        explain.removeAttribute('open'); // 收合
+        
+        const selfcheck = document.getElementById(`selfcheck-${qId}`);
+        selfcheck.style.display = 'none';
+        selfcheck.querySelector('details').removeAttribute('open'); // 收合答案
+
+        // Badge 重置
+        const badge = document.getElementById(`q-badge-${qId}`);
+        badge.className = 'q-badge';
+        badge.textContent = '未作答';
+
+        // Tab 重置
+        document.getElementById(`tab-status-${qId}`).textContent = '';
+
+        // 按鈕重置
+        const btn = document.getElementById(`btn-submit-${qId}`);
+        btn.textContent = '送出答案';
+        btn.className = 'btn btn-primary';
+        btn.setAttribute('onclick', `submitAnswer(${qId})`);
+
+        updateProgress();
+    }
+
+    function updateProgress() {
+        const total = quizData.questions.length;
+        const completed = appState.completed.size;
+        const percent = Math.round((completed / total) * 100);
+
+        document.getElementById('progress-text').innerHTML = `已完成：<strong>${completed}</strong> / ${total}`;
+        document.getElementById('progress-fill').style.width = `${percent}%`;
+
+        const statusText = document.getElementById('status-text');
+        if (completed === total) {
+            statusText.textContent = '✅ 本題組已完成';
+            statusText.className = 'status-done';
+        } else {
+            statusText.textContent = '📝 尚未完成';
+            statusText.className = 'status-pending';
+        }
+    }
+
+    // 啟動應用
+    window.onload = initApp;
+
+</script>
+</body>
+</html>
