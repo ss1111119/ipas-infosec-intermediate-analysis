@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>零信任架構與微分割互動試題</title>
+    
+    <!-- 引入 Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- 引入 Bootstrap 5 (僅用於基礎 Reset 與 Grid，不依賴其 JS) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    
+    <!-- 引入 FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            /* 核心色彩 V4.0 */
+            --body-bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #596b7d;
+            --primary: #2980b9;
+            --primary-hover: #1f6391;
+            --highlight: #f1c40f;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --success-border: #a5d6a7;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            --error-border: #ef9a9a;
+            
+            /* 標籤色彩 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        body {
+            background-color: var(--body-bg);
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-bottom: 40px;
+        }
+
+        /* 容器規範 */
+        .page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 16px;
+                padding: 24px;
+                width: auto;
+            }
+        }
+
+        /* Header 區域 */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .question-number {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background-color: #ecf0f1;
+            color: #7f8c8d;
+            transition: all 0.3s;
+        }
+
+        /* 情境卡 */
+        .context-card {
+            background-color: #f8f9fa;
+            border-left: 5px solid var(--tag-mgm);
+            padding: 16px 20px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* 題目與選項 */
+        h2.question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px 20px;
+            border: 2px solid #ecf0f1;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-label:hover {
+            background-color: #e3f2fd;
+            border-color: #bbdefb;
+            transform: translateY(-2px);
+        }
+
+        .option-label input[type="radio"] {
+            margin-top: 5px;
+            margin-right: 16px;
+            accent-color: var(--primary);
+            transform: scale(1.2);
+        }
+
+        .option-text {
+            font-size: 1.05rem;
+            word-break: break-word;
+        }
+
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .option-label.disabled:hover {
+            transform: none;
+            background-color: transparent;
+            border-color: #ecf0f1;
+        }
+
+        /* 操作區域 */
+        .action-area {
+            margin-top: 32px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-submit, .btn-retry {
+            padding: 12px 48px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-submit {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41,128,185,0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-retry {
+            background-color: #7f8c8d;
+            color: white;
+            display: none; /* 初始隱藏 */
+        }
+        
+        .btn-retry:hover {
+            background-color: #607d8b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(96,125,139,0.3);
+        }
+
+        /* 回饋區域 */
+        .feedback-area {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .feedback-success {
+            background-color: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: var(--success-text);
+        }
+
+        .feedback-error {
+            background-color: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: var(--error-text);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 解析與自我檢測通用樣式 */
+        details {
+            margin-top: 24px;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        details[open] {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        summary {
+            padding: 16px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            list-style: none; /* 隱藏預設三角 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '\f078'; /* FontAwesome Chevron Down */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        .details-content {
+            padding: 24px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* 標籤樣式 */
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.8rem;
+            margin-right: 6px;
+            font-weight: 500;
+            vertical-align: middle;
+        }
+        .tag-zt { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+        .tag-key { background-color: var(--tag-law); }
+
+        /* 重點標記 */
+        mark {
+            background-color: var(--highlight);
+            color: #333;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+
+        /* 解析分段卡片 */
+        .explain-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .explain-section h4 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .explain-section h4 i {
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+        
+        .explain-section ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+        
+        .explain-section p {
+            margin-bottom: 0.8rem;
+        }
+        
+        .explain-section p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 自我檢測專用樣式 */
+        .self-check-item {
+            margin-bottom: 16px;
+            border: 1px solid #ecf0f1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .self-check-item summary {
+            background-color: #fff;
+            padding: 12px 20px;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .self-check-item summary:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .self-check-answer {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 16px 20px;
+            border-top: 1px solid #c8e6c9;
+            font-size: 0.95rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="page-container" id="pageContainer">
+        
+        <!-- 1. Header -->
+        <header class="quiz-header">
+            <span class="question-number">Question 11</span>
+            <span class="status-badge" id="statusBadge">未作答</span>
+        </header>
+
+        <!-- 2. Context -->
+        <div class="context-card">
+            <i class="fa-solid fa-circle-info me-2"></i>本題無額外情境 (Context-Free)
+        </div>
+
+        <!-- 3. Question -->
+        <section class="question-area" id="questionArea">
+            <h2 class="question-text">
+                <span class="tag tag-zt">零信任</span>
+                在零信任安全架構下，考慮到<mark>網路微分割</mark>（Network Micro-Segmentation）的實施，下列何項描述最準確地闡述了它與其他零信任安全控制措施（如身份和存取管理、加密和持續監控）的交互作用？
+            </h2>
+
+            <div class="options-group" id="optionsGroup">
+                <!-- Option A -->
+                <label class="option-label">
+                    <input type="radio" name="quizOption" value="A">
+                    <span class="option-text">
+                        (A) 網路微分割獨立於其他零信任控制措施運作，不與身份和存取管理或加密策略互動
+                    </span>
+                </label>
+
+                <!-- Option B -->
+                <label class="option-label">
+                    <input type="radio" name="quizOption" value="B">
+                    <span class="option-text">
+                        (B) 身份和存取管理策略在網路微分割實施之前是不必要的，因為微分割本身就足以防範網路入侵
+                    </span>
+                </label>
+
+                <!-- Option C -->
+                <label class="option-label">
+                    <input type="radio" name="quizOption" value="C">
+                    <span class="option-text">
+                        (C) 網路微分割與身份和存取管理緊密結合，確保只有驗證和授權的用戶才能存取特定網路段，同時加密和持續監控提供額外的安全層
+                    </span>
+                </label>
+
+                <!-- Option D -->
+                <label class="option-label">
+                    <input type="radio" name="quizOption" value="D">
+                    <span class="option-text">
+                        (D) 持續監控在網路微分割實施過程中不起作用，因為微分割旨在隔離和控制網路流量，而不是監控
+                    </span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 4. Action Area -->
+        <div class="action-area">
+            <button class="btn-submit" id="submitBtn">送出答案</button>
+            <button class="btn-retry" id="retryBtn">重新作答</button>
+        </div>
+
+        <!-- 5. Feedback -->
+        <div class="feedback-area" id="feedbackArea">
+            <!-- 內容由 JS 動態生成 -->
+        </div>
+
+        <!-- 6. Explain -->
+        <details id="explainArea" style="display: none;">
+            <summary>
+                <span><i class="fa-solid fa-book-open me-2"></i> 顯示詳解與觀念分析</span>
+            </summary>
+            <div class="details-content">
+                
+                <!-- 第一步：找關鍵字 -->
+                <div class="explain-section" style="border-left-color: var(--tag-zt);">
+                    <h4><i class="fa-solid fa-magnifying-glass"></i> 第一步：找關鍵字</h4>
+                    <p>
+                        <span class="tag tag-zt">零信任（Zero Trust）</span> 題目主軸，核心是「不預設信任任何人或設備」。<br>
+                        <span class="tag tag-net">網路微分割</span> 將內網切成小區塊，防止擴散。<br>
+                        <span class="tag tag-mgm">交互作用</span> 重點在於「整合」，而非獨立運作。<br>
+                        <strong>持續監控</strong> 零信任強調「一直驗證、一直觀察」，不是一次放行就沒事。
+                    </p>
+                    <p class="text-secondary small mt-2">💡 為什麼這些字是線索：題目問的是「微分割如何和 IAM、加密、監控搭配」，所以選項中只要出現「獨立、不需要、沒作用」，多半就違反零信任精神。</p>
+                </div>
+
+                <!-- 第二步：白話翻譯 -->
+                <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                    <h4><i class="fa-solid fa-language"></i> 第二步：白話翻譯</h4>
+                    <p>這題其實在問：<strong>「零信任不是只靠一招。那『網路微分割』這一招，要怎麼跟『帳號權限管理（IAM）』、『資料加密』、『一直監控』一起配合，才是最正確的說法？」</strong></p>
+                </div>
+
+                <!-- 第三步：解題思路 -->
+                <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                    <h4><i class="fa-regular fa-lightbulb"></i> 第三步：解題思路</h4>
+                    <p><strong>1. 解題步驟：</strong></p>
+                    <ul>
+                        <li>先抓零信任核心：永不信任、持續驗證、最小權限。</li>
+                        <li>想像微分割：把內網切成很多小房間，每個房間有獨立門禁。</li>
+                        <li>看選項：凡是說「獨立、不需要、沒作用」通常不對，要選「整合、互相支援」。</li>
+                    </ul>
+                    <hr class="my-3 opacity-25">
+                    <p><strong>2. 生活例子（具象化）：</strong></p>
+                    <p>把公司網路想成一棟大樓：</p>
+                    <ul>
+                        <li><strong>微分割</strong> = 把大樓切成「研發樓層、財務樓層」並設門禁。</li>
+                        <li><strong>IAM</strong> = 員工識別證：研發只能進研發區，財務只能進財務區。</li>
+                        <li><strong>加密</strong> = 文件上鎖，就算偷到也打不開。</li>
+                        <li><strong>持續監控</strong> = 保全與 CCTV，看到有人半夜刷卡連闖多區，立刻抓人。</li>
+                    </ul>
+                </div>
+
+                <!-- 第四步：選項分析 -->
+                <div class="explain-section" style="border-left-color: var(--primary);">
+                    <h4><i class="fa-solid fa-list-check"></i> 第四步：選項分析</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">❌ <strong>(A)</strong>：說微分割「獨立運作」不符合零信任。零信任強調多控制面協作。</li>
+                        <li class="mb-2">❌ <strong>(B)</strong>：說 IAM「不必要」是嚴重錯誤。微分割把路切開，但「誰能走」必須靠 IAM 決定。</li>
+                        <li class="mb-2">✅ <strong>(C)</strong>：描述了完美的協作：微分割 + IAM（驗證授權）+ 加密 + 監控，形成完整防護網。</li>
+                        <li class="mb-2">❌ <strong>(D)</strong>：說監控「不起作用」相反。切得再細，若不監控，就不知道攻擊者是否在小房間內作亂。</li>
+                    </ul>
+                </div>
+
+                <!-- 觀念補充與延伸 -->
+                <div class="explain-section" style="border-left-color: var(--tag-iso);">
+                    <h4><i class="fa-solid fa-book-medical"></i> 觀念補充與延伸</h4>
+                    <p><strong>1. 法條或定義（白話）：</strong></p>
+                    <ul>
+                        <li><strong>零信任</strong>：核心精神是「永不信任、持續驗證」，依賴身份、裝置狀態、行為動態決策。</li>
+                        <li><strong>微分割</strong>：目的在限制「橫向移動（Lateral Movement）」，降低單點失守後的擴散面。</li>
+                    </ul>
+                    <p><strong>2. 觸類旁通（舉一反三）：</strong></p>
+                    <ul>
+                        <li><strong>變化題型</strong>：若題目問「哪一項最能降低橫向移動？」，答案通常是微分割。</li>
+                        <li><strong>情境題</strong>：若問某服務只能給特定角色存取，解法通常是 IAM + 微分割 + 日誌監控。</li>
+                    </ul>
+                </div>
+
+                <!-- 記憶口訣 -->
+                <div class="explain-section" style="border-left-color: var(--highlight);">
+                    <h4><i class="fa-solid fa-star"></i> 記憶口訣</h4>
+                    <p class="fs-5 fw-bold text-center text-primary my-2">「分、證、密、監」</p>
+                    <ul class="mb-0">
+                        <li><strong>分</strong>：微分割（隔離）</li>
+                        <li><strong>證</strong>：IAM（身份驗證與授權）</li>
+                        <li><strong>密</strong>：加密（資料保護）</li>
+                        <li><strong>監</strong>：持續監控（異常偵測）</li>
+                    </ul>
+                </div>
+
+                <!-- 常見陷阱 -->
+                <div class="explain-section" style="border-left-color: var(--error-text);">
+                    <h4><i class="fa-solid fa-triangle-exclamation"></i> 常見陷阱與避坑指南</h4>
+                    <ul>
+                        <li><strong>心理盲點</strong>：看到「隔離」就直覺覺得不需要監控，以為隔離後就安全。其實隔離只是降低擴散，仍需監控內部濫用。</li>
+                        <li><strong>避坑指南</strong>：看到選項出現「獨立」、「不需要」、「沒作用」這種絕對化字眼，先提高警覺。零信任幾乎都在講「整合」與「持續」。</li>
+                    </ul>
+                </div>
+
+            </div>
+        </details>
+
+        <!-- 7. Self Check -->
+        <details id="selfCheckArea">
+            <summary>
+                <span><i class="fa-solid fa-clipboard-check me-2"></i> 自我檢測 (Self-Check)</span>
+            </summary>
+            <div class="details-content">
+                <p class="text-secondary mb-3 small"><i class="fa-solid fa-eye-slash me-1"></i> 點擊題目可查看隱藏答案</p>
+                
+                <!-- Q1 -->
+                <details class="self-check-item">
+                    <summary><strong>Q1：如果公司已做微分割，但所有人用同一組共用帳號登入，零信任會出什麼問題？</strong></summary>
+                    <div class="self-check-answer">
+                        A：共用帳號會讓「身份不可追溯」，無法做到最小權限與責任歸屬；微分割也很難精準授權誰能進哪一段。
+                    </div>
+                </details>
+
+                <!-- Q2 -->
+                <details class="self-check-item">
+                    <summary><strong>Q2：微分割主要是在降低哪一種攻擊行為的效果？</strong></summary>
+                    <div class="self-check-answer">
+                        A：降低橫向移動（Lateral Movement，入侵後在內網到處跳、擴散）的效果。
+                    </div>
+                </details>
+
+                <!-- Q3 -->
+                <details class="self-check-item">
+                    <summary><strong>Q3：如果監控系統發現某服務正在大量掃描其他微分割區，下一步是什麼？</strong></summary>
+                    <div class="self-check-answer">
+                        A：告警並動態調整策略（例如收緊存取、隔離該工作負載、強制重新驗證），同時進行事件調查。
+                    </div>
+                </details>
+            </div>
+        </details>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 定義 DOM 元素
+            const submitBtn = document.getElementById('submitBtn');
+            const retryBtn = document.getElementById('retryBtn');
+            const optionsGroup = document.getElementById('optionsGroup');
+            const allOptions = document.getElementsByName('quizOption');
+            const feedbackArea = document.getElementById('feedbackArea');
+            const explainArea = document.getElementById('explainArea');
+            const selfCheckArea = document.getElementById('selfCheckArea');
+            const statusBadge = document.getElementById('statusBadge');
+            const questionArea = document.getElementById('questionArea');
+
+            // 正確答案設定
+            const CORRECT_ANSWER = 'C';
+
+            // 送出按鈕事件
+            submitBtn.addEventListener('click', function() {
+                // 1. 檢查是否有選擇
+                let selectedValue = null;
+                for (const option of allOptions) {
+                    if (option.checked) {
+                        selectedValue = option.value;
+                        break;
+                    }
+                }
+
+                if (!selectedValue) {
+                    alert('⚠️ 請先選擇一個答案再送出！');
+                    return;
+                }
+
+                // 2. 鎖定選項
+                optionsGroup.classList.add('disabled-group');
+                for (const option of allOptions) {
+                    option.disabled = true;
+                    option.parentElement.classList.add('disabled');
+                    
+                    // 標記正確與錯誤選項的視覺
+                    if (option.value === CORRECT_ANSWER) {
+                        option.parentElement.style.backgroundColor = '#e8f5e9'; // 淺綠
+                        option.parentElement.style.borderColor = '#2e7d32';
+                    } else if (option.checked && option.value !== CORRECT_ANSWER) {
+                        option.parentElement.style.backgroundColor = '#fce4ec'; // 淺紅
+                        option.parentElement.style.borderColor = '#c62828';
+                    }
+                }
+
+                // 3. 判定與顯示回饋
+                feedbackArea.style.display = 'block';
+                feedbackArea.className = 'feedback-area'; // Reset classes
+
+                if (selectedValue === CORRECT_ANSWER) {
+                    // 答對
+                    feedbackArea.classList.add('feedback-success');
+                    feedbackArea.innerHTML = `
+                        <strong><i class="fa-solid fa-circle-check"></i> 答對了！</strong>
+                        <p class="mb-0 mt-2">微分割必須和 IAM 的驗證授權配合，再加上加密與持續監控，才能形成零信任的多層防護。</p>
+                    `;
+                    statusBadge.textContent = '✓ 答對';
+                    statusBadge.style.backgroundColor = '#e8f5e9';
+                    statusBadge.style.color = '#2e7d32';
+                } else {
+                    // 答錯
+                    feedbackArea.classList.add('feedback-error');
+                    feedbackArea.innerHTML = `
+                        <strong><i class="fa-solid fa-circle-xmark"></i> 答錯了</strong>
+                        <p class="mb-1 mt-2">正確答案是 <strong>(C)</strong></p>
+                        <p class="mb-0">理由：微分割不能獨立運作，需搭配 IAM 進行權限管理，並結合加密與監控才能完整防禦。</p>
+                    `;
+                    statusBadge.textContent = '✗ 答錯';
+                    statusBadge.style.backgroundColor = '#fce4ec';
+                    statusBadge.style.color = '#c62828';
+                }
+
+                // 4. 顯示詳解區域
+                explainArea.style.display = 'block';
+                
+                // 5. 切換按鈕
+                submitBtn.style.display = 'none';
+                retryBtn.style.display = 'inline-block';
+
+                // 6. 平滑捲動到回饋區
+                feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+
+            // 重新作答按鈕事件
+            retryBtn.addEventListener('click', function() {
+                resetQuiz();
+            });
+
+            // 重置功能
+            function resetQuiz() {
+                // 清空選項
+                for (const option of allOptions) {
+                    option.checked = false;
+                    option.disabled = false;
+                    // 重置樣式
+                    option.parentElement.classList.remove('disabled');
+                    option.parentElement.style.backgroundColor = '';
+                    option.parentElement.style.borderColor = '#ecf0f1';
+                }
+                optionsGroup.classList.remove('disabled-group');
+
+                // 隱藏回饋與詳解
+                feedbackArea.style.display = 'none';
+                explainArea.style.display = 'none';
+                explainArea.open = false; // 收合詳解
+                selfCheckArea.open = false; // 收合自我檢測
+
+                // 收合所有自我檢測的小題
+                const selfCheckItems = document.querySelectorAll('.self-check-item');
+                selfCheckItems.forEach(item => item.open = false);
+
+                // 重置 Header 狀態
+                statusBadge.textContent = '未作答';
+                statusBadge.style.backgroundColor = '#ecf0f1';
+                statusBadge.style.color = '#7f8c8d';
+
+                // 按鈕切換回送出
+                submitBtn.style.display = 'inline-block';
+                retryBtn.style.display = 'none';
+
+                // 捲動回頂端
+                questionArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    </script>
+</body>
+</html>

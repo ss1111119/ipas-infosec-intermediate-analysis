@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安監控與事件管理 (SIEM) - 互動試題</title>
+    
+    <!-- 外部資源：Bootstrap 5, FontAwesome, Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 核心變數與配色系統 (符合 v4.0 規範) --- */
+        :root {
+            --body-bg: #f4f7f6;       /* 冷灰調背景 */
+            --card-bg: #ffffff;       /* 卡片底色 */
+            --text-primary: #2c3e50;  /* 深藍灰文字 */
+            --primary: #2980b9;       /* 主要藍色 */
+            --primary-hover: #1f6391;
+            --highlight: #f1c40f;     /* 記憶黃標記 */
+            --success-bg: #e8f5e9;    /* 正確背景 */
+            --success-text: #2e7d32;  /* 正確文字 */
+            --error-bg: #fce4ec;      /* 錯誤背景 */
+            --error-text: #c62828;    /* 錯誤文字 */
+            
+            /* 標籤色彩 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-bottom: 40px;
+        }
+
+        /* --- 版型容器 --- */
+        .page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+        }
+
+        @media (max-width: 767px) {
+            .page-container {
+                max-width: 100%;
+                margin: 16px;
+                padding: 20px;
+                border-radius: 12px;
+            }
+            body { font-size: 14px; }
+            h2 { font-size: 20px; }
+            h3 { font-size: 16px; }
+        }
+
+        /* --- 元件樣式 --- */
+        
+        /* 1. Header */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 16px;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 700;
+            background-color: #e0e0e0;
+            color: #555;
+            transition: all 0.3s ease;
+        }
+        .status-badge.correct { background-color: var(--success-bg); color: var(--success-text); }
+        .status-badge.wrong { background-color: var(--error-bg); color: var(--error-text); }
+
+        /* 2. Context Card */
+        .context-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        /* 3. Question & Options */
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            background-color: var(--highlight);
+            padding: 2px 4px;
+            border-radius: 4px;
+            color: #000;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start; /* 頂部對齊，適應長文字 */
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-label:hover {
+            background-color: #e3f2fd;
+            border-color: #bbdefb;
+            transform: translateY(-2px);
+        }
+
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .option-label.disabled:hover {
+            transform: none;
+            background-color: inherit;
+        }
+
+        .option-input {
+            margin-top: 5px; /* 微調對齊 */
+            margin-right: 12px;
+            transform: scale(1.2);
+            accent-color: var(--primary);
+        }
+
+        /* 4. Action Area */
+        .action-area {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .btn-submit {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(41,128,185,0.2);
+            transition: all 0.2s ease;
+            min-height: 44px; /* 觸控友善 */
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41,128,185,0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-retry {
+            background-color: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-retry:hover {
+            background-color: #f0f8ff;
+        }
+
+        /* 5. Feedback */
+        .feedback-area {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 300ms ease;
+        }
+        
+        .feedback-area.success {
+            background-color: var(--success-bg);
+            border: 2px solid #a5d6a7;
+            color: var(--success-text);
+        }
+        
+        .feedback-area.error {
+            background-color: var(--error-bg);
+            border: 2px solid #ef9a9a;
+            color: var(--error-text);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 6. Explanation */
+        .explain-area {
+            margin-top: 24px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            display: none; /* 初始隱藏 */
+        }
+
+        .details-main summary {
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+            padding: 10px 0;
+            list-style: none; /* 移除預設三角 */
+        }
+        
+        .details-main summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .details-main summary::after {
+            content: '\f078'; /* FontAwesome chevron-down */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            float: right;
+            transition: transform 0.3s;
+        }
+        
+        .details-main[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        .explain-content {
+            margin-top: 16px;
+        }
+
+        .explain-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .explain-section h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explain-section ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+
+        .explain-section li {
+            margin-bottom: 8px;
+        }
+
+        /* 7. Tags */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.85rem;
+            margin-right: 6px;
+            font-weight: 500;
+        }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        /* Self Check Style Override */
+        .self-check-container {
+            margin-top: 20px;
+        }
+        
+        .self-check-item {
+            margin-bottom: 10px;
+            background-color: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 8px;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .self-check-item summary {
+            background-color: #fff3cd;
+            padding: 12px 16px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #856404;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            list-style: none;
+        }
+        
+        .self-check-item summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .self-check-item summary::after {
+            content: '\f059'; /* FontAwesome question-circle */
+            font-family: "Font Awesome 6 Free";
+            margin-left: 10px;
+            opacity: 0.5;
+        }
+
+        .self-check-content {
+            padding: 16px;
+            border-top: 1px solid #ffe082;
+            color: #333;
+            background-color: #ffffff;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    
+    <!-- 1. Header -->
+    <header class="quiz-header">
+        <h3 class="m-0"><i class="fa-solid fa-list-check me-2"></i>題號：Q016</h3>
+        <span id="statusBadge" class="status-badge">未作答</span>
+    </header>
+
+    <!-- 2. Context -->
+    <section class="context-card">
+        <span class="tag tag-mgm mb-2">背景知識</span>
+        <p class="mb-0">
+            安全性資訊與事件管理（Security Information and Event Management，SIEM）是蒐集、分析、關聯日誌，並且提供即時的警報與威脅檢測，可針對事件回溯與調查。
+        </p>
+    </section>
+
+    <!-- 3. Question Area -->
+    <section id="questionArea">
+        <h2 class="question-text">
+            當我們設定要將一台 <span class="highlight">Windows Server 2019</span> 的安全性事件，拋送回到 SIEM 進行分析，可以透過下列哪些通訊協定，<span class="highlight">無需額外透過 cmd 指令串接</span>、設定、組態 即可傳送？（複選）
+        </h2>
+        
+        <div class="option-group">
+            <label class="option-label">
+                <input type="checkbox" name="quizOption" value="A" class="option-input">
+                <span class="option-text">(A) Syslog（System Logging Protocol）</span>
+            </label>
+            
+            <label class="option-label">
+                <input type="checkbox" name="quizOption" value="B" class="option-input">
+                <span class="option-text">(B) SNMP（Simple Network Management Protocol）</span>
+            </label>
+            
+            <label class="option-label">
+                <input type="checkbox" name="quizOption" value="C" class="option-input">
+                <span class="option-text">(C) Agent-Based</span>
+            </label>
+            
+            <label class="option-label">
+                <input type="checkbox" name="quizOption" value="D" class="option-input">
+                <span class="option-text">(D) Windows Event Forwarding（WEF）</span>
+            </label>
+        </div>
+    </section>
+
+    <!-- 4. Action Area -->
+    <section class="action-area">
+        <button id="submitBtn" class="btn-submit" onclick="checkAnswer()">送出答案</button>
+    </section>
+
+    <!-- 5. Feedback -->
+    <section id="feedbackArea" class="feedback-area">
+        <!-- JS動態填入內容 -->
+    </section>
+
+    <!-- 6. Explanation & 7. Self Check -->
+    <section id="explainArea" class="explain-area">
+        <details class="details-main">
+            <summary><i class="fa-regular fa-lightbulb me-2"></i>點擊查看詳細解析</summary>
+            <div class="explain-content">
+                
+                <!-- 第一步：找關鍵字 -->
+                <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                    <h4><i class="fa-solid fa-magnifying-glass"></i> 第一步：找關鍵字</h4>
+                    <ul>
+                        <li><strong>SIEM</strong>：集中蒐集與分析日誌的系統。</li>
+                        <li><strong>Windows Server 2019</strong>：代表是 Windows 原生環境。</li>
+                        <li><strong>安全性事件（日誌）</strong>：重點是「事件紀錄」，不是效能監控。</li>
+                        <li><strong>無需額外透過 cmd 指令串接</strong>：這是本題最關鍵的限制條件。</li>
+                    </ul>
+                </div>
+
+                <!-- 第二步：白話翻譯 -->
+                <div class="explain-section" style="border-left-color: var(--tag-net);">
+                    <h4><i class="fa-solid fa-language"></i> 第二步：白話翻譯</h4>
+                    <p>這題在問：「Windows Server 2019 要把安全性事件送到 SIEM，有哪些方法是<strong>現成就能用、不用自己寫 cmd 指令或額外客製設定的</strong>？」</p>
+                </div>
+
+                <!-- 第三步：解題思路 -->
+                <div class="explain-section" style="border-left-color: var(--primary);">
+                    <h4><i class="fa-solid fa-lightbulb"></i> 第三步：解題思路</h4>
+                    <p><strong>考點：</strong>考你是否理解 Windows 與 SIEM 的常見日誌整合方式，以及哪些是「原生或標準作法」。</p>
+                    <p><strong>原理與規則：</strong></p>
+                    <ul>
+                        <li>Windows 本身就會產生 Security/System/Application Log。</li>
+                        <li>SIEM 只要「接得到」，就能分析。</li>
+                    </ul>
+                    <p><strong>💡 生活化比喻：</strong><br>把 Windows Server 想成一台「監視攝影機」。只要插上標準訊號線（標準協定或代理程式），就能送畫面，不用自己手動焊接轉接頭（寫 cmd 指令）。</p>
+                </div>
+
+                <!-- 第四步：選項分析 -->
+                <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                    <h4><i class="fa-solid fa-list-check"></i> 第四步：選項分析</h4>
+                    <ul>
+                        <li><span class="text-success fw-bold">✔ (A) Syslog</span>：雖然 Windows 原生不直接產生 Syslog，但它是 SIEM 界最通用的標準，多數 SIEM 支援接收，被視為不需要寫複雜程式串接的標準方式。</li>
+                        <li><span class="text-danger fw-bold">✘ (B) SNMP</span>：主要用於「設備狀態」與「效能監控」（如 CPU 使用率、設備死活），而非詳細的「安全性事件日誌」。若硬要用它送日誌，需要非常複雜的設定。</li>
+                        <li><span class="text-success fw-bold">✔ (C) Agent-Based</span>：SIEM 廠商提供的代理程式。安裝後即可直接讀取 Windows Event Log 並自動送回 SIEM，是最常見的標準整合方式。</li>
+                        <li><span class="text-success fw-bold">✔ (D) WEF (Windows Event Forwarding)</span>：Windows 原生功能。專門用來將事件轉送到集中伺服器，完全不需額外撰寫 cmd 指令。</li>
+                    </ul>
+                </div>
+
+                <!-- 觀念補充與延伸 -->
+                <div class="explain-section" style="border-left-color: var(--tag-law);">
+                    <h4><i class="fa-solid fa-book-open"></i> 觀念補充與延伸</h4>
+                    <ul>
+                        <li><strong>核心觀念</strong>：Log Collection (日誌收集) 與 Centralized Logging (集中化日誌)。</li>
+                        <li><strong>法條或定義 (白話)</strong>：
+                            <ul>
+                                <li><strong>SIEM</strong>：集中收集各系統日誌，進行關聯分析與告警。</li>
+                                <li><strong>WEF</strong>：Windows 原生機制，讓事件日誌自動轉送到集中系統。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 記憶口訣 -->
+                <div class="explain-section" style="border-left-color: var(--highlight);">
+                    <h4><i class="fa-solid fa-brain"></i> 記憶口訣</h4>
+                    <p>「Windows 日誌三兄弟：<strong>Syslog、Agent、WEF</strong>」—— 事件要上 SIEM，找原生功能或專用代理最省事，別用監控設備狀態的 SNMP。</p>
+                </div>
+
+                <!-- 常見陷阱 -->
+                <div class="explain-section" style="border-left-color: var(--error-text);">
+                    <h4><i class="fa-solid fa-triangle-exclamation"></i> 常見陷阱</h4>
+                    <ul>
+                        <li><strong>學生誤區</strong>：把 SNMP 當成「什麼都能送」。</li>
+                        <li><strong>心理盲點</strong>：看到「通訊協定」就以為都能送事件日誌。</li>
+                        <li><strong>避坑指南</strong>：看到 Security Event Log → 先排除 SNMP。</li>
+                    </ul>
+                </div>
+
+                <!-- 自我檢測 -->
+                <div class="self-check-container">
+                    <h4 class="mb-3"><i class="fa-solid fa-clipboard-question text-warning"></i> 自我檢測 (點擊題目查看答案)</h4>
+                    
+                    <details class="self-check-item">
+                        <summary>Q1. 為什麼 SNMP 不適合用來傳送 Windows 安全性事件？</summary>
+                        <div class="self-check-content">
+                            <strong>答案：</strong>因為 SNMP 主要用於設備狀態與效能管理，其封包格式不適合承載詳細的事件文字日誌。
+                        </div>
+                    </details>
+                    
+                    <details class="self-check-item">
+                        <summary>Q2. 在大型企業中，為何常用 Agent-Based 而非純 Syslog？</summary>
+                        <div class="self-check-content">
+                            <strong>答案：</strong>Agent 可提供更完整、穩定、且具備加密與緩衝機制的事件收集能力。
+                        </div>
+                    </details>
+                    
+                    <details class="self-check-item">
+                        <summary>Q3. 如果只使用 Windows 原生功能，不安裝任何軟體，該選哪一種？</summary>
+                        <div class="self-check-content">
+                            <strong>答案：</strong>WEF (Windows Event Forwarding)。
+                        </div>
+                    </details>
+                </div>
+
+            </div>
+        </details>
+    </section>
+
+</div>
+
+<script>
+    // 定義正確答案（複選）
+    const correctAnswers = ['A', 'C', 'D'];
+    
+    // 取得 DOM 元素
+    const submitBtn = document.getElementById('submitBtn');
+    const inputs = document.querySelectorAll('.option-input');
+    const optionLabels = document.querySelectorAll('.option-label');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const explainArea = document.getElementById('explainArea');
+    const statusBadge = document.getElementById('statusBadge');
+    const questionArea = document.getElementById('questionArea');
+    // Note: selfCheckArea is now part of explainArea
+
+    function checkAnswer() {
+        // 1. 取得使用者選擇
+        const userSelected = Array.from(inputs)
+            .filter(input => input.checked)
+            .map(input => input.value)
+            .sort();
+
+        // 2. 防呆：未選不可送出
+        if (userSelected.length === 0) {
+            alert("請先選擇至少一個答案！");
+            return;
+        }
+
+        // 3. 判定邏輯（全對才算對）
+        const isCorrect = JSON.stringify(userSelected) === JSON.stringify(correctAnswers.sort());
+
+        // 4. 鎖定選項與按鈕
+        inputs.forEach(input => input.disabled = true);
+        optionLabels.forEach(label => label.classList.add('disabled'));
+        
+        // 5. 渲染 Feedback
+        feedbackArea.style.display = 'block';
+        if (isCorrect) {
+            feedbackArea.className = 'feedback-area success';
+            feedbackArea.innerHTML = `
+                <h4><i class="fa-regular fa-circle-check me-2"></i>答對了！</h4>
+                <p class="mb-0">理由：Syslog、Agent-Based 與 WEF 都是 SIEM 常見或 Windows 原生的事件日誌傳送方式，無需自行撰寫 cmd 指令進行串接。</p>
+            `;
+            statusBadge.textContent = "✔ 答對";
+            statusBadge.className = "status-badge correct";
+        } else {
+            feedbackArea.className = 'feedback-area error';
+            feedbackArea.innerHTML = `
+                <h4><i class="fa-regular fa-circle-xmark me-2"></i>答錯了</h4>
+                <p><strong>正確答案：A、C、D</strong></p>
+                <p class="mb-0">理由：Syslog、Agent-Based 與 WEF 都是 SIEM 常見或 Windows 原生的事件日誌傳送方式，無需自行撰寫 cmd 指令進行串接。</p>
+            `;
+            statusBadge.textContent = "✗ 答錯";
+            statusBadge.className = "status-badge wrong";
+        }
+
+        // 6. 顯示詳解
+        explainArea.style.display = 'block';
+        document.querySelector('.details-main').open = true; // 自動展開詳解區塊
+
+        // 7. 切換按鈕為「重新作答」
+        submitBtn.textContent = "重新作答";
+        submitBtn.className = "btn-submit btn-retry";
+        submitBtn.onclick = resetQuiz;
+    }
+
+    function resetQuiz() {
+        // 1. 清空選項
+        inputs.forEach(input => input.checked = false);
+        
+        // 2. 解除禁用
+        inputs.forEach(input => input.disabled = false);
+        optionLabels.forEach(label => label.classList.remove('disabled'));
+        
+        // 3. 隱藏回饋與詳解
+        feedbackArea.style.display = 'none';
+        explainArea.style.display = 'none';
+        document.querySelector('.details-main').open = false;
+        
+        // 收合所有自我檢測題目
+        document.querySelectorAll('.self-check-item').forEach(item => item.open = false);
+        
+        // 4. 重置 Header 狀態
+        statusBadge.textContent = "未作答";
+        statusBadge.className = "status-badge";
+
+        // 5. 按鈕復原
+        submitBtn.textContent = "送出答案";
+        submitBtn.className = "btn-submit";
+        submitBtn.onclick = checkAnswer;
+
+        // 6. 平滑捲動回題目
+        questionArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+</script>
+
+</body>
+</html>

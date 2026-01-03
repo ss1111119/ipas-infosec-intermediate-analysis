@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q13. WAF 網頁應用程式防火牆概念 | 資安觀念題</title>
+    
+    <!-- 外部資源 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --body-bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --primary-color: #2980b9;
+            --primary-hover: #1f6391;
+            --highlight: #f1c40f;
+            --success-bg: #e8f5e9;
+            --success-border: #a5d6a7;
+            --success-text: #2e7d32;
+            --error-bg: #fce4ec;
+            --error-border: #ef9a9a;
+            --error-text: #c62828;
+            --radius-main: 16px;
+            --radius-sm: 8px;
+            
+            /* 標籤色彩規範 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        body {
+            background-color: var(--body-bg);
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* 容器規範 */
+        .page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: var(--radius-main);
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 16px;
+                padding: 24px 20px;
+                border-radius: 12px;
+            }
+        }
+
+        /* Header */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #edf2f7;
+        }
+
+        .status-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            background-color: #e2e8f0;
+            color: #64748b;
+        }
+        .status-badge.correct { background-color: var(--success-bg); color: var(--success-text); }
+        .status-badge.wrong { background-color: var(--error-bg); color: var(--error-text); }
+
+        /* Context */
+        .context-card {
+            background-color: #f8fafc;
+            border-left: 4px solid #94a3b8;
+            padding: 16px 20px;
+            margin-bottom: 30px;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            font-size: 0.95rem;
+            color: #546e7a;
+        }
+
+        /* Question & Options */
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #1a202c;
+        }
+
+        .option-group { display: flex; flex-direction: column; gap: 12px; }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-label:hover { background-color: #f0f9ff; border-color: #cbd5e1; }
+        .option-label.selected { background-color: #e0f2fe; border-color: var(--primary-color); }
+
+        .option-input {
+            margin-top: 5px;
+            margin-right: 12px;
+            accent-color: var(--primary-color);
+            transform: scale(1.2);
+        }
+
+        /* Action Area */
+        .action-area { margin-top: 32px; text-align: center; }
+
+        .btn-action {
+            padding: 12px 48px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            min-height: 48px;
+            transition: all 0.2s ease;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+        .btn-outline { background-color: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); }
+        .btn-outline:hover { background-color: #f0f9ff; }
+
+        /* Feedback */
+        .feedback-area {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeInUp 0.4s ease;
+        }
+        .feedback-success { background-color: var(--success-bg); border: 1px solid var(--success-border); color: var(--success-text); }
+        .feedback-error { background-color: var(--error-bg); border: 1px solid var(--error-border); color: var(--error-text); }
+
+        /* Explain & SelfCheck */
+        details {
+            margin-top: 24px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+            transition: all 0.3s;
+        }
+        details[open] { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+        summary {
+            padding: 16px 24px;
+            background-color: #f8fafc;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-primary);
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        summary::after {
+            content: '\f078';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+        details[open] summary::after { transform: rotate(180deg); }
+
+        .details-content {
+            padding: 24px;
+            background-color: #fff;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* 結構化解析卡片系統 */
+        .explain-section {
+            background-color: #fcfcfc;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #cbd5e1;
+            position: relative;
+        }
+        .explain-section h4 {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        
+        .section-badge {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            background: #95a5a6;
+            margin-right: 8px;
+            vertical-align: text-top;
+        }
+
+        /* 自我檢測互動題 */
+        .self-check-item {
+            margin-bottom: 20px;
+            padding: 16px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        .check-q { 
+            font-weight: 600; 
+            color: var(--text-primary); 
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .check-q::before {
+            content: 'Q.';
+            color: var(--primary-color);
+            font-weight: 800;
+        }
+        
+        /* 隱藏答案的按鈕 */
+        .reveal-btn {
+            background-color: #e2e8f0;
+            color: #475569;
+            border: none;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .reveal-btn:hover { background-color: #cbd5e1; }
+        
+        .check-a {
+            margin-top: 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--success-border);
+            color: #2e7d32;
+            display: none; /* 預設隱藏 */
+            animation: fadeIn 0.3s ease;
+        }
+        .check-a.visible { display: block; }
+
+        /* Highlight & Tags */
+        mark { background-color: rgba(241, 196, 15, 0.3); padding: 0 4px; border-radius: 2px; }
+        .badge-tag { display: inline-block; padding: 4px 10px; border-radius: 4px; color: white; font-size: 0.85rem; font-weight: 500; margin: 0 2px; }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-risk { background-color: var(--tag-mgm); }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        <!-- 1. Header -->
+        <header class="quiz-header">
+            <h3 class="m-0"><i class="fa-solid fa-shield-halved me-2"></i>Q13. 網站安全防護</h3>
+            <span id="status-badge" class="status-badge">未作答</span>
+        </header>
+
+        <!-- 2. Context -->
+        <section class="context-card">
+            <i class="fa-solid fa-circle-info me-2"></i>本題無額外情境
+        </section>
+
+        <!-- 3. Question -->
+        <main>
+            <h2 class="question-text">
+                13. 有關「<span class="badge-tag tag-sec">網頁應用程式防火牆 (WAF)</span>」的描述，下列何者較為適切？
+            </h2>
+            <div class="option-group">
+                <label class="option-label"><input type="radio" name="quiz" value="A" class="option-input"><span class="option-text">(A) WAF 主要用於過濾電子郵件內容，防止垃圾郵件</span></label>
+                <label class="option-label"><input type="radio" name="quiz" value="B" class="option-input"><span class="option-text">(B) WAF 的規則有機會被攻擊者繞過，無法完全阻擋網頁攻擊</span></label>
+                <label class="option-label"><input type="radio" name="quiz" value="C" class="option-input"><span class="option-text">(C) WAF 只能用來防止 OWASP Top 10 2021 裡面的 A03:2021 Injection</span></label>
+                <label class="option-label"><input type="radio" name="quiz" value="D" class="option-input"><span class="option-text">(D) WAF 只能阻擋已知特徵的 SQL Injection 攻擊，但是特徵必須一模一樣，如果特徵稍微有變化 WAF 就無法阻擋</span></label>
+            </div>
+        </main>
+
+        <!-- 4. Action -->
+        <section class="action-area">
+            <button id="submit-btn" class="btn-action btn-primary" onclick="submitAnswer()">送出答案</button>
+        </section>
+
+        <!-- 5. Feedback -->
+        <section id="feedback-area" class="feedback-area"></section>
+
+        <!-- 6. Explain (Full Detailed Version) -->
+        <details id="explain-area">
+            <summary><span><i class="fa-solid fa-book-open me-2"></i>完整解析與觀念剖析</span></summary>
+            <div class="details-content">
+                
+                <!-- 步驟一：找關鍵字 -->
+                <div class="explain-section" style="border-left-color: var(--primary-color);">
+                    <h4><span class="section-badge">第一步</span>找關鍵字</h4>
+                    <p>
+                        <strong>網頁應用程式防火牆（WAF）</strong>：題目主角，考你對 WAF 能力與限制的正確認知。<br>
+                        <strong>較為適切</strong>：代表不是「完美描述」，而是「最符合實務」的選項。<br>
+                        <strong>被繞過、無法完全阻擋</strong>：資安考試常見關鍵詞，暗示<mark>「沒有任何防護是 100%」</mark>。
+                    </p>
+                </div>
+
+                <!-- 步驟二：白話翻譯 -->
+                <div class="explain-section" style="border-left-color: var(--tag-law);">
+                    <h4><span class="section-badge">第二步</span>白話翻譯</h4>
+                    <p class="fs-5 fw-bold text-center text-secondary my-3">
+                        「WAF 這個東西，在真實世界中，對網頁攻擊的防護能力，下列哪個說法比較接近事實？」
+                    </p>
+                </div>
+
+                <!-- 步驟三：解題思路 -->
+                <div class="explain-section" style="border-left-color: var(--tag-net);">
+                    <h4><span class="section-badge">第三步</span>解題思路</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-3"><strong>1. 解題步驟：</strong>先確認 WAF 的定位是「降低風險」而非「消除風險」。接著檢查選項，若出現「只能」、「一定」、「完全」等絕對用語，通常有問題。</li>
+                        <li class="mb-3"><strong>2. 原理與規則：</strong>WAF 站在網站前面檢查 HTTP/HTTPS 請求，主要依賴特徵碼或行為分析。但攻擊手法會不斷變形（如編碼、分段），導致 WAF 可能漏接。</li>
+                        <li><strong>3. 生活例子：</strong>WAF 就像大樓的<mark>「保全 ＋ 金屬探測門」</mark>，它可以擋掉大部份帶刀的人，但如果是高手把刀拆解藏在鞋底（變形攻擊），保全可能就抓不到。所以保全是重要的，但不能保證 100% 安全。</li>
+                    </ul>
+                </div>
+
+                <!-- 步驟四：選項分析 -->
+                <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                    <h4><span class="section-badge">第四步</span>選項分析</h4>
+                    <div class="mb-2"><span class="badge bg-secondary">A 錯</span> <strong>定位錯誤：</strong>過濾垃圾郵件是「郵件安全閘道 (ESG)」的工作，不是 WAF。</div>
+                    <div class="mb-2"><span class="badge bg-success">B 對</span> <strong>符合實務：</strong>WAF 的規則確實可能被繞過（Bypassed），資安界公認無法完全阻擋所有攻擊。</div>
+                    <div class="mb-2"><span class="badge bg-secondary">C 錯</span> <strong>功能低估：</strong>WAF 不只防 Injection，還能防 XSS、Bot、路徑穿越等多種威脅。</div>
+                    <div><span class="badge bg-secondary">D 錯</span> <strong>過時描述：</strong>現代 WAF 具備「正規化」能力，可還原變形特徵，並非只能比對一模一樣的字串。</div>
+                </div>
+
+                <!-- 觀念補充與延伸 -->
+                <div class="explain-section" style="border-left-color: var(--tag-zt);">
+                    <h4><i class="fa-solid fa-lightbulb me-2"></i>觀念補充與延伸</h4>
+                    
+                    <h5 class="fs-6 fw-bold mt-3">法條或定義（白話）</h5>
+                    <p class="small text-muted">WAF：一種專門保護 Web 應用程式，透過檢查 HTTP/HTTPS 流量來偵測與阻擋攻擊的安全機制。</p>
+
+                    <h5 class="fs-6 fw-bold mt-3">觸類旁通（舉一反三）</h5>
+                    <ul class="small text-muted ps-3">
+                        <li><strong>對比概念：</strong>WAF 是「補救與監控」，而 <span class="badge-tag tag-sec">Secure Coding (安全程式設計)</span> 才是根本解法。</li>
+                        <li><strong>變化題型：</strong>若問「為什麼有 WAF 還要修補程式漏洞？」，答案就是因為「WAF 可能被繞過」。</li>
+                    </ul>
+
+                    <h5 class="fs-6 fw-bold mt-3">記憶口訣</h5>
+                    <div class="alert alert-warning py-2 mb-0">
+                        「WAF 能擋多，不能擋光」或「WAF 是防線，不是保證」。
+                    </div>
+                </div>
+
+                <!-- 常見陷阱 -->
+                <div class="explain-section" style="border-left-color: var(--error-text);">
+                    <h4><i class="fa-solid fa-triangle-exclamation me-2"></i>常見陷阱</h4>
+                    <p><strong>心理盲點：</strong>考試時看到「防火牆」三個字，直覺認為它很強大、無堅不摧，容易誤選「可以完全阻擋」的選項。</p>
+                    <p><strong>避坑指南：</strong>看到選項出現<mark>「完全」、「只能」、「一定」</mark>這種過度絕對的詞彙，先懷疑它。</p>
+                </div>
+
+            </div>
+        </details>
+
+        <!-- 7. Self Check (Interactive) -->
+        <details id="self-check-area">
+            <summary><span><i class="fa-solid fa-clipboard-question me-2"></i>自我檢測（點擊查看答案）</span></summary>
+            <div class="details-content">
+                
+                <div class="self-check-item">
+                    <div class="check-q">為什麼部署 WAF 之後，仍然要修補程式漏洞？</div>
+                    <button class="reveal-btn" onclick="toggleAnswer(this)">看答案</button>
+                    <div class="check-a">答案：因為 WAF 的規則有可能被繞過，若程式碼本身不修補，一旦 WAF 失效或被繞過，系統將直接暴露在風險中。</div>
+                </div>
+
+                <div class="self-check-item">
+                    <div class="check-q">如果 WAF 停用或故障，哪一層防護最直接承受攻擊？</div>
+                    <button class="reveal-btn" onclick="toggleAnswer(this)">看答案</button>
+                    <div class="check-a">答案：Web 應用程式本身（程式碼層）。</div>
+                </div>
+
+                <div class="self-check-item">
+                    <div class="check-q">WAF 最適合被放在縱深防禦的哪一層？</div>
+                    <button class="reveal-btn" onclick="toggleAnswer(this)">看答案</button>
+                    <div class="check-a">答案：應用層 (Application Layer) 防護的一環，需搭配安全程式設計與監控。</div>
+                </div>
+
+            </div>
+        </details>
+
+    </div>
+
+    <script>
+        const correctValue = 'B';
+        const submitBtn = document.getElementById('submit-btn');
+        const feedbackArea = document.getElementById('feedback-area');
+        const explainArea = document.getElementById('explain-area');
+        const selfCheckArea = document.getElementById('self-check-area');
+        const statusBadge = document.getElementById('status-badge');
+        const options = document.querySelectorAll('input[name="quiz"]');
+        const optionLabels = document.querySelectorAll('.option-label');
+
+        optionLabels.forEach(label => {
+            label.addEventListener('click', () => {
+                if (!submitBtn.classList.contains('btn-outline')) {
+                    optionLabels.forEach(l => l.classList.remove('selected'));
+                    label.classList.add('selected');
+                }
+            });
+        });
+
+        function submitAnswer() {
+            if (submitBtn.textContent === '重新作答') { resetQuiz(); return; }
+
+            let selectedValue = null;
+            options.forEach(opt => { if (opt.checked) selectedValue = opt.value; });
+
+            if (!selectedValue) { alert("請先選擇一個答案！"); return; }
+
+            options.forEach(opt => opt.disabled = true);
+            optionLabels.forEach(label => label.style.cursor = 'not-allowed');
+
+            let feedbackHTML = '';
+            if (selectedValue === correctValue) {
+                statusBadge.textContent = "✓ 答對";
+                statusBadge.className = "status-badge correct";
+                feedbackHTML = `<div class="feedback-success p-3 rounded"><h5 class="mb-2"><i class="fa-solid fa-circle-check me-2"></i>答對了！</h5><p class="mb-0"><strong>一句話理由：</strong>WAF 能降低風險，但無法保證 100% 阻擋，這是資安實務的正確觀念。</p></div>`;
+            } else {
+                statusBadge.textContent = "✗ 答錯";
+                statusBadge.className = "status-badge wrong";
+                document.querySelector(`input[value="${selectedValue}"]`).parentElement.style.borderColor = 'var(--error-border)';
+                document.querySelector(`input[value="${selectedValue}"]`).parentElement.style.backgroundColor = 'var(--error-bg)';
+                feedbackHTML = `<div class="feedback-error p-3 rounded"><h5 class="mb-2"><i class="fa-solid fa-circle-xmark me-2"></i>答錯了</h5><p class="mb-1"><strong>正確答案是：(B)</strong></p><p class="mb-0"><strong>一句話理由：</strong>WAF 是防線不是保證。它像大樓保全，能擋大部分壞人，但高手仍可能繞過它。</p></div>`;
+            }
+
+            feedbackArea.innerHTML = feedbackHTML;
+            feedbackArea.style.display = 'block';
+            explainArea.style.display = 'block';
+            selfCheckArea.style.display = 'block';
+            submitBtn.textContent = '重新作答';
+            submitBtn.className = 'btn-action btn-outline';
+            feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function resetQuiz() {
+            options.forEach(opt => { opt.checked = false; opt.disabled = false; });
+            optionLabels.forEach(label => {
+                label.classList.remove('selected');
+                label.style.cursor = 'pointer';
+                label.style.backgroundColor = '';
+                label.style.borderColor = '';
+            });
+            feedbackArea.style.display = 'none';
+            explainArea.style.display = 'none';
+            explainArea.open = false;
+            selfCheckArea.style.display = 'none';
+            selfCheckArea.open = false;
+            
+            // 重置自我檢測的答案顯示狀態
+            document.querySelectorAll('.check-a').forEach(el => el.classList.remove('visible'));
+            document.querySelectorAll('.reveal-btn').forEach(btn => btn.style.display = 'inline-block');
+
+            statusBadge.textContent = "未作答";
+            statusBadge.className = "status-badge";
+            submitBtn.textContent = '送出答案';
+            submitBtn.className = 'btn-action btn-primary';
+            document.querySelector('.page-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 自我檢測顯示答案功能
+        function toggleAnswer(btn) {
+            const answerDiv = btn.nextElementSibling;
+            answerDiv.classList.add('visible');
+            btn.style.display = 'none'; // 點擊後隱藏按鈕
+        }
+    </script>
+</body>
+</html>

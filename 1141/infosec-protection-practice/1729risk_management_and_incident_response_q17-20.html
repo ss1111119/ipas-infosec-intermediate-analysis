@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題組 2｜完整教學模板</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --body-bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --primary: #2980b9;
+            --primary-hover: #3498db;
+            --highlight: #f1c40f;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            --border-radius: 16px;
+            --transition-speed: 200ms;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Layout */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: var(--border-radius);
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 16px;
+                padding: 20px;
+                width: calc(100% - 32px);
+                border-radius: 12px;
+            }
+        }
+
+        /* Typography */
+        h1 { font-size: 24px; margin: 0 0 16px 0; color: var(--primary); }
+        h2 { font-size: 20px; margin: 0 0 12px 0; }
+        h3 { font-size: 18px; margin: 0 0 8px 0; }
+        p { margin-bottom: 16px; }
+
+        /* Tags */
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-right: 6px; color: white; vertical-align: middle; }
+        .tag-law { background-color: #607d8b; }
+        .tag-iso { background-color: #27ae60; }
+        .tag-zt  { background-color: #8e44ad; }
+        .tag-net { background-color: #2980b9; }
+        .tag-sec { background-color: #c0392b; }
+        .tag-mgm { background-color: #d35400; }
+
+        mark { background-color: var(--highlight); color: #000; padding: 0 2px; border-radius: 2px; }
+
+        /* Header & Progress */
+        .group-header { margin-bottom: 30px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; }
+        .progress-info { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .progress-bar { height: 8px; background-color: #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--primary-hover)); transition: width 400ms ease; }
+        .completion-status { font-weight: bold; font-size: 14px; }
+        .status-pending { color: #f39c12; }
+        .status-done { color: var(--success-text); display: none; }
+
+        /* Context */
+        .group-context { background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 5px solid var(--primary); margin-bottom: 30px; }
+        .group-context h3 { color: var(--primary); margin-top: 0; }
+
+        /* Tabs */
+        .tabs-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+        .tab-btn {
+            background: #fff; border: 1px solid #ddd; padding: 8px 16px; border-radius: 8px; cursor: pointer;
+            font-family: inherit; font-weight: 500; color: #666; transition: var(--transition-speed); min-height: 48px;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .tab-btn:hover { background-color: #e3f2fd; transform: translateY(-2px); }
+        .tab-btn.active { background-color: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 8px rgba(41,128,185,0.3); }
+        .tab-status { font-size: 12px; opacity: 0.9; }
+
+        /* Question Area */
+        .tab-content { display: none; animation: fadeIn 300ms ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .question-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .q-status-badge { font-size: 14px; padding: 4px 12px; border-radius: 12px; background: #eee; color: #666; }
+        .q-status-badge.correct { background: var(--success-bg); color: var(--success-text); }
+        .q-status-badge.wrong { background: var(--error-bg); color: var(--error-text); }
+
+        /* Options */
+        .options-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+        .option-label {
+            display: flex; align-items: flex-start; padding: 12px 16px; border: 2px solid #eee; border-radius: 8px;
+            cursor: pointer; transition: var(--transition-speed); position: relative;
+        }
+        .option-label:hover { background-color: #e3f2fd; }
+        .option-label.selected { background-color: #bbdefb; border-color: var(--primary); }
+        .option-label.disabled { cursor: not-allowed; opacity: 0.7; }
+        .option-label.disabled:hover { background-color: #f4f4f4; }
+        
+        .option-input { margin-top: 4px; margin-right: 12px; accent-color: var(--primary); }
+        .option-text { width: 100%; word-break: break-word; }
+
+        /* Buttons */
+        .action-area { margin-bottom: 24px; }
+        .btn-primary {
+            background-color: var(--primary); color: white; border: none; padding: 10px 24px;
+            border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%;
+            transition: var(--transition-speed); min-height: 44px;
+        }
+        .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(41,128,185,0.3); }
+        .btn-primary:disabled { background-color: #bdc3c7; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        .btn-retry { background-color: #f39c12; }
+        .btn-retry:hover { background-color: #e67e22; }
+
+        /* Feedback & Explain */
+        .feedback { padding: 16px; border-radius: 8px; margin-bottom: 20px; display: none; animation: fadeInUp 300ms ease; }
+        .feedback.success { background-color: var(--success-bg); border-left: 4px solid var(--success-text); color: var(--success-text); }
+        .feedback.error { background-color: var(--error-bg); border-left: 4px solid var(--error-text); color: var(--error-text); }
+        
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        details { background-color: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+        details summary { padding: 12px 16px; background-color: #f8f9fa; cursor: pointer; font-weight: bold; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+        details summary::after { content: '+'; font-size: 20px; color: #666; }
+        details[open] summary::after { content: '-'; }
+        .details-content { padding: 20px; border-top: 1px solid #ddd; }
+        
+        .explain-section { background-color: #f8f9fa; padding: 16px; border-radius: 4px; margin-bottom: 12px; border-left: 4px solid var(--primary); }
+        .explain-section h4 { margin: 0 0 8px 0; color: var(--primary); font-size: 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(41,128,185,0.2); padding-bottom: 6px; }
+        .explain-section ul { padding-left: 20px; margin: 0; }
+        .explain-section li { margin-bottom: 6px; }
+        
+        /* Self Check Specifics */
+        .self-check-box { margin-top: 20px; border: 2px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+        .self-check-header { background-color: #fafafa; padding: 12px 16px; font-weight: bold; color: #444; border-bottom: 1px solid #e0e0e0; }
+        .self-check-q { padding: 16px; font-weight: 500; color: #2c3e50; }
+        .self-check-ans-reveal { padding: 0 16px 16px 16px; }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    <!-- 1. Header -->
+    <header class="group-header">
+        <h1>題組 2｜完整教學模板</h1>
+        <div class="progress-info">
+            <span id="progress-text">已完成：<strong>0</strong> / 4</span>
+            <span id="overall-status" class="status-pending">📝 尚未完成</span>
+            <span id="overall-done" class="status-done">✅ 本題組已完成</span>
+        </div>
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+    </header>
+
+    <!-- 2. Context -->
+    <div class="group-context">
+        <h3>📖 題組背景</h3>
+        <p>A 公司為一家金融機構，依我國《資通安全管理法》相關規定，被核定為資通安全責任等級 <strong>A 級</strong>（代表其資訊系統若受影響，將可能衝擊金融秩序、社會運作或國家安全，屬於最高資安責任等級）。</p>
+        <p>近期因駭客攻擊事件頻繁發生，公司高層要求資安單位，必須重新檢視目前外部資安威脅環境以及內部資訊資產的變化情形，重新進行風險檢視與評估，並依評估結果採取適切的風險處理措施，以確保公司整體資訊安全。</p>
+    </div>
+
+    <!-- 3. Tabs -->
+    <div id="tabs-container" class="tabs-container">
+        <!-- Rendered by JS -->
+    </div>
+
+    <!-- 4. Tab Content -->
+    <div id="content-container">
+        <!-- Rendered by JS -->
+    </div>
+</div>
+
+<script>
+    // --- Data ---
+    const quizData = {
+        groupName: "題組 2｜完整教學模板",
+        questions: [
+            {
+                id: 17,
+                type: "single",
+                tag: "mgm", // 風險管理/弱點管理
+                tagName: "弱點管理",
+                question: "該公司資安人員針對所有資訊資產進行了弱點掃描作業。試問有關該資安人員所實施的弱點掃描敘述，下列何者錯誤？",
+                options: [
+                    { id: "A", text: "使用 Fortify Static Code Analyzer 執行網站弱點掃描作業" },
+                    { id: "B", text: "使用 Nessus Professional 執行系統弱點掃描作業" },
+                    { id: "C", text: "將弱點掃描結果屬於中風險程度以上之弱點進行後續處理之評估" },
+                    { id: "D", text: "依據弱點修補結果實施第二次的弱點掃描複測作業" }
+                ],
+                correctAnswer: ["A"],
+                reason: "Fortify 是程式碼分析工具(SAST)，不是網站弱點掃描工具(DAST)。",
+                explanation: `
+                    <div class="explain-section">
+                        <h4>🔍 第一步：找關鍵字</h4>
+                        <p>弱點掃描、Fortify Static Code Analyzer、Nessus Professional、中風險以上、複測</p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>🗣️ 第二步：白話翻譯</h4>
+                        <p>公司在做「找系統漏洞」這件事時，下面哪一個做法是用錯工具或概念錯誤的？</p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>💡 第三步：解題思路</h4>
+                        <ul>
+                            <li><strong>解題步驟：</strong>
+                                <ol>
+                                    <li>分辨工具是「掃程式碼」還是「掃系統」。</li>
+                                    <li>檢查弱點處理流程是否合理。</li>
+                                    <li>找出用途不正確的選項。</li>
+                                </ol>
+                            </li>
+                            <li><strong>原理與規則：</strong>
+                                <ul>
+                                    <li>掃「程式碼」(SAST) ＝ 看 DNA（檢查原始碼邏輯）。</li>
+                                    <li>掃「系統主機」(System Scan) ＝ 照 X 光（檢查已運行的服務與補丁）。</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="explain-section">
+                        <h4>📊 第四步：選項分析</h4>
+                        <ul>
+                            <li><strong>(A) 錯誤：</strong>Fortify Static Code Analyzer 是 SAST（靜態應用程式安全測試）工具，功能是檢查「原始碼」是否有安全缺陷，<strong>不是用來掃描已上線的網站系統</strong>（那是 DAST 工具的工作）。</li>
+                            <li><strong>(B) 正確：</strong>Nessus 是典型的「系統弱點掃描工具」，可檢測作業系統、服務、套件漏洞。</li>
+                            <li><strong>(C) 正確：</strong>中風險以上列入後續處理評估，符合弱點管理原則。</li>
+                            <li><strong>(D) 正確：</strong>修補後再掃一次，稱為「複測」，是標準流程。</li>
+                        </ul>
+                    </div>
+                    <div class="explain-section">
+                        <h4>📚 觀念補充與延伸</h4>
+                        <p><strong>弱點管理定義：</strong>指識別、分析、修補及追蹤資訊系統弱點的管理程序。（白話：找洞、補洞、再檢查）。</p>
+                        <p><strong>觸類旁通：</strong></p>
+                        <ul>
+                            <li>SAST (Static Application Security Testing)：掃原始碼 (Source Code)。</li>
+                            <li>DAST (Dynamic Application Security Testing)：掃運作中的網站 (Web Behavior)。</li>
+                            <li>常見工具替換：Checkmarx (SAST)、OpenVAS (系統掃描)。</li>
+                        </ul>
+                    </div>
+                    <div class="explain-section">
+                        <h4>🧠 記憶口訣</h4>
+                        <p><mark>「Fortify 看碼，Nessus 看機」</mark></p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>⚠️ 常見陷阱</h4>
+                        <ul>
+                            <li><strong>心理盲點：</strong>看到「網站」就直覺選跟網站有關的工具，忽略了工具是看「程式碼」還是「行為」。</li>
+                            <li><strong>避坑指南：</strong>先問自己：「這個工具是看原始碼，還是看系統？」</li>
+                        </ul>
+                    </div>
+                `,
+                selfCheck: {
+                    question: "1. 若題目改成「原始碼安全檢測」，Fortify 適不適合？<br>2. Nessus 是否能完整檢測 SQL Injection？",
+                    answer: "1. 適合。<br>2. 不行，Nessus 主攻系統層與服務漏洞，SQL Injection 屬於網站應用層，需用 DAST 工具（如 WebInspect）檢測較佳。"
+                }
+            },
+            {
+                id: 18,
+                type: "single",
+                tag: "mgm",
+                tagName: "風險評鑑",
+                question: "資安人員於風險評鑑過程中，發覺該公司有一部防火牆已遭原廠宣告終止服務（End of Service，EOS）。試問有關資安人員對於此一發現之後續作為，下列何者最為適切？",
+                options: [
+                    { id: "A", text: "立即變更防火牆設定，將外對內之封包進行阻擋" },
+                    { id: "B", text: "立即變更防火牆設定，將內對外之封包進行阻擋" },
+                    { id: "C", text: "立即將防火牆的設定檔（Config）進行備份" },
+                    { id: "D", text: "立即評估該防火牆之風險並妥採適切之控制措施" }
+                ],
+                correctAnswer: ["D"],
+                reason: "風險管理原則是「先評估、再處理」，直接修改設定可能造成業務中斷。",
+                explanation: `
+                    <div class="explain-section">
+                        <h4>🔍 第一步：找關鍵字</h4>
+                        <p>風險評鑑、防火牆、EOS（終止服務）、後續作為</p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>🗣️ 第二步：白話翻譯</h4>
+                        <p>發現一台防火牆「原廠已經不再更新、不再修漏洞」，第一個正確動作是什麼？</p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>💡 第三步：解題思路</h4>
+                        <ul>
+                            <li><strong>解題步驟：</strong>
+                                <ol>
+                                    <li>確認 EOS 是「風險來源」。</li>
+                                    <li>判斷不能直接亂動系統設定。</li>
+                                    <li>選擇符合「先評估、再處理」的選項。</li>
+                                </ol>
+                            </li>
+                            <li><strong>原理與規則：</strong>風險管理不是「看到問題就亂改」，而是「先搞清楚影響，再決定對策」。</li>
+                        </ul>
+                    </div>
+                    <div class="explain-section">
+                        <h4>📊 第四步：選項分析</h4>
+                        <ul>
+                            <li><strong>(A) 錯誤：</strong>未經評估就阻擋外對內流量，可能造成業務中斷。</li>
+                            <li><strong>(B) 錯誤：</strong>阻擋內對外流量可能影響正常上網與業務系統。</li>
+                            <li><strong>(C) 不夠適切：</strong>備份只是技術動作，不是風險處理策略。</li>
+                            <li><strong>(D) 正確：</strong>EOS 屬於重大風險，應先評估，再決定汰換、補強或隔離。</li>
+                        </ul>
+                    </div>
+                    <div class="explain-section">
+                        <h4>📚 觀念補充與延伸</h4>
+                        <p><strong>風險處理 (Risk Treatment)：</strong>指對風險採取避免、降低、移轉或接受之決策。（白話：怎麼面對風險）。</p>
+                        <p><strong>觸類旁通：</strong>EOS ≠ 立刻關機；EOS = 必須列入高風險評估。</p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>🧠 記憶口訣</h4>
+                        <p><mark>「EOS 先評估，不是先亂動」</mark></p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>⚠️ 常見陷阱</h4>
+                        <ul>
+                            <li><strong>心理盲點：</strong>怕出事就想立刻動設定，認為「馬上關掉或封鎖」就是好作法。</li>
+                            <li><strong>避坑指南：</strong>題目出現「風險評鑑」→ 選「評估」相關選項。</li>
+                        </ul>
+                    </div>
+                `,
+                selfCheck: {
+                    question: "1. EOS 是否一定要立即汰換？<br>2. EOS 與 EOL 差別是否重要？",
+                    answer: "1. 不一定，需評估（可能採隔離措施）。<br>2. 重要，皆屬風險來源，但都需要被納入風險評鑑。"
+                }
+            },
+            {
+                id: 19,
+                type: "single",
+                tag: "mgm",
+                tagName: "事件應變",
+                question: "當資安人員進行風險評鑑與處理時，接獲內部人員通報發生勒索病毒感染之資通安全事件，該事件已造成檔案交換主機（未涉及關鍵基礎設施維運）內的檔案遭加密無法開啟，系統亦無法正常使用，影響了核心業務的正常運作且無法於可容忍中斷時間內回復正常運作。試問有關資安人員對於此一事件處理之作為，下列何者錯誤？",
+                options: [
+                    { id: "A", text: "一小時內通報金管會" },
+                    { id: "B", text: "資通安全事件等級判斷為二級" },
+                    { id: "C", text: "對該檔案交換主機進行隔離" },
+                    { id: "D", text: "建議資安長啟動該核心業務之業務持續計畫" }
+                ],
+                correctAnswer: ["B"],
+                reason: "影響核心業務且無法於容忍時間內復原，屬於嚴重等級（通常為三級或四級），不可能僅為二級。",
+                explanation: `
+                    <div class="explain-section">
+                        <h4>🔍 第一步：找關鍵字</h4>
+                        <p>勒索病毒、核心業務、無法回復、事件等級</p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>🗣️ 第二步：白話翻譯</h4>
+                        <p>公司被勒索病毒打到，影響核心業務，下面哪一個處理動作是「判斷錯誤的」？</p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>💡 第三步：解題思路</h4>
+                        <ul>
+                            <li><strong>解題步驟：</strong>
+                                <ol>
+                                    <li>判斷事件嚴重性。</li>
+                                    <li>檢查等級是否合理。</li>
+                                    <li>找出低估事件嚴重度的選項。</li>
+                                </ol>
+                            </li>
+                            <li><strong>原理與規則：</strong>資通安全事件等級依影響範圍、業務中斷程度進行分級。（白話：影響越大，等級越高）。</li>
+                        </ul>
+                    </div>
+                    <div class="explain-section">
+                        <h4>📊 第四步：選項分析</h4>
+                        <ul>
+                            <li><strong>(A) 正確：</strong>金融機構發生重大資安事件，需通報主管機關。</li>
+                            <li><strong>(B) 錯誤：</strong>已影響核心業務且無法於可容忍時間內復原，事件等級不可能僅為二級（通常為三級以上）。</li>
+                            <li><strong>(C) 正確：</strong>隔離感染主機是標準處置。</li>
+                            <li><strong>(D) 正確：</strong>啟動 BCP（業務持續計畫）是合理作法。</li>
+                        </ul>
+                    </div>
+                    <div class="explain-section">
+                        <h4>📚 觀念補充與延伸</h4>
+                        <p><strong>觸類旁通：</strong></p>
+                        <ul>
+                            <li>未影響業務 ≠ 低等級（仍需評估資料外洩程度）。</li>
+                            <li>影響核心業務 = 高等級。</li>
+                        </ul>
+                    </div>
+                    <div class="explain-section">
+                        <h4>🧠 記憶口訣</h4>
+                        <p><mark>「核心業務停，等級不會輕」</mark></p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>⚠️ 常見陷阱</h4>
+                        <ul>
+                            <li><strong>心理盲點：</strong>看到「未涉及關鍵基礎設施」就以為等級低，把「關鍵基礎設施」和「核心業務」混為一談。</li>
+                            <li><strong>避坑指南：</strong>看「有沒有影響核心業務」。</li>
+                        </ul>
+                    </div>
+                `,
+                selfCheck: {
+                    question: "1. 若僅影響單一使用者，等級會提高嗎？<br>2. BCP 與 DRP 是否同時啟動？",
+                    answer: "1. 不一定，需視該使用者權限與資料重要性。<br>2. 視情況，DRP 是 BCP 的一部分，通常技術復原（DRP）先行或同時運作。"
+                }
+            },
+            {
+                id: 20,
+                type: "multiple",
+                tag: "mgm",
+                tagName: "情資分享",
+                question: "鑒於防火牆 EOS 的事件，該公司資安長非常重視事前資通安全情資的蒐集與分析，俾利公司能有足夠的時間來因應突發的資訊安全風險發生。試問有關資安人員對於資通安全情資的蒐集與分析作為，下列哪些正確？（複選）",
+                options: [
+                    { id: "A", text: "資通安全情資包含使資通系統安全控制措施無效或利用安全漏洞之方法在內" },
+                    { id: "B", text: "資通安全情資包含資通安全事件造成之實際損害或可能產生之負面影響在內" },
+                    { id: "C", text: "加入衛生福利部資安資訊分享與分析中心（H-ISAC）平台" },
+                    { id: "D", text: "加入金融資安資訊分享與分析中心（F-ISAC）平台" }
+                ],
+                correctAnswer: ["A", "B", "D"],
+                reason: "情資內容包含漏洞利用與影響評估；且該公司為「金融機構」，應加入 F-ISAC 而非 H-ISAC。",
+                explanation: `
+                    <div class="explain-section">
+                        <h4>🔍 第一步：找關鍵字</h4>
+                        <p>資通安全情資（CTI）、蒐集與分析、ISAC</p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>🗣️ 第二步：白話翻譯</h4>
+                        <p>公司要提早知道「可能會被怎麼打、會造成什麼影響」，哪些作法是正確的？</p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>💡 第三步：解題思路</h4>
+                        <ul>
+                            <li><strong>解題步驟：</strong>
+                                <ol>
+                                    <li>判斷什麼算「情資內容」。</li>
+                                    <li>判斷金融業該加入哪個 ISAC。</li>
+                                    <li>選出符合產業別的選項。</li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="explain-section">
+                        <h4>📊 第四步：選項分析</h4>
+                        <ul>
+                            <li><strong>(A) 正確：</strong>漏洞利用方式本身就是重要情資。</li>
+                            <li><strong>(B) 正確：</strong>事件造成的衝擊與損害屬於情資分析重點。</li>
+                            <li><strong>(C) 錯誤：</strong>H-ISAC 為醫療體系使用，非金融業。</li>
+                            <li><strong>(D) 正確：</strong>金融機構應加入 F-ISAC。</li>
+                        </ul>
+                    </div>
+                    <div class="explain-section">
+                        <h4>📚 觀念補充與延伸</h4>
+                        <p><strong>CTI (Cyber Threat Intelligence)：</strong>蒐集、分析與分享威脅相關資訊，以預防與應對攻擊。（白話：提早知道風險）。</p>
+                        <p><strong>觸類旁通：</strong>金融業 → F-ISAC；醫療業 → H-ISAC。</p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>🧠 記憶口訣</h4>
+                        <p><mark>「金融找 F，醫療找 H」</mark></p>
+                    </div>
+                    <div class="explain-section">
+                        <h4>⚠️ 常見陷阱</h4>
+                        <ul>
+                            <li><strong>心理盲點：</strong>看到 ISAC 就以為都能加入，忽略「產業別」。</li>
+                            <li><strong>避坑指南：</strong>題目出現產業 → 對應 ISAC。</li>
+                        </ul>
+                    </div>
+                `,
+                selfCheck: {
+                    question: "1. 若是電信業，應加入哪類 ISAC？<br>2. 情資是否只包含技術細節？",
+                    answer: "1. 電信相關 ISAC（如 NCC 或 T-ISAC）。<br>2. 否，亦包含影響評估、策略面資訊。"
+                }
+            }
+        ]
+    };
+
+    // --- State Management ---
+    const quizState = {
+        questions: quizData.questions.map(q => ({
+            id: q.id,
+            status: 'pending', // pending, correct, wrong
+            selected: []
+        }))
+    };
+
+    // --- DOM Elements ---
+    const tabsContainer = document.getElementById('tabs-container');
+    const contentContainer = document.getElementById('content-container');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const overallStatus = document.getElementById('overall-status');
+    const overallDone = document.getElementById('overall-done');
+
+    // --- Render Logic ---
+
+    function init() {
+        renderTabs();
+        renderQuestions();
+        switchTab(0);
+        updateProgress();
+    }
+
+    function renderTabs() {
+        tabsContainer.innerHTML = '';
+        quizData.questions.forEach((q, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'tab-btn';
+            btn.innerHTML = `第 ${q.id} 題 <span class="tab-status" id="tab-status-${q.id}"></span>`;
+            btn.onclick = () => switchTab(index);
+            tabsContainer.appendChild(btn);
+        });
+    }
+
+    function renderQuestions() {
+        contentContainer.innerHTML = '';
+        quizData.questions.forEach((q, index) => {
+            const container = document.createElement('div');
+            container.className = 'tab-content';
+            container.id = `q-content-${q.id}`;
+
+            // Type Label text
+            const typeText = q.type === 'single' ? '單選題' : '複選題';
+            const tagClass = `tag-${q.tag || 'sec'}`;
+
+            // Options HTML
+            const optionsHtml = q.options.map(opt => `
+                <label class="option-label" id="opt-label-${q.id}-${opt.id}" onclick="handleOptionSelect(${q.id}, '${opt.id}', '${q.type}')">
+                    <input type="${q.type === 'single' ? 'radio' : 'checkbox'}" 
+                           name="q-${q.id}" 
+                           class="option-input" 
+                           id="opt-input-${q.id}-${opt.id}"
+                           value="${opt.id}">
+                    <span class="option-text">(${opt.id}) ${opt.text}</span>
+                </label>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="question-header">
+                    <div>
+                        <span class="tag ${tagClass}">${q.tagName}</span>
+                        <span style="color: #666; font-size: 14px;">${typeText}</span>
+                    </div>
+                    <span id="badge-${q.id}" class="q-status-badge">未作答</span>
+                </div>
+
+                <div class="question-body">
+                    <h2 style="font-size: 18px; line-height: 1.5; margin-bottom: 20px;">${q.question}</h2>
+                    <div class="options-list">
+                        ${optionsHtml}
+                    </div>
+                </div>
+
+                <div class="action-area">
+                    <button id="btn-${q.id}" class="btn-primary" onclick="submitAnswer(${q.id})">送出答案</button>
+                </div>
+
+                <div id="feedback-${q.id}" class="feedback"></div>
+
+                <details id="explain-${q.id}" style="display: none;">
+                    <summary>💡 完整解析與詳解</summary>
+                    <div class="details-content">
+                        ${q.explanation}
+                    </div>
+                </details>
+
+                <div id="check-${q.id}" class="self-check-box" style="display: none;">
+                    <div class="self-check-header">🔍 自我檢測</div>
+                    <div class="self-check-q">${q.selfCheck.question}</div>
+                    <details class="self-check-ans-reveal">
+                        <summary style="cursor: pointer; color: #2980b9; font-weight: 500;">點擊查看參考答案</summary>
+                        <div style="margin-top: 10px; padding: 10px; background: #f0f4f8; border-radius: 6px;">
+                            ${q.selfCheck.answer}
+                        </div>
+                    </details>
+                </div>
+            `;
+            contentContainer.appendChild(container);
+        });
+    }
+
+    // --- Interaction Logic ---
+
+    function switchTab(index) {
+        // Update Buttons
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach((btn, i) => {
+            if (i === index) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+
+        // Update Content
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach((content, i) => {
+            if (i === index) content.classList.add('active');
+            else content.classList.remove('active');
+        });
+
+        // Scroll to top of container smoothly
+        document.querySelector('.page-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function handleOptionSelect(qId, optId, type) {
+        // Prevent selection if already submitted
+        const qState = quizState.questions.find(q => q.id === qId);
+        if (qState.status !== 'pending') return;
+
+        const inputs = document.querySelectorAll(`input[name="q-${qId}"]`);
+        const labels = document.querySelectorAll(`#q-content-${qId} .option-label`);
+
+        // UI Update
+        labels.forEach(label => label.classList.remove('selected'));
+        
+        if (type === 'single') {
+            qState.selected = [optId];
+            document.getElementById(`opt-label-${qId}-${optId}`).classList.add('selected');
+        } else {
+            // Multiple
+            const checkbox = document.getElementById(`opt-input-${qId}-${optId}`);
+            // Custom visual sync:
+            setTimeout(() => {
+                const selectedOpts = [];
+                inputs.forEach(input => {
+                    const label = document.getElementById(`opt-label-${qId}-${input.value}`);
+                    if (input.checked) {
+                        label.classList.add('selected');
+                        selectedOpts.push(input.value);
+                    } else {
+                        label.classList.remove('selected');
+                    }
+                });
+                qState.selected = selectedOpts;
+            }, 0);
+        }
+    }
+
+    function submitAnswer(qId) {
+        const qData = quizData.questions.find(q => q.id === qId);
+        const qState = quizState.questions.find(q => q.id === qId);
+
+        // Validation
+        if (qState.selected.length === 0) {
+            alert("請先選擇答案");
+            return;
+        }
+
+        // Logic Check
+        // Sort both arrays to compare
+        const userAns = [...qState.selected].sort().join(',');
+        const correctAns = [...qData.correctAnswer].sort().join(',');
+        const isCorrect = userAns === correctAns;
+
+        // Update State
+        qState.status = isCorrect ? 'correct' : 'wrong';
+
+        // UI Updates
+        // 1. Disable Options
+        const inputs = document.querySelectorAll(`input[name="q-${qId}"]`);
+        inputs.forEach(input => input.disabled = true);
+        const labels = document.querySelectorAll(`#q-content-${qId} .option-label`);
+        labels.forEach(label => classAdd(label, 'disabled'));
+
+        // 2. Show Feedback
+        const feedbackEl = document.getElementById(`feedback-${qId}`);
+        feedbackEl.style.display = 'block';
+        feedbackEl.className = `feedback ${isCorrect ? 'success' : 'error'}`;
+        feedbackEl.innerHTML = isCorrect 
+            ? `<strong>✓ 答對了！</strong><p>${qData.reason}</p>`
+            : `<strong>✗ 答錯了</strong><p>正確答案：${qData.correctAnswer.join('、')}</p><p>${qData.reason}</p>`;
+
+        // 3. Show Details
+        document.getElementById(`explain-${qId}`).style.display = 'block';
+        document.getElementById(`explain-${qId}`).open = true;
+        document.getElementById(`check-${qId}`).style.display = 'block';
+
+        // 4. Update Header Status
+        const badge = document.getElementById(`badge-${qId}`);
+        badge.textContent = isCorrect ? '已答對' : '已答錯';
+        badge.className = `q-status-badge ${isCorrect ? 'correct' : 'wrong'}`;
+
+        // 5. Update Tab Status
+        const tabStatus = document.getElementById(`tab-status-${qId}`);
+        tabStatus.textContent = isCorrect ? '✓' : '✗';
+        
+        // 6. Change Button
+        const btn = document.getElementById(`btn-${qId}`);
+        btn.textContent = '重新作答';
+        btn.className = 'btn-primary btn-retry';
+        btn.onclick = () => retryQuestion(qId); // Override click handler
+
+        updateProgress();
+    }
+
+    function retryQuestion(qId) {
+        const qState = quizState.questions.find(q => q.id === qId);
+        
+        // 1. Reset State
+        qState.status = 'pending';
+        qState.selected = [];
+
+        // 2. Reset Options UI
+        const inputs = document.querySelectorAll(`input[name="q-${qId}"]`);
+        inputs.forEach(input => {
+            input.disabled = false;
+            input.checked = false;
+        });
+        const labels = document.querySelectorAll(`#q-content-${qId} .option-label`);
+        labels.forEach(label => {
+            label.classList.remove('disabled');
+            label.classList.remove('selected');
+        });
+
+        // 3. Hide Feedback & Details
+        document.getElementById(`feedback-${qId}`).style.display = 'none';
+        const explain = document.getElementById(`explain-${qId}`);
+        explain.style.display = 'none';
+        explain.open = false;
+        const check = document.getElementById(`check-${qId}`);
+        check.style.display = 'none';
+        // check.open = false; // Self check logic managed by internal details
+
+        // 4. Reset Header Status
+        const badge = document.getElementById(`badge-${qId}`);
+        badge.textContent = '未作答';
+        badge.className = 'q-status-badge';
+
+        // 5. Reset Tab Status
+        document.getElementById(`tab-status-${qId}`).textContent = '';
+
+        // 6. Reset Button
+        const btn = document.getElementById(`btn-${qId}`);
+        btn.textContent = '送出答案';
+        btn.className = 'btn-primary';
+        btn.onclick = () => submitAnswer(qId);
+
+        updateProgress();
+
+        // Scroll to question top
+        document.getElementById(`q-content-${qId}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function updateProgress() {
+        const completedCount = quizState.questions.filter(q => q.status !== 'pending').length;
+        const total = quizData.questions.length;
+        const percentage = Math.round((completedCount / total) * 100);
+
+        progressFill.style.width = `${percentage}%`;
+        progressText.innerHTML = `已完成：<strong>${completedCount}</strong> / ${total}`;
+
+        if (completedCount === total) {
+            overallStatus.style.display = 'none';
+            overallDone.style.display = 'inline';
+        } else {
+            overallStatus.style.display = 'inline';
+            overallDone.style.display = 'none';
+        }
+    }
+
+    // Helper for classList
+    function classAdd(el, className) {
+        if (!el.classList.contains(className)) el.classList.add(className);
+    }
+
+    // Run
+    init();
+
+</script>
+
+</body>
+</html>

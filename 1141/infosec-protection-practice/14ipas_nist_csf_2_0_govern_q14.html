@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIST CSF 1.1 vs 2.0 核心差異解析</title>
+    
+    <!-- 外部資源：Bootstrap 5, FontAwesome, Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 核心變數與配色系統 --- */
+        :root {
+            --body-bg: #f4f7f6;       /* 冷灰調背景 */
+            --card-bg: #ffffff;       /* 卡片底色 */
+            --text-primary: #2c3e50;  /* 深藍灰文字 */
+            --primary: #2980b9;       /* 主要藍色 */
+            --primary-hover: #21618c;
+            --highlight: #f1c40f;     /* 記憶黃標記 */
+            --success-bg: #e8f5e9;    /* 正確背景 */
+            --success-text: #2e7d32;  /* 正確文字 */
+            --error-bg: #fce4ec;      /* 錯誤背景 */
+            --error-text: #c62828;    /* 錯誤文字 */
+            --border-radius: 12px;
+            --card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            
+            /* 標籤色彩規範 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        body {
+            background-color: var(--body-bg);
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-bottom: 60px; /* 避免底部過擠 */
+        }
+
+        /* --- 版型容器 --- */
+        .page-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: var(--card-shadow);
+            border-radius: 16px;
+            position: relative;
+        }
+
+        /* --- 響應式調整 (<768px) --- */
+        @media (max-width: 767.98px) {
+            .page-container {
+                margin: 16px;
+                padding: 20px;
+                width: auto;
+                border-radius: 12px;
+            }
+            h2 { font-size: 20px; }
+            h3 { font-size: 16px; }
+            .btn-action { width: 100%; }
+        }
+
+        /* --- UI 元件樣式 --- */
+        
+        /* 1. Header */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 16px;
+        }
+        .quiz-id {
+            font-weight: 700;
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background-color: #e0e0e0;
+            color: #555;
+        }
+        .status-badge.correct { background-color: var(--success-bg); color: var(--success-text); }
+        .status-badge.wrong { background-color: var(--error-bg); color: var(--error-text); }
+
+        /* 2. Context Card */
+        .context-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--tag-iso); /* 使用標準標籤色 */
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        .context-label {
+            font-weight: 700;
+            color: var(--tag-iso);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        /* 3. Question & Options */
+        .question-text {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start; /* 頂對齊以適應長文字 */
+            padding: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 200ms ease;
+            position: relative;
+        }
+
+        .option-label:hover:not(.disabled) {
+            background-color: #e3f2fd;
+            border-color: #bdc3c7;
+        }
+
+        .option-label.selected {
+            background-color: #e3f2fd;
+            border-color: var(--primary);
+        }
+
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        /* 隱藏原生 radio/checkbox，改用自定義樣式或僅依賴外框 */
+        .option-input {
+            margin-top: 5px; /* 對齊文字 */
+            margin-right: 12px;
+            transform: scale(1.2);
+            accent-color: var(--primary);
+        }
+        
+        .option-text {
+            word-break: break-word;
+            flex: 1;
+        }
+
+        /* 4. Action Area */
+        .action-area {
+            margin-top: 32px;
+            text-align: center;
+        }
+        
+        .btn-action {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            min-height: 48px; /* 觸控友善 */
+            transition: all 200ms ease;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+            background-color: var(--primary-hover);
+        }
+
+        .btn-action:active {
+            transform: translateY(0);
+        }
+        
+        .btn-action.btn-reset {
+            background-color: #607d8b; /* 灰色系用於重置 */
+        }
+        .btn-action.btn-reset:hover {
+            background-color: #455a64;
+        }
+
+        /* 5. Feedback Section */
+        .feedback-section {
+            margin-top: 24px;
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 300ms ease;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback-card {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .feedback-card.success {
+            background-color: var(--success-bg);
+            border: 1px solid #c8e6c9;
+            color: var(--success-text);
+        }
+
+        .feedback-card.error {
+            background-color: var(--error-bg);
+            border: 1px solid #ffcdd2;
+            color: var(--error-text);
+        }
+
+        /* 6. Explain Section */
+        .explain-section {
+            margin-top: 24px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            display: none; /* 初始隱藏 */
+        }
+
+        .explain-summary {
+            padding: 16px 20px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .explain-content {
+            padding: 24px;
+            background-color: #fff;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .explain-block {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .explain-block h5 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explain-block p {
+            margin-bottom: 0.5rem;
+        }
+        
+        .explain-block ul {
+            margin-bottom: 0;
+        }
+
+        /* 7. Self Check */
+        .self-check {
+            margin-top: 24px;
+            border-top: 2px dashed #e0e0e0;
+            padding-top: 24px;
+        }
+        
+        .self-check summary {
+            cursor: pointer;
+            color: var(--primary);
+            font-weight: 600;
+            padding: 8px 0;
+            list-style: none; /* 移除預設箭頭 */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .self-check summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .self-check summary::after {
+            content: '\f078'; /* FontAwesome chevron-down */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.2s;
+        }
+
+        .self-check[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        /* Tags Utility */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.8rem;
+            margin-right: 6px;
+            font-weight: normal;
+            vertical-align: middle;
+        }
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt  { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        mark {
+            background-color: var(--highlight);
+            color: #000;
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    
+    <!-- 1. Header -->
+    <header class="quiz-header">
+        <div class="quiz-id">題號：Q-NIST-001</div>
+        <div id="status-badge" class="status-badge">未作答</div>
+    </header>
+
+    <!-- 2. Context -->
+    <section id="context-section" class="context-card">
+        <span class="context-label"><i class="fas fa-book-open me-2"></i>考題情境</span>
+        本題測驗您對美國國家標準技術研究院（NIST）網路安全框架（CSF）版本演進的理解，特別是從 v1.1 到 v2.0 的核心結構變化。
+    </section>
+
+    <!-- 3. Question -->
+    <section id="question-section">
+        <div class="question-text">
+            <span class="tag tag-iso">標準</span><span class="tag tag-mgm">風險管理</span><br><br>
+            下列何項是美國國家標準技術研究院（NIST）的網路安全框架（CyberSecurity Framework，CSF）從版本 1.1 更新到 2.0 中<mark>最明顯的改變</mark>？
+        </div>
+        
+        <div class="option-group" role="radiogroup">
+            <label class="option-label" for="optA">
+                <input type="radio" name="quizOption" id="optA" value="A" class="option-input">
+                <span class="option-text">
+                    (A) 增加了新的五大功能類別，分別為辨識（Identify）、保護（Protect）、偵測（Detect）、回應（Respond）、復原（Recover）
+                </span>
+            </label>
+
+            <label class="option-label" for="optB">
+                <input type="radio" name="quizOption" id="optB" value="B" class="option-input">
+                <span class="option-text">
+                    (B) 引入「治理（Govern）」作為第六個核心功能
+                </span>
+            </label>
+
+            <label class="option-label" for="optC">
+                <input type="radio" name="quizOption" id="optC" value="C" class="option-input">
+                <span class="option-text">
+                    (C) 簡化了所有類別的定義以提升易用性
+                </span>
+            </label>
+
+            <label class="option-label" for="optD">
+                <input type="radio" name="quizOption" id="optD" value="D" class="option-input">
+                <span class="option-text">
+                    (D) 擴展了對雲端安全的具體指導內容
+                </span>
+            </label>
+        </div>
+    </section>
+
+    <!-- 4. Action Area -->
+    <section id="action-section" class="action-area">
+        <button id="submitBtn" class="btn-action">送出答案</button>
+    </section>
+
+    <!-- 5. Feedback -->
+    <section id="feedback-section" class="feedback-section">
+        <!-- 內容由 JS 動態生成 -->
+    </section>
+
+    <!-- 6. Explain -->
+    <details id="explain-section" class="explain-section">
+        <summary class="explain-summary">
+            <span><i class="fas fa-lightbulb me-2" style="color: var(--primary);"></i> 查看詳細解析</span>
+            <i class="fas fa-chevron-down"></i>
+        </summary>
+        <div class="explain-content">
+            
+            <!-- 第一步：找關鍵字 -->
+            <div class="explain-block">
+                <h5><i class="fas fa-search"></i> 第一步：找關鍵字</h5>
+                <ul>
+                    <li><strong>NIST CSF</strong>：美國官方資安標準框架，考的是「標準」非產品。</li>
+                    <li><strong>版本 1.1 → 2.0</strong>：明確在考「版本差異」。</li>
+                    <li><strong>最明顯的改變</strong>：不是細節調整，而是「一眼就看得出來的結構變化」。</li>
+                </ul>
+            </div>
+
+            <!-- 第二步：白話翻譯 -->
+            <div class="explain-block" style="border-left-color: var(--tag-sec);">
+                <h5><i class="fas fa-language"></i> 第二步：白話翻譯</h5>
+                <p>這題在問：「NIST 的 CSF 從舊版 1.1 升級到新版 2.0，到底『最大、最關鍵』的差異是什麼？」</p>
+                <p>不是問有沒有修錯字或多寫說明，而是問<strong>整個框架層級有沒有不一樣</strong>。</p>
+            </div>
+
+            <!-- 第三步：解題思路 (原理與生活例子) -->
+            <div class="explain-block" style="border-left-color: var(--tag-mgm);">
+                <h5><i class="fas fa-chess-king"></i> 第三步：解題思路與生活例子</h5>
+                <p><strong>1. 原理與規則：</strong></p>
+                <ul>
+                    <li><strong>CSF 1.1 (舊版)</strong>：只有五大功能 (Identify, Protect, Detect, Respond, Recover)，重點在「事情怎麼做」。</li>
+                    <li><strong>CSF 2.0 (新版)</strong>：新增第六功能 <strong>Govern (治理)</strong>。這代表 NIST 告訴你，資安不只是工程師的事，更是「管理階層要負責的事」。</li>
+                </ul>
+                <p><strong>2. 生活化比喻 (學校與校長)：</strong></p>
+                <ul>
+                    <li><strong>五大功能 (舊)</strong>：就像學校老師負責教學、點名、補救學生 (第一線執行)。</li>
+                    <li><strong>Govern 治理 (新)</strong>：就像<strong>校長室與董事會</strong>。要不要編預算？要不要請資安人員？出事誰負責？CSF 2.0 就是多加了一層「校長室」。</li>
+                </ul>
+            </div>
+
+            <!-- 第四步：選項分析 -->
+            <div class="explain-block" style="border-left-color: var(--tag-net);">
+                <h5><i class="fas fa-check-double"></i> 第四步：選項分析</h5>
+                <ul class="mb-0 ps-3">
+                    <li><strong>(A) 錯誤</strong>：這五大功能本來就在 1.1 版裡，屬於「舊內容」，非新增。</li>
+                    <li><strong>(B) 正確</strong>：Govern（治理）是 CSF 2.0 才新增的第六大核心功能，完全符合「最明顯的改變」。</li>
+                    <li><strong>(C) 錯誤</strong>：定義確實有調整，但那是細節優化，不符合「最明顯」關鍵字。</li>
+                    <li><strong>(D) 錯誤</strong>：CSF 是「高層框架」，不是雲端技術操作手冊。</li>
+                </ul>
+            </div>
+
+            <!-- 觀念補充與觸類旁通 -->
+            <div class="explain-block" style="border-left-color: var(--tag-iso);">
+                <h5><i class="fas fa-book-reader"></i> 觀念補充與延伸</h5>
+                <p><strong>法條或定義 (白話版)：</strong><br>
+                <strong>Govern (治理)</strong> = 確保組織在資安上有明確責任、決策流程與高層支持。白話說：<strong>不是出事才找人扛，而是一開始就講清楚誰負責。</strong></p>
+                
+                <hr style="margin: 10px 0; border-top: 1px dashed #ccc;">
+                
+                <p><strong>觸類旁通 (舉一反三)：</strong></p>
+                <ul>
+                    <li><strong>對比概念</strong>：CSF (方向與治理框架) vs ISO 27001 (制度與稽核導向)。</li>
+                    <li><strong>常見變化題</strong>：若問「哪一項最能體現高層資安責任？」，答案也是選與「治理 (Govern)」相關的選項。</li>
+                </ul>
+            </div>
+
+            <!-- 記憶口訣與陷阱 -->
+            <div class="explain-block" style="border-left-color: var(--highlight);">
+                <h5><i class="fas fa-brain"></i> 記憶口訣與常見陷阱</h5>
+                <p><strong>記憶口訣：</strong><br>
+                <span style="background-color: var(--highlight); padding: 2px 5px; border-radius: 4px;">「CSF 2.0，多一個管事的」</span> 或 <span style="background-color: var(--highlight); padding: 2px 5px; border-radius: 4px;">「五加一，治理進來了」</span>。</p>
+                
+                <p><strong>常見陷阱 (避坑指南)：</strong></p>
+                <ul>
+                    <li><strong>心理盲點</strong>：太熟舊版的五大功能，看到選項 (A) 列出五大功能就覺得好親切直接選，結果掉入陷阱。</li>
+                    <li><strong>避坑指南</strong>：看到「CSF 2.0」關鍵字 → 請立刻先找 <strong>Govern (治理)</strong>。</li>
+                </ul>
+            </div>
+
+        </div>
+    </details>
+
+    <!-- 7. Self Check (Multiple Questions) -->
+    <section class="mt-4">
+        <h5 class="mb-3"><i class="fas fa-tasks me-2"></i>自我檢測</h5>
+        
+        <details class="self-check">
+            <summary>Q1: 為什麼 NIST 要在 CSF 2.0 特別加入「治理」？</summary>
+            <div class="mt-3 p-3 bg-light rounded text-success">
+                <strong>參考答案：</strong><br>
+                因為資安需要高層決策與責任，不只是技術問題。若缺乏治理，資安將缺乏資源與方向。
+            </div>
+        </details>
+
+        <details class="self-check">
+            <summary>Q2: 如果一個組織只有技術防護，沒有高層支持，CSF 2.0 認為會出什麼問題？</summary>
+            <div class="mt-3 p-3 bg-light rounded text-success">
+                <strong>參考答案：</strong><br>
+                會導致資源不足、責任不清、風險無法有效管理。
+            </div>
+        </details>
+
+        <details class="self-check">
+            <summary>Q3: 「Govern」最接近下列哪一個角色？(A)工程師 (B)事件處理人員 (C)高階主管</summary>
+            <div class="mt-3 p-3 bg-light rounded text-success">
+                <strong>正確答案：(C) 高階主管</strong><br>
+                治理層級涉及決策與資源分配，屬於管理階層的職責。
+            </div>
+        </details>
+    </section>
+
+</div>
+
+<script>
+    // --- 資料與變數 ---
+    const CORRECT_ANSWER = 'B';
+    const REASON_TEXT = 'CSF 2.0 相較 1.1，最明顯的結構性改變是新增「治理（Govern）」作為第六個核心功能。';
+    
+    // --- DOM 元素 ---
+    const submitBtn = document.getElementById('submitBtn');
+    const options = document.querySelectorAll('input[name="quizOption"]');
+    const optionLabels = document.querySelectorAll('.option-label');
+    const feedbackSection = document.getElementById('feedback-section');
+    const explainSection = document.getElementById('explain-section');
+    const statusBadge = document.getElementById('status-badge');
+    const questionSection = document.getElementById('question-section');
+
+    // --- 互動邏輯：選項樣式 ---
+    options.forEach(opt => {
+        opt.addEventListener('change', () => {
+            // 移除所有 label 的 selected 樣式
+            optionLabels.forEach(lbl => lbl.classList.remove('selected'));
+            // 為當前選中的 label 添加 selected 樣式
+            if(opt.checked) {
+                opt.closest('.option-label').classList.add('selected');
+            }
+        });
+    });
+
+    // --- 核心邏輯：送出與判定 ---
+    submitBtn.addEventListener('click', () => {
+        
+        // 1. 判斷模式：是「送出」還是「重作」？
+        if (submitBtn.classList.contains('btn-reset')) {
+            resetQuiz();
+            return;
+        }
+
+        // 2. 檢查是否有作答
+        const selectedOption = document.querySelector('input[name="quizOption"]:checked');
+        if (!selectedOption) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        // 3. 鎖定選項
+        options.forEach(opt => {
+            opt.disabled = true;
+            opt.closest('.option-label').classList.add('disabled');
+        });
+
+        // 4. 判定結果
+        const userValue = selectedOption.value;
+        const isCorrect = userValue === CORRECT_ANSWER;
+
+        // 5. 顯示回饋 UI
+        feedbackSection.style.display = 'block';
+        
+        if (isCorrect) {
+            // 答對處理
+            statusBadge.textContent = '✓ 答對';
+            statusBadge.className = 'status-badge correct';
+            
+            feedbackSection.innerHTML = `
+                <div class="feedback-card success">
+                    <strong><i class="fas fa-check-circle me-2"></i>完全正確！</strong>
+                    <p class="mb-0 mt-2">${REASON_TEXT}</p>
+                </div>
+            `;
+        } else {
+            // 答錯處理
+            statusBadge.textContent = '✗ 答錯';
+            statusBadge.className = 'status-badge wrong';
+            
+            feedbackSection.innerHTML = `
+                <div class="feedback-card error">
+                    <strong><i class="fas fa-times-circle me-2"></i>答錯了...</strong>
+                    <p class="mb-1 mt-2">正確答案是 <strong>(${CORRECT_ANSWER})</strong></p>
+                    <p class="mb-0 small">${REASON_TEXT}</p>
+                </div>
+            `;
+            
+            // 標示正確選項
+            const correctInput = document.querySelector(`input[value="${CORRECT_ANSWER}"]`);
+            if(correctInput) {
+                correctInput.closest('.option-label').style.borderColor = 'var(--success-text)';
+                correctInput.closest('.option-label').style.backgroundColor = 'var(--success-bg)';
+            }
+        }
+
+        // 6. 顯示解析與轉換按鈕
+        explainSection.style.display = 'block';
+        explainSection.open = true; // 自動展開解析
+        
+        submitBtn.textContent = '重新作答';
+        submitBtn.classList.add('btn-reset');
+        
+        // 微動畫：平滑捲動到回饋區
+        feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    // --- 重置邏輯 ---
+    function resetQuiz() {
+        // 1. 清空選項
+        options.forEach(opt => {
+            opt.checked = false;
+            opt.disabled = false;
+            opt.closest('.option-label').classList.remove('selected', 'disabled');
+            // 清除正確答案的高亮
+            opt.closest('.option-label').style.borderColor = '';
+            opt.closest('.option-label').style.backgroundColor = '';
+        });
+
+        // 2. 隱藏回饋與解析
+        feedbackSection.style.display = 'none';
+        explainSection.style.display = 'none';
+        explainSection.open = false;
+        
+        // 關閉所有自我檢測
+        document.querySelectorAll('.self-check').forEach(el => el.open = false);
+
+        // 3. 重置 Header 狀態
+        statusBadge.textContent = '未作答';
+        statusBadge.className = 'status-badge';
+
+        // 4. 重置按鈕
+        submitBtn.textContent = '送出答案';
+        submitBtn.classList.remove('btn-reset');
+
+        // 5. 滾動回頂端
+        questionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+</script>
+
+</body>
+</html>
