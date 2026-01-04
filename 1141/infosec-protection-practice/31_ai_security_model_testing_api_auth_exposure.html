@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q31. AI 安全性檢測與 API 防護 - 互動式教學網頁 v5.1</title>
+    
+    <!-- Google Fonts: Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6 (Icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Tailwind CSS (Utility Classes) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Bootstrap 5 (Grid & Components fallback) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',    // 專業藍
+                        highlight: '#fef9c3',  // 柔和黃底 (記憶點)
+                        success: '#059669',    // 正確綠
+                        error: '#dc2626',      // 錯誤紅
+                        textMain: '#1f2937',
+                        bgLight: '#f3f4f6'
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Noto Sans TC', sans-serif;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        /* 容器規範 */
+        .main-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 選項互動樣式 */
+        .option-card {
+            border: 2px solid #e5e7eb;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .option-card:hover:not(.disabled) {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .option-card.selected {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .option-card.correct {
+            border-color: #059669;
+            background-color: #ecfdf5;
+        }
+
+        .option-card.wrong {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+        }
+        
+        /* 紅線標示錯誤選項 */
+        .option-card.wrong::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 2px;
+            background-color: #dc2626;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .option-card.disabled {
+            cursor: default;
+            pointer-events: none;
+        }
+
+        /* 按鈕微互動 */
+        .btn-action {
+            transition: all 0.15s ease;
+        }
+        .btn-action:active {
+            transform: scale(0.96);
+        }
+
+        /* 詳細解析過場動畫 */
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+
+        /* 自我檢測 Checklist */
+        details > summary {
+            list-style: none;
+            cursor: pointer;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        /* 手機版適配 */
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 1rem;
+                border-radius: 12px;
+            }
+            .p-responsive {
+                padding: 1rem !important;
+            }
+            .text-responsive {
+                font-size: 1rem !important;
+            }
+            .btn-mobile {
+                height: 48px; /* 確保觸控高度 */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        .p-responsive {
+            padding: 2.5rem;
+        }
+        
+        /* 標籤樣式 */
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container" id="app">
+        <!-- 1. Header: 題號、知識標籤 -->
+        <div class="bg-gray-50 border-b border-gray-100 p-4 md:px-8 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="bg-primary text-white font-bold px-3 py-1 rounded-lg text-lg shadow-sm">Q31</span>
+                <span class="text-xs md:text-sm font-medium px-2 py-1 rounded bg-blue-100 text-blue-700 border border-blue-200">
+                    <i class="fa-solid fa-network-wired mr-1"></i>網路安全
+                </span>
+                <span class="text-xs md:text-sm font-medium px-2 py-1 rounded bg-red-100 text-red-700 border border-red-200">
+                    <i class="fa-solid fa-robot mr-1"></i>AI 技術
+                </span>
+            </div>
+            <div id="status-indicator" class="text-gray-400 text-sm font-medium">
+                <i class="fa-regular fa-circle"></i> 尚未作答
+            </div>
+        </div>
+
+        <div class="p-responsive">
+            
+            <!-- 2. Context: 情境描述 -->
+            <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                <h3 class="text-blue-800 font-bold text-sm mb-1"><i class="fa-solid fa-briefcase mr-2"></i>情境描述</h3>
+                <p class="text-blue-900 text-sm md:text-base">
+                    企業導入 AI 提升工作流程或修訂除錯，而 AI 安全也因應而生。現在這家企業正準備進行 AI 模型的安全性檢測。
+                </p>
+            </div>
+
+            <!-- 3. Question: 題目與選項 -->
+            <div class="mb-8">
+                <h1 class="text-lg md:text-xl font-bold text-gray-800 mb-6 leading-relaxed">
+                    為識別和修復可能的 AI 安全漏洞，下列何種措施<span class="text-red-600 border-b-2 border-red-600">較為適切</span>？
+                </h1>
+                
+                <div id="options-container" class="grid gap-3">
+                    <!-- Options will be injected by JS -->
+                </div>
+            </div>
+
+            <!-- 4. Action Area: 操作區 -->
+            <div class="flex flex-col md:flex-row gap-4 border-t border-gray-100 pt-6">
+                <button id="btn-submit" onclick="submitAnswer()" class="btn-action btn-mobile bg-primary hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-blue-500/30 w-full md:w-auto text-lg">
+                    <i class="fa-solid fa-paper-plane mr-2"></i>送出答案
+                </button>
+                <button id="btn-retry" onclick="resetQuiz()" class="btn-action btn-mobile hidden bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 px-8 rounded-xl w-full md:w-auto">
+                    <i class="fa-solid fa-rotate-right mr-2"></i>重新挑戰
+                </button>
+            </div>
+
+            <!-- 5. Feedback: 即時判定 (預設隱藏) -->
+            <div id="feedback-area" class="hidden mt-6 rounded-xl p-4 border flex items-start gap-4 fade-in-up">
+                <div id="feedback-icon" class="text-2xl mt-1"></div>
+                <div>
+                    <h3 id="feedback-title" class="font-bold text-lg"></h3>
+                    <p id="feedback-text" class="text-sm md:text-base mt-1"></p>
+                </div>
+            </div>
+
+            <!-- 6. Explain: 深度解析 (預設隱藏) -->
+            <div id="explanation-area" class="hidden mt-8 border-t-2 border-dashed border-gray-200 pt-8 fade-in-up">
+                
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fa-solid fa-book-open-reader mr-3 text-primary"></i> 全能深度解析
+                </h2>
+
+                <!-- 第一步：找關鍵字 -->
+                <div class="mb-6 bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                    <span class="tag-pill bg-purple-100 text-purple-700"><i class="fa-solid fa-magnifying-glass mr-2"></i>第一步：找關鍵字</span>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <span class="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium text-gray-700">AI 模型的安全性檢測</span>
+                        <span class="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium text-gray-700">識別和修復</span>
+                        <span class="bg-red-50 px-3 py-1 rounded-full text-sm font-medium text-red-700 border border-red-100">API</span>
+                        <span class="bg-red-50 px-3 py-1 rounded-full text-sm font-medium text-red-700 border border-red-100">未經身份驗證的存取</span>
+                        <span class="bg-red-50 px-3 py-1 rounded-full text-sm font-medium text-red-700 border border-red-100">過度暴露的功能</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-3"><i class="fa-solid fa-arrow-right text-gray-400 mr-2"></i><strong>解析：</strong>題目要找的是「怎麼測」才算真的在做 AI 安全檢測。重點在於「可驗證、可重現」的方式，且要針對 AI 最常被攻擊的入口（API、權限）。</p>
+                </div>
+
+                <!-- 第二步：白話翻譯 -->
+                <div class="mb-6 bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                    <span class="tag-pill bg-blue-100 text-blue-700"><i class="fa-solid fa-language mr-2"></i>第二步：白話翻譯</span>
+                    <p class="text-gray-700 mt-2 font-medium">
+                        「公司把 AI 做成一個可以被系統呼叫的服務（像點餐系統叫外送平台 API）。你要檢查這個 AI 服務會不會『誰都能呼叫』、或是『不該給外面用的功能卻開放了』，因為這些最容易變成真正的入侵途徑。」
+                    </p>
+                </div>
+
+                <!-- 第三步：解題思路 -->
+                <div class="mb-6 bg-indigo-50 border border-indigo-100 rounded-xl p-5">
+                    <span class="tag-pill bg-indigo-200 text-indigo-800"><i class="fa-solid fa-lightbulb mr-2"></i>第三步：解題思路</span>
+                    
+                    <div class="mt-4 space-y-4">
+                        <div class="flex gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">1</div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">解題步驟</h4>
+                                <p class="text-sm text-gray-600">判斷題目是在問「單點檢查」還是「完整實測」。找出能對應「攻擊入口」的選項（API、驗證、授權）。排除只做一半或只做靜態的選項。</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold">2</div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">原理與規則</h4>
+                                <p class="text-sm text-gray-600">AI 模型在企業環境通常是：<br><strong>模型 + 服務(API) + 權限 + 記錄 + 資料流</strong><br>只檢查其中一塊，會漏掉最常被打的「外部呼叫入口」。</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold"><i class="fa-solid fa-burger"></i></div>
+                            <div>
+                                <h4 class="font-bold text-gray-800">生活例子</h4>
+                                <p class="text-sm text-gray-600">你只檢查「廚房食材沒被換掉」（訓練資料完整性），但不檢查「大門有沒有鎖、任何人能不能走進來點餐進廚房」（API 身分驗證），那風險還是很高。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 第四步：選項分析 -->
+                <div class="mb-6">
+                    <h3 class="font-bold text-gray-800 mb-3"><i class="fa-solid fa-list-check mr-2"></i>第四步：選項分析</h3>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-red-50 rounded-lg border border-red-100">
+                            <p class="font-bold text-red-700 mb-1">(A) 僅對 AI 模型的訓練數據進行完整性檢查...</p>
+                            <p class="text-sm text-gray-700"><i class="fa-solid fa-xmark text-red-500 mr-1"></i> <strong>為什麼錯？</strong> 只做資料檢查（怕被偷換）很重要，但忽略了「行為分析」與「服務層面的攻擊」。如果不看對抗樣本或模型濫用，風險極高。</p>
+                        </div>
+                        <div class="p-4 bg-green-50 rounded-lg border border-green-100 relative overflow-hidden">
+                            <div class="absolute right-0 top-0 p-2 text-green-200 text-4xl opacity-20"><i class="fa-solid fa-check"></i></div>
+                            <p class="font-bold text-green-700 mb-1">(B) 針對 AI 系統的 API 進行測試...</p>
+                            <p class="text-sm text-gray-700"><i class="fa-solid fa-check text-green-500 mr-1"></i> <strong>為什麼對？</strong> AI 系統一旦對外，<strong>API 就是最直接的攻擊面</strong>。測試 API 可直接找出「未經身份驗證」與「過度暴露」（如管理端點外開）的問題，並能明確修補。</p>
+                        </div>
+                        <div class="p-4 bg-red-50 rounded-lg border border-red-100">
+                            <p class="font-bold text-red-700 mb-1">(C) 在滲透測試中，僅關注於傳統的網路...</p>
+                            <p class="text-sm text-gray-700"><i class="fa-solid fa-xmark text-red-500 mr-1"></i> <strong>為什麼錯？</strong> 忽略 AI 特定風險（如 Prompt Injection、模型濫用），題目明講要測 AI 安全，不能把 AI 當不存在。</p>
+                        </div>
+                        <div class="p-4 bg-red-50 rounded-lg border border-red-100">
+                            <p class="font-bold text-red-700 mb-1">(D) 僅在模型上使用靜態分析工具...</p>
+                            <p class="text-sm text-gray-700"><i class="fa-solid fa-xmark text-red-500 mr-1"></i> <strong>為什麼錯？</strong> 靜態分析（看 Code）找不出執行時期的邏輯漏洞（如 API 權限繞過、參數操控）。一定要做「動態實測」才能確認真實威脅。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 觀念補充與延伸 -->
+                <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                        <span class="tag-pill bg-teal-100 text-teal-700"><i class="fa-solid fa-book mr-2"></i>觀念補充</span>
+                        <ul class="text-sm text-gray-700 space-y-2 mt-2">
+                            <li><strong>身份驗證 (Authentication):</strong> 確認「你是誰」。</li>
+                            <li><strong>授權 (Authorization):</strong> 確認「你可以做什麼」。</li>
+                            <li><strong>白話：</strong>先驗明正身，再決定能不能進哪個房間。</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                        <span class="tag-pill bg-teal-100 text-teal-700"><i class="fa-solid fa-share-nodes mr-2"></i>觸類旁通</span>
+                        <ul class="text-sm text-gray-700 space-y-2 mt-2">
+                            <li><span class="font-bold text-gray-800">對比：</span>資料完整性 vs. API 安全（門鎖）。</li>
+                            <li><span class="font-bold text-gray-800">對比：</span>靜態分析（看圖紙）vs. 動態測試（實際闖闖看）。</li>
+                            <li><span class="font-bold text-gray-800">變化題：</span>問「優先檢測攻擊面」選 API/權限；問「最不完整」選只做單點檢查。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 陷阱與口訣 -->
+                <div class="grid md:grid-cols-2 gap-4 mb-8">
+                    <div class="bg-white border border-red-100 rounded-xl p-5 shadow-sm relative">
+                        <span class="tag-pill bg-red-100 text-red-700"><i class="fa-solid fa-triangle-exclamation mr-2"></i>常見陷阱 & 盲點</span>
+                        <ul class="text-sm text-gray-700 space-y-2 mt-2">
+                            <li><i class="fa-solid fa-circle-exclamation text-red-400 mr-1"></i> <strong>盲點：</strong> 以為 AI 安全 = 只管資料或只管模型，忽略「模型通常是被包成 API 服務」。</li>
+                            <li><i class="fa-solid fa-circle-exclamation text-red-400 mr-1"></i> <strong>直覺誤區：</strong> 覺得「資料沒問題就安全」，但真實攻擊常從「入口沒鎖」開始。</li>
+                            <li><i class="fa-solid fa-shield-halved text-green-500 mr-1"></i> <strong>避坑指南：</strong> 看到「識別與修復」時，優先選對應「攻擊入口」與「可落地修補」的作法。</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-5 text-center flex flex-col justify-center shadow-lg transform hover:scale-[1.02] transition-transform">
+                        <p class="text-blue-200 text-xs uppercase tracking-widest mb-2">MEMORY HOOK</p>
+                        <p class="text-white text-xl md:text-2xl font-bold leading-relaxed">
+                            「AI 上線先看門<br>API 要驗證<br>功能別外露」
+                        </p>
+                        <p class="text-blue-200 text-xs mt-2">（看門＝身份驗證；別外露＝最小暴露）</p>
+                    </div>
+                </div>
+
+                <!-- 7. Self-Check: 自我檢測 (題目不隱藏，答案隱藏) -->
+                <div class="border-t-2 border-gray-100 pt-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fa-solid fa-clipboard-question text-primary mr-2"></i> 學習反思：你真的懂了嗎？
+                    </h3>
+                    <div class="space-y-4">
+                        
+                        <!-- Q1 -->
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <p class="font-bold text-gray-800 mb-2">1. 如果題目把「API」改成「模型輸出是否會洩漏機敏資料」，你會優先做哪種測試？</p>
+                            <details class="group">
+                                <summary class="cursor-pointer text-blue-600 text-sm font-medium hover:text-blue-800 transition-colors list-none flex items-center">
+                                    <span class="mr-2 group-open:rotate-90 transition-transform"><i class="fa-solid fa-caret-right"></i></span>
+                                    點擊查看解答與提示
+                                </summary>
+                                <div class="mt-3 pl-4 border-l-2 border-blue-200 text-sm text-gray-600 bg-white p-3 rounded-r-md">
+                                    <strong>參考方向：</strong> 資料外洩測試、紅隊提示測試 (Red Teaming for Prompt Injection)、輸出過濾 (Output Filtering) 與存取控管。
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- Q2 -->
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <p class="font-bold text-gray-800 mb-2">2. 為什麼「只做靜態分析」不足以驗證 AI 系統安全？</p>
+                            <details class="group">
+                                <summary class="cursor-pointer text-blue-600 text-sm font-medium hover:text-blue-800 transition-colors list-none flex items-center">
+                                    <span class="mr-2 group-open:rotate-90 transition-transform"><i class="fa-solid fa-caret-right"></i></span>
+                                    點擊查看解答與提示
+                                </summary>
+                                <div class="mt-3 pl-4 border-l-2 border-blue-200 text-sm text-gray-600 bg-white p-3 rounded-r-md">
+                                    <strong>參考方向：</strong> 因為很多風險（如權限繞過、特定輸入觸發的不安全行為）要靠動態輸入與真實攻擊路徑才會觸發，靜態程式碼看不出來執行時的狀態。
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- Q3 -->
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <p class="font-bold text-gray-800 mb-2">3. 若 API 已有身份驗證，但仍擔心「過度暴露功能」，你會加做什麼？</p>
+                            <details class="group">
+                                <summary class="cursor-pointer text-blue-600 text-sm font-medium hover:text-blue-800 transition-colors list-none flex items-center">
+                                    <span class="mr-2 group-open:rotate-90 transition-transform"><i class="fa-solid fa-caret-right"></i></span>
+                                    點擊查看解答與提示
+                                </summary>
+                                <div class="mt-3 pl-4 border-l-2 border-blue-200 text-sm text-gray-600 bg-white p-3 rounded-r-md">
+                                    <strong>參考方向：</strong> 進行 API 端點盤點 (Endpoint Enumeration)、實施最小權限原則、檢查授權矩陣、進行權限測試、設定 Rate limit 與日誌監控。
+                                </div>
+                            </details>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 題目資料結構
+        const quizData = {
+            id: 31,
+            correctIndex: 1, // 對應 options 中的索引 (原 B 選項)
+            options: [
+                { id: 'A', text: "僅對 AI 模型的訓練數據進行完整性檢查，而不進行模型行為分析" },
+                { id: 'B', text: "針對 AI 系統的 API 進行測試，以識別未經身份驗證的存取或過度暴露的功能" },
+                { id: 'C', text: "在滲透測試中，僅關注於傳統的網路基礎設施和主機漏洞，無需關注 AI 模型的特定風險" },
+                { id: 'D', text: "僅在模型上使用靜態分析工具來檢測程式碼中的潛在問題，而不測試實際攻擊途徑" }
+            ]
+        };
+
+        let currentShuffledOptions = [];
+        let selectedOptionIndex = -1;
+        let isSubmitted = false;
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initQuiz();
+        });
+
+        function initQuiz() {
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            // 隨機打亂選項 (Fisher-Yates Shuffle)
+            currentShuffledOptions = [...quizData.options]; // 複製一份
+            for (let i = currentShuffledOptions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentShuffledOptions[i], currentShuffledOptions[j]] = [currentShuffledOptions[j], currentShuffledOptions[i]];
+            }
+
+            // 渲染選項
+            currentShuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-card bg-white p-4 rounded-xl flex items-start gap-3';
+                btn.onclick = () => selectOption(index);
+                btn.id = `option-${index}`;
+                
+                btn.innerHTML = `
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 font-bold mt-0.5 option-idx transition-colors">
+                        ${String.fromCharCode(65 + index)}
+                    </div>
+                    <div class="text-gray-700 text-base md:text-lg leading-snug font-medium select-none">
+                        ${opt.text}
+                    </div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function selectOption(index) {
+            if (isSubmitted) return;
+
+            // 移除舊的選中狀態
+            if (selectedOptionIndex !== -1) {
+                document.getElementById(`option-${selectedOptionIndex}`).classList.remove('selected');
+                document.getElementById(`option-${selectedOptionIndex}`).querySelector('.option-idx').classList.remove('bg-primary', 'text-white', 'border-primary');
+            }
+
+            // 設置新狀態
+            selectedOptionIndex = index;
+            const el = document.getElementById(`option-${index}`);
+            el.classList.add('selected');
+            el.querySelector('.option-idx').classList.add('bg-primary', 'text-white', 'border-primary');
+            
+            // 更新狀態指示器
+            const status = document.getElementById('status-indicator');
+            status.innerHTML = '<i class="fa-solid fa-pen-nib text-blue-500"></i> 已選擇，準備送出';
+            status.classList.add('text-blue-600');
+        }
+
+        function submitAnswer() {
+            if (selectedOptionIndex === -1) {
+                // 防呆：未選提示
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            isSubmitted = true;
+            const submitBtn = document.getElementById('btn-submit');
+            const retryBtn = document.getElementById('btn-retry');
+            const selectedOpt = currentShuffledOptions[selectedOptionIndex];
+            const isCorrect = selectedOpt.id === 'B'; // 原始 ID 為 B 的是正確答案
+
+            // 禁用按鈕與選項
+            submitBtn.classList.add('hidden');
+            retryBtn.classList.remove('hidden');
+            document.querySelectorAll('.option-card').forEach(el => el.classList.add('disabled'));
+
+            // 視覺回饋處理
+            const feedbackArea = document.getElementById('feedback-area');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackText = document.getElementById('feedback-text');
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const status = document.getElementById('status-indicator');
+
+            // 找出正確選項在畫面上的 index
+            const correctVisualIndex = currentShuffledOptions.findIndex(opt => opt.id === 'B');
+            
+            // 標示正確答案
+            const correctEl = document.getElementById(`option-${correctVisualIndex}`);
+            correctEl.classList.add('correct');
+            correctEl.querySelector('.option-idx').classList.replace('bg-primary', 'bg-success');
+            correctEl.querySelector('.option-idx').classList.replace('border-primary', 'border-success');
+            correctEl.querySelector('.option-idx').innerHTML = '<i class="fa-solid fa-check"></i>';
+
+            if (isCorrect) {
+                // 答對邏輯
+                feedbackArea.classList.remove('hidden');
+                feedbackArea.classList.add('bg-green-50', 'border-green-200', 'text-green-800');
+                feedbackIcon.innerHTML = '<i class="fa-solid fa-circle-check text-success"></i>';
+                feedbackTitle.innerText = '回答正確！';
+                feedbackText.innerText = '太棒了！您準確抓住了 AI 安全的關鍵——API 防護。';
+                status.innerHTML = '<i class="fa-solid fa-check-circle text-green-600"></i> 答對';
+            } else {
+                // 答錯邏輯
+                const wrongEl = document.getElementById(`option-${selectedOptionIndex}`);
+                wrongEl.classList.remove('selected'); // 移除選中藍框
+                wrongEl.classList.add('wrong');       // 加上錯誤紅框與刪除線
+                wrongEl.querySelector('.option-idx').classList.replace('bg-primary', 'bg-error');
+                wrongEl.querySelector('.option-idx').classList.replace('border-primary', 'border-error');
+                wrongEl.querySelector('.option-idx').innerHTML = '<i class="fa-solid fa-xmark"></i>';
+
+                feedbackArea.classList.remove('hidden');
+                feedbackArea.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+                feedbackIcon.innerHTML = '<i class="fa-solid fa-circle-xmark text-error"></i>';
+                feedbackTitle.innerText = '回答錯誤';
+                feedbackText.innerText = '別氣餒！請看正確答案與解析，這是一個常見的盲點。';
+                status.innerHTML = '<i class="fa-solid fa-times-circle text-red-600"></i> 答錯';
+            }
+
+            // 顯示解析
+            document.getElementById('explanation-area').classList.remove('hidden');
+
+            // 平滑捲動至頂部 (UX 優化)
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetQuiz() {
+            // 重置狀態變數
+            isSubmitted = false;
+            selectedOptionIndex = -1;
+
+            // UI 重置
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-retry').classList.add('hidden');
+            
+            const feedbackArea = document.getElementById('feedback-area');
+            feedbackArea.className = 'hidden mt-6 rounded-xl p-4 border flex items-start gap-4 fade-in-up'; // Reset classes
+            
+            document.getElementById('explanation-area').classList.add('hidden');
+            
+            const status = document.getElementById('status-indicator');
+            status.innerHTML = '<i class="fa-regular fa-circle"></i> 尚未作答';
+            status.className = 'text-gray-400 text-sm font-medium';
+
+            // 收起 Self Check 答案
+            document.querySelectorAll('details').forEach(el => el.removeAttribute('open'));
+
+            // 重新初始化題目 (會重新洗牌)
+            initQuiz();
+
+            // 平滑捲動至題目區
+            document.querySelector('.main-container').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

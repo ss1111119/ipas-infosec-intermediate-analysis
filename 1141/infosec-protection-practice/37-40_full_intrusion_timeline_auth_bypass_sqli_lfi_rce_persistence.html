@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>37-40 題完整入侵時間線 (End-to-End Attack Timeline)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .timeline-line {
+            position: absolute;
+            left: 2rem;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, #3b82f6, #ef4444, #a855f7, #22c55e);
+            z-index: 0;
+        }
+        .card-glow:hover {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+            border-color: #60a5fa;
+        }
+        .code-bg {
+            background-color: #1e293b;
+            border-left: 4px solid #3b82f6;
+        }
+        /* Mobile adjustment for line */
+        @media (max-width: 640px) {
+            .timeline-line {
+                left: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-white tracking-wide">
+                    <i class="fa-solid fa-bug-slash text-red-500 mr-2"></i>
+                    入侵時間線：題組 37-40
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">從登入點 → 權限繞過 → 系統控制 → 風險處置</p>
+            </div>
+            <div class="hidden md:block">
+                <span class="bg-blue-900 text-blue-200 text-xs px-2 py-1 rounded border border-blue-700">Cyber Security Exam</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8 relative">
+        
+        <!-- Timeline Container -->
+        <div class="relative pl-8 sm:pl-12 py-4">
+            <!-- Continuous Line -->
+            <div class="timeline-line rounded-full opacity-50"></div>
+
+            <!-- STAGE 0: Baseline -->
+            <div class="relative mb-12 group">
+                <div class="absolute -left-10 sm:-left-14 top-1 w-8 h-8 bg-slate-700 rounded-full border-4 border-slate-800 flex items-center justify-center z-10 shadow-lg group-hover:bg-slate-600 transition">
+                    <i class="fa-solid fa-server text-xs text-gray-300"></i>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-5 border border-slate-700 shadow-lg hover:border-slate-500 transition duration-300">
+                    <div class="flex justify-between items-start mb-2">
+                        <h2 class="text-lg font-bold text-gray-200">【階段 0】目標系統背景 (Baseline)</h2>
+                        <span class="text-xs bg-slate-600 text-slate-200 px-2 py-1 rounded">環境</span>
+                    </div>
+                    <ul class="list-disc list-inside text-slate-400 text-sm space-y-1">
+                        <li>Web 應用程式 (PHP) + MySQL 資料庫</li>
+                        <li>使用 Session/Cookie 維持登入</li>
+                        <li><strong>關鍵配置：</strong> 系統 Log (access/auth) 可寫入且 MySQL 未限制來源 IP</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- STAGE 1: Login & CSRF -->
+            <div class="relative mb-12 group">
+                <div class="absolute -left-10 sm:-left-14 top-1 w-8 h-8 bg-blue-600 rounded-full border-4 border-slate-800 flex items-center justify-center z-10 shadow-lg group-hover:bg-blue-500 transition">
+                    <i class="fa-solid fa-shield-halved text-xs text-white"></i>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-5 border border-slate-700 shadow-lg hover:border-blue-500 transition duration-300">
+                    <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
+                        <h2 class="text-lg font-bold text-blue-400">【階段 1】登入點攻防 (Q37)</h2>
+                        <span class="mt-2 sm:mt-0 text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded border border-blue-700">防守成功</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="text-slate-300 text-sm">
+                            <p class="mb-2"><i class="fa-solid fa-user-ninja mr-2"></i><strong>攻擊者：</strong> 使用 Hydra 暴力破解，發現每次請求需帶隨機值。</p>
+                            <p class="mb-2"><i class="fa-solid fa-shield-virus mr-2"></i><strong>系統防護：</strong> 實作 CSRF Token，Token 每次請求皆不同。</p>
+                        </div>
+                        <div class="bg-blue-900/30 p-3 rounded text-xs border border-blue-800">
+                            <strong class="block text-blue-300 mb-1"><i class="fa-regular fa-lightbulb mr-1"></i>考點解析：</strong>
+                            即使錯誤訊息洩漏帳號狀態，<span class="text-white font-bold">CSRF Token</span> 有效防止了自動化重放攻擊與跨站請求偽造。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 2: SQLi -->
+            <div class="relative mb-12 group">
+                <div class="absolute -left-10 sm:-left-14 top-1 w-8 h-8 bg-red-600 rounded-full border-4 border-slate-800 flex items-center justify-center z-10 shadow-lg group-hover:bg-red-500 transition">
+                    <i class="fa-solid fa-database text-xs text-white"></i>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-5 border border-slate-700 shadow-lg hover:border-red-500 transition duration-300">
+                    <div class="flex justify-between items-start mb-3">
+                        <h2 class="text-lg font-bold text-red-400">【階段 2】資料庫層突破 (SQLi)</h2>
+                        <span class="text-xs bg-red-900 text-red-200 px-2 py-1 rounded border border-red-700">前置作業</span>
+                    </div>
+                    <p class="text-slate-300 text-sm mb-2">
+                        攻擊者在其他功能點發現並利用 <strong>SQL Injection</strong>。
+                    </p>
+                    <div class="p-3 bg-red-900/20 border-l-4 border-red-600 rounded-r text-sm text-slate-300">
+                        <p>目的並非直接竊取資料，而是獲取「更深層的控制權」，為 Log Poisoning 鋪路。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 3: Log Poisoning -->
+            <div class="relative mb-12 group">
+                <div class="absolute -left-10 sm:-left-14 top-1 w-8 h-8 bg-orange-600 rounded-full border-4 border-slate-800 flex items-center justify-center z-10 shadow-lg group-hover:bg-orange-500 transition">
+                    <i class="fa-solid fa-syringe text-xs text-white"></i>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-5 border border-slate-700 shadow-lg hover:border-orange-500 transition duration-300">
+                    <div class="flex justify-between items-start mb-3">
+                        <h2 class="text-lg font-bold text-orange-400">【階段 3】Log Poisoning (注入惡意碼)</h2>
+                        <span class="text-xs bg-orange-900 text-orange-200 px-2 py-1 rounded border border-orange-700">關鍵步驟</span>
+                    </div>
+                    <p class="text-slate-300 text-sm mb-3">
+                        攻擊者故意輸入特殊字串作為「使用者名稱」，導致伺服器將 PHP 程式碼寫入 Log 檔案。
+                    </p>
+                    <div class="code-bg p-3 rounded font-mono text-xs sm:text-sm text-green-400 mb-2 overflow-x-auto">
+                        User-Agent: Mozilla/5.0...<br>
+                        Username: <span class="text-red-400">&lt;?php system($_GET['c']); ?&gt;</span>
+                    </div>
+                    <p class="text-xs text-slate-500">結果：惡意程式碼現已存在於 <code class="bg-slate-700 px-1 rounded">/var/log/auth.log</code> 中。</p>
+                </div>
+            </div>
+
+            <!-- STAGE 4: LFI -->
+            <div class="relative mb-12 group">
+                <div class="absolute -left-10 sm:-left-14 top-1 w-8 h-8 bg-orange-600 rounded-full border-4 border-slate-800 flex items-center justify-center z-10 shadow-lg group-hover:bg-orange-500 transition">
+                    <i class="fa-solid fa-file-import text-xs text-white"></i>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-5 border border-slate-700 shadow-lg hover:border-orange-500 transition duration-300">
+                    <div class="flex justify-between items-start mb-3">
+                        <h2 class="text-lg font-bold text-orange-400">【階段 4】LFI 觸發執行 (Q38 核心)</h2>
+                        <span class="text-xs bg-orange-900 text-orange-200 px-2 py-1 rounded border border-orange-700">觸發</span>
+                    </div>
+                    <p class="text-slate-300 text-sm mb-3">
+                        利用 Local File Inclusion (LFI) 漏洞，強制 PHP 去 include 剛剛被汙染的 log 檔案。
+                    </p>
+                    <div class="code-bg p-3 rounded font-mono text-xs sm:text-sm text-yellow-300 mb-2 overflow-x-auto">
+                        GET /index.php?page=<span class="text-red-400">../../../../var/log/auth.log</span>&c=whoami
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2">PHP 解析器將 log 檔視為程式碼執行，觸發了 system() 函數。</p>
+                </div>
+            </div>
+
+            <!-- STAGE 5: RCE -->
+            <div class="relative mb-12 group">
+                <div class="absolute -left-10 sm:-left-14 top-1 w-8 h-8 bg-red-700 rounded-full border-4 border-slate-800 flex items-center justify-center z-10 shadow-lg animate-pulse">
+                    <i class="fa-solid fa-terminal text-xs text-white"></i>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-5 border-l-4 border-red-600 shadow-lg shadow-red-900/20">
+                    <div class="flex justify-between items-start mb-3">
+                        <h2 class="text-lg font-bold text-red-500">【階段 5】遠端指令執行 (RCE)</h2>
+                        <span class="text-xs bg-red-600 text-white px-2 py-1 rounded font-bold">Q38 答案</span>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-slate-300 text-sm">攻擊者成功透過網址參數 <code class="bg-slate-700 px-1 rounded">c</code> 在伺服器上執行任意作業系統指令。</p>
+                        <div class="grid grid-cols-3 gap-2 mt-2">
+                            <div class="bg-black/50 p-2 rounded text-center border border-slate-600">
+                                <span class="block text-xs text-slate-500">指令 1</span>
+                                <span class="font-mono text-green-400 text-sm">whoami</span>
+                            </div>
+                            <div class="bg-black/50 p-2 rounded text-center border border-slate-600">
+                                <span class="block text-xs text-slate-500">指令 2</span>
+                                <span class="font-mono text-green-400 text-sm">ipaddr</span>
+                            </div>
+                            <div class="bg-black/50 p-2 rounded text-center border border-slate-600">
+                                <span class="block text-xs text-slate-500">指令 3</span>
+                                <span class="font-mono text-green-400 text-sm">hostname</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 6: Broken Access Control -->
+            <div class="relative mb-12 group">
+                <div class="absolute -left-10 sm:-left-14 top-1 w-8 h-8 bg-purple-600 rounded-full border-4 border-slate-800 flex items-center justify-center z-10 shadow-lg group-hover:bg-purple-500 transition">
+                    <i class="fa-solid fa-users-gear text-xs text-white"></i>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-5 border border-slate-700 shadow-lg hover:border-purple-500 transition duration-300">
+                    <div class="flex justify-between items-start mb-3">
+                        <h2 class="text-lg font-bold text-purple-400">【階段 6】橫向與權限擴張 (Q39)</h2>
+                        <span class="text-xs bg-purple-900 text-purple-200 px-2 py-1 rounded border border-purple-700">Broken Access Control</span>
+                    </div>
+                    <div class="text-slate-300 text-sm space-y-2">
+                        <p>攻擊者觀察管理者封包，發現多了參數：</p>
+                        <div class="code-bg p-2 rounded font-mono text-xs">
+                            &pri=admin&sid=101
+                        </div>
+                        <p>低權限帳號自行添加此參數後，伺服器未驗證身分即放行，成功存取管理後台。</p>
+                        <div class="bg-purple-900/20 p-2 rounded text-xs text-purple-300 border border-purple-800 mt-2">
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                            <strong>OWASP Top 10 A01:</strong> 權限判斷僅依賴前端傳入參數，缺乏伺服器端驗證。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 7: Deep Risk -->
+            <div class="relative mb-12 group">
+                <div class="absolute -left-10 sm:-left-14 top-1 w-8 h-8 bg-pink-700 rounded-full border-4 border-slate-800 flex items-center justify-center z-10 shadow-lg">
+                    <i class="fa-solid fa-fire text-xs text-white"></i>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-5 border border-slate-700 shadow-lg hover:border-pink-600 transition duration-300">
+                    <div class="flex justify-between items-start mb-3">
+                        <h2 class="text-lg font-bold text-pink-500">【階段 7】深度風險擴大</h2>
+                        <span class="text-xs bg-pink-900 text-pink-200 px-2 py-1 rounded border border-pink-700">全面淪陷</span>
+                    </div>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-xmark text-red-500 mt-1 mr-2"></i>
+                            透過 LFI 讀取 Config 檔，取得資料庫帳密。
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-xmark text-red-500 mt-1 mr-2"></i>
+                            發現 MySQL 監聽公開介面且無來源 IP 限制。
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-skull text-red-500 mt-1 mr-2"></i>
+                            <strong>後果：</strong> 資料庫面臨外部直接連線，資料恐被竊取、刪除或竄改。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- STAGE 8: Remediation -->
+            <div class="relative group">
+                <div class="absolute -left-10 sm:-left-14 top-1 w-8 h-8 bg-emerald-600 rounded-full border-4 border-slate-800 flex items-center justify-center z-10 shadow-lg group-hover:bg-emerald-500 transition">
+                    <i class="fa-solid fa-kit-medical text-xs text-white"></i>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-5 border border-slate-700 shadow-lg hover:border-emerald-500 transition duration-300">
+                    <div class="flex justify-between items-start mb-3">
+                        <h2 class="text-lg font-bold text-emerald-400">【階段 8】風險處置與止血 (Q40)</h2>
+                        <span class="text-xs bg-emerald-900 text-emerald-200 px-2 py-1 rounded border border-emerald-700">防禦建議</span>
+                    </div>
+                    <p class="text-slate-300 text-sm mb-3">
+                        在不影響可用性且成本最低的前提下，立即採取的措施：
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="bg-emerald-900/30 p-3 rounded border border-emerald-800">
+                            <div class="font-bold text-emerald-300 mb-1"><i class="fa-solid fa-network-wired mr-1"></i>限制來源 IP</div>
+                            <p class="text-xs text-slate-400">同時對 Web 應用與 MySQL 設定 IP 白名單，大幅降低攻擊面。</p>
+                        </div>
+                        <div class="bg-emerald-900/30 p-3 rounded border border-emerald-800">
+                            <div class="font-bold text-emerald-300 mb-1"><i class="fa-solid fa-shield-dog mr-1"></i>導入 WAF</div>
+                            <p class="text-xs text-slate-400">即時阻擋 SQL Injection、LFI 路徑遍歷及參數操控攻擊。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Summary Footer -->
+        <div class="mt-12 bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-6 border border-slate-700 text-center shadow-xl">
+            <h3 class="text-xl font-bold text-white mb-2">一句話總結</h3>
+            <p class="text-lg text-blue-300 italic font-medium">
+                「Token 擋假登入，但擋不了程式漏洞；<br class="sm:hidden">
+                SQL 開門、LFI 點火、權限一壞，全站失守。」
+            </p>
+            <div class="mt-4 flex flex-wrap justify-center gap-2 text-xs text-slate-500">
+                <span class="px-2 py-1 bg-slate-800 rounded border border-slate-700">#SQLInjection</span>
+                <span class="px-2 py-1 bg-slate-800 rounded border border-slate-700">#LogPoisoning</span>
+                <span class="px-2 py-1 bg-slate-800 rounded border border-slate-700">#LFI</span>
+                <span class="px-2 py-1 bg-slate-800 rounded border border-slate-700">#RCE</span>
+                <span class="px-2 py-1 bg-slate-800 rounded border border-slate-700">#BrokenAccessControl</span>
+            </div>
+        </div>
+
+    </main>
+    
+    <footer class="text-center py-6 text-slate-600 text-xs">
+        &copy; 2025 Cyber Security Exam Review | Generated by Gemini
+    </footer>
+
+</body>
+</html>

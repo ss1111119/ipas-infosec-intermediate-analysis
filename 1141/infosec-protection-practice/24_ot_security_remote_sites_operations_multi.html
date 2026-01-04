@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OT 安全維運實務 - 互動測驗</title>
+    
+    <!-- 外部資源：Bootstrap 5, FontAwesome, Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 核心配色系統 --- */
+        :root {
+            --body-bg: #f4f7f6;       /* 冷灰調背景 */
+            --card-bg: #ffffff;       /* 卡片底色 */
+            --text-primary: #2c3e50;  /* 深藍灰文字 */
+            --primary-color: #2980b9; /* 主要藍色 */
+            --highlight: #f1c40f;     /* 記憶黃標記 */
+            --success-bg: #e8f5e9;    /* 正確背景 */
+            --success-border: #2e7d32;/* 正確邊框 */
+            --error-bg: #fce4ec;      /* 錯誤背景 */
+            --error-border: #c62828;  /* 錯誤邊框 */
+            
+            /* 標籤功能色 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        /* --- 基礎設定 --- */
+        body {
+            font-family: 'Noto Sans TC', system-ui, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- 容器版型 --- */
+        .page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                max-width: 100%;
+                margin: 16px;
+                padding: 20px;
+                border-radius: 12px;
+            }
+            h2 { font-size: 20px; }
+            h3 { font-size: 16px; }
+        }
+
+        /* --- UI 元件樣式 --- */
+        
+        /* 1. Header */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 12px;
+        }
+        .quiz-status {
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background-color: #e0e0e0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* 2. Context Card */
+        .context-card {
+            background-color: #f8f9fa;
+            border-left: 5px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+        }
+        .context-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* 3. Question & Options */
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start; /* 頂對齊，適應長文字 */
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-label:hover {
+            background-color: #e3f2fd;
+            border-color: #bbdefb;
+            transform: translateY(-2px);
+        }
+
+        /* 選中樣式 (透過 JS 添加 class) */
+        .option-label.selected {
+            background-color: #e3f2fd;
+            border-color: var(--primary-color);
+        }
+
+        /* 禁用樣式 */
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+            pointer-events: none; /* 防止點擊 */
+        }
+        .option-label.disabled:hover {
+            transform: none;
+        }
+
+        .option-input {
+            margin-top: 5px; /* 對齊文字 */
+            margin-right: 12px;
+            transform: scale(1.2);
+            accent-color: var(--primary-color);
+        }
+
+        .option-text {
+            word-break: break-word;
+            flex: 1;
+        }
+
+        /* 4. Action Area */
+        .action-area {
+            margin-top: 32px;
+            text-align: center;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+            transition: all 0.2s ease;
+            min-height: 44px; /* 觸控友善 */
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+            background-color: #3498db;
+        }
+        
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-retry {
+            background-color: #7f8c8d;
+            color: white;
+        }
+        .btn-retry:hover {
+            background-color: #95a5a6;
+        }
+
+        /* 5. Feedback Area */
+        .feedback-area {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 0.3s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback-success {
+            background-color: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: var(--success-border);
+        }
+
+        .feedback-error {
+            background-color: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: var(--error-border);
+        }
+
+        /* 6. Explain Area */
+        .explain-area {
+            margin-top: 24px;
+            display: none; /* 初始隱藏 */
+        }
+
+        .explain-summary {
+            cursor: pointer;
+            padding: 16px;
+            background-color: #f1f2f6;
+            border-radius: 8px;
+            font-weight: bold;
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        
+        .explain-summary:hover {
+            background-color: #e4e6eb;
+        }
+        
+        .explain-summary::after {
+            content: '\f078'; /* FontAwesome Chevron Down */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+
+        details[open] .explain-summary::after {
+            transform: rotate(180deg);
+        }
+
+        .explain-content {
+            padding-top: 16px;
+        }
+
+        .explain-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--tag-net);
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 0 8px 8px 0;
+            position: relative;
+        }
+
+        .explain-section h4 {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .step-badge {
+            display: inline-block;
+            background-color: #34495e;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+
+        /* 7. Self Check */
+        .self-check-area {
+            margin-top: 24px;
+            border-top: 2px dashed #e0e0e0;
+            padding-top: 24px;
+        }
+        
+        .self-check-summary {
+            cursor: pointer;
+            padding: 16px;
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #1565c0;
+            list-style: none;
+            position: relative;
+        }
+        
+        .self-check-summary:hover {
+            background-color: #bbdefb;
+        }
+
+        .self-check-summary::after {
+            content: '點擊查看答案 ▼';
+            float: right;
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+        
+        details[open] .self-check-summary::after {
+            content: '隱藏答案 ▲';
+        }
+
+        /* --- 標籤樣式 --- */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: white;
+            margin-right: 6px;
+            margin-bottom: 4px;
+            vertical-align: middle;
+        }
+        .tag-law { background-color: var(--tag-law); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        mark {
+            background-color: var(--highlight);
+            color: #000;
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+        
+        .correct-answer-text {
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .highlight-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="page-container" id="quizContainer">
+        
+        <!-- 1. Header -->
+        <header class="quiz-header">
+            <div>
+                <span class="badge bg-secondary me-2">複選題 24</span>
+                <span style="font-size: 0.9rem; color: #7f8c8d;">資安防護實務 / OT 安全</span>
+            </div>
+            <div id="statusBadge" class="quiz-status">未作答</div>
+        </header>
+
+        <!-- 2. Context -->
+        <div class="context-card">
+            <div class="context-title"><i class="fa-solid fa-circle-info me-2"></i>情境描述</div>
+            關鍵基礎設施與製造業常有據點分佈全球之狀況，因此須考量遠距情況下的實體安全差異，是否對運營科技（Operational Technology，OT，就是控制工廠設備與流程的技術）的運作能力或安全性造成風險。
+        </div>
+
+        <!-- 3. Question -->
+        <div class="question-area">
+            <div class="question-text">
+                關於運營科技的安全維運敘述，下列何者<mark>最為適切</mark>？（複選）
+            </div>
+            
+            <div class="option-group" id="optionGroup">
+                <!-- Option A -->
+                <label class="option-label" for="optA">
+                    <input type="checkbox" name="quizOption" id="optA" value="A" class="option-input">
+                    <span class="option-text">
+                        (A) 據點間的通信應使用點對點加密與身份驗證，無論專線、衛星或網際網路等形式
+                    </span>
+                </label>
+
+                <!-- Option B -->
+                <label class="option-label" for="optB">
+                    <input type="checkbox" name="quizOption" id="optB" value="B" class="option-input">
+                    <span class="option-text">
+                        (B) 各據點確保有足夠的網路頻寬，來收集與傳輸監控資料與運營資料
+                    </span>
+                </label>
+
+                <!-- Option C -->
+                <label class="option-label" for="optC">
+                    <input type="checkbox" name="quizOption" id="optC" value="C" class="option-input">
+                    <span class="option-text">
+                        (C) 各據點皆須建立必要的網絡安全防護措施，以降低來自網路攻擊威脅與危害
+                    </span>
+                </label>
+
+                <!-- Option D -->
+                <label class="option-label" for="optD">
+                    <input type="checkbox" name="quizOption" id="optD" value="D" class="option-input">
+                    <span class="option-text">
+                        (D) 各據點<mark>不應採用</mark>委外管理模式的資通安全威脅偵測管理（Security Operation Center，SOC）
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 4. Action Area -->
+        <div class="action-area">
+            <button id="submitBtn" class="btn-submit" onclick="submitAnswer()">送出答案</button>
+        </div>
+
+        <!-- 5. Feedback -->
+        <div id="feedbackArea" class="feedback-area">
+            <!-- 內容由 JS 動態生成 -->
+        </div>
+
+        <!-- 6. Explain -->
+        <details id="explainArea" class="explain-area">
+            <summary class="explain-summary">
+                <span><i class="fa-regular fa-lightbulb me-2"></i>查看詳細解析</span>
+            </summary>
+            <div class="explain-content">
+                
+                <!-- 第一步 -->
+                <div class="explain-section" style="border-left-color: var(--tag-mgm);">
+                    <span class="step-badge">第一步</span>
+                    <h4>🔍 找關鍵字</h4>
+                    <p>
+                        <ul>
+                            <li><strong>關鍵基礎設施、製造業：</strong>高風險、高影響，不能只靠單一防護。</li>
+                            <li><strong>據點分佈全球、遠距：</strong>一定會牽涉到「通訊安全」與「維運一致性」。</li>
+                            <li><strong>運營科技（OT）：</strong>工控系統、產線、設備控制，不是一般辦公室 IT。</li>
+                            <li><strong>安全維運、最為適切：</strong>問的是「正確、實務上合理的做法」。</li>
+                        </ul>
+                    </p>
+                </div>
+
+                <!-- 第二步 -->
+                <div class="explain-section" style="border-left-color: var(--tag-net);">
+                    <span class="step-badge">第二步</span>
+                    <h4>🗣️ 白話翻譯</h4>
+                    <p>很多工廠、關鍵設施分散在世界各地，要遠端監控與管理設備。那麼在 OT（工控系統）的資安維運上，哪些做法才是「正確又合理的」？</p>
+                </div>
+
+                <!-- 第三步 -->
+                <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                    <span class="step-badge">第三步</span>
+                    <h4>🧠 解題思路與原理</h4>
+                    <p><strong>思考方向：</strong>
+                        <ol>
+                            <li><strong>OT 特性：</strong>不中斷、穩定、安全比方便重要。</li>
+                            <li><strong>基本資安原則：</strong>檢查選項是否符合「縱深防禦」與「零信任」精神。</li>
+                            <li><strong>生活例子：</strong>OT 就像工廠的「神經系統」，跨廠區連線就像拉「神經傳導線」。如果不加密、不驗證，就等於「裸線亂拉」，隨時會被接線竊聽或阻斷。</li>
+                        </ol>
+                    </p>
+                </div>
+
+                <!-- 第四步：選項分析 -->
+                <div class="explain-section" style="border-left-color: var(--primary-color);">
+                    <span class="step-badge">第四步</span>
+                    <h4>📝 選項逐一分析</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <span class="badge bg-success me-2">正確</span> <strong>(A) 通信加密與驗證：</strong><br>
+                            跨據點連線一定經過不可信網路（Internet）。不論是專線、衛星，都可能被攔截。<strong>加密與身份驗證</strong>是基本底線。
+                        </li>
+                        <li class="mb-3">
+                            <span class="badge bg-success me-2">正確</span> <strong>(B) 足夠頻寬：</strong><br>
+                            OT 需要即時監控（Real-time）。頻寬不足會影響告警回傳與決策，甚至導致即時控制失效。
+                        </li>
+                        <li class="mb-3">
+                            <span class="badge bg-success me-2">正確</span> <strong>(C) 網路安全防護：</strong><br>
+                            防火牆、網段隔離、存取控制都是必要措施。不能因為是封閉工廠就以為「物理隔離」足夠（Air Gap 已被證實不可靠）。
+                        </li>
+                        <li class="mb-3">
+                            <span class="badge bg-danger me-2">錯誤</span> <strong>(D) 關於 SOC 委外：</strong><br>
+                            SOC 是否委外，重點在「管理與合約」。並非「不能委外」，而是要管好。題目用「不應採用」過於武斷，許多企業反而依賴專業 MSSP 來補足能力。
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 觀念補充與延伸 -->
+                <div class="explain-section" style="border-left-color: var(--tag-iso);">
+                    <h4>📚 觀念補充：IT vs OT</h4>
+                    <p>
+                        <strong>OT (Operational Technology)：</strong>用來控制實體設備、製程與產線的技術。
+                        <br>
+                        <strong>核心差異：</strong>
+                        <ul>
+                            <li>IT 重視資料的機密性 (C)。</li>
+                            <li>OT 重視系統的「可用性 (A)」與「人員安全 (Safety)」。</li>
+                        </ul>
+                    </p>
+                </div>
+
+                <!-- 常見陷阱與盲點 -->
+                <div class="explain-section" style="border-left-color: var(--error-border);">
+                    <h4>⚠️ 常見陷阱與避坑指南</h4>
+                    <p>
+                        <strong>心理盲點：</strong> 學生常以為 OT 系統很特殊，所以「一定不能委外」或「一定不能聯網」。
+                        <br>
+                        <strong>避坑指南：</strong> 考試看到「不應」、「一律禁止」、「一定不能」等絕對性字眼，請先提高警覺。現代 OT 資安強調的是「風險管理」而非「絕對禁止」。
+                    </p>
+                </div>
+
+                <!-- 記憶口訣 -->
+                <div class="explain-section" style="border-left-color: var(--highlight);">
+                    <h4>💡 記憶口訣</h4>
+                    <div class="highlight-box">
+                        <strong>「跨廠連線要加密，頻寬要夠、防護要有；委外不是原罪，亂禁才有罪。」</strong>
+                    </div>
+                </div>
+
+            </div>
+        </details>
+
+        <!-- 7. Self Check -->
+        <details id="selfCheckArea" class="self-check-area">
+            <!-- 修正：題目直接顯示在 Summary，答案隱藏在內容中 -->
+            <summary class="self-check-summary">
+                <i class="fa-solid fa-clipboard-check me-2"></i>
+                <strong>自我檢測題目：</strong>在資安三角（CIA）中，IT 環境通常最重視機密性，請問 OT 環境最重視哪一項？
+            </summary>
+            
+            <div class="explain-content px-3">
+                <div class="alert alert-info mt-2">
+                    <strong>答案：可用性 (Availability)</strong>
+                    <hr>
+                    <p class="mb-0">
+                        因為 OT 系統控制實體設備（如電力、水壩、產線），系統一旦停擺可能造成人員傷亡或重大經濟損失，因此「持續運作」是最高優先級，其次是完整性，最後才是機密性。
+                    </p>
+                </div>
+            </div>
+        </details>
+
+    </div>
+
+    <script>
+        // --- 資料設定 ---
+        const correctAnswers = ['A', 'B', 'C'];
+        
+        // --- DOM 元素 ---
+        const optionInputs = document.querySelectorAll('.option-input');
+        const optionLabels = document.querySelectorAll('.option-label');
+        const submitBtn = document.getElementById('submitBtn');
+        const feedbackArea = document.getElementById('feedbackArea');
+        const explainArea = document.getElementById('explainArea');
+        const selfCheckArea = document.getElementById('selfCheckArea');
+        const statusBadge = document.getElementById('statusBadge');
+        const quizContainer = document.getElementById('quizContainer');
+
+        // --- 互動效果：選取時改變樣式 ---
+        optionInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const label = this.closest('label');
+                if(this.checked) {
+                    label.classList.add('selected');
+                } else {
+                    label.classList.remove('selected');
+                }
+            });
+        });
+
+        // --- 核心功能：送出答案 ---
+        function submitAnswer() {
+            // 1. 取得使用者選擇
+            const selected = Array.from(optionInputs)
+                .filter(input => input.checked)
+                .map(input => input.value);
+
+            // 2. 防呆：未選
+            if (selected.length === 0) {
+                alert("請先選擇答案！");
+                return;
+            }
+
+            // 3. 判定邏輯 (複選題：必須完全一致)
+            // 先排序再比對字串，確保順序不影響判定
+            const isCorrect = JSON.stringify(selected.sort()) === JSON.stringify(correctAnswers.sort());
+
+            // 4. 更新 UI 狀態
+            disableOptions();
+            showFeedback(isCorrect);
+            updateStatus(isCorrect);
+            
+            // 5. 顯示詳解
+            explainArea.style.display = 'block';
+            // 自動展開詳解
+            explainArea.open = true; 
+
+            // 6. 切換按鈕為重作
+            submitBtn.textContent = '重新作答';
+            submitBtn.className = 'btn-submit btn-retry';
+            submitBtn.onclick = resetQuiz;
+
+            // 7. 捲動到回饋區
+            feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // --- 輔助功能：鎖定選項 ---
+        function disableOptions() {
+            optionInputs.forEach(input => input.disabled = true);
+            optionLabels.forEach(label => label.classList.add('disabled'));
+        }
+
+        // --- 輔助功能：顯示回饋 ---
+        function showFeedback(isCorrect) {
+            feedbackArea.style.display = 'block';
+            feedbackArea.className = 'feedback-area ' + (isCorrect ? 'feedback-success' : 'feedback-error');
+            
+            let content = '';
+            if (isCorrect) {
+                content = `
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fa-solid fa-circle-check fa-xl me-2"></i>
+                        <h4 class="m-0">答對了！</h4>
+                    </div>
+                    <p class="m-0">理由：OT 跨據點維運重點在通訊安全、頻寬與基本資安防護，而非一概否定 SOC 委外模式。</p>
+                `;
+            } else {
+                content = `
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fa-solid fa-circle-xmark fa-xl me-2"></i>
+                        <h4 class="m-0">答錯了</h4>
+                    </div>
+                    <div class="correct-answer-text mb-2">正確答案：A、B、C</div>
+                    <p class="m-0">理由：OT 跨據點維運重點在通訊安全、頻寬與基本資安防護。選項 (D) 關於 SOC 委外不應直接禁止，而是要做好管理。</p>
+                `;
+            }
+            feedbackArea.innerHTML = content;
+        }
+
+        // --- 輔助功能：更新狀態標籤 ---
+        function updateStatus(isCorrect) {
+            if (isCorrect) {
+                statusBadge.textContent = '✓ 答對';
+                statusBadge.style.backgroundColor = '#e8f5e9';
+                statusBadge.style.color = '#2e7d32';
+            } else {
+                statusBadge.textContent = '✗ 答錯';
+                statusBadge.style.backgroundColor = '#fce4ec';
+                statusBadge.style.color = '#c62828';
+            }
+        }
+
+        // --- 核心功能：重新作答 ---
+        function resetQuiz() {
+            // 1. 清空選項
+            optionInputs.forEach(input => {
+                input.checked = false;
+                input.disabled = false;
+            });
+            optionLabels.forEach(label => {
+                label.classList.remove('selected', 'disabled');
+            });
+
+            // 2. 隱藏區域
+            feedbackArea.style.display = 'none';
+            explainArea.style.display = 'none';
+            explainArea.open = false; // 收合詳解
+            selfCheckArea.open = false; // 收合自我檢測
+
+            // 3. 恢復按鈕
+            submitBtn.textContent = '送出答案';
+            submitBtn.className = 'btn-submit';
+            submitBtn.onclick = submitAnswer;
+
+            // 4. 恢復狀態標籤
+            statusBadge.textContent = '未作答';
+            statusBadge.style.backgroundColor = '#e0e0e0';
+            statusBadge.style.color = '#666';
+
+            // 5. 捲動回頂端
+            quizContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+</body>
+</html>

