@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安工程師 - 題組衝刺 (21-24)</title>
+    <style>
+        :root {
+            /* 配色系統 */
+            --primary-bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-secondary: #666666;
+            
+            /* 標籤顏色 */
+            --tag-law: #607d8b;   /* 法規 */
+            --tag-iso: #27ae60;   /* 標準 */
+            --tag-zt: #8e44ad;    /* 零信任 */
+            --tag-net: #2980b9;   /* 網路 */
+            --tag-sec: #c0392b;   /* 技術 */
+            --tag-mgm: #d35400;   /* 風險/管理 */
+
+            /* 狀態顏色 */
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            --neutral-gray: #e0e0e0;
+            --highlight-red: #d32f2f;
+            --step-badge-bg: #34495e;
+
+            /* 介面尺寸 */
+            --radius: 16px;
+            --spacing: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* 容器與佈局 */
+        .app-container {
+            max-width: 960px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 80vh;
+        }
+
+        /* 頁首 Header */
+        header {
+            padding: var(--spacing);
+            border-bottom: 1px solid #eee;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: #2c3e50;
+        }
+
+        .progress-info {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background-color: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--tag-net);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* 題組情境 Context */
+        .context-box {
+            background-color: #e3f2fd;
+            padding: var(--spacing);
+            border-left: 5px solid #2196f3;
+            margin: 0;
+            font-size: 0.95rem;
+            color: #0d47a1;
+        }
+
+        .context-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* 分頁 Tabs */
+        .tabs-container {
+            display: flex;
+            background-color: #f8f9fa;
+            padding: 10px var(--spacing) 0;
+            gap: 5px;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+        }
+        .tabs-container::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: #e9ecef;
+            border-radius: 12px 12px 0 0;
+            font-weight: bold;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid transparent;
+            border-bottom: none;
+            min-height: 48px;
+        }
+
+        .tab:hover {
+            background: #dde2e6;
+        }
+
+        .tab.active {
+            background: #ffffff;
+            color: var(--tag-net);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        .tab-icon {
+            font-size: 1.1em;
+        }
+
+        .tab.correct { color: var(--success-text); }
+        .tab.wrong { color: var(--error-text); }
+
+        /* 題目區域 Question Area */
+        .question-container {
+            padding: var(--spacing);
+            flex: 1;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .q-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        .q-text {
+            font-size: 1.15rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+
+        .highlight-negative {
+            color: var(--highlight-red);
+            font-weight: 900;
+            border-bottom: 2px solid var(--highlight-red);
+        }
+
+        /* 選項 Options */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-item:hover:not(.disabled) {
+            border-color: var(--tag-net);
+            background-color: #f8fbff;
+        }
+
+        .option-item.selected {
+            border-color: var(--tag-net);
+            background-color: #e3f2fd;
+        }
+
+        .option-item.disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .option-item.correct-answer {
+            border-color: var(--success-text);
+            background-color: var(--success-bg);
+        }
+
+        .option-item.wrong-answer {
+            border-color: var(--error-text);
+            background-color: var(--error-bg);
+        }
+
+        .option-check {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #bdbdbd;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .option-item[data-type="checkbox"] .option-check {
+            border-radius: 4px; /* Square for checkbox */
+        }
+
+        .option-item.selected .option-check {
+            border-color: var(--tag-net);
+            background-color: var(--tag-net);
+        }
+
+        .option-check::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            display: none;
+        }
+        
+        .option-item[data-type="checkbox"].selected .option-check::after {
+             display: block;
+             width: 5px;
+             height: 9px;
+             border: solid white;
+             border-width: 0 2px 2px 0;
+             transform: rotate(45deg);
+             border-radius: 0;
+             background: transparent;
+             margin-bottom: 2px;
+        }
+
+        .option-item.selected .option-check::after {
+            display: block;
+        }
+
+        /* 按鈕區 Action Area */
+        .action-area {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-submit {
+            background-color: var(--tag-net);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-retry {
+            background-color: var(--tag-mgm);
+            color: white;
+            flex: 1;
+            display: none;
+        }
+        
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 詳解區 Explain Section (新版設計) */
+        .explain-section {
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+            margin-top: 20px;
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .explain-header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+
+        .explain-content {
+            padding: 25px;
+            background-color: #fcfcfc;
+        }
+
+        /* 詳解區塊通用樣式 */
+        .step-box {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .step-badge {
+            display: inline-block;
+            background-color: var(--step-badge-bg);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .step-content {
+            padding-left: 5px;
+            color: #444;
+        }
+
+        .keyword-highlight {
+            color: var(--tag-sec);
+            font-weight: bold;
+            background-color: #fff3cd;
+            padding: 0 4px;
+        }
+
+        /* 邏輯區塊 */
+        .logic-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .logic-list li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+        .logic-list li::before {
+            content: '•';
+            color: var(--tag-net);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        /* 選項分析表格 */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            margin-top: 10px;
+        }
+        .analysis-table th, .analysis-table td {
+            border: 1px solid #eee;
+            padding: 8px;
+            text-align: left;
+        }
+        .analysis-table th {
+            background-color: #f2f2f2;
+            color: var(--text-main);
+        }
+        .analysis-table tr.correct-row {
+            background-color: var(--success-bg);
+        }
+
+        /* 記憶金句 */
+        .golden-sentence {
+            background-color: #fff8e1;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            font-weight: bold;
+            color: #795548;
+            font-size: 1.1rem;
+            text-align: center;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* 陷阱區 */
+        .trap-box {
+            background-color: #ffebee;
+            border: 1px solid #ffcdd2;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+        .trap-title {
+            color: var(--error-text);
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 自我檢測 (Self-Check) */
+        .check-container {
+            margin-top: 20px;
+        }
+        .check-item {
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+        .check-question {
+            padding: 12px 15px;
+            font-weight: bold;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eee;
+            color: var(--text-main);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .check-answer-box {
+            padding: 0;
+        }
+        .check-toggle-btn {
+            width: 100%;
+            border: none;
+            background: white;
+            color: var(--tag-net);
+            padding: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .check-toggle-btn:hover {
+            background-color: #f0f8ff;
+        }
+        .check-answer {
+            padding: 15px;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            display: none; /* 預設隱藏 */
+            border-top: 1px dashed #c8e6c9;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .app-container { border-radius: 0; }
+            .tabs-container { padding-left: 10px; }
+            .q-text { font-size: 1.05rem; }
+            .analysis-table { font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Header -->
+    <header>
+        <div class="header-top">
+            <h1>iPAS 資安題組衝刺 (No.21-24)</h1>
+            <div class="progress-info">進度：<span id="progressText">0/4</span></div>
+        </div>
+        <div class="progress-track">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </header>
+
+    <!-- Context -->
+    <div class="context-box">
+        <span class="context-label">【題組共同情境】</span>
+        K 公司為國內股票上市食品之製造商，公司新建置網路販售系統，將產品直接銷售給國內的消費者，並暫時不提供將所販售產品寄到本國以外的地區。公司在規劃與建置此網路販售系統時，需同步考量法規遵循、資安要求與系統安全設計，以確保營運與消費者資料安全。
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container" id="tabsContainer">
+        <!-- Rendered by JS -->
+    </div>
+
+    <!-- Question Area -->
+    <div class="question-container" id="questionContainer">
+        <!-- Rendered by JS -->
+    </div>
+</div>
+
+<script>
+    // --- 1. 資料定義 (Data Structure Updated) ---
+    const quizData = {
+        groupTitle: "K 公司電商系統建置與資安規劃",
+        questions: [
+            {
+                id: 21,
+                tag: "管理",
+                tagClass: "tag-mgm",
+                text: "請問公司在建置此網路販售系統時，下列何項為最「不」需要考慮的項目？",
+                type: "radio",
+                options: [
+                    "主管機關的要求",
+                    "法令規定",
+                    "公司資安長的專長",
+                    "系統安全需求"
+                ],
+                correct: ["公司資安長的專長"],
+                analysis: {
+                    keywords: ["建置網路販售系統", "最「不」需要考慮", "資安長的專長"],
+                    translation: "公司要蓋一個正規的系統，應該依據法律規定和系統需求來蓋，還是看資安長個人擅長什麼就蓋什麼？",
+                    logic: {
+                        steps: [
+                            "區分「客觀必要條件」與「主觀能力資源」。",
+                            "法規與安全需求是「死的」（必須遵守），不遵守會違法或被駭。",
+                            "人員專長是「活的」（資源），若專長不足應該外聘顧問或進修，而非降低系統標準。"
+                        ],
+                        principle: "需求分析應基於業務目標與合規性 (Compliance)，而非現有人力資源。",
+                        example: "就像蓋房子（建置系統）必須符合建築法規（法令）和耐震標準（安全需求），不能因為建築師不擅長蓋耐震結構（專長），就決定房子不用耐震。"
+                    },
+                    options_analysis: [
+                        { opt: "主管機關的要求", result: "必要", reason: "上市公司受高度監管，不遵守會受罰。" },
+                        { opt: "法令規定", result: "必要", reason: "這是法遵底線（如個資法）。" },
+                        { opt: "公司資安長的專長", result: "非必要 (正解)", reason: "專長屬於執行層面的工具，不應反過來決定系統的規格目標。若專長不足應尋求外部資源。" },
+                        { opt: "系統安全需求", result: "必要", reason: "缺乏安全需求的系統無法抵禦攻擊。" }
+                    ],
+                    extension: {
+                        law: "需求規格書 (RFP) 的撰寫應獨立於執行團隊的能力之外。",
+                        analogy: "考駕照（法規）不會因為你不會路邊停車（專長），監理站就取消這個考科。"
+                    },
+                    mnemonic: "「建置看需求，不看人頭。」",
+                    trap: {
+                        blindspot: "權威偏誤：覺得資安長職位很大，他的意見或能力就是標準。",
+                        guide: "看到「個人」特質（專長、喜好、習慣）通常不是制度面的考量依據。"
+                    },
+                    self_check: [
+                        { q: "如果資安長離職了，系統原本的安全建置標準需要改變嗎？", a: "不用。標準是跟著公司與法規的，不隨人員異動而改變。" },
+                        { q: "法令規定屬於內在需求還是外在限制？", a: "外在限制 (Constraint)。" }
+                    ]
+                }
+            },
+            {
+                id: 22,
+                tag: "風險",
+                tagClass: "tag-mgm",
+                text: "公司於建置系統時評估自行負責金流作業風險過大，決定將網路金流作業交由合格之金資服務機構辦理，不自行處理金流作業。請問此項決策屬下列何項風險處理措施？",
+                type: "radio",
+                options: [
+                    "風險緩解 (Risk Mitigation)",
+                    "風險避免 (Risk Avoidance)",
+                    "風險分擔 (Risk Sharing)",
+                    "風險保留 (Risk Retention)"
+                ],
+                correct: ["風險避免 (Risk Avoidance)"],
+                analysis: {
+                    keywords: ["不自行處理", "交由...辦理", "風險處理措施"],
+                    translation: "因為怕處理金流會出事（風險大），所以公司決定「我不做了」，這個動作叫什麼？",
+                    logic: {
+                        steps: [
+                            "判斷公司是否繼續進行該項高風險活動？",
+                            "是 -> 考慮緩解或分擔；否 -> 風險避免。",
+                            "題目強調「不自行處理」，代表公司本身停止了金流處理這項活動。"
+                        ],
+                        principle: "風險避免 (Risk Avoidance) = 停止或不參與產生風險的活動。",
+                        example: "怕開車會撞人（風險），所以決定把車賣了，以後都搭捷運（不自行開車 = 避免）。"
+                    },
+                    options_analysis: [
+                        { opt: "風險緩解", result: "錯誤", reason: "繼續做，但加裝防護（如防火牆）。" },
+                        { opt: "風險避免", result: "正確", reason: "直接停止內部處理金流的活動，避開了風險源。" },
+                        { opt: "風險分擔", result: "易混淆", reason: "雖然找了第三方，但分擔通常指「活動照做，但找人分攤損失（如保險）」。題目強調「不自行處理」的決策，更偏向避免內部操作風險。" },
+                        { opt: "風險保留", result: "錯誤", reason: "照做且不避險，自己承擔後果。" }
+                    ],
+                    extension: {
+                        law: "風險處置策略四象限：高衝擊/高機率通常建議「避免」。",
+                        analogy: "怕伺服器被網路攻擊，決定直接拔掉網路線（極端避免）。"
+                    },
+                    mnemonic: "「不做就是避免，找人扛是分擔。」",
+                    trap: {
+                        blindspot: "看到「交給別人」就直覺想到分擔（移轉）。",
+                        guide: "關鍵在動詞！「不自行處理」強度大於「找人幫忙」。重點在於公司內部「避開」了這個作業流程。"
+                    },
+                    self_check: [
+                        { q: "如果公司自己做金流，但買了資安保險，這屬於哪一種？", a: "風險分擔 (Risk Sharing)。" },
+                        { q: "如果公司評估後覺得金流風險很小，決定自己做且不買保險，這屬於哪一種？", a: "風險保留 (Risk Retention)。" }
+                    ]
+                }
+            },
+            {
+                id: 23,
+                tag: "技術",
+                tagClass: "tag-sec",
+                text: "建置網路販售系統時，公司考量該系統之機密性、可用性、完整性（CIA）規劃了相關控制項目，請問下列何項系統建置規劃「不」屬機密性（Confidentiality）的考量？",
+                type: "radio",
+                options: [
+                    "規定使用多因子認證 (MFA) 登入系統",
+                    "要求定期更改密碼",
+                    "建置即時系統備援機制",
+                    "使用 TLS 1.3 加密通訊協定"
+                ],
+                correct: ["建置即時系統備援機制"],
+                analysis: {
+                    keywords: ["機密性", "不屬", "備援機制"],
+                    translation: "下面哪一個措施「不是」用來防偷看的？（暗示：是用來防當機或防竄改的）",
+                    logic: {
+                        steps: [
+                            "分類 CIA 三要素：C=防洩漏, I=防竄改, A=防中斷。",
+                            "分析選項目的：MFA、密碼、TLS 都是為了「限制存取」（防洩漏）。",
+                            "備援機制的目的是「當主機壞掉時有人接手」，確保服務不中斷。"
+                        ],
+                        principle: "可用性 (Availability) = 授權使用者在需要時能存取資產。",
+                        example: "銀行保險箱（機密性） vs 發電機（可用性）。發電機不能防小偷，但能讓你在停電時還能工作。"
+                    },
+                    options_analysis: [
+                        { opt: "多因子認證 (MFA)", result: "機密性", reason: "確認身分，防止帳號被盜用偷看資料。" },
+                        { opt: "定期更改密碼", result: "機密性", reason: "降低舊密碼外洩被利用的風險。" },
+                        { opt: "即時系統備援", result: "可用性 (正解)", reason: "目的是確保系統服務不中斷，與資料保密無直接關係。" },
+                        { opt: "TLS 1.3 加密", result: "機密性", reason: "防止傳輸過程被竊聽。" }
+                    ],
+                    extension: {
+                        law: "CIA Triad 是資安最核心的基礎模型。",
+                        analogy: "DDoS 攻擊就是在破壞可用性；勒索軟體加密檔案也是在破壞可用性（讓你不能用）。"
+                    },
+                    mnemonic: "「加密鎖門是機密，備份備援是可用。」",
+                    trap: {
+                        blindspot: "把「資安」當作一個模糊的整體，沒分細項。",
+                        guide: "看到「備份」、「備援」、「高可用 (HA)」等關鍵字，請直接聯想「可用性 (A)」。"
+                    },
+                    self_check: [
+                        { q: "如果駭客把你的銀行存款從 100 元改成 10000 元，這是破壞了哪一項？", a: "完整性 (Integrity)。" },
+                        { q: "勒索軟體把你電腦鎖起來要贖金，主要影響了什麼？", a: "可用性 (Availability)。" }
+                    ]
+                }
+            },
+            {
+                id: 24,
+                tag: "法規",
+                tagClass: "tag-law",
+                text: "網路販售系統上線 6 個月後，公司收到證券主管機關通知，大量會員資料被人於國外網站上架販售。請問發生此個資外洩事件，公司於回應此資安事件時，須注意下列哪些法令規章？（複選）",
+                type: "checkbox",
+                options: [
+                    "電腦處理個人資料保護法",
+                    "上市上櫃公司資通安全管控指引",
+                    "個人資料保護法",
+                    "食品安全衛生管理法"
+                ],
+                correct: ["上市上櫃公司資通安全管控指引", "個人資料保護法"],
+                analysis: {
+                    keywords: ["上市公司", "個資外洩", "法令規章"],
+                    translation: "一家大公司（上市公司）把會員資料弄丟了，處理這件事要翻哪幾本法律書？",
+                    logic: {
+                        steps: [
+                            "分析事件本質：個資外洩 -> 必適用《個人資料保護法》。",
+                            "分析公司身分：上市公司 -> 必適用證券主管機關之《資通安全管控指引》。",
+                            "刪去法：舊法已廢止；食安法管食物不管資料。"
+                        ],
+                        principle: "法規遵循需同時考量「行業別（上市公司）」與「事件屬性（個資事件）」。",
+                        example: "開車撞人（刑法/民法），如果你是職業計程車司機，還要多看一條《道路交通管理處罰條例》關於職業駕駛的加重規定。"
+                    },
+                    options_analysis: [
+                        { opt: "電腦處理個人資料...", result: "錯誤", reason: "這是舊法，已被《個人資料保護法》取代。" },
+                        { opt: "上市上櫃...管控指引", result: "正確", reason: "因為 K 公司是上市公司，必須遵守金管會的特別規範。" },
+                        { opt: "個人資料保護法", result: "正確", reason: "發生個資外洩事件的最高指導原則。" },
+                        { opt: "食品安全衛生管理法", result: "錯誤", reason: "這是管產品（食品）安全的，跟資料外洩無關。" }
+                    ],
+                    extension: {
+                        law: "特別法優於普通法概念；不同監管單位有不同要求。",
+                        analogy: "如果是公務機關發生此事，就要看《資通安全管理法》。"
+                    },
+                    mnemonic: "「個資漏了看個資，上市櫃加看指引。」",
+                    trap: {
+                        blindspot: "看到「食品製造商」就想選食安法。",
+                        guide: "題目問的是「資安事件」的回應，不是問「產品過期」的回應。請對症下藥。"
+                    },
+                    self_check: [
+                        { q: "如果這家公司不是上市公司，還需要遵守管控指引嗎？", a: "不需要。但仍需遵守個資法。" },
+                        { q: "如果只是系統當機但沒有資料外洩，優先適用哪一個？", a: "若是上市公司，仍需依《管控指引》通報資安事件，但不一定適用《個資法》（除非有個資受損）。" }
+                    ]
+                }
+            }
+        ]
+    };
+
+    // --- 2. 狀態管理 ---
+    let appState = {
+        currentTab: 0,
+        answers: {}, // { qId: { selected: [], isCorrect: bool, submitted: bool } }
+    };
+
+    // 初始化狀態
+    quizData.questions.forEach(q => {
+        appState.answers[q.id] = { selected: [], isCorrect: null, submitted: false };
+    });
+
+    // --- 3. 核心功能 ---
+
+    // 洗牌演算法 Fisher-Yates
+    function shuffleArray(array) {
+        let currentIndex = array.length, randomIndex;
+        let newArr = [...array];
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [newArr[currentIndex], newArr[randomIndex]] = [newArr[randomIndex], newArr[currentIndex]];
+        }
+        return newArr;
+    }
+
+    // 文字處理：負面詞標紅
+    function highlightKeywords(text) {
+        const negativeWords = ["不", "不是", "錯誤", "最不適用", "沒有", "非"];
+        let processedText = text;
+        negativeWords.forEach(word => {
+            const regex = new RegExp(`(${word})`, 'g');
+            processedText = processedText.replace(regex, `<span class="highlight-negative">$1</span>`);
+        });
+        return processedText;
+    }
+
+    // --- 4. 渲染邏輯 ---
+
+    function init() {
+        renderTabs();
+        renderQuestion(0);
+        updateProgress();
+    }
+
+    // 渲染 Tabs
+    function renderTabs() {
+        const container = document.getElementById('tabsContainer');
+        container.innerHTML = '';
+        
+        quizData.questions.forEach((q, index) => {
+            const btn = document.createElement('div');
+            btn.className = `tab ${index === appState.currentTab ? 'active' : ''}`;
+            
+            let icon = '';
+            const state = appState.answers[q.id];
+            if (state.submitted) {
+                if (state.isCorrect) {
+                    btn.classList.add('correct');
+                    icon = '✓';
+                } else {
+                    btn.classList.add('wrong');
+                    icon = '✗';
+                }
+            } else {
+                icon = (index + 1).toString();
+            }
+
+            btn.innerHTML = `<span class="tab-icon">${icon}</span> 第 ${q.id} 題`;
+            btn.onclick = () => switchTab(index);
+            container.appendChild(btn);
+        });
+    }
+
+    function switchTab(index) {
+        appState.currentTab = index;
+        renderTabs();
+        renderQuestion(index);
+        document.querySelector('.app-container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 渲染題目與詳解 (Updated Render Logic)
+    function renderQuestion(index) {
+        const q = quizData.questions[index];
+        const state = appState.answers[q.id];
+        const container = document.getElementById('questionContainer');
+        const analysis = q.analysis;
+        
+        if (!q.shuffledOptions) {
+            q.shuffledOptions = shuffleArray(q.options);
+        }
+
+        // --- 建構詳解 HTML ---
+        let explanationHTML = '';
+        if (state.submitted) {
+            
+            // 選項分析表格列
+            const optionsTableRows = analysis.options_analysis.map(opt => `
+                <tr class="${opt.result.includes('正解') || opt.result.includes('正確') ? 'correct-row' : ''}">
+                    <td><strong>${opt.opt}</strong></td>
+                    <td style="white-space:nowrap;">${opt.result}</td>
+                    <td>${opt.reason}</td>
+                </tr>
+            `).join('');
+
+            // 自我檢測項目
+            const selfCheckItems = analysis.self_check.map((item, idx) => `
+                <div class="check-item">
+                    <div class="check-question">
+                        <span>Q${idx+1}:</span>
+                        <span>${item.q}</span>
+                    </div>
+                    <div class="check-answer-box">
+                        <button class="check-toggle-btn" onclick="this.nextElementSibling.style.display='block'; this.style.display='none'">
+                            👇 點擊顯示參考答案
+                        </button>
+                        <div class="check-answer">
+                            <strong>A:</strong> ${item.a}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            explanationHTML = `
+                <div class="explain-section" id="explainSection" style="display:block">
+                    <div class="explain-header">
+                        <span>📝 詳細解析與觀念導讀</span>
+                        <span>${state.isCorrect ? '✅ 答對' : '❌ 答錯'}</span>
+                    </div>
+                    <div class="explain-content">
+                        
+                        <!-- 1. 關鍵字 -->
+                        <div class="step-box">
+                            <span class="step-badge">第一步：找關鍵字</span>
+                            <div class="step-content">
+                                題目重點：${analysis.keywords.map(k => `<span class="keyword-highlight">${k}</span>`).join('、')}
+                            </div>
+                        </div>
+
+                        <!-- 2. 白話翻譯 -->
+                        <div class="step-box">
+                            <span class="step-badge">第二步：白話翻譯</span>
+                            <div class="step-content">
+                                "${analysis.translation}"
+                            </div>
+                        </div>
+
+                        <!-- 3. 解題思路 -->
+                        <div class="step-box">
+                            <span class="step-badge">第三步：解題思路</span>
+                            <div class="step-content">
+                                <p><strong>📌 解題步驟：</strong></p>
+                                <ul class="logic-list">
+                                    ${analysis.logic.steps.map(s => `<li>${s}</li>`).join('')}
+                                </ul>
+                                <hr style="margin:15px 0; border:0; border-top:1px dashed #ddd;">
+                                <p><strong>⚖️ 原理與規則：</strong>${analysis.logic.principle}</p>
+                                <p><strong>🍎 生活例子：</strong>${analysis.logic.example}</p>
+                            </div>
+                        </div>
+
+                        <!-- 4. 選項分析 -->
+                        <div class="step-box">
+                            <span class="step-badge">第四步：選項分析</span>
+                            <table class="analysis-table">
+                                <thead>
+                                    <tr>
+                                        <th width="30%">選項</th>
+                                        <th width="15%">判定</th>
+                                        <th>原因分析</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${optionsTableRows}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 5. 觀念補充 -->
+                        <div class="step-box" style="background-color: #f4f6f7;">
+                            <span class="step-badge" style="background-color:#7f8c8d;">觀念補充與延伸</span>
+                            <div class="step-content">
+                                <p><strong>📖 定義/法條：</strong>${analysis.extension.law}</p>
+                                <p><strong>🔗 觸類旁通：</strong>${analysis.extension.analogy}</p>
+                            </div>
+                        </div>
+
+                        <!-- 6. 記憶金句 -->
+                        <div class="golden-sentence">
+                            🔑 記憶口訣：${analysis.mnemonic}
+                        </div>
+
+                        <!-- 7. 常見陷阱 -->
+                        <div class="trap-box">
+                            <div class="trap-title">⚠️ 常見陷阱</div>
+                            <ul style="margin:0; padding-left:20px;">
+                                <li><strong>心理盲點：</strong>${analysis.trap.blindspot}</li>
+                                <li><strong>避坑指南：</strong>${analysis.trap.guide}</li>
+                            </ul>
+                        </div>
+
+                        <!-- 8. 自我檢測 -->
+                        <div class="check-container">
+                            <h4 style="color:#2c3e50; margin-bottom:10px;">🛡️ 自我檢測 (Self-Check)</h4>
+                            ${selfCheckItems}
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        let html = `
+            <div class="q-meta">
+                <span class="tag ${q.tagClass}">${q.tag}</span>
+                <span style="color: #666; font-size: 0.9rem;">${q.type === 'checkbox' ? '（複選題）' : '（單選題）'}</span>
+            </div>
+            <div class="q-text">${highlightKeywords(q.text)}</div>
+            
+            <div class="options-list">
+                ${q.shuffledOptions.map(opt => {
+                    const isSelected = state.selected.includes(opt);
+                    const isSubmitted = state.submitted;
+                    const isCorrectOption = q.correct.includes(opt);
+                    
+                    let classes = 'option-item';
+                    if (isSelected) classes += ' selected';
+                    if (isSubmitted) {
+                        classes += ' disabled';
+                        if (isCorrectOption) classes += ' correct-answer';
+                        if (isSelected && !isCorrectOption) classes += ' wrong-answer';
+                    }
+
+                    return `
+                        <div class="${classes}" 
+                             onclick="handleOptionClick(${q.id}, '${opt.replace(/'/g, "\\'")}')"
+                             data-type="${q.type}">
+                            <div class="option-check"></div>
+                            <div>${opt}</div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+
+            <div class="action-area">
+                <button class="btn btn-submit" id="submitBtn" onclick="submitAnswer(${q.id})" ${state.submitted ? 'style="display:none"' : ''}>
+                    送出答案
+                </button>
+                <button class="btn btn-retry" id="retryBtn" onclick="resetQuestion(${q.id})" ${state.submitted ? 'style="display:flex"' : ''}>
+                    重新作答
+                </button>
+            </div>
+
+            ${explanationHTML}
+        `;
+
+        container.innerHTML = html;
+    }
+
+    // --- 5. 互動邏輯 ---
+
+    // 點擊選項
+    window.handleOptionClick = function(qId, optionText) {
+        const q = quizData.questions.find(x => x.id === qId);
+        const state = appState.answers[qId];
+
+        if (state.submitted) return;
+
+        if (q.type === 'radio') {
+            state.selected = [optionText];
+        } else {
+            const idx = state.selected.indexOf(optionText);
+            if (idx > -1) {
+                state.selected.splice(idx, 1);
+            } else {
+                state.selected.push(optionText);
+            }
+        }
+        
+        renderQuestion(quizData.questions.findIndex(x => x.id === qId));
+    };
+
+    // 送出答案
+    window.submitAnswer = function(qId) {
+        const q = quizData.questions.find(x => x.id === qId);
+        const state = appState.answers[qId];
+
+        if (state.selected.length === 0) {
+            alert("請先選擇至少一個答案！");
+            return;
+        }
+
+        const sortedSelected = [...state.selected].sort();
+        const sortedCorrect = [...q.correct].sort();
+        
+        const isCorrect = JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
+        
+        state.submitted = true;
+        state.isCorrect = isCorrect;
+
+        renderTabs();
+        renderQuestion(quizData.questions.findIndex(x => x.id === qId));
+        updateProgress();
+
+        setTimeout(() => {
+            const explain = document.getElementById('explainSection');
+            if(explain) explain.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    };
+
+    // 重置單題
+    window.resetQuestion = function(qId) {
+        const q = quizData.questions.find(x => x.id === qId);
+        appState.answers[qId] = { selected: [], isCorrect: null, submitted: false };
+        q.shuffledOptions = shuffleArray(q.options);
+
+        renderTabs();
+        renderQuestion(quizData.questions.findIndex(x => x.id === qId));
+        updateProgress();
+        
+        document.querySelector('.question-container').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // 更新進度條
+    function updateProgress() {
+        const total = quizData.questions.length;
+        let completed = 0;
+        Object.values(appState.answers).forEach(s => {
+            if (s.submitted) completed++;
+        });
+
+        const percent = (completed / total) * 100;
+        document.getElementById('progressBar').style.width = `${percent}%`;
+        document.getElementById('progressText').innerText = `${completed}/${total}`;
+    }
+
+    // 啟動
+    init();
+
+</script>
+
+</body>
+</html>

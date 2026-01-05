@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題組：企業治理與新興框架 (題組 13-16)</title>
+    <style>
+        :root {
+            /* 標籤色系 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+
+            /* 介面色系 */
+            --primary-bg: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-light: #7f8c8d;
+            --accent-blue: #3498db;
+            --success-green: #2ecc71;
+            --error-red: #e74c3c;
+            --border-color: #e0e0e0;
+            
+            /* 步驟色系 */
+            --step-keyword-bg: #fff3cd; /* 黃 */
+            --step-keyword-text: #856404;
+            --step-trans-bg: #e2e3e5; /* 灰 */
+            --step-trans-text: #383d41;
+            --step-logic-bg: #d1ecf1; /* 藍 */
+            --step-logic-text: #0c5460;
+            --step-trap-bg: #f8d7da; /* 紅 */
+            --step-trap-text: #721c24;
+            --step-golden-bg: #d4edda; /* 綠 */
+            --step-golden-text: #155724;
+
+            /* 狀態色 */
+            --correct-bg: #e8f5e9;
+            --error-bg: #fce4ec;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px 10px;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* 頁首與進度條 */
+        header {
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0 0 15px 0;
+            color: var(--text-main);
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .progress-bar {
+            flex-grow: 1;
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--success-green);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            font-weight: bold;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        /* 題組情境 */
+        .scenario-box {
+            background-color: #e3f2fd;
+            border-left: 5px solid var(--accent-blue);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            color: #34495e;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .scenario-title {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: var(--tag-net);
+            font-size: 1.1rem;
+        }
+
+        /* Tab 切換 */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        .tabs::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        .tab-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--text-light);
+            white-space: nowrap;
+            transition: all 0.2s;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tab-btn.active {
+            background-color: var(--text-main);
+            color: #fff;
+            border-color: var(--text-main);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .tab-btn.correct {
+            border-color: var(--success-green);
+            color: var(--success-green);
+        }
+        
+        .tab-btn.active.correct {
+            background-color: var(--success-green);
+            color: #fff;
+        }
+
+        .tab-btn.wrong {
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
+
+        .tab-btn.active.wrong {
+            background-color: var(--error-red);
+            color: #fff;
+        }
+
+        /* 題目卡片 */
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            display: none; /* 預設隱藏，透過 JS 切換 */
+            animation: fadeIn 0.3s ease;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .q-tag {
+            padding: 4px 12px;
+            border-radius: 4px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .q-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--text-main);
+        }
+
+        /* 關鍵字強調 */
+        .highlight-negative {
+            color: #c0392b;
+            font-weight: 900;
+            text-decoration: underline;
+        }
+        
+        .highlight-keyword {
+            background-color: #fff3cd;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        /* 選項區域 */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: flex-start; /* 讓長文字靠上對齊 */
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            background: #fff;
+        }
+
+        .option-item:hover:not(.disabled) {
+            background-color: #f8f9fa;
+            border-color: var(--accent-blue);
+        }
+
+        .option-item.selected {
+            border-color: var(--text-main);
+            background-color: #f2f6f8;
+        }
+
+        .option-item.correct {
+            border-color: var(--success-green);
+            background-color: var(--correct-bg);
+        }
+
+        .option-item.wrong {
+            border-color: var(--error-red);
+            background-color: var(--error-bg);
+        }
+        
+        /* 隱藏原生 radio/checkbox */
+        .option-input {
+            margin-top: 5px; /* 對齊文字 */
+            margin-right: 15px;
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+
+        /* 禁用狀態 */
+        .option-item.disabled {
+            cursor: default;
+            opacity: 0.9;
+        }
+        
+        .option-item.disabled:hover {
+            border-color: var(--border-color); /* 恢復原狀 */
+        }
+        
+        /* 動作按鈕區 */
+        .action-area {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 0 30px;
+            height: 48px;
+            border-radius: 24px;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 140px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-submit {
+            background-color: var(--text-main);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: #ecf0f1;
+            color: var(--text-main);
+            border: 1px solid #bdc3c7;
+        }
+
+        /* 詳解區塊樣式 - 新版 */
+        .explain-section {
+            margin-top: 30px;
+            display: none; /* 預設隱藏 */
+            animation: fadeIn 0.5s ease;
+        }
+
+        .step-box {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .step-title {
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .step-content {
+            padding: 15px;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-main);
+        }
+
+        /* 不同步驟的配色 */
+        .step-1 .step-title { background-color: var(--step-keyword-bg); color: var(--step-keyword-text); }
+        .step-2 .step-title { background-color: var(--step-trans-bg); color: var(--step-trans-text); }
+        .step-3 .step-title { background-color: var(--step-logic-bg); color: var(--step-logic-text); }
+        .step-4 .step-title { background-color: #fff; color: var(--text-main); border-bottom: 2px solid var(--text-main); }
+        .step-ext .step-title { background-color: #e8f5e9; color: #2e7d32; }
+        .step-mnemonic .step-title { background-color: var(--step-golden-bg); color: var(--step-golden-text); }
+        .step-trap .step-title { background-color: var(--step-trap-bg); color: var(--step-trap-text); }
+        .step-check .step-title { background-color: #e3f2fd; color: #0d47a1; }
+
+        /* 自我檢測樣式 */
+        .check-item {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 10px;
+        }
+        .check-item:last-child { border-bottom: none; }
+        .check-q { font-weight: bold; margin-bottom: 5px; }
+        .check-a { 
+            display: none; 
+            margin-top: 8px; 
+            padding: 8px; 
+            background: #f1f8e9; 
+            border-radius: 4px; 
+            color: #33691e;
+            font-size: 0.9rem;
+        }
+        .toggle-ans-btn {
+            background: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            cursor: pointer;
+            color: #666;
+            margin-top: 5px;
+        }
+        .toggle-ans-btn:hover { background: #eee; }
+
+        /* 標籤顏色類別 */
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        /* RWD */
+        @media (max-width: 768px) {
+            .container { padding: 0 15px; }
+            .btn { width: 100%; }
+            .tabs { padding: 0 5px 10px 5px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <header>
+        <h1 id="group-title">載入中...</h1>
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <span class="progress-text" id="progress-text">0 / 0</span>
+        </div>
+    </header>
+
+    <!-- Context -->
+    <div class="scenario-box" id="global-scenario">
+        <!-- 情境內容由 JS 填入 -->
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="tabs-container">
+        <!-- 分頁按鈕由 JS 產生 -->
+    </div>
+
+    <!-- Questions Container -->
+    <div id="questions-container">
+        <!-- 題目卡片由 JS 產生 -->
+    </div>
+</div>
+
+<script>
+    // --- 1. 資料定義 (含擴充詳解) ---
+    const quizData = {
+        "groupTitle": "iPAS 資安題組：企業治理與最新框架應用 (題組 13-16)",
+        "groupScenario": "<span class='scenario-title'>【題組共用情境】</span>在準備上市公司的董事會會議中，資通安全是議程的重點。此次會議主要討論如何加強公司的資通安全防護及管理機制，應對生成式 AI（Generative AI）帶來的威脅，以及了解最新的資安框架更新（如 NIST CSF 2.0）如何融入公司治理之中。<br><br>資安主管需向高層說明：(1) 依據法規誰該為資安政策負責、(2) 攻擊者如何利用 AI 資源、(3) 新版框架如何強化治理、以及 (4) 資安三要素在實際事件中的應用。",
+        "questions": [
+            {
+                "id": 13,
+                "type": "single",
+                "tag": "法規/治理",
+                "tagClass": "tag-law",
+                "text": "依據我國上市上櫃公司資通安全控管指引，為協助公司強化資通安全防護及管理機制，於該指引中明文規定必須設置專責人員訂定資通安全政策及目標，本項明文要求必須由公司內部哪一個職務以上核定政策及目標？",
+                "options": ["監察人", "資訊主管", "董事", "副總經理"],
+                "correct": ["副總經理"],
+                "analysis": {
+                    "step1": "「上市上櫃公司」、「資通安全控管指引」、「核定」、「政策及目標」、「哪一個職務以上」。",
+                    "step2": "在大型上市公司裡，要決定「公司整體的資安大方向與目標」（例如：今年要花多少錢做資安、要達到什麼安全標準），這份文件必須由誰簽名批准才算數？是寫程式的主管，還是管理公司的高層？",
+                    "step3": "<strong>解題步驟：</strong><br>1. 辨識法規對象：上市上櫃公司（受金管會高度監管）。<br>2. 辨識關鍵動作：「核定政策及目標」。這屬於公司治理（Governance）層次，而非技術執行層次。<br>3. 對應職級：指引中明確要求需由「副總經理」或相當層級以上之管理階層核定。<br><br><strong>原理與規則：</strong><br>資安政策涉及全公司的資源調度、跨部門協作（如人資、法務、財務）。若層級不夠高（如僅資訊主管），無法指揮其他平行部門配合。<br><br><strong>生活例子：</strong><br>就像學校要訂定「全校手機管理規定」，這必須由「校長」或「學務主任」（副總級）核定，不能只由「電腦老師」（資訊主管）自己決定，否則其他班級不會理會。",
+                    "step4": "<strong>(A) 監察人：</strong>負責監督公司運作是否合法，但不介入經營管理決策。<br><strong>(B) 資訊主管：</strong>通常是政策的「起草者」與「執行者」，但職權不足以「核定」跨部門政策。<br><strong>(C) 董事：</strong>董事會負責監督與重大決策，但指引特別要求的是具備實際管理權的「管理階層」專責主管。<br><strong>(D) 副總經理：</strong>正確。屬於高階管理階層，有權調動資源並承擔最終成敗責任。",
+                    "extension": "<strong>法條定義：</strong>《上市上櫃公司資通安全控管指引》要求設置資安專責主管及人員，並明定資安政策須由副總經理以上核定。<br><strong>觸類旁通：</strong>現在許多公司設有「資安長（CISO）」，通常也要求由副總經理級別以上兼任，以確保其獨立性與話語權。",
+                    "mnemonic": "「資安政策是大條事，副總簽名才算數。」",
+                    "trap": "<strong>心理盲點：</strong>看到「資通安全」四個字，直覺反應選「資訊主管」。<br><strong>避坑指南：</strong>區分「執行（Execution）」與「治理（Governance）」。做事的是資訊主管，但扛責任、畫押批准的必須是高層（副總）。",
+                    "selfCheck": [
+                        { "q": "為什麼資訊主管不能核定資安政策？", "a": "因為資訊主管通常屬於中階主管，職權僅限於資訊部門，無法強制要求業務、財務等其他部門配合資安政策，需更高層級授權。" },
+                        { "q": "如果公司沒有副總經理這個職稱怎麼辦？", "a": "法規通常指「相當層級」，故應由位階相當於副總或直接由總經理核定。" }
+                    ]
+                }
+            },
+            {
+                "id": 14,
+                "type": "single",
+                "tag": "技術/攻擊",
+                "tagClass": "tag-sec",
+                "text": "情境如題組所述，生成式 AI 也成為攻擊者利用的利器之一。MITRE ATT&CK 於 15.01 版本將 AI 納入，新增技術 T1588.007 Artificial Intelligence。請問此新增的攻擊技術，歸屬於下列哪一個戰術進程？",
+                "options": ["Impact（衝擊）", "Persistence（維持）", "Defense Evasion（防禦規避）", "Resource Development（資源開發）"],
+                "correct": ["Resource Development（資源開發）"],
+                "analysis": {
+                    "step1": "「MITRE ATT&CK」、「T1588.007」、「Artificial Intelligence」、「戰術進程（Tactic）」。",
+                    "step2": "駭客想要用 AI 來做壞事（例如寫釣魚信、寫程式），在 ATT&CK 的地圖裡，駭客「弄到一個 AI 工具」這個動作，算是在攻擊流程的哪一個階段？是已經在破壞了嗎？還是在準備中？",
+                    "step3": "<strong>解題步驟：</strong><br>1. 分析 T1588 編號，屬於 \"Obtain Capabilities\"（取得能力）類別。<br>2. 判斷 AI 在此的角色：是攻擊者手中的「工具」或「資源」。<br>3. 對應戰術：在攻擊發起前，建立、購買、竊取或下載攻擊所需工具的階段，稱為「資源開發」。<br><br><strong>原理與規則：</strong><br><strong>Resource Development（資源開發）：</strong>攻擊者在入侵前建立基礎設施與能力的階段。AI 模型在此被視為一種「能力（Capability）」。<br><br><strong>生活例子：</strong><br>就像搶匪在搶銀行前，先去買一台跑得很快的車（AI 工具），這個買車的動作就是「資源開發」，而不是搶劫本身（Impact）。",
+                    "step4": "<strong>(A) Impact（衝擊）：</strong>這是攻擊造成的最終後果（如資料被刪、服務中斷）。AI 是工具，不是後果。<br><strong>(B) Persistence（維持）：</strong>這是讓惡意程式賴在系統裡不走。與取得 AI 工具無關。<br><strong>(C) Defense Evasion（防禦規避）：</strong>這是躲避防毒軟體。雖然 AI 可用來寫免殺病毒，但 T1588 重點在「取得」這個 AI。<br><strong>(D) Resource Development（資源開發）：</strong>正確。T1588.007 定義為攻擊者獲取 AI 能力以支援後續攻擊。",
+                    "extension": "<strong>觀念補充：</strong>ATT&CK 框架分為 PRE-ATT&CK（攻擊前）與 Enterprise（企業內）。Resource Development 連接了兩者，強調攻擊者的準備工作。<br><strong>觸類旁通：</strong>除了 AI，購買網域（Domains）、購買憑證（Certificates）也都屬於 Resource Development。",
+                    "mnemonic": "「Resource Development 是備料，AI 工具先傳好。」（傳好=準備好）",
+                    "trap": "<strong>心理盲點：</strong>覺得 AI 很強大、破壞力高，所以直覺選「Impact（衝擊）」。<br><strong>避坑指南：</strong>問自己「駭客現在是在『準備工具』還是在『造成傷害』？」T1588 是在講駭客如何擁有 AI，所以是準備階段。",
+                    "selfCheck": [
+                        { "q": "如果駭客用 AI 寫了一封釣魚信並寄出，『寄出』這動作屬於哪個戰術？", "a": "Initial Access（初始存取）。" },
+                        { "q": "為什麼 AI 不歸類在 Defense Evasion？", "a": "雖然 AI 可以輔助規避，但 T1588 的定義側重於『取得』這項技術能力，而非具體執行的規避行為。" }
+                    ]
+                }
+            },
+            {
+                "id": 15,
+                "type": "single",
+                "tag": "標準/CSF",
+                "tagClass": "tag-iso",
+                "text": "NIST CSF 於 2024 年 3 月公佈最新版 2.0 版，自原有的 5 個主功能擴增為 6 大主要功能，強調將有限資源做最佳投注。請問新增的功能稱之為下列何項？",
+                "options": ["識別（Identify）", "響應（Respond）", "治理（Govern）", "復原（Recover）"],
+                "correct": ["治理（Govern）"],
+                "analysis": {
+                    "step1": "「NIST CSF 2.0」、「5個擴增為6個」、「新增的功能」、「資源做最佳投注」。",
+                    "step2": "以前資安框架有五大步驟（IPDRR），現在 2.0 版多了一個「老大」功能，專門管錢、管人、定方向，這個新功能叫什麼？",
+                    "step3": "<strong>解題步驟：</strong><br>1. 回想 CSF 1.1 版的五大功能：Identify, Protect, Detect, Respond, Recover。<br>2. 2.0 版的核心變革是將「治理」拉出來成為獨立且核心的功能。<br>3. 治理負責串聯其他五項，確保資安策略與企業目標一致。<br><br><strong>原理與規則：</strong><br><strong>Govern（治理）：</strong>位於 CSF 2.0 的圓心，強調組織的資安風險管理策略、角色權責與政策制定。<br><br><strong>生活例子：</strong><br>舊版像是一支球隊有前鋒、後衛、守門員（技術角色），但一直輸球。2.0 版發現原來缺了一個「總教練」（治理），負責戰術指導跟資源分配。",
+                    "step4": "<strong>(A) 識別（Identify）：</strong>舊有功能。負責盤點資產與風險。<br><strong>(B) 響應（Respond）：</strong>舊有功能。負責資安事件發生時的處置。<br><strong>(C) 治理（Govern）：</strong>正確。2.0 新增功能，負責建立與監控資安風險管理策略。<br><strong>(D) 復原（Recover）：</strong>舊有功能。負責災後恢復運作。",
+                    "extension": "<strong>觀念補充：</strong>CSF 2.0 適用範圍從「關鍵基礎設施」擴大到「所有組織」。Govern 功能包含：組織環境、風險管理策略、角色權責、政策、監督。<br><strong>觸類旁通：</strong>ISO 27001 的 Clause 5 Leadership 也是在講類似的概念。",
+                    "mnemonic": "「IPDRR + G = G-IPDRR（治理老大帶頭跑）。」",
+                    "trap": "<strong>心理盲點：</strong>容易把「管理（Management）」跟「識別（Identify）」搞混，覺得盤點資產就是管理。<br><strong>避坑指南：</strong>看到「資源配置」、「決策」、「優先順序」關鍵字，請直接聯想「治理（Govern）」。",
+                    "selfCheck": [
+                        { "q": "Govern 功能在 CSF 2.0 的圖形中位置在哪裡？", "a": "在圓心。代表它驅動並連結其他五個功能。" },
+                        { "q": "制定資安政策屬於哪一個功能？", "a": "Govern（治理）。" }
+                    ]
+                }
+            },
+            {
+                "id": 16,
+                "type": "multi",
+                "tag": "觀念/CIA",
+                "tagClass": "tag-mgm",
+                "text": "【複選題】下列哪些選項描述的狀況，符合資安三要素中「完整性（Integrity：資料未被未授權竄改或破壞）」的特性？",
+                "options": [
+                    "人員到職後，因預設密碼未進行變更，該員的帳號被登入並且外洩了公司的資料",
+                    "公司執行資安檢測時，發現 SQL Injection 的問題，變更部分資料庫內容",
+                    "公司的電子郵件透過憑證進行電子郵件加密",
+                    "因使用者資安意識不足，點擊了勒索軟體，以致部分文件內容無法讀取"
+                ],
+                "correct": [
+                    "公司執行資安檢測時，發現 SQL Injection 的問題，變更部分資料庫內容",
+                    "因使用者資安意識不足，點擊了勒索軟體，以致部分文件內容無法讀取"
+                ],
+                "analysis": {
+                    "step1": "「完整性（Integrity）」、「未授權竄改」、「破壞」。",
+                    "step2": "請選出哪兩個選項是發生了「資料被亂改」或者「資料內容壞掉」的情況？",
+                    "step3": "<strong>解題步驟：</strong><br>1. 逐一檢查選項，判斷資料發生的狀態改變。<br>2. 關鍵字對應：外洩=被看光(C)；變更=被改(I)；加密=保護不被看(C)；無法讀取/加密破壞=結構壞了(I+A)。<br><br><strong>原理與規則：</strong><br><strong>完整性（Integrity）：</strong>確保資訊在傳輸或儲存過程中，維持準確與完整，未受未授權的竄改。<br><br><strong>生活例子：</strong><br>你寄一封信給朋友。如果信被郵差偷看了，是失去機密性。如果信裡的字被塗改，變成罵人的話，是失去完整性。",
+                    "step4": "<strong>(A) 外洩資料：</strong>資料被偷看、複製，但原始資料沒變。這是<strong>機密性（Confidentiality）</strong>受損。<br><strong>(B) SQL Injection 變更內容：</strong>資料被非法修改（例如金額 100 改成 1000）。這是典型的<strong>完整性（Integrity）</strong>破壞。<br><strong>(C) 電子郵件加密：</strong>加密是為了防止被偷看。這是保護<strong>機密性（Confidentiality）</strong>的手段。<br><strong>(D) 勒索軟體：</strong>檔案被強制加密，導致檔案結構改變、內容變成亂碼（非原始內容）。這同時破壞了<strong>可用性</strong>與<strong>完整性</strong>。題目問完整性，此選項符合「資料被破壞/竄改」。",
+                    "extension": "<strong>定義補充：</strong>CIA 三要素是 Confidentiality（機密性）、Integrity（完整性）、Availability（可用性）。<br><strong>觸類旁通：</strong>雜湊函數（Hash）是檢查完整性最常用的技術，如下載檔案時比對 MD5/SHA256 值。",
+                    "mnemonic": "「完整性就是『原封不動』，被改被刪都不行。」",
+                    "trap": "<strong>常見陷阱：</strong>看到勒索軟體（Ransomware）只想到「檔案打不開（可用性喪失）」，忽略了它本質上是透過「惡意修改（加密）」檔案內容來達成目的，所以也破壞了完整性。<br><strong>避坑指南：</strong>問自己「現在的資料內容，跟原本的一樣嗎？」不一樣就是失去完整性。",
+                    "selfCheck": [
+                        { "q": "如果駭客把網站首頁圖片換成鬼臉圖，這破壞了什麼？", "a": "完整性（網頁被竄改）。" },
+                        { "q": "DDoS 攻擊導致網站連不上，這破壞了什麼？", "a": "可用性（Availability）。" }
+                    ]
+                }
+            }
+        ]
+    };
+
+    // --- 2. 核心邏輯函式庫 ---
+
+    // 洗牌演算法 (Fisher-Yates)
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // 關鍵字標紅處理
+    function highlightKeywords(text) {
+        const negativeWords = ["不正確", "不是", "錯誤", "最不適用", "不包含", "未被"];
+        let newText = text;
+        negativeWords.forEach(word => {
+            const regex = new RegExp(word, "g");
+            newText = newText.replace(regex, `<span class="highlight-negative">${word}</span>`);
+        });
+        return newText;
+    }
+
+    // 狀態管理
+    const state = {
+        total: quizData.questions.length,
+        completed: 0,
+        answers: {}, // { id: { userSelection: [], isCorrect: bool } }
+    };
+
+    // --- 3. DOM 生成與渲染 ---
+
+    function initPage() {
+        // 1. 設定標題與情境
+        document.getElementById('group-title').innerText = quizData.groupTitle;
+        document.getElementById('global-scenario').innerHTML = quizData.groupScenario;
+        updateProgress();
+
+        // 2. 生成 Tabs
+        const tabsContainer = document.getElementById('tabs-container');
+        const questionsContainer = document.getElementById('questions-container');
+
+        quizData.questions.forEach((q, index) => {
+            // Create Tab
+            const tab = document.createElement('button');
+            tab.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+            // Change: Use q.id instead of index+1 for display
+            tab.innerHTML = `<span>第 ${q.id} 題</span> <span id="icon-${q.id}"></span>`;
+            tab.onclick = () => switchTab(index);
+            tab.id = `tab-${index}`;
+            tabsContainer.appendChild(tab);
+
+            // Create Question Card
+            const card = document.createElement('div');
+            card.className = `question-card ${index === 0 ? 'active' : ''}`;
+            card.id = `q-card-${index}`;
+            
+            // 隨機化選項
+            const shuffledOptions = q.options.map((opt, i) => ({ text: opt, originalIndex: i }));
+            shuffleArray(shuffledOptions);
+
+            // 選項 HTML
+            let optionsHtml = '';
+            shuffledOptions.forEach((opt, i) => {
+                const inputType = q.type === 'multi' ? 'checkbox' : 'radio';
+                optionsHtml += `
+                    <label class="option-item" id="opt-${q.id}-${i}" onclick="selectOption(${index}, ${q.id}, '${inputType}', this)">
+                        <input type="${inputType}" name="q-${q.id}" value="${opt.text}" class="option-input">
+                        <span>${opt.text}</span>
+                    </label>
+                `;
+            });
+
+            // 自我檢測 HTML 生成
+            let selfCheckHtml = '';
+            q.analysis.selfCheck.forEach((check, idx) => {
+                selfCheckHtml += `
+                    <div class="check-item">
+                        <div class="check-q">Q${idx+1}: ${check.q}</div>
+                        <button class="toggle-ans-btn" onclick="toggleAnswer(this)">顯示參考答案</button>
+                        <div class="check-a">${check.a}</div>
+                    </div>
+                `;
+            });
+
+            // 卡片內容結構 (更新詳解區塊)
+            card.innerHTML = `
+                <div class="q-header">
+                    <!-- Change: Use q.id instead of index+1 for display -->
+                    <span class="q-tag ${q.tagClass}">第 ${q.id} 題</span>
+                    <span class="q-tag ${q.tagClass}">${q.tag}</span>
+                </div>
+                <div class="q-text">${highlightKeywords(q.text)}</div>
+                <div class="options-list" id="opts-list-${q.id}">
+                    ${optionsHtml}
+                </div>
+                <div class="action-area">
+                    <button class="btn btn-submit" id="btn-submit-${q.id}" onclick="checkAnswer(${index}, ${q.id}, '${q.type}')">送出答案</button>
+                    <button class="btn btn-reset" id="btn-reset-${q.id}" style="display:none;" onclick="resetQuestion(${index}, ${q.id})">重新作答</button>
+                </div>
+                
+                <!-- 八步驟詳解區 -->
+                <div class="explain-section" id="explain-${q.id}">
+                    <div class="step-box step-1">
+                        <div class="step-title">【第一步：找關鍵字】</div>
+                        <div class="step-content">
+                            請在題目中圈出：<br>
+                            <span class="highlight-keyword">${q.analysis.step1}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="step-box step-2">
+                        <div class="step-title">【第二步：白話翻譯】</div>
+                        <div class="step-content">${q.analysis.step2}</div>
+                    </div>
+
+                    <div class="step-box step-3">
+                        <div class="step-title">【第三步：解題思路】</div>
+                        <div class="step-content">${q.analysis.step3}</div>
+                    </div>
+
+                    <div class="step-box step-4">
+                        <div class="step-title">【第四步：選項分析】</div>
+                        <div class="step-content">${q.analysis.step4}</div>
+                    </div>
+
+                    <div class="step-box step-ext">
+                        <div class="step-title">【觀念補充與延伸】</div>
+                        <div class="step-content">${q.analysis.extension}</div>
+                    </div>
+
+                    <div class="step-box step-mnemonic">
+                        <div class="step-title">【記憶口訣】</div>
+                        <div class="step-content" style="font-weight:bold; font-size:1.1rem;">${q.analysis.mnemonic}</div>
+                    </div>
+
+                    <div class="step-box step-trap">
+                        <div class="step-title">【常見陷阱】</div>
+                        <div class="step-content">${q.analysis.trap}</div>
+                    </div>
+
+                    <div class="step-box step-check">
+                        <div class="step-title">【自我檢測】</div>
+                        <div class="step-content">
+                            ${selfCheckHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            questionsContainer.appendChild(card);
+        });
+    }
+
+    // --- 4. 互動邏輯 ---
+
+    function switchTab(index) {
+        document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+            if (i === index) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        document.querySelectorAll('.question-card').forEach((card, i) => {
+            if (i === index) card.classList.add('active');
+            else card.classList.remove('active');
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function selectOption(qIndex, qId, type, labelElem) {
+        if (state.answers[qId] && state.answers[qId].submitted) return;
+        const input = labelElem.querySelector('input');
+        if (type === 'radio') {
+            const allLabels = document.querySelectorAll(`#opts-list-${qId} .option-item`);
+            allLabels.forEach(l => {
+                l.classList.remove('selected');
+                l.querySelector('input').checked = false;
+            });
+            labelElem.classList.add('selected');
+            input.checked = true;
+        } else {
+            setTimeout(() => {
+                if(input.checked) labelElem.classList.add('selected');
+                else labelElem.classList.remove('selected');
+            }, 0);
+        }
+    }
+
+    function checkAnswer(qIndex, qId, type) {
+        const inputs = document.querySelectorAll(`input[name="q-${qId}"]:checked`);
+        if (inputs.length === 0) {
+            alert("請先選擇答案！");
+            return;
+        }
+
+        const userValues = Array.from(inputs).map(i => i.value);
+        const correctValues = quizData.questions[qIndex].correct;
+
+        const userStr = userValues.sort().join('|');
+        const corrStr = correctValues.sort().join('|');
+        const isCorrect = userStr === corrStr;
+
+        const optionsList = document.getElementById(`opts-list-${qId}`);
+        const allLabels = optionsList.querySelectorAll('.option-item');
+        
+        allLabels.forEach(label => {
+            label.classList.add('disabled');
+            const val = label.querySelector('input').value;
+            if (correctValues.includes(val)) {
+                label.classList.add('correct');
+            }
+            if (userValues.includes(val) && !correctValues.includes(val)) {
+                label.classList.add('wrong');
+            }
+            label.querySelector('input').disabled = true;
+            label.onclick = null; 
+        });
+
+        document.getElementById(`btn-submit-${qId}`).style.display = 'none';
+        document.getElementById(`btn-reset-${qId}`).style.display = 'inline-flex';
+        
+        const explainSection = document.getElementById(`explain-${qId}`);
+        explainSection.style.display = 'block';
+        explainSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        const tabIcon = document.getElementById(`icon-${qId}`);
+        const tabBtn = document.getElementById(`tab-${qIndex}`);
+        
+        tabBtn.classList.remove('correct', 'wrong');
+        if (isCorrect) {
+            tabIcon.innerText = '✓';
+            tabBtn.classList.add('correct');
+        } else {
+            tabIcon.innerText = '✗';
+            tabBtn.classList.add('wrong');
+        }
+
+        if (!state.answers[qId]) {
+            state.answers[qId] = { submitted: true, isCorrect: isCorrect };
+            state.completed++;
+            updateProgress();
+        }
+    }
+
+    function resetQuestion(qIndex, qId) {
+        const optionsList = document.getElementById(`opts-list-${qId}`);
+        const allLabels = optionsList.querySelectorAll('.option-item');
+        allLabels.forEach(label => {
+            label.classList.remove('selected', 'correct', 'wrong', 'disabled');
+            const input = label.querySelector('input');
+            input.checked = false;
+            input.disabled = false;
+        });
+
+        document.getElementById(`btn-submit-${qId}`).style.display = 'inline-flex';
+        document.getElementById(`btn-reset-${qId}`).style.display = 'none';
+        document.getElementById(`explain-${qId}`).style.display = 'none';
+
+        const tabIcon = document.getElementById(`icon-${qId}`);
+        const tabBtn = document.getElementById(`tab-${qIndex}`);
+        tabIcon.innerText = '';
+        tabBtn.classList.remove('correct', 'wrong');
+
+        if (state.answers[qId]) {
+            state.completed--;
+            delete state.answers[qId];
+            updateProgress();
+        }
+        document.getElementById(`q-card-${qIndex}`).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function updateProgress() {
+        const pct = Math.round((state.completed / state.total) * 100);
+        document.getElementById('progress-fill').style.width = `${pct}%`;
+        document.getElementById('progress-text').innerText = `完成度：${state.completed} / ${state.total}`;
+    }
+
+    // 自我檢測答案切換
+    function toggleAnswer(btn) {
+        const answerDiv = btn.nextElementSibling;
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+            btn.innerText = '顯示參考答案';
+        } else {
+            answerDiv.style.display = 'block';
+            btn.innerText = '隱藏參考答案';
+        }
+    }
+
+    window.onload = initPage;
+
+</script>
+
+</body>
+</html>

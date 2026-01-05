@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安短期衝刺班 - 軟體供應鏈風險管理 (題組 5)</title>
+    <style>
+        :root {
+            /* 品牌色系 */
+            --primary-blue: #0288d1;
+            --primary-dark: #01579b;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-secondary: #666666;
+            
+            /* 狀態色系 */
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            --neutral-gray: #e0e0e0;
+            
+            /* 標籤色系 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+
+            /* 陰影與圓角 */
+            --shadow-card: 0 4px 20px rgba(0,0,0,0.08);
+            --radius-card: 16px;
+            --radius-btn: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 16px;
+        }
+
+        /* --- 容器與佈局 --- */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* --- 頁首 Header --- */
+        .header {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-card);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .group-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 0;
+        }
+
+        .progress-info {
+            font-weight: bold;
+            color: var(--primary-blue);
+            font-size: 0.9rem;
+        }
+
+        /* 進度條 */
+        .progress-track {
+            background-color: var(--neutral-gray);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .progress-fill {
+            background-color: var(--success-text);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- 共同情境區塊 --- */
+        .scenario-box {
+            background-color: #e1f5fe;
+            border-left: 5px solid var(--primary-blue);
+            padding: 20px;
+            border-radius: var(--radius-btn);
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            color: #0277bd;
+        }
+
+        .scenario-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.85rem;
+        }
+
+        /* --- Tabs 導航 --- */
+        .tabs-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+        
+        .tabs-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            background: white;
+            border: 2px solid transparent;
+            border-radius: var(--radius-btn);
+            padding: 10px 20px;
+            min-width: 100px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+            height: 48px;
+        }
+
+        .tab-btn.active {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            background-color: #e3f2fd;
+        }
+
+        .tab-btn.correct {
+            border-color: var(--success-text);
+            color: var(--success-text);
+            background-color: var(--success-bg);
+        }
+
+        .tab-btn.wrong {
+            border-color: var(--error-text);
+            color: var(--error-text);
+            background-color: var(--error-bg);
+        }
+
+        /* --- 題目卡片區 --- */
+        .question-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-card);
+            padding: 30px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .q-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        .q-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .highlight-negative {
+            color: var(--error-text);
+            font-weight: 900;
+            text-decoration: underline;
+        }
+
+        /* --- 選項樣式 --- */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option-item {
+            position: relative;
+            padding: 16px 20px;
+            border: 2px solid var(--neutral-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            background: #fff;
+        }
+
+        .option-item:hover:not(.disabled) {
+            border-color: var(--primary-blue);
+            background-color: #f1f9ff;
+        }
+
+        .option-item.selected {
+            border-color: var(--primary-blue);
+            background-color: #e3f2fd;
+        }
+
+        .option-item input {
+            opacity: 0;
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        .option-indicator {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 14px;
+            color: white;
+        }
+        
+        .option-item.multi .option-indicator {
+            border-radius: 6px;
+        }
+
+        .option-item.selected .option-indicator {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .option-item.correct {
+            border-color: var(--success-text);
+            background-color: var(--success-bg);
+        }
+        
+        .option-item.correct .option-indicator {
+            background-color: var(--success-text);
+            border-color: var(--success-text);
+        }
+        
+        .option-item.correct::after {
+            content: "✓";
+            color: var(--success-text);
+            font-weight: bold;
+            margin-left: auto;
+            font-size: 1.2rem;
+        }
+
+        .option-item.wrong {
+            border-color: var(--error-text);
+            background-color: var(--error-bg);
+        }
+
+        .option-item.wrong .option-indicator {
+            background-color: var(--error-text);
+            border-color: var(--error-text);
+        }
+
+        .option-item.wrong::after {
+            content: "✗";
+            color: var(--error-text);
+            font-weight: bold;
+            margin-left: auto;
+            font-size: 1.2rem;
+        }
+
+        .option-item.disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        /* --- 按鈕區 --- */
+        .action-area {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s, background 0.2s;
+            min-height: 44px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-reset {
+            background-color: #78909c;
+        }
+        
+        .btn:disabled {
+            background-color: #bdbdbd;
+            cursor: not-allowed;
+        }
+
+        /* --- 詳解區塊樣式重構 --- */
+        .explanation-section {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed var(--neutral-gray);
+            padding-top: 25px;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-block {
+            margin-bottom: 25px;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .step-header {
+            background-color: #f1f5f9;
+            padding: 10px 15px;
+            font-weight: bold;
+            color: var(--primary-dark);
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .step-header::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-blue);
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .step-content {
+            padding: 15px;
+            color: #444;
+            font-size: 0.95rem;
+        }
+        
+        .step-content mark {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* 特別區塊樣式 */
+        .block-concept { border-left: 4px solid #8e44ad; }
+        .block-trap { border-left: 4px solid #e74c3c; }
+        .block-memo { border-left: 4px solid #f1c40f; }
+
+        .self-check-item {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .self-check-question {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--primary-dark);
+        }
+        
+        .self-check-answer {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            color: var(--success-text);
+            display: none; /* 預設隱藏 */
+            margin-top: 5px;
+            border-left: 3px solid var(--success-text);
+        }
+
+        .btn-reveal {
+            font-size: 0.85rem;
+            padding: 4px 12px;
+            background-color: transparent;
+            border: 1px solid var(--primary-blue);
+            color: var(--primary-blue);
+            border-radius: 15px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        
+        .btn-reveal:hover {
+            background-color: #e3f2fd;
+        }
+
+        /* --- Mobile 調整 --- */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+            .header, .question-card {
+                padding: 20px 15px;
+            }
+            .options-list {
+                gap: 10px;
+            }
+            .option-item {
+                padding: 12px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-top">
+            <div class="group-title" id="groupTitle">載入中...</div>
+            <div class="progress-info">
+                完成進度：<span id="progressCount">0</span> / <span id="totalCount">0</span>
+            </div>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+    </header>
+
+    <!-- Global Scenario -->
+    <div class="scenario-box" id="groupScenario">
+        <span class="scenario-label">📜 題組共同情境</span>
+        <div id="scenarioText">載入中...</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container" id="tabsContainer">
+        <!-- Tabs will be injected here -->
+    </div>
+
+    <!-- Questions Container -->
+    <div id="questionsContainer">
+        <!-- Question Cards will be injected here -->
+    </div>
+
+</div>
+
+<!-- JavaScript Logic -->
+<script>
+    // --- 題目資料 (整合自 37-40) 並擴充詳細解析結構 ---
+    const quizData = {
+        "groupTitle": "資安短期衝刺班：軟體供應鏈風險管理 (題組 5)",
+        "groupScenario": "各產業對於軟體供應鏈安全的韌性要求日益提高，這包含供應鏈上下游的公司資訊安全、軟體安全等。在風險管理方面，企業常參考 ISO、NIST 等框架，並透過威脅建模與控制措施，以達到有效的風險管控。",
+        "questions": [
+            {
+                "id": 37,
+                "tag": "風險管理",
+                "tagClass": "tag-mgm",
+                "text": "在美國國家標準暨技術研究院（NIST）訂定的軟體開發安全框架（SSDF）中，針對第三方元件弱點的風險管控，下列達成風險管控的方式何者錯誤？",
+                "options": [
+                    "盤點各系統使用的第三方元件清單",
+                    "清查第三方元件的弱點",
+                    "持續監控第三方元件弱點情資",
+                    "使用較不知名的第三方元件"
+                ],
+                "correct": ["使用較不知名的第三方元件"],
+                "analysis": {
+                    "step1_keywords": "請圈出關鍵字：<mark>NIST SSDF</mark> (標準)、<mark>第三方元件</mark> (風險來源)、<mark>弱點</mark> (要防範的洞)、<mark>風險管控</mark> (目標)、<mark>錯誤</mark> (逆向思考)。",
+                    "step2_translation": "美國政府出了一本叫 SSDF 的書教大家安全寫軟體。書裡說，如果你開發軟體時有「引用別人的程式碼（第三方元件）」，要怎麼做才安全？題目問：<strong>哪個做法是大錯特錯、會害你被駭的？</strong>",
+                    "step3_logic": `
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li><strong>原則：</strong>SSDF 強調「透明度」與「可管理性」。你看不到、沒人管的東西最危險。</li>
+                            <li><strong>檢視選項：</strong>
+                                <ul>
+                                    <li>(A) 盤點清單 = 建立 SBOM，知道自己用了什麼 (正確)。</li>
+                                    <li>(B) 清查弱點 = 檢查有沒有地雷 (正確)。</li>
+                                    <li>(C) 持續監控 = 確保未來不出事 (正確)。</li>
+                                    <li>(D) 使用不知名元件 = <strong>賭運氣</strong>。不知名通常代表開發者少、沒人維護、出事沒人修 (錯誤)。</li>
+                                </ul>
+                            </li>
+                        </ol>
+                        <p><strong>生活例子：</strong> 就像修車廠進貨煞車皮。A、B、C 是記錄廠牌、檢查有沒有召回公告。D 是「故意去路邊撿沒牌子的煞車皮來裝」，覺得沒人認識這個牌子就沒事？這當然最危險！</p>
+                    `,
+                    "step4_options": "詳見上方解題思路，(D) 違反了供應鏈安全最基本的「可信賴來源」原則。",
+                    "supplement": `
+                        <p><strong>法條或定義（白話）：</strong></p>
+                        <ul>
+                            <li><strong>隱匿式安全 (Security by Obscurity)：</strong>以為把東西藏起來、或用沒人知道的冷門技術就安全。這在資安界是公認無效的，因為駭客是用機器掃描，不管你知不知名，有洞就打。</li>
+                        </ul>
+                        <p><strong>觸類旁通：</strong>如果 Log4j 漏洞爆發，你第一件事要做什麼？答案是執行 (A) 盤點清單，確認自己有沒有用它。</p>
+                    `,
+                    "mnemonic": "盤、查、盯 都正確，冷門亂用最危險。",
+                    "traps": `
+                        <p><strong>心理盲點：</strong>很多考生會誤以為「不知名 = 駭客懶得攻擊 = 安全」。</p>
+                        <p><strong>避坑指南：</strong>資安講求「經過驗證的信任」。不知名通常等於「未經驗證」與「缺乏維護」，在供應鏈中是大地雷。</p>
+                    `,
+                    "selfCheck": [
+                        { q: "SSDF 對於第三方元件管理的第一步通常是什麼？", a: "建立清單 (盤點)，也就是現在常說的 SBOM。" },
+                        { q: "為什麼「不知名」的元件風險反而高？", a: "因為缺乏社群維護，發現漏洞時可能無人修補 (End-of-Life)，成為孤兒元件。" }
+                    ]
+                }
+            },
+            {
+                "id": 38,
+                "tag": "技術與模型",
+                "tagClass": "tag-sec",
+                "text": "情境如上，在風險管理上，使用威脅評估模型進行供應鏈資安風險評估。請問下何者敘述錯誤？",
+                "options": [
+                    "DREAD 是威脅建模的一種模式",
+                    "STRIDE 是威脅建模的一種模式",
+                    "VAST 是威脅建模的一種模式",
+                    "NIST 是國際標準的威脅建模"
+                ],
+                "correct": ["NIST 是國際標準的威脅建模"],
+                "analysis": {
+                    "step1_keywords": "請圈出關鍵字：<mark>威脅評估模型</mark> (Method)、<mark>DREAD / STRIDE / VAST</mark> (選項主角)、<mark>NIST</mark> (選項主角)。",
+                    "step2_translation": "這題在玩「找臥底」的遊戲。選項裡有三個是真的「威脅建模方法」，有一個其實是「機構名稱」或「標準名稱」，請把它抓出來。",
+                    "step3_logic": `
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li><strong>分類法：</strong>把選項分成「方法 (How)」與「單位 (Who)」。</li>
+                            <li><strong>辨識：</strong>
+                                <ul>
+                                    <li>STRIDE (微軟出的，分類威脅)、DREAD (評分風險)、VAST (敏捷開發用) -> 這些都是<strong>方法</strong>。</li>
+                                    <li>NIST (美國國家標準技術研究院) -> 這是<strong>單位/警察局</strong>。它會發布標準，但不會把一個模型命名為 "NIST"。</li>
+                                </ul>
+                            </li>
+                        </ol>
+                        <p><strong>生活例子：</strong> STRIDE 像是「降龍十八掌」(招式名稱)，NIST 像是「少林寺」(門派/機構名稱)。你可以學少林寺的武功，但不會說「少林寺」本身是一套拳法。</p>
+                    `,
+                    "step4_options": "(D) 錯誤。NIST 發布了許多標準 (如 SP 800-53)，但 NIST 本身不是威脅建模模型的名稱。",
+                    "supplement": `
+                        <p><strong>觀念補充：</strong></p>
+                        <ul>
+                            <li><strong>STRIDE：</strong>S(偽冒), T(竄改), R(否認), I(資訊揭露), D(阻斷服務), E(權限提升)。用來<strong>分類</strong>威脅。</li>
+                            <li><strong>DREAD：</strong>用來<strong>打分數</strong> (計算風險高低)。</li>
+                        </ul>
+                    `,
+                    "mnemonic": "NIST 是警察局 (機構)，不是抓人招式 (模型)。",
+                    "traps": `
+                        <p><strong>心理盲點：</strong>看到 NIST 是資安大神，就覺得它什麼都是對的。</p>
+                        <p><strong>避坑指南：</strong>區分 "Institute" (機構) 與 "Model" (模型)。題目問的是模型。</p>
+                    `,
+                    "selfCheck": [
+                        { q: "STRIDE 的主要用途是「評分」還是「分類」？", a: "分類 (Categorize)。" },
+                        { q: "DREAD 的主要用途是「分類」還是「評分」？", a: "評分 (Rank/Score)。" }
+                    ]
+                }
+            },
+            {
+                "id": 39,
+                "tag": "風險管理",
+                "tagClass": "tag-mgm",
+                "text": "承上情境，下列何者「不」是正確的軟體風險管理控制方法？",
+                "options": [
+                    "第三方元件弱點管理",
+                    "於合約中載明軟體開發之資安修補責任",
+                    "定期巡檢軟體弱點與更新",
+                    "透過第三方軟體庫進行更新"
+                ],
+                "correct": ["透過第三方軟體庫進行更新"],
+                "analysis": {
+                    "step1_keywords": "請圈出關鍵字：<mark>風險管理控制</mark> (要是安全的手段)、<mark>不正確</mark> (找地雷)、<mark>第三方軟體庫更新</mark> (未提及驗證)。",
+                    "step2_translation": "題目問：下面哪一種做法，聽起來像是在維護，其實可能是在「引狼入室」？",
+                    "step3_logic": `
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li><strong>檢查控制效力：</strong>
+                                <ul>
+                                    <li>(A) 管理弱點 -> 有做事 (O)。</li>
+                                    <li>(B) 簽合約 -> 有法律保障 (O)。</li>
+                                    <li>(C) 定期巡檢 -> 有保持衛生 (O)。</li>
+                                </ul>
+                            </li>
+                            <li><strong>分析陷阱選項 (D)：</strong>「透過第三方軟體庫更新」。注意，這裡沒說「驗證簽章」或「檢查來源」。
+                                <ul>
+                                    <li><strong>原理：</strong>第三方庫 (如 npm, Docker Hub) 人人都能上傳。駭客常上傳惡意套件 (Typosquatting)。</li>
+                                    <li><strong>結論：</strong>盲目從第三方庫更新 = 讓駭客幫你更新系統 = 極度危險。</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    `,
+                    "step4_options": "(D) 是錯誤的。正確做法應包含「驗證雜湊值」、「數位簽章」或使用「內部受信任的儲存庫」。",
+                    "supplement": `
+                        <p><strong>觸類旁通：</strong></p>
+                        <ul>
+                            <li><strong>供應鏈攻擊 (Supply Chain Attack)：</strong>駭客汙染了上游的更新檔，導致下游所有使用者更新後全部中獎 (如 SolarWinds 事件)。</li>
+                        </ul>
+                    `,
+                    "mnemonic": "A管漏洞、B管責任、C要巡檢；只靠第三方庫盲更最危險。",
+                    "traps": `
+                        <p><strong>常見陷阱：</strong>看到「更新」兩個字就反射性覺得是好習慣。</p>
+                        <p><strong>避坑指南：</strong>對於更新，要多問一句：「從哪裡更？安全嗎？」沒有驗證的更新是傳播病毒最快的方式。</p>
+                    `,
+                    "selfCheck": [
+                        { q: "為什麼直接從公開的開源儲存庫下載套件有風險？", a: "因為可能下載到駭客偽造的惡意套件 (名稱相似) 或被竄改的版本。" },
+                        { q: "企業應該如何安全地使用第三方套件？", a: "建立內部的私有儲存庫 (Private Repo)，先掃描過濾後再給內部開發人員使用。" }
+                    ]
+                }
+            },
+            {
+                "id": 40,
+                "tag": "預防與檢測",
+                "tagClass": "tag-sec",
+                "type": "multi", 
+                "text": "在軟體供應鏈中的風險管理上，有以下哪些方式進行資安預防及檢測？（複選）",
+                "options": [
+                    "軟體物料清單（Software Bill of Materials, SBOM）",
+                    "原始碼檢測及防毒掃描",
+                    "IAS-99",
+                    "SEMI 197"
+                ],
+                "correct": ["軟體物料清單（Software Bill of Materials, SBOM）", "原始碼檢測及防毒掃描"],
+                "analysis": {
+                    "step1_keywords": "請圈出關鍵字：<mark>預防及檢測</mark> (要具體的工具/手段)、<mark>SBOM</mark>、<mark>原始碼檢測</mark>、<mark>標準代號</mark> (IAS-99, SEMI)。",
+                    "step2_translation": "既然軟體是拼裝車，我們要用什麼「工具」來檢查零件成分，以及掃描有沒有炸彈？(請選出做事的工具，不要選文件代號)",
+                    "step3_logic": `
+                        <p><strong>解題步驟：</strong></p>
+                        <ol>
+                            <li><strong>辨識屬性：</strong>
+                                <ul>
+                                    <li>(A) SBOM：成分表 -> 這是檢測的基礎 (O)。</li>
+                                    <li>(B) 掃描：X光機 -> 這是檢測的動作 (O)。</li>
+                                    <li>(C) IAS-99 (應為 ISA-99)：工控資安標準 -> 這是文件 (X)。</li>
+                                    <li>(D) SEMI 197：半導體標準 -> 這是文件 (X)。</li>
+                                </ul>
+                            </li>
+                        </ol>
+                        <p><strong>生活例子：</strong> SBOM 就像食品包裝上的「營養成分表」(預防過敏)，掃描就像機場的「金屬探測門」(檢測危險)。</p>
+                    `,
+                    "step4_options": "正確答案為 (A)、(B)。這兩者是 DevSecOps 流程中實際執行的預防與檢測環節。",
+                    "supplement": `
+                        <p><strong>觀念補充：</strong></p>
+                        <ul>
+                            <li><strong>SCA (軟體成分分析)：</strong>通常搭配 SBOM 使用，自動分析這些成分有沒有已知漏洞。</li>
+                        </ul>
+                    `,
+                    "mnemonic": "A看成分表 (SBOM)、B做大掃描；英文代號多是標準，不一定是檢測招。",
+                    "traps": `
+                        <p><strong>心理盲點：</strong>看到很專業的英文+數字編號 (如 IAS-99) 就覺得是厲害的答案。</p>
+                        <p><strong>避坑指南：</strong>題目問「方式 (Tools/Methods)」，優先選「具體的執行手段」，而不是「參照的標準」。</p>
+                    `,
+                    "selfCheck": [
+                        { q: "SBOM 最主要的用途是什麼？", a: "提高軟體供應鏈的透明度，當漏洞爆發時能快速定位受影響的範圍。" },
+                        { q: "原始碼檢測 (SAST) 和防毒掃描有什麼不同？", a: "原始碼檢測是找程式寫法上的邏輯漏洞；防毒掃描是比對特徵碼找已知的惡意程式。" }
+                    ]
+                }
+            }
+        ]
+    };
+
+    // --- 全域變數 ---
+    let currentQuestions = []; // 儲存初始化後的題目狀態（包含亂數選項）
+
+    // --- 初始化程式 ---
+    window.onload = function() {
+        initApp();
+    };
+
+    function initApp() {
+        // 1. 填充 Header 資訊
+        document.getElementById('groupTitle').textContent = quizData.groupTitle;
+        document.getElementById('groupScenario').querySelector('#scenarioText').innerHTML = quizData.groupScenario;
+        document.getElementById('totalCount').textContent = quizData.questions.length;
+
+        // 2. 初始化題目數據 (洗牌選項)
+        currentQuestions = quizData.questions.map((q, index) => {
+            return {
+                ...q,
+                index: index,
+                shuffledOptions: shuffleArray([...q.options]), // 複製並洗牌
+                userAnswers: [], // 儲存使用者選擇
+                state: 'unanswered' // unanswered, correct, wrong
+            };
+        });
+
+        // 3. 渲染 Tabs
+        renderTabs();
+
+        // 4. 渲染題目卡片
+        renderQuestions();
+
+        // 5. 預設顯示第一題
+        switchTab(0);
+    }
+
+    // --- 核心邏輯 ---
+
+    // 洗牌演算法 (Fisher-Yates)
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // 處理關鍵字標紅 (不, 錯誤, False, etc.)
+    function highlightKeywords(text) {
+        const keywords = ["不", "不是", "錯誤", "最不適用", "False", "Error"];
+        let newText = text;
+        keywords.forEach(kw => {
+            const regex = new RegExp(`(${kw})`, 'g');
+            newText = newText.replace(regex, '<span class="highlight-negative">$1</span>');
+        });
+        return newText;
+    }
+
+    // 渲染 Tabs
+    function renderTabs() {
+        const container = document.getElementById('tabsContainer');
+        container.innerHTML = '';
+        currentQuestions.forEach((q, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'tab-btn';
+            btn.id = `tab-${idx}`;
+            btn.innerHTML = `<span>第 ${q.id} 題</span>`; // 預設無圖示
+            btn.onclick = () => switchTab(idx);
+            container.appendChild(btn);
+        });
+    }
+
+    // 渲染題目區塊
+    function renderQuestions() {
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = '';
+
+        currentQuestions.forEach((q, idx) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.id = `question-${idx}`;
+
+            const isMulti = q.type === 'multi';
+            const inputType = isMulti ? 'checkbox' : 'radio';
+            
+            // 標題與標籤
+            let html = `
+                <div class="q-header">
+                    <span class="tag ${q.tagClass}">${q.tag}</span>
+                    <span style="color: #999; font-size: 0.9rem;">${isMulti ? '(複選題)' : '(單選題)'}</span>
+                </div>
+                <div class="q-text">${highlightKeywords(q.text)}</div>
+            `;
+
+            // 選項區域
+            html += `<div class="options-list" id="options-list-${idx}">`;
+            q.shuffledOptions.forEach((opt, optIdx) => {
+                html += `
+                    <label class="option-item ${isMulti ? 'multi' : ''}" onclick="selectOption(${idx}, ${optIdx}, '${inputType}')">
+                        <input type="${inputType}" name="q-${idx}" value="${opt}">
+                        <div class="option-indicator">${String.fromCharCode(65 + optIdx)}</div>
+                        <div class="option-content">${opt}</div>
+                    </label>
+                `;
+            });
+            html += `</div>`;
+
+            // 按鈕區域
+            html += `
+                <div class="action-area">
+                    <button class="btn" id="btn-submit-${idx}" onclick="submitAnswer(${idx})">送出答案</button>
+                    <button class="btn btn-reset" id="btn-reset-${idx}" onclick="resetQuestion(${idx})" style="display:none;">重新作答</button>
+                </div>
+            `;
+
+            // 詳解區域 (根據新結構重寫)
+            const a = q.analysis;
+            html += `
+                <div class="explanation-section" id="explain-${idx}">
+                    
+                    <div class="step-block">
+                        <div class="step-header">第一步：找關鍵字</div>
+                        <div class="step-content">${a.step1_keywords}</div>
+                    </div>
+
+                    <div class="step-block">
+                        <div class="step-header">第二步：白話翻譯</div>
+                        <div class="step-content">${a.step2_translation}</div>
+                    </div>
+
+                    <div class="step-block block-concept">
+                        <div class="step-header">第三步：解題思路 (步驟、原理、生活例子)</div>
+                        <div class="step-content">${a.step3_logic}</div>
+                    </div>
+
+                    <div class="step-block">
+                        <div class="step-header">第四步：選項分析</div>
+                        <div class="step-content">${a.step4_options}</div>
+                    </div>
+
+                    <div class="step-block">
+                        <div class="step-header">觀念補充與延伸 (法條、定義、觸類旁通)</div>
+                        <div class="step-content">${a.supplement}</div>
+                    </div>
+
+                    <div class="step-block block-memo">
+                        <div class="step-header">記憶口訣</div>
+                        <div class="step-content" style="font-weight:bold; color:#d35400;">${a.mnemonic}</div>
+                    </div>
+
+                    <div class="step-block block-trap">
+                        <div class="step-header">常見陷阱 (心理盲點、避坑指南)</div>
+                        <div class="step-content">${a.traps}</div>
+                    </div>
+                    
+                    <div class="step-block">
+                        <div class="step-header">自我檢測 (點擊顯示答案)</div>
+                        <div class="step-content">
+                            ${a.selfCheck.map((check, i) => `
+                                <div class="self-check-item">
+                                    <div class="self-check-question">Q${i+1}: ${check.q}</div>
+                                    <button class="btn-reveal" onclick="toggleSelfCheckAnswer(this)">看答案</button>
+                                    <div class="self-check-answer">${check.a}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                </div>
+            `;
+
+            card.innerHTML = html;
+            container.appendChild(card);
+        });
+    }
+
+    // 切換 Tab
+    function switchTab(index) {
+        // Update Tabs UI
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`tab-${index}`).classList.add('active');
+
+        // Update Question UI
+        document.querySelectorAll('.question-card').forEach(card => card.classList.remove('active'));
+        const activeCard = document.getElementById(`question-${index}`);
+        activeCard.classList.add('active');
+
+        // Smooth Scroll to Top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 選擇選項 (UI 互動)
+    function selectOption(qIdx, optIdx, type) {
+        const qData = currentQuestions[qIdx];
+        if (qData.state !== 'unanswered') return; // 已送出則鎖定
+
+        const optionsList = document.getElementById(`options-list-${qIdx}`);
+        const inputs = optionsList.querySelectorAll('input');
+        const items = optionsList.querySelectorAll('.option-item');
+
+        if (type === 'radio') {
+            // 清除其他選取
+            items.forEach(item => item.classList.remove('selected'));
+            // 選取當前
+            items[optIdx].classList.add('selected');
+            inputs[optIdx].checked = true;
+        } else {
+            // Toggle
+            const item = items[optIdx];
+            const input = inputs[optIdx];
+            if (input.checked) {
+                item.classList.remove('selected');
+                input.checked = false;
+            } else {
+                item.classList.add('selected');
+                input.checked = true;
+            }
+        }
+    }
+
+    // 送出答案
+    function submitAnswer(qIdx) {
+        const qData = currentQuestions[qIdx];
+        const optionsList = document.getElementById(`options-list-${qIdx}`);
+        const inputs = optionsList.querySelectorAll('input:checked');
+
+        if (inputs.length === 0) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        // 收集使用者答案
+        const userAnswers = Array.from(inputs).map(input => input.value);
+        
+        // 比對答案 (處理複選順序問題)
+        const isCorrect = userAnswers.length === qData.correct.length && 
+                          userAnswers.sort().every((val, index) => val === qData.correct.sort()[index]);
+
+        // 更新狀態
+        qData.state = isCorrect ? 'correct' : 'wrong';
+
+        // UI 更新：鎖定選項並標示對錯
+        const allItems = optionsList.querySelectorAll('.option-item');
+        const allInputs = optionsList.querySelectorAll('input');
+        
+        allInputs.forEach((input, idx) => {
+            const item = allItems[idx];
+            item.classList.add('disabled');
+            item.onclick = null; // 移除點擊事件
+
+            const val = input.value;
+            // 標示邏輯：
+            // 1. 這是正確答案 -> 綠色
+            // 2. 使用者選了這個且它是錯的 -> 紅色
+            if (qData.correct.includes(val)) {
+                item.classList.add('correct');
+            } else if (userAnswers.includes(val) && !qData.correct.includes(val)) {
+                item.classList.add('wrong');
+            }
+        });
+
+        // 顯示詳解
+        document.getElementById(`explain-${qIdx}`).style.display = 'block';
+
+        // 切換按鈕
+        document.getElementById(`btn-submit-${qIdx}`).style.display = 'none';
+        document.getElementById(`btn-reset-${qIdx}`).style.display = 'inline-block';
+
+        // 更新 Tab 狀態
+        updateTabStatus(qIdx, qData.state);
+
+        // 更新全域進度
+        updateGlobalProgress();
+    }
+
+    // 重置單題
+    function resetQuestion(qIdx) {
+        const qData = currentQuestions[qIdx];
+        qData.state = 'unanswered';
+        
+        // 重新洗牌選項 - 回頭找原始 quizData
+        const originalOptions = quizData.questions[qIdx].options;
+        qData.shuffledOptions = shuffleArray([...originalOptions]);
+
+        // 重新渲染該題的選項區域
+        const optionsList = document.getElementById(`options-list-${qIdx}`);
+        optionsList.innerHTML = '';
+        const isMulti = qData.type === 'multi';
+        const inputType = isMulti ? 'checkbox' : 'radio';
+
+        qData.shuffledOptions.forEach((opt, optIdx) => {
+            optionsList.innerHTML += `
+                <label class="option-item ${isMulti ? 'multi' : ''}" onclick="selectOption(${qIdx}, ${optIdx}, '${inputType}')">
+                    <input type="${inputType}" name="q-${qIdx}" value="${opt}">
+                    <div class="option-indicator">${String.fromCharCode(65 + optIdx)}</div>
+                    <div class="option-content">${opt}</div>
+                </label>
+            `;
+        });
+
+        // 隱藏詳解
+        document.getElementById(`explain-${qIdx}`).style.display = 'none';
+
+        // 切換按鈕
+        document.getElementById(`btn-submit-${qIdx}`).style.display = 'inline-block';
+        document.getElementById(`btn-reset-${qIdx}`).style.display = 'none';
+
+        // 重置 Tab 狀態
+        updateTabStatus(qIdx, 'unanswered');
+        
+        // 更新進度
+        updateGlobalProgress();
+
+        // 捲動回頂部
+        const card = document.getElementById(`question-${qIdx}`);
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // 更新 Tab 狀態樣式
+    function updateTabStatus(idx, state) {
+        const tab = document.getElementById(`tab-${idx}`);
+        tab.classList.remove('correct', 'wrong');
+        
+        let icon = '';
+        if (state === 'correct') {
+            tab.classList.add('correct');
+            icon = '✓ ';
+        } else if (state === 'wrong') {
+            tab.classList.add('wrong');
+            icon = '✗ ';
+        }
+        
+        tab.innerHTML = `<span>${icon}第 ${quizData.questions[idx].id} 題</span>`;
+    }
+
+    // 更新全域進度條
+    function updateGlobalProgress() {
+        const total = currentQuestions.length;
+        const completed = currentQuestions.filter(q => q.state !== 'unanswered').length;
+        const percent = (completed / total) * 100;
+
+        document.getElementById('progressCount').textContent = completed;
+        document.getElementById('progressBar').style.width = `${percent}%`;
+    }
+
+    // 自我檢測答案切換
+    function toggleSelfCheckAnswer(btn) {
+        const answerDiv = btn.nextElementSibling;
+        if (answerDiv.style.display === 'block') {
+            answerDiv.style.display = 'none';
+            btn.textContent = '看答案';
+        } else {
+            answerDiv.style.display = 'block';
+            btn.textContent = '隱藏答案';
+        }
+    }
+
+</script>
+
+</body>
+</html>
