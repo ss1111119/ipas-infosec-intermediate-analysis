@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安防護實務 - DDoS 專題實戰 (Q17-Q20)</title>
+    <style>
+        /* --- 基礎設定 --- */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-secondary: #555555;
+            --success-bg: #e8f5e9;
+            --success-text: #2e7d32;
+            --error-bg: #fce4ec;
+            --error-text: #c62828;
+            --border-radius: 16px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            
+            /* 標籤配色系統 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- 容器與佈局 --- */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                width: 100%;
+            }
+        }
+
+        /* --- Header --- */
+        header {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.35rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #eee;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), #2980b9);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: bold;
+        }
+
+        /* --- 情境區塊 --- */
+        .global-context {
+            background-color: #e3f2fd;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            border-left: 5px solid var(--accent-color);
+            box-shadow: var(--shadow);
+        }
+
+        .context-title {
+            font-weight: bold;
+            color: var(--tag-net);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+
+        .context-content {
+            font-size: 1rem;
+        }
+        
+        .context-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 15px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid #ddd;
+            display: block;
+        }
+        
+        .image-caption {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* --- Tabs --- */
+        .tabs-container {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+        
+        .tabs-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 10px 20px;
+            min-width: 90px;
+            font-weight: bold;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 50px;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
+        }
+
+        .tab-btn.correct {
+            border-color: var(--success-text);
+            color: var(--success-text);
+            background: var(--success-bg);
+        }
+        
+        .tab-btn.active.correct {
+            background: var(--success-text);
+            color: #fff;
+        }
+
+        .tab-btn.wrong {
+            border-color: var(--error-text);
+            color: var(--error-text);
+            background: var(--error-bg);
+        }
+
+        .tab-btn.active.wrong {
+            background: var(--error-text);
+            color: #fff;
+        }
+
+        /* --- 題目卡片 --- */
+        .question-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.4s ease-in-out;
+            display: none;
+        }
+
+        .question-card.active-card {
+            display: block;
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .tag {
+            font-size: 0.85rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            color: #fff;
+            font-weight: bold;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        .q-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            line-height: 1.7;
+            color: #222;
+        }
+
+        .highlight-negative {
+            color: #c0392b;
+            font-weight: 800;
+            text-decoration: underline;
+            text-decoration-thickness: 3px;
+            text-underline-offset: 3px;
+        }
+
+        /* --- 選項區域 --- */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fff;
+            min-height: 50px;
+            font-size: 1.05rem;
+        }
+
+        .option-item:hover {
+            border-color: #bdc3c7;
+            background-color: #f8f9fa;
+        }
+
+        .option-item input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            height: 26px;
+            width: 26px;
+            background-color: #eee;
+            border-radius: 50%;
+            margin-right: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .option-item.multi .checkmark {
+            border-radius: 6px;
+        }
+
+        .option-item:hover input ~ .checkmark {
+            background-color: #ccc;
+        }
+
+        .option-item input:checked ~ .checkmark {
+            background-color: var(--primary-color);
+        }
+
+        .checkmark:after {
+            content: "";
+            display: none;
+        }
+
+        .option-item input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        .option-item .checkmark:after {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: white;
+        }
+        
+        .option-item.multi .checkmark:after {
+            width: 6px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+            border-radius: 0;
+            background: transparent;
+            margin-bottom: 3px;
+        }
+
+        .option-item.correct-ans {
+            border-color: var(--success-text);
+            background-color: var(--success-bg);
+        }
+        
+        .option-item.wrong-ans {
+            border-color: var(--error-text);
+            background-color: var(--error-bg);
+            opacity: 0.8;
+        }
+        
+        .option-item.disabled {
+            pointer-events: none;
+        }
+
+        .opt-label {
+            font-weight: 800;
+            margin-right: 10px;
+            min-width: 25px;
+            color: var(--primary-color);
+        }
+
+        /* --- 操作區 --- */
+        .action-area {
+            margin-top: 35px;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 50px;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 48px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-color), #34495e);
+            color: white;
+        }
+        
+        .btn-submit:hover {
+            box-shadow: 0 6px 12px rgba(44, 62, 80, 0.3);
+        }
+
+        .btn-reset {
+            background-color: #95a5a6;
+            color: white;
+            display: none;
+        }
+
+        /* --- 詳解區 (新版結構) --- */
+        .explain-section {
+            margin-top: 30px;
+            border-top: 3px dashed #d1d8dd;
+            padding-top: 30px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .explain-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .explain-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .explain-header {
+            background: #f8f9fa;
+            padding: 12px 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 1.05rem;
+        }
+        
+        /* 區塊特定配色 */
+        .header-step1 { background: #e3f2fd; color: #1565c0; } /* 關鍵字 */
+        .header-step2 { background: #fff3e0; color: #ef6c00; } /* 白話 */
+        .header-step3 { background: #e8f5e9; color: #2e7d32; } /* 思路 */
+        .header-step4 { background: #f3e5f5; color: #7b1fa2; } /* 選項 */
+        .header-trap { background: #ffebee; color: #c62828; }  /* 陷阱 */
+        .header-golden { background: linear-gradient(135deg, #fff8e1, #ffecb3); color: #8d6e63; } /* 金句 */
+
+        .explain-body {
+            padding: 18px;
+            font-size: 1rem;
+            color: #444;
+            line-height: 1.8;
+        }
+        
+        .explain-body ul, .explain-body ol {
+            margin: 0;
+            padding-left: 25px;
+        }
+        
+        .explain-body li {
+            margin-bottom: 8px;
+        }
+
+        .highlight-text {
+            background-color: #fff176;
+            padding: 0 4px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 自我檢測樣式 */
+        details.self-check {
+            background: #e1f5fe;
+            border: 1px solid #b3e5fc;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        details.self-check summary {
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #0277bd;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        details.self-check summary::-webkit-details-marker {
+            display: none;
+        }
+        
+        details.self-check summary::after {
+            content: '+';
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        
+        details.self-check[open] summary::after {
+            content: '-';
+        }
+
+        .check-content {
+            padding: 20px;
+            background: #fff;
+            border-top: 1px solid #b3e5fc;
+            color: #333;
+        }
+        
+        .answer-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f1f8e9;
+            border-radius: 8px;
+            color: #33691e;
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <header>
+        <div class="header-top">
+            <h1>🛡️ iPAS 資安防護實務 - DDoS 專題實戰</h1>
+            <div class="status-text">完成進度：<span id="progress-text">0/4</span></div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+    </header>
+
+    <!-- Global Context -->
+    <div class="global-context">
+        <div class="context-title">
+            📝 題組共同情境
+        </div>
+        <div class="context-content">
+            某新創公司對外提供展示用的 Web 伺服器，供業務人員在公司外部進行產品 Demo。
+            <br>某日業務反應在外部無法連回展示伺服器，但 MIS 檢查後發現：
+            <ul>
+                <li>公司對外上網電路正常。</li>
+                <li>內部員工連外上網亦正常。</li>
+                <li>主機連線紀錄與網路側錄資料顯示短時間內出現大量異常請求。</li>
+            </ul>
+            研判遭受 DDoS 類型攻擊，導致對外服務品質下降。公司<strong>資源有限</strong>，希望以「<strong>最低成本、最高效益</strong>」方式建立防護。
+            <img src="https://i.meee.com.tw/veoEf96.png" alt="DDoS連線異常示意圖" class="context-image">
+            <div class="image-caption">附圖：展示服務遭大量連線請求，連線數（Sessions）垂直飆升示意</div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-container" id="tabs-container">
+        <!-- Tabs will be injected by JS -->
+    </div>
+
+    <!-- Questions Area -->
+    <div id="questions-container">
+        <!-- Questions will be injected by JS -->
+    </div>
+
+</div>
+
+<script>
+    // --- 題目資料庫 (Enhanced) ---
+    const quizData = {
+        groupTitle: "DDoS 攻擊與防護實務",
+        questions: [
+            {
+                id: 17,
+                tag: "網路攻擊判斷",
+                tagClass: "tag-net",
+                text: "請問業務無法在外部展示期間，公司最可能遭受下列什麼類型的攻擊？",
+                type: "single",
+                options: ["跨站腳本攻擊 (XSS)", "DNS 洪水攻擊 (DNS Flood)", "HTTP 洪水攻擊 (HTTP Flood)", "ICMP 洪水攻擊 (ICMP Flood)"],
+                correct: ["HTTP 洪水攻擊 (HTTP Flood)"],
+                detailedAnalysis: {
+                    keywords: `<span class="highlight-text">外部無法連線</span>、<span class="highlight-text">內部連外正常</span>、<span class="highlight-text">HTTP 連線暴增</span>。`,
+                    vernacular: `想像你的公司是一家熱門餐廳。<br>
+                                 <b>外部無法連線</b>：門口被一群假客人堵住了，真客人進不來。<br>
+                                 <b>內部連外正常</b>：但是店員從後門出去買東西是順暢的（表示路沒斷，是門口塞了）。<br>
+                                 <b>HTTP 連線暴增</b>：這群假客人一直在門口大喊「我要看菜單！」（HTTP Request），讓櫃台忙死。`,
+                    logic: `<ul>
+                                <li><b>解題步驟 1 (檢查頻寬)</b>：題目說「內部連外正常」，代表網路管線沒塞爆 → 刪除頻寬消耗型攻擊（如 ICMP Flood）。</li>
+                                <li><b>解題步驟 2 (檢查目標)</b>：只有 Web 服務掛點 → 針對應用層（Layer 7）。</li>
+                                <li><b>解題步驟 3 (檢查證據)</b>：圖表顯示 HTTP 協定請求暴增 → 鎖定 HTTP Flood。</li>
+                                <li><b>生活例子</b>：這就像「F5 按鍵精靈」攻擊，一秒鐘重新整理網頁一萬次，伺服器就被累垮了。</li>
+                            </ul>`,
+                    options: `<ul>
+                                <li><b>(A) XSS</b>：是在別人的瀏覽器偷執行程式，通常不會讓伺服器掛掉。</li>
+                                <li><b>(B) DNS Flood</b>：是攻擊 DNS Server，讓大家查不到 IP，跟 HTTP 暴增無關。</li>
+                                <li><b>(C) HTTP Flood</b>：正解，針對 Web Server 的資源耗盡攻擊。</li>
+                                <li><b>(D) ICMP Flood</b>：會塞滿頻寬，導致「內部連外」也會卡頓，與題意不符。</li>
+                              </ul>`,
+                    supplement: `<b>法條/定義：</b>阻斷服務攻擊 (DoS) 指的是讓授權使用者無法取得應有的資源或服務。<br>
+                                 <b>觸類旁通：</b>如果是針對 SSL/TLS 握手過程的攻擊，會消耗更多伺服器算力（HTTPS Flood）。`,
+                    mnemonic: `「網站卡、網路好 → HTTP Flood；<br>裡外都不通 → 頻寬被塞爆」`,
+                    traps: `<b>心理盲點：</b>看到「無法連線」就直覺選最常見的 Ping 攻擊 (ICMP Flood)。<br>
+                            <b>避坑指南：</b>一定要回頭看「內部上網正不正常」，這是區分 L7 (應用層) 和 L3/L4 (網路層) 攻擊的黃金關鍵。`,
+                    selfCheckQ: `如果攻擊變成 Syn Flood，防火牆 Log 會看到什麼狀態的連線暴增？`,
+                    selfCheckA: `SYN_RECV (收到 SYN 但還沒完成握手的半開連線狀態)。`
+                }
+            },
+            {
+                id: 18,
+                tag: "攻擊目的",
+                tagClass: "tag-sec",
+                text: "承上題，請問下列何項「不是」分散式阻斷服務 (DDoS) 攻擊的破壞目的？",
+                type: "single",
+                options: ["癱瘓系統服務主機", "破壞系統服務程式", "影響網頁服務正常運作", "塞爆服務網路的頻寬"],
+                correct: ["破壞系統服務程式"],
+                detailedAnalysis: {
+                    keywords: `<span class="highlight-text">DDoS</span>、<span class="highlight-negative">不是</span>、<span class="highlight-text">破壞目的</span>。`,
+                    vernacular: `駭客發動 DDoS 就像是找人去包圍店家抗議。<br>
+                                 <b>目的</b>：讓店家沒辦法做生意（服務中斷）。<br>
+                                 <b>非目的</b>：抗議群眾通常不會衝進去把店家的裝潢拆了或把錢偷走（破壞程式/竊取資料）。`,
+                    logic: `<ul>
+                                <li><b>解題步驟 1</b>：確認攻擊類型：DDoS 是「可用性」(Availability) 的殺手。</li>
+                                <li><b>解題步驟 2</b>：區分資安三要素：DDoS 不負責偷看 (機密性)、不負責竄改 (完整性)。</li>
+                                <li><b>解題步驟 3</b>：刪去法：找一個關於「修改、刪除、破壞檔案」的選項。</li>
+                                <li><b>生活例子</b>：高速公路塞車（DDoS）會讓你回不了家，但不會把你的車拆解掉（破壞程式）。</li>
+                            </ul>`,
+                    options: `<ul>
+                                <li><b>(A) 癱瘓主機</b>：是 DDoS 目的。</li>
+                                <li><b>(B) 破壞程式</b>：<b>不是</b> DDoS 目的。這通常需要入侵權限或病毒。</li>
+                                <li><b>(C) 影響運作</b>：是 DDoS 目的。</li>
+                                <li><b>(D) 塞爆頻寬</b>：是 DDoS 目的。</li>
+                              </ul>`,
+                    supplement: `<b>觸類旁通：</b>勒索軟體 (Ransomware) 才是針對「完整性」（加密檔案）與「可用性」的混合攻擊。<br>
+                                 <b>CIA 三要素：</b>DDoS 破壞 A (Availability)。`,
+                    mnemonic: `「DDoS 只塞路、不拆屋；<br>讓人不能用、不是讓人壞掉。」`,
+                    traps: `<b>心理盲點：</b>覺得「服務壞了」等於「程式壞了」。其實服務只是「忙不過來」，程式碼本身完好無缺。`,
+                    selfCheckQ: `如果駭客的目的是「竊取客戶個資」，他會發動 DDoS 嗎？`,
+                    selfCheckA: `通常不會，DDoS 反而會引起注意。竊取個資通常要低調入侵 (APT)。不過有時 DDoS 會作為煙霧彈掩護入侵。`
+                }
+            },
+            {
+                id: 19,
+                tag: "防禦技術",
+                tagClass: "tag-tech",
+                text: "針對 TCP SYN Flood 攻擊，下列何項應對策略「可能無法有效緩解」攻擊的影響？",
+                type: "single",
+                options: ["啟用 DNS 反向代理", "設定 TCP 連接速率限制", "啟用 SYN Cookies 機制", "將展示服務部署到內容派遣網路 (CDN) 上"],
+                correct: ["啟用 DNS 反向代理"],
+                detailedAnalysis: {
+                    keywords: `<span class="highlight-text">TCP SYN Flood</span>、<span class="highlight-negative">無法有效緩解</span>。`,
+                    vernacular: `有人惡作劇打電話訂位（SYN），店員接起電話（SYN-ACK）對方就不出聲也不掛斷，導致電話線全被佔滿。題目問「哪一招沒用」。`,
+                    logic: `<ul>
+                                <li><b>解題步驟 1 (定位層級)</b>：SYN Flood 是 Layer 4 (傳輸層) 攻擊。</li>
+                                <li><b>解題步驟 2 (檢視選項)</b>：DNS 是 Layer 7 (應用層) 或基礎設施查詢。</li>
+                                <li><b>解題步驟 3 (判斷有效性)</b>：攻擊者既然已經在打你的 IP (進行 TCP 握手)，那他早就查完 DNS 了，甚至不需要 DNS。所以弄 DNS 反向代理救不了 TCP 連線塞車。</li>
+                            </ul>`,
+                    options: `<ul>
+                                <li><b>(A) DNS 反向代理</b>：<b>無效</b>。這是查電話簿的機制，擋不了直接打電話進來的騷擾。</li>
+                                <li><b>(B) 速率限制</b>：有效，限制同一個號碼打來的頻率。</li>
+                                <li><b>(C) SYN Cookies</b>：有效，不佔用記憶體，給對方一個加密號碼牌，真的回來確認才給位子。</li>
+                                <li><b>(D) CDN</b>：有效，請一堆分店幫忙接電話。</li>
+                              </ul>`,
+                    supplement: `<b>觀念延伸：</b>DNS Sinkhole 才是用來處理惡意網域解析的技術，但對直打 IP 的 SYN Flood 效果也有限。<br>
+                                 <b>原理：</b>利用 TCP 三向交握的設計漏洞，製造大量「半開連線」耗盡 Server 記憶體。`,
+                    mnemonic: `「SYN 打連線 (L4)，DNS 查地址；<br>地址查到了，再藏電話簿也沒用。」`,
+                    traps: `<b>心理盲點：</b>看到 "Proxy" (代理) 就覺得萬能。要分清楚是 HTTP Proxy (能擋 L7) 還是 DNS Proxy (擋不了 L4)。`,
+                    selfCheckQ: `SYN Cookies 的缺點是什麼？`,
+                    selfCheckA: `會遺失一些 TCP 的進階選項資訊 (如 Window Scale)，且計算 Hash 會消耗一點 CPU。`
+                }
+            },
+            {
+                id: 20,
+                tag: "NIST CSF / 應變",
+                tagClass: "tag-mgm",
+                text: "參考 NIST CSF 框架，在「資源有限」情況下，應導入哪些 DDoS 防護機制最為合適？(複選：選三項)",
+                type: "multi",
+                options: [
+                    "RS.CO-02：當發生 DDoS 事件時，即時與內外部利害關係人溝通",
+                    "ID.IM-01：擴增網路頻寬與設備效能以提高 DDoS 攻擊的門檻",
+                    "DE.CM-01：增設新世代防火牆限制惡意流量與偵測異常威脅",
+                    "RS.MA-01：一旦發生 DDoS 攻擊時可以啟動網路上游業者的流量清洗服務"
+                ],
+                correct: [
+                    "RS.CO-02：當發生 DDoS 事件時，即時與內外部利害關係人溝通",
+                    "DE.CM-01：增設新世代防火牆限制惡意流量與偵測異常威脅",
+                    "RS.MA-01：一旦發生 DDoS 攻擊時可以啟動網路上游業者的流量清洗服務"
+                ],
+                detailedAnalysis: {
+                    keywords: `<span class="highlight-text">資源有限</span>、<span class="highlight-text">NIST CSF</span>、<span class="highlight-text">DDoS</span>。`,
+                    vernacular: `小公司沒錢，被攻擊了怎麼辦？要挑「便宜又大碗」的方法。`,
+                    logic: `<ul>
+                                <li><b>解題步驟 1 (核心限制)</b>：抓住「最低成本」這個關鍵。</li>
+                                <li><b>解題步驟 2 (篩選選項)</b>：
+                                    <ul>
+                                        <li>溝通 (SOP) → 免費 (人力成本)。</li>
+                                        <li>買頻寬 → 超貴 (無底洞)。</li>
+                                        <li>防火牆 → 必要投資 (且能擋多種攻擊)。</li>
+                                        <li>流量清洗 → 依需付費 (被攻擊才開)，比自建便宜。</li>
+                                    </ul>
+                                </li>
+                                <li><b>原理</b>：NIST CSF 強調 Identify, Protect, Detect, Respond, Recover。資源分配要平衡。</li>
+                            </ul>`,
+                    options: `<ul>
+                                <li><b>(A) 溝通</b>：RS (Respond) 範疇，便宜有效。</li>
+                                <li><b>(B) 擴頻寬</b>：ID (Identify) 範疇，但成本極高，不符題意。</li>
+                                <li><b>(C) 防火牆</b>：DE (Detect) 範疇，高 CP 值。</li>
+                                <li><b>(D) 清洗</b>：RS (Respond) 範疇，借力使力。</li>
+                              </ul>`,
+                    supplement: `<b>觸類旁通：</b>如果是「資源無上限」的金融業，那 (B) 擴充頻寬也是必要的基礎建設。`,
+                    mnemonic: `「沒錢別拚頻寬，要會叫人(ISP)幫忙，<br>還有記得安撫老闆(溝通)。」`,
+                    traps: `<b>避坑指南：</b>不要看到「提高攻擊門檻」就覺得好。題目有「資源有限」這個緊箍咒。`,
+                    selfCheckQ: `NIST CSF 的五大功能順序？`,
+                    selfCheckA: `識別 (ID) → 保護 (PR) → 偵測 (DE) → 回應 (RS) → 復原 (RC)。`
+                }
+            }
+        ]
+    };
+
+    // --- 全域狀態 ---
+    const state = {
+        answers: {}, 
+        status: {},
+        shuffledOptions: {}
+    };
+
+    // --- 初始化 ---
+    function init() {
+        renderTabs();
+        prepareQuestions();
+        renderQuestions();
+        updateProgress();
+        switchTab(quizData.questions[0].id);
+    }
+
+    // --- 洗牌演算法 ---
+    function shuffleArray(array) {
+        let currentIndex = array.length, randomIndex;
+        const newArray = [...array];
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [newArray[currentIndex], newArray[randomIndex]] = [
+                newArray[randomIndex], newArray[currentIndex]];
+        }
+        return newArray;
+    }
+
+    // --- 準備題目 ---
+    function prepareQuestions() {
+        const labels = ['A', 'B', 'C', 'D', 'E', 'F'];
+        quizData.questions.forEach(q => {
+            const optsObj = q.options.map((opt, idx) => ({
+                text: opt,
+                originalIndex: idx
+            }));
+            const shuffled = shuffleArray(optsObj);
+            state.shuffledOptions[q.id] = shuffled.map((item, idx) => ({
+                ...item,
+                label: labels[idx]
+            }));
+        });
+    }
+
+    // --- 渲染 Tabs ---
+    function renderTabs() {
+        const container = document.getElementById('tabs-container');
+        container.innerHTML = quizData.questions.map((q) => `
+            <button class="tab-btn" id="tab-${q.id}" onclick="switchTab(${q.id})">
+                Q${q.id}
+                <span id="icon-${q.id}"></span>
+            </button>
+        `).join('');
+    }
+
+    // --- 渲染題目 (核心邏輯更新) ---
+    function renderQuestions() {
+        const container = document.getElementById('questions-container');
+        container.innerHTML = quizData.questions.map(q => {
+            const options = state.shuffledOptions[q.id];
+            const isMulti = q.type === 'multi';
+            const inputType = isMulti ? 'checkbox' : 'radio';
+            const da = q.detailedAnalysis; // 簡寫
+
+            // 題目關鍵字標紅
+            const highlightedText = highlightKeywords(q.text);
+
+            return `
+            <div class="question-card" id="card-${q.id}">
+                <div class="q-header">
+                    <span class="tag ${q.tagClass}">${q.tag}</span>
+                    <span class="tag" style="background:#999; margin-left:10px;">${isMulti ? '複選題' : '單選題'}</span>
+                </div>
+                
+                <div class="q-text">
+                    ${q.id}. ${highlightedText}
+                </div>
+
+                <div class="options-list" id="opts-list-${q.id}">
+                    ${options.map(opt => `
+                        <label class="option-item ${isMulti ? 'multi' : ''}" id="opt-item-${q.id}-${opt.label}">
+                            <input type="${inputType}" name="q${q.id}" value="${opt.text}">
+                            <div class="checkmark"></div>
+                            <span class="opt-label">${opt.label}.</span>
+                            <span class="opt-text">${opt.text}</span>
+                        </label>
+                    `).join('')}
+                </div>
+
+                <div class="action-area">
+                    <button class="btn btn-submit" id="btn-submit-${q.id}" onclick="checkAnswer(${q.id})">
+                        送出答案
+                    </button>
+                    <button class="btn btn-reset" id="btn-reset-${q.id}" onclick="resetQuestion(${q.id})">
+                        ↺ 重新作答
+                    </button>
+                </div>
+
+                <!-- 詳解區塊 -->
+                <div class="explain-section" id="explain-${q.id}">
+                    <div class="explain-grid">
+                        
+                        <div class="explain-card">
+                            <div class="explain-header header-step1">🎯 第一步：找關鍵字</div>
+                            <div class="explain-body">${da.keywords}</div>
+                        </div>
+
+                        <div class="explain-card">
+                            <div class="explain-header header-step2">🗣️ 第二步：白話翻譯</div>
+                            <div class="explain-body">${da.vernacular}</div>
+                        </div>
+
+                        <div class="explain-card">
+                            <div class="explain-header header-step3">💡 第三步：解題思路</div>
+                            <div class="explain-body">${da.logic}</div>
+                        </div>
+
+                        <div class="explain-card">
+                            <div class="explain-header header-step4">🔍 第四步：選項分析</div>
+                            <div class="explain-body">${da.options}</div>
+                        </div>
+
+                        <div class="explain-card">
+                            <div class="explain-header" style="background:#e0f2f1; color:#00695c;">📚 觀念補充與延伸</div>
+                            <div class="explain-body">${da.supplement}</div>
+                        </div>
+
+                        <div class="explain-card" style="border-color:#ffe0b2;">
+                            <div class="explain-header header-golden">🧠 記憶口訣</div>
+                            <div class="explain-body" style="text-align:center; font-size:1.1rem; font-weight:bold; color:#8d6e63;">${da.mnemonic}</div>
+                        </div>
+
+                        <div class="explain-card">
+                            <div class="explain-header header-trap">⚠️ 常見陷阱 & 避坑指南</div>
+                            <div class="explain-body">${da.traps}</div>
+                        </div>
+
+                        <details class="self-check">
+                            <summary>🧐 自我檢測：${da.selfCheckQ}</summary>
+                            <div class="check-content">
+                                <div class="answer-box">
+                                    💡 答案：${da.selfCheckA}
+                                </div>
+                            </div>
+                        </details>
+
+                    </div>
+                </div>
+            </div>
+            `;
+        }).join('');
+    }
+
+    // --- 關鍵字標紅邏輯 ---
+    function highlightKeywords(text) {
+        const negativeWords = ["不正確", "不是", "錯誤", "最不適用", "無法", "可能無法"];
+        let newText = text;
+        negativeWords.forEach(word => {
+            const regex = new RegExp(word, "g");
+            newText = newText.replace(regex, `<span class="highlight-negative">${word}</span>`);
+        });
+        return newText;
+    }
+
+    // --- 切換 Tab ---
+    function switchTab(id) {
+        document.querySelectorAll('.question-card').forEach(card => card.classList.remove('active-card'));
+        document.getElementById(`card-${id}`).classList.add('active-card');
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`tab-${id}`).classList.add('active');
+        
+        window.scrollTo({ top: 180, behavior: 'smooth' });
+    }
+
+    // --- 檢查答案 ---
+    function checkAnswer(id) {
+        const qData = quizData.questions.find(q => q.id === id);
+        const selectedInputs = document.querySelectorAll(`input[name="q${id}"]:checked`);
+        const userAnswers = Array.from(selectedInputs).map(input => input.value);
+        
+        if (userAnswers.length === 0) return;
+
+        const sortedUser = [...userAnswers].sort();
+        const sortedCorrect = [...qData.correct].sort();
+        const isCorrect = JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
+        
+        state.status[id] = isCorrect ? 'correct' : 'wrong';
+        state.answers[id] = userAnswers;
+
+        const optionsList = document.getElementById(`opts-list-${id}`);
+        const inputs = optionsList.querySelectorAll('input');
+        
+        inputs.forEach(input => {
+            const parent = input.closest('.option-item');
+            parent.classList.add('disabled');
+            
+            if (qData.correct.includes(input.value)) {
+                parent.classList.add('correct-ans');
+            } else if (input.checked && !qData.correct.includes(input.value)) {
+                parent.classList.add('wrong-ans');
+            }
+        });
+
+        document.getElementById(`btn-submit-${id}`).style.display = 'none';
+        document.getElementById(`btn-reset-${id}`).style.display = 'flex';
+
+        const explainSec = document.getElementById(`explain-${id}`);
+        explainSec.style.display = 'block';
+        explainSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        updateTabStatus(id, isCorrect);
+        updateProgress();
+    }
+
+    // --- 更新 Tab 狀態 ---
+    function updateTabStatus(id, isCorrect) {
+        const tab = document.getElementById(`tab-${id}`);
+        const icon = document.getElementById(`icon-${id}`);
+        
+        tab.classList.remove('correct', 'wrong');
+        tab.classList.add(isCorrect ? 'correct' : 'wrong');
+        icon.innerHTML = isCorrect ? '✓' : '✗';
+    }
+
+    // --- 重置單題 ---
+    function resetQuestion(id) {
+        state.status[id] = null;
+        state.answers[id] = [];
+        
+        const inputs = document.querySelectorAll(`input[name="q${id}"]`);
+        inputs.forEach(input => input.checked = false);
+        
+        const optionItems = document.querySelectorAll(`#opts-list-${id} .option-item`);
+        optionItems.forEach(item => {
+            item.classList.remove('correct-ans', 'wrong-ans', 'disabled');
+        });
+
+        document.getElementById(`explain-${id}`).style.display = 'none';
+        document.getElementById(`btn-submit-${id}`).style.display = 'flex';
+        document.getElementById(`btn-reset-${id}`).style.display = 'none';
+
+        const tab = document.getElementById(`tab-${id}`);
+        const icon = document.getElementById(`icon-${id}`);
+        tab.classList.remove('correct', 'wrong');
+        icon.innerHTML = '';
+        
+        updateProgress();
+        switchTab(id);
+    }
+
+    // --- 更新進度條 ---
+    function updateProgress() {
+        const total = quizData.questions.length;
+        const completed = Object.keys(state.status).filter(k => state.status[k] !== null).length;
+        const percent = (completed / total) * 100;
+        
+        document.getElementById('progress-bar').style.width = `${percent}%`;
+        document.getElementById('progress-text').innerText = `${completed}/${total}`;
+    }
+
+    window.onload = init;
+</script>
+
+</body>
+</html>
