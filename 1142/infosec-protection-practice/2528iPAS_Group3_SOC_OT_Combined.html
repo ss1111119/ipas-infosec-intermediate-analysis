@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iPAS 資安題組 3：SOC、OT 與威脅情資綜合練習（深度解析版）</title>
+    <style>
+        /* --- 0. CSS 變數系統 --- */
+        :root {
+            /* 顏色系統 */
+            --primary-color: #2c3e50;    /* 深藍：主視覺 */
+            --accent-color: #3498db;     /* 亮藍：互動元素 */
+            --bg-body: #f0f2f5;          /* 背景色 */
+            --bg-card: #ffffff;          /* 卡片背景 */
+            
+            --success-color: #27ae60;    /* 正確 */
+            --success-bg: #e8f5e9;
+            --error-color: #c0392b;      /* 錯誤 */
+            --error-bg: #fce4ec;
+            --neutral-gray: #95a5a6;     /* 未作答/中性 */
+            
+            /* 標籤顏色 */
+            --tag-sec: #c0392b; /* 技術/資安 */
+            --tag-mgm: #d35400; /* 管理/風險 */
+
+            /* 排版數值 */
+            --max-width: 960px;
+            --border-radius: 16px;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        /* --- 1. 全域設定 --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0; padding: 0; padding-bottom: 80px;
+            font-family: system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-body); color: #333; line-height: 1.6;
+        }
+
+        /* --- 2. Header & Progress --- */
+        header {
+            background: var(--primary-color); color: white; position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15); padding: 10px 0;
+        }
+        .header-inner {
+            max-width: var(--max-width); margin: 0 auto; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center; height: 40px;
+        }
+        .header-title { font-weight: 700; font-size: 1.1rem; }
+        .progress-bar-container {
+            width: 100%; height: 6px; background-color: rgba(255,255,255,0.2);
+            position: absolute; bottom: 0; left: 0;
+        }
+        .progress-bar {
+            height: 100%; background-color: var(--success-color); width: 0%; transition: width 0.5s;
+        }
+
+        /* --- 3. 主要容器 --- */
+        main { max-width: var(--max-width); margin: 20px auto; padding: 0 20px; }
+        @media (max-width: 768px) { main { padding: 0 10px; margin-top: 15px; } }
+
+        /* --- 4. 題組情境區 --- */
+        .group-context-card {
+            background-color: #e3f2fd; border-left: 5px solid var(--accent-color);
+            padding: 20px; border-radius: 8px; margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .group-title { font-weight: bold; color: var(--primary-color); margin-bottom: 8px; }
+        
+        /* 新增：情境圖片樣式 */
+        .context-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #cce5ff;
+            display: block;
+        }
+
+        /* --- 5. Tabs --- */
+        .tabs-container {
+            display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; margin-bottom: 20px;
+            scrollbar-width: none;
+        }
+        .tabs-container::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            background: white; border: 1px solid #ddd; border-radius: 24px; padding: 10px 20px;
+            white-space: nowrap; cursor: pointer; font-weight: bold; color: #666; transition: all 0.2s;
+            display: flex; align-items: center; gap: 6px; min-height: 44px;
+        }
+        .tab-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .tab-btn.correct { background: var(--success-bg); color: var(--success-color); border-color: var(--success-color); }
+        .tab-btn.wrong { background: var(--error-bg); color: var(--error-color); border-color: var(--error-color); }
+        .tab-btn.active.correct { background: var(--success-color); color: white; }
+        .tab-btn.active.wrong { background: var(--error-color); color: white; }
+
+        /* --- 6. 題目卡片 --- */
+        .question-card {
+            background: var(--bg-card); border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow); padding: 30px; margin-bottom: 30px;
+        }
+        .q-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .q-id { background: #eee; padding: 4px 12px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; }
+        .q-tag { font-size: 0.85rem; padding: 4px 12px; border-radius: 12px; color: white; font-weight: bold; }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+        .q-text { font-size: 1.2rem; font-weight: bold; color: var(--primary-color); margin-bottom: 25px; line-height: 1.5; }
+        .highlight-negative { color: var(--error-color); font-weight: 900; text-decoration: underline; text-underline-offset: 4px; }
+
+        /* --- 7. 選項樣式 --- */
+        .options-list { display: flex; flex-direction: column; gap: 12px; }
+        .option-item {
+            position: relative; display: flex; padding: 16px 20px; border: 2px solid #eee;
+            border-radius: 12px; cursor: pointer; transition: all 0.2s; background: white;
+            align-items: flex-start;
+        }
+        .option-item:hover { border-color: var(--accent-color); background-color: #f8fbff; }
+        .option-item input { position: absolute; opacity: 0; width: 0; }
+        .option-marker {
+            width: 24px; height: 24px; border: 2px solid #ccc; border-radius: 50%;
+            margin-right: 15px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: white; margin-top: 2px;
+        }
+        .option-item.multiple .option-marker { border-radius: 6px; }
+        .option-item input:checked ~ .option-marker { background-color: var(--accent-color); border-color: var(--accent-color); }
+        .option-item input:checked ~ .option-content { font-weight: bold; color: var(--accent-color); }
+        /* 判定後樣式 */
+        .option-item.correct { border-color: var(--success-color); background-color: var(--success-bg); }
+        .option-item.correct .option-marker { background-color: var(--success-color); border-color: var(--success-color); content: '✓'; }
+        .option-item.wrong { border-color: var(--error-color); background-color: var(--error-bg); }
+        .option-item.wrong .option-marker { background-color: var(--error-color); border-color: var(--error-color); }
+        .option-item.missed { border-color: var(--success-color); border-style: dashed; }
+        .option-item.disabled { pointer-events: none; opacity: 0.8; }
+
+        /* --- 8. 按鈕 --- */
+        .action-area { margin-top: 30px; display: flex; justify-content: center; }
+        .btn-main {
+            background-color: var(--primary-color); color: white; border: none; padding: 12px 40px;
+            font-size: 1rem; font-weight: bold; border-radius: 30px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(44, 62, 80, 0.4); display: flex; align-items: center; gap: 8px;
+        }
+        .btn-main.reset-mode { background-color: white; color: var(--primary-color); border: 2px solid var(--primary-color); }
+
+        /* --- 9. 深度解析區 (Deep Dive) --- */
+        .analysis-section {
+            margin-top: 40px; border-top: 2px dashed #eee; padding-top: 20px;
+            display: none; /* 預設隱藏 */
+            animation: slideDown 0.5s ease;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .step-card {
+            background: white; border: 1px solid #e0e0e0; border-radius: 12px;
+            margin-bottom: 20px; overflow: hidden;
+        }
+        .step-header {
+            background: #f8f9fa; padding: 12px 20px; font-weight: bold; color: var(--primary-color);
+            border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px;
+        }
+        .step-badge {
+            background: var(--accent-color); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;
+        }
+        .step-content { padding: 20px; font-size: 1rem; color: #444; }
+
+        /* 關鍵字樣式 */
+        .kw-tag { display: inline-block; background: #fff3e0; color: #d35400; padding: 2px 6px; border-radius: 4px; margin: 2px; font-weight: bold; border: 1px solid #ffe0b2; }
+        
+        /* 選項分析表格 */
+        .opt-analysis-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .opt-analysis-table th, .opt-analysis-table td { padding: 10px; border: 1px solid #eee; text-align: left; vertical-align: top; }
+        .opt-analysis-table th { background: #f1f1f1; width: 60px; }
+        .opt-status-correct { color: var(--success-color); font-weight: bold; }
+        .opt-status-wrong { color: var(--error-color); font-weight: bold; }
+
+        /* 記憶金句 */
+        .mnemonic-box {
+            background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%);
+            border-left: 5px solid #ffc107; padding: 15px; font-size: 1.1rem;
+            color: #d35400; font-weight: bold; margin-top: 5px; text-align: center;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* 自我檢測互動 */
+        .self-check-item { margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; }
+        .sc-question { font-weight: bold; margin-bottom: 10px; display: flex; gap: 10px; }
+        .sc-question::before { content: 'Q.'; color: var(--accent-color); }
+        .sc-answer-box { display: none; background: #e8f5e9; padding: 10px 15px; border-radius: 6px; margin-top: 10px; color: #2e7d32; }
+        .btn-reveal {
+            background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color);
+            padding: 4px 12px; border-radius: 15px; cursor: pointer; font-size: 0.85rem;
+        }
+        .btn-reveal:hover { background: var(--accent-color); color: white; }
+
+        /* 特殊區塊顏色 */
+        .block-logic { border-left: 4px solid #9b59b6; }
+        .block-trap { border-left: 4px solid #e74c3c; }
+        .block-supp { border-left: 4px solid #1abc9c; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <div class="header-title">iPAS 題組 3：SOC 建置與維運（深度解析版）</div>
+        <div class="progress-text"><span id="completed-count">0</span> / <span id="total-count">4</span></div>
+    </div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="global-progress"></div>
+    </div>
+</header>
+
+<main>
+    <!-- Group Scenario Context -->
+    <div class="group-context-card">
+        <div class="group-title">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            題組情境
+        </div>
+        <div class="context-text" id="group-scenario-text">
+            <!-- JS Populated -->
+        </div>
+        <!-- 插入情境圖片 -->
+        <img src="https://i.meee.com.tw/fNga74B.jpg" alt="SOC 與 OT 資安監控情境示意圖" class="context-img">
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-container" id="tabs-container">
+        <!-- JS Populated -->
+    </div>
+
+    <!-- Question Area -->
+    <div id="question-render-area">
+        <!-- JS Populated -->
+    </div>
+</main>
+
+<script>
+    // --- 題目資料庫 (擴充版) ---
+    const quizData = {
+        "groupTitle": "iPAS 資安題組 3：SOC、OT 與威脅情資綜合練習",
+        "groupScenario": "某大型組織正計畫建立並維運一個符合未來需求的資安營運中心（SOC），監控範圍需涵蓋 IT、OT（營運技術）與雲端環境。在建置與維運過程中，團隊面臨了勒索軟體感染生產線、APT 進階持續性滲透攻擊等挑戰，需評估合適的組織架構、情資工具（如 MITRE ATT&CK）與端點偵測技術（EDR），並制定精確的事件回應流程。",
+        "questions": [
+            {
+                "id": 25,
+                "type": "single",
+                "tag": "技術/安全",
+                "tagClass": "tag-sec",
+                "text": "針對此類涉及 OT (營運技術) 的勒索軟體事件處理優先序，下列描述何者較為適切？",
+                "options": [
+                    "由於勒索軟體通常只影響特定檔案，且 OT 系統穩定性優先，應優先進行系統備份，然後等待 OT 維運團隊排程處理",
+                    "勒索軟體屬一般惡意軟體，主要任務是收集鑑識證據以追溯攻擊者，OT 系統的影響可稍後評估",
+                    "此類事件優先序極高，可能對實體安全和關鍵業務營運造成嚴重中斷，需立即啟動遏制與恢復措施，並與 OT 擁有者密切合作",
+                    "優先順序取決於是否支付贖金，若已決定支付則回應優先順序可降低，以便與攻擊者協商"
+                ],
+                "correct": ["此類事件優先序極高，可能對實體安全和關鍵業務營運造成嚴重中斷，需立即啟動遏制與恢復措施，並與 OT 擁有者密切合作"],
+                "detailedAnalysis": {
+                    "step1": {
+                        "keywords": ["OT 系統 (營運技術)", "勒索軟體", "生產控制停擺", "關鍵基礎設施", "優先序", "實體安全"]
+                    },
+                    "step2": "工廠的機器因為中毒快要停擺了！身為資安人員，你現在最優先要做什麼？是先慢慢備份？先忙著找兇手（鑑識）？還是立刻止血（遏制）並想辦法讓機器恢復運作？",
+                    "step3": {
+                        "logic": "OT 系統不同於辦公室 IT。IT 重視資料保密，但 OT 重視**人身安全 (Safety)** 與 **可用性 (Availability)**。\n解題三步驟：\n1. **判斷場景**：涉及工廠與生產，可能有物理危害。\n2. **決定策略**：因為會停產或傷人，首要任務是「活下去」—即「遏制擴散」與「恢復運作」。\n3. **執行方式**：OT 設備嬌貴，不能隨便斷網或重灌，必須與「OT 擁有者（廠長/工程師）」合作。",
+                        "example": "生活例子：工廠失火了（勒索軟體攻擊）。\n(X) 先架攝影機抓縱火犯（鑑識）。\n(X) 先把貨物搬出來備份，等明天再滅火（等待排程）。\n(O) 立刻疏散人員並滅火，同時問廠長哪裡有易燃物要先救（遏制、恢復、協作）。"
+                    },
+                    "step4": [
+                        { "opt": "A", "status": "wrong", "reason": "【等待排程 = 等死】勒索軟體會橫向擴散，等待排程會錯失止血黃金時間，導致全廠癱瘓。" },
+                        { "opt": "B", "status": "wrong", "reason": "【鑑識優先是 IT 思維】在 OT 事件中，生存（恢復運作）永遠比真相（鑑識）重要。" },
+                        { "opt": "C", "status": "correct", "reason": "【正確】承認高風險，採取遏制與恢復並行，並尊重 OT 專業（協作）。" },
+                        { "opt": "D", "status": "wrong", "reason": "【付錢不代表沒事】付贖金不保證能解密，且遏制擴散的動作不能因為付錢而停止。" }
+                    ],
+                    "supplement": "法條/定義：**遏制 (Containment)** 是指將攻擊限制在特定範圍，防止損害擴大。在 OT 中，常用的遏制手段包括「邏輯隔離」（防火牆阻擋）或「流量清洗」，而非直接拔線（可能導致設備故障）。",
+                    "analogy": "就像急診室醫生，遇到大出血病人（勒索攻擊），第一件事是「止血」（遏制）和「維持生命徵象」（恢復），而不是先去「驗血查病因」（鑑識）。",
+                    "mnemonic": "「OT 先止血，人命第一先；遏制恢復快，鑑識放一邊。」",
+                    "traps": "心理盲點：看到「鑑識 (Forensics)」覺得很專業就選它。記住，在災難面前，活下來比找兇手重要。",
+                    "pitfalls": "避坑指南：題目若出現「關鍵基礎設施」、「實體安全」、「人身安全」，答案一定與「可用性 (Availability)」或「立即遏制」有關，絕不會是「慢慢備份」或「先做鑑識」。",
+                    "selfCheck": [
+                        { "q": "如果攻擊只影響辦公室 IT 檔案伺服器，未影響 OT，優先序策略會變成怎樣？", "a": "可以較從容地進行鑑識與分析，優先保護資料機密性，這與 OT 的急迫性不同。" },
+                        { "q": "若現場工程師說「這台機器絕對不能斷網，一斷就會發生化學外洩」，SOC 該怎麼遏制？", "a": "這就是為什麼要「與 OT 擁有者合作」。不能拔線，改用防火牆阻擋特定 Port 或流量清洗。" },
+                        { "q": "在 CIA 三角中，OT 環境最看重哪一項？", "a": "A (Availability, 可用性) 以及 Safety (安全性)。" }
+                    ]
+                }
+            },
+            {
+                "id": 26,
+                "type": "single",
+                "tag": "情資/技術",
+                "tagClass": "tag-sec",
+                "text": "在利用 MITRE ATT&CK 這類框架的主要價值時，下列描述何者最為正確？",
+                "options": [
+                    "MITRE ATT&CK 提供詳盡的特定攻擊者 IP 位址和網域名稱列表，便於 SOC 立即封鎖，是唯一實用的情資來源",
+                    "MITRE ATT&CK 能夠自動且絕對地將攻擊歸因於特定國家級行為者，簡化歸因過程，減少分析師工作量",
+                    "MITRE ATT&CK 的主要目的是為 SOC 提供自動化的威脅偵測工具，取代人工分析師的判斷，達到全面自動化",
+                    "MITRE ATT&CK 提供一套基於真實世界觀察的威脅者戰術、技術與程序（TTPs）知識庫，有助於 SOC 理解威脅者行為模式"
+                ],
+                "correct": ["MITRE ATT&CK 提供一套基於真實世界觀察的威脅者戰術、技術與程序（TTPs）知識庫，有助於 SOC 理解威脅者行為模式"],
+                "detailedAnalysis": {
+                    "step1": {
+                        "keywords": ["MITRE ATT&CK", "主要價值", "TTPs (戰術、技術、程序)", "知識庫", "非自動化工具"]
+                    },
+                    "step2": "SOC 用 MITRE ATT&CK 這個表格到底是為了什麼？它是幫我們「自動抓人」的軟體？還是一本教我們看懂駭客招式的「武功祕笈」？",
+                    "step3": {
+                        "logic": "1. **定義**：MITRE ATT&CK 是一個 Knowledge Base (知識庫)，紀錄駭客「怎麼打」(How)。\n2. **區分**：它不是黑名單 (IOCs)，也不是防毒軟體 (Tool)。\n3. **價值**：幫助分析師從「行為模式」層面去防禦，而不只是擋 IP。",
+                        "example": "生活例子：ATT&CK 就像是警察局的**「犯罪手法百科全書」**（教你小偷通常怎麼撬開門鎖），而不是列出所有罪犯電話號碼的「電話簿」（黑名單）。"
+                    },
+                    "step4": [
+                        { "opt": "A", "status": "wrong", "reason": "【搞錯層級】IP 和網域是 IOC (入侵指標)，變化很快，不是 ATT&CK 的核心 (TTPs)。" },
+                        { "opt": "B", "status": "wrong", "reason": "【歸因困難】攻擊歸因 (Attribution) 非常難，駭客會偽裝，框架無法「自動且絕對」判定是哪個國家做的。" },
+                        { "opt": "C", "status": "wrong", "reason": "【不是工具】ATT&CK 是知識架構，不是「自動化工具」，也不能完全取代人工分析師。" },
+                        { "opt": "D", "status": "correct", "reason": "【正確】關鍵字命中：真實世界觀察、TTPs、知識庫、理解行為。" }
+                    ],
+                    "supplement": "定義：**TTPs** 指 Tactics (戰術-目的)、Techniques (技術-手段)、Procedures (程序-細節)。它是痛苦金字塔 (Pyramid of Pain) 的頂端，代表防禦者若能掌握此層，對駭客造成的痛苦最大。",
+                    "analogy": "給魚吃 (IP 黑名單) vs 教你怎麼釣魚 (ATT&CK TTPs)。IP 封鎖一個換一個很快，但如果你知道駭客習慣用 PowerShell 下載惡意程式，你把 PowerShell 監控好，他換多少 IP 都沒用。",
+                    "mnemonic": "「ATT&CK 看行為，不給黑名單；不是抓兇手，是懂怎麼打。」",
+                    "traps": "常見陷阱：看到「自動化」、「取代人工」、「唯一實用」這種武斷的詞，通常都是錯的。",
+                    "pitfalls": "避坑指南：考試時若問 ATT&CK，找「TTPs」、「行為」、「知識庫」這幾個關鍵字準沒錯。",
+                    "selfCheck": [
+                        { "q": "如果 SOC 的目標是「快速且自動化地封鎖」惡意連線，該用 IOC 還是 TTPs？", "a": "IOC (如 IP 黑名單)。因為格式固定，防火牆能直接讀取。" },
+                        { "q": "MITRE ATT&CK 能單獨用來判定攻擊者是誰嗎？", "a": "不能。不同駭客組織可能使用相同的工具 (Living off the Land)，需多方佐證。" },
+                        { "q": "Pyramid of Pain 越頂層代表什麼？", "a": "代表對攻擊者造成的痛苦越大，防禦難度也越高。" }
+                    ]
+                }
+            },
+            {
+                "id": 27,
+                "type": "single",
+                "tag": "EDR/監控",
+                "tagClass": "tag-sec",
+                "text": "關於 EDR 能力對 SOC 在偵測與確認入侵方面的價值，下列描述何者最為正確？",
+                "options": [
+                    "EDR 主要用於監控網路流量，以發現已知惡意程式碼的特徵碼，與傳統 IDS 無異",
+                    "EDR 提供的資訊與傳統網路流量資料相比，在確認入侵方面較不具參考價值，因為它可能被攻擊者規避",
+                    "EDR 系統提供來自端點的強大偵測和豐富的監控數據，使其資料在確認入侵方面通常比網路流量資料更具資訊性",
+                    "EDR 僅是一種傳統防毒解決方案的升級版，不具備進階威脅偵測能力，無法應對 APT 級攻擊"
+                ],
+                "correct": ["EDR 系統提供來自端點的強大偵測和豐富的監控數據，使其資料在確認入侵方面通常比網路流量資料更具資訊性"],
+                "detailedAnalysis": {
+                    "step1": {
+                        "keywords": ["EDR (端點偵測與回應)", "SOC", "確認入侵", "價值比較", "端點 vs 流量"]
+                    },
+                    "step2": "SOC 要判斷「到底有沒有被駭客成功入侵」時，是看路過的網路流量（門口）準，還是看電腦裡面的紀錄（房間內）準？",
+                    "step3": {
+                        "logic": "1. **工具定位**：EDR 裝在電腦(端點)上，看 Process/File；IDS/Firewall 在網路上，看 Packet。\n2. **確認入侵**：流量異常只能懷疑「有人敲門」；端點看到「不明程式在執行」才能確認「小偷進來了」。\n3. **比較**：端點資料 (Visibility) 深度大於流量資料。",
+                        "example": "生活例子：**流量 (IDS)** 就像大樓門口的警衛，看到有人進來（但不知道他去哪）。**EDR** 就像房間裡的監視器，清楚拍到那個人打開保險箱拿走錢（行為證據）。要「確認」竊盜案，監視器畫面比警衛紀錄更有用。"
+                    },
+                    "step4": [
+                        { "opt": "A", "status": "wrong", "reason": "【搞錯對象】監控流量是 IDS/NDR 的工作，EDR 是監控端點行為。" },
+                        { "opt": "B", "status": "wrong", "reason": "【因噎廢食】雖然 EDR 可能被高手繞過，但它提供的「Process Tree」、「Command Line」等資訊仍是確認入侵最有價值的證據。" },
+                        { "opt": "C", "status": "correct", "reason": "【正確】端點數據（行為、檔案變更、註冊表）比單純的網路封包更能還原攻擊現場。" },
+                        { "opt": "D", "status": "wrong", "reason": "【低估能力】EDR 專門用來抓防毒軟體抓不到的 APT 與未知威脅，具備行為分析與威脅獵捕能力。" }
+                    ],
+                    "supplement": "觀念：**Visibility (可視性)** 是 SOC 的核心。隨著加密流量 (HTTPS) 普及，傳統網路設備越來越難看到封包內容，因此「端點 (Endpoint)」成為最後一道防線與最清晰的視野。",
+                    "analogy": "防毒軟體像「疫苗」，擋已知的病；EDR 像「免疫系統 + 醫生」，隨時監控身體異常反應（發燒、白血球增多），並進行處置。",
+                    "mnemonic": "「流量看門口，EDR 看房間；確認入侵，看端點行為最直觀。」",
+                    "traps": "心理盲點：覺得「可能會被駭客關掉 (Bypass)」所以沒用。資安沒有完美的工具，不能因為有繞過風險就否定其核心價值。",
+                    "pitfalls": "避坑指南：題目若問「確認 (Confirmation)」或「鑑識 (Forensics)」，端點資料通常優於網路資料。",
+                    "selfCheck": [
+                        { "q": "若員工在家工作不連 VPN，公司的防火牆看得到他的流量嗎？", "a": "看不到。這時必須依賴安裝在筆電上的 EDR 回傳日誌才能監控。" },
+                        { "q": "EDR 偵測到 `powershell.exe` 下載檔案，這代表什麼？", "a": "代表攻擊者可能已經進入系統並正在執行惡意指令（Living off the Land），這是明確的入侵指標。" },
+                        { "q": "傳統 Antivirus 和 EDR 最大差別？", "a": "AV 靠特徵碼擋已知病毒（事前/事中）；EDR 靠行為分析抓未知威脅並能記錄軌跡（事中/事後）。" }
+                    ]
+                }
+            },
+            {
+                "id": 28,
+                "type": "multiple",
+                "tag": "SOC/管理",
+                "tagClass": "tag-mgm",
+                "text": "在建立 SOC 過程中應處理或採納的關鍵考量或功能，下列描述哪些最正確？（複選）",
+                "options": [
+                    "根據組織規模與需求，建立適當的 SOC 架構（含雲端、OT 職責）",
+                    "實做全面的威脅情資（CTI）計畫，理解威脅者 TTPs 並調整防禦",
+                    "建立績效指標需聚焦於 SOC 對組織「外部形象」的正面影響，內部運作效率可事後再評估",
+                    "透過 SOP 與應急手冊定義事件類別與升級路徑，並依業務影響定優先序"
+                ],
+                "correct": [
+                    "根據組織規模與需求，建立適當的 SOC 架構（含雲端、OT 職責）",
+                    "實做全面的威脅情資（CTI）計畫，理解威脅者 TTPs 並調整防禦",
+                    "透過 SOP 與應急手冊定義事件類別與升級路徑，並依業務影響定優先序"
+                ],
+                "detailedAnalysis": {
+                    "step1": {
+                        "keywords": ["建立 SOC", "組織架構", "CTI (情資)", "績效指標", "SOP (標準作業程序)", "業務影響優先序"]
+                    },
+                    "step2": "公司要蓋一個資安作戰中心，要準備哪些「真材實料」？是人要分工好？要有情報來源？還是只要把外表弄漂亮就好？",
+                    "step3": {
+                        "logic": "SOC 建設三大支柱：**People (人)**、**Process (流程)**、**Technology (技術)**。\n1. **人 (A)**：定義職責範圍（Scope），包含雲端跟工廠(OT)。\n2. **情資 (B)**：要有情報來源 (CTI)，知己知彼。\n3. **流程 (D)**：出事怎麼辦？要有 SOP 和 Playbook。\n4. **指標 (C)**：目的是提升「戰力」(內部效率)，不是「作秀」(外部形象)。",
+                        "example": "生活例子：建立消防局。\n(A) 分配誰開車、誰滅火。\n(B) 蒐集哪裡有易燃物的情報。\n(D) 規定火災警鈴響幾分鐘內要出車。\n(C-錯誤) 規定消防車要烤漆得很漂亮給民眾看，但滅火慢一點沒關係。"
+                    },
+                    "step4": [
+                        { "opt": "A", "status": "correct", "reason": "【Scope 定義】第一步就是劃地盤，確認要管哪些範圍（雲端、OT），避免權責不清。" },
+                        { "opt": "B", "status": "correct", "reason": "【情資驅動】SOC 不能被動等告警，要利用 CTI 主動調整防禦策略。" },
+                        { "opt": "C", "status": "wrong", "reason": "【目標錯誤】SOC 的 KPI 是 MTTD (偵測時間) / MTTR (回應時間) 等內部效率，關注「外部形象」是本末倒置。" },
+                        { "opt": "D", "status": "correct", "reason": "【流程標準化】SOP 確保每個人處理品質一致；「依業務影響定優先」確保資源花在刀口上。" }
+                    ],
+                    "supplement": "指標定義：**MTTD** (Mean Time To Detect) 平均偵測時間；**MTTR** (Mean Time To Respond) 平均回應時間。這兩個越短，代表 SOC 戰力越強。",
+                    "analogy": "SOC 就像軍隊指揮所，要有組織圖 (架構)、敵軍情報 (CTI)、作戰準則 (SOP)，而不是只在意閱兵好不好看 (外部形象)。",
+                    "mnemonic": "「建 SOC：人、流、情資缺一不可；指標看內功，不看外表。」",
+                    "traps": "心理盲點：覺得「形象」很重要。但在資安領域，實質防禦能力 (Effectiveness) 永遠優先於表面功夫。",
+                    "pitfalls": "避坑指南：看到選項強調「外部形象」、「公關效果」通常都是陷阱。看到「SOP」、「優先序」、「情資驅動」通常是正解。",
+                    "selfCheck": [
+                        { "q": "若 SOC 要納入雲端監控，最關鍵需要整合哪類資料？", "a": "日誌 (Logs)，特別是身分驗證與管理操作日誌 (CloudTrail 等)。" },
+                        { "q": "為什麼 OT 環境的 SOP 中，「升級路徑 (Escalation)」特別重要？", "a": "因為涉及實體停機決策，資安分析師通常無權決定，必須明確定義何時該通報廠長下令。" },
+                        { "q": "只看外部形象指標會導致什麼風險？", "a": "報喜不報憂，隱瞞真實資安事件以維持形象，導致內部風險失控。" }
+                    ]
+                }
+            }
+        ]
+    };
+
+    // --- 應用程式狀態 ---
+    const appState = {
+        currentTab: 0,
+        questionStatus: [] 
+    };
+
+    // --- 核心功能函式 ---
+
+    function initApp() {
+        document.getElementById('group-scenario-text').textContent = quizData.groupScenario;
+        document.getElementById('total-count').textContent = quizData.questions.length;
+
+        quizData.questions.forEach((q, index) => {
+            const indices = q.options.map((_, i) => i);
+            shuffleArray(indices);
+            appState.questionStatus.push({
+                answered: false,
+                correct: false,
+                shuffledIndices: indices,
+                userAnswers: []
+            });
+        });
+
+        renderTabs();
+        renderQuestion(0);
+        updateGlobalProgress();
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function renderTabs() {
+        const container = document.getElementById('tabs-container');
+        container.innerHTML = '';
+
+        quizData.questions.forEach((q, index) => {
+            const status = appState.questionStatus[index];
+            const btn = document.createElement('div');
+            btn.className = `tab-btn ${index === appState.currentTab ? 'active' : ''}`;
+            
+            if (status.answered) {
+                btn.classList.add(status.correct ? 'correct' : 'wrong');
+            }
+
+            let icon = '';
+            if (status.answered) {
+                icon = status.correct 
+                    ? `<svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>`
+                    : `<svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>`;
+            } else {
+                icon = `Q${q.id}`;
+            }
+
+            btn.innerHTML = `${icon} <span style="font-size:0.9rem">第 ${q.id} 題</span>`;
+            
+            btn.onclick = () => {
+                appState.currentTab = index;
+                renderTabs();
+                renderQuestion(index);
+                document.querySelector('.group-context-card').scrollIntoView({ behavior: 'smooth', block: 'end' });
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    function renderQuestion(index) {
+        const q = quizData.questions[index];
+        const status = appState.questionStatus[index];
+        const da = q.detailedAnalysis;
+        const container = document.getElementById('question-render-area');
+        
+        const negativeWords = /不正確|不是|錯誤|最不適用/g;
+        const highlightedText = q.text.replace(negativeWords, match => `<span class="highlight-negative">${match}</span>`);
+        const labels = ['A', 'B', 'C', 'D', 'E'];
+
+        // 關鍵字 HTML
+        const keywordsHTML = da.step1.keywords.map(k => `<span class="kw-tag">${k}</span>`).join(' ');
+
+        // 選項分析 HTML
+        const optAnalysisRows = da.step4.map(opt => `
+            <tr>
+                <td style="text-align:center; font-weight:bold;">${opt.opt}</td>
+                <td class="${opt.status === 'correct' ? 'opt-status-correct' : 'opt-status-wrong'}">
+                    ${opt.reason}
+                </td>
+            </tr>
+        `).join('');
+
+        // 自我檢測 HTML
+        const selfCheckRows = da.selfCheck.map((item, idx) => `
+            <div class="self-check-item">
+                <div class="sc-question">${item.q}</div>
+                <button class="btn-reveal" onclick="toggleAnswer('ans-${index}-${idx}', this)">顯示答案</button>
+                <div id="ans-${index}-${idx}" class="sc-answer-box">${item.a}</div>
+            </div>
+        `).join('');
+        
+        let html = `
+            <div class="question-card">
+                <div class="q-header">
+                    <span class="q-id">第 ${q.id} 題</span>
+                    <span class="q-tag ${q.tagClass}">${q.tag}</span>
+                </div>
+                <div class="q-text">${highlightedText}</div>
+                
+                <div class="options-list">
+                    ${status.shuffledIndices.map((originalIdx, i) => {
+                        const optionText = q.options[originalIdx];
+                        const label = labels[i];
+                        const inputType = q.type === 'multiple' ? 'checkbox' : 'radio';
+                        return `
+                        <label class="option-item ${q.type} ${status.answered ? 'disabled' : ''}" id="opt-${index}-${originalIdx}">
+                            <input type="${inputType}" name="q-${index}" value="${originalIdx}" ${status.answered ? 'disabled' : ''}>
+                            <div class="option-marker">${label}</div>
+                            <div class="option-content">${optionText}</div>
+                        </label>
+                        `;
+                    }).join('')}
+                </div>
+
+                <div class="action-area">
+                    ${!status.answered 
+                        ? `<button class="btn-main" onclick="submitAnswer(${index})">送出答案</button>`
+                        : `<button class="btn-main reset-mode" onclick="resetQuestion(${index})">
+                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                             重新作答
+                           </button>`
+                    }
+                </div>
+
+                <!-- 深度解析區 -->
+                <div class="analysis-section" style="display: ${status.answered ? 'block' : 'none'}">
+                    
+                    <div class="step-card">
+                        <div class="step-header"><span class="step-badge">第一步</span> 找關鍵字</div>
+                        <div class="step-content">
+                            ${keywordsHTML}
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-header"><span class="step-badge">第二步</span> 白話翻譯</div>
+                        <div class="step-content">${da.step2}</div>
+                    </div>
+
+                    <div class="step-card block-logic">
+                        <div class="step-header"><span class="step-badge">第三步</span> 解題思路與原理</div>
+                        <div class="step-content" style="white-space: pre-line">
+                            <strong>邏輯拆解：</strong><br>${da.step3.logic}
+                            <br><br>
+                            <strong>生活例子：</strong><br>${da.step3.example}
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-header"><span class="step-badge">第四步</span> 選項分析</div>
+                        <div class="step-content" style="padding:0">
+                            <table class="opt-analysis-table" style="border:none; margin:0;">
+                                ${optAnalysisRows}
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="step-card block-supp">
+                        <div class="step-header">觀念補充、法條定義與觸類旁通</div>
+                        <div class="step-content">
+                            <strong>定義/法條：</strong><br>${da.supplement}<br><br>
+                            <strong>觸類旁通：</strong><br>${da.analogy}
+                        </div>
+                    </div>
+
+                    <div class="step-card block-trap">
+                        <div class="step-header">記憶口訣與避坑指南</div>
+                        <div class="step-content">
+                            <div class="mnemonic-box">${da.mnemonic}</div>
+                            <br>
+                            <strong>常見陷阱：</strong>${da.traps}<br>
+                            <strong>避坑指南：</strong>${da.pitfalls}
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-header" style="background:#e8f5e9; color:#2e7d32;">自我檢測 (考考自己)</div>
+                        <div class="step-content">
+                            ${selfCheckRows}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        `;
+        container.innerHTML = html;
+        if (status.answered) {
+            applyFeedbackUI(index, status.userAnswers);
+        }
+    }
+
+    function toggleAnswer(id, btn) {
+        const el = document.getElementById(id);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+            btn.textContent = '顯示答案';
+        } else {
+            el.style.display = 'block';
+            btn.textContent = '隱藏答案';
+        }
+    }
+
+    function submitAnswer(qIndex) {
+        const q = quizData.questions[qIndex];
+        const inputs = document.querySelectorAll(`input[name="q-${qIndex}"]:checked`);
+        if (inputs.length === 0) { alert("請先選擇答案！"); return; }
+        const userIndices = Array.from(inputs).map(input => parseInt(input.value));
+        const correctOptions = q.correct;
+        const userTexts = userIndices.map(idx => q.options[idx]);
+        let isCorrect = false;
+        if (q.type === 'single') { isCorrect = correctOptions.includes(userTexts[0]); } 
+        else { isCorrect = userTexts.length === correctOptions.length && userTexts.every(t => correctOptions.includes(t)); }
+
+        appState.questionStatus[qIndex].answered = true;
+        appState.questionStatus[qIndex].correct = isCorrect;
+        appState.questionStatus[qIndex].userAnswers = userIndices;
+
+        applyFeedbackUI(qIndex, userIndices);
+        renderTabs();
+        renderQuestion(qIndex);
+        updateGlobalProgress();
+        
+        // 自動捲動到解析區
+        setTimeout(() => {
+            const analysisSection = document.querySelector('.analysis-section');
+            if(analysisSection) analysisSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+    }
+
+    function applyFeedbackUI(qIndex, userIndices) {
+        const q = quizData.questions[qIndex];
+        const status = appState.questionStatus[qIndex];
+        status.shuffledIndices.forEach(originalIdx => {
+            const el = document.getElementById(`opt-${qIndex}-${originalIdx}`);
+            const text = q.options[originalIdx];
+            const isCorrectOption = q.correct.includes(text);
+            const isSelected = userIndices.includes(originalIdx);
+            el.classList.remove('correct', 'wrong', 'missed');
+            if (isCorrectOption) {
+                if (isSelected) el.classList.add('correct');
+                else el.classList.add('missed');
+            } else if (isSelected) {
+                el.classList.add('wrong');
+            }
+        });
+    }
+
+    function resetQuestion(qIndex) {
+        const q = quizData.questions[qIndex];
+        appState.questionStatus[qIndex].answered = false;
+        appState.questionStatus[qIndex].correct = false;
+        appState.questionStatus[qIndex].userAnswers = [];
+        const indices = q.options.map((_, i) => i);
+        shuffleArray(indices);
+        appState.questionStatus[qIndex].shuffledIndices = indices;
+        renderTabs();
+        renderQuestion(qIndex);
+        updateGlobalProgress();
+    }
+
+    function updateGlobalProgress() {
+        const total = quizData.questions.length;
+        const answered = appState.questionStatus.filter(s => s.answered).length;
+        const percent = (answered / total) * 100;
+        document.getElementById('completed-count').textContent = answered;
+        document.getElementById('global-progress').style.width = `${percent}%`;
+    }
+
+    initApp();
+</script>
+
+</body>
+</html>
