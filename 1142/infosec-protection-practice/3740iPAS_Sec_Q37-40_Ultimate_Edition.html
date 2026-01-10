@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPAS 資安工程師模擬題組 (Q37-40) 終極詳解版</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --success-bg: #e8f5e9;
+            --error: #c0392b;
+            --error-bg: #fce4ec;
+            --warning: #f39c12;
+            --text: #333333;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --border-radius: 12px;
+            --shadow: 0 4px 15px rgba(0,0,0,0.08);
+            
+            /* Tag Colors */
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            font-size: 16px;
+            padding-bottom: 60px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .progress-track {
+            background: #eee;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Group Context */
+        .group-context {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            border-left: 5px solid var(--accent);
+            font-size: 0.95rem;
+        }
+
+        /* Tabs */
+        .tabs-area {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+        }
+
+        .tab-btn {
+            flex: 0 0 auto;
+            padding: 10px 20px;
+            border: none;
+            background: #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #555;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .tab-btn.correct { background: var(--success); color: white; }
+        .tab-btn.wrong { background: var(--error); color: white; }
+
+        /* Question Card */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .q-tag {
+            background: #666;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        .tag-sec { background: var(--tag-sec); }
+        .tag-mgm { background: var(--tag-mgm); }
+
+        .q-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .negative-keyword {
+            color: var(--error);
+            text-decoration: underline;
+            font-weight: 900;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-item:hover:not(.disabled) {
+            background: #f8f9fa;
+            border-color: #ccc;
+        }
+
+        .option-item.disabled {
+            cursor: default;
+        }
+
+        .option-item.correct-ans {
+            background: var(--success-bg);
+            border-color: var(--success);
+            color: #155724;
+        }
+        
+        .option-item.wrong-ans {
+            background: var(--error-bg);
+            border-color: var(--error);
+            color: #721c24;
+        }
+
+        .option-item input {
+            margin-right: 15px;
+            transform: scale(1.3);
+        }
+
+        /* Action Buttons */
+        .action-area {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+        }
+
+        .btn:active { transform: scale(0.95); }
+        .btn-submit { background: var(--primary); }
+        .btn-reset { background: #7f8c8d; }
+
+        /* Explanation Sections (Rich Content) */
+        .explanation-container {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .step-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .step-header {
+            background: #f1f2f6;
+            padding: 12px 20px;
+            font-weight: bold;
+            color: var(--primary);
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+
+        .step-icon { margin-right: 10px; font-size: 1.2rem; }
+
+        .step-content {
+            padding: 20px;
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: #856404;
+        }
+
+        /* Specific Styles for Sections */
+        .section-logic { border-left: 5px solid var(--accent); }
+        .section-trap { border-left: 5px solid var(--error); }
+        .section-memo { border-left: 5px solid var(--warning); background: linear-gradient(to right, #fffdf5, #fff); }
+        
+        /* Self Check */
+        .self-check-box {
+            background: #f8f9fa;
+            border: 2px dashed #bdc3c7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .check-item { margin-bottom: 15px; }
+        .check-q { font-weight: bold; margin-bottom: 8px; display: block; }
+        
+        .check-ans { 
+            display: none; 
+            margin-top: 8px; 
+            padding: 10px; 
+            background: #d4edda; 
+            color: #155724; 
+            border-radius: 5px; 
+        }
+
+        .btn-toggle-ans {
+            font-size: 0.8rem;
+            padding: 5px 12px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>iPAS 資安題組 (Q37-40) 終極解析版</h1>
+        <div>完成進度：<span id="progress-text">0/4</span></div>
+        <div class="progress-track">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+    </header>
+
+    <div class="group-context">
+        <strong>【題組共同情境】</strong><br>
+        本題組情境涵蓋企業資安實務，包含 DevSecOps 流程導入、Web 滲透測試執行、高層管理報告撰寫，以及弱點掃描後的分類與修補策略。請根據這些職場情境進行判斷。
+    </div>
+
+    <div class="tabs-area" id="tabs-area"></div>
+
+    <div id="question-area"></div>
+</div>
+
+<script>
+    // --- Rich Content Data ---
+    const quizData = [
+        {
+            id: 37,
+            tag: "技術",
+            tagClass: "tag-sec",
+            text: "【情境：DevSecOps】開發團隊希望建立自動化原始碼檢測機制，符合「安全左移 (Shift Left)」精神，盡早發現弱點。下列何種技術最適合整合至 CI/CD 工作流程中？",
+            type: "single",
+            options: ["靜態應用安全測試 (SAST)", "SQL 資料表比對工具", "黑箱測試 (Black-box Testing)", "動態應用安全測試 (DAST)"],
+            correct: ["A"],
+            explanation: {
+                step1: "關鍵字：自動化原始碼檢測、DevSecOps、CI/CD、提前發現弱點 (Shift Left)。",
+                step2: "白話翻譯：如果你想在工程師剛寫好程式碼時，就自動檢查有沒有寫錯導致安全漏洞，哪種工具最適合塞進自動化流程裡？",
+                step3: {
+                    title: "解題思路與原理",
+                    content: `
+                        <ul>
+                            <li><strong>原理：</strong>DevSecOps 強調「安全左移」，也就是在軟體開發生命週期 (SDLC) 的越早期 (左邊) 進行測試越好。</li>
+                            <li><strong>步驟 1：</strong>看到「原始碼檢測」，直接聯想到白箱測試 (White-box)。</li>
+                            <li><strong>步驟 2：</strong>SAST (Static Application Security Testing) 是針對原始碼進行靜態分析的技術，不需要執行程式。</li>
+                            <li><strong>步驟 3：</strong>SAST 速度快，適合在 CI/CD 的 Build 階段自動執行，符合「盡早發現」的需求。</li>
+                            <li><strong>生活例子：</strong>這就像蓋房子。SAST 是在畫設計圖時就檢查樑柱位置對不對 (看原始碼)；DAST 是房子蓋好後去踹門窗看牢不牢固 (執行後測試)。畫圖時修改最便宜，蓋好後修改最貴。</li>
+                        </ul>
+                    `
+                },
+                step4: [
+                    { opt: "(A) SAST", desc: "正確。直接掃描原始碼，適合早期自動化。", status: "correct" },
+                    { opt: "(B) SQL 比對", desc: "錯誤。這是用來同步資料庫結構的工具。", status: "wrong" },
+                    { opt: "(C) 黑箱測試", desc: "錯誤。通常指 DAST 或滲透測試，需等待程式部署後才能做。", status: "wrong" },
+                    { opt: "(D) DAST", desc: "錯誤。雖可自動化，但屬動態測試 (Runtime)，時間點較晚。", status: "wrong" }
+                ],
+                extension: `
+                    <strong>觀念補充：</strong><br>
+                    1. <strong>Shift Left (安全左移)：</strong>將資安測試從「上線前」移動到「開發中」。<br>
+                    2. <strong>誤報率 (False Positive)：</strong>SAST 的缺點是容易誤判，因為它看不懂程式邏輯，只對照規則庫。
+                `,
+                analogy: "SAST 是零件剛出廠就用X光掃描；DAST 是整台車組裝好後上路試跑。",
+                mnemonic: "「看碼先 SAST，跑起來再 DAST；左移就是越早越好。」",
+                trap: "陷阱：看到「自動化」就想選 DAST？<br>避坑：SAST 也是高度自動化的，且題目指定「原始碼」，這只有 SAST 能做。",
+                selfChecks: [
+                    { q: "1. 應用程式還沒跑起來 (還沒 Compile 或 Deploy)，可以做 DAST 嗎？", a: "不行。DAST 必須與運作中的應用程式互動。" },
+                    { q: "2. 為什麼 SAST 適合 CI/CD？", a: "因為它掃描速度相對快，且不需準備測試環境，工程師 Commit code 後幾分鐘內就能看到結果。" }
+                ]
+            }
+        },
+        {
+            id: 38,
+            tag: "技術",
+            tagClass: "tag-sec",
+            text: "【情境：Web 滲透測試】你需要選擇具備「攔截 (Intercept)」與「注入/重放 (Injection/Replay)」HTTP 請求功能的工具。請問下列何項工具最適合？",
+            type: "single",
+            options: ["SonarQube", "Burp Suite", "Qualys", "Nmap"],
+            correct: ["B"],
+            explanation: {
+                step1: "關鍵字：Web 弱點滲透測試、攔截 (Intercept)、注入 (Injection)、HTTP 請求。",
+                step2: "白話翻譯：你要當個「中間人」，把瀏覽器寄給伺服器的信件半路攔下來，偷偷改掉裡面的內容 (注入攻擊) 再寄出去，要用哪個工具？",
+                step3: {
+                    title: "解題思路與原理",
+                    content: `
+                        <ul>
+                            <li><strong>原理：</strong>這是在考 Web Proxy (代理伺服器) 的應用。滲透測試中，我們需要攔截封包來修改參數。</li>
+                            <li><strong>步驟 1：</strong>看到「攔截」、「修改請求」，就要找 Proxy 類型的工具。</li>
+                            <li><strong>步驟 2：</strong>Burp Suite 是全球資安業界標準的 Web Proxy 工具。</li>
+                            <li><strong>生活例子：</strong>Burp Suite 就像海關檢查站。所有進出口的貨櫃 (封包) 都要經過它，海關人員可以把貨櫃扣留下來 (Intercept)，把裡面的蘋果換成炸彈 (Injection)，再放行看對方收到會怎樣。</li>
+                        </ul>
+                    `
+                },
+                step4: [
+                    { opt: "(A) SonarQube", desc: "錯誤。這是原始碼掃描工具 (SAST)。", status: "wrong" },
+                    { opt: "(B) Burp Suite", desc: "正確。具備 Proxy, Repeater, Intruder 等強大攔截功能。", status: "correct" },
+                    { opt: "(C) Qualys", desc: "錯誤。這是自動化弱點掃描平台，非手動攔截工具。", status: "wrong" },
+                    { opt: "(D) Nmap", desc: "錯誤。這是網路埠口掃描工具 (Port Scanner)。", status: "wrong" }
+                ],
+                extension: `
+                    <strong>功能定義 (Burp Suite)：</strong><br>
+                    1. <strong>Repeater：</strong>重放攻擊。手動修改參數，反覆發送請求。<br>
+                    2. <strong>Intruder：</strong>自動化注入。設定變數，用字典檔大量轟炸。
+                `,
+                analogy: "Nmap 是在門口看哪扇門沒鎖 (掃 Port)；Burp 是進門後假傳聖旨 (改封包)。",
+                mnemonic: "「攔截改包用 Burp，掃描開門用 Nmap。」",
+                trap: "陷阱：混淆「掃描器」與「代理工具」。<br>避坑：Qualys 或 Nessus 是自動掃描報告，Burp 是讓駭客手動操作精細攻擊。",
+                selfChecks: [
+                    { q: "1. 如果我想知道目標主機開了哪些 Port (如 80, 443)，該用誰？", a: "Nmap。" },
+                    { q: "2. 什麼是中間人攻擊 (MITM) 測試？", a: "就是透過像 Burp 這樣的 Proxy，卡在客戶端與伺服器中間竊聽或竄改資料。" }
+                ]
+            }
+        },
+        {
+            id: 39,
+            tag: "管理",
+            tagClass: "tag-mgm",
+            text: "【情境：資安報告】你在整理將完整的資安測試報告準備提交給「董事會」，下列何項內容對董事會而言最「不」重要？",
+            type: "single",
+            options: ["測試人員背景與工具版本", "執行測試所需耗費的時間 (工時)", "符合公司期望及需求的結論", "弱點評估結果與修補建議"],
+            correct: ["B"],
+            explanation: {
+                step1: "關鍵字：提交給董事會、完整測試報告、最「不」重要。",
+                step2: "白話翻譯：大老闆們要決定投多少錢做資安，哪一條資訊對他們「做決策」最沒用？",
+                step3: {
+                    title: "解題思路與原理",
+                    content: `
+                        <ul>
+                            <li><strong>原理：</strong>受眾分析 (Audience Analysis)。報告必須根據閱讀對象調整內容。</li>
+                            <li><strong>步驟 1：</strong>分析董事會關注點：風險 (Risk)、影響 (Impact)、成本 (Cost)、合規 (Compliance)。</li>
+                            <li><strong>步驟 2：</strong>分析選項。(B)「耗費時間」屬於專案執行層面的行政瑣事，老闆不在乎過程多辛苦，只在乎結果與風險。</li>
+                            <li><strong>生活例子：</strong>就像你去看醫生。你想知道「得了什麼病 (風險)、會不會死 (影響)、要不要開刀 (建議)」。你不會想知道醫生「昨天睡幾個小時」或「聽診器買多少錢」，雖然這些是看診過程的一部分，但對你的決策無關。</li>
+                        </ul>
+                    `
+                },
+                step4: [
+                    { opt: "(A) 人員背景", desc: "重要。證明報告的權威性與可信度。", status: "wrong" },
+                    { opt: "(B) 耗費時間", desc: "最不重要。這是流水帳，對高層決策無價值。", status: "correct" },
+                    { opt: "(C) 結論", desc: "重要。老闆最愛看摘要與結論。", status: "wrong" },
+                    { opt: "(D) 評估與建議", desc: "重要。這是決定預算與優先順序的依據。", status: "wrong" }
+                ],
+                extension: `
+                    <strong>報告分層原則：</strong><br>
+                    1. <strong>高層 (Executive)：</strong>看趨勢、風險等級、預算需求。<br>
+                    2. <strong>技術 (Technical)：</strong>看重現步驟、Payload、Log、程式碼行數。
+                `,
+                analogy: "董事會是校長，想知道校舍安不安全；技術人員是維修工，想知道牆壁裂縫幾公分。",
+                mnemonic: "「董事會看風險與錢，不看工時與細節。」",
+                trap: "盲點：以為「完整」就是要巨細靡遺。<br>避坑：對高層來說，過多的技術細節是雜訊 (Noise)，不是資訊。",
+                selfChecks: [
+                    { q: "1. 如果報告對象改成「開發團隊」，什麼最重要？", a: "漏洞的重現步驟 (PoC) 與修復程式碼範例。" },
+                    { q: "2. Executive Summary 通常放在報告哪裡？", a: "最前面。讓大老闆一頁看完重點。" }
+                ]
+            }
+        },
+        {
+            id: 40,
+            tag: "技術",
+            tagClass: "tag-sec",
+            text: "【情境：漏洞分類】進行系統原始碼掃描時，下列哪些情境可被歸類為「Broken Authentication (身分驗證失效)」或「Access Control (存取控制失效)」？(複選)",
+            type: "multi",
+            options: ["密碼輸入不經雜湊直接儲存於資料庫", "可以修改自己帳號 ID 參數讀取到其他人資料", "使用 Base64 加 SHA256 加鹽雜湊儲存密碼", "以 GET 方法將帳號與密碼置於 URL 參數"],
+            correct: ["A", "B", "D"],
+            explanation: {
+                step1: "關鍵字：Broken Authentication (身分驗證)、Access Control (存取控制)、密碼儲存、參數竄改。",
+                step2: "白話翻譯：哪些選項代表「鎖爛掉了 / 鑰匙亂丟」(驗證問題) 或者 「門禁警衛在睡覺」(越權問題)？",
+                step3: {
+                    title: "解題思路與原理",
+                    content: `
+                        <ul>
+                            <li><strong>原理：</strong>OWASP Top 10 分類判斷。</li>
+                            <li><strong>步驟 1：</strong>(A) 明文密碼 = 鑰匙沒保護 = Broken Auth。</li>
+                            <li><strong>步驟 2：</strong>(B) 修改 ID 看別人資料 = 越權 (IDOR) = Access Control。</li>
+                            <li><strong>步驟 3：</strong>(C) 有 Hash 有 Salt = 安全做法 = 不是漏洞。</li>
+                            <li><strong>步驟 4：</strong>(D) URL 放密碼 = 鑰匙外露 = Broken Auth。</li>
+                            <li><strong>生活例子：</strong>明文密碼 = 把鑰匙直接掛在門把上。越權存取 = 拿著普通員工證卻能刷開總經理辦公室。</li>
+                        </ul>
+                    `
+                },
+                step4: [
+                    { opt: "(A) 明文儲存", desc: "選。驗證保護失效。", status: "correct" },
+                    { opt: "(B) 越權讀取", desc: "選。存取控制失效 (IDOR)。", status: "correct" },
+                    { opt: "(C) 加鹽雜湊", desc: "不選。這是正確的安全實作。", status: "wrong" },
+                    { opt: "(D) GET 傳密碼", desc: "選。敏感資訊洩漏 (Broken Auth)。", status: "correct" }
+                ],
+                extension: `
+                    <strong>名詞解釋：</strong><br>
+                    1. <strong>IDOR (Insecure Direct Object References)：</strong>不安全的物件直接參照。攻擊者透過修改參數 (如 user_id=100 改成 101) 存取他人資料。<br>
+                    2. <strong>Salt (鹽)：</strong>在密碼後加隨機字串再 Hash，防止彩虹表攻擊。
+                `,
+                analogy: "Base64 是翻譯 (像中文翻英文，懂英文的都看得懂)；AES/SHA 是加密 (像上鎖的保險箱)。",
+                mnemonic: "「帳密外洩算驗證壞，參數越權算控管壞。」",
+                trap: "陷阱：看到 Base64 就以為不安全？<br>避坑：要看後面有沒有接 SHA256。如果有 Hash + Salt，Base64 只是用來編碼顯示亂碼的，這是安全的。",
+                selfChecks: [
+                    { q: "1. 為什麼 GET 傳密碼不安全？不是有 HTTPS 嗎？", a: "因為 URL 會被瀏覽器歷史紀錄、Proxy log 記下來，HTTPS 只能保護傳輸中不被竊聽，不能防止 URL 被紀錄。" },
+                    { q: "2. 越權通常發生在前端還是後端？", a: "後端。因為後端沒有檢查「發出請求的人」是否有權限存取「這個 ID 的資料」。" }
+                ]
+            }
+        }
+    ];
+
+    // --- State & Logic ---
+    let currentTab = 0;
+    // userStatus: { answered: bool, selected: [], isCorrect: bool }
+    let userStatus = quizData.map(() => ({ answered: false, selected: [], isCorrect: false }));
+    
+    // Shuffle map
+    let shuffleMap = quizData.map(q => {
+        let arr = [0,1,2,3];
+        for(let i=arr.length-1; i>0; i--){
+            const j = Math.floor(Math.random()*(i+1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    });
+
+    const tabsArea = document.getElementById('tabs-area');
+    const questionArea = document.getElementById('question-area');
+    const progressText = document.getElementById('progress-text');
+    const progressBar = document.getElementById('progress-bar');
+
+    function init() {
+        renderTabs();
+        loadQuestion(0);
+        updateProgress();
+    }
+
+    function renderTabs() {
+        tabsArea.innerHTML = '';
+        quizData.forEach((q, idx) => {
+            const btn = document.createElement('button');
+            let statusClass = '';
+            let icon = '';
+            if (userStatus[idx].answered) {
+                statusClass = userStatus[idx].isCorrect ? 'correct' : 'wrong';
+                icon = userStatus[idx].isCorrect ? '✓' : '✗';
+            }
+            btn.className = `tab-btn ${idx === currentTab ? 'active' : ''} ${statusClass}`;
+            btn.innerHTML = `第 ${q.id} 題 ${icon}`;
+            btn.onclick = () => { currentTab = idx; loadQuestion(idx); renderTabs(); scrollToTop(); };
+            tabsArea.appendChild(btn);
+        });
+    }
+
+    function processText(text) {
+        const keywords = ["不", "錯誤", "不正確", "不是", "最不適用"];
+        let res = text;
+        keywords.forEach(kw => {
+            res = res.replace(new RegExp(kw, "g"), `<span class="negative-keyword">${kw}</span>`);
+        });
+        return res;
+    }
+
+    function loadQuestion(idx) {
+        const q = quizData[idx];
+        const map = shuffleMap[idx];
+        const status = userStatus[idx];
+
+        // Prepare Options HTML
+        let optsHTML = '';
+        const labels = ['A','B','C','D'];
+        
+        labels.forEach((lbl, displayIdx) => {
+            const originalIdx = map[displayIdx]; // Content index
+            const content = q.options[originalIdx];
+            
+            // Check if this option is conceptually correct
+            // q.correct stores "A","B"... mapping to original index 0,1...
+            const correctIndices = q.correct.map(c => c.charCodeAt(0)-65);
+            const isActuallyCorrect = correctIndices.includes(originalIdx);
+
+            let itemClass = '';
+            let checked = '';
+            let disabled = '';
+
+            if (status.answered) {
+                disabled = 'disabled';
+                // status.selected stores Display Labels (A,B...)
+                const wasSelected = status.selected.includes(lbl);
+                if (wasSelected) {
+                    checked = 'checked';
+                    itemClass = isActuallyCorrect ? 'correct-ans' : 'wrong-ans';
+                } else if (isActuallyCorrect) {
+                    // Missed correct answer visual cue (optional, good for learning)
+                    itemClass = 'correct-ans'; 
+                }
+            }
+
+            const inputType = q.type === 'single' ? 'radio' : 'checkbox';
+            
+            optsHTML += `
+                <label class="option-item ${itemClass} ${disabled}" onclick="selectOption(${idx})">
+                    <input type="${inputType}" name="opt_q${idx}" value="${lbl}" ${checked} ${disabled ? 'disabled' : ''}>
+                    <span><strong>(${lbl})</strong> ${content}</span>
+                </label>
+            `;
+        });
+
+        // Prepare Explanation HTML
+        const exp = q.explanation;
+        let selfCheckHTML = '';
+        exp.selfChecks.forEach((sc, i) => {
+            selfCheckHTML += `
+                <div class="check-item">
+                    <span class="check-q">${sc.q}</span>
+                    <button class="btn-toggle-ans" onclick="toggleAns(this)">顯示解答</button>
+                    <div class="check-ans">${sc.a}</div>
+                </div>
+            `;
+        });
+
+        const explanationHTML = `
+            <div class="explanation-container" style="display: ${status.answered ? 'block' : 'none'}">
+                <div class="step-card">
+                    <div class="step-header"><span class="step-icon">🔍</span> 第一步：找關鍵字</div>
+                    <div class="step-content">${exp.step1}</div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header"><span class="step-icon">🗣️</span> 第二步：白話翻譯</div>
+                    <div class="step-content">${exp.step2}</div>
+                </div>
+
+                <div class="step-card section-logic">
+                    <div class="step-header"><span class="step-icon">💡</span> 第三步：${exp.step3.title}</div>
+                    <div class="step-content">${exp.step3.content}</div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header"><span class="step-icon">📊</span> 第四步：選項分析</div>
+                    <div class="step-content">
+                        ${exp.step4.map(o => `
+                            <div style="margin-bottom: 8px; color: ${o.status==='correct'?'var(--success)':'var(--error)'}">
+                                <strong>${o.opt}</strong>：${o.desc}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header"><span class="step-icon">📚</span> 觀念補充與延伸</div>
+                    <div class="step-content">${exp.extension}</div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-header"><span class="step-icon">🔗</span> 觸類旁通 (舉一反三)</div>
+                    <div class="step-content">${exp.analogy}</div>
+                </div>
+
+                <div class="step-card section-memo">
+                    <div class="step-header"><span class="step-icon">📝</span> 記憶口訣</div>
+                    <div class="step-content" style="font-size: 1.1rem; font-weight: bold; color: var(--warning);">${exp.mnemonic}</div>
+                </div>
+
+                <div class="step-card section-trap">
+                    <div class="step-header"><span class="step-icon">🚧</span> 常見陷阱與避坑指南</div>
+                    <div class="step-content">${exp.trap}</div>
+                </div>
+
+                <div class="self-check-box">
+                    <h3 style="margin-bottom:15px; color: var(--primary);">🤔 自我檢測 (點擊按鈕揭曉)</h3>
+                    ${selfCheckHTML}
+                </div>
+            </div>
+        `;
+
+        // Buttons
+        let btnHTML = `<button class="btn btn-submit" onclick="submitAns(${idx})">送出答案</button>`;
+        if (status.answered) {
+            btnHTML = `<button class="btn btn-reset" onclick="resetAns(${idx})">重新作答 / 複習</button>`;
+        }
+
+        const html = `
+            <div class="card">
+                <div class="q-header">
+                    <span class="q-tag ${q.tagClass}">${q.tag}</span>
+                    <span style="font-weight:bold; color:#888;">題號：${q.id}</span>
+                </div>
+                <div class="q-text">${processText(q.text)}</div>
+                <div class="options-grid">${optsHTML}</div>
+                <div class="action-area">${btnHTML}</div>
+            </div>
+            ${explanationHTML}
+        `;
+
+        questionArea.innerHTML = html;
+        
+        // Auto scroll to explanation if answered
+        if (status.answered) {
+            setTimeout(() => {
+                const el = document.querySelector('.explanation-container');
+                if(el) el.scrollIntoView({behavior: 'smooth', block: 'start'});
+            }, 100);
+        }
+    }
+
+    // --- Interaction ---
+    function selectOption(idx) {
+        // Native radio/checkbox handles UI state, we handle logic on submit
+    }
+
+    function submitAns(idx) {
+        const inputs = document.querySelectorAll(`input[name="opt_q${idx}"]:checked`);
+        if (inputs.length === 0) { alert("請先選擇答案！"); return; }
+        
+        const selectedLabels = Array.from(inputs).map(i => i.value);
+        const q = quizData[idx];
+        const map = shuffleMap[idx]; // [2,0,3,1] means Display A is Original 2
+
+        // Logic: Convert Selected Display Label -> Original Index
+        const selectedIndices = selectedLabels.map(l => {
+            const displayIndex = l.charCodeAt(0) - 65; // A=0, B=1
+            return map[displayIndex]; // Original content index
+        });
+
+        // Correct indices
+        const correctIndices = q.correct.map(c => c.charCodeAt(0)-65);
+
+        // Compare
+        const setSel = new Set(selectedIndices);
+        const setCor = new Set(correctIndices);
+        const isCorrect = (setSel.size === setCor.size) && [...setSel].every(x => setCor.has(x));
+
+        userStatus[idx] = { answered: true, selected: selectedLabels, isCorrect: isCorrect };
+        
+        loadQuestion(idx);
+        renderTabs();
+        updateProgress();
+    }
+
+    function resetAns(idx) {
+        // Shuffle again for drill practice
+        let arr = [0,1,2,3];
+        for(let i=arr.length-1; i>0; i--){
+            const j = Math.floor(Math.random()*(i+1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        shuffleMap[idx] = arr;
+
+        userStatus[idx] = { answered: false, selected: [], isCorrect: false };
+        loadQuestion(idx);
+        renderTabs();
+        updateProgress();
+        scrollToTop();
+    }
+
+    function toggleAns(btn) {
+        const div = btn.nextElementSibling;
+        if (div.style.display === 'block') {
+            div.style.display = 'none';
+            btn.innerText = '顯示解答';
+        } else {
+            div.style.display = 'block';
+            btn.innerText = '隱藏解答';
+        }
+    }
+
+    function updateProgress() {
+        const done = userStatus.filter(u => u.answered).length;
+        const total = quizData.length;
+        document.getElementById('progress-text').innerText = `${done}/${total}`;
+        document.getElementById('progress-bar').style.width = `${(done/total)*100}%`;
+    }
+
+    function scrollToTop() {
+        window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    // Go
+    init();
+
+</script>
+
+</body>
+</html>
