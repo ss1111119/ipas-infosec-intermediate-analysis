@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紅隊演練攻擊手法檢測 | 資安互動試題</title>
+    
+    <!-- 外部資源：Bootstrap 5, FontAwesome, Google Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 認知友善配色系統 v4.0 --- */
+        :root {
+            --body-bg: #f4f7f6;       /* 冷灰調背景 */
+            --card-bg: #ffffff;       /* 卡片底色 */
+            --text-primary: #2c3e50;  /* 深藍灰文字 */
+            --primary: #2980b9;       /* 主要藍色 */
+            --primary-hover: #2471a3;
+            --secondary-bg: #f8f9fa;  /* 淺灰區塊底色 */
+            --highlight: #f1c40f;     /* 記憶黃標記 */
+            --success-bg: #e8f5e9;    /* 正確背景 */
+            --success-text: #2e7d32;  /* 正確文字 */
+            --success-border: #a5d6a7;
+            --error-bg: #fce4ec;      /* 錯誤背景 */
+            --error-text: #c62828;    /* 錯誤文字 */
+            --error-border: #ef9a9a;
+            
+            /* 標籤色彩 */
+            --tag-law: #607d8b; /* 法規 */
+            --tag-iso: #27ae60; /* 標準 */
+            --tag-zt: #8e44ad;  /* 零信任 */
+            --tag-net: #2980b9; /* 網路 */
+            --tag-sec: #c0392b; /* 技術 */
+            --tag-mgm: #d35400; /* 風險/管理 */
+        }
+
+        body {
+            background-color: var(--body-bg);
+            color: var(--text-primary);
+            font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* --- 版型容器 --- */
+        .page-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            position: relative;
+        }
+
+        /* 行動版適配 */
+        @media (max-width: 768px) {
+            .page-container {
+                margin: 16px;
+                padding: 20px;
+                border-radius: 12px;
+            }
+            h2 { font-size: 20px; }
+            h3 { font-size: 18px; }
+            .btn-action { width: 100%; }
+        }
+
+        /* --- 元件樣式 --- */
+        h2 { font-size: 24px; font-weight: 700; margin-bottom: 20px; color: var(--primary); }
+        h3 { font-size: 18px; font-weight: 700; margin-bottom: 15px; border-left: 5px solid var(--primary); padding-left: 10px; }
+        
+        /* 標籤 Tag */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: white;
+            font-weight: 500;
+            margin: 0 2px;
+            vertical-align: text-bottom;
+        }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        /* 重點標記 */
+        mark {
+            background-color: rgba(241, 196, 15, 0.3);
+            color: #333;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* 情境卡 */
+        .context-card {
+            background-color: #eef2f3;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid #95a5a6;
+            color: #555;
+        }
+
+        /* --- 選項區域 --- */
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option-item {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: #fff;
+        }
+
+        .option-item:hover:not(.disabled) {
+            background-color: #e3f2fd;
+            border-color: #bbdefb;
+            transform: translateY(-2px);
+        }
+
+        .option-item.selected {
+            background-color: #e3f2fd;
+            border-color: var(--primary);
+        }
+
+        .option-item.disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+            background-color: #f8f9fa;
+        }
+        
+        .option-item input[type="checkbox"] {
+            margin-top: 5px;
+            margin-right: 12px;
+            accent-color: var(--primary);
+            transform: scale(1.2);
+            flex-shrink: 0;
+        }
+
+        .option-content {
+            flex-grow: 1;
+            font-size: 1rem;
+        }
+
+        /* --- 按鈕 --- */
+        .btn-action {
+            display: inline-block;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+            min-height: 44px; /* 觸控友善 */
+        }
+
+        .btn-action:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+        }
+
+        .btn-action:active {
+            transform: translateY(0);
+        }
+
+        .btn-reset {
+            background-color: #607d8b;
+        }
+        .btn-reset:hover {
+            background-color: #546e7a;
+        }
+
+        /* --- 回饋區域 --- */
+        .feedback-area {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .feedback-success {
+            background-color: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: var(--success-text);
+        }
+
+        .feedback-error {
+            background-color: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: var(--error-text);
+        }
+
+        /* --- 解析與自我檢測 --- */
+        /* 主 Details 容器 */
+        details.main-details {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        details.main-details[open] {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        /* 主 Summary 樣式 */
+        details.main-details > summary {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            font-weight: 600;
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        details.main-details > summary::after {
+            content: '\f078'; /* FontAwesome Chevron Down */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+
+        details.main-details[open] > summary::after {
+            transform: rotate(180deg);
+        }
+
+        .details-content {
+            padding: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        /* 巢狀 Details (用於自我檢測) */
+        .nested-details {
+            margin-bottom: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background-color: #fff;
+        }
+
+        .nested-details > summary {
+            padding: 12px 15px;
+            background-color: #fff;
+            cursor: pointer;
+            font-weight: 500;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-primary);
+        }
+        
+        .nested-details > summary:hover {
+            background-color: #f1f3f5;
+        }
+
+        .nested-details > summary::after {
+            content: '\f054'; /* FontAwesome Chevron Right */
+            font-family: 'Font Awesome 6 Free';
+            font-size: 0.8em;
+            color: #aaa;
+            transition: transform 0.2s;
+        }
+
+        .nested-details[open] > summary::after {
+            transform: rotate(90deg);
+        }
+
+        .nested-details .answer-box {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #eee;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        /* 解析段落 */
+        .explain-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--secondary-bg);
+            border-left: 4px solid var(--tag-sec);
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .explain-section h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .explain-section ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+        
+        .explain-section li {
+            margin-bottom: 8px;
+        }
+
+        /* 動畫 */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 自定義樣式調整 */
+        .header-badges {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .badge-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+            background-color: #e0e0e0;
+            color: #666;
+        }
+        
+        .badge-status.active {
+            background-color: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    
+    <!-- 1. Header -->
+    <div class="header-badges">
+        <span class="badge bg-secondary text-white fs-6">Q3. 複選題</span>
+        <span id="statusBadge" class="badge-status">未作答</span>
+    </div>
+
+    <!-- 2. Question -->
+    <div id="questionArea">
+        <h2>下列哪幾種方式是檢測人員執行<span class="tag tag-sec">紅隊演練</span>過程中可能會使用的攻擊手法？</h2>
+        
+        <!-- Context (本題無情境) -->
+        <div class="context-card">
+            <i class="fa-solid fa-circle-info me-2"></i>本題無額外情境背景
+        </div>
+
+        <p class="text-muted mb-4">請選擇所有符合「模擬真實攻擊者」的情境 (複選)：</p>
+
+        <div class="option-group">
+            <!-- Option A -->
+            <label class="option-item" id="opt-A-label">
+                <input type="checkbox" name="quiz" value="A" id="opt-A">
+                <div class="option-content">
+                    (A) 在 DMZ 網頁伺服器找到 <span class="tag tag-sec">RCE</span> 漏洞並取得系統控制權，然後在內網進行 <mark>橫向移動</mark>，嘗試取得 Windows Server Active Directory (AD) 的控制權。
+                </div>
+            </label>
+
+            <!-- Option B -->
+            <label class="option-item" id="opt-B-label">
+                <input type="checkbox" name="quiz" value="B" id="opt-B">
+                <div class="option-content">
+                    (B) 透過 <span class="tag tag-sec">釣魚信件</span> 對企業的海外分公司員工進行社交工程，取得員工電腦控制權，然後讀取員工電子郵件信箱，尋找可以拿來利用的機敏資料。
+                </div>
+            </label>
+
+            <!-- Option C -->
+            <label class="option-item" id="opt-C-label">
+                <input type="checkbox" name="quiz" value="C" id="opt-C">
+                <div class="option-content">
+                    (C) 移動到企業所在的樓層，<span class="tag tag-net">側錄 Wi-Fi</span> 然後嘗試破解密碼，取得企業 Wi-Fi 的存取方式，入侵企業內部網路。
+                </div>
+            </label>
+
+            <!-- Option D -->
+            <label class="option-item" id="opt-D-label">
+                <input type="checkbox" name="quiz" value="D" id="opt-D">
+                <div class="option-content">
+                    (D) 註冊成為企業的 <span class="tag tag-mgm">供應商</span>，並且利用供應商專用網站造假資料、竄改商品金額，驗證攻擊者可以用更低的價格買進商品。
+                </div>
+            </label>
+        </div>
+    </div>
+
+    <!-- 3. Action Area -->
+    <div class="text-center mb-4">
+        <button id="submitBtn" class="btn-action">送出答案</button>
+    </div>
+
+    <!-- 4. Feedback -->
+    <div id="feedbackArea" class="feedback-area">
+        <div id="feedbackTitle" class="fs-5 fw-bold mb-2"></div>
+        <div id="feedbackContent"></div>
+    </div>
+
+    <!-- 5. Explain -->
+    <details id="explainArea" class="main-details" style="display: none;">
+        <summary>
+            <span><i class="fa-solid fa-book-open me-2 text-primary"></i> 查看詳細解析</span>
+        </summary>
+        <div class="details-content">
+            
+            <!-- 第一步：找關鍵字 & 白話翻譯 -->
+            <div class="explain-section" style="border-left-color: var(--tag-law);">
+                <h4><i class="fa-solid fa-magnifying-glass"></i> 第一步：找關鍵字 & 白話翻譯</h4>
+                <ul>
+                    <li><strong>關鍵字：</strong>紅隊演練 (Red Team Exercise)、模擬真實攻擊者、RCE、橫向移動、釣魚、社交工程、側錄 Wi-Fi、供應商竄改。</li>
+                    <li><strong>白話翻譯：</strong>這題在問：「紅隊在演練時，會不會真的像壞人一樣，從網站漏洞、釣魚信、Wi-Fi、甚至假扮供應商去試著入侵？」只要符合「模擬真實攻擊」，就是紅隊手法。</li>
+                </ul>
+            </div>
+
+            <!-- 第二步 & 第三步：解題思路 -->
+            <div class="explain-section" style="border-left-color: var(--tag-iso);">
+                <h4><i class="fa-solid fa-brain"></i> 第二步：解題思路</h4>
+                <p class="mb-2"><strong>原理與規則：</strong>紅隊不是只測單一系統，而是測「整體防禦」(人、流程、技術、實體)。</p>
+                <p class="mb-2"><strong>生活例子：</strong>把公司想成一棟大樓，紅隊會嘗試：</p>
+                <ul>
+                    <li>(A) 從大門旁櫃台鑽漏洞進去 (Web RCE)。</li>
+                    <li>(B) 騙員工開門 (釣魚社工)。</li>
+                    <li>(C) 在停車場偷聽對講機訊號 (Wi-Fi 側錄)。</li>
+                    <li>(D) 假冒供應商進去改帳本 (流程濫用)。</li>
+                </ul>
+            </div>
+
+            <!-- 第四步：選項分析 -->
+            <div class="explain-section" style="border-left-color: var(--tag-sec);">
+                <h4><i class="fa-solid fa-list-check"></i> 第四步：選項分析</h4>
+                
+                <div class="mb-3">
+                    <strong>(A) 技術面滲透：</strong>
+                    <p class="text-muted ms-3 mb-1">這是經典紅隊路徑：外網 (DMZ) → 初始存取 (RCE) → 橫向移動 → 內網核心 (AD)。驗證邊界防護與修補流程。</p>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>(B) 人員與社工：</strong>
+                    <p class="text-muted ms-3 mb-1">駭客常從「人」下手。釣魚郵件 (Phishing) 騙取權限，讀信箱蒐集情資 (Reconnaissance)。驗證員工資安意識。</p>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>(C) 實體與無線網路：</strong>
+                    <p class="text-muted ms-3 mb-1">紅隊可進行「實體接近」。側錄/破解 Wi-Fi，直接物理接入內網。驗證門禁與無線安全。</p>
+                </div>
+                
+                <div>
+                    <strong>(D) 供應鏈與業務邏輯：</strong>
+                    <p class="text-muted ms-3 mb-1">模擬「業務邏輯漏洞」。測試身分驗證、交易流程 (如竄改金額) 是否有瑕疵。驗證流程抗性。</p>
+                </div>
+            </div>
+
+            <!-- 觀念補充與延伸 -->
+            <div class="explain-section" style="border-left-color: var(--tag-zt);">
+                <h4><i class="fa-solid fa-lightbulb"></i> 觀念補充與延伸</h4>
+                <p><strong>觸類旁通（舉一反三）：</strong></p>
+                <ul>
+                    <li><strong>滲透測試 (Penetration Test)：</strong>像「找哪扇窗戶沒鎖」（專注於技術漏洞）。</li>
+                    <li><strong>紅隊演練 (Red Team)：</strong>像「演一場完整的搶劫劇本」（不限手段，包含社工、潛伏、實體入侵）。</li>
+                </ul>
+            </div>
+            
+            <!-- 記憶口訣 -->
+            <div class="mt-3 p-3 bg-light rounded border border-warning" style="background-color: #fffbf0 !important;">
+                <strong>💡 記憶口訣：</strong>「紅隊四路：<mark>技術、人、場、鏈</mark>」（技術漏洞、人員社工、實體場域、供應鏈流程）。
+            </div>
+
+            <!-- 常見陷阱 -->
+             <div class="explain-section mt-3" style="border-left-color: var(--error-text); background-color: #fff5f5;">
+                <h4 style="color: var(--error-text);"><i class="fa-solid fa-triangle-exclamation"></i> 常見陷阱與避坑指南</h4>
+                <ul>
+                    <li><strong>心理盲點：</strong>容易覺得 (D) 供應商改金額是「詐欺/內控」不算資安。其實紅隊也測「業務流程安全」。</li>
+                    <li><strong>避坑指南：</strong>只要是「真實駭客會做的事」且「能測出防禦死角」，通常都是紅隊範疇。</li>
+                </ul>
+            </div>
+
+        </div>
+    </details>
+
+    <!-- 6. Self Check -->
+    <details id="selfCheckArea" class="main-details mt-3">
+        <summary>
+            <span><i class="fa-solid fa-clipboard-check me-2 text-success"></i> 自我檢測</span>
+        </summary>
+        <div class="details-content">
+            
+            <!-- Q1 -->
+            <details class="nested-details">
+                <summary>
+                    <span><i class="fa-regular fa-circle-question me-2"></i>Q1: 如果只做弱點掃描 (Vulnerability Scan) 出一份報告，算紅隊演練嗎？</span>
+                </summary>
+                <div class="answer-box">
+                    <strong>答案：通常不算。</strong><br>
+                    那比較偏向弱點掃描或滲透測試的前置作業；紅隊演練的重點必須包含「模擬攻擊行為 (TTPs)」與「驗證防禦方的偵測/應變能力」。
+                </div>
+            </details>
+
+            <!-- Q2 -->
+            <details class="nested-details">
+                <summary>
+                    <span><i class="fa-regular fa-circle-question me-2"></i>Q2: 取得員工電腦控制權後，為什麼會去讀信箱？</span>
+                </summary>
+                <div class="answer-box">
+                    <strong>答案：為了擴大戰果。</strong><br>
+                    信箱常有內部資訊、帳密重設信、附件文件，可用來擴大攻擊 (Lateral Movement) 或取得機敏資料，也能測驗 DLP (資料外洩防護) 有沒有反應。
+                </div>
+            </details>
+
+            <!-- Q3 -->
+            <details class="nested-details">
+                <summary>
+                    <span><i class="fa-regular fa-circle-question me-2"></i>Q3: 選項 (D) 竄改商品金額屬於哪一類弱點？</span>
+                </summary>
+                <div class="answer-box">
+                    <strong>答案：業務邏輯 (Business Logic) 漏洞。</strong><br>
+                    這不一定是傳統的程式碼漏洞 (如 SQLi)，而是設計流程上的缺陷。資安不只是防毒，應用程式流程若設計不良導致可被詐欺，也是重大風險。
+                </div>
+            </details>
+
+        </div>
+    </details>
+
+</div>
+
+<script>
+    // 定義正確答案與 DOM 元素
+    const correctAnswers = ['A', 'B', 'C', 'D']; // 複選題全對才算對
+    const submitBtn = document.getElementById('submitBtn');
+    const questionArea = document.getElementById('questionArea');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const feedbackTitle = document.getElementById('feedbackTitle');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const explainArea = document.getElementById('explainArea');
+    const selfCheckArea = document.getElementById('selfCheckArea');
+    const statusBadge = document.getElementById('statusBadge');
+    
+    const options = document.querySelectorAll('input[name="quiz"]');
+    const labels = document.querySelectorAll('.option-item');
+
+    // 狀態變數
+    let isSubmitted = false;
+
+    // 監聽選項點擊 (UI 互動效果)
+    options.forEach(opt => {
+        opt.addEventListener('change', function() {
+            // 更新選取樣式
+            const label = document.getElementById(this.id + '-label');
+            if (this.checked) {
+                label.classList.add('selected');
+            } else {
+                label.classList.remove('selected');
+            }
+        });
+    });
+
+    // 按鈕點擊處理
+    submitBtn.addEventListener('click', function() {
+        if (isSubmitted) {
+            resetQuiz();
+        } else {
+            checkAnswer();
+        }
+    });
+
+    function checkAnswer() {
+        // 1. 獲取使用者選擇
+        const selectedValues = Array.from(options)
+            .filter(opt => opt.checked)
+            .map(opt => opt.value)
+            .sort();
+
+        // 2. 防呆：未選任何選項
+        if (selectedValues.length === 0) {
+            alert('請先選擇答案！');
+            return;
+        }
+
+        // 3. 判定邏輯 (全對才算對)
+        // 檢查長度是否一致，且每個元素都相同
+        const isCorrect = selectedValues.length === correctAnswers.length && 
+                          selectedValues.every((val, index) => val === correctAnswers[index]);
+
+        // 4. 更新 UI 狀態
+        isSubmitted = true;
+        
+        // 鎖定選項
+        options.forEach(opt => opt.disabled = true);
+        labels.forEach(lbl => lbl.classList.add('disabled'));
+
+        // 顯示回饋
+        feedbackArea.style.display = 'block';
+        explainArea.style.display = 'block';
+        
+        if (isCorrect) {
+            feedbackArea.className = 'feedback-area feedback-success';
+            feedbackTitle.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i>答對了！';
+            feedbackContent.innerText = '正確！紅隊演練的範圍涵蓋技術、人員、實體與流程，這四個選項都是真實攻擊者可能採用的路徑。';
+            statusBadge.innerText = '答對';
+            statusBadge.className = 'badge-status bg-success text-white';
+        } else {
+            feedbackArea.className = 'feedback-area feedback-error';
+            feedbackTitle.innerHTML = '<i class="fa-solid fa-circle-xmark me-2"></i>答錯了';
+            feedbackContent.innerHTML = `正確答案是：<strong>A、B、C、D</strong><br>理由：紅隊演練需模擬真實且全面的攻擊威脅，包含RCE漏洞利用、釣魚社工、實體Wifi破解以及業務邏輯濫用。`;
+            statusBadge.innerText = '答錯';
+            statusBadge.className = 'badge-status bg-danger text-white';
+        }
+
+        // 變更按鈕為重作
+        submitBtn.innerText = '重新作答';
+        submitBtn.classList.remove('btn-primary');
+        submitBtn.classList.add('btn-reset');
+        
+        // 平滑捲動至回饋區
+        feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetQuiz() {
+        // 1. 清空選項
+        options.forEach(opt => {
+            opt.checked = false;
+            opt.disabled = false;
+        });
+        labels.forEach(lbl => {
+            lbl.classList.remove('selected');
+            lbl.classList.remove('disabled');
+        });
+
+        // 2. 隱藏回饋與解析
+        feedbackArea.style.display = 'none';
+        explainArea.style.display = 'none';
+        explainArea.open = false;
+        
+        // 關閉自我檢測與其子選單
+        selfCheckArea.open = false;
+        const nestedDetails = selfCheckArea.querySelectorAll('details');
+        nestedDetails.forEach(d => d.open = false);
+
+        // 3. 重置按鈕與狀態
+        isSubmitted = false;
+        submitBtn.innerText = '送出答案';
+        submitBtn.classList.remove('btn-reset');
+        submitBtn.classList.add('btn-primary');
+        
+        statusBadge.innerText = '未作答';
+        statusBadge.className = 'badge-status';
+
+        // 4. 捲回頂端
+        questionArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+</script>
+
+</body>
+</html>

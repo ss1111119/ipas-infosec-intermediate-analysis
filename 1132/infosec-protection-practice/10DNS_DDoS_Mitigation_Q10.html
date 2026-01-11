@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安防護 - DNS DDoS 防護策略解析 | 互動試題 Q10</title>
+    
+    <!-- 1. 外部資源 (含降級邏輯與安全性設定) -->
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* 2. 核心配色系統 (Tokens) */
+        :root {
+            --primary-blue: #2563eb;       /* 專業藍 */
+            --memory-yellow: #fef9c3;      /* 記憶亮點 */
+            --correct-green: #059669;      /* 正確回饋 */
+            --wrong-red: #dc2626;          /* 錯誤回饋 */
+            --bg-off-white: #f8fafc;       /* 柔和背景 */
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f1f5f9;
+            color: #334155;
+            line-height: 1.7;
+        }
+
+        /* 3. 響應式容器骨架 */
+        .quiz-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* 4. 選項互動微動畫 */
+        .option-card {
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #e2e8f0;
+            position: relative;
+        }
+
+        .option-card:hover:not(.disabled) {
+            transform: translateY(-2px);
+            border-color: var(--primary-blue);
+            background-color: #eff6ff;
+        }
+
+        .option-card.selected {
+            border-color: var(--primary-blue);
+            background-color: #eff6ff;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
+        }
+
+        /* 5. 狀態判定樣式 */
+        .option-card.correct-answer {
+            border-color: var(--correct-green) !important;
+            background-color: #ecfdf5 !important;
+        }
+
+        .option-card.wrong-choice {
+            border-color: var(--wrong-red) !important;
+            background-color: #fef2f2 !important;
+        }
+
+        .option-card.disabled {
+            cursor: default;
+            opacity: 0.95;
+            pointer-events: none;
+        }
+
+        /* 6. 動畫庫 */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate3d(0, 20px, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+        .animate-fadeInUp { animation: fadeInUp 0.5s ease-out forwards; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
+
+        /* 細節優化 */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        
+        /* 標籤風格 */
+        .step-badge {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-weight: bold;
+            font-size: 0.85rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 7. 行動裝置適配 */
+        @media (max-width: 768px) {
+            .quiz-container { margin: 1rem 0.5rem; border-radius: 12px; }
+            .btn-action { min-height: 48px; font-size: 1rem; }
+            h1 { font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-4">
+
+    <div class="quiz-container w-full" id="quizApp">
+        
+        <!-- Header -->
+        <header class="bg-blue-600 text-white p-5 md:p-6 relative overflow-hidden">
+            <div class="relative z-10 flex justify-between items-start md:items-center">
+                <div>
+                    <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm mb-2 inline-block tracking-wide">
+                        <i class="fas fa-network-wired mr-1"></i> 網路安全管理
+                    </span>
+                    <h1 class="text-xl md:text-2xl font-bold tracking-tight leading-tight">
+                        DNS DDoS 混合式攻擊防護分析
+                    </h1>
+                </div>
+                <div class="text-right flex flex-col items-end">
+                    <span class="text-xs md:text-sm opacity-80 font-mono">Q10</span>
+                    <div id="status-badge" class="mt-2 text-xs bg-white/20 px-3 py-1 rounded-full font-medium">
+                        等待作答
+                    </div>
+                </div>
+            </div>
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        </header>
+
+        <main class="p-5 md:p-8 space-y-8">
+            
+            <!-- Context -->
+            <section class="bg-slate-50 border-l-4 border-blue-500 p-4 rounded-r-lg shadow-sm">
+                <h3 class="text-xs font-bold text-slate-500 uppercase mb-1 tracking-wider">
+                    <i class="fas fa-info-circle mr-1"></i> 情境描述
+                </h3>
+                <p class="text-slate-700 font-medium text-sm md:text-base">
+                    機關對外服務網站無法正常提供服務，經分析 DNS 遭受混合式 DDoS 攻擊（Hybrid DDoS）。
+                </p>
+            </section>
+
+            <!-- Question -->
+            <section>
+                <h2 class="text-lg md:text-xl font-bold text-slate-800 mb-6 leading-relaxed">
+                    下列建議之 DDoS 防護措施何者最<span class="text-red-600 font-extrabold text-2xl mx-1 underline decoration-wavy decoration-red-300">「不」</span>合適？
+                    <span class="inline-block bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded ml-2 align-middle border border-slate-200">
+                        複選題 (請選 2 項)
+                    </span>
+                </h2>
+                
+                <div id="options-container" class="space-y-3">
+                    <!-- JS 生成選項 -->
+                </div>
+            </section>
+
+            <!-- Action Area -->
+            <section class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-slate-100">
+                <button id="submit-btn" class="btn-action flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fas fa-paper-plane"></i> 確認送出
+                </button>
+                <button id="retry-btn" class="hidden btn-action flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-6 rounded-lg border border-slate-300 transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fas fa-redo-alt"></i> 重新挑戰
+                </button>
+            </section>
+
+            <!-- Result & Explanation Section -->
+            <div id="result-section" class="hidden space-y-6">
+                
+                <!-- Feedback Card -->
+                <div id="feedback-card" class="animate-fadeInUp rounded-lg p-5 border-l-4 shadow-sm"></div>
+
+                <!-- 深度解析 (完整包含所有心法) -->
+                <details id="explanation-details" class="group bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden animate-fadeInUp">
+                    <summary class="flex justify-between items-center p-5 cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors select-none">
+                        <span class="font-bold text-slate-700 flex items-center gap-2">
+                            <i class="fas fa-book-open text-blue-500"></i> 全能解析：解題心法與觀念拆解
+                        </span>
+                        <span class="transition-transform duration-300 group-open:rotate-180 text-slate-400">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </summary>
+                    
+                    <div class="p-6 space-y-8 border-t border-slate-200 bg-white">
+                        
+                        <!-- 第一步 & 第二步 -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <span class="step-badge">第一步：找關鍵字</span>
+                                <ul class="list-disc list-inside text-sm text-slate-700 space-y-1">
+                                    <li><strong>DNS</strong></li>
+                                    <li><strong>混合式 DDoS</strong> (流量洪水+放大攻擊)</li>
+                                    <li><strong>最「不」合適</strong> (選錯誤觀念)</li>
+                                    <li><strong>Open Resolver</strong> (關鍵字)</li>
+                                </ul>
+                            </div>
+                            <div class="bg-indigo-50 p-4 rounded-lg">
+                                <span class="step-badge">第二步：白話翻譯</span>
+                                <p class="text-sm text-slate-700 leading-relaxed">
+                                    這題在問：「當 DNS 正在被大量惡意流量打爆時，下面哪幾個做法其實<strong>不太適合</strong>用來當 DDoS 的防護方式（會傷到自己人或根本無效）？」
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 第三步：解題思路與生活例子 -->
+                        <div class="border-l-4 border-yellow-400 pl-4 py-1">
+                            <span class="step-badge bg-yellow-100 text-yellow-800">第三步：解題思路 & 生活例子</span>
+                            <div class="mt-2 space-y-3">
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">原理與規則</h4>
+                                    <p class="text-sm text-slate-600">DDoS 防護核心：1. 不能擋掉正常使用者 2. 必須承認頻寬有限。</p>
+                                </div>
+                                <div class="bg-yellow-50 p-3 rounded text-sm text-slate-700">
+                                    <strong><i class="fas fa-mug-hot mr-1"></i> 生活例子 (具象化)：</strong>
+                                    <p>DNS 像是公司總機。DDoS 就是幾萬通惡意電話同時打進來。</p>
+                                    <ul class="list-disc list-inside mt-1 ml-2 text-slate-600">
+                                        <li>好的防護：轉接到大型客服中心 (清洗)，或過濾騷擾電話。</li>
+                                        <li>不好的防護 (本題要選的)：規定「每小時只能接 10 通電話」(正常客戶也被掛斷)，或者幻想「電話線無限多條」(不切實際)。</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 第四步：選項分析 -->
+                        <div>
+                            <span class="step-badge bg-green-100 text-green-800">第四步：選項分析</span>
+                            <div class="space-y-3 mt-2">
+                                <div class="flex gap-3 p-3 bg-slate-50 rounded border border-slate-100">
+                                    <span class="font-bold text-slate-400 w-6">(A)</span>
+                                    <div class="text-sm">
+                                        <span class="font-bold text-green-600">合適 (不選)。</span>
+                                        流量清洗 (Scrubbing) 是主流做法，能在上游過濾惡意流量。
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 p-3 bg-red-50 rounded border border-red-100">
+                                    <span class="font-bold text-red-500 w-6">(B)</span>
+                                    <div class="text-sm">
+                                        <span class="font-bold text-red-600">不合適 (正解)。</span>
+                                        限制 DNS 查詢次數 (Rate Limit) 若無差別執行，會直接<strong>誤殺正常使用者</strong>，造成服務中斷。
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 p-3 bg-red-50 rounded border border-red-100">
+                                    <span class="font-bold text-red-500 w-6">(C)</span>
+                                    <div class="text-sm">
+                                        <span class="font-bold text-red-600">不合適 (正解)。</span>
+                                        「頻寬無須考量」是不切實際的幻想前提。DDoS 攻擊的核心問題就是頻寬耗盡。
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 p-3 bg-slate-50 rounded border border-slate-100">
+                                    <span class="font-bold text-slate-400 w-6">(D)</span>
+                                    <div class="text-sm">
+                                        <span class="font-bold text-green-600">合適 (不選)。</span>
+                                        Open Resolver 是放大攻擊的幫兇，避免成為 Open Resolver 是正確的資安衛生習慣。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 觀念補充與觸類旁通 -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-bold text-slate-800 mb-2 border-b pb-1"><i class="fas fa-book mr-2 text-blue-500"></i>觀念補充與延伸</h4>
+                                <ul class="list-disc list-inside text-sm text-slate-600 space-y-1">
+                                    <li><strong>DDoS</strong>: 分散式阻斷服務攻擊。</li>
+                                    <li><strong>Open Resolver</strong>: 對任何來源開放遞迴查詢的 DNS，易被利用做「放大攻擊」。</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 mb-2 border-b pb-1"><i class="fas fa-exchange-alt mr-2 text-purple-500"></i>觸類旁通 (舉一反三)</h4>
+                                <ul class="list-disc list-inside text-sm text-slate-600 space-y-1">
+                                    <li>若題目問「何者最合適」？ → 選 A、D。</li>
+                                    <li>若題目問「哪個反而造成 DoS」？ → 選 B。</li>
+                                    <li>NTP/SSDP 放大攻擊 → 原理同 Open Resolver。</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 陷阱與口訣 -->
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-orange-50 p-4 rounded-lg border border-orange-100">
+                                <h4 class="font-bold text-orange-800 text-sm mb-2">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i> 常見陷阱 & 避坑指南
+                                </h4>
+                                <p class="text-xs text-orange-900 leading-relaxed">
+                                    <strong>心理盲點：</strong>看到「限制」就直覺覺得是防護。
+                                    <br><strong>避坑指南：</strong>解題時自問：「這個措施會不會先把正常人擋掉？」、「是不是建立在不切實際(頻寬無限)的前提上？」
+                                </p>
+                            </div>
+                            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100 relative overflow-hidden">
+                                <div class="absolute top-0 right-0 p-2 opacity-10">
+                                    <i class="fas fa-lightbulb text-6xl text-yellow-500"></i>
+                                </div>
+                                <h4 class="font-bold text-yellow-800 text-sm mb-2">
+                                    <i class="fas fa-star mr-1"></i> 記憶口訣
+                                </h4>
+                                <p class="text-sm font-medium text-slate-800 italic">
+                                    「DNS 打爆先清洗，<br>
+                                    　亂限查詢最傷民，<br>
+                                    　頻寬不管是幻想，<br>
+                                    　關掉 Open 才正經。」
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </details>
+
+                <!-- Part 6: Self-Check (自我檢測 - 題目顯示，答案隱藏) -->
+                <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden animate-fadeInUp">
+                    <div class="p-5 bg-slate-50 border-b border-slate-200">
+                        <span class="font-bold text-slate-700 flex items-center gap-2">
+                            <i class="fas fa-clipboard-question text-green-500"></i> 觀念自我檢測 (點擊展開答案)
+                        </span>
+                    </div>
+                    
+                    <div class="p-0">
+                        <!-- Q1 -->
+                        <details class="group border-b border-slate-100 last:border-0">
+                            <summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 transition-colors">
+                                <span class="text-sm font-medium text-slate-700 flex gap-3">
+                                    <span class="bg-blue-100 text-blue-600 px-2 rounded text-xs flex items-center h-6">Q1</span>
+                                    為什麼 Open Resolver 會被用來做 DNS 放大攻擊？
+                                </span>
+                                <i class="fas fa-plus text-slate-300 group-open:hidden"></i>
+                                <i class="fas fa-minus text-slate-300 hidden group-open:block"></i>
+                            </summary>
+                            <div class="p-4 bg-slate-50 text-sm text-slate-600 border-t border-slate-100 pl-12">
+                                <strong>答案參考：</strong>因為它允許任何人查詢，且攻擊者可用小小的查詢請求（如 60 bytes），換來很大的回應封包（如 3000 bytes），達到「四兩撥千斤」的放大效果，並偽造來源 IP 攻擊受害者。
+                            </div>
+                        </details>
+
+                        <!-- Q2 -->
+                        <details class="group border-b border-slate-100 last:border-0">
+                            <summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 transition-colors">
+                                <span class="text-sm font-medium text-slate-700 flex gap-3">
+                                    <span class="bg-blue-100 text-blue-600 px-2 rounded text-xs flex items-center h-6">Q2</span>
+                                    如果機關無法立即採購清洗服務，第一步可以先做什麼？
+                                </span>
+                                <i class="fas fa-plus text-slate-300 group-open:hidden"></i>
+                                <i class="fas fa-minus text-slate-300 hidden group-open:block"></i>
+                            </summary>
+                            <div class="p-4 bg-slate-50 text-sm text-slate-600 border-t border-slate-100 pl-12">
+                                <strong>答案參考：</strong>
+                                1. 關閉 Open Resolver 功能。<br>
+                                2. 調整 ACL (存取控制清單)，只允許信任的來源查詢。<br>
+                                3. 若有能力，限制遞迴查詢的來源範圍。
+                            </div>
+                        </details>
+
+                        <!-- Q3 -->
+                        <details class="group">
+                            <summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 transition-colors">
+                                <span class="text-sm font-medium text-slate-700 flex gap-3">
+                                    <span class="bg-blue-100 text-blue-600 px-2 rounded text-xs flex items-center h-6">Q3</span>
+                                    為什麼 DDoS 防護常在 ISP 或雲端做，而不是只靠自己機房？
+                                </span>
+                                <i class="fas fa-plus text-slate-300 group-open:hidden"></i>
+                                <i class="fas fa-minus text-slate-300 hidden group-open:block"></i>
+                            </summary>
+                            <div class="p-4 bg-slate-50 text-sm text-slate-600 border-t border-slate-100 pl-12">
+                                <strong>答案參考：</strong>因為當攻擊流量到達你自己機房的防火牆時，你的聯外頻寬（Pipe）通常已經被塞滿了。必須在流量進入「最後一哩路」之前，就在上游（ISP 或清洗中心）把髒流量濾掉。
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center py-6 text-slate-400 text-xs border-t border-slate-200 w-full mt-auto">
+            Interactive Learning Module v5.2 (Enhanced) | Designed for Cyber Security Education
+        </footer>
+    </div>
+
+    <!-- Logic Script -->
+    <script>
+        const quizData = {
+            id: "Q10",
+            answers: ["B", "C"],
+            options: [
+                { id: "A", text: "可透過採購網路流量清洗服務，來緩解 DDoS 攻擊", correct: false },
+                { id: "B", text: "可透過限制 DNS 查詢次數，來緩解 DDoS 攻擊", correct: true },
+                { id: "C", text: "如果網路頻寬無須考量，可使用過濾機制來緩解 DDoS 攻擊", correct: true },
+                { id: "D", text: "可透過避免成為 Open Resolver 來緩解 DDoS 攻擊", correct: false }
+            ]
+        };
+
+        let selectedOptions = new Set();
+        let isSubmitted = false;
+
+        const el = {
+            optionsContainer: document.getElementById('options-container'),
+            submitBtn: document.getElementById('submit-btn'),
+            retryBtn: document.getElementById('retry-btn'),
+            resultSection: document.getElementById('result-section'),
+            feedbackCard: document.getElementById('feedback-card'),
+            explanationDetails: document.getElementById('explanation-details'),
+            statusBadge: document.getElementById('status-badge'),
+            quizApp: document.getElementById('quizApp')
+        };
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function renderOptions() {
+            el.optionsContainer.innerHTML = '';
+            const shuffledOptions = shuffleArray([...quizData.options]);
+
+            shuffledOptions.forEach(opt => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option-card bg-white p-4 rounded-lg flex items-center gap-4 shadow-sm select-none group';
+                optionDiv.dataset.id = opt.id;
+                
+                optionDiv.innerHTML = `
+                    <div class="checkbox-indicator w-6 h-6 rounded border-2 border-slate-300 flex items-center justify-center transition-colors duration-200 bg-white group-hover:border-blue-400">
+                        <i class="fas fa-check text-white text-xs opacity-0 transition-opacity duration-200"></i>
+                    </div>
+                    <span class="text-base font-medium text-slate-700 flex-1 leading-snug tracking-wide">${opt.text}</span>
+                    <div class="status-icon w-8 h-8 flex items-center justify-center hidden"></div>
+                `;
+
+                optionDiv.addEventListener('click', () => handleOptionClick(optionDiv, opt.id));
+                el.optionsContainer.appendChild(optionDiv);
+            });
+        }
+
+        function handleOptionClick(element, id) {
+            if (isSubmitted) return;
+
+            const indicator = element.querySelector('.checkbox-indicator');
+            const checkIcon = element.querySelector('.fa-check');
+
+            if (selectedOptions.has(id)) {
+                selectedOptions.delete(id);
+                element.classList.remove('selected');
+                indicator.classList.remove('bg-blue-600', 'border-blue-600');
+                indicator.classList.add('bg-white', 'border-slate-300');
+                checkIcon.classList.add('opacity-0');
+            } else {
+                selectedOptions.add(id);
+                element.classList.add('selected');
+                indicator.classList.remove('bg-white', 'border-slate-300');
+                indicator.classList.add('bg-blue-600', 'border-blue-600');
+                checkIcon.classList.remove('opacity-0');
+            }
+        }
+
+        function handleSubmit() {
+            if (selectedOptions.size === 0) {
+                el.submitBtn.classList.add('animate-shake');
+                setTimeout(() => el.submitBtn.classList.remove('animate-shake'), 300);
+                return;
+            }
+
+            isSubmitted = true;
+            
+            const selectedArray = Array.from(selectedOptions).sort();
+            const correctArray = quizData.answers.sort();
+            const isCorrect = JSON.stringify(selectedArray) === JSON.stringify(correctArray);
+
+            const optionElements = document.querySelectorAll('.option-card');
+            optionElements.forEach(elem => {
+                elem.classList.add('disabled');
+                const id = elem.dataset.id;
+                const statusIconContainer = elem.querySelector('.status-icon');
+                const isActuallyCorrect = quizData.answers.includes(id); 
+                const userSelected = selectedOptions.has(id);
+
+                statusIconContainer.classList.remove('hidden');
+
+                if (isActuallyCorrect) {
+                    elem.classList.add('correct-answer');
+                    elem.classList.remove('selected');
+                    if (userSelected) {
+                        statusIconContainer.innerHTML = '<i class="fas fa-check-circle text-green-600 text-xl"></i>';
+                    } else {
+                        statusIconContainer.innerHTML = '<span class="text-xs text-green-700 font-bold bg-green-100 px-2 py-1 rounded">應選</span>';
+                    }
+                } else {
+                    if (userSelected) {
+                        elem.classList.add('wrong-choice');
+                        statusIconContainer.innerHTML = '<i class="fas fa-times-circle text-red-600 text-xl"></i>';
+                        elem.querySelector('span').classList.add('line-through', 'decoration-red-400', 'decoration-2');
+                    } else {
+                        elem.classList.add('opacity-40');
+                    }
+                }
+            });
+
+            el.resultSection.classList.remove('hidden');
+            
+            if (isCorrect) {
+                el.feedbackCard.className = 'animate-fadeInUp rounded-lg p-5 border-l-4 shadow-sm bg-green-50 border-green-500 flex items-start gap-4';
+                el.feedbackCard.innerHTML = `
+                    <div class="bg-green-100 p-2 rounded-full text-green-600">
+                        <i class="fas fa-trophy text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-green-800 text-lg">挑戰成功！</h4>
+                        <p class="text-green-700 text-sm mt-1">您精準識別出了不合適的建議，且避開了「限制查詢」的陷阱。</p>
+                    </div>
+                `;
+                el.statusBadge.textContent = "挑戰成功";
+                el.statusBadge.className = "mt-2 text-xs bg-green-500 text-white px-3 py-1 rounded-full font-medium";
+            } else {
+                el.feedbackCard.className = 'animate-fadeInUp rounded-lg p-5 border-l-4 shadow-sm bg-red-50 border-red-500 flex items-start gap-4';
+                el.feedbackCard.innerHTML = `
+                    <div class="bg-red-100 p-2 rounded-full text-red-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-red-800 text-lg">觀念釐清中</h4>
+                        <p class="text-red-700 text-sm mt-1">
+                            別忘了題目問的是「不」合適。建議閱讀下方【全能解析】，我們幫您拆解了 4 步解題法。
+                        </p>
+                    </div>
+                `;
+                el.statusBadge.textContent = "答題結束";
+                el.statusBadge.className = "mt-2 text-xs bg-red-500 text-white px-3 py-1 rounded-full font-medium";
+            }
+
+            el.submitBtn.classList.add('hidden');
+            el.retryBtn.classList.remove('hidden');
+            
+            setTimeout(() => {
+                el.explanationDetails.open = true;
+                el.resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 600);
+        }
+
+        function handleRetry() {
+            selectedOptions.clear();
+            isSubmitted = false;
+            el.resultSection.classList.add('hidden');
+            el.submitBtn.classList.remove('hidden');
+            el.retryBtn.classList.add('hidden');
+            el.explanationDetails.open = false;
+            el.statusBadge.textContent = "等待作答";
+            el.statusBadge.className = "mt-2 text-xs bg-white/20 px-3 py-1 rounded-full font-medium";
+            renderOptions();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderOptions();
+            el.submitBtn.addEventListener('click', handleSubmit);
+            el.retryBtn.addEventListener('click', handleRetry);
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q8: NIST CSF 參考標準辨析 | 資安規劃實務</title>
+    
+    <!-- 1. 外部資源 (CDN with integrity/crossorigin) -->
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" xintegrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Google Fonts (Noto Sans TC) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS (Script format for standalone usage) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* 2. 認知友善配色系統 (Tokens) & 基礎設定 */
+        :root {
+            --primary-blue: #2563eb;       /* 專業藍 */
+            --memory-yellow: #fef9c3;      /* 記憶高亮 */
+            --correct-green: #059669;      /* 正確 */
+            --wrong-red: #dc2626;          /* 錯誤 */
+            --text-main: #1f2937;
+            --bg-light: #f3f4f6;
+            
+            /* 標籤色 */
+            --tag-gray: #6b7280;   /* 法規 */
+            --tag-green: #10b981;  /* 標準 */
+            --tag-red: #ef4444;    /* 技術 */
+            --tag-orange: #f59e0b; /* 管理 */
+            --tag-blue: #3b82f6;   /* 網路 */
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px 10px;
+        }
+
+        /* 3. 容器規範 */
+        .quiz-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            padding: 40px;
+            position: relative;
+        }
+
+        /* Header */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .badge-custom {
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            color: white;
+            margin-right: 5px;
+        }
+        .bg-tag-green { background-color: var(--tag-green); }
+        .bg-tag-orange { background-color: var(--tag-orange); }
+
+        /* Context Card */
+        .context-card {
+            background-color: #eff6ff;
+            border-left: 5px solid var(--primary-blue);
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            font-size: 1rem;
+            color: #1e3a8a;
+        }
+
+        /* Question Area */
+        .question-text {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .highlight-negative {
+            color: var(--wrong-red);
+            font-weight: 900;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        /* Options Interaction */
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-label:hover:not(.disabled) {
+            border-color: var(--primary-blue);
+            background-color: #f0f9ff;
+            transform: translateY(-2px);
+        }
+
+        .option-input {
+            margin-right: 15px;
+            transform: scale(1.2);
+            accent-color: var(--primary-blue);
+        }
+
+        /* Selected State */
+        .option-input:checked + span {
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+        .option-label:has(.option-input:checked) {
+            border-color: var(--primary-blue);
+            background-color: #eff6ff;
+        }
+
+        /* Feedback States */
+        .correct-answer {
+            border-color: var(--correct-green) !important;
+            background-color: #ecfdf5 !important;
+            color: var(--correct-green) !important;
+        }
+        
+        .wrong-answer {
+            border-color: var(--wrong-red) !important;
+            background-color: #fef2f2 !important;
+            color: var(--wrong-red) !important;
+            text-decoration: line-through;
+        }
+
+        .option-label.disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+            transform: none !important;
+        }
+
+        /* Feedback Section */
+        #feedback-area {
+            display: none; /* JS toggles this */
+        }
+        
+        .feedback-alert {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .feedback-success { background-color: #d1fae5; color: var(--correct-green); }
+        .feedback-error { background-color: #fee2e2; color: var(--wrong-red); }
+
+        /* Explanation Card */
+        .explanation-card {
+            margin-top: 25px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .explanation-header {
+            background-color: #f8fafc;
+            padding: 15px 20px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .explanation-body {
+            padding: 25px;
+            background-color: white;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        /* New Styles for Detailed Explanation Sections */
+        .step-badge {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+        .section-title {
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+        .section-box {
+            background-color: #f8fafc;
+            border-left: 4px solid #cbd5e1;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        .highlight-text {
+            background-color: var(--memory-yellow);
+            padding: 0 4px;
+            font-weight: 600;
+        }
+        
+        /* Self Check specific */
+        .self-check-area {
+            margin-top: 25px;
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        details summary {
+            font-weight: 700;
+            cursor: pointer;
+            color: #166534;
+            padding: 8px 0;
+        }
+        
+        details[open] summary {
+            border-bottom: 1px solid #bbf7d0;
+            margin-bottom: 10px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate3d(0, 20px, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+        .animate-fade-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .quiz-container { padding: 20px; border-radius: 0; box-shadow: none; }
+            .option-label { padding: 12px; }
+            .btn-action { width: 100%; margin-bottom: 10px; height: 50px; }
+            .question-text { font-size: 1.15rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <!-- UI Skeleton Part 1: Header -->
+    <div class="quiz-header">
+        <div>
+            <span class="text-secondary fw-bold me-2">Question 8</span>
+            <span class="badge-custom bg-tag-green">標準</span>
+            <span class="badge-custom bg-tag-orange">管理</span>
+        </div>
+        <div id="status-indicator" class="text-secondary fw-bold">
+            <i class="far fa-circle"></i> 未作答
+        </div>
+    </div>
+
+    <!-- UI Skeleton Part 2: Context -->
+    <div class="context-card">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>情境：</strong> NIST 網路安全框架（CSF）旨在協助組織管理與降低資安風險，適用於 IT 與 OT 環境，且設計時參考了多項國際標準。
+    </div>
+
+    <!-- UI Skeleton Part 3: Question -->
+    <div class="question-text">
+        有關 NIST CSF 所參考、適用於 IT 與 OT（營運科技，例如工控系統）環境之國際標準或指引，下列敘述何者<span class="highlight-negative">錯誤</span>？
+    </div>
+
+    <form id="quiz-form">
+        <div class="option-group" id="options-container">
+            <!-- Options will be injected here by JS -->
+        </div>
+    </form>
+
+    <!-- UI Skeleton Part 4: Action Area -->
+    <div class="mt-4 text-center">
+        <button id="submit-btn" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm btn-action hover:scale-105 transition-transform duration-200">
+            <i class="fas fa-paper-plane me-2"></i>送出答案
+        </button>
+        <button id="retry-btn" class="btn btn-outline-secondary btn-lg px-5 rounded-pill shadow-sm btn-action d-none hover:scale-105 transition-transform duration-200">
+            <i class="fas fa-redo me-2"></i>重新挑戰
+        </button>
+    </div>
+
+    <!-- UI Skeleton Part 5: Feedback -->
+    <div id="feedback-area" class="animate-fade-up">
+        <div id="feedback-message" class="feedback-alert"></div>
+    </div>
+
+    <!-- UI Skeleton Part 6: Explain (Expanded) -->
+    <div id="explanation-area" class="d-none animate-fade-up">
+        <div class="explanation-card">
+            <div class="explanation-header" onclick="toggleExplanation()">
+                <span><i class="fas fa-book-open me-2 text-primary"></i> 深度解析：從解題到精通</span>
+                <i class="fas fa-chevron-down" id="explain-toggle-icon"></i>
+            </div>
+            <div class="explanation-body" id="explanation-content" style="display: none;">
+                
+                <!-- 1. 關鍵字與翻譯 -->
+                <div class="section-box">
+                    <div class="section-title"><span class="step-badge">第一步</span>找關鍵字 & 白話翻譯</div>
+                    <p class="mb-1"><strong>🔍 關鍵字：</strong> <span class="text-primary fw-bold">NIST CSF</span>（框架）、<span class="text-primary fw-bold">IT 與 OT</span>（涵蓋範圍）、<span class="text-primary fw-bold">800-72</span>（陷阱數字）。</p>
+                    <p class="mb-0"><strong>🗣️ 白話翻譯：</strong> 「下面哪個標準『不是』 NIST CSF 用來作為 IT/OT 資安管理的參考依據？」</p>
+                </div>
+
+                <!-- 2. 解題思路與生活例子 -->
+                <div class="section-box" style="border-left-color: #3b82f6;">
+                    <div class="section-title"><span class="step-badge" style="background-color: #3b82f6;">第二步</span>解題思路 & 原理</div>
+                    <ul class="list-unstyled mb-2">
+                        <li><strong>🎯 核心觀念：</strong> NIST CSF 是「整合既有標準」的高階框架。它不會憑空創造，而是參考：
+                            <ul>
+                                <li><strong>IT 端：</strong> ISO 27001, NIST SP 800-53</li>
+                                <li><strong>OT 端：</strong> ISA/IEC 62443</li>
+                            </ul>
+                        </li>
+                        <li><strong>💡 生活例子：</strong> 就像寫「交通安全守則」(CSF)，會參考「交通法規」(27001) 和「道路設計規範」(62443)，但不會把「駕照號碼編碼規則」(800-72) 當作核心依據。</li>
+                    </ul>
+                </div>
+
+                <!-- 3. 選項分析 -->
+                <div class="section-box" style="border-left-color: #10b981;">
+                    <div class="section-title"><span class="step-badge" style="background-color: #10b981;">第三步</span>選項分析</div>
+                    <div class="row g-2">
+                        <div class="col-12"><i class="fas fa-check text-success me-2"></i><strong>(A) ISO/IEC 27001：</strong> ISMS 標準，CSF 核心參考。</div>
+                        <div class="col-12"><i class="fas fa-check text-success me-2"></i><strong>(B) ISA 62443-2-1：</strong> 工控資安管理，CSF 在 OT 端的重要依據。</div>
+                        <div class="col-12"><i class="fas fa-times text-danger me-2"></i><strong>(C) NIST SP 800-72：</strong> <span class="text-danger fw-bold">這是答案。</span>主題是「PIV 智慧卡介面指引」，屬於單一技術細節，非整體框架參考。</div>
+                        <div class="col-12"><i class="fas fa-check text-success me-2"></i><strong>(D) ISA 62443-3-3：</strong> 工控系統安全要求，CSF 參考重點。</div>
+                    </div>
+                </div>
+
+                <!-- 4. 延伸與避坑 -->
+                <div class="section-box" style="border-left-color: #f59e0b;">
+                    <div class="section-title"><span class="step-badge" style="background-color: #f59e0b;">第四步</span>觸類旁通 & 避坑指南</div>
+                    
+                    <div class="mb-2">
+                        <strong>🚧 常見陷阱 / 心理盲點：</strong>
+                        <p class="mb-0 text-secondary">看到 "NIST SP 800" 開頭就以為一定是 CSF 參考標準。要問自己：「這是在講整體管理，還是特定技術？」</p>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <strong>📚 觀念延伸：</strong>
+                        <p class="mb-0 text-secondary">若選項改成 <span class="fw-bold text-dark">NIST SP 800-53</span> (控制措施) 或 <span class="fw-bold text-dark">800-82</span> (工控資安指引)，就是正確的參考標準。</p>
+                    </div>
+
+                    <div class="alert alert-warning border-0 mt-3 mb-0 p-2">
+                        <i class="fas fa-star text-warning me-1"></i> <strong>記憶口訣：</strong>
+                        <span class="fw-bold text-dark">「CSF 看框架，不看證件卡 (800-72)。」</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Skeleton Part 7: Self-Check -->
+    <div id="self-check-area" class="d-none animate-fade-up">
+        <div class="self-check-area">
+            <h5 class="fw-bold mb-3"><i class="fas fa-clipboard-check me-2"></i>自我檢測 (點擊展開答案)</h5>
+            
+            <details class="mb-2">
+                <summary>Q1. 如果把選項 (C) 改成 NIST SP 800-53，答案會改變嗎？</summary>
+                <div class="ps-3 py-2 text-dark border-start border-3 border-success bg-white rounded-end">
+                    <strong>會改變。</strong><br>
+                    800-53 是資安控制清單，是 CSF 最重要的參考來源之一，所以它會變成「正確敘述」，這題就沒有錯誤選項了。
+                </div>
+            </details>
+
+            <details class="mb-2">
+                <summary>Q2. 為什麼 ISA 62443 系列會被 CSF 納入參考？</summary>
+                <div class="ps-3 py-2 text-dark border-start border-3 border-success bg-white rounded-end">
+                    因為 CSF 的設計目標是同時涵蓋 <strong>IT (資訊技術)</strong> 與 <strong>OT (營運科技)</strong>，而 62443 正是 OT 領域的權威標準。
+                </div>
+            </details>
+
+            <details>
+                <summary>Q3. CSF 本身是強制標準嗎？</summary>
+                <div class="ps-3 py-2 text-dark border-start border-3 border-success bg-white rounded-end">
+                    <strong>不是。</strong><br>
+                    CSF 是一個自願性 (Voluntary) 的高階管理框架，用來協助組織溝通與管理風險。
+                </div>
+            </details>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // 資料結構
+    const quizData = {
+        id: 8,
+        correctValue: "C",
+        options: [
+            { id: "A", text: "ISO/IEC 27001：2013" },
+            { id: "B", text: "ISA 62443-2-1：2009" },
+            { id: "C", text: "NIST SP 800-72" },
+            { id: "D", text: "ISA 62443-3-3：2013" }
+        ]
+    };
+
+    // DOM Elements
+    const optionsContainer = document.getElementById('options-container');
+    const submitBtn = document.getElementById('submit-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    const feedbackArea = document.getElementById('feedback-area');
+    const feedbackMessage = document.getElementById('feedback-message');
+    const explanationArea = document.getElementById('explanation-area');
+    const explanationContent = document.getElementById('explanation-content');
+    const selfCheckArea = document.getElementById('self-check-area');
+    const statusIndicator = document.getElementById('status-indicator');
+    const explainToggleIcon = document.getElementById('explain-toggle-icon');
+
+    // 初始化
+    function initQuiz() {
+        // 重置狀態
+        optionsContainer.innerHTML = '';
+        feedbackArea.style.display = 'none';
+        explanationArea.classList.add('d-none');
+        explanationContent.style.display = 'none'; // 收合狀態
+        explainToggleIcon.className = "fas fa-chevron-down"; // 重置icon
+        selfCheckArea.classList.add('d-none');
+        submitBtn.classList.remove('d-none');
+        retryBtn.classList.add('d-none');
+        statusIndicator.innerHTML = '<i class="far fa-circle"></i> 未作答';
+        statusIndicator.className = "text-secondary fw-bold";
+
+        // 隨機化選項 (Fisher-Yates Shuffle)
+        let shuffledOptions = [...quizData.options];
+        for (let i = shuffledOptions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+        }
+
+        // 渲染選項
+        shuffledOptions.forEach(opt => {
+            const label = document.createElement('label');
+            label.className = 'option-label';
+            label.dataset.id = opt.id; // 綁定原始ID用於判定
+            
+            label.innerHTML = `
+                <input type="radio" name="quizOption" value="${opt.id}" class="option-input">
+                <span class="fs-5">${opt.text}</span>
+            `;
+
+            // 輔助點擊效果 (事件委派處理)
+            label.addEventListener('click', function(e) {
+                // 防止禁用後點擊
+                if (this.classList.contains('disabled')) return;
+                
+                // 移除其他選中樣式
+                document.querySelectorAll('.option-label').forEach(l => {
+                    l.style.borderColor = '#e5e7eb';
+                    l.style.backgroundColor = 'white';
+                });
+                // 添加當前選中樣式
+                this.style.borderColor = 'var(--primary-blue)';
+                this.style.backgroundColor = '#eff6ff';
+            });
+
+            optionsContainer.appendChild(label);
+        });
+    }
+
+    // 提交邏輯
+    submitBtn.addEventListener('click', () => {
+        const selected = document.querySelector('input[name="quizOption"]:checked');
+        
+        // 防呆：未選
+        if (!selected) {
+            // 使用 Bootstrap Toast 或簡單 alert，這裡使用簡單視覺晃動提示
+            submitBtn.classList.add('btn-danger');
+            submitBtn.innerText = '請先選擇一個選項';
+            setTimeout(() => {
+                submitBtn.classList.remove('btn-danger');
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>送出答案';
+            }, 1000);
+            return;
+        }
+
+        const userAns = selected.value;
+        const isCorrect = userAns === quizData.correctValue;
+
+        // 禁用所有選項
+        document.querySelectorAll('.option-input').forEach(input => input.disabled = true);
+        document.querySelectorAll('.option-label').forEach(label => label.classList.add('disabled'));
+        submitBtn.classList.add('d-none');
+        retryBtn.classList.remove('d-none');
+
+        // 視覺反饋
+        const allLabels = document.querySelectorAll('.option-label');
+        allLabels.forEach(label => {
+            if (label.dataset.id === quizData.correctValue) {
+                label.classList.add('correct-answer'); // 標示正解
+                label.innerHTML += ` <i class="fas fa-check-circle ms-auto text-success fs-4"></i>`;
+            }
+            if (label.dataset.id === userAns && !isCorrect) {
+                label.classList.add('wrong-answer'); // 標示錯選
+                label.innerHTML += ` <i class="fas fa-times-circle ms-auto text-danger fs-4"></i>`;
+            }
+        });
+
+        // Feedback 區域
+        feedbackArea.style.display = 'block';
+        if (isCorrect) {
+            feedbackMessage.className = 'feedback-alert feedback-success';
+            feedbackMessage.innerHTML = '<i class="fas fa-crown me-2"></i>恭喜答對！觀念非常清晰！';
+            statusIndicator.innerHTML = '<i class="fas fa-check-circle"></i> 答對';
+            statusIndicator.className = "text-success fw-bold";
+        } else {
+            feedbackMessage.className = 'feedback-alert feedback-error';
+            feedbackMessage.innerHTML = '<i class="fas fa-bomb me-2"></i>哎呀答錯了！請查看正確答案與解析。';
+            statusIndicator.innerHTML = '<i class="fas fa-times-circle"></i> 答錯';
+            statusIndicator.className = "text-danger fw-bold";
+        }
+
+        // 顯示解析與自我檢測
+        explanationArea.classList.remove('d-none');
+        selfCheckArea.classList.remove('d-none');
+        
+        // 自動展開解析以便閱讀
+        setTimeout(() => {
+             // 平滑捲動
+            explanationArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // 自動展開內容
+            explanationContent.style.display = 'block';
+            explainToggleIcon.className = "fas fa-chevron-up";
+        }, 300);
+    });
+
+    // 重新挑戰
+    retryBtn.addEventListener('click', () => {
+        initQuiz();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // 解析收合切換
+    function toggleExplanation() {
+        if (explanationContent.style.display === 'none') {
+            explanationContent.style.display = 'block';
+            explainToggleIcon.className = "fas fa-chevron-up";
+        } else {
+            explanationContent.style.display = 'none';
+            explainToggleIcon.className = "fas fa-chevron-down";
+        }
+    }
+
+    // 啟動
+    initQuiz();
+
+</script>
+
+</body>
+</html>
