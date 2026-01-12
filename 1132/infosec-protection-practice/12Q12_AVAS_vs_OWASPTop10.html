@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q12. AVAS vs OWASP Top 10 驗收基礎 | 互動試題解析</title>
+    
+    <!-- External Resources -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Tokens & Styles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#2563eb', // 專業藍
+                            light: '#eff6ff',
+                        },
+                        highlight: '#fef9c3', // 記憶高亮
+                        success: '#059669',
+                        error: '#dc2626',
+                        tag: {
+                            manage: '#f97316', // 管理類
+                            tech: '#dc2626',   // 技術類
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Options Interaction */
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background-color: white;
+        }
+
+        .option-label:hover:not(.disabled) {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        /* Radio Button Styling */
+        .option-input {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #d1d5db;
+            border-radius: 50%;
+            margin-top: 0.25rem;
+            flex-shrink: 0;
+            background-color: white;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .option-input:checked {
+            border-color: #2563eb;
+            border-width: 6px;
+        }
+
+        .option-input:checked + .option-content {
+            font-weight: 500;
+            color: #111827;
+        }
+        
+        .option-label.selected {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        .option-label.correct {
+            border-color: #059669;
+            background-color: #ecfdf5;
+        }
+
+        .option-label.wrong {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+        }
+        
+        .option-label.disabled {
+            cursor: default;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        /* Section Styles */
+        .explain-section-title {
+            font-weight: 700;
+            color: #1e3a8a; /* dark blue */
+            border-left: 4px solid #2563eb;
+            padding-left: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+        
+        .concept-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate3d(0, 20px, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+
+        .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container { margin: 0; border-radius: 0; min-height: 100vh; }
+            .p-responsive { padding: 1rem; }
+        }
+        @media (min-width: 769px) { .p-responsive { padding: 2.5rem; } }
+
+        /* Details/Summary for Self Check */
+        details.qa-item > summary {
+            list-style: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #374151;
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        details.qa-item > summary:hover {
+            background-color: #f3f4f6;
+            color: #2563eb;
+        }
+        details.qa-item[open] > summary {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            background-color: #eff6ff;
+            color: #2563eb;
+        }
+        details.qa-item > .qa-content {
+            padding: 1rem;
+            border: 1px solid #f3f4f6;
+            border-top: none;
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+            background-color: white;
+            color: #4b5563;
+        }
+        details.qa-item summary::-webkit-details-marker { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <!-- Header -->
+        <div class="bg-brand-blue text-white p-4 flex justify-between items-center sticky top-0 z-20 shadow-md">
+            <div class="flex items-center gap-3">
+                <span class="font-bold text-lg bg-white/20 px-3 py-1 rounded-full">Q12</span>
+                <span class="text-sm font-medium tracking-wide">資安驗收標準</span>
+            </div>
+            <div class="flex gap-2">
+                <span class="text-xs bg-tag-manage text-white px-2 py-1 rounded border border-white/20">安全管理</span>
+                <span class="text-xs bg-tag-tech text-white px-2 py-1 rounded border border-white/20">弱點掃描</span>
+            </div>
+        </div>
+
+        <div class="p-responsive">
+
+            <!-- Context -->
+            <div class="bg-gray-50 border-l-4 border-brand-blue p-4 mb-6 rounded-r-lg">
+                <h6 class="text-brand-blue font-bold text-sm uppercase mb-1"><i class="fas fa-briefcase me-2"></i>情境描述</h6>
+                <p class="text-gray-700 text-sm">
+                    一家公司正準備進行「網站應用程式」的採購案，目前處於訂定驗收標準的階段。資安團隊正在評估該使用何種基準來確保交付品質。
+                </p>
+            </div>
+
+            <!-- Question -->
+            <div class="mb-8">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900 mb-6 leading-relaxed">
+                    為什麼應該以 <span class="text-brand-blue">自動化漏洞評估系統（AVAS）</span> 作為驗收基礎，<span class="text-error font-extrabold border-b-4 border-error/20">而不是</span> 根據開放式網路應用安全項目（OWASP）Top 10 的 10 大弱點項目作為驗收要件？
+                </h1>
+                <div id="options-container" class="space-y-3">
+                    <!-- Options injected by JS -->
+                </div>
+            </div>
+
+            <!-- Action -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8 pt-6 border-t border-gray-100">
+                <button id="submit-btn" class="btn-action w-full sm:w-auto px-8 py-3 bg-brand-blue hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fas fa-paper-plane"></i> 送出答案
+                </button>
+                <button id="retry-btn" class="btn-action hidden w-full sm:w-auto px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-redo"></i> 重新挑戰
+                </button>
+            </div>
+
+            <!-- Feedback -->
+            <div id="feedback-area" class="hidden mt-6 text-center fade-in-up">
+                <div id="result-alert" class="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-lg shadow-sm"></div>
+            </div>
+
+            <!-- Explanation Area -->
+            <div id="explanation-area" class="hidden mt-8 fade-in-up">
+                <div class="bg-white border-2 border-brand-blue/10 rounded-2xl overflow-hidden shadow-soft">
+                    <div class="bg-brand-blue/5 p-4 border-b border-brand-blue/10 flex justify-between items-center cursor-pointer hover:bg-brand-blue/10 transition" onclick="toggleExplanation()">
+                        <h3 class="font-bold text-brand-blue flex items-center gap-2">
+                            <i class="fas fa-book-open text-yellow-500"></i> 深度試題解析
+                        </h3>
+                        <i id="explain-toggle-icon" class="fas fa-chevron-down text-brand-blue transition-transform"></i>
+                    </div>
+                    
+                    <div id="explain-content" class="p-5 md:p-6 space-y-8">
+                        
+                        <!-- Step 1 & 2 -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="explain-section-title">步驟一：找關鍵字</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm font-bold border border-gray-300">採購驗收</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-brand-blue rounded text-sm font-bold border border-blue-200">AVAS (掃描工具)</span>
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-sm font-bold border border-yellow-200">OWASP Top 10 (風險排名)</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="explain-section-title">步驟二：白話翻譯</h4>
+                                <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+                                    公司要買系統，驗收時要用「能測量、夠全面」的工具（AVAS），而不能只拿一張「常見問題排行榜」（Top 10）當標準，為什麼？
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Logic & Principles -->
+                        <div>
+                            <h4 class="explain-section-title">步驟三：解題思路與原理</h4>
+                            <div class="concept-box">
+                                <ul class="space-y-3 text-sm text-gray-700">
+                                    <li>
+                                        <strong class="text-brand-blue"><i class="fas fa-cog"></i> 原理與規則：</strong>
+                                        驗收需要「可量測性」與「完整性」。OWASP Top 10 只是風險分類指引，AVAS 則是自動化全盤檢測的實作手段。
+                                    </li>
+                                    <li>
+                                        <strong class="text-brand-blue"><i class="fas fa-coffee"></i> 生活例子：</strong>
+                                        OWASP Top 10 就像「十大常見死因排行榜」，你不能只檢查這十項就說這個人完全健康；AVAS 則像「全身健康檢查儀器」，能掃描數百種潛在問題。
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Option Analysis -->
+                        <div>
+                            <h4 class="explain-section-title">步驟四：選項分析</h4>
+                            <div class="space-y-3">
+                                <div class="flex gap-3 items-start p-3 bg-green-50 rounded-lg border border-green-200">
+                                    <span class="font-bold text-green-700 shrink-0">(A)</span>
+                                    <div>
+                                        <span class="font-bold text-green-800">正解。</span>
+                                        <span class="text-sm text-gray-700">OWASP Top 10 僅列出最常見的 10 大類風險，並非完整的弱點清單。驗收若只看這 10 點，會漏掉大量已知的其他漏洞。</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 items-start p-2 hover:bg-red-50 rounded transition">
+                                    <span class="font-bold text-red-500 shrink-0">(B)</span>
+                                    <span class="text-sm text-gray-600">成本低不代表品質好。驗收目的是確保安全，而非省錢。</span>
+                                </div>
+                                <div class="flex gap-3 items-start p-2 hover:bg-red-50 rounded transition">
+                                    <span class="font-bold text-red-500 shrink-0">(C)</span>
+                                    <span class="text-sm text-gray-600">「領導者象限」是行銷或市佔指標，與技術驗收標準無關。</span>
+                                </div>
+                                <div class="flex gap-3 items-start p-2 hover:bg-red-50 rounded transition">
+                                    <span class="font-bold text-red-500 shrink-0">(D)</span>
+                                    <span class="text-sm text-gray-600">錯誤歸納。OWASP 專注於 Web，AVAS 其實可涵蓋更廣（如主機層），且不應以適用範圍作為排除 OWASP 的主因（主因是不夠全面）。</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Extensions & Analogies -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="explain-section-title">觀念補充：AVAS vs OWASP</h4>
+                                <ul class="text-sm text-gray-600 list-disc pl-5 space-y-1">
+                                    <li><strong>OWASP Top 10：</strong>提升意識的教育工具 (Awareness)。</li>
+                                    <li><strong>AVAS：</strong>找出問題的檢測工具 (Detection)。</li>
+                                    <li><strong>驗收標準：</strong>必須包含「檢測方法」與「允收標準」（例如：高風險漏洞必須為 0）。</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="explain-section-title">觸類旁通（舉一反三）</h4>
+                                <div class="bg-blue-50 p-3 rounded text-sm text-gray-700 border border-blue-100">
+                                    <p><strong>掃描 vs 滲透：</strong></p>
+                                    <p class="mt-1">AVAS (弱點掃描) 像是「巡邏檢查門窗有沒有鎖」。<br>滲透測試 (Pen Test) 像是「請小偷真的試著撬開鎖」。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Traps & Mnemonics -->
+                        <div>
+                            <h4 class="explain-section-title">常見陷阱與記憶口訣</h4>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="border border-red-200 bg-red-50 p-3 rounded-lg">
+                                    <h5 class="text-error font-bold text-sm mb-1"><i class="fas fa-exclamation-triangle"></i> 心理盲點</h5>
+                                    <p class="text-xs text-gray-700">看到 "Top 10" 容易直覺認為是最權威、最完整的標準。需轉念：它是「榜單」而非「全集」。</p>
+                                </div>
+                                <div class="border border-yellow-200 bg-highlight p-3 rounded-lg">
+                                    <h5 class="text-yellow-800 font-bold text-sm mb-1"><i class="fas fa-comment-dots"></i> 記憶口訣</h5>
+                                    <p class="text-sm font-bold text-gray-800">「Top 10 是課本，AVAS 是考卷；<br>驗收要看分數，不能只看書。」</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Self Check (Questions visible, Answers hidden) -->
+            <div class="mt-8">
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm p-4">
+                    <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2 text-lg">
+                        <i class="fas fa-clipboard-check text-brand-blue"></i> 自我檢測 (點擊題目看答案)
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <details class="qa-item group">
+                            <summary>
+                                <span>Q1. 如果公司只用 OWASP Top 10 當驗收，可能會漏掉哪些類型的問題？</span>
+                                <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="qa-content">
+                                <p class="text-sm">會漏掉<strong>不在前十名榜單上</strong>的特定漏洞、系統層錯誤設定、舊版本軟體的已知弱點，以及非 Web 應用層的網路與主機弱點。</p>
+                            </div>
+                        </details>
+
+                        <details class="qa-item group">
+                            <summary>
+                                <span>Q2. OWASP Top 10 在採購驗收中完全沒用嗎？應該怎麼用才對？</span>
+                                <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="qa-content">
+                                <p class="text-sm">有用。它適合用來<strong>規劃測試優先序</strong>與開發規範，但不應作為唯一的驗收通過條件。正確做法是：用 Top 10 做教育訓練，用 AVAS 做驗收檢測。</p>
+                            </div>
+                        </details>
+
+                        <details class="qa-item group">
+                            <summary>
+                                <span>Q3. 弱點掃描 (AVAS) 與滲透測試差在哪？哪個更適合當「驗收基礎」？</span>
+                                <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="qa-content">
+                                <p class="text-sm">掃描是廣泛的全面檢查，滲透是深度的模擬攻擊。作為「驗收基礎」，<strong>AVAS 更適合</strong>，因為它成本可控、可重複執行且覆蓋面廣；滲透測試通常作為高風險系統的額外加強驗證。</p>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script -->
+    <script>
+        const questionData = {
+            id: "Q12",
+            correctId: "A",
+            options: [
+                { id: "A", text: "OWASP Top 10 僅涵蓋最常見的安全漏洞，而不是所有可能的安全問題" },
+                { id: "B", text: "OWASP Top 10 較易於實施且成本更低" },
+                { id: "C", text: "AVAS 獲得領導者向象中的指標意義" },
+                { id: "D", text: "AVAS 僅針對網站應用程式，而 OWASP Top 10 適用於所有類型的軟體" }
+            ]
+        };
+
+        const optionsContainer = document.getElementById('options-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const feedbackArea = document.getElementById('feedback-area');
+        const resultAlert = document.getElementById('result-alert');
+        const explanationArea = document.getElementById('explanation-area');
+        let currentShuffledOptions = [];
+        let hasSubmitted = false;
+
+        function init() {
+            hasSubmitted = false;
+            currentShuffledOptions = [...questionData.options].sort(() => Math.random() - 0.5);
+            renderOptions();
+            resetUI();
+        }
+
+        function renderOptions() {
+            optionsContainer.innerHTML = '';
+            currentShuffledOptions.forEach((opt) => {
+                const label = document.createElement('label');
+                label.className = 'option-label group';
+                label.innerHTML = `
+                    <input type="radio" name="answer" value="${opt.id}" class="option-input">
+                    <span class="option-content ml-3 text-gray-700 group-hover:text-gray-900 select-none">${opt.text}</span>
+                `;
+                const input = label.querySelector('input');
+                input.addEventListener('change', () => {
+                    if(hasSubmitted) return;
+                    document.querySelectorAll('.option-label').forEach(el => el.classList.remove('selected'));
+                    label.classList.add('selected');
+                });
+                optionsContainer.appendChild(label);
+            });
+        }
+
+        function submitAnswer() {
+            const selected = document.querySelector('input[name="answer"]:checked');
+            if (!selected) {
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-exclamation-circle"></i> 請先選擇一個答案';
+                submitBtn.classList.replace('bg-brand-blue', 'bg-gray-600');
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.classList.replace('bg-gray-600', 'bg-brand-blue');
+                }, 2000);
+                return;
+            }
+
+            hasSubmitted = true;
+            const userAnswerId = selected.value;
+            const isCorrect = userAnswerId === questionData.correctId;
+
+            document.querySelectorAll('.option-label').forEach(label => {
+                const input = label.querySelector('input');
+                const val = input.value;
+                label.classList.add('disabled');
+                input.disabled = true;
+
+                if (val === questionData.correctId) {
+                    label.classList.add('correct');
+                    label.innerHTML += '<i class="fas fa-check-circle text-success absolute right-4 top-4 text-xl"></i>';
+                } else if (val === userAnswerId && !isCorrect) {
+                    label.classList.add('wrong');
+                    label.innerHTML += '<i class="fas fa-times-circle text-error absolute right-4 top-4 text-xl"></i>';
+                }
+            });
+
+            feedbackArea.classList.remove('hidden');
+            if (isCorrect) {
+                resultAlert.className = "inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-lg shadow-sm bg-green-100 text-green-800 border border-green-200";
+                resultAlert.innerHTML = '<i class="fas fa-check-circle"></i> 答對了！觀念正確！';
+            } else {
+                resultAlert.className = "inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-lg shadow-sm bg-red-100 text-red-800 border border-red-200";
+                resultAlert.innerHTML = '<i class="fas fa-times-circle"></i> 答錯了，請看解析修正觀念。';
+            }
+
+            explanationArea.classList.remove('hidden');
+            if (!isCorrect) {
+                document.getElementById('explain-content').classList.remove('hidden');
+                document.getElementById('explain-toggle-icon').classList.add('rotate-180');
+            } else {
+                document.getElementById('explain-content').classList.add('hidden');
+            }
+
+            submitBtn.classList.add('hidden');
+            retryBtn.classList.remove('hidden');
+        }
+
+        function resetUI() {
+            submitBtn.classList.remove('hidden');
+            retryBtn.classList.add('hidden');
+            feedbackArea.classList.add('hidden');
+            explanationArea.classList.add('hidden');
+            
+            // Close all details
+            document.querySelectorAll('details').forEach(el => el.removeAttribute('open'));
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function toggleExplanation() {
+            const content = document.getElementById('explain-content');
+            const icon = document.getElementById('explain-toggle-icon');
+            content.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        submitBtn.addEventListener('click', submitAnswer);
+        retryBtn.addEventListener('click', init);
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q19 通訊安全加密機制解析</title>
+    
+    <!-- External Resources: Tailwind CSS, Bootstrap Icons, Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Config & Styles -->
+    <style>
+        :root {
+            --primary-color: #2563eb;    /* 專業藍 */
+            --success-color: #059669;    /* 正確綠 */
+            --error-color: #dc2626;      /* 錯誤紅 */
+            --highlight-bg: #fef9c3;     /* 記憶高亮 */
+            --bg-color: #f3f4f6;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            .p-responsive {
+                padding: 1rem;
+            }
+            .btn-mobile {
+                min-height: 48px; /* Touch target size */
+            }
+        }
+
+        .p-responsive {
+            padding: 2rem;
+        }
+
+        /* Option Interactions */
+        .option-card {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid #e5e7eb;
+        }
+
+        .option-card:hover:not(.disabled) {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .option-card.selected {
+            border-color: var(--primary-color);
+            background-color: #dbeafe;
+            font-weight: 500;
+        }
+
+        .option-card.correct {
+            border-color: var(--success-color);
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .option-card.wrong {
+            border-color: var(--error-color);
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .option-card.disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+
+        /* Custom Details/Summary for Self Check */
+        details.qa-item summary {
+            list-style: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        details.qa-item summary::-webkit-details-marker {
+            display: none;
+        }
+        details.qa-item[open] summary {
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        /* Section Badges */
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <!-- 1. Header Area -->
+        <header class="bg-slate-800 text-white p-4 flex justify-between items-center sticky top-0 z-10">
+            <div class="flex items-center gap-3">
+                <span class="bg-blue-500 px-2 py-1 rounded text-sm font-bold">Q19</span>
+                <span class="text-sm md:text-base font-medium opacity-90">通訊加密機制</span>
+            </div>
+            <div id="status-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-gray-600">
+                尚未作答
+            </div>
+        </header>
+
+        <div class="p-responsive">
+            
+            <!-- 2. Context Card (情境描述) -->
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                <h3 class="text-blue-800 font-bold mb-1"><i class="bi bi-info-circle-fill me-2"></i>情境導讀</h3>
+                <p class="text-sm text-blue-700 m-0">
+                    企業建立 VPN 或 TLS 安全連線時，需同時考量「傳輸效率」與「金鑰安全性」。這是一個典型的「混合式加密系統 (Hybrid Cryptosystem)」應用場景。
+                </p>
+            </div>
+
+            <!-- 3. Question Area -->
+            <div class="mb-8">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800 mb-6 leading-relaxed">
+                    建置異地或遠距系統的安全連網機制時，請問下列何者通訊安全加密機制規劃較為適當？
+                </h1>
+                
+                <div id="options-container" class="space-y-3">
+                    <!-- Options will be injected here by JS -->
+                </div>
+            </div>
+
+            <!-- 4. Action Area -->
+            <div class="flex flex-col sm:flex-row gap-4 border-t pt-6">
+                <button id="submit-btn" class="btn-mobile w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow transition-colors flex items-center justify-center gap-2">
+                    <i class="bi bi-send-fill"></i> 送出答案
+                </button>
+                <button id="retry-btn" class="btn-mobile w-full sm:w-auto px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold shadow transition-colors hidden flex items-center justify-center gap-2">
+                    <i class="bi bi-arrow-counterclockwise"></i> 重新挑戰
+                </button>
+            </div>
+
+            <!-- 5. Feedback Area -->
+            <div id="feedback-area" class="hidden mt-6 p-4 rounded-lg text-center font-bold text-lg fade-in-up"></div>
+
+            <!-- 6. Explanation Area (Updated Structure) -->
+            <div id="explanation-area" class="hidden mt-8 border rounded-xl overflow-hidden shadow-sm fade-in-up">
+                <div class="bg-slate-100 p-4 border-b flex justify-between items-center cursor-pointer hover:bg-slate-200 transition" onclick="toggleExplanation()">
+                    <h3 class="font-bold text-slate-800"><i class="bi bi-lightbulb-fill text-yellow-500 mr-2"></i>深度解析 (四步解題法)</h3>
+                    <i class="bi bi-chevron-down text-slate-500 transition-transform" id="explain-toggle-icon"></i>
+                </div>
+                
+                <div id="explanation-content" class="p-5 bg-white space-y-8">
+                    
+                    <!-- Step 1 & 2: Keywords & Translation -->
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-indigo-50 p-4 rounded-lg">
+                            <span class="step-badge bg-indigo-100 text-indigo-800">第一步：找關鍵字</span>
+                            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1 mt-2">
+                                <li><span class="font-bold text-indigo-700">異地或遠距系統</span>：暗示 VPN/TLS 情境。</li>
+                                <li><span class="font-bold text-indigo-700">大量訊息</span>：暗示需高效能 (Symmetric Encryption)。</li>
+                                <li><span class="font-bold text-indigo-700">金鑰交換</span>：暗示需解決安全傳遞問題 (Key Exchange)。</li>
+                            </ul>
+                        </div>
+                        <div class="bg-emerald-50 p-4 rounded-lg">
+                            <span class="step-badge bg-emerald-100 text-emerald-800">第二步：白話翻譯</span>
+                            <p class="text-sm text-gray-700 mt-2">
+                                兩個遠端系統要在網路上通訊。「傳很多資料」時哪種加密比較快？而那把「加密用的鑰匙」又要怎麼在網路上安全地給對方？請選出最合理的搭配。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Logic, Principles & Examples -->
+                    <div class="border-t pt-6">
+                        <h4 class="font-bold text-gray-800 mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-2">3</span>
+                            第三步：解題思路與原理
+                        </h4>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-white border-l-4 border-blue-400 pl-4">
+                                <h5 class="font-bold text-gray-700">解題邏輯</h5>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    1. 先判斷「大量訊息」：使用<span class="font-bold text-blue-600">對稱式加密 (Symmetric Encryption)</span>，速度快、成本低。<br>
+                                    2. 再判斷「金鑰交換」：使用<span class="font-bold text-blue-600">非對稱式加密 (Asymmetric Encryption)</span>，適合在不安全通道建立安全協定。<br>
+                                    3. 這是標準的<span class="font-bold text-blue-600">「混合式加密系統」 (Hybrid Cryptosystem)</span>。
+                                </p>
+                            </div>
+
+                            <div class="bg-orange-50 p-4 rounded-lg flex gap-3">
+                                <div class="text-2xl text-orange-500"><i class="bi bi-house-door"></i></div>
+                                <div>
+                                    <h5 class="font-bold text-orange-800 text-sm">生活例子：鑰匙與信箱</h5>
+                                    <p class="text-sm text-gray-700 mt-1">
+                                        <strong>對稱式 (Symmetric)</strong>：就像你家的「門鑰匙」，每天進出開門很快 (加密解密快)，但你不敢隨便把鑰匙寄給別人。<br>
+                                        <strong>非對稱式 (Asymmetric)</strong>：就像「寄送一個上鎖的盒子」。你公開鎖頭 (公鑰 Public Key)，別人把門鑰匙 (對稱金鑰) 放進盒子鎖上，寄回來給你。只有你有鑰匙 (私鑰 Private Key) 能打開拿出那把門鑰匙。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Option Analysis -->
+                    <div class="border-t pt-6">
+                        <h4 class="font-bold text-gray-800 mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-2">4</span>
+                            第四步：選項分析
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="p-3 border border-green-200 bg-green-50 rounded-lg">
+                                <span class="font-bold text-green-700 mr-2">(A) 正確</span>
+                                <span class="text-sm text-gray-700">大量訊息用<span class="font-bold">對稱式 (Symmetric)</span>，金鑰交換用<span class="font-bold">非對稱式 (Asymmetric)</span>。符合混合式加密原理。</span>
+                            </div>
+                            <div class="p-3 border border-red-100 bg-red-50 rounded-lg opacity-80">
+                                <span class="font-bold text-red-700 mr-2">(B) 錯誤</span>
+                                <span class="text-sm text-gray-700">「數位簽章 <span class="font-bold">(Digital Signature)</span>」是用來驗證身分與防竄改，不是用來「交換金鑰 (Key Exchange)」的工具。</span>
+                            </div>
+                            <div class="p-3 border border-red-100 bg-red-50 rounded-lg opacity-80">
+                                <span class="font-bold text-red-700 mr-2">(C) 錯誤</span>
+                                <span class="text-sm text-gray-700">非對稱式運算太慢，不適合處理「大量訊息」。且簽章用途描述錯誤。</span>
+                            </div>
+                            <div class="p-3 border border-red-100 bg-red-50 rounded-lg opacity-80">
+                                <span class="font-bold text-red-700 mr-2">(D) 錯誤</span>
+                                <span class="text-sm text-gray-700">若用對稱式做金鑰交換，前提是雙方要先有共同密鑰，這正是題目情境 (遠距連網) 缺乏的。</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pitfalls & Blind Spots -->
+                    <div class="border-t pt-6 grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h5 class="font-bold text-gray-800 mb-2"><i class="bi bi-exclamation-triangle-fill text-yellow-500 mr-2"></i>常見陷阱與盲點</h5>
+                            <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                <li><strong>誤區 1</strong>：以為非對稱式比較「高級」，所以什麼都用它。其實它效率很差，僅適合少量資料 (如 Session Key 或 Hash)。</li>
+                                <li><strong>誤區 2</strong>：混淆「數位簽章 (Digital Signature)」的功能。簽章是「蓋章認證」，不是「貨運卡車」。</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-gray-800 mb-2"><i class="bi bi-shield-check text-blue-500 mr-2"></i>避坑指南</h5>
+                            <p class="text-sm text-gray-600">
+                                看到<strong>「大量訊息」</strong> ➔ 直覺選<strong>對稱式 (Symmetric)</strong>。<br>
+                                看到<strong>「金鑰交換」</strong> ➔ 直覺選<strong>非對稱式 (Asymmetric)</strong>。<br>
+                                看到<strong>「簽章」</strong> ➔ 直覺想<strong>驗證身分 (Authentication)</strong>。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Mnemonic -->
+                    <div class="bg-gray-800 text-white p-4 rounded-lg text-center mt-4">
+                        <p class="text-xs text-gray-400 mb-1">記憶口訣</p>
+                        <p class="font-bold text-lg tracking-wide">「大資料跑得快（對稱），鑰匙交換靠公鑰（非對稱）。」</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 7. Self-Check (Q&A Format) -->
+            <div class="mt-8">
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="p-4 bg-gray-50 border-b border-gray-200">
+                        <h3 class="font-bold text-gray-800"><i class="bi bi-clipboard-check mr-2 text-blue-600"></i>自我檢測 (點擊題目看答案)</h3>
+                    </div>
+                    
+                    <div class="divide-y divide-gray-100">
+                        <!-- Q1 -->
+                        <details class="qa-item group p-4 bg-white hover:bg-slate-50">
+                            <summary class="font-medium text-gray-700 flex justify-between items-center">
+                                <span>1. 為什麼非對稱式加密 (Asymmetric Encryption) 不適合用來處理大量資料？</span>
+                                <i class="bi bi-plus-lg text-gray-400 group-open:hidden"></i>
+                                <i class="bi bi-dash-lg text-blue-500 hidden group-open:block"></i>
+                            </summary>
+                            <div class="mt-3 text-sm text-gray-600 pl-4 border-l-2 border-blue-500">
+                                <p>因為非對稱式加密涉及複雜的數學運算 (如大數質因數分解、離散對數)，計算成本極高，速度比對稱式慢非常多 (約慢 100~1000 倍)，因此不適合即時處理大量數據流。</p>
+                            </div>
+                        </details>
+
+                        <!-- Q2 -->
+                        <details class="qa-item group p-4 bg-white hover:bg-slate-50">
+                            <summary class="font-medium text-gray-700 flex justify-between items-center">
+                                <span>2. 如果雙方一開始就已經面對面交換過密鑰，還需要非對稱式金鑰交換嗎？</span>
+                                <i class="bi bi-plus-lg text-gray-400 group-open:hidden"></i>
+                                <i class="bi bi-dash-lg text-blue-500 hidden group-open:block"></i>
+                            </summary>
+                            <div class="mt-3 text-sm text-gray-600 pl-4 border-l-2 border-blue-500">
+                                <p>基本上不需要。如果已經有安全的共享密鑰，直接用對稱式加密即可。但在遠距連網情境下 (如連上 Google)，雙方素未謀面，才必須依賴非對稱式機制來建立初始信任與交換密鑰。</p>
+                            </div>
+                        </details>
+
+                        <!-- Q3 -->
+                        <details class="qa-item group p-4 bg-white hover:bg-slate-50">
+                            <summary class="font-medium text-gray-700 flex justify-between items-center">
+                                <span>3. 數位簽章 (Digital Signature) 主要提供哪三種安全性功能？</span>
+                                <i class="bi bi-plus-lg text-gray-400 group-open:hidden"></i>
+                                <i class="bi bi-dash-lg text-blue-500 hidden group-open:block"></i>
+                            </summary>
+                            <div class="mt-3 text-sm text-gray-600 pl-4 border-l-2 border-blue-500">
+                                <p>1. <strong>身分認證 (Authentication)</strong>：證明寄件者是誰。<br>2. <strong>完整性 (Integrity)</strong>：證明訊息未被竄改。<br>3. <strong>不可否認性 (Non-repudiation)</strong>：寄件者事後不能抵賴說沒發過。</p>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        // Data Structure
+        const quizData = {
+            id: "Q19",
+            correctAnswer: "A",
+            options: [
+                { id: "A", text: "採用對稱式加密機制來處理大量訊息，並使用非對稱式加密進行金鑰交換" },
+                { id: "B", text: "採用對稱式加密機制來處理大量訊息，並使用數位簽章進行金鑰交換" },
+                { id: "C", text: "採用非對稱式加密機制來處理大量訊息，並使用數位簽章進行金鑰交換" },
+                { id: "D", text: "採用非對稱式加密機制來處理大量訊息，並使用對稱式加密進行金鑰交換" }
+            ]
+        };
+
+        let selectedOptionId = null;
+
+        // DOM Elements
+        const optionsContainer = document.getElementById('options-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const feedbackArea = document.getElementById('feedback-area');
+        const explanationArea = document.getElementById('explanation-area');
+        const statusBadge = document.getElementById('status-badge');
+        const explanationContent = document.getElementById('explanation-content');
+        const explainToggleIcon = document.getElementById('explain-toggle-icon');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initQuiz();
+        });
+
+        function initQuiz() {
+            // Reset State
+            selectedOptionId = null;
+            optionsContainer.innerHTML = '';
+            feedbackArea.className = 'hidden mt-6 p-4 rounded-lg text-center font-bold text-lg fade-in-up';
+            feedbackArea.textContent = '';
+            
+            // Hide explanation initially
+            explanationArea.classList.add('hidden');
+            explanationContent.style.display = 'block'; // Prepare for when it is shown
+            explainToggleIcon.style.transform = 'rotate(180deg)';
+
+            submitBtn.classList.remove('hidden');
+            retryBtn.classList.add('hidden');
+            statusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-gray-600';
+            statusBadge.textContent = '尚未作答';
+            statusBadge.style.backgroundColor = '#4b5563'; 
+
+            // Close all details in self-check
+            document.querySelectorAll('details.qa-item').forEach(el => el.removeAttribute('open'));
+
+            // Shuffle Options
+            const shuffledOptions = [...quizData.options].sort(() => Math.random() - 0.5);
+
+            // Render Options
+            shuffledOptions.forEach(opt => {
+                const div = document.createElement('div');
+                div.className = 'option-card p-4 rounded-lg bg-white flex items-start gap-3';
+                div.dataset.id = opt.id;
+                div.onclick = () => selectOption(div, opt.id);
+                
+                div.innerHTML = `
+                    <div class="mt-1 min-w-[20px]">
+                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center option-circle">
+                            <div class="w-2.5 h-2.5 rounded-full bg-blue-600 opacity-0 transition-opacity"></div>
+                        </div>
+                    </div>
+                    <span class="text-gray-700 font-medium">${opt.text}</span>
+                `;
+                optionsContainer.appendChild(div);
+            });
+        }
+
+        function selectOption(element, id) {
+            if (submitBtn.classList.contains('hidden')) return;
+
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector('.option-circle').classList.remove('border-blue-600');
+                card.querySelector('.option-circle div').classList.add('opacity-0');
+            });
+
+            element.classList.add('selected');
+            element.querySelector('.option-circle').classList.add('border-blue-600');
+            element.querySelector('.option-circle div').classList.remove('opacity-0');
+            selectedOptionId = id;
+        }
+
+        submitBtn.addEventListener('click', () => {
+            if (!selectedOptionId) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            const allOptions = document.querySelectorAll('.option-card');
+            allOptions.forEach(card => card.classList.add('disabled'));
+            
+            const isCorrect = selectedOptionId === quizData.correctAnswer;
+            
+            allOptions.forEach(card => {
+                const id = card.dataset.id;
+                if (id === quizData.correctAnswer) {
+                    card.classList.add('correct');
+                    card.innerHTML += `<i class="bi bi-check-circle-fill text-green-600 ml-auto text-xl"></i>`;
+                } else if (id === selectedOptionId && !isCorrect) {
+                    card.classList.add('wrong');
+                    card.innerHTML += `<i class="bi bi-x-circle-fill text-red-600 ml-auto text-xl"></i>`;
+                }
+            });
+
+            feedbackArea.classList.remove('hidden');
+            if (isCorrect) {
+                feedbackArea.classList.add('bg-green-100', 'text-green-800');
+                feedbackArea.innerHTML = `<i class="bi bi-check-lg mr-2"></i>答對了！混合式加密是最佳解。`;
+                statusBadge.textContent = '答對';
+                statusBadge.style.backgroundColor = '#059669';
+            } else {
+                feedbackArea.classList.add('bg-red-100', 'text-red-800');
+                feedbackArea.innerHTML = `<i class="bi bi-x-lg mr-2"></i>答錯了。請參考下方解析修正觀念。`;
+                statusBadge.textContent = '答錯';
+                statusBadge.style.backgroundColor = '#dc2626';
+            }
+
+            submitBtn.classList.add('hidden');
+            retryBtn.classList.remove('hidden');
+            explanationArea.classList.remove('hidden');
+            
+            // Auto open explanation on wrong answer, or just show it
+            explanationContent.style.display = 'block';
+            explainToggleIcon.style.transform = 'rotate(180deg)';
+            
+            feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        retryBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => initQuiz(), 300);
+        });
+
+        function toggleExplanation() {
+            if (explanationContent.style.display === 'none') {
+                explanationContent.style.display = 'block';
+                explainToggleIcon.style.transform = 'rotate(180deg)';
+            } else {
+                explanationContent.style.display = 'none';
+                explainToggleIcon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安考題解析 - Q13 CVE-2023-3519 SSL VPN 防護</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb', // 專業藍
+                        secondary: '#1e40af',
+                        success: '#059669', // 綠
+                        error: '#dc2626',   // 紅
+                        highlight: '#fef9c3', // 柔和黃
+                        bgLight: '#f3f4f6',
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+        
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        /* Checkbox Styling Override */
+        .custom-checkbox:checked + label {
+            background-color: #eff6ff;
+            border-color: #2563eb;
+            color: #1e3a8a;
+        }
+        
+        .custom-checkbox:checked + label::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 1rem;
+            color: #2563eb;
+        }
+
+        /* Option Hover Effect */
+        .option-label {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .option-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Correct/Incorrect Styling */
+        .correct-answer {
+            background-color: #d1fae5 !important;
+            border-color: #059669 !important;
+            color: #064e3b !important;
+        }
+        .wrong-answer {
+            background-color: #fee2e2 !important;
+            border-color: #dc2626 !important;
+            color: #7f1d1d !important;
+        }
+
+        /* Image Placeholder if load fails */
+        .img-fallback {
+            background-color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        /* Details Summary Styling */
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex justify-center py-8 px-4 md:px-0">
+
+    <div class="w-full max-w-[900px] bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        
+        <!-- 1. Header -->
+        <header class="bg-primary text-white p-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 mb-2">
+                <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase backdrop-blur-sm">Q13</span>
+                <span class="bg-red-500/80 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm"><i class="fa-solid fa-bug mr-1"></i>CVE漏洞</span>
+                <span class="bg-indigo-500/80 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm"><i class="fa-solid fa-network-wired mr-1"></i>網路防護</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-bold mt-2">CVE-2023-3519 SSL VPN 漏洞防護與應對</h1>
+            <p class="text-blue-100 text-sm mt-2"><i class="fa-regular fa-clock mr-1"></i> 預估答題時間：2 分鐘</p>
+        </header>
+
+        <main class="p-6 md:p-8 space-y-8">
+            
+            <!-- 2. Context Card (Scenario) -->
+            <section class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                <h3 class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-3"><i class="fa-solid fa-image mr-1"></i> 情境描述</h3>
+                <div class="flex flex-col md:flex-row gap-6 items-start">
+                    <div class="w-full md:w-1/3 shrink-0">
+                        <div class="aspect-video rounded-lg overflow-hidden border border-slate-200 shadow-sm relative group bg-white">
+                            <!-- Image with fallback -->
+                            <img src="https://i.meee.com.tw/pOtV8N1.png" 
+                                 alt="攻擊流程圖：SSL VPN漏洞 -> Webshell -> AD解密 -> LDAP偵察" 
+                                 class="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full img-fallback flex flex-col\'><i class=\'fa-solid fa-image-slash mb-2 text-2xl\'></i><span>圖片載入失敗</span></div>'">
+                        </div>
+                        <p class="text-xs text-slate-400 text-center mt-2 italic">點擊圖片可查看細節（示意）</p>
+                    </div>
+                    <div class="text-sm text-slate-700 space-y-3 leading-relaxed">
+                        <p><strong>攻擊鏈分析：</strong></p>
+                        <ol class="list-decimal list-inside space-y-1 ml-1 text-slate-600">
+                            <li><span class="font-bold text-red-600">CVE漏洞利用</span>：攻擊者透過 CVE2023-3519 打穿 SSL VPN 邊界設備。</li>
+                            <li><span class="font-bold text-red-600">權限維持</span>：上傳 Webshell 進行遠端控制。</li>
+                            <li><span class="font-bold text-red-600">憑證竊取</span>：解密設定檔，取得 AD 連線帳密。</li>
+                            <li><span class="font-bold text-red-600">內網偵察</span>：利用 ldapsearch 蒐集資訊，並發送大量 SMB 封包嘗試橫向移動。</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Question Area -->
+            <section id="question-area">
+                <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-4 leading-normal">
+                    <span class="text-primary mr-2">題目：</span>
+                    如附圖所示，某機關防火牆發現大量異常連線，SSL VPN 設備發送大量 SMB 封包，經查 SSL VPN 設備存在安全性漏洞（CVE2023-3519）。攻擊者利用漏洞上傳 Webshell，亦可透過解密設備中之設定檔來取得 AD 連線帳密，後續透過 ldapsearch 進一步蒐集內網使用者資訊。請問應進行下列哪些措施可<span class="text-red-600 border-b-2 border-red-600 font-black">最有效避免</span>此一攻擊？（複選）
+                </h2>
+                
+                <form id="quiz-form" class="space-y-3">
+                    <!-- Options container for JS randomization -->
+                    <div id="options-container" class="space-y-3">
+                        <!-- Options will be injected here by JS -->
+                    </div>
+                </form>
+            </section>
+
+            <!-- 4. Action Area -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-100">
+                <button id="submit-btn" onclick="checkAnswer()" class="flex-1 bg-primary hover:bg-secondary text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center">
+                    <i class="fa-solid fa-paper-plane mr-2"></i> 送出答案
+                </button>
+                <button id="retry-btn" onclick="resetQuiz()" class="hidden flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-xl transition-all active:scale-95 flex items-center justify-center border border-gray-300">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> 重新挑戰
+                </button>
+            </div>
+
+            <!-- 5. Feedback & Explanation (Initially Hidden) -->
+            <div id="feedback-section" class="hidden space-y-8">
+                
+                <!-- Result Banner -->
+                <div id="result-banner" class="p-4 rounded-xl text-center font-bold text-lg fade-in-up"></div>
+
+                <!-- Deep Analysis Container -->
+                <div class="space-y-6 fade-in-up" style="animation-delay: 0.1s;">
+                    
+                    <!-- Phase 1: 解題三部曲 -->
+                    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-blue-50 p-4 border-b border-blue-100">
+                            <h3 class="font-bold text-primary flex items-center">
+                                <i class="fa-solid fa-location-crosshairs mr-2"></i> 解題三部曲：拆解題目與思路
+                            </h3>
+                        </div>
+                        <div class="p-5 space-y-6">
+                            <!-- Step 1: Keywords -->
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">【第一步：找關鍵字】</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-bold">CVE2023-3519</span>
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-bold">Webshell</span>
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-bold">解密設定檔</span>
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-bold">AD 帳密</span>
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-bold">ldapsearch</span>
+                                    <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm font-bold">最有效避免</span>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Translation -->
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">【第二步：白話翻譯】</h4>
+                                <p class="text-gray-700 bg-gray-50 p-3 rounded-lg border-l-4 border-gray-300">
+                                    機關的 SSL VPN 設備有已知漏洞，駭客直接把後門（Webshell）塞進去，還挖出 AD 帳密，接著用 ldapsearch 去內網查資料。題目問：做什麼能「最直接阻斷」這條路？
+                                </p>
+                            </div>
+
+                            <!-- Step 3: Logic & Life Example -->
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">【第三步：解題思路與生活例子】</h4>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div class="bg-blue-50/50 p-3 rounded-lg">
+                                        <h5 class="font-bold text-primary mb-1"><i class="fa-solid fa-lightbulb mr-1"></i> 思路邏輯</h5>
+                                        <ul class="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                                            <li>入口是「CVE 漏洞」，不是「釣魚」。</li>
+                                            <li>成功後是「植入 Webshell」與「竊取 AD 憑證」。</li>
+                                            <li>後續是「內網偵察」與「擴散」。</li>
+                                            <li><strong>解法：</strong>偵測 Webshell 落地（置換監控）+ 限制擴散範圍（網段隔離）。</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-green-50/50 p-3 rounded-lg">
+                                        <h5 class="font-bold text-green-700 mb-1"><i class="fa-solid fa-mug-hot mr-1"></i> 生活例子</h5>
+                                        <p class="text-sm text-gray-700">
+                                            就像大樓側門鎖壞了（漏洞），小偷撬開進來（Webshell），還在警衛室偷了萬能鑰匙（AD 帳密）。<br>
+                                            <strong>最有效做法：</strong>
+                                            1. 裝警報器偵測門被動過（置換監控）。<br>
+                                            2. 把側門通道封起來只准通往倉庫，不能通往金庫（網段隔離）。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phase 2: 選項分析 -->
+                    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-purple-50 p-4 border-b border-purple-100">
+                            <h3 class="font-bold text-purple-700 flex items-center">
+                                <i class="fa-solid fa-list-check mr-2"></i> 第四步：選項深度分析
+                            </h3>
+                        </div>
+                        <div class="p-5 space-y-4">
+                            <div class="flex gap-3">
+                                <span class="shrink-0 w-8 h-8 flex items-center justify-center bg-red-100 text-red-600 font-bold rounded-full">A</span>
+                                <div>
+                                    <p class="font-bold text-gray-800">抗網釣多因素驗證 (MFA)</p>
+                                    <p class="text-sm text-gray-600">❌ <span class="font-bold">為什麼錯？</span> 這主要解「釣魚偷帳密」。但此題駭客是利用 CVE 漏洞直接打穿設備，根本不需要登入介面，MFA 擋不住。</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="shrink-0 w-8 h-8 flex items-center justify-center bg-green-100 text-green-600 font-bold rounded-full">B</span>
+                                <div>
+                                    <p class="font-bold text-gray-800">網頁置換監控告警</p>
+                                    <p class="text-sm text-gray-600">⭕ <span class="font-bold">為什麼對？</span> Webshell 通常是新增或修改網頁檔案。監控檔案完整性（Integrity）能在後門落地時立刻發現。</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="shrink-0 w-8 h-8 flex items-center justify-center bg-green-100 text-green-600 font-bold rounded-full">C</span>
+                                <div>
+                                    <p class="font-bold text-gray-800">隔離 SSL VPN 於獨立網段</p>
+                                    <p class="text-sm text-gray-600">⭕ <span class="font-bold">為什麼對？</span> 這是「網段隔離（Segmentation）」。就算 VPN 失守，也因為在獨立網段，駭客很難直接掃描到內網核心伺服器。</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="shrink-0 w-8 h-8 flex items-center justify-center bg-red-100 text-red-600 font-bold rounded-full">D</span>
+                                <div>
+                                    <p class="font-bold text-gray-800">啟用 SMBv1、SMBv2</p>
+                                    <p class="text-sm text-gray-600">❌ <span class="font-bold">嚴重錯誤！</span> SMBv1 是老舊且充滿漏洞的協定（如 WannaCry）。資安實務是「關閉」它，而不是啟用來做加密。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phase 3: 觀念與陷阱 -->
+                    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-yellow-50 p-4 border-b border-yellow-100">
+                            <h3 class="font-bold text-yellow-800 flex items-center">
+                                <i class="fa-solid fa-triangle-exclamation mr-2"></i> 觀念補充與避坑指南
+                            </h3>
+                        </div>
+                        <div class="p-5 grid md:grid-cols-2 gap-6">
+                            <!-- Left: Concepts -->
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-bold text-gray-700 border-l-4 border-blue-500 pl-2">法條或定義（白話版）</h4>
+                                    <ul class="text-sm text-gray-600 mt-2 space-y-2">
+                                        <li><strong>網段隔離 (Network Segmentation)：</strong> 把大房子隔成很多小房間，鑰匙分開管。就算一間失火，也不會整棟燒光。</li>
+                                        <li><strong>完整性監控 (Integrity Monitoring)：</strong> 就像在檔案上貼封條，只要有人動過（修改時間、雜湊值變更）就會知道。</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-700 border-l-4 border-red-500 pl-2">常見陷阱與心理盲點</h4>
+                                    <ul class="text-sm text-gray-600 mt-2 space-y-2">
+                                        <li>⚠️ 看到「帳密、AD」就直覺選 MFA？ <br><span class="text-red-600">錯！</span>要先看入口是「漏洞」還是「釣魚」。</li>
+                                        <li>⚠️ 以為「加密」就一定好？ <br><span class="text-red-600">錯！</span>SMBv1 是毒藥，不能因為它名字裡有「協定」就啟用它。</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Right: Mnemonics -->
+                            <div class="flex flex-col justify-center bg-yellow-50/50 rounded-lg p-4 text-center border border-yellow-100">
+                                <div class="mb-4">
+                                    <i class="fa-solid fa-brain text-4xl text-yellow-500 mb-2"></i>
+                                    <h4 class="font-bold text-gray-800">記憶口訣</h4>
+                                </div>
+                                <p class="text-lg font-bold text-yellow-800 mb-2">「VPN 漏洞被打穿：<br>先抓後門，再切網段。」</p>
+                                <p class="text-sm text-gray-600">Webshell 落地 -> 置換監控<br>內網擴散 -> 網段隔離</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 6. Self Check (Interactive Q&A) -->
+            <section class="border-t border-gray-200 pt-6">
+                <div class="bg-indigo-50 rounded-xl p-5 border border-indigo-100">
+                    <h3 class="font-bold text-indigo-900 mb-4 flex items-center">
+                        <i class="fa-solid fa-clipboard-question mr-2"></i> 觸類旁通：自我檢測 (點擊題目看答案)
+                    </h3>
+                    <div class="space-y-3">
+                        
+                        <!-- Q1 -->
+                        <details class="group bg-white rounded-lg shadow-sm border border-gray-200 cursor-pointer">
+                            <summary class="flex items-center justify-between p-4 font-medium text-gray-800 hover:bg-gray-50 transition-colors list-none">
+                                <span>Q1. 如果攻擊者不是利用 CVE 漏洞，而是用釣魚郵件騙到 VPN 帳密，這題要選哪個？</span>
+                                <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="p-4 pt-0 text-sm text-gray-600 border-t border-gray-100 mt-2 pt-3">
+                                <span class="font-bold text-green-600">答案：(A)</span><br>
+                                因為攻擊入口變成了「合法帳號登入」，這時候多因素驗證 (MFA) 才是最有效的阻擋手段。
+                            </div>
+                        </details>
+
+                        <!-- Q2 -->
+                        <details class="group bg-white rounded-lg shadow-sm border border-gray-200 cursor-pointer">
+                            <summary class="flex items-center justify-between p-4 font-medium text-gray-800 hover:bg-gray-50 transition-colors list-none">
+                                <span>Q2. 為什麼「網段隔離」比「只開加密協定」更能阻止橫向移動？</span>
+                                <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="p-4 pt-0 text-sm text-gray-600 border-t border-gray-100 mt-2 pt-3">
+                                <span class="font-bold text-primary">解析：</span><br>
+                                「加密」只能保護傳輸內容不被偷看，但不能阻止連線。而「隔離」是直接切斷連線路徑，讓攻擊者根本連不到目標伺服器，所以對阻止擴散更有效。
+                            </div>
+                        </details>
+
+                        <!-- Q3 -->
+                        <details class="group bg-white rounded-lg shadow-sm border border-gray-200 cursor-pointer">
+                            <summary class="flex items-center justify-between p-4 font-medium text-gray-800 hover:bg-gray-50 transition-colors list-none">
+                                <span>Q3. 如果要「事前」降低此類風險，最優先該做什麼？</span>
+                                <i class="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="p-4 pt-0 text-sm text-gray-600 border-t border-gray-100 mt-2 pt-3">
+                                <span class="font-bold text-primary">解析：</span><br>
+                                1. 迅速修補 CVE 漏洞（Patching）。<br>
+                                2. 關閉不必要的對外管理介面。<br>
+                                3. 定期備份與加密設定檔。
+                            </div>
+                        </details>
+
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Data Structure
+        const quizData = {
+            id: "Q13",
+            correctAnswers: ["B", "C"], // Multiple Choice
+            options: [
+                { id: "A", text: "所有員工與服務應強制啟用抗網釣攻擊的多因素驗證機制" },
+                { id: "B", text: "針對 SSL VPN 登入頁面進行網頁置換監控告警" },
+                { id: "C", text: "隔離此類 SSL VPN 設備於獨立網段，降低攻擊擴散途徑" },
+                { id: "D", text: "內網啟用 SMBv1、SMBv2 伺服器訊息區協定以達傳輸加密" }
+            ]
+        };
+
+        // DOM Elements
+        const optionsContainer = document.getElementById('options-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const feedbackSection = document.getElementById('feedback-section');
+        const resultBanner = document.getElementById('result-banner');
+
+        // Initial Load
+        window.addEventListener('DOMContentLoaded', () => {
+            initQuiz();
+        });
+
+        function initQuiz() {
+            // Shuffle options
+            const shuffledOptions = [...quizData.options].sort(() => Math.random() - 0.5);
+            
+            optionsContainer.innerHTML = '';
+            shuffledOptions.forEach(opt => {
+                const optionHtml = `
+                    <div class="relative">
+                        <input type="checkbox" name="answer" id="opt-${opt.id}" value="${opt.id}" class="custom-checkbox sr-only peer">
+                        <label for="opt-${opt.id}" class="option-label block w-full p-4 pl-12 rounded-xl border-2 border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/50 peer-checked:border-primary peer-checked:bg-blue-50 text-gray-700 font-medium select-none">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 rounded border-2 border-gray-300 bg-white flex items-center justify-center peer-checked:border-primary peer-checked:bg-primary text-white text-xs transition-colors">
+                                <i class="fa-solid fa-check opacity-0 peer-checked:opacity-100"></i>
+                            </span>
+                            <span class="mr-2 font-bold text-gray-400">(${opt.id})</span> ${opt.text}
+                        </label>
+                    </div>
+                `;
+                optionsContainer.insertAdjacentHTML('beforeend', optionHtml);
+            });
+        }
+
+        function checkAnswer() {
+            // Get selected answers
+            const selected = Array.from(document.querySelectorAll('input[name="answer"]:checked')).map(el => el.value);
+            
+            // Validation: Must select at least one
+            if (selected.length === 0) {
+                alert('請至少選擇一個答案！');
+                return;
+            }
+
+            // Disable inputs
+            const inputs = document.querySelectorAll('input[name="answer"]');
+            inputs.forEach(input => input.disabled = true);
+            submitBtn.classList.add('hidden');
+            retryBtn.classList.remove('hidden');
+
+            // Logic Check (Exact match for multiple choice)
+            const correctSet = new Set(quizData.correctAnswers);
+            const selectedSet = new Set(selected);
+            
+            // Check if Sets match exactly
+            const isCorrect = selectedSet.size === correctSet.size && [...selectedSet].every(val => correctSet.has(val));
+
+            // UI Feedback Logic
+            inputs.forEach(input => {
+                const label = input.nextElementSibling;
+                const val = input.value;
+                const isSelected = selectedSet.has(val);
+                const isAnswer = correctSet.has(val);
+
+                // Remove default hover effects
+                label.classList.remove('hover:border-blue-300', 'hover:bg-blue-50/50');
+
+                if (isAnswer) {
+                    // Correct answer style (Green)
+                    label.classList.add('correct-answer');
+                    // Add checkmark icon to text if not selected (to show missed answer)
+                    if (!isSelected) {
+                        label.innerHTML += ` <span class="text-green-700 text-sm ml-2 font-bold"><i class="fa-solid fa-arrow-left"></i> 正解</span>`;
+                    }
+                } else if (isSelected && !isAnswer) {
+                    // User selected wrong answer (Red)
+                    label.classList.add('wrong-answer');
+                    label.innerHTML += ` <span class="text-red-700 text-sm ml-2 font-bold"><i class="fa-solid fa-xmark"></i> 錯誤</span>`;
+                }
+            });
+
+            // Show Result Banner & Explanation
+            feedbackSection.classList.remove('hidden');
+            
+            if (isCorrect) {
+                resultBanner.className = "p-4 rounded-xl text-center font-bold text-lg fade-in-up bg-green-100 text-green-800 border border-green-200";
+                resultBanner.innerHTML = `<i class="fa-solid fa-circle-check text-2xl mb-1 block"></i> 完全正確！觀念非常清晰！`;
+            } else {
+                resultBanner.className = "p-4 rounded-xl text-center font-bold text-lg fade-in-up bg-red-100 text-red-800 border border-red-200";
+                resultBanner.innerHTML = `<i class="fa-solid fa-circle-xmark text-2xl mb-1 block"></i> 答錯了，請參考下方解析！`;
+            }
+
+            // Smooth scroll to feedback
+            setTimeout(() => {
+                feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function resetQuiz() {
+            // Reset UI
+            feedbackSection.classList.add('hidden');
+            submitBtn.classList.remove('hidden');
+            retryBtn.classList.add('hidden');
+            
+            // Re-init options
+            initQuiz();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

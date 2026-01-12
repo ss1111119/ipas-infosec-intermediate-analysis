@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q11 - APT 檔案上傳防護 | 資安互動試題</title>
+    
+    <!-- Google Fonts: Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Tailwind CSS (Script for rapid styling) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* --- 全域設定 --- */
+        :root {
+            --primary-color: #2563eb;       /* 專業藍 */
+            --highlight-bg: #fef9c3;        /* 柔和黃底 */
+            --success-color: #059669;       /* 綠 */
+            --error-color: #dc2626;         /* 紅 */
+            --text-main: #1f2937;
+            --bg-page: #f3f4f6;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* --- 容器與卡片 --- */
+        .main-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        /* --- 標籤系統 --- */
+        .tag-badge {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+        .tag-tech { background-color: #fee2e2; color: #991b1b; } /* 技術 - 紅 */
+        .tag-manage { background-color: #ffedd5; color: #9a3412; } /* 管理 - 橙 */
+
+        /* --- 選項樣式 --- */
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-label:hover:not(.disabled) {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .option-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            accent-color: var(--primary-color);
+        }
+
+        /* 選中狀態 */
+        .option-input:checked + .option-text {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        /* 禁用狀態 (送出後) */
+        .option-label.disabled {
+            cursor: default;
+            opacity: 0.7;
+        }
+        .option-label.disabled:hover {
+            transform: none;
+        }
+
+        /* 答題回饋樣式 */
+        .option-label.correct-answer {
+            border-color: var(--success-color) !important;
+            background-color: #ecfdf5 !important;
+        }
+        .option-label.correct-answer::after {
+            content: '\f00c'; /* Check icon */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 1rem;
+            color: var(--success-color);
+        }
+
+        .option-label.wrong-selection {
+            border-color: var(--error-color) !important;
+            background-color: #fef2f2 !important;
+        }
+        .option-label.wrong-selection::after {
+            content: '\f00d'; /* X icon */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 1rem;
+            color: var(--error-color);
+        }
+
+        /* --- 按鈕樣式 --- */
+        .btn-action {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            height: 50px; /* Mobile Friendly */
+        }
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+            transform: scale(0.99);
+        }
+        .btn-retry {
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            display: none; /* 初始隱藏 */
+        }
+        .btn-retry:hover {
+            background-color: #374151;
+        }
+
+        /* --- 解析區域 --- */
+        .feedback-area {
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+        }
+        .section-title i {
+            margin-right: 0.5rem;
+        }
+
+        .explain-block {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* 關鍵字標記 */
+        .keyword-badge {
+            background-color: #fef3c7;
+            color: #92400e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 0 2px;
+        }
+
+        /* --- 自我檢測 Checklist & Q&A --- */
+        details {
+            margin-bottom: 0.5rem;
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        details summary {
+            cursor: pointer;
+            padding: 1rem;
+            background-color: #f0f9ff;
+            font-weight: 600;
+            color: #0369a1;
+            list-style: none; /* 隱藏預設箭頭 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        details summary:hover {
+            background-color: #e0f2fe;
+        }
+        details summary::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+        .answer-content {
+            padding: 1rem;
+            background-color: #fff;
+            color: #334155;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        /* --- 動畫 --- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 手機版優化 --- */
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 0;
+                border-radius: 0;
+                padding: 1rem;
+                box-shadow: none;
+                min-height: 100vh;
+            }
+            h1 { font-size: 1.25rem !important; }
+            .option-label { padding: 0.75rem; }
+            .explain-block { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <!-- 1. Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="tag-badge tag-manage mb-2 d-inline-block">資安防護實務</span>
+                <span class="tag-badge tag-tech mb-2 d-inline-block">APT 防禦</span>
+                <h1 class="text-2xl font-bold text-gray-800 m-0">Q11. APT 檔案上傳防護</h1>
+            </div>
+            <div id="status-badge" class="badge bg-secondary rounded-pill px-3 py-2">未作答</div>
+        </div>
+
+        <!-- 2. Context (情境) -->
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4">
+            <h5 class="font-bold text-blue-800 mb-2"><i class="fas fa-file-invoice-dollar me-2"></i>情境描述</h5>
+            <p class="text-gray-700 mb-3 text-sm md:text-base">
+                如附圖所示，駭客透過某機關網頁上傳功能漏洞植入 APT 惡意程式，並嘗試取得系統資料，恐有資料外洩之虞。
+            </p>
+            <div class="text-center bg-white p-2 rounded-lg border border-gray-200">
+                <img src="https://i.meee.com.tw/s9DhUXw.png" 
+                     alt="APT攻擊示意圖：駭客透過上傳漏洞植入惡意程式" 
+                     class="img-fluid rounded shadow-sm"
+                     style="max-height: 250px; object-fit: contain;"
+                     onerror="this.onerror=null; this.src='https://placehold.co/600x300?text=Image+Load+Failed'; this.alt='圖片載入失敗';">
+                <div class="text-xs text-gray-400 mt-1">題目附圖參考</div>
+            </div>
+        </div>
+
+        <!-- 3. Question -->
+        <div class="mb-4">
+            <h4 class="text-lg md:text-xl font-bold mb-4 leading-relaxed">
+                下列建議之防範措施何者<span class="text-red-600 font-black text-xl border-b-4 border-red-200">最「不」合適</span>？
+            </h4>
+            
+            <div id="options-container">
+                <!-- 選項將由 JS 動態生成並隨機排列 -->
+            </div>
+        </div>
+
+        <!-- 4. Action Area -->
+        <div class="mt-4 mb-3">
+            <button id="btn-submit" class="btn-action btn-submit" onclick="submitAnswer()">
+                <i class="fas fa-paper-plane me-2"></i>送出答案
+            </button>
+            <button id="btn-retry" class="btn-action btn-retry" onclick="resetQuiz()">
+                <i class="fas fa-redo me-2"></i>重新挑戰
+            </button>
+        </div>
+
+        <!-- 5. Feedback & Explain Area -->
+        <div id="feedback-section" class="feedback-area">
+            
+            <!-- 結果判定 -->
+            <div id="result-banner" class="alert alert-success d-flex align-items-center mb-4" role="alert">
+                <i id="result-icon" class="fas fa-check-circle fs-4 me-3"></i>
+                <div>
+                    <h5 id="result-title" class="alert-heading font-bold m-0">恭喜答對！</h5>
+                    <p id="result-text" class="mb-0 text-sm">您的觀念非常清晰。</p>
+                </div>
+            </div>
+
+            <!-- === 詳解區塊 1: 解題三部曲 === -->
+            <div class="explain-block border-l-4 border-l-blue-500">
+                <h5 class="section-title"><i class="fas fa-route"></i>解題三部曲</h5>
+                
+                <div class="mb-4">
+                    <p class="font-bold text-gray-700 mb-1">【第一步：找關鍵字】</p>
+                    <p class="text-sm">
+                        <span class="keyword-badge">網頁上傳功能漏洞</span>
+                        <span class="keyword-badge">植入 APT 惡意程式</span>
+                        <span class="keyword-badge">資料外洩之虞</span>
+                        <span class="keyword-badge">最「不」合適</span>
+                        <span class="keyword-badge">不限格式上傳</span> (陷阱!)
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <p class="font-bold text-gray-700 mb-1">【第二步：白話翻譯】</p>
+                    <p class="text-sm bg-white p-2 rounded border border-gray-200">
+                        「已經知道駭客是從『上傳功能』塞進 APT 惡意程式，下面哪一個防範建議其實很不合理，甚至會讓系統更危險？」
+                    </p>
+                </div>
+
+                <div>
+                    <p class="font-bold text-gray-700 mb-1">【第三步：解題思路】</p>
+                    <ul class="list-disc pl-5 text-sm space-y-1 text-gray-600">
+                        <li><strong>防毒軟體是最後一道防線，不是唯一防線。</strong></li>
+                        <li>不能因為有裝防毒，就放寬「限制上傳格式」這個基本原則。</li>
+                        <li><strong>生活例子：</strong>就像海關安檢，合理的作法是「只准帶符合規定的行李並過 X 光機 (白名單+檢測)」，而不是「什麼違禁品都能帶進來，只靠警衛用肉眼看 (黑名單/依賴單一防線)」。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- === 詳解區塊 2: 選項分析 === -->
+            <div class="explain-block border-l-4 border-l-purple-500">
+                <h5 class="section-title"><i class="fas fa-tasks"></i>第四步：選項深度剖析</h5>
+                
+                <div class="space-y-3">
+                    <div class="bg-white p-3 rounded border border-gray-100">
+                        <span class="font-bold text-blue-600">(A) 建立資通安全威脅偵測管理機制</span>
+                        <p class="text-sm mt-1 text-gray-600">⭕ <strong>合適。</strong>這通常指 SOC、SIEM 或 EDR 等機制，能即時偵測異常行為與橫向移動，是現代抗 APT 的標配。</p>
+                    </div>
+
+                    <div class="bg-red-50 p-3 rounded border border-red-200">
+                        <span class="font-bold text-red-600">(B) 上傳檔案不限格式且一律透過防毒軟體告警</span>
+                        <p class="text-sm mt-1 text-red-800">❌ <strong>最不合適 (本題答案)。</strong><br>
+                        1. 「不限格式」是極高風險，駭客可上傳 exe, php, asp 等腳本。<br>
+                        2. 防毒軟體對 APT（針對性攻擊）或 0-day 漏洞的偵測率並非 100%。<br>
+                        3. 正確做法：<strong>白名單過濾副檔名 + 防毒掃描 + 隔離沙箱。</strong></p>
+                    </div>
+
+                    <div class="bg-white p-3 rounded border border-gray-100">
+                        <span class="font-bold text-blue-600">(C) 目錄完整性監控及驗證 (FIM)</span>
+                        <p class="text-sm mt-1 text-gray-600">⭕ <strong>合適。</strong>若駭客真的繞過防護上傳了 Web Shell，監控目錄異動（新增/修改檔案）能即時發出警報。</p>
+                    </div>
+
+                    <div class="bg-white p-3 rounded border border-gray-100">
+                        <span class="font-bold text-blue-600">(D) 採多家廠商交互驗證</span>
+                        <p class="text-sm mt-1 text-gray-600">⭕ <strong>合適。</strong>使用多種掃描引擎（Multi-Engine Scanning）可降低單一廠商資料庫漏判的風險。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === 詳解區塊 3: 觀念與延伸 === -->
+            <div class="explain-block border-l-4 border-l-green-500">
+                <h5 class="section-title"><i class="fas fa-lightbulb"></i>觀念補充與延伸</h5>
+                
+                <div class="mb-4">
+                    <p class="font-bold text-gray-700 mb-1">【觸類旁通（舉一反三）】</p>
+                    <ul class="list-disc pl-5 text-sm space-y-1 text-gray-600">
+                        <li><strong>對比概念：</strong>正確防護 = 限制格式 + 限制大小 + 防毒 + 隔離儲存 + 權限控管 (No Exec)。</li>
+                        <li><strong>變化題型：</strong>如果選項改成「僅允許白名單格式上傳並搭配防毒」，那就是正確的防護建議。</li>
+                        <li><strong>常見漏洞：</strong>檔案上傳 (File Upload)、指令注入 (Command Injection) 都是 Web 應用程式常見的高危風險。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- === 詳解區塊 4: 避坑指南 === -->
+            <div class="explain-block border-l-4 border-l-yellow-500">
+                <h5 class="section-title"><i class="fas fa-exclamation-triangle"></i>常見陷阱與記憶口訣</h5>
+                
+                <div class="mb-3">
+                    <p class="font-bold text-gray-700 mb-1">【常見陷阱 / 心理盲點】</p>
+                    <p class="text-sm text-gray-600">
+                        考生容易有「裝了防毒就安全」的迷思，忽略了 APT 攻擊的特徵就是「刻意繞過偵測」。看到題目寫「不限格式」時，警鈴大作，這幾乎一定是錯誤選項。
+                    </p>
+                </div>
+
+                <div class="bg-yellow-100 p-3 rounded-lg border border-yellow-300 text-center">
+                    <p class="text-sm text-yellow-800 font-bold mb-1">【📝 記憶口訣】</p>
+                    <span class="text-lg font-bold text-gray-800">「上傳不設限，防毒救不了；<br>先擋再掃描，APT 才進不了。」</span>
+                </div>
+            </div>
+
+            <!-- === 自我檢測 (Interactive) === -->
+            <div class="mt-4">
+                <h5 class="section-title mb-3"><i class="fas fa-clipboard-check"></i>自我檢測 (點擊展開答案)</h5>
+                
+                <details>
+                    <summary>Q1: 為什麼防毒軟體對 APT 的防護效果有限？</summary>
+                    <div class="answer-content">
+                        <strong>答案：</strong><br>
+                        因為 APT 攻擊常使用<strong>未知樣本 (0-day)</strong>、加殼混淆、或延遲執行技術來繞過傳統特徵碼 (Signature-based) 的偵測。
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Q2: Web 上傳功能至少應限制哪些項目？</summary>
+                    <div class="answer-content">
+                        <strong>答案：</strong><br>
+                        1. <strong>副檔名 (Extension)</strong>：採白名單機制。<br>
+                        2. <strong>MIME Type</strong>：檢查檔案標頭。<br>
+                        3. <strong>檔案大小</strong>：避免 DoS 攻擊。<br>
+                        4. <strong>儲存目錄</strong>：不可有執行權限 (No Execute)。
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Q3: 如果已發現 Web Shell，被歸類為哪一類事件？</summary>
+                    <div class="answer-content">
+                        <strong>答案：</strong><br>
+                        屬於<strong>入侵事件 (Incident)</strong>。代表系統已被攻破，需立即啟動資安事件通報與應變 (IR) 流程。
+                    </div>
+                </details>
+            </div>
+
+        </div>
+
+        <footer class="text-center mt-8 text-gray-400 text-xs">
+            © 2025 Security Exam Prep | Designed for Learning Efficiency
+        </footer>
+
+    </div>
+
+    <!-- JavaScript Interaction Logic -->
+    <script>
+        // 資料定義
+        const quizData = {
+            id: "Q11",
+            correctOptionContent: "為落實軟體及資訊完整性防護，上傳檔案不限格式且一律透過防毒軟體告警", // 用內容來比對，因為順序會變
+            options: [
+                "機關建立資通安全威脅偵測管理機制",
+                "為落實軟體及資訊完整性防護，上傳檔案不限格式且一律透過防毒軟體告警",
+                "對於目錄進行完整性監控及驗證，即時偵測目錄異動行為",
+                "辦理服務安全性檢測作業時，可評估採多家廠商交互驗證為宜"
+            ]
+        };
+
+        let currentShuffledOptions = [];
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initQuiz();
+        });
+
+        // 初始化/重置試題
+        function initQuiz() {
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            // 隨機打亂選項
+            currentShuffledOptions = [...quizData.options].sort(() => Math.random() - 0.5);
+
+            currentShuffledOptions.forEach((optText, index) => {
+                const label = document.createElement('label');
+                label.className = 'option-label';
+                label.innerHTML = `
+                    <input type="radio" name="quizOption" value="${index}" class="option-input">
+                    <span class="option-text">${optText}</span>
+                `;
+                // 點擊變色輔助
+                label.addEventListener('click', function() {
+                    document.querySelectorAll('.option-label').forEach(el => {
+                        el.style.borderColor = '#e5e7eb';
+                        el.style.backgroundColor = 'transparent';
+                    });
+                    if(!this.classList.contains('disabled')) {
+                       // CSS :checked handles the bold/color, this is just for visual feedback reset
+                    }
+                });
+                container.appendChild(label);
+            });
+
+            // 重置 UI 狀態
+            document.getElementById('feedback-section').style.display = 'none';
+            document.getElementById('btn-submit').style.display = 'block';
+            document.getElementById('btn-retry').style.display = 'none';
+            document.getElementById('status-badge').className = 'badge bg-secondary rounded-pill px-3 py-2';
+            document.getElementById('status-badge').innerText = '未作答';
+            
+            // 關閉所有自我檢測的 details
+            document.querySelectorAll('details').forEach(d => d.removeAttribute('open'));
+        }
+
+        // 送出答案
+        function submitAnswer() {
+            const selected = document.querySelector('input[name="quizOption"]:checked');
+            
+            // 防呆：未選
+            if (!selected) {
+                alert('請先選擇一個答案！');
+                return;
+            }
+
+            const selectedIndex = parseInt(selected.value);
+            const selectedText = currentShuffledOptions[selectedIndex];
+            const isCorrect = selectedText === quizData.correctOptionContent;
+
+            // 鎖定選項
+            document.querySelectorAll('.option-input').forEach(input => input.disabled = true);
+            document.querySelectorAll('.option-label').forEach(label => label.classList.add('disabled'));
+
+            // 顯示結果區域
+            const feedbackSection = document.getElementById('feedback-section');
+            feedbackSection.style.display = 'block';
+            
+            const resultBanner = document.getElementById('result-banner');
+            const resultTitle = document.getElementById('result-title');
+            const resultText = document.getElementById('result-text');
+            const resultIcon = document.getElementById('result-icon');
+            const statusBadge = document.getElementById('status-badge');
+
+            // 標示選項樣式
+            const allLabels = document.querySelectorAll('.option-label');
+            
+            // 找出正確選項的 Index
+            let correctIndex = -1;
+            currentShuffledOptions.forEach((opt, idx) => {
+                if(opt === quizData.correctOptionContent) correctIndex = idx;
+            });
+
+            if (isCorrect) {
+                // 答對處理
+                resultBanner.className = 'alert alert-success d-flex align-items-center mb-4';
+                resultIcon.className = 'fas fa-check-circle fs-4 me-3 text-success';
+                resultTitle.innerText = '恭喜答對！';
+                resultText.innerText = '您的觀念非常清晰，成功揪出了錯誤的資安防護建議。';
+                
+                statusBadge.className = 'badge bg-success rounded-pill px-3 py-2';
+                statusBadge.innerText = '答對';
+
+                // 標記正確綠色
+                allLabels[selectedIndex].classList.add('correct-answer');
+
+            } else {
+                // 答錯處理
+                resultBanner.className = 'alert alert-danger d-flex align-items-center mb-4';
+                resultIcon.className = 'fas fa-times-circle fs-4 me-3 text-danger';
+                resultTitle.innerText = '回答錯誤';
+                resultText.innerHTML = '別灰心！請看下方的「選項深度剖析」，了解為什麼 <strong>(B)</strong> 才是最不合適的選項。';
+                
+                statusBadge.className = 'badge bg-danger rounded-pill px-3 py-2';
+                statusBadge.innerText = '答錯';
+
+                // 標記考生選的錯誤紅色
+                allLabels[selectedIndex].classList.add('wrong-selection');
+                // 標記正確答案綠色
+                allLabels[correctIndex].classList.add('correct-answer');
+            }
+
+            // 切換按鈕
+            document.getElementById('btn-submit').style.display = 'none';
+            document.getElementById('btn-retry').style.display = 'block';
+
+            // 自動滾動到解析區
+            feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // 重新挑戰
+        function resetQuiz() {
+            initQuiz();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
