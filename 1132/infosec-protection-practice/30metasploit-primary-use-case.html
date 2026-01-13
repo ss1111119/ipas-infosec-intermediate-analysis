@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metasploit 核心用途解析 | 資安技術</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" xintegrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Tailwind CSS (Script for rapid styling) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Noto Sans TC Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --highlight-bg: #fef9c3;
+            --success-color: #059669;
+            --error-color: #dc2626;
+            --text-main: #1f2937;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .quiz-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            padding: 0;
+        }
+
+        /* Header Styles */
+        .quiz-header {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag-badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Question Area */
+        .content-area {
+            padding: 2.5rem;
+        }
+
+        .context-card {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 0 8px 8px 0;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #111827;
+        }
+
+        /* Options */
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .option-label:hover:not(.disabled) {
+            border-color: #93c5fd;
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .option-input {
+            margin-right: 16px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-color);
+        }
+
+        .option-label.selected {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Feedback States */
+        .option-label.correct-answer {
+            border-color: var(--success-color);
+            background-color: #ecfdf5;
+            color: #065f46;
+        }
+
+        .option-label.wrong-answer {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+            color: #991b1b;
+        }
+
+        .feedback-area {
+            display: none;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .feedback-success {
+            background-color: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+        }
+
+        .feedback-error {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        /* Action Buttons */
+        .action-area {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-retry {
+            background-color: #e2e8f0;
+            color: #475569;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            display: none;
+            transition: all 0.2s;
+        }
+
+        .btn-retry:hover {
+            background-color: #cbd5e1;
+        }
+
+        /* --- Expanded Explanation Section Styles --- */
+        .explanation-section {
+            display: none;
+            margin-top: 2rem;
+            background-color: white;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 2rem;
+        }
+
+        /* Section Headers inside explanation */
+        .section-header {
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #bfdbfe;
+        }
+        .section-header i { margin-right: 0.75rem; color: var(--primary-color); }
+        
+        .step-badge {
+            background-color: #dbeafe;
+            color: #1e40af;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-right: 8px;
+            white-space: nowrap;
+        }
+
+        /* Step Cards */
+        .step-card {
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: transform 0.2s;
+        }
+        .step-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .keyword-box span {
+            background-color: #fef08a; /* yellow-200 */
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            margin: 0 4px;
+        }
+
+        /* Translation Box */
+        .translation-box {
+            background-color: #f0fdf4; /* green-50 */
+            border-left: 4px solid #22c55e;
+            padding: 1rem;
+            font-style: italic;
+            color: #15803d;
+            margin-bottom: 1rem;
+        }
+
+        /* Life Example */
+        .life-example {
+            background-color: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-top: 1rem;
+        }
+        .life-example-title {
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Analysis Table/Grid */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .analysis-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .analysis-item.correct { background-color: #ecfdf5; border: 1px solid #a7f3d0; }
+        .analysis-item.wrong { background-color: #fff1f2; border: 1px solid #fecaca; }
+        
+        /* Concept & Traps */
+        .concept-block {
+            background-color: #eef2ff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+        .trap-list li { margin-bottom: 0.75rem; position: relative; padding-left: 1.5rem; }
+        .trap-list li::before {
+            content: '⚠️';
+            position: absolute;
+            left: 0;
+            top: 2px;
+        }
+
+        /* Mnemonic */
+        .golden-sentence {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #1e40af;
+            border: 2px solid #bfdbfe;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .golden-sentence::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-size: 5rem;
+            color: rgba(37,99,235,0.1);
+            font-family: serif;
+        }
+
+        /* Q&A Self Check Style */
+        .qa-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        details.qa-item {
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        details.qa-item summary {
+            padding: 1rem 1.5rem;
+            background-color: #f8fafc;
+            cursor: pointer;
+            font-weight: 600;
+            color: #334155;
+            list-style: none; /* Hide default arrow */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        details.qa-item summary::-webkit-details-marker { display: none; }
+        
+        details.qa-item summary::after {
+            content: '查看答案 ▼';
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            background-color: #eff6ff;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        
+        details.qa-item[open] summary::after {
+            content: '收起答案 ▲';
+            color: #4b5563;
+            background-color: #e5e7eb;
+        }
+
+        details.qa-item .qa-answer {
+            padding: 1.5rem;
+            background-color: #fff;
+            border-top: 1px solid #e5e7eb;
+            color: #065f46;
+            font-weight: 500;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .quiz-container { margin: 20px 10px; }
+            .content-area { padding: 1.5rem; }
+            .golden-sentence { font-size: 1.1rem; padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="quiz-container" id="quizApp">
+        <!-- 1. Header -->
+        <div class="quiz-header">
+            <div>
+                <span class="badge bg-white text-primary me-2">NO. 30</span>
+                <span class="tag-badge text-white border border-white"><i class="fas fa-shield-alt me-1"></i>資訊安全技術</span>
+            </div>
+            <div id="statusBadge" class="badge bg-dark bg-opacity-25">未作答</div>
+        </div>
+
+        <div class="content-area">
+            <!-- 2. Context -->
+            <div class="context-card">
+                <i class="fas fa-info-circle me-2 text-primary"></i>
+                <span id="contextText">情境：滲透測試工具與常見資安框架應用。</span>
+            </div>
+
+            <!-- 3. Question -->
+            <div class="question-block">
+                <h2 class="question-text">
+                    Metasploit 框架<span class="text-primary">最主要是</span>用於下列何種情境？
+                </h2>
+                
+                <div class="option-group" id="optionsContainer">
+                    <!-- Options injected by JS -->
+                </div>
+            </div>
+
+            <!-- 4. Feedback Area -->
+            <div id="feedbackArea" class="feedback-area">
+                <div id="feedbackTitle" class="d-flex align-items-center mb-2 fs-5 fw-bold"></div>
+                <p id="feedbackText" class="mb-0"></p>
+            </div>
+
+            <!-- 5. Action Area -->
+            <div class="action-area">
+                <button id="submitBtn" class="btn btn-submit" onclick="submitAnswer()">
+                    <i class="fas fa-paper-plane me-2"></i>送出答案
+                </button>
+                <button id="retryBtn" class="btn btn-retry" onclick="resetQuiz()">
+                    <i class="fas fa-redo me-2"></i>重新挑戰
+                </button>
+            </div>
+
+            <!-- 6. Expanded Explanation Section -->
+            <div id="explanationSection" class="explanation-section">
+                <div class="text-center mb-4">
+                    <h4 class="fw-bold text-gray-800"><i class="fas fa-book-open text-primary me-2"></i>題目深度解析</h4>
+                    <p class="text-muted text-sm">解題四步曲與完整觀念剖析</p>
+                </div>
+
+                <!-- Part 1: Steps 1 & 2 -->
+                <div class="section-header"><i class="fas fa-search"></i>步驟一、二：破題與翻譯</div>
+                <div class="step-card">
+                    <div class="mb-3 keyword-box">
+                        <span class="step-badge">第一步：找關鍵字</span>
+                        題目在考 <span>Metasploit 框架</span> 的 <span>最主要</span> 用途，而非邊緣功能。
+                    </div>
+                    <div class="translation-box">
+                        <span class="step-badge text-xs">第二步：白話翻譯</span><br>
+                        「Metasploit 是資安人員常用的一套工具箱。它最主要是拿來做哪件事？」
+                    </div>
+                </div>
+
+                <!-- Part 2: Step 3 Logic & Principles -->
+                <div class="section-header"><i class="fas fa-brain"></i>步驟三：解題思路與原理</div>
+                <div class="step-card">
+                    <h5 class="fw-bold text-gray-700 mb-2">解題步驟與原理</h5>
+                    <ul class="list-disc ps-4 space-y-1 text-gray-600 mb-4">
+                        <li><strong>定位角色：</strong>先把 Metasploit 想成「攻擊模擬工具箱」。</li>
+                        <li><strong>核心工作：</strong>它最核心的功能是利用模組 (Exploits) 去執行漏洞利用，驗證系統是否真的能被打進去。</li>
+                        <li><strong>組成元件：</strong>
+                            <span class="bg-gray-100 px-1 rounded text-sm">Exploit (漏洞利用)</span>、
+                            <span class="bg-gray-100 px-1 rounded text-sm">Payload (酬載)</span>、
+                            <span class="bg-gray-100 px-1 rounded text-sm">Auxiliary (輔助)</span>。
+                        </li>
+                    </ul>
+
+                    <div class="life-example">
+                        <div class="life-example-title"><i class="fas fa-key me-1"></i>生活具象化例子</div>
+                        <p class="mb-0 text-gray-700">
+                            把 Metasploit 想像成<strong>「鎖匠的測試工具箱」</strong>：<br>
+                            它不是教你怎麼裝門（防火牆配置），也不是錄影監控你家門口（封包分析），而是拿工具去測<strong>「這把鎖到底能不能被撬開」</strong>（漏洞利用與測試）。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Part 3: Step 4 Option Analysis -->
+                <div class="section-header"><i class="fas fa-list-check"></i>步驟四：選項分析</div>
+                <div class="analysis-grid">
+                    <div class="analysis-item wrong">
+                        <div class="me-3 fs-4 text-red-500"><i class="fas fa-times"></i></div>
+                        <div>
+                            <strong>(A) 防火牆配置</strong><br>
+                            <span class="text-sm text-gray-600">這是「防禦側」的設定工具，屬於管理範疇，非 Metasploit 核心。</span>
+                        </div>
+                    </div>
+                    <div class="analysis-item wrong">
+                        <div class="me-3 fs-4 text-red-500"><i class="fas fa-times"></i></div>
+                        <div>
+                            <strong>(B) 網路封包分析</strong><br>
+                            <span class="text-sm text-gray-600">這是 Wireshark、Tcpdump 的工作，用來看「門口誰經過」，不是用來「撬門」。</span>
+                        </div>
+                    </div>
+                    <div class="analysis-item correct">
+                        <div class="me-3 fs-4 text-green-500"><i class="fas fa-check"></i></div>
+                        <div>
+                            <strong>(C) 漏洞利用和測試</strong><br>
+                            <span class="text-sm text-gray-600">正解。利用 Exploit 模組驗證漏洞是否存在且可被利用，是其最主要用途。</span>
+                        </div>
+                    </div>
+                    <div class="analysis-item wrong">
+                        <div class="me-3 fs-4 text-red-500"><i class="fas fa-times"></i></div>
+                        <div>
+                            <strong>(D) 垃圾郵件過濾</strong><br>
+                            <span class="text-sm text-gray-600">這是郵件安全閘道 (Email Gateway) 的功能，與滲透測試框架無關。</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Part 4: Extended Concepts -->
+                <div class="section-header"><i class="fas fa-lightbulb"></i>觀念補充與延伸</div>
+                <div class="concept-block">
+                    <h6 class="fw-bold text-primary mb-2">法條或定義（白話版）</h6>
+                    <p class="text-sm text-gray-700 mb-4">
+                        <strong>滲透測試 (Penetration Testing)：</strong>在授權下模擬攻擊，找出可被利用的弱點並評估風險。<br>
+                        <strong>漏洞利用 (Exploit)：</strong>利用系統弱點達成未授權行為的技術或程式碼。
+                    </p>
+
+                    <h6 class="fw-bold text-primary mb-2">觸類旁通（舉一反三）</h6>
+                    <div class="bg-white p-3 rounded border border-blue-100">
+                        <ul class="list-unstyled mb-0 space-y-2 text-sm">
+                            <li>🔍 <strong>Nmap：</strong>找「有哪些門」（Port Scanning）</li>
+                            <li>🛠️ <strong>Metasploit：</strong>試「門能不能被撬開」（Exploiting）</li>
+                            <li>👀 <strong>Wireshark：</strong>看「門口的人在說什麼」（Packet Sniffing）</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Part 5: Traps & Tips -->
+                <div class="section-header"><i class="fas fa-exclamation-triangle"></i>常見陷阱與避坑</div>
+                <div class="step-card bg-red-50 border-red-100">
+                    <h6 class="fw-bold text-red-700 mb-2">心理盲點</h6>
+                    <p class="text-sm text-gray-700 mb-3">看到「框架 (Framework)」這兩個字，容易誤以為是純管理平台或防禦架構，其實它是「攻擊模組的集合平台」。</p>
+                    
+                    <h6 class="fw-bold text-red-700 mb-2">避坑指南</h6>
+                    <p class="text-sm text-gray-700">看到 Metasploit 先聯想三個字：<strong>Exploit（漏洞利用）</strong>。選項只要不是與「滲透、攻擊驗證、漏洞利用」相關，大多可排除。</p>
+                </div>
+
+                <!-- Part 6: Mnemonic -->
+                <div class="golden-sentence">
+                    Nmap 找門，Meta 撬門<br>
+                    Metasploit = Exploit 測漏洞
+                </div>
+
+                <!-- Part 7: Self Check (Q&A Style) -->
+                <div class="section-header"><i class="fas fa-clipboard-check"></i>自我檢測（點擊查看答案）</div>
+                <div class="qa-container">
+                    <details class="qa-item">
+                        <summary>Q1: 如果題目改成「用來掃描網路上有哪些主機與開放的 Port」，答案會是 Metasploit 嗎？</summary>
+                        <div class="qa-answer">
+                            不是。那是 <strong>Nmap</strong> 的核心用途。Metasploit 雖然有輔助掃描模組，但「最主要」還是用來利用漏洞。
+                        </div>
+                    </details>
+                    
+                    <details class="qa-item">
+                        <summary>Q2: Metasploit 裡的 Exploit 和 Payload 差在哪？</summary>
+                        <div class="qa-answer">
+                            <strong>Exploit</strong> 是用來打進去的方法（撬開鎖的工具）；<br>
+                            <strong>Payload</strong> 是打進去後要執行的內容（進屋後做的事，如建立連線）。
+                        </div>
+                    </details>
+                    
+                    <details class="qa-item">
+                        <summary>Q3: 為什麼企業做修補後，常會再用 Metasploit 進行驗證？</summary>
+                        <div class="qa-answer">
+                            用來確認漏洞是否真的已被修補成功、是否已無法被利用（驗證修補成效）。
+                        </div>
+                    </details>
+                </div>
+                
+                <div class="text-center mt-5 text-gray-400 text-xs">
+                    互動式教學內容 v5.1 | Design for Learning
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 題目資料設定
+    const quizData = {
+        id: 30,
+        correctAnswer: "C", // 對應 options 中的 value
+        options: [
+            { text: "防火牆配置", value: "A" },
+            { text: "網路封包分析", value: "B" },
+            { text: "漏洞利用和測試", value: "C" },
+            { text: "垃圾郵件過濾", value: "D" }
+        ]
+    };
+
+    let selectedValue = null;
+    let isSubmitted = false;
+
+    // 初始化：隨機排列選項
+    function initQuiz() {
+        const container = document.getElementById('optionsContainer');
+        container.innerHTML = '';
+        
+        // 隨機打亂選項 (Fisher-Yates Shuffle)
+        const shuffledOptions = [...quizData.options];
+        for (let i = shuffledOptions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+        }
+
+        shuffledOptions.forEach((opt, index) => {
+            const label = document.createElement('label');
+            label.className = 'option-label';
+            label.setAttribute('for', `option_${index}`);
+            label.onclick = () => selectOption(opt.value, label);
+
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'quizOption';
+            input.id = `option_${index}`;
+            input.value = opt.value;
+            input.className = 'option-input form-check-input';
+            
+            // 防止點擊 input 時觸發兩次 label click
+            input.onclick = (e) => e.stopPropagation();
+            input.onchange = () => selectOption(opt.value, label);
+
+            const span = document.createElement('span');
+            span.textContent = `(${opt.value}) ${opt.text}`;
+            span.className = 'fw-medium';
+
+            label.appendChild(input);
+            label.appendChild(span);
+            container.appendChild(label);
+        });
+    }
+
+    // 處理選項點擊
+    function selectOption(val, labelElement) {
+        if (isSubmitted) return;
+
+        selectedValue = val;
+        
+        document.querySelectorAll('.option-label').forEach(el => {
+            el.classList.remove('selected');
+            el.querySelector('input').checked = false;
+        });
+
+        labelElement.classList.add('selected');
+        labelElement.querySelector('input').checked = true;
+    }
+
+    // 送出答案判定
+    function submitAnswer() {
+        if (!selectedValue) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        isSubmitted = true;
+        const correct = quizData.correctAnswer;
+        const isCorrect = selectedValue === correct;
+
+        // 1. UI 狀態更新
+        document.getElementById('submitBtn').style.display = 'none';
+        document.getElementById('retryBtn').style.display = 'inline-block';
+        
+        document.querySelectorAll('input[type="radio"]').forEach(inp => inp.disabled = true);
+        document.querySelectorAll('.option-label').forEach(lbl => lbl.classList.add('disabled'));
+
+        // 2. 顯示 Feedback
+        const feedbackArea = document.getElementById('feedbackArea');
+        const feedbackTitle = document.getElementById('feedbackTitle');
+        const feedbackText = document.getElementById('feedbackText');
+        const statusBadge = document.getElementById('statusBadge');
+
+        feedbackArea.style.display = 'block';
+
+        if (isCorrect) {
+            feedbackArea.className = 'feedback-area feedback-success';
+            feedbackTitle.innerHTML = '<i class="fas fa-check-circle me-2"></i>答對了！';
+            feedbackText.textContent = '觀念正確！Metasploit 正是用於滲透測試與漏洞利用的強大工具。';
+            statusBadge.textContent = '答對';
+            statusBadge.className = 'badge bg-success';
+        } else {
+            feedbackArea.className = 'feedback-area feedback-error';
+            feedbackTitle.innerHTML = '<i class="fas fa-times-circle me-2"></i>答錯了';
+            feedbackText.textContent = `正確答案是 (C)。防火牆是防禦，Wireshark 是分析，而 Metasploit 是用來「打」進去的。`;
+            statusBadge.textContent = '答錯';
+            statusBadge.className = 'badge bg-danger';
+        }
+
+        // 3. 選項視覺標記
+        document.querySelectorAll('.option-label').forEach(label => {
+            const inputVal = label.querySelector('input').value;
+            
+            if (inputVal === correct) {
+                label.classList.add('correct-answer');
+                if (inputVal !== selectedValue) {
+                   const icon = document.createElement('i');
+                   icon.className = 'fas fa-check text-success ms-auto';
+                   label.appendChild(icon);
+                }
+            }
+            
+            if (inputVal === selectedValue && !isCorrect) {
+                label.classList.add('wrong-answer');
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-times text-danger ms-auto';
+                label.appendChild(icon);
+            }
+        });
+
+        // 4. 展開詳解區
+        document.getElementById('explanationSection').style.display = 'block';
+
+        // 5. 平滑捲動到回饋區
+        setTimeout(() => {
+            feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    }
+
+    // 重置測驗
+    function resetQuiz() {
+        selectedValue = null;
+        isSubmitted = false;
+
+        document.getElementById('submitBtn').style.display = 'inline-block';
+        document.getElementById('retryBtn').style.display = 'none';
+        document.getElementById('feedbackArea').style.display = 'none';
+        document.getElementById('explanationSection').style.display = 'none';
+        document.getElementById('statusBadge').textContent = '未作答';
+        document.getElementById('statusBadge').className = 'badge bg-dark bg-opacity-25';
+        
+        // 關閉所有 details
+        document.querySelectorAll('details.qa-item').forEach(el => el.removeAttribute('open'));
+
+        initQuiz();
+        document.querySelector('.quiz-container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 啟動程式
+    window.onload = initQuiz;
+
+</script>
+
+</body>
+</html>

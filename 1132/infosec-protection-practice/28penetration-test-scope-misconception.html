@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>滲透測試範圍誤區解析 | 資安觀念強化</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <!-- Fixed integrity attribute -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    
+    <!-- FontAwesome -->
+    <!-- Fixed integrity attribute -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Tailwind CSS (Script for rapid styling) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* --- Global Reset & Typography --- */
+        :root {
+            --primary-color: #2563eb;       /* 專業藍 */
+            --highlight-color: #fef9c3;     /* 柔和黃底 */
+            --success-color: #059669;       /* 綠 */
+            --error-color: #dc2626;         /* 紅 */
+            --bg-color: #f8fafc;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        /* --- Layout Container --- */
+        .quiz-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- Mobile Adaptations --- */
+        @media (max-width: 768px) {
+            .quiz-container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            .btn-action {
+                height: 48px; /* Touch target size */
+            }
+        }
+
+        /* --- Option Styling --- */
+        .option-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-card:hover:not(.disabled) {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .option-card.selected {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+            box-shadow: 0 0 0 1px var(--primary-color);
+        }
+
+        .option-input {
+            margin-top: 0.3rem;
+            margin-right: 0.75rem;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        /* --- Feedback States --- */
+        .option-card.correct-answer {
+            border-color: var(--success-color);
+            background-color: #ecfdf5;
+        }
+        
+        .option-card.wrong-choice {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+        }
+
+        /* --- Animation --- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        /* --- Tags --- */
+        .tag {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+        .tag-mgmt { background-color: #ffedd5; color: #9a3412; } /* 管理 - 橙 */
+        .tag-net { background-color: #dbeafe; color: #1e40af; }  /* 網路 - 藍 */
+
+        /* --- Action Area --- */
+        .btn-action {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: transform 0.1s;
+        }
+        .btn-action:active {
+            transform: scale(0.98);
+        }
+
+        /* --- Explanation Section Styling --- */
+        .explanation-card {
+            background-color: #f8fafc;
+            border-left: 5px solid var(--primary-color);
+            border-radius: 8px;
+        }
+
+        .step-badge {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+
+        .concept-box {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .trap-box {
+            background-color: #fff1f2;
+            border-left: 4px solid var(--error-color);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .mnemonic-box {
+            background-color: var(--highlight-color);
+            border: 2px dashed #facc15;
+            border-radius: 12px;
+            color: #854d0e;
+        }
+
+        /* --- CUSTOM COLLAPSE IMPLEMENTATION (Replaces Bootstrap Collapse) --- */
+        .custom-collapse {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-out;
+            visibility: hidden; /* Ensure it doesn't take clicks when hidden */
+        }
+        
+        .custom-collapse.show {
+            max-height: 2500px; /* Arbitrary large value to accommodate content */
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Chevron Rotation */
+        .accordion-btn-custom .fa-chevron-down {
+            transition: transform 0.3s ease;
+        }
+        .accordion-btn-custom[aria-expanded="true"] .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        /* --- Self Check Details Styling --- */
+        .self-check-item details {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+        .self-check-item details[open] {
+            background: #fff;
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .self-check-item summary {
+            padding: 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            list-style: none; /* Hide default arrow */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .self-check-item summary::after {
+            content: '\f078'; /* FontAwesome chevron-down */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.2s;
+        }
+        .self-check-item details[open] summary::after {
+            transform: rotate(180deg);
+        }
+        .self-check-content {
+            padding: 0 1rem 1rem 1rem;
+            color: var(--success-color);
+            font-weight: 500;
+            border-top: 1px solid #f1f5f9;
+            margin-top: 0.5rem;
+            padding-top: 0.75rem;
+        }
+        
+        /* Disable interaction styles */
+        .disabled {
+            pointer-events: none;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="quiz-container" id="quiz-top">
+        
+        <!-- 1. Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+            <div>
+                <span class="badge bg-secondary mb-1">Q28</span>
+                <div class="d-flex gap-2 mt-1">
+                    <span class="tag tag-mgmt">資安管理</span>
+                    <span class="tag tag-net">滲透測試</span>
+                </div>
+            </div>
+            <div id="status-indicator" class="text-secondary fw-bold">
+                <i class="fa-regular fa-circle-question me-1"></i> 作答中
+            </div>
+        </div>
+
+        <!-- 2. Context -->
+        <div class="alert alert-light border shadow-sm mb-4">
+            <i class="fa-solid fa-crosshairs text-primary me-2"></i>
+            <strong>情境：</strong> 您正在審查一份關於企業網路安全滲透測試的規劃書，其中列出了各種測試目標的定義。請運用您的專業知識，找出定義<strong>錯誤</strong>的項目。
+        </div>
+
+        <!-- 3. Question Area -->
+        <div class="mb-4">
+            <h5 class="fw-bold mb-3 lh-base">
+                28. 網路安全滲透測試的目標包括一切與網路相關的基礎設施，包含網路裝置、作業系統、實體安全、應用程式、管理制度等。<br>
+                下列敘述<span class="text-danger fw-bolder text-decoration-underline">哪些錯誤</span>？（複選）
+            </h5>
+
+            <!-- Options Container (Content will be injected by JS) -->
+            <div id="options-container" class="d-flex flex-column gap-2">
+                <!-- Options will be rendered here -->
+            </div>
+        </div>
+
+        <!-- 4. Action Area -->
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-5 mb-3">
+            <button id="submit-btn" class="btn btn-primary btn-action px-5 py-2 rounded-pill shadow-sm">
+                <i class="fa-solid fa-paper-plane me-2"></i> 送出答案
+            </button>
+            <button id="retry-btn" class="btn btn-outline-secondary btn-action px-5 py-2 rounded-pill d-none">
+                <i class="fa-solid fa-rotate-right me-2"></i> 重新挑戰
+            </button>
+        </div>
+
+        <!-- 5. Feedback & Explanation (Hidden initially) -->
+        <div id="feedback-section" class="d-none animate-fade-in">
+            
+            <!-- Result Banner -->
+            <div id="result-banner" class="alert text-center fw-bold mb-4" role="alert">
+                <!-- Dynamic Content -->
+            </div>
+
+            <!-- Detailed Explanation Accordion (Custom Implementation) -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white border-bottom-0 pt-3">
+                    <!-- Changed to id="btn-explanation" and removed data-bs attributes to prevent conflict -->
+                    <button id="btn-explanation" class="btn btn-link accordion-btn-custom text-decoration-none text-dark fw-bold w-100 text-start d-flex justify-content-between align-items-center" type="button" aria-expanded="false">
+                        <span><i class="fa-solid fa-book-open me-2 text-primary"></i> 深度解析與觀念重建 (點擊展開)</span>
+                        <i class="fa-solid fa-chevron-down text-secondary"></i>
+                    </button>
+                </div>
+                <!-- Changed class to custom-collapse -->
+                <div id="explanation-content" class="custom-collapse">
+                    <div class="card-body pt-0 px-4 pb-4">
+                        
+                        <!-- Step 1 & 2: Analysis -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold"><span class="step-badge">第一步</span>找關鍵字 & <span class="step-badge">第二步</span>白話翻譯</h6>
+                            <div class="concept-box text-secondary">
+                                <ul class="mb-0 ps-3">
+                                    <li class="mb-2"><strong>關鍵字：</strong>網路安全滲透測試、目標包括、下列敘述哪些錯誤。</li>
+                                    <li><strong>白話翻譯：</strong>這題在問：「滲透測試會檢查很多東西，像設備、系統、機房、程式、制度。下面這些對它們的定義，哪些是<strong>張冠李戴</strong>或<strong>觀念錯誤</strong>的？」</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Logic -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold"><span class="step-badge">第三步</span>解題思路</h6>
+                            <div class="concept-box">
+                                <p class="mb-2"><strong><i class="fa-solid fa-circle-nodes text-primary me-1"></i> 原理與規則：</strong></p>
+                                <p>滲透測試是「整體資安風險評估」。雖然包含多個面向，但每個項目都有專屬定義，不能混用。</p>
+                                <p class="mb-1"><strong><i class="fa-solid fa-building-user text-primary me-1"></i> 生活例子：</strong></p>
+                                <p class="text-muted small mb-0">就像檢查公司安全：門禁（實體）≠ 員工手冊（制度）≠ 工作軟體（應用程式）。如果把「員工手冊」說成是「負責鎖門的裝置」，那就是觀念錯誤。</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Option Analysis -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold"><span class="step-badge">第四步</span>選項分析</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item px-0">
+                                    <span class="badge bg-success-subtle text-success border border-success me-2">正確敘述</span>
+                                    <strong>(A) 網路裝置：</strong>包含路由器、交換機、防火牆等。<br>
+                                    <small class="text-muted">👉 定義無誤，這些都是負責連線的實體。</small>
+                                </li>
+                                <li class="list-group-item px-0 bg-red-50">
+                                    <span class="badge bg-danger text-white me-2">本題答案(錯誤敘述)</span>
+                                    <strong>(B) 實體安全...是資訊安全中最重要的目標：</strong><br>
+                                    <small class="text-danger">👉 <strong>錯誤點：</strong>過度武斷。資安講求 CIA（機密性、完整性、可用性）平衡，沒有所謂「最重要」。軟體有漏洞，機房再堅固也沒用。</small>
+                                </li>
+                                <li class="list-group-item px-0 bg-red-50">
+                                    <span class="badge bg-danger text-white me-2">本題答案(錯誤敘述)</span>
+                                    <strong>(C) 應用程式是管理與控制電腦軟硬體資源...：</strong><br>
+                                    <small class="text-danger">👉 <strong>錯誤點：</strong>偷換概念。這是在描述「作業系統 (OS)」。應用程式是提供使用者功能用的。</small>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <span class="badge bg-success-subtle text-success border border-success me-2">正確敘述</span>
+                                    <strong>(D) 管理制度：</strong>對使用者提出的要求與限制。<br>
+                                    <small class="text-muted">👉 定義無誤，如資安政策、帳號規範。</small>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Supplement & Traps -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="bg-light p-3 rounded h-100 border">
+                                    <h6 class="fw-bold text-dark"><i class="fa-solid fa-book me-2 text-primary"></i>觸類旁通（舉一反三）</h6>
+                                    <ul class="small ps-3 mb-0 text-secondary">
+                                        <li class="mb-2">若題目把「作業系統」描述成「提供企業業務流程功能」，也是錯（那是應用程式）。</li>
+                                        <li>若把「管理制度」說成「防火牆規則」，則是技術與制度混淆。</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="trap-box h-100">
+                                    <h6 class="fw-bold text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>常見陷阱與盲點</h6>
+                                    <ul class="small ps-3 mb-0 text-danger-emphasis">
+                                        <li class="mb-2"><strong>心理盲點：</strong>看到「最重要」這種絕對字眼容易被帶走。考試最愛用這種極端詞出題。</li>
+                                        <li><strong>避坑指南：</strong>看到「最重要、一定、全部」，先提高警覺，打個問號。</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mnemonic -->
+                        <div class="mnemonic-box p-3 text-center fw-bold">
+                            <i class="fa-solid fa-lightbulb me-2 text-warning"></i> 記憶金句：
+                            <br>「管硬體的是 OS，用來工作的才是 App」
+                            <br>「資安沒有最重要，只有缺一不可」
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Self Check (Q&A Format) -->
+            <div class="card border-0 shadow-none bg-transparent">
+                <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-clipboard-check me-2"></i> 自我檢測 (點擊題目看答案)</h6>
+                
+                <div class="self-check-item">
+                    <details>
+                        <summary>1. 如果題目把「作業系統」說成「提供企業業務流程功能」，正確嗎？</summary>
+                        <div class="self-check-content">
+                            <i class="fa-solid fa-circle-check me-2"></i>不正確，那是應用程式的定義。
+                        </div>
+                    </details>
+                </div>
+
+                <div class="self-check-item">
+                    <details>
+                        <summary>2. 滲透測試只測系統漏洞，不測管理制度，對嗎？</summary>
+                        <div class="self-check-content">
+                            <i class="fa-solid fa-circle-check me-2"></i>不對，管理制度（如人員資安意識）也是滲透測試的重要評估範圍。
+                        </div>
+                    </details>
+                </div>
+
+                <div class="self-check-item">
+                    <details>
+                        <summary>3. 為什麼考試不會說哪一個資安面向「最重要」？</summary>
+                        <div class="self-check-content">
+                            <i class="fa-solid fa-circle-check me-2"></i>因為資安是整體防護（木桶理論），任何一環缺失都會造成風險，缺一不可。
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- JavaScript Logic -->
+<script>
+    // --- Data ---
+    const quizData = {
+        correctIds: ['B', 'C'], 
+        options: [
+            { id: 'A', text: '(A) 網路裝置是包含所有能夠連接到網路的各種實體，像是路由器、交換機、防火牆、個人電腦等' },
+            { id: 'B', text: '(B) 實體安全主要指的是機房環境、通訊設備等，是資訊安全中最重要的目標' },
+            { id: 'C', text: '(C) 應用程式是管理與控制電腦軟硬體資源的電腦程式' },
+            { id: 'D', text: '(D) 管理制度指的是為了保障網路安全對使用者提出的要求與限制' }
+        ]
+    };
+
+    // --- State ---
+    let shuffledOptions = [];
+    let isSubmitted = false;
+
+    // --- DOM Elements ---
+    const optionsContainer = document.getElementById('options-container');
+    const submitBtn = document.getElementById('submit-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    const feedbackSection = document.getElementById('feedback-section');
+    const resultBanner = document.getElementById('result-banner');
+    const statusIndicator = document.getElementById('status-indicator');
+    
+    // Custom Toggle Elements
+    const btnExplanation = document.getElementById('btn-explanation');
+    const explanationContent = document.getElementById('explanation-content');
+
+    // --- Init ---
+    function init() {
+        shuffledOptions = [...quizData.options].sort(() => Math.random() - 0.5);
+        renderOptions();
+        
+        submitBtn.addEventListener('click', handleSubmit);
+        retryBtn.addEventListener('click', handleReset);
+        
+        // Custom Toggle Listener
+        btnExplanation.addEventListener('click', toggleExplanation);
+    }
+
+    // --- Render ---
+    function renderOptions() {
+        optionsContainer.innerHTML = '';
+        shuffledOptions.forEach(opt => {
+            const card = document.createElement('div');
+            card.className = 'option-card';
+            card.setAttribute('data-id', opt.id);
+            
+            card.innerHTML = `
+                <input class="form-check-input option-input" type="checkbox" name="quizOption" id="opt-${opt.id}" value="${opt.id}">
+                <label class="form-check-label w-100 cursor-pointer user-select-none" for="opt-${opt.id}">
+                    ${opt.text}
+                </label>
+            `;
+
+            card.addEventListener('click', (e) => {
+                if(isSubmitted) return;
+                if(e.target !== card.querySelector('input')) {
+                    const checkbox = card.querySelector('input');
+                    checkbox.checked = !checkbox.checked;
+                }
+                if(card.querySelector('input').checked) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+
+            optionsContainer.appendChild(card);
+        });
+    }
+
+    // --- Logic ---
+    function handleSubmit() {
+        const selectedIds = Array.from(document.querySelectorAll('input[name="quizOption"]:checked')).map(el => el.value);
+
+        if (selectedIds.length === 0) {
+            alert('請至少選擇一個選項！');
+            return;
+        }
+
+        isSubmitted = true;
+        disableInputs();
+
+        const isCorrect = selectedIds.length === quizData.correctIds.length && 
+                          selectedIds.every(id => quizData.correctIds.includes(id));
+
+        showFeedback(isCorrect, selectedIds);
+    }
+
+    function disableInputs() {
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.classList.add('disabled');
+            card.querySelector('input').disabled = true;
+        });
+        submitBtn.classList.add('d-none');
+        retryBtn.classList.remove('d-none');
+    }
+
+    function showFeedback(isCorrect, selectedIds) {
+        feedbackSection.classList.remove('d-none');
+        
+        statusIndicator.innerHTML = isCorrect 
+            ? '<span class="text-success"><i class="fa-solid fa-circle-check"></i> 答對了</span>'
+            : '<span class="text-danger"><i class="fa-solid fa-circle-xmark"></i> 答錯了</span>';
+
+        if (isCorrect) {
+            resultBanner.className = 'alert alert-success text-center fw-bold mb-4';
+            resultBanner.innerHTML = '<i class="fa-solid fa-trophy me-2"></i>恭喜！完全正確！觀念非常清晰！';
+        } else {
+            resultBanner.className = 'alert alert-danger text-center fw-bold mb-4';
+            resultBanner.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-2"></i>差一點！請參考下方解析找出盲點。';
+        }
+
+        document.querySelectorAll('.option-card').forEach(card => {
+            const id = card.getAttribute('data-id');
+            const isSelected = selectedIds.includes(id);
+            const isActuallyCorrect = quizData.correctIds.includes(id);
+            
+            if (isActuallyCorrect) {
+                card.classList.add('correct-answer');
+                const label = card.querySelector('label');
+                label.innerHTML += ' <span class="badge bg-success ms-2"><i class="fa-solid fa-check"></i> 正解</span>';
+            } else if (isSelected) {
+                card.classList.add('wrong-choice');
+                const label = card.querySelector('label');
+                label.innerHTML += ' <span class="badge bg-danger ms-2"><i class="fa-solid fa-xmark"></i> 誤選</span>';
+            }
+        });
+
+        feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // --- Custom Toggle Logic ---
+    function toggleExplanation() {
+        const isExpanded = btnExplanation.getAttribute('aria-expanded') === 'true';
+        
+        if (isExpanded) {
+            // Close
+            explanationContent.classList.remove('show');
+            btnExplanation.setAttribute('aria-expanded', 'false');
+        } else {
+            // Open
+            explanationContent.classList.add('show');
+            btnExplanation.setAttribute('aria-expanded', 'true');
+        }
+    }
+
+    function handleReset() {
+        isSubmitted = false;
+        shuffledOptions.sort(() => Math.random() - 0.5);
+        
+        feedbackSection.classList.add('d-none');
+        submitBtn.classList.remove('d-none');
+        retryBtn.classList.add('d-none');
+        statusIndicator.innerHTML = '<i class="fa-regular fa-circle-question me-1"></i> 作答中';
+        
+        // Reset Self-Check Details
+        document.querySelectorAll('details').forEach(el => el.removeAttribute('open'));
+
+        // Reset Main Explanation (Custom Toggle)
+        explanationContent.classList.remove('show');
+        btnExplanation.setAttribute('aria-expanded', 'false');
+
+        renderOptions();
+        document.getElementById('quiz-top').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    init();
+
+</script>
+
+<!-- Bootstrap Bundle JS -->
+<!-- Fixed integrity attribute -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+</body>
+</html>

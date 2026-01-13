@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安事件應變優先順序 - 全能解析版</title>
+    
+    <!-- 引入外部資源 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- 自定義樣式與 Tokens -->
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+            --soft-yellow: #fef9c3;
+            --success-green: #059669;
+            --danger-red: #dc2626;
+            --text-main: #1f2937;
+            --bg-light: #f3f4f6;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        /* 標籤樣式 */
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .tag-manage { background-color: #ffedd5; color: #c2410c; }
+        .tag-tech { background-color: #fee2e2; color: #b91c1c; }
+        .tag-incident { background-color: #dbeafe; color: #1e40af; }
+
+        /* 選項樣式 */
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-label:hover:not(.disabled) {
+            border-color: var(--primary-blue);
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .option-label.selected {
+            border-color: var(--primary-blue);
+            background-color: #eff6ff;
+            font-weight: 500;
+        }
+
+        .option-label.correct {
+            border-color: var(--success-green);
+            background-color: #d1fae5;
+            color: var(--success-green);
+        }
+
+        .option-label.wrong {
+            border-color: var(--danger-red);
+            background-color: #fee2e2;
+            color: var(--danger-red);
+            text-decoration: line-through;
+        }
+
+        .option-input {
+            margin-right: 1rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: var(--primary-blue);
+        }
+
+        /* 按鈕樣式 */
+        .btn-action {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: transform 0.1s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-submit {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+        .btn-submit:hover { background-color: #1d4ed8; }
+        
+        .btn-retry {
+            background-color: #4b5563;
+            color: white;
+            display: none;
+        }
+        .btn-retry:hover { background-color: #374151; }
+
+        .btn-action:active { transform: scale(0.98); }
+
+        /* 動畫 */
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 內容卡片樣式 */
+        .content-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        .content-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .section-title i { margin-right: 0.5rem; }
+
+        .keyword-box {
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 生活例子卡片 */
+        .analogy-card {
+            background: linear-gradient(to right, #f0f9ff, #e0f2fe);
+            border-left: 4px solid #0ea5e9;
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+
+        /* 陷阱卡片 */
+        .trap-card {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        /* 自我檢測 Q&A 樣式 */
+        .qa-item {
+            margin-bottom: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .qa-question {
+            background-color: #f9fafb;
+            padding: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .qa-question:hover { background-color: #f3f4f6; }
+        .qa-answer {
+            padding: 1rem;
+            background-color: #fff;
+            border-top: 1px solid #e5e7eb;
+            color: #4b5563;
+        }
+        
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details > summary::after {
+            content: '\f078';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.3s;
+            color: #9ca3af;
+        }
+        details[open] > summary::after { transform: rotate(180deg); }
+
+        @media (max-width: 768px) {
+            .main-container { margin: 1rem; padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container" id="quiz-app">
+        <!-- 1. Header -->
+        <header class="mb-6 border-b pb-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-gray-500 text-sm font-mono mb-1 block">Question #22</span>
+                    <h1 class="text-2xl font-bold text-gray-800">資安事件應變優先順序</h1>
+                </div>
+                <div id="status-badge" class="px-3 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-600">
+                    未作答
+                </div>
+            </div>
+            <div class="mt-3">
+                <span class="tag tag-incident">資安事件應變</span>
+                <span class="tag tag-manage">帳號管理</span>
+                <span class="tag tag-tech">存取控制</span>
+            </div>
+        </header>
+
+        <!-- 2. Context (情境) -->
+        <section class="mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
+            <div class="flex flex-col md:flex-row gap-4 items-start">
+                <div class="w-full md:w-1/3">
+                    <img src="https://i.meee.com.tw/R39y2Eg.png" alt="Server Administrator checking logs" class="w-full h-auto rounded-lg shadow-sm object-cover border border-gray-200">
+                </div>
+                <div class="w-full md:w-2/3">
+                    <h3 class="font-bold text-blue-800 mb-2"><i class="fas fa-info-circle mr-2"></i>情境描述</h3>
+                    <p class="text-gray-700 text-sm md:text-base">
+                        某機關伺服器管理員於系統例行巡檢時，發現應用程式日誌中出現「Unauthorized data access attempt」等告警訊息。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Question & Options -->
+        <section class="mb-8">
+            <h2 class="text-lg md:text-xl font-bold mb-4 text-gray-800">
+                22. 如附圖與情境所示，下列何者是<span class="text-red-600 border-b-2 border-red-200">最優先</span>的應變措施？
+            </h2>
+            <div id="options-container">
+                <!-- JS Generated -->
+            </div>
+        </section>
+
+        <!-- 4. Action Area -->
+        <div class="mb-8">
+            <button id="btn-submit" class="btn-action btn-submit" onclick="submitAnswer()">
+                確認送出 <i class="fas fa-paper-plane ml-2"></i>
+            </button>
+            <button id="btn-retry" class="btn-action btn-retry" onclick="resetQuiz()">
+                重新挑戰 <i class="fas fa-redo ml-2"></i>
+            </button>
+        </div>
+
+        <!-- 5. Feedback Area -->
+        <div id="feedback-area" class="hidden mb-6 p-4 rounded-xl text-center font-bold text-lg"></div>
+
+        <!-- 6. Full Explanation Area -->
+        <section id="explanation-area" class="hidden fade-in-up">
+            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                <h3 class="text-2xl font-bold mb-6 text-center text-gray-800 border-b pb-4">
+                    全能解析與觀念重構
+                </h3>
+
+                <!-- 第一步：找關鍵字 -->
+                <div class="content-section">
+                    <h4 class="section-title"><i class="fas fa-search text-blue-500"></i> 第一步：找關鍵字</h4>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <div class="keyword-box">
+                            <span class="text-red-600 font-bold">系統例行巡檢</span>
+                            <p class="text-xs text-gray-500 mt-1">管理員主動發現異常，非被動通報。</p>
+                        </div>
+                        <div class="keyword-box">
+                            <span class="text-red-600 font-bold">Unauthorized data access attempt</span>
+                            <p class="text-xs text-gray-500 mt-1">未授權存取 → 存取控制、帳號權限問題。</p>
+                        </div>
+                        <div class="keyword-box">
+                            <span class="text-red-600 font-bold">應用程式日誌</span>
+                            <p class="text-xs text-gray-500 mt-1">線索來自系統 Log，非外部防火牆或網路設備。</p>
+                        </div>
+                        <div class="keyword-box">
+                            <span class="text-red-600 font-bold">最優先</span>
+                            <p class="text-xs text-gray-500 mt-1">考順序：先止血/確認範圍，再談改善。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 第二步：白話翻譯 -->
+                <div class="content-section">
+                    <h4 class="section-title"><i class="fas fa-language text-purple-500"></i> 第二步：白話翻譯</h4>
+                    <div class="bg-white p-4 rounded-lg border-l-4 border-purple-500 shadow-sm">
+                        <p class="font-medium text-gray-700">
+                            「管理員在看系統日誌時，發現有人（或程式）在『不該存取資料的情況下嘗試存取』。現在第一步最重要的是要先做哪件事？」
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 第三步：解題思路 -->
+                <div class="content-section">
+                    <h4 class="section-title"><i class="fas fa-brain text-yellow-500"></i> 第三步：解題思路</h4>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h5 class="font-bold text-gray-700 mb-2">1. 判斷事件性質</h5>
+                            <p class="text-sm text-gray-600">未授權存取 (Unauthorized Access) → 高度懷疑是「帳號」或「權限」被濫用。</p>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-gray-700 mb-2">2. 應變原則（為什麼？）</h5>
+                            <p class="text-sm text-gray-600">第一時間要做的是「確認誰在搞鬼」以及「這個帳號還活著嗎」。這是初步鑑識與控管。</p>
+                        </div>
+                        
+                        <!-- 生活例子 -->
+                        <div class="analogy-card">
+                            <h5 class="font-bold text-blue-800 mb-2"><i class="fas fa-home"></i> 生活例子：門禁卡的比喻</h5>
+                            <p class="text-sm text-blue-900">
+                                就像你發現家裡門禁紀錄顯示「有人用錯誤方式嘗試開門」：<br>
+                                第一件事不是去換整棟大樓的門鎖（全面評估），也不是去罵保全（檢查防毒），<br>
+                                而是先確認<strong>「是不是誰的門禁卡被偷了？誰還有權限進來？」</strong>（清查帳號）。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 第四步：選項分析 -->
+                <div class="content-section">
+                    <h4 class="section-title"><i class="fas fa-list-check text-green-500"></i> 第四步：選項分析</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="text-red-500 font-bold mr-2 w-8">(A)</span>
+                            <div>
+                                <span class="font-bold text-gray-700 line-through">確定防毒軟體版本</span>
+                                <p class="text-sm text-gray-500">這是維運層面。版本新舊無法解釋「誰在偷看資料」。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start bg-green-50 p-2 rounded">
+                            <span class="text-green-600 font-bold mr-2 w-8">(B)</span>
+                            <div>
+                                <span class="font-bold text-green-700">清查所有管理員帳號使用狀態</span>
+                                <p class="text-sm text-green-800">正解。未授權存取最直接關聯的是帳號。需檢查有無不明啟用、離職未停用或異常登入。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-red-500 font-bold mr-2 w-8">(C)</span>
+                            <div>
+                                <span class="font-bold text-gray-700 line-through">進行全面性的網路安全評估</span>
+                                <p class="text-sm text-gray-500">這是中長期作業。火燒眉毛時，不能先做全身健康檢查。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-red-500 font-bold mr-2 w-8">(D)</span>
+                            <div>
+                                <span class="font-bold text-gray-700 line-through">更新防火牆規則以阻擋可疑流量</span>
+                                <p class="text-sm text-gray-500">線索是「應用程式日誌」，不一定是網路流量攻擊（可能是內網或合法通訊埠的非法存取）。且順序在後。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 觀念補充與延伸 & 觸類旁通 -->
+                <div class="content-section">
+                    <h4 class="section-title"><i class="fas fa-book-open text-indigo-500"></i> 觀念補充與觸類旁通</h4>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-indigo-50 p-3 rounded text-sm">
+                            <strong class="block text-indigo-700 mb-1">法條或定義 (白話)</strong>
+                            <ul class="list-disc pl-4 space-y-1">
+                                <li><strong>未授權存取</strong>：未經允許使用帳號或權限存取系統。</li>
+                                <li><strong>事件應變 (Incident Response)</strong>：依序進行確認、控制、調查與改善。本題在「確認/控制」階段。</li>
+                            </ul>
+                        </div>
+                        <div class="bg-indigo-50 p-3 rounded text-sm">
+                            <strong class="block text-indigo-700 mb-1">觸類旁通 (舉一反三)</strong>
+                            <ul class="list-disc pl-4 space-y-1">
+                                <li>若題目改成「已確認帳號遭盜用」，下一步才是封鎖帳號或改密碼。</li>
+                                <li>若題目強調「外部惡意流量攻擊」，防火牆選項才合理。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 常見陷阱與心理盲點 -->
+                <div class="content-section">
+                    <h4 class="section-title"><i class="fas fa-exclamation-triangle text-orange-500"></i> 常見陷阱與避坑指南</h4>
+                    <div class="trap-card">
+                        <ul class="list-disc pl-5 space-y-2 text-sm text-red-800">
+                            <li><strong>心理盲點</strong>：學生常以為「全面評估」聽起來最完整、最好，卻忽略題目問的是「最優先」的時間順序。</li>
+                            <li><strong>避坑指南</strong>：看到「最優先」四個字，先問自己：「哪一個選項可以最快確認風險來源並立即止血？」</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 記憶口訣 -->
+                <div class="mt-4 bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded text-yellow-900 font-medium text-center">
+                    <i class="fas fa-star mr-2"></i> 口訣：「帳號出事，先查人；未授權存取，不先換設備。」
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 7. Self-Check (Q&A Style) -->
+        <section class="mt-6 fade-in-up hidden" id="self-check-area">
+            <h3 class="text-lg font-bold text-gray-700 mb-4 flex items-center">
+                <i class="fas fa-clipboard-check text-blue-500 mr-2"></i> 自我檢測 (點擊題目看答案)
+            </h3>
+            
+            <div class="qa-item">
+                <details>
+                    <summary class="qa-question">
+                        1. 如果日誌顯示的是「大量異常封包從外部 IP 湧入」，最優先措施會改選哪一項？
+                    </summary>
+                    <div class="qa-answer text-sm bg-green-50">
+                        <strong class="text-green-700">參考答案：</strong><br>
+                        應選擇更新防火牆規則或進行流量阻擋。因為問題明確來自「網路層」且具有外部流量特徵，此時防火牆是最有效的阻擋工具。
+                    </div>
+                </details>
+            </div>
+
+            <div class="qa-item">
+                <details>
+                    <summary class="qa-question">
+                        2. 為什麼「全面性網路安全評估」不適合當第一步？
+                    </summary>
+                    <div class="qa-answer text-sm bg-green-50">
+                        <strong class="text-green-700">參考答案：</strong><br>
+                        因為全面評估耗時長、範圍大。在資安事件發生的當下（應變階段），首要任務是「快速止血」與「釐清單一事件原因」，而非進行大規模的健康檢查。
+                    </div>
+                </details>
+            </div>
+
+            <div class="qa-item">
+                <details>
+                    <summary class="qa-question">
+                        3. 如果清查後發現某管理員帳號異常登入，下一步合理措施是什麼？
+                    </summary>
+                    <div class="qa-answer text-sm bg-green-50">
+                        <strong class="text-green-700">參考答案：</strong><br>
+                        立即停用或鎖定該帳號，並強制登出該帳號目前的所有連線，接著進行鑑識調查（查 Log、看動過什麼檔案）。
+                    </div>
+                </details>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        // 題目資料
+        const quizData = {
+            id: 22,
+            correctAnswer: "B",
+            options: [
+                { id: "A", text: "確定防毒軟體版本" },
+                { id: "B", text: "清查所有管理員帳號使用狀態" },
+                { id: "C", text: "進行全面性的網路安全評估" },
+                { id: "D", text: "更新防火牆規則以阻擋可疑流量" }
+            ]
+        };
+
+        const optionsContainer = document.getElementById('options-container');
+        const submitBtn = document.getElementById('btn-submit');
+        const retryBtn = document.getElementById('btn-retry');
+        const feedbackArea = document.getElementById('feedback-area');
+        const explanationArea = document.getElementById('explanation-area');
+        const selfCheckArea = document.getElementById('self-check-area');
+        const statusBadge = document.getElementById('status-badge');
+        const appContainer = document.getElementById('quiz-app');
+
+        let selectedOptionId = null;
+
+        function init() { renderOptions(); }
+
+        function renderOptions() {
+            const shuffledOptions = [...quizData.options].sort(() => Math.random() - 0.5);
+            optionsContainer.innerHTML = '';
+            shuffledOptions.forEach(opt => {
+                const label = document.createElement('label');
+                label.className = 'option-label';
+                label.setAttribute('data-id', opt.id);
+                label.onclick = () => selectOption(opt.id, label);
+                label.innerHTML = `
+                    <input type="radio" name="quiz-option" class="option-input" value="${opt.id}">
+                    <span class="text-gray-700 font-medium">${opt.text}</span>
+                `;
+                optionsContainer.appendChild(label);
+            });
+        }
+
+        function selectOption(id, element) {
+            if (submitBtn.style.display === 'none') return;
+            document.querySelectorAll('.option-label').forEach(el => {
+                el.classList.remove('selected');
+                el.querySelector('input').checked = false;
+            });
+            element.classList.add('selected');
+            element.querySelector('input').checked = true;
+            selectedOptionId = id;
+        }
+
+        function submitAnswer() {
+            if (!selectedOptionId) { alert('請先選擇一個答案！'); return; }
+
+            document.querySelectorAll('.option-input').forEach(input => input.disabled = true);
+            document.querySelectorAll('.option-label').forEach(label => label.classList.add('disabled'));
+
+            const isCorrect = selectedOptionId === quizData.correctAnswer;
+            const correctOptionEl = document.querySelector(`.option-label[data-id="${quizData.correctAnswer}"]`);
+            const selectedOptionEl = document.querySelector(`.option-label[data-id="${selectedOptionId}"]`);
+
+            if (isCorrect) {
+                statusBadge.textContent = "答對了";
+                statusBadge.className = "px-3 py-1 rounded-full text-sm font-bold bg-green-100 text-green-700";
+                feedbackArea.textContent = "🎉 正確！觀念非常清晰！";
+                feedbackArea.className = "mb-6 p-4 rounded-xl text-center font-bold text-lg bg-green-100 text-green-700 fade-in-up";
+                selectedOptionEl.classList.add('correct');
+            } else {
+                statusBadge.textContent = "答錯了";
+                statusBadge.className = "px-3 py-1 rounded-full text-sm font-bold bg-red-100 text-red-700";
+                feedbackArea.textContent = "💪 別氣餒，看看詳細解析找出盲點！";
+                feedbackArea.className = "mb-6 p-4 rounded-xl text-center font-bold text-lg bg-red-100 text-red-700 fade-in-up";
+                selectedOptionEl.classList.add('wrong');
+                correctOptionEl.classList.add('correct');
+            }
+
+            submitBtn.style.display = 'none';
+            retryBtn.style.display = 'block';
+            feedbackArea.classList.remove('hidden');
+            explanationArea.classList.remove('hidden');
+            selfCheckArea.classList.remove('hidden');
+
+            feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function resetQuiz() {
+            selectedOptionId = null;
+            submitBtn.style.display = 'block';
+            retryBtn.style.display = 'none';
+            feedbackArea.classList.add('hidden');
+            explanationArea.classList.add('hidden');
+            selfCheckArea.classList.add('hidden');
+            statusBadge.textContent = "未作答";
+            statusBadge.className = "px-3 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-600";
+            
+            // 關閉所有自我檢測的答案
+            document.querySelectorAll('details').forEach(d => d.removeAttribute('open'));
+
+            renderOptions();
+            appContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 23 題 - 郵件伺服器資安事件防範</title>
+    
+    <!-- 引入 Google Fonts: Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- 引入 FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        :root {
+            /* 認知友善配色系統 */
+            --primary-color: #2563eb;       /* 專業藍 */
+            --primary-hover: #1d4ed8;
+            --success-color: #059669;       /* 正確綠 */
+            --error-color: #dc2626;         /* 錯誤紅 */
+            --highlight-bg: #fef9c3;        /* 記憶高亮黃 */
+            --text-main: #1f2937;
+            --text-secondary: #4b5563;
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            
+            /* 標籤色 */
+            --tag-gray: #6b7280;
+            --tag-green: #10b981;
+            --tag-red: #ef4444;
+            --tag-orange: #f59e0b;
+            --tag-blue: #3b82f6;
+
+            /* 陰影 */
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* 容器規範 */
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background-color: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
+            padding: 40px;
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 16px;
+        }
+
+        .question-number {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .tag-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            font-size: 0.85rem;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .tag-manage { background-color: var(--tag-orange); }
+        .tag-tech { background-color: var(--tag-red); }
+
+        /* 情境卡片 */
+        .context-card {
+            background-color: #eff6ff;
+            border-left: 5px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .context-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        /* 關鍵字高亮樣式 */
+        .kw-highlight {
+            background-color: #dbeafe;
+            color: #1e40af;
+            font-weight: 600;
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+
+        /* 題目區 */
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-main);
+        }
+
+        .highlight-negative {
+            color: var(--error-color);
+            font-weight: 800;
+            text-decoration: underline;
+        }
+
+        /* 選項區 */
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 32px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-item {
+            position: relative;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: white;
+            font-size: 1.05rem;
+        }
+
+        .option-label:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f9ff;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            height: 24px;
+            width: 24px;
+            background-color: #fff;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            margin-right: 16px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            margin-top: 2px;
+        }
+
+        .option-input:checked ~ .option-label {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+            font-weight: 500;
+        }
+
+        .option-input:checked ~ .option-label .checkmark {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .checkmark:after {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: white;
+            font-size: 14px;
+            display: none;
+        }
+
+        .option-input:checked ~ .option-label .checkmark:after {
+            display: block;
+        }
+
+        .option-input:disabled ~ .option-label {
+            cursor: not-allowed;
+            opacity: 0.8;
+            transform: none !important;
+        }
+
+        .option-input.is-wrong ~ .option-label {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+        }
+        
+        .option-input.is-correct ~ .option-label {
+            border-color: var(--success-color);
+            background-color: #ecfdf5;
+        }
+
+        /* Action Area */
+        .action-area {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            flex: 2;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+            transform: scale(0.98);
+        }
+
+        .btn-retry {
+            background-color: #e5e7eb;
+            color: var(--text-secondary);
+            flex: 1;
+            display: none;
+        }
+
+        .btn-retry:hover {
+            background-color: #d1d5db;
+        }
+
+        /* Feedback */
+        .feedback-area {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .feedback-correct {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .feedback-wrong {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        /* 深度解析卡片 - 擴充樣式 */
+        .explanation-card {
+            margin-top: 32px;
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .explanation-header {
+            background-color: #f9fafb;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explanation-content {
+            padding: 24px;
+        }
+
+        /* 解析步驟區塊 */
+        .step-block {
+            margin-bottom: 24px;
+            border-bottom: 1px dashed #e5e7eb;
+            padding-bottom: 16px;
+        }
+        .step-block:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .step-title {
+            font-size: 1rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .concept-text {
+            font-size: 1rem;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .highlight-box {
+            background-color: var(--highlight-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #854d0e;
+            font-weight: 500;
+        }
+
+        /* 項目列表樣式 */
+        .detail-list {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+        .detail-list li {
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+
+        /* 生活例子方塊 */
+        .example-box {
+            background-color: #f3f4f6;
+            border-left: 4px solid #9ca3af;
+            padding: 12px;
+            margin-top: 12px;
+            border-radius: 0 4px 4px 0;
+            font-size: 0.95rem;
+            color: #374151;
+        }
+
+        /* 記憶口訣 */
+        .mnemonic-box {
+            background-color: #ecfdf5;
+            border: 2px dashed var(--success-color);
+            padding: 16px;
+            border-radius: 12px;
+            color: #047857;
+            font-weight: 700;
+            text-align: center;
+            font-size: 1.1rem;
+            margin-top: 24px;
+        }
+
+        /* 常見陷阱區 */
+        .trap-box {
+            background-color: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+        .trap-title {
+            color: #b91c1c;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        /* 自我檢測 - Q&A 模式 */
+        .self-check {
+            margin-top: 32px;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 24px;
+        }
+
+        .self-check-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+
+        .qa-item {
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .qa-summary {
+            background-color: #f9fafb;
+            padding: 12px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-main);
+        }
+        
+        .qa-summary:hover {
+            background-color: #f3f4f6;
+        }
+
+        .qa-summary::after {
+            content: '\f078'; /* fa-chevron-down */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 0.3s;
+            font-size: 0.8rem;
+            color: var(--tag-gray);
+        }
+
+        details[open] .qa-summary::after {
+            transform: rotate(180deg);
+        }
+
+        .qa-answer {
+            padding: 16px;
+            background-color: #fff;
+            color: var(--success-color);
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.95rem;
+        }
+
+        /* RWD */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 20px; }
+            .header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .btn { min-height: 48px; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <header class="header">
+        <div class="question-number">第 23 題 - 資安事件根因分析</div>
+        <div class="tag-group">
+            <span class="tag tag-manage">資安管理</span>
+            <span class="tag tag-tech">預防控制</span>
+        </div>
+    </header>
+
+    <!-- Context Card -->
+    <div class="context-card">
+        <span class="context-label"><i class="fa-solid fa-magnifying-glass"></i> 第一步：找關鍵字（情境）</span>
+        H 公司於上周發生公司 <span class="kw-highlight">email 超過 4 個小時無法收發</span> 的資安事件。經 MIS 處理發現：
+        <ul style="margin: 8px 0 8px 20px; padding: 0;">
+            <li>直接原因：郵件伺服器因硬碟空間不足無法運作。</li>
+            <li>觸發點：一封寄給 <span class="kw-highlight">全公司 2000 位同仁</span> 的公告，夾帶 <span class="kw-highlight">4GB 附檔</span>。</li>
+            <li>檢查結果：防毒與沙箱檢查 <span class="kw-highlight">並無病毒</span>。</li>
+            <li>根本原因：確認為 <span class="kw-highlight">人員操作失誤</span> 所致。</li>
+        </ul>
+    </div>
+
+    <!-- Question -->
+    <div class="question-section" id="question-anchor">
+        <div class="question-text">
+            請問下列哪些措施可以<span class="highlight-negative">防範相關事件再度發生</span>？（複選）
+        </div>
+
+        <form id="quiz-form">
+            <ul class="options-list" id="options-container">
+                <!-- JS 生成選項 -->
+            </ul>
+        </form>
+    </div>
+
+    <!-- Action Area -->
+    <div class="action-area">
+        <button class="btn btn-submit" id="submit-btn" onclick="checkAnswer()">
+            <i class="fa-solid fa-paper-plane"></i> 送出答案
+        </button>
+        <button class="btn btn-retry" id="retry-btn" onclick="resetQuiz()">
+            <i class="fa-solid fa-rotate-right"></i> 重新挑戰
+        </button>
+    </div>
+
+    <!-- Feedback Area -->
+    <div id="feedback-area" class="feedback-area"></div>
+
+    <!-- Explanation Card -->
+    <div class="explanation-card" id="explanation-card">
+        <div class="explanation-header">
+            <i class="fa-solid fa-book-open"></i> 深度解析與解題思路
+        </div>
+        <div class="explanation-content">
+
+            <!-- Step 2 -->
+            <div class="step-block">
+                <div class="step-title"><i class="fa-solid fa-language"></i> 第二步：白話翻譯</div>
+                <p class="concept-text">
+                    題目翻譯：有人寄了一封夾帶超大檔案（4GB）的公告信給全公司，結果把郵件伺服器硬碟塞爆，導致公司 email 壞掉 4 小時。這不是病毒，而是<strong>人為操作錯誤</strong>。請問以後要怎麼做，才能<strong>避免再發生一樣的事</strong>？
+                </p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-block">
+                <div class="step-title"><i class="fa-solid fa-lightbulb"></i> 第三步：解題思路</div>
+                <p class="concept-text"><strong>1. 解題步驟：</strong></p>
+                <ul class="detail-list">
+                    <li>找出真正原因：人員不懂操作 + 系統無限制。</li>
+                    <li>思考「預防再發生」：針對「人」要教育，針對「系統」要設限。</li>
+                    <li>排除無效選項：排除只是「事後補救」或「針對錯誤目標（如病毒）」的選項。</li>
+                </ul>
+                <p class="concept-text"><strong>2. 原理與規則：</strong></p>
+                <p class="concept-text">
+                    資安改善原則：「不要只治標，要治本」。
+                    本題本質不是惡意攻擊，而是<strong>人為疏失 (Human Error)</strong> 與缺乏<strong>預防性控制 (Preventive Control)</strong>。
+                </p>
+                <div class="example-box">
+                    <strong><i class="fa-solid fa-mug-hot"></i> 生活例子：</strong><br>
+                    這就像有人把整桶廢油倒進水槽，造成大樓水管堵塞。<br>
+                    解決方法不是「把水管加粗」（選項 A），而是：
+                    1. 教大家不要亂倒（教育訓練）。
+                    2. 在水槽裝濾網或限流裝置（系統限制）。
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step-block">
+                <div class="step-title"><i class="fa-solid fa-list-check"></i> 第四步：選項分析</div>
+                <ul class="detail-list">
+                    <li>
+                        <span style="color:var(--error-color)"><strong>(A) 增購硬碟容量</strong></span>：<br>
+                        錯在哪？這只是「撐大容器」。如果沒有限制，下次有人寄 10GB 檔案，硬碟一樣會爆。這是治標不治本。
+                    </li>
+                    <li>
+                        <span style="color:var(--success-color)"><strong>(B) 加強資安教育訓練</strong></span>：<br>
+                        為什麼對？題目指出是「人員操作失誤」。教育訓練可讓員工知道應用其他方式分享大檔，從「人」解決問題。
+                    </li>
+                    <li>
+                        <span style="color:var(--error-color)"><strong>(C) 增加防火牆檢查</strong></span>：<br>
+                        錯在哪？防火牆管的是「網路進出」。本案是「內部合法流量」且無病毒，防火牆不是關鍵防線。
+                    </li>
+                    <li>
+                        <span style="color:var(--success-color)"><strong>(D) 增設容量限制</strong></span>：<br>
+                        為什麼對？這是技術防呆。直接限制附件上限（如 20MB），物理上阻絕大檔案塞爆伺服器的可能。
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Extension & Traps -->
+            <div class="step-block">
+                <div class="step-title"><i class="fa-solid fa-graduation-cap"></i> 觀念補充與延伸</div>
+                <p class="concept-text">
+                    <strong>法條/定義：</strong>「預防性控制」是在事件發生前就阻止其發生的措施。
+                </p>
+                <p class="concept-text">
+                    <strong>觸類旁通（舉一反三）：</strong>
+                    若題目改成「外部惡意大量垃圾郵件」，才需考慮郵件過濾或防火牆。
+                    若強調「勒索病毒導致資料遺失」，才需考慮備份與還原。
+                </p>
+                
+                <div class="trap-box">
+                    <div class="trap-title"><i class="fa-solid fa-triangle-exclamation"></i> 常見陷阱與避坑指南</div>
+                    <ul class="detail-list" style="color:#b91c1c;">
+                        <li><strong>心理盲點：</strong>看到「硬碟不足」就直覺選「加硬碟」(A)。</li>
+                        <li><strong>避坑指南：</strong>先問自己：「如果同樣的錯誤再發生一次（又有人寄大檔），這個選項（加硬碟）能阻止它嗎？」答案是不能，所以不選。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Mnemonic -->
+            <div class="mnemonic-box">
+                <i class="fa-solid fa-star"></i> 記憶口訣：
+                「人出錯，先教人；怕塞爆，要限量」
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Self Check (Q visible, A hidden) -->
+    <div class="self-check">
+        <div class="self-check-title"><i class="fa-solid fa-clipboard-question"></i> 自我檢測：遮住答案想一想</div>
+        
+        <details class="qa-item">
+            <summary class="qa-summary">Q1. 如果有人改用雲端硬碟分享連結，而不是寄附件，還會發生同樣問題嗎？</summary>
+            <div class="qa-answer">
+                參考答案：不會。<br>
+                因為郵件伺服器不再負責承載那個 4GB 的大型檔案，流量與儲存壓力轉移到了專門儲存檔案的雲端服務上。
+            </div>
+        </details>
+
+        <details class="qa-item">
+            <summary class="qa-summary">Q2. 為什麼「增加硬碟容量」不是好的預防措施？</summary>
+            <div class="qa-answer">
+                參考答案：因為它無法「阻止」錯誤行為再次發生。<br>
+                它只是延後問題爆發的時間（比如下次寄 10GB 才會爆）。好的預防措施應該要能從根源消除風險。
+            </div>
+        </details>
+
+        <details class="qa-item">
+            <summary class="qa-summary">Q3. 如果題目改成「外部駭客發動 DDoS 攻擊導致郵件癱瘓」，答案還會選教育訓練嗎？</summary>
+            <div class="qa-answer">
+                參考答案：不會。<br>
+                如果是 DDoS 攻擊，屬於外部惡意流量，這時就該選防火牆、流量清洗等技術防禦措施，而非員工教育訓練。
+            </div>
+        </details>
+    </div>
+</div>
+
+<script>
+    // 題目資料
+    const quizData = {
+        correctIds: ['B', 'D'],
+        options: [
+            { id: 'A', text: '儘快增購郵件伺服器的硬碟容量，避免再發生相同空間不足的問題再度發生' },
+            { id: 'B', text: '對員工加強資安教育訓練，避免錯誤的資訊系統操作行為' },
+            { id: 'C', text: '增加防火牆檢查細則，減少大量或敏感資料的傳輸與攻擊事件' },
+            { id: 'D', text: '郵件伺服器增設郵件處理容量限制，阻絕大檔案的傳送服務' }
+        ]
+    };
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function initQuiz() {
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        const shuffledOptions = shuffleArray([...quizData.options]);
+
+        shuffledOptions.forEach(opt => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.innerHTML = `
+                <input type="checkbox" id="opt-${opt.id}" name="quiz-option" value="${opt.id}" class="option-input">
+                <label for="opt-${opt.id}" class="option-label">
+                    <div class="checkmark"></div>
+                    <span>(${opt.id}) ${opt.text}</span>
+                </label>
+            `;
+            container.appendChild(li);
+        });
+
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('explanation-card').style.display = 'none';
+        document.getElementById('submit-btn').style.display = 'flex';
+        document.getElementById('retry-btn').style.display = 'none';
+        
+        // 關閉所有自我檢測的答案
+        document.querySelectorAll('details').forEach(d => d.removeAttribute('open'));
+
+        const inputs = document.querySelectorAll('.option-input');
+        inputs.forEach(input => input.disabled = false);
+    }
+
+    function checkAnswer() {
+        const selectedInputs = document.querySelectorAll('input[name="quiz-option"]:checked');
+        const userAnswers = Array.from(selectedInputs).map(input => input.value);
+
+        if (userAnswers.length === 0) {
+            alert('請至少選擇一個選項！');
+            return;
+        }
+
+        const isCorrectLength = userAnswers.length === quizData.correctIds.length;
+        const allMatch = userAnswers.every(val => quizData.correctIds.includes(val));
+        const isCorrect = isCorrectLength && allMatch;
+
+        renderFeedback(isCorrect);
+    }
+
+    function renderFeedback(isCorrect) {
+        const feedbackArea = document.getElementById('feedback-area');
+        const submitBtn = document.getElementById('submit-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const inputs = document.querySelectorAll('.option-input');
+
+        inputs.forEach(input => {
+            input.disabled = true;
+            const val = input.value;
+            if (quizData.correctIds.includes(val)) {
+                input.classList.add('is-correct');
+            } else if (input.checked) {
+                input.classList.add('is-wrong');
+            }
+        });
+
+        feedbackArea.style.display = 'block';
+        if (isCorrect) {
+            feedbackArea.className = 'feedback-area feedback-correct';
+            feedbackArea.innerHTML = `
+                <div class="feedback-title"><i class="fa-solid fa-circle-check"></i> 答對了！</div>
+                <div>完全正確！您已掌握事件根因分析與預防控制的精隨。</div>
+            `;
+        } else {
+            feedbackArea.className = 'feedback-area feedback-wrong';
+            feedbackArea.innerHTML = `
+                <div class="feedback-title"><i class="fa-solid fa-circle-xmark"></i> 答錯了</div>
+                <div>正確答案應為 <strong>${quizData.correctIds.join('、')}</strong>。請參考下方解析修正觀念。</div>
+            `;
+        }
+
+        document.getElementById('explanation-card').style.display = 'block';
+        submitBtn.style.display = 'none';
+        retryBtn.style.display = 'flex';
+        
+        // 平滑捲動到回饋區
+        feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetQuiz() {
+        document.getElementById('question-anchor').scrollIntoView({ behavior: 'smooth' });
+        setTimeout(() => { initQuiz(); }, 300);
+    }
+
+    window.onload = initQuiz;
+</script>
+
+</body>
+</html>

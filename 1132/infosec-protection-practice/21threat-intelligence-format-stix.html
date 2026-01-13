@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安威脅情資格式辨識 | 資安與情資交換標準</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" xintegrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #059669;
+            --error-color: #dc2626;
+            --warning-bg: #fef9c3;
+            --highlight-bg: #e0f2fe;
+            --border-radius: 16px;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: #ffffff;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding-bottom: 2rem;
+        }
+
+        /* Header */
+        .quiz-header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            position: relative;
+        }
+        
+        .tag-badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            backdrop-filter: blur(4px);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Context Image */
+        .context-card {
+            margin: 1.5rem 2rem;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .context-image-wrapper {
+            text-align: center;
+            background: #000; /* Dark background for code contrast */
+            padding: 1rem;
+        }
+
+        .context-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Question */
+        .question-area {
+            padding: 0 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .negative-word {
+            color: var(--error-color);
+            font-weight: 800;
+            text-decoration: underline;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background: white;
+        }
+
+        .option-label:hover:not(.disabled) {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .option-input {
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #9ca3af;
+            border-radius: 50%;
+            margin-right: 1rem;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .option-input:checked {
+            border-color: var(--primary-color);
+            background-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .option-label.selected {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        .option-label.correct {
+            border-color: var(--success-color);
+            background-color: #ecfdf5;
+        }
+
+        .option-label.wrong {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+        }
+
+        .option-label.disabled {
+            cursor: default;
+            opacity: 0.8;
+            pointer-events: none; /* Crucial for disabling clicks */
+        }
+
+        /* Status Icons inside options */
+        .status-icon {
+            margin-left: auto;
+            font-size: 1.25rem;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .option-label.correct .status-icon {
+            color: var(--success-color);
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .option-label.wrong .status-icon {
+            color: var(--error-color);
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Action Area */
+        .action-area {
+            padding: 1.5rem 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            border-top: 1px solid #f3f4f6;
+            margin-top: 1rem;
+        }
+
+        .btn-custom {
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-retry {
+            background-color: #4b5563;
+            color: white;
+            display: none; /* Hidden by default */
+        }
+
+        .btn-retry:hover {
+            background-color: #374151;
+        }
+
+        /* Explanation */
+        .explanation-card {
+            margin: 0 2rem 2rem 2rem;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            display: none; /* Hidden by default */
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .explanation-header {
+            padding: 1rem 1.5rem;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 700;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .explanation-body {
+            padding: 1.5rem;
+        }
+
+        .step-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+
+        .step-section:last-child {
+            border-bottom: none;
+        }
+
+        .step-title {
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .concept-tag {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .mnemonic-box {
+            background: var(--warning-bg);
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+        }
+
+        /* Self Check QA Style */
+        .self-check-area {
+            margin: 0 2rem 2rem;
+            padding: 1.5rem;
+            background: #f0fdfa;
+            border: 1px solid #ccfbf1;
+            border-radius: 12px;
+        }
+
+        .qa-item {
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .qa-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .qa-question {
+            padding: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+        }
+        
+        .qa-question:hover {
+            background: #f8fafc;
+        }
+
+        .qa-answer {
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #059669;
+            font-weight: 500;
+        }
+
+        details > summary {
+            list-style: none;
+        }
+        
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .qa-icon {
+            transition: transform 0.3s;
+            color: #94a3b8;
+        }
+
+        details[open] .qa-icon {
+            transform: rotate(180deg);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .quiz-header {
+                padding: 1rem 1.25rem;
+            }
+
+            .context-card, .question-area, .action-area, .explanation-card, .self-check-area {
+                margin-left: 1rem;
+                margin-right: 1rem;
+                padding-left: 0;
+                padding-right: 0;
+            }
+            
+            .question-area {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+
+            .action-area {
+                padding: 1rem;
+            }
+
+            .btn-custom {
+                width: 100%;
+                padding: 1rem; /* Larger touch target */
+            }
+
+            .option-label {
+                padding: 0.75rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <!-- Header -->
+    <header class="quiz-header">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-white text-primary">Q.21 資安標準</span>
+            <div id="status-badge" class="badge bg-dark bg-opacity-25">未作答</div>
+        </div>
+        <h1 class="h4 mb-0 text-white">威脅情資交換格式辨識</h1>
+        <div class="mt-2">
+            <span class="tag-badge"><i class="fas fa-shield-alt"></i> 威脅情資</span>
+            <span class="tag-badge"><i class="fas fa-file-code"></i> 格式標準</span>
+        </div>
+    </header>
+
+    <!-- Context Image -->
+    <div class="context-card">
+        <div class="bg-light p-2 border-bottom text-muted small">
+            <i class="fas fa-image me-1"></i> 情境圖片：惡意程式情資結構範例
+        </div>
+        <div class="context-image-wrapper">
+            <!-- Using the user provided image URL -->
+            <img src="https://i.meee.com.tw/ZocpgBw.png" alt="JSON結構顯示 bundle, objects, spec_version 2.1" class="context-image">
+        </div>
+        <div class="p-3 bg-white">
+            <p class="mb-0 small text-secondary">
+                <i class="fas fa-info-circle me-1"></i> 提示：請觀察圖片中的 <code>"type": "bundle"</code> 與 <code>"objects"</code> 結構。
+            </p>
+        </div>
+    </div>
+
+    <!-- Question Section -->
+    <div class="question-area">
+        <p class="question-text">
+            如附圖所示，機關透過威脅情資分享以達到及早預防或應變處理，目前業界針對此等資料交換已發展出多種格式/機制，附圖為惡意程式情資，其所使用格式為下列何項？
+        </p>
+        
+        <div class="options-grid" id="options-container">
+            <!-- Options will be injected by JS -->
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-area">
+        <button class="btn btn-custom btn-submit" id="submit-btn" onclick="submitAnswer()">
+            <i class="fas fa-paper-plane me-2"></i>送出答案
+        </button>
+        <button class="btn btn-custom btn-retry" id="retry-btn" onclick="resetQuiz()">
+            <i class="fas fa-redo me-2"></i>重新挑戰
+        </button>
+    </div>
+
+    <!-- Explanation (Hidden initially) -->
+    <div class="explanation-card" id="explanation">
+        <div class="explanation-header" onclick="toggleExplanation()">
+            <i class="fas fa-lightbulb text-warning"></i> 深度解析與觀念釐清
+            <i class="fas fa-chevron-down ms-auto"></i>
+        </div>
+        <div class="explanation-body">
+            
+            <!-- Step 1: Keywords -->
+            <div class="step-section">
+                <div class="step-title"><i class="fas fa-search"></i> 第一步：找關鍵字</div>
+                <ul class="small text-muted ps-3 mb-0">
+                    <li><strong>威脅情資分享</strong>：題目在考「情資交換標準」，而非特定防毒軟體。</li>
+                    <li><strong>資料交換</strong>：代表會有「固定欄位、固定結構」的格式（像 JSON 物件）。</li>
+                    <li><strong>附圖為惡意程式情資</strong>：要從圖裡的欄位結構來判斷是哪種格式。</li>
+                    <li><strong>格式/機制</strong>：這是提示。有些選項是「格式」（STIX/CybOX/MAEC），有些是「機制」（TAXII）。</li>
+                </ul>
+            </div>
+
+            <!-- Step 2: Translation -->
+            <div class="step-section">
+                <div class="step-title"><i class="fas fa-language"></i> 第二步：白話翻譯</div>
+                <p class="small text-muted mb-0">
+                    「政府或公司要互相分享『病毒/駭客線索』，業界有幾種標準寫法與傳法。圖片裡這份惡意程式情資，用的是哪一種標準寫法？」
+                </p>
+            </div>
+
+            <!-- Step 3: Logic -->
+            <div class="step-section">
+                <div class="step-title"><i class="fas fa-brain"></i> 第三步：解題思路</div>
+                <div class="small text-muted">
+                    <p><strong>1. 觀察圖片結構：</strong><br>
+                    圖片是一個 JSON 物件，關鍵特徵有：<code>"type": "bundle"</code>（打包）、<code>"objects"</code>（包含 indicator, malware, relationship）、以及 <code>"spec_version": "2.1"</code>。</p>
+                    
+                    <p><strong>2. 聯想生活例子：</strong><br>
+                    把情資分享想成「寄包裹」：
+                    <ul>
+                        <li><strong>STIX</strong>：包裹裡面的物品清單與擺放格式（人人看得懂的標準）。</li>
+                        <li><strong>TAXII</strong>：物流公司或傳送方式（計程車/郵差），負責把包裹送達。</li>
+                        <li><strong>CybOX</strong>：物品的具體特徵描述（例如這個物品是圓的、紅色的）。</li>
+                    </ul>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 4: Option Analysis -->
+            <div class="step-section">
+                <div class="step-title"><i class="fas fa-list-check"></i> 第四步：選項分析</div>
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item bg-transparent px-0">
+                        <span class="text-danger fw-bold">❌ (A) CybOX</span>：偏向描述單一的「可觀測特徵」（如 IP、Hash、檔案）。圖中是完整的 STIX 物件模型（含 Bundle, Indicator 等），格局比 CybOX 大。
+                    </li>
+                    <li class="list-group-item bg-transparent px-0">
+                        <span class="text-danger fw-bold">❌ (B) MAEC</span>：專注於「惡意程式」本身的行為與屬性描述標準。圖中結構是用 STIX 2.1 的物件來串聯關係，並非 MAEC 的格式。
+                    </li>
+                    <li class="list-group-item bg-transparent px-0">
+                        <span class="text-success fw-bold">✅ (C) STIX</span>：正確。圖中出現 <code>"type": "bundle"</code>、<code>"indicator"</code>、<code>"relationship"</code> 等標準 STIX 2.x 物件結構，且明確標示版本 2.1。
+                    </li>
+                    <li class="list-group-item bg-transparent px-0">
+                        <span class="text-danger fw-bold">❌ (D) TAXII</span>：這是「傳輸/交換機制」（Transport），是用來傳送資料的通道，而不是資料本身的格式。
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Extension & Pitfalls -->
+            <div class="step-section">
+                <div class="step-title"><i class="fas fa-exclamation-triangle"></i> 常見陷阱與延伸</div>
+                <div class="small text-muted">
+                    <p><strong>⚠️ 心理盲點（避坑指南）：</strong><br>
+                    看到「交換」兩個字，很容易直覺選 TAXII。請務必檢查題目問的是「所使用的格式」還是「傳輸的方式」。題目給了 JSON 內容圖，就是問「長相（格式）」，所以選 STIX。</p>
+                    <p><strong>💡 觸類旁通：</strong><br>
+                    如果題目改問：「用來在不同組織間『自動化傳輸』情資的標準協定為何？」，答案就會是 TAXII。</p>
+                </div>
+            </div>
+
+            <!-- Mnemonic -->
+            <div class="mnemonic-box">
+                <h6 class="fw-bold mb-2"><i class="fas fa-star me-1"></i> 記憶口訣</h6>
+                <p class="mb-0 font-monospace">
+                    「<span class="text-danger">S</span>」是 Structure (結構/格式) → <strong>STIX</strong>（資料長相）<br>
+                    「<span class="text-danger">T</span>」是 Transport (傳輸/計程車) → <strong>TAXII</strong>（物流傳送）
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Self Check (QA Format) -->
+    <div class="self-check-area" id="self-check-section" style="display:none;">
+        <h5 class="h6 fw-bold mb-3 text-success"><i class="fas fa-clipboard-check me-2"></i> 觀念自我檢測 (點擊題目看答案)</h5>
+        
+        <details class="qa-item">
+            <summary class="qa-question">
+                <span>Q1: 如果題目改成「用來在不同組織之間『傳輸/交換』情資的標準」，答案會變嗎？</span>
+                <i class="fas fa-chevron-down qa-icon"></i>
+            </summary>
+            <div class="qa-answer">
+                會變。那會是在問傳輸機制，應選 (D) TAXII。
+            </div>
+        </details>
+
+        <details class="qa-item">
+            <summary class="qa-question">
+                <span>Q2: 圖中看到 "type": "bundle"、"spec_version": "2.1"，最合理的判斷是什麼？</span>
+                <i class="fas fa-chevron-down qa-icon"></i>
+            </summary>
+            <div class="qa-answer">
+                這是 STIX 2.x 的資料格式（結構化威脅情資表達）。
+            </div>
+        </details>
+
+        <details class="qa-item">
+            <summary class="qa-question">
+                <span>Q3: 請用一句話區分 STIX 與 TAXII 的角色差異。</span>
+                <i class="fas fa-chevron-down qa-icon"></i>
+            </summary>
+            <div class="qa-answer">
+                STIX 是情資「內容格式」（包裹），TAXII 是情資「傳輸交換機制」（物流）。
+            </div>
+        </details>
+    </div>
+</div>
+
+<script>
+    // Quiz Data
+    const quizData = {
+        correctAnswer: "STIX",
+        options: [
+            { id: "A", text: "CybOX", type: "wrong" },
+            { id: "B", text: "MAEC", type: "wrong" },
+            { id: "C", text: "STIX", type: "correct" },
+            { id: "D", text: "TAXII", type: "wrong" }
+        ]
+    };
+
+    let selectedOption = null;
+    let isSubmitted = false;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        initQuiz();
+    });
+
+    function initQuiz() {
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        
+        // Randomize options
+        const shuffledOptions = [...quizData.options].sort(() => Math.random() - 0.5);
+
+        shuffledOptions.forEach((opt, index) => {
+            const div = document.createElement('div');
+            div.className = 'option-label';
+            div.id = `label-${index}`;
+            div.onclick = () => selectOption(index, opt.text);
+            
+            div.innerHTML = `
+                <input type="radio" name="quizOption" class="option-input" id="opt-${index}" value="${opt.text}">
+                <span class="fw-medium">${opt.text}</span>
+                <i class="status-icon fas ${opt.text === quizData.correctAnswer ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function selectOption(index, value) {
+        if (isSubmitted) return; // Prevent change after submit
+
+        // Reset visual state
+        document.querySelectorAll('.option-label').forEach(el => {
+            el.classList.remove('selected');
+            el.querySelector('input').checked = false;
+        });
+
+        // Set new state
+        const selectedLabel = document.getElementById(`label-${index}`);
+        selectedLabel.classList.add('selected');
+        selectedLabel.querySelector('input').checked = true;
+        
+        selectedOption = { index, value };
+    }
+
+    function submitAnswer() {
+        if (!selectedOption) {
+            alert('請先選擇一個答案！'); // Simple alert as fallback
+            return;
+        }
+
+        if (isSubmitted) return;
+        isSubmitted = true;
+
+        const isCorrect = selectedOption.value === quizData.correctAnswer;
+        const statusBadge = document.getElementById('status-badge');
+        
+        // Update Status
+        if (isCorrect) {
+            statusBadge.className = 'badge bg-success';
+            statusBadge.innerText = '答對了！';
+        } else {
+            statusBadge.className = 'badge bg-danger';
+            statusBadge.innerText = '答錯了';
+        }
+
+        // Lock inputs and show results
+        document.querySelectorAll('.option-label').forEach(el => {
+            el.classList.add('disabled');
+            const val = el.querySelector('input').value;
+            
+            if (val === quizData.correctAnswer) {
+                el.classList.add('correct'); // Green highlight for correct answer
+            } else if (val === selectedOption.value && !isCorrect) {
+                el.classList.add('wrong'); // Red highlight for wrong selection
+            }
+        });
+
+        // Show Buttons & Explanation & Self Check
+        document.getElementById('submit-btn').style.display = 'none';
+        document.getElementById('retry-btn').style.display = 'block';
+        document.getElementById('explanation').style.display = 'block';
+        document.getElementById('self-check-section').style.display = 'block';
+
+        // Scroll to explanation on mobile if needed
+        if (window.innerWidth < 768) {
+            document.getElementById('explanation').scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    function resetQuiz() {
+        isSubmitted = false;
+        selectedOption = null;
+        
+        // Reset UI
+        document.getElementById('submit-btn').style.display = 'block';
+        document.getElementById('retry-btn').style.display = 'none';
+        document.getElementById('explanation').style.display = 'none';
+        document.getElementById('self-check-section').style.display = 'none'; // Hide self check
+        document.getElementById('status-badge').className = 'badge bg-dark bg-opacity-25';
+        document.getElementById('status-badge').innerText = '未作答';
+        
+        // Re-init options
+        initQuiz();
+
+        // Scroll top
+        document.querySelector('.main-container').scrollIntoView({ behavior: 'smooth' });
+        
+        // Close self check details (if any were open)
+        document.querySelectorAll('.qa-item').forEach(el => el.removeAttribute('open'));
+    }
+    
+    function toggleExplanation() {
+        // Optional: Manual toggle logic if not using display block logic
+    }
+</script>
+
+</body>
+</html>

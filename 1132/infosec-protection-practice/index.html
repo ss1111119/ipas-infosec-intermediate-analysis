@@ -3,80 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>113年第二次中級資安工程師練習題目錄</title>
+    <title>資安實務題庫導航 (Q01-Q30)</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; max-width: 950px; margin: 40px auto; padding: 0 20px; color: #333; }
-        h1 { border-bottom: 2px solid #2980b9; padding-bottom: 10px; color: #2980b9; }
-        
-        /* 標籤說明圖例樣式 */
-        .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; padding: 15px; background: #f8f9fa; border: 1px dashed #ccc; border-radius: 8px; }
-        .legend-item { display: flex; align-items: center; font-size: 0.85em; margin-right: 15px; }
-
-        /* 雙欄列表樣式 */
-        ul { 
-            list-style: none; 
-            padding: 0; 
-            display: grid; 
-            grid-template-columns: 1fr; 
-            gap: 12px; 
+        :root {
+            --primary-bg: #1a1a2e; /* 深色背景 */
+            --secondary-bg: #16213e;
+            --accent-color: #0f3460;
+            --highlight: #e94560; /* 強調色 */
+            --text-main: #e0e0e0;
+            --text-sub: #a0a0a0;
+            --card-bg: #ffffff;
+            --light-bg: #f4f6f9;
         }
 
-        @media (min-width: 768px) {
-            ul {
-                grid-template-columns: 1fr 1fr; 
-            }
+        body {
+            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+            background-color: var(--light-bg);
+            color: #333;
+            margin: 0;
+            padding: 20px;
         }
 
-        li { background: #f6f8fa; padding: 12px; border-radius: 6px; border: 1px solid #d1d5da; transition: 0.2s; display: flex; align-items: center; height: 100%; box-sizing: border-box; }
-        li:hover { background: #eef6fc; border-color: #2980b9; }
-        a { text-decoration: none; color: #0366d6; font-weight: bold; flex-grow: 1; display: block; word-break: break-word; font-size: 0.95em; }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--primary-bg);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        h1 { margin: 0; font-size: 1.8em; }
+        .subtitle { color: #ccc; margin-top: 5px; font-size: 0.9em; }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 5px;
+            border: none;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .section-title {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--secondary-bg);
+            border-left: 5px solid var(--highlight);
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            gap: 10px;
+        }
+
+        .file-item {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #eee;
+        }
+
+        .file-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #badcff;
+        }
+
+        .file-link {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .icon {
+            font-size: 1.5em;
+            margin-right: 15px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .details { flex-grow: 1; }
         
-        .tag { font-size: 0.8em; padding: 3px 8px; border-radius: 4px; margin-right: 10px; color: white; font-weight: normal; min-width: 55px; text-align: center; flex-shrink: 0; }
-        
-        .tag-law { background-color: #6c757d; } /* 法規 */
-        .tag-iso { background-color: #28a745; } /* 標準/ISO */
-        .tag-zt  { background-color: #6610f2; } /* 零信任 */
-        .tag-net { background-color: #17a2b8; } /* 網路/OT */
-        .tag-ai  { background-color: #fd7e14; } /* AI 安全 */
-        .tag-sec { background-color: #dc3545; } /* 攻防/技術 */
-        .tag-mgm { background-color: #e83e8c; } /* 風險管理/控制 */
+        .filename {
+            font-weight: bold;
+            font-size: 1.05em;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .meta {
+            font-size: 0.8em;
+            color: #666;
+            background-color: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        /* 標籤樣式 */
+        .tag {
+            font-size: 0.75em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            color: white;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        .tag-blue { background-color: #3498db; }
+        .tag-red { background-color: #e74c3c; }
+        .tag-green { background-color: #27ae60; }
+        .tag-purple { background-color: #9b59b6; }
+
     </style>
 </head>
 <body>
-    <h1>📂 113年第二次中級資訊安全工程師</h1>
-    <h3>資訊安全防護實務 - 練習題目錄 (目前進度)</h3>
-    
-    <div class="legend">
-        <div class="legend-item"><span class="tag tag-sec">SEC</span> 攻防 / 技術</div>
-        <div class="legend-item"><span class="tag tag-mgm">MGM</span> 風險管理 / 控制</div>
-        <div class="legend-item"><span class="tag tag-net">NET</span> 網路安全</div>
-        <div class="legend-item"><span class="tag tag-iso">ISO</span> 標準規範</div>
+
+<div class="container">
+    <header>
+        <h1>資訊安全實務題庫導航</h1>
+        <p class="subtitle">涵蓋 MITRE ATT&CK, NIST CSF, 滲透測試與威脅情資 (Q01-Q30)</p>
+        <input type="text" id="searchInput" class="search-box" placeholder="輸入關鍵字搜尋題目 (例如: STIX, DDoS, SQL)...">
+    </header>
+
+    <div class="section-title">
+        <span class="icon">🕵️</span> 最新更新：威脅情資與滲透測試 (Q21-Q30)
     </div>
-
-    <ul>
-        <li><span class="tag tag-sec">Q01</span><a href="01MITRE_ATTCK_Credential_Access_Q1.html">MITRE ATT&CK 憑證存取 (Credential Access)</a></li>
-        <li><span class="tag tag-mgm">Q02</span><a href="02Vulnerability_Scanning_Basics_Q2.html">弱點掃描基礎觀念 (Vulnerability Scanning)</a></li>
-        <li><span class="tag tag-sec">Q03</span><a href="03Red_Team_Exercise_Attack_Methods_Q3.html">紅隊演練攻擊手法與途徑分析</a></li>
-        <li><span class="tag tag-mgm">Q04-07</span><a href="0407Risk_Assessment_Vulnerability_Q4-Q7_Full.html">風險評估與弱點管理（題組）</a></li>
-        <li><span class="tag tag-iso">Q08</span><a href="08NIST_CSF_Referenced_Standards_Q8.html">NIST CSF 框架與參照標準觀念</a></li>
-        <li><span class="tag tag-mgm">Q09</span><a href="09OWASP_CDM_Cyber_Defense_Matrix_Q9.html">OWASP CDM 網路防禦矩陣分析</a></li>
-        <li><span class="tag tag-net">Q10</span><a href="10DNS_DDoS_Mitigation_Q10.html">DNS 服務防護與 DDoS 緩解技術</a></li>
-        <li><span class="tag tag-sec">Q11</span><a href="11_APT_File_Upload_Mitigation_Q11.html">APT 攻擊與惡意檔案上傳防護</a></li>
-        
-        <li><span class="tag tag-sec">Q12</span><a href="12_Q12_AVAS_vs_OWASPTop10.html">AVAS 弱點與 OWASP Top 10 對應分析</a></li>
-        
-        <li><span class="tag tag-sec">Q13</span><a href="13_CVE2023-3519_SSLVPN_Webshell_LDAP_Protection.html">CVE-2023-3519 SSLVPN 漏洞與 Webshell 防禦</a></li>
-        
-        <li><span class="tag tag-mgm">Q14</span><a href="14_Authentication_Password_Policy_CAPTCHA.html">身分認證、密碼原則與 CAPTCHA 機制</a></li>
-
-        <li><span class="tag tag-sec">Q15-18</span><a href="1518Group2_Q15-18_Full_Tutorial.html">綜合技術題組：資安防護實務 (Q15-18)</a></li>
-
-        <li><span class="tag tag-net">Q19</span><a href="19_Remote_Networking_Encryption_Symmetric_Asymmetric_Key_Exchange.html">遠端網路加密：對稱、非對稱與金鑰交換</a></li>
-
-        <li><span class="tag tag-mgm">Q20</span><a href="20_Backup_3-2-1_Rule_Explanation.html">資料備份策略：3-2-1 原則深度解析</a></li>
+    <ul class="file-list">
+        <li class="file-item">
+            <a href="21threat-intelligence-format-stix.html" class="file-link">
+                <span class="icon">📜</span>
+                <div class="details">
+                    <span class="filename">Q21. 威脅情資交換格式 (STIX) <span class="tag tag-purple">New</span></span>
+                    <span class="meta">21threat-intelligence-format-stix.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="22incident-response-priority-admin-account.html" class="file-link">
+                <span class="icon">🚨</span>
+                <div class="details">
+                    <span class="filename">Q22. 事件應變優先順序 (Admin Account) <span class="tag tag-purple">New</span></span>
+                    <span class="meta">22incident-response-priority-admin-account.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="23email-server-incident-prevention.html" class="file-link">
+                <span class="icon">📧</span>
+                <div class="details">
+                    <span class="filename">Q23. 電子郵件伺服器事件預防 <span class="tag tag-purple">New</span></span>
+                    <span class="meta">23email-server-incident-prevention.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="2427incident-analysis-question-group-3-full.html" class="file-link">
+                <span class="icon">🧩</span>
+                <div class="details">
+                    <span class="filename">Q24-27. 資安事件分析題組 (Incident Analysis) <span class="tag tag-blue">Group</span></span>
+                    <span class="meta">2427incident-analysis-question-group-3-full.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="28penetration-test-scope-misconception.html" class="file-link">
+                <span class="icon">🎯</span>
+                <div class="details">
+                    <span class="filename">Q28. 滲透測試範圍誤解 (Scope Misconception) <span class="tag tag-purple">New</span></span>
+                    <span class="meta">28penetration-test-scope-misconception.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="29penetration-testing-tools-correct-usage.html" class="file-link">
+                <span class="icon">🧰</span>
+                <div class="details">
+                    <span class="filename">Q29. 滲透測試工具正確使用 <span class="tag tag-purple">New</span></span>
+                    <span class="meta">29penetration-testing-tools-correct-usage.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="30metasploit-primary-use-case.html" class="file-link">
+                <span class="icon">🦊</span>
+                <div class="details">
+                    <span class="filename">Q30. Metasploit 主要用途 <span class="tag tag-purple">New</span></span>
+                    <span class="meta">30metasploit-primary-use-case.html</span>
+                </div>
+            </a>
+        </li>
     </ul>
 
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 40px 0;">
-    <p style="font-size: 0.85em; color: #666; text-align: center;">更新時間：2026/01/11</p>
+    <div class="section-title">
+        <span class="icon">🛡️</span> 進階防禦與合規 (Q11-Q20)
+    </div>
+    <ul class="file-list">
+        <li class="file-item">
+            <a href="11APT_File_Upload_Mitigation_Q11.html" class="file-link">
+                <span class="icon">📂</span>
+                <div class="details">
+                    <span class="filename">Q11. APT 檔案上傳緩解措施</span>
+                    <span class="meta">11APT_File_Upload_Mitigation_Q11.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="12Q12_AVAS_vs_OWASPTop10.html" class="file-link">
+                <span class="icon">🆚</span>
+                <div class="details">
+                    <span class="filename">Q12. AVAS vs OWASP Top 10</span>
+                    <span class="meta">12Q12_AVAS_vs_OWASPTop10.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="13_CVE2023-3519_SSLVPN_Webshell_LDAP_Protection.html" class="file-link">
+                <span class="icon">🐛</span>
+                <div class="details">
+                    <span class="filename">Q13. CVE-2023-3519 SSLVPN & Webshell 防護</span>
+                    <span class="meta">13_CVE2023-3519_SSLVPN_Webshell_LDAP_Protection.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="14_Authentication_Password_Policy_CAPTCHA.html" class="file-link">
+                <span class="icon">🔐</span>
+                <div class="details">
+                    <span class="filename">Q14. 身份驗證與密碼政策 (CAPTCHA)</span>
+                    <span class="meta">14_Authentication_Password_Policy_CAPTCHA.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="1518Group2_Q15-18_Full_Tutorial.html" class="file-link">
+                <span class="icon">📚</span>
+                <div class="details">
+                    <span class="filename">Q15-18. 整合題組 (Full Tutorial) <span class="tag tag-blue">Group</span></span>
+                    <span class="meta">1518Group2_Q15-18_Full_Tutorial.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="19_Remote_Networking_Encryption_Symmetric_Asymmetric_Key_Exchange.html" class="file-link">
+                <span class="icon">🔑</span>
+                <div class="details">
+                    <span class="filename">Q19. 遠端網路加密與金鑰交換</span>
+                    <span class="meta">19_Remote_Networking_Encryption...html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="20_Backup_3-2-1_Rule_Explanation.html" class="file-link">
+                <span class="icon">💾</span>
+                <div class="details">
+                    <span class="filename">Q20. 備份 3-2-1 原則</span>
+                    <span class="meta">20_Backup_3-2-1_Rule_Explanation.html</span>
+                </div>
+            </a>
+        </li>
+    </ul>
+
+    <div class="section-title">
+        <span class="icon">🧱</span> 基礎架構與標準 (Q01-Q10)
+    </div>
+    <ul class="file-list">
+        <li class="file-item">
+            <a href="01MITRE_ATTCK_Credential_Access_Q1.html" class="file-link">
+                <span class="icon">🥷</span>
+                <div class="details">
+                    <span class="filename">Q01. MITRE ATT&CK 憑證存取</span>
+                    <span class="meta">01MITRE_ATTCK_Credential_Access_Q1.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="02Vulnerability_Scanning_Basics_Q2.html" class="file-link">
+                <span class="icon">🔍</span>
+                <div class="details">
+                    <span class="filename">Q02. 弱點掃描基礎</span>
+                    <span class="meta">02Vulnerability_Scanning_Basics_Q2.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="03Red_Team_Exercise_Attack_Methods_Q3.html" class="file-link">
+                <span class="icon">🔴</span>
+                <div class="details">
+                    <span class="filename">Q03. 紅隊演練攻擊手法</span>
+                    <span class="meta">03Red_Team_Exercise_Attack_Methods_Q3.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="0407Risk_Assessment_Vulnerability_Q4-Q7_Full.html" class="file-link">
+                <span class="icon">📉</span>
+                <div class="details">
+                    <span class="filename">Q04-07. 風險評鑑與弱點管理題組 <span class="tag tag-blue">Group</span></span>
+                    <span class="meta">0407Risk_Assessment_Vulnerability_Q4-Q7_Full.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="08NIST_CSF_Referenced_Standards_Q8.html" class="file-link">
+                <span class="icon">📏</span>
+                <div class="details">
+                    <span class="filename">Q08. NIST CSF 參考標準</span>
+                    <span class="meta">08NIST_CSF_Referenced_Standards_Q8.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="09OWASP_CDM_Cyber_Defense_Matrix_Q9.html" class="file-link">
+                <span class="icon">♟️</span>
+                <div class="details">
+                    <span class="filename">Q09. OWASP CDM 網路防禦矩陣</span>
+                    <span class="meta">09OWASP_CDM_Cyber_Defense_Matrix_Q9.html</span>
+                </div>
+            </a>
+        </li>
+        <li class="file-item">
+            <a href="10DNS_DDoS_Mitigation_Q10.html" class="file-link">
+                <span class="icon">🌐</span>
+                <div class="details">
+                    <span class="filename">Q10. DNS DDoS 緩解措施</span>
+                    <span class="meta">10DNS_DDoS_Mitigation_Q10.html</span>
+                </div>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<script>
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+        const searchText = e.target.value.toLowerCase();
+        const items = document.querySelectorAll('.file-item');
+        
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            if(text.includes(searchText)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事件分析題組 3：Log 分析與帳號防護</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 16px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            
+            /* Tag Colors */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+
+            /* Analysis Step Colors */
+            --step-1: #e91e63; /* 關鍵字 */
+            --step-2: #9c27b0; /* 翻譯 */
+            --step-3: #2196f3; /* 思路 */
+            --step-4: #009688; /* 選項 */
+            --step-supp: #795548; /* 補充 */
+            --step-ext: #673ab7; /* 舉一反三 */
+            --step-gold: #fbc02d; /* 金句 - darker yellow for text */
+            --step-trap: #d32f2f; /* 陷阱 */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header & Progress */
+        header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--primary-color);
+        }
+
+        .progress-container {
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            background-color: var(--success-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: right;
+        }
+
+        /* Context Card */
+        .context-card {
+            background-color: #e3f2fd;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 24px;
+            border-left: 5px solid var(--accent-color);
+            box-shadow: var(--shadow);
+        }
+
+        .context-title {
+            font-weight: bold;
+            color: var(--tag-net);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .context-img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 12px;
+            border: 1px solid #ddd;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            scrollbar-width: none; /* Firefox */
+        }
+        .tabs-container::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #fff;
+            border-radius: 24px;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 2px solid #eee;
+            color: #666;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 48px;
+        }
+
+        .tab.active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background-color: #f0f7ff;
+        }
+
+        .tab.correct {
+            background-color: #e8f5e9;
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .tab.wrong {
+            background-color: #ffebee;
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        /* Question Card */
+        .question-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            display: none; /* Hidden by default */
+        }
+
+        .question-card.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .q-id {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .tag {
+            padding: 4px 12px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .tag-law { background-color: var(--tag-law); }
+        .tag-tech { background-color: var(--tag-sec); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        .q-text {
+            font-size: 1.1rem;
+            margin-bottom: 24px;
+            color: #2c3e50;
+        }
+
+        .highlight-negative {
+            color: #c0392b;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option {
+            display: flex;
+            padding: 16px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            background: #fff;
+        }
+
+        .option:hover:not(.disabled) {
+            border-color: var(--accent-color);
+            background-color: #f8fbff;
+        }
+
+        .option.selected {
+            border-color: var(--accent-color);
+            background-color: #e3f2fd;
+        }
+
+        .option.correct-answer {
+            border-color: var(--success-color);
+            background-color: #e8f5e9;
+        }
+
+        .option.wrong-answer {
+            border-color: var(--error-color);
+            background-color: #ffebee;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        .opt-label {
+            font-weight: bold;
+            margin-right: 12px;
+            min-width: 24px;
+        }
+
+        /* Action Area */
+        .action-area {
+            margin-top: 24px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            min-height: 44px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-reset {
+            background-color: var(--text-color);
+            color: white;
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Explanation Section Styles */
+        .explanation {
+            margin-top: 32px;
+            border-top: 2px dashed #eee;
+            padding-top: 24px;
+            display: none;
+        }
+
+        .analysis-section {
+            margin-bottom: 20px;
+            background-color: #fafafa;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        .analysis-header {
+            padding: 8px 16px;
+            font-weight: bold;
+            color: white;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .analysis-content {
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            color: #444;
+            white-space: pre-line; /* Handle line breaks */
+        }
+
+        /* Specific Header Colors */
+        .h-step1 { background-color: var(--step-1); }
+        .h-step2 { background-color: var(--step-2); }
+        .h-step3 { background-color: var(--step-3); }
+        .h-step4 { background-color: var(--step-4); }
+        .h-supp { background-color: var(--step-supp); }
+        .h-ext { background-color: var(--step-ext); }
+        .h-gold { background-color: var(--step-gold); color: #333; }
+        .h-trap { background-color: var(--step-trap); }
+
+        /* Self Check Styles */
+        .self-check-box {
+            background-color: #fff3e0;
+            border: 2px solid #ffe0b2;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+
+        .check-title {
+            font-weight: 800;
+            color: #d35400;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .check-question {
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        details {
+            margin-top: 8px;
+        }
+
+        summary {
+            color: #e67e22;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 4px 0;
+        }
+
+        summary:hover {
+            text-decoration: underline;
+        }
+
+        .check-answer {
+            margin-top: 8px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            color: var(--success-color);
+            font-weight: bold;
+            border: 1px solid #ffe0b2;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+            .header-title {
+                font-size: 1.2rem;
+            }
+            .question-card {
+                padding: 16px;
+            }
+            .option {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-title">事件分析題組 3：Log 分析與帳號防護</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text">完成進度：<span id="progressText">0/4</span></div>
+    </header>
+
+    <div class="context-card" id="contextCard">
+        <div class="context-title">📝 題組情境</div>
+        <div class="context-text" id="groupScenario">
+            <!-- JS Injected -->
+        </div>
+    </div>
+
+    <div class="tabs-container" id="tabsContainer">
+        <!-- JS Injected -->
+    </div>
+
+    <div id="questionsContainer">
+        <!-- JS Injected -->
+    </div>
+</div>
+
+<script>
+    // --- 題目資料 (完整擴充版) ---
+    const quizData = {
+        groupTitle: "事件分析題組 3：Log 分析與帳號防護",
+        groupScenario: `
+            特別聘請你擔任資訊安全長一職，首要之務須解決企業內部的資安架構問題。
+            本次事件範圍廣泛，涵蓋網站伺服器、網域控制站等。
+            <br>
+            <img src="https://i.meee.com.tw/OocaKGN.png" alt="情境示意圖" class="context-img">
+        `,
+        questions: [
+            {
+                id: 24,
+                tag: "技術",
+                tagClass: "tag-tech",
+                type: "single",
+                text: "特別聘請你擔任資訊安全長一職，首要之務，你必須解決大量的 Log 時間不同步的問題，下列那一個方案能提供最佳成本效益？",
+                options: [
+                    "將主要網域控制站的 NTP 校時指向國家時間頻率實驗室，並將所有設備 NTP 校時指向主要網域控制站。",
+                    "停用硬體內建時鐘，更換可採用電波校時的設備。",
+                    "將不同設備指向不同的 NTP 校時 IP 以分散流量。",
+                    "將所有設備停用硬體時間，改以定期手動校時。"
+                ],
+                correctIndex: [0], 
+                analysis: {
+                    step1: "【第一步：找關鍵字】\n- 資訊安全長：代表要從整體架構思考，而非單點修補。\n- Log 時間不同步：影響事件關聯分析與鑑識。\n- 最佳成本效益：不是最先進，而是最合理、最省成本。",
+                    step2: "【第二步：白話翻譯】\n公司所有系統記錄的時間都不一樣，導致資安事件發生時，Log 對不起來。要用哪一種方式，花最少的錢，又能讓所有系統時間一致？",
+                    step3: "【第三步：解題思路】\n* 這題在考什麼觀念？\n  → 企業時間同步（NTP）的正確架構設計。\n\n* 解題步驟\n  1. 確認對外唯一可信的時間來源。\n  2. 內部集中由一個節點負責校時。\n  3. 其他設備全部向該節點同步。\n\n* 原理與規則（白話）\n  - NTP（Network Time Protocol，就是讓電腦時間自動對齊的機制）。\n  - 若每台設備各自校時，誤差會放大。\n  - Windows 網域中，網域控制站（DC）本來就負責時間同步。\n\n* 生活例子\n  就像全班對時間：\n  - 老師對原子鐘。\n  - 全班學生只對老師，不各自對錶。",
+                    step4: "【第四步：選項分析】\n(A) 正確：一主多從，集中校時，成本最低、管理最簡單。\n(B) 錯誤：更換設備成本極高，不符成本效益。\n(C) 錯誤：時間來源分散，反而更容易產生誤差。\n(D) 錯誤：人工校時不可靠，也無法長期維持一致。",
+                    supplement: "【觀念補充與延伸】\n- 核心章節：Log 管理、事件鑑識基礎。\n- 考試地位：高頻必考觀念題。\n- 法條或定義（白話）：NTP 是用來讓網路中所有設備時間一致的通訊協定。",
+                    extension: "【觸類旁通（舉一反三）】\n- 若題目問「跨組織校時」，原則仍是「單一可信來源」。",
+                    mnemonic: "【記憶口訣】\n- 「時間要準，只能一尊」",
+                    trap: "【常見陷阱】\n- 心理盲點：以為設備越高級越好。\n- 避坑指南：看到「最佳成本效益」，選架構解法。",
+                    selfCheckQ: "若每台設備各自對外校時，會有什麼問題？",
+                    selfCheckA: "時間誤差無法控制，Log 無法對齊。"
+                }
+            },
+            {
+                id: 25,
+                tag: "技術",
+                tagClass: "tag-tech",
+                type: "single",
+                text: "發現 Windows 作業系統建置的網站伺服器，該主機上的安全性事件中，查得大量的 4625 事件編號之事件，此事件編號所指的是下列何種事件？",
+                options: [
+                    "帳號登入成功",
+                    "帳號被鎖定",
+                    "帳號有異動",
+                    "帳號登入失敗"
+                ],
+                correctIndex: [3],
+                analysis: {
+                    step1: "【第一步：找關鍵字】\n- Windows 作業系統\n- 4625 事件編號\n- 大量出現",
+                    step2: "【第二步：白話翻譯】\nWindows 系統一直記錄「4625」，這代表什麼狀況？",
+                    step3: "【第三步：解題思路】\n* 核心考點：Windows 安全事件編號對照。\n* 解題步驟：\n  1. 記住最常考的一組：\n     - 4624 → 登入成功\n     - 4625 → 登入失敗\n\n* 原理與規則\n  - Windows 事件編號是固定定義，不能自行解釋。\n\n* 生活例子\n  門禁刷卡：\n  - 刷成功\n  - 刷失敗（反覆失敗就很可疑）",
+                    step4: "【第四步：選項分析】\n(A) 錯誤：登入成功是 4624。\n(B) 錯誤：帳號鎖定是 4740。\n(C) 錯誤：非帳號異動事件。\n(D) 正確：4625 代表登入失敗。",
+                    supplement: "【觀念補充與延伸】\n- 常與暴力破解、密碼噴撒題型一起考。\n- 法條或定義（白話）：4625 為帳號驗證失敗事件。",
+                    extension: "【觸類旁通】\n- 大量 4625 → 高度疑似登入攻擊。",
+                    mnemonic: "【記憶口訣】\n- 「25 失敗，24 成功」",
+                    trap: "【常見陷阱】\n- 心理盲點：只記數字，不記意義。",
+                    selfCheckQ: "若出現大量 4624，代表什麼？",
+                    selfCheckA: "大量成功登入。"
+                }
+            },
+            {
+                id: 26,
+                tag: "技術",
+                tagClass: "tag-tech",
+                type: "single",
+                text: "於網站存取 Log 中出現了大量類似密碼的字元「1q2w#E$R」，而前面的欄位中出現了包含 admin、root、jason 等帳號型式的字元，且得到的狀態代碼回應為 200，這種類型的記錄應屬於下列何種攻擊手法？",
+                options: [
+                    "資料庫注入攻擊",
+                    "密碼噴撒攻擊",
+                    "跨站台請求偽造",
+                    "密碼暴力破解"
+                ],
+                correctIndex: [1],
+                analysis: {
+                    step1: "【第一步：找關鍵字】\n- 多個帳號：admin、root、jason\n- 類似密碼的字串\n- 大量 POST 嘗試",
+                    step2: "【第二步：白話翻譯】\n有人用同一組（或少數幾組）常見密碼，去試很多帳號。",
+                    step3: "【第三步：解題思路】\n* 多帳號 + 少量密碼 → 密碼噴撒。\n\n* 原理與規則\n  - 密碼噴撒：避免鎖帳，用常見密碼試多人。\n  - 暴力破解：針對單一帳號狂試密碼。\n\n* 生活例子\n  拿一把鑰匙，去試整排門。",
+                    step4: "【第四步：選項分析】\n(A) 錯誤：沒有 SQL 語法特徵。\n(B) 正確：符合密碼噴撒行為。\n(C) 錯誤：與使用者登入無關。\n(D) 錯誤：不是針對單一帳號。",
+                    supplement: "【觀念補充與延伸】\n- 密碼噴撒常搭配弱密碼與未啟用 MFA。\n- 法條或定義（白話）：密碼噴撒是以少量密碼嘗試大量帳號的攻擊方式。",
+                    extension: "【觸類旁通】\n- 單帳號多密碼 → 暴力破解。",
+                    mnemonic: "【記憶口訣】\n- 「一密試多人，就是噴撒」",
+                    trap: "【常見陷阱】\n- 心理盲點：看到很多嘗試就選暴力破解。",
+                    selfCheckQ: "如果只對 admin 試 1000 個密碼，是哪一種攻擊？",
+                    selfCheckA: "密碼暴力破解。"
+                }
+            },
+            {
+                id: 27,
+                tag: "管理",
+                tagClass: "tag-mgm",
+                type: "multi",
+                text: "本次事件範圍廣泛... 鑑識小組認為應有網站零日漏洞被利用。請問下列哪 2 項對於員工個人帳號保護最為有效？(複選)",
+                options: [
+                    "EIP 系統應限定僅有內部 IP 得以連接",
+                    "密碼破解類的字典檔攻擊，應宣導加長密碼長度以提升帳號安全",
+                    "導入 SOC 機制使入侵行為即早得到預警",
+                    "導入多因素驗證 (MFA) 以降低帳號被盜風險"
+                ],
+                correctIndex: [1, 3],
+                analysis: {
+                    step1: "【第一步：找關鍵字】\n- 員工個人帳號保護\n- 最為有效\n- 零日漏洞",
+                    step2: "【第二步：白話翻譯】\n就算系統有漏洞，怎麼做才能最直接保護「帳號本身」？",
+                    step3: "【第三步：解題思路】\n- 專挑「直接作用在帳號」的措施。\n\n【解題步驟】\n1. 排除只做偵測、不做防護的選項。\n2. 選能降低帳號被盜成功率的措施。\n\n【原理與規則】\n- 帳號安全優先順序：\n  密碼強度 → 多因素驗證。\n\n【生活例子】\n- 密碼是門鎖。\n- MFA 是再加一道門禁。",
+                    step4: "【第四步：選項分析】\n(A) 錯誤：屬於網路層限制，不能防止帳號被猜密碼。\n(B) 正確：加長密碼能有效降低字典與噴撒成功率。\n(C) 錯誤：SOC 是偵測與通報，非直接防護。\n(D) 正確：MFA 即使密碼外洩也能阻止登入。",
+                    supplement: "【觀念補充與延伸】\n- MFA 為近年資安考試與實務的重點。\n- 法條或定義（白話）：MFA 使用兩種以上不同驗證因子進行身分驗證。",
+                    extension: "【觸類旁通（舉一反三）】\n- OTP、憑證、生物辨識都屬於 MFA。",
+                    mnemonic: "【記憶口訣】\n- 「帳號保命符：長密碼 + MFA」",
+                    trap: "【常見陷阱】\n- 心理盲點：以為 SOC 可以防止所有攻擊。\n- 避坑指南：題目問「帳號保護」，不要選偵測工具。",
+                    selfCheckQ: "只有 SOC，沒有 MFA，帳號會安全嗎？",
+                    selfCheckA: "不會，只能事後知道。"
+                }
+            }
+        ]
+    };
+
+    // --- 全域變數 ---
+    let currentTab = 0;
+    // 紀錄每題的狀態
+    let questionStates = []; 
+
+    // --- 初始化 ---
+    function init() {
+        document.getElementById('groupScenario').innerHTML = quizData.groupScenario;
+        
+        // 初始化狀態與洗牌
+        questionStates = quizData.questions.map(q => {
+            const indices = q.options.map((_, i) => i);
+            shuffleArray(indices); // 洗牌
+            return {
+                shuffledIndices: indices,
+                selectedOptions: new Set(),
+                isSubmitted: false,
+                isCorrect: false
+            };
+        });
+
+        renderTabs();
+        renderQuestions();
+        updateProgress();
+    }
+
+    // --- 洗牌演算法 (Fisher-Yates) ---
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // --- 關鍵字標紅 ---
+    function highlightKeywords(text) {
+        const negativeWords = ["不正確", "不是", "錯誤", "最不適用", "不包含", "除外"];
+        let newText = text;
+        negativeWords.forEach(word => {
+            const regex = new RegExp(word, "g");
+            newText = newText.replace(regex, `<span class="highlight-negative">${word}</span>`);
+        });
+        return newText;
+    }
+
+    // --- 渲染 Tabs ---
+    function renderTabs() {
+        const container = document.getElementById('tabsContainer');
+        container.innerHTML = '';
+        
+        quizData.questions.forEach((q, index) => {
+            const state = questionStates[index];
+            const btn = document.createElement('div');
+            btn.className = `tab ${index === currentTab ? 'active' : ''}`;
+            
+            let icon = '';
+            if (state.isSubmitted) {
+                if (state.isCorrect) {
+                    btn.classList.add('correct');
+                    icon = '✓';
+                } else {
+                    btn.classList.add('wrong');
+                    icon = '✗';
+                }
+            }
+
+            btn.innerHTML = `第 ${q.id} 題 ${icon}`;
+            btn.onclick = () => switchTab(index);
+            container.appendChild(btn);
+        });
+    }
+
+    // --- 切換 Tab ---
+    function switchTab(index) {
+        currentTab = index;
+        
+        // Update Tabs UI
+        document.querySelectorAll('.tab').forEach((tab, i) => {
+            if (i === index) tab.classList.add('active');
+            else tab.classList.remove('active');
+        });
+
+        // Update Question Visibility
+        document.querySelectorAll('.question-card').forEach((card, i) => {
+            if (i === index) card.classList.add('active');
+            else card.classList.remove('active');
+        });
+
+        // Scroll to top
+        document.getElementById('contextCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- 渲染題目 ---
+    function renderQuestions() {
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = '';
+
+        quizData.questions.forEach((q, qIndex) => {
+            const state = questionStates[qIndex];
+            const card = document.createElement('div');
+            card.className = `question-card ${qIndex === 0 ? 'active' : ''}`;
+            card.id = `q-card-${qIndex}`;
+
+            // 選項 HTML 生成
+            let optionsHtml = '';
+            const labels = ['A', 'B', 'C', 'D', 'E', 'F'];
+            
+            state.shuffledIndices.forEach((originalIndex, displayIndex) => {
+                const optionText = q.options[originalIndex];
+                optionsHtml += `
+                    <div class="option" id="opt-${qIndex}-${displayIndex}" onclick="selectOption(${qIndex}, ${displayIndex})">
+                        <span class="opt-label">${labels[displayIndex]}</span>
+                        <span>${optionText}</span>
+                    </div>
+                `;
+            });
+
+            const typeLabel = q.type === 'multi' ? '(複選)' : '(單選)';
+
+            // 解析 HTML 生成 (拆分成多區塊)
+            const analysisHtml = `
+                <div class="explanation" id="exp-${qIndex}">
+                    <!-- 第一步：關鍵字 -->
+                    <div class="analysis-section">
+                        <div class="analysis-header h-step1">🔑 找關鍵字</div>
+                        <div class="analysis-content">${q.analysis.step1.replace('【第一步：找關鍵字】', '').trim()}</div>
+                    </div>
+                    <!-- 第二步：白話翻譯 -->
+                    <div class="analysis-section">
+                        <div class="analysis-header h-step2">💬 白話翻譯</div>
+                        <div class="analysis-content">${q.analysis.step2.replace('【第二步：白話翻譯】', '').trim()}</div>
+                    </div>
+                    <!-- 第三步：解題思路 -->
+                    <div class="analysis-section">
+                        <div class="analysis-header h-step3">💡 解題思路</div>
+                        <div class="analysis-content">${q.analysis.step3.replace('【第三步：解題思路】', '').trim()}</div>
+                    </div>
+                    <!-- 第四步：選項分析 -->
+                    <div class="analysis-section">
+                        <div class="analysis-header h-step4">🔍 選項分析</div>
+                        <div class="analysis-content">${q.analysis.step4.replace('【第四步：選項分析】', '').trim()}</div>
+                    </div>
+                    <!-- 補充與延伸 -->
+                    <div class="analysis-section">
+                        <div class="analysis-header h-supp">📚 觀念補充</div>
+                        <div class="analysis-content">${q.analysis.supplement.replace('【觀念補充與延伸】', '').trim()}</div>
+                    </div>
+                    <!-- 觸類旁通 -->
+                    <div class="analysis-section">
+                        <div class="analysis-header h-ext">🔄 觸類旁通</div>
+                        <div class="analysis-content">${q.analysis.extension.replace('【觸類旁通（舉一反三）】', '').replace('【觸類旁通】', '').trim()}</div>
+                    </div>
+                    <!-- 記憶口訣 -->
+                    <div class="analysis-section">
+                        <div class="analysis-header h-gold">✨ 記憶口訣</div>
+                        <div class="analysis-content">${q.analysis.mnemonic.replace('【記憶口訣】', '').trim()}</div>
+                    </div>
+                    <!-- 常見陷阱 -->
+                    <div class="analysis-section">
+                        <div class="analysis-header h-trap">⚠️ 常見陷阱</div>
+                        <div class="analysis-content">${q.analysis.trap.replace('【常見陷阱】', '').trim()}</div>
+                    </div>
+                    
+                    <!-- 自我檢測 -->
+                    <div class="self-check-box">
+                        <div class="check-title">📝 自我檢測</div>
+                        <div class="check-question">Q: ${q.analysis.selfCheckQ}</div>
+                        <details>
+                            <summary>查看參考答案</summary>
+                            <div class="check-answer">A: ${q.analysis.selfCheckA}</div>
+                        </details>
+                    </div>
+                </div>
+            `;
+
+            card.innerHTML = `
+                <div class="q-header">
+                    <div class="q-id">第 ${q.id} 題 <span style="font-size:0.9rem; color:#666;">${typeLabel}</span></div>
+                    <div class="tag ${q.tagClass}">${q.tag}</div>
+                </div>
+                <div class="q-text">${highlightKeywords(q.text)}</div>
+                
+                <div class="options-grid">
+                    ${optionsHtml}
+                </div>
+
+                <div class="action-area">
+                    <button class="btn btn-primary" id="btn-${qIndex}" onclick="submitAnswer(${qIndex})">送出答案</button>
+                </div>
+
+                ${analysisHtml}
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // --- 選擇選項 ---
+    function selectOption(qIndex, displayIndex) {
+        const state = questionStates[qIndex];
+        const qData = quizData.questions[qIndex];
+
+        if (state.isSubmitted) return; 
+
+        if (qData.type === 'single') {
+            state.selectedOptions.clear();
+            state.selectedOptions.add(displayIndex);
+        } else {
+            if (state.selectedOptions.has(displayIndex)) {
+                state.selectedOptions.delete(displayIndex);
+            } else {
+                state.selectedOptions.add(displayIndex);
+            }
+        }
+        updateOptionsUI(qIndex);
+    }
+
+    function updateOptionsUI(qIndex) {
+        const state = questionStates[qIndex];
+        const options = document.querySelectorAll(`#q-card-${qIndex} .option`);
+        
+        options.forEach((opt, idx) => {
+            if (state.selectedOptions.has(idx)) {
+                opt.classList.add('selected');
+            } else {
+                opt.classList.remove('selected');
+            }
+        });
+    }
+
+    // --- 送出答案 / 重新作答 ---
+    function submitAnswer(qIndex) {
+        const state = questionStates[qIndex];
+        const qData = quizData.questions[qIndex];
+        const btn = document.getElementById(`btn-${qIndex}`);
+
+        if (state.isSubmitted) {
+            resetQuestion(qIndex);
+            return;
+        }
+
+        if (state.selectedOptions.size === 0) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        state.isSubmitted = true;
+
+        const userSelectedOriginalIndices = Array.from(state.selectedOptions).map(displayIdx => state.shuffledIndices[displayIdx]);
+        
+        const userSet = userSelectedOriginalIndices.sort().toString();
+        const correctSet = qData.correctIndex.sort().toString();
+        
+        state.isCorrect = (userSet === correctSet);
+
+        // UI 反饋
+        const options = document.querySelectorAll(`#q-card-${qIndex} .option`);
+        options.forEach((opt, displayIdx) => {
+            opt.classList.add('disabled');
+            const originalIdx = state.shuffledIndices[displayIdx];
+            
+            if (qData.correctIndex.includes(originalIdx)) {
+                opt.classList.add('correct-answer');
+                if (!state.selectedOptions.has(displayIdx)) {
+                   opt.style.border = "2px dashed #27ae60";
+                }
+            }
+            
+            if (state.selectedOptions.has(displayIdx) && !qData.correctIndex.includes(originalIdx)) {
+                opt.classList.add('wrong-answer');
+            }
+        });
+
+        // 顯示詳解
+        document.getElementById(`exp-${qIndex}`).style.display = 'block';
+
+        btn.textContent = "重新作答";
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-reset');
+
+        renderTabs(); 
+        updateProgress();
+    }
+
+    // --- 單題重置 ---
+    function resetQuestion(qIndex) {
+        const state = questionStates[qIndex];
+        const qData = quizData.questions[qIndex];
+
+        state.selectedOptions.clear();
+        state.isSubmitted = false;
+        state.isCorrect = false;
+
+        // 不重新洗牌，僅重置
+        renderQuestions(); 
+        
+        renderTabs();
+        document.querySelectorAll('.tab')[qIndex].classList.add('active'); 
+        document.querySelectorAll('.question-card')[qIndex].classList.add('active'); 
+
+        updateProgress();
+    }
+
+    // --- 更新進度條 ---
+    function updateProgress() {
+        const completed = questionStates.filter(s => s.isSubmitted).length;
+        const total = questionStates.length;
+        const percentage = (completed / total) * 100;
+
+        document.getElementById('progressBar').style.width = `${percentage}%`;
+        document.getElementById('progressText').innerText = `${completed}/${total}`;
+    }
+
+    window.onload = init;
+
+</script>
+
+</body>
+</html>
