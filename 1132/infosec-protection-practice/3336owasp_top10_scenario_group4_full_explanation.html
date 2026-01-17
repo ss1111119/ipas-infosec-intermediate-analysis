@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP Top 10 情境題組互動測驗</title>
+    <style>
+        :root {
+            --primary: #2196F3;
+            --success: #27ae60;
+            --error: #c0392b;
+            --neutral: #607d8b;
+            --bg-page: #f5f7fa;
+            --bg-card: #ffffff;
+            --text-main: #2c3e50;
+            --text-sec: #7f8c8d;
+            
+            /* Tag Colors */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+
+            /* Step Colors */
+            --step-1: #e1f5fe; /* Light Blue */
+            --step-text-1: #01579b;
+            --step-2: #f3e5f5; /* Light Purple */
+            --step-text-2: #4a148c;
+            --step-3: #fff3e0; /* Light Orange */
+            --step-text-3: #e65100;
+            --step-4: #e8f5e9; /* Light Green */
+            --step-text-4: #1b5e20;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px 10px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* Layout & Container */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 20px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .progress-container {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary), #64b5f6);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: var(--text-sec);
+            font-weight: bold;
+        }
+
+        /* Scenario Box */
+        .scenario-box {
+            background-color: #e3f2fd;
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .scenario-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            display: block;
+        }
+
+        /* Tabs */
+        .tabs-wrapper {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        .tabs-wrapper::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        .tabs {
+            display: inline-flex;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-height: 48px;
+            color: var(--text-sec);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+        }
+
+        .tab-btn.correct {
+            border-color: var(--success);
+            color: var(--success);
+            background: #e8f5e9;
+        }
+        
+        .tab-btn.active.correct {
+            background: var(--success);
+            color: white;
+        }
+
+        .tab-btn.incorrect {
+            border-color: var(--error);
+            color: var(--error);
+            background: #fce4ec;
+        }
+
+        .tab-btn.active.incorrect {
+            background: var(--error);
+            color: white;
+        }
+
+        /* Question Card */
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .tag-tech { background-color: var(--tag-sec); }
+        .tag-risk { background-color: var(--tag-mgm); }
+        .tag-defense { background-color: var(--tag-iso); }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .highlight-red {
+            color: var(--error);
+            font-weight: 800;
+            border-bottom: 2px solid var(--error);
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .option-item {
+            display: flex;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+            background: white;
+            min-height: 56px; /* Touch target */
+        }
+
+        .option-item:hover:not(.disabled) {
+            border-color: var(--primary);
+            background-color: #f0f8ff;
+        }
+
+        .option-label {
+            background: #eee;
+            width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            color: var(--text-sec);
+        }
+
+        .option-content {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Selected State */
+        .option-item.selected {
+            border-color: var(--primary);
+            background-color: #e3f2fd;
+        }
+        .option-item.selected .option-label {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Validated States */
+        .option-item.correct {
+            border-color: var(--success);
+            background-color: #e8f5e9;
+        }
+        .option-item.correct .option-label {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .option-item.wrong {
+            border-color: var(--error);
+            background-color: #ffebee;
+            opacity: 0.8;
+        }
+        .option-item.wrong .option-label {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .option-item.disabled {
+            cursor: default;
+            opacity: 0.7;
+        }
+
+        /* Action Area */
+        .action-area {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+            transition: transform 0.1s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-retry {
+            background-color: var(--text-main);
+            box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+        }
+
+        /* Explanation Section Styles */
+        .explanation-section {
+            margin-top: 30px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+            display: none; /* Hidden by default */
+        }
+
+        .explanation-section.show {
+            display: block;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .exp-header {
+            background-color: #eceff1;
+            padding: 15px 20px;
+            font-weight: bold;
+            color: var(--text-main);
+            border-bottom: 1px solid #ddd;
+        }
+
+        .exp-content {
+            padding: 20px;
+        }
+
+        .exp-block {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+
+        .exp-block:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .step-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .badge-1 { background-color: var(--step-1); color: var(--step-text-1); }
+        .badge-2 { background-color: var(--step-2); color: var(--step-text-2); }
+        .badge-3 { background-color: var(--step-3); color: var(--step-text-3); }
+        .badge-4 { background-color: var(--step-4); color: var(--step-text-4); }
+        .badge-gray { background-color: #eeeeee; color: #616161; }
+        .badge-gold { background-color: #fff8e1; color: #ff8f00; border: 1px solid #ffecb3; }
+        .badge-red { background-color: #ffebee; color: #c62828; }
+
+        .exp-text {
+            color: var(--text-main);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .exp-text strong {
+            color: #37474f;
+        }
+
+        .self-check-container {
+            margin-top: 15px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .self-check-item {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        .self-check-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        details {
+            cursor: pointer;
+        }
+        
+        summary {
+            font-weight: 600;
+            color: var(--primary);
+            list-style: none; /* Remove default triangle in some browsers */
+            display: flex;
+            align-items: center;
+        }
+        
+        summary::after {
+            content: '(點擊看答案)';
+            font-size: 0.8rem;
+            color: var(--text-sec);
+            margin-left: 8px;
+            font-weight: normal;
+        }
+
+        details[open] summary::after {
+            content: '';
+        }
+
+        .check-answer {
+            margin-top: 8px;
+            padding: 10px;
+            background-color: #f1f8e9;
+            border-radius: 6px;
+            color: #2e7d32;
+            font-size: 0.95rem;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .container { padding: 0; }
+            .question-card { border-radius: 0; box-shadow: none; padding: 20px; }
+            .header-top { padding: 0 20px; }
+            .progress-container { margin: 0 20px 10px 20px; width: auto; }
+            .scenario-box { margin: 0 20px 20px 20px; }
+            .tabs-wrapper { padding-left: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <!-- Header -->
+    <header>
+        <div class="header-top">
+            <h1>OWASP Top 10 安全檢視</h1>
+            <span class="progress-text" id="progressText">0 / 4 題</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </header>
+
+    <!-- Global Scenario -->
+    <div class="scenario-box">
+        <span class="scenario-title">【題組 4｜整體情境】</span>
+        <div>情境如附圖所示，為一段網站後端原始碼進行安全檢視（Code Review）之情境。</div>
+        <img src="https://i.meee.com.tw/9FVCpc6.png" alt="原始碼情境圖" class="scenario-img" loading="lazy">
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-wrapper">
+        <div class="tabs" id="tabsContainer">
+            <!-- Dynamic Tabs -->
+        </div>
+    </div>
+
+    <!-- Question Area -->
+    <div class="question-card">
+        <div class="tags" id="questionTags">
+            <!-- Dynamic Tags -->
+        </div>
+        
+        <div class="question-text" id="questionText">
+            <!-- Dynamic Question -->
+        </div>
+
+        <!-- Optional Question Image -->
+        <div id="questionImageContainer" style="display:none; margin-bottom: 20px;">
+            <img id="questionImage" src="" alt="題目附圖" class="scenario-img">
+        </div>
+
+        <div class="options-grid" id="optionsGrid">
+            <!-- Dynamic Options -->
+        </div>
+
+        <div class="action-area">
+            <button class="btn-primary" id="actionBtn" onclick="handleAction()">送出答案</button>
+        </div>
+
+        <!-- Explanation Section (Updated Structure) -->
+        <div class="explanation-section" id="explanation">
+            <div class="exp-header">詳解分析與教學</div>
+            <div class="exp-content" id="expContent">
+                <!-- Content will be injected by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Data Source
+const quizData = {
+    groupTitle: "OWASP Top 10 安全檢視",
+    questions: [
+        {
+            id: 33,
+            tag: "風險辨識",
+            tagClass: "tag-risk",
+            text: "根據所發現的原始碼，除發現 logLoginAttempt 函數未實做而可能有 OWASP A09:2021 – Security Logging and Monitoring Failures（安全記錄與監控失效）風險外，還有下列何項 OWASP Top 10:2021 風險最可能存在？",
+            type: "single",
+            options: [
+                "A02:2021 – Cryptographic Failures",
+                "A03:2021 – Injection",
+                "A05:2021 – Security Misconfiguration",
+                "A06:2021 – Vulnerable and Outdated Components"
+            ],
+            correct: ["A03:2021 – Injection"],
+            analysis: {
+                step1: "原始碼 (Source Code)、使用者輸入 / API 請求、未見輸入驗證與過濾、OWASP Top 10:2021",
+                step2: "題目在問：「除了沒有好好記錄登入事件之外，從這段程式碼的寫法來看，最有可能還藏著哪一種 OWASP Top 10 的重大漏洞？」",
+                step3: `
+                    <strong>這題在考什麼觀念？</strong><br>
+                    是否能從「原始碼直接使用外部輸入」聯想到 Injection（注入攻擊）。<br><br>
+                    <strong>解題步驟：</strong>
+                    <ol style="margin-top:5px; padding-left:20px;">
+                        <li>看程式碼是否直接使用 request 參數、token、payload</li>
+                        <li>是否沒有看到輸入驗證（validation）或過濾（sanitization）</li>
+                        <li>是否可能讓攻擊者「塞惡意內容進來」</li>
+                    </ol>
+                    <strong>原理與規則（白話）：</strong><br>
+                    Injection 的核心概念是：「系統把攻擊者送來的資料，誤當成指令來執行。」<br>
+                    常見類型：SQL Injection, Command Injection, Script / JSON Injection。<br><br>
+                    <strong>生活例子：</strong><br>
+                    就像有人在「填寫表單」時，不是填名字，而是偷偷寫「執行指令」，系統卻照做。
+                `,
+                step4: `
+                    <strong>(A) Cryptographic Failures</strong><br>錯：題目沒有提到加密演算法、明文傳輸或金鑰管理問題。<br>
+                    <strong>(B) Injection</strong><br>對：原始碼若直接使用外部輸入且缺乏防護，最符合 Injection 的典型風險。<br>
+                    <strong>(C) Security Misconfiguration</strong><br>錯：此題重點在程式邏輯，不是系統設定。<br>
+                    <strong>(D) Vulnerable and Outdated Components</strong><br>錯：未提及套件版本或已知漏洞元件。
+                `,
+                extension: `
+                    <strong>核心觀念定位：</strong>Injection 是 OWASP Top 10 中長年排名前段的必考風險。<br>
+                    <strong>法條或定義（白話）：</strong>Injection：未正確處理外部輸入，導致系統執行非預期指令。<br>
+                    <strong>觸類旁通（舉一反三）：</strong>若題目出現「直接拼接 SQL、命令、JSON」，幾乎直接聯想到 Injection。
+                `,
+                mnemonic: "外部輸入沒過濾，注入風險一定有",
+                pitfall: `
+                    <strong>心理盲點：</strong>以為只有 SQL 才叫 Injection。<br>
+                    <strong>避坑指南：</strong>看到「使用者輸入 + 未驗證」，先想 Injection。
+                `,
+                check: [
+                    { q: "1) 為什麼 Injection 不是只有 SQL Injection？", a: "因為只要是直譯器（Interpreter）能執行的指令都可能被注入（如 OS Command, LDAP, NoSQL）。" },
+                    { q: "2) 如果有輸入驗證，Injection 風險會完全消失嗎？", a: "不一定，最好配合參數化查詢（Prepared Statement）才安全，並採縱深防禦。" }
+                ]
+            }
+        },
+        {
+            id: 34,
+            tag: "技術實作",
+            tagClass: "tag-tech",
+            text: "根據所發現的原始碼，verifyToken 函數若要實做安全檢查機制，下列何項措施最合適？",
+            type: "single",
+            options: [
+                "檢查 token 的時間戳記",
+                "驗證 token 的簽章",
+                "確認 token 的使用者角色",
+                "檢查 token 的來源 IP"
+            ],
+            correct: ["驗證 token 的簽章"],
+            analysis: {
+                step1: "verifyToken、安全檢查、Token",
+                step2: "題目在問：「一個負責驗證 token 的函數，最重要、最不能少的安全檢查是什麼？」",
+                step3: `
+                    <strong>解題思路：</strong><br>
+                    Token 的核心安全在於「是否被竄改」。驗證真偽一定先驗證「簽章」。<br><br>
+                    <strong>解題步驟：</strong>
+                    <ol style="margin-top:5px; padding-left:20px;">
+                        <li>先區分「驗證（Authentication）」與「授權（Authorization）」</li>
+                        <li>找出哪個選項能證明 token 是真的</li>
+                    </ol>
+                    <strong>原理與規則（白話）：</strong><br>
+                    Token 簽章就像「防偽印章」，沒驗簽，就不知道 token 是不是自己人發的。<br><br>
+                    <strong>生活例子：</strong><br>
+                    就像驗證證件，一定先看「是否偽造」，不是先看職稱。
+                `,
+                step4: `
+                    <strong>(A) 檢查時間戳記</strong><br>錯：只能確認是否過期，不能確認是否被偽造。<br>
+                    <strong>(B) 驗證 token 的簽章</strong><br>對：能確認 token 未被竄改且為合法簽發。<br>
+                    <strong>(C) 確認使用者角色</strong><br>錯：屬於授權階段。<br>
+                    <strong>(D) 檢查來源 IP</strong><br>錯：IP 容易變動，且無法證明 token 真偽。
+                `,
+                extension: `
+                    <strong>觀念補充：</strong><br>
+                    驗證（Authentication）：你是誰？<br>
+                    授權（Authorization）：你能做什麼？
+                `,
+                mnemonic: "先驗真，再談權",
+                pitfall: `
+                    <strong>心理盲點：</strong>把角色檢查當成驗證。<br>
+                    <strong>避坑指南：</strong>看到 verifyToken，一定選「簽章」。
+                `,
+                check: [
+                    { q: "1) 為什麼沒驗簽的 token 等於不可信？", a: "因為任何人都可以偽造 Payload 的內容，沒有簽章就無法發現被竄改。" },
+                    { q: "2) 驗證與授權的順序為何？", a: "先驗證（Authentication）身分，再授權（Authorization）權限。" }
+                ]
+            }
+        },
+        {
+            id: 35,
+            tag: "防禦策略",
+            tagClass: "tag-defense",
+            text: "根據所發現的原始碼，如要降低 /api/protected 路徑潛在漏洞而危害資料安全，下列何項措施何者最合適？",
+            type: "single",
+            options: [
+                "提升使用者密碼複雜度設定規則",
+                "實做網路層的防火牆保護",
+                "對 API 回應適當的去機敏資料處理",
+                "執行用戶端行為分析和異常檢測"
+            ],
+            correct: ["對 API 回應適當的去機敏資料處理"],
+            analysis: {
+                step1: "/api/protected、API 回應、資料安全",
+                step2: "如果 API 不小心被看到或被濫用，怎麼做才能「把資料外洩的傷害降到最低」？",
+                step3: `
+                    <strong>解題思路：</strong><br>
+                    防護不只在「擋住」，也在「就算被看到也看不到重點」。
+                `,
+                step4: `
+                    <strong>(A) 密碼複雜度</strong><br>錯：與 API 回應內容無直接關係。<br>
+                    <strong>(B) 防火牆</strong><br>錯：屬外圍防護，無法控制回傳資料。<br>
+                    <strong>(C) 去機敏資料</strong><br>對：即使 API 被存取，也不會洩漏敏感資訊。<br>
+                    <strong>(D) 行為分析</strong><br>錯：屬偵測，非降低資料內容風險。
+                `,
+                extension: "<strong>防禦縱深：</strong>除了預防入侵（防火牆、驗證），減輕後果（資料最小化、去機敏）也是重要一環。",
+                mnemonic: "擋不住，就少給",
+                pitfall: "<strong>陷阱：</strong>誤以為防火牆能過濾應用層資料內容。",
+                check: [
+                    { q: "1) 為什麼 API 去機敏是重要防線？", a: "因為當權限控管失效時，去機敏化是保護資料內容的最後防線。" },
+                    { q: "2) 哪些資料一定不該回傳？", a: "密碼 Hash、身分證號、詳細錯誤訊息（Stack Trace）。" }
+                ]
+            }
+        },
+        {
+            id: 36,
+            tag: "日誌與監控",
+            tagClass: "tag-defense",
+            text: "在你執行完安全檢測並提供相關建議後，開發團隊對程式進行弱點修補並強化了 logLoginAttempt 函數如圖 1，下列哪些描述正確？（複選）",
+            img: "https://i.meee.com.tw/qDybLRg.png",
+            type: "multi",
+            options: [
+                "記錄 IP 位置有助於識別和追蹤嘗試惡意登入的來源",
+                "使用 ISO 8601 的時間格式有利於分析，可紀錄一致且標準化的時間資訊",
+                "日誌記錄於瀏覽器主控台或可公開存取檔案，為兼顧安全與可用性的實做方式",
+                "此函數能夠協助系統管理者識別帳號枚舉攻擊與試圖暴力破解之行為"
+            ],
+            correct: [
+                "記錄 IP 位置有助於識別和追蹤嘗試惡意登入的來源",
+                "使用 ISO 8601 的時間格式有利於分析，可紀錄一致且標準化的時間資訊",
+                "此函數能夠協助系統管理者識別帳號枚舉攻擊與試圖暴力破解之行為"
+            ],
+            analysis: {
+                step1: "IP、時間格式、登入失敗紀錄、帳號枚舉 / 暴力破解",
+                step2: "關於日誌記錄（Log）的正確做法與功能。",
+                step3: "<strong>原則：</strong>日誌應包含足夠的鑑識資訊（Who, When, What），且需保護日誌本身安全（不公開、不存前端）。",
+                step4: `
+                    <strong>(A)</strong> 對：IP 是追蹤來源的基礎。<br>
+                    <strong>(B)</strong> 對：ISO 8601 標準時間格式利於跨系統分析。<br>
+                    <strong>(C)</strong> 錯：日誌不應公開或記錄在前端 Console。<br>
+                    <strong>(D)</strong> 對：大量失敗紀錄是暴力破解的特徵。
+                `,
+                extension: "<strong>Logging & Monitoring：</strong>不僅是記錄，更要能觸發警報。",
+                mnemonic: "有 IP、有時間，就能抓人",
+                pitfall: "誤以為寫在 Browser Console 也是一種 Log。",
+                check: [
+                    { q: "1) 為什麼日誌不能放在前端？", a: "前端代碼對使用者可見，易被竄改或洩漏敏感邏輯/資料。" },
+                    { q: "2) 登入失敗紀錄如何判斷暴力破解？", a: "觀察同一來源 IP 或同一帳號在短時間內是否有大量失敗紀錄。" }
+                ]
+            }
+        }
+    ]
+};
+
+// State Management
+let currentTab = 0;
+let userAnswers = {}; // { questionId: { selectedIndices: [], isCorrect: bool, completed: bool } }
+let shuffledOptionsMap = {}; // Stores the shuffled order per question
+
+// Fisher-Yates Shuffle
+function shuffleArray(array) {
+    const newArr = [...array];
+    for (let i = newArr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+    }
+    return newArr;
+}
+
+// Initialization
+function init() {
+    // 1. Prepare shuffled options for all questions
+    quizData.questions.forEach((q, index) => {
+        // Store objects with original text to track correctness
+        const optionsObj = q.options.map(opt => ({ text: opt }));
+        shuffledOptionsMap[index] = shuffleArray(optionsObj);
+        userAnswers[index] = { selectedIndices: [], isCorrect: false, completed: false };
+    });
+
+    renderHeader();
+    renderTabs();
+    renderQuestion(0);
+}
+
+function renderHeader() {
+    // Calculate progress
+    const total = quizData.questions.length;
+    const completed = Object.values(userAnswers).filter(a => a.completed).length;
+    
+    document.getElementById('progressText').innerText = `${completed} / ${total} 題`;
+    document.getElementById('progressBar').style.width = `${(completed / total) * 100}%`;
+}
+
+function renderTabs() {
+    const container = document.getElementById('tabsContainer');
+    container.innerHTML = '';
+
+    quizData.questions.forEach((q, index) => {
+        const status = userAnswers[index];
+        const btn = document.createElement('div');
+        let classes = 'tab-btn';
+        if (index === currentTab) classes += ' active';
+        if (status.completed) {
+            classes += status.isCorrect ? ' correct' : ' incorrect';
+        }
+        
+        let icon = '';
+        if (status.completed) {
+            icon = status.isCorrect ? '✓ ' : '✗ ';
+        }
+
+        btn.className = classes;
+        btn.innerHTML = `${icon}第 ${index + 1} 題`;
+        btn.onclick = () => switchTab(index);
+        container.appendChild(btn);
+    });
+}
+
+function switchTab(index) {
+    currentTab = index;
+    renderTabs();
+    renderQuestion(index);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function formatQuestionText(text) {
+    // Highlight keywords
+    const keywords = ["不正確", "不是", "錯誤", "最不適用", "不合適", "沒有"];
+    let formatted = text;
+    keywords.forEach(kw => {
+        formatted = formatted.replace(new RegExp(kw, 'g'), `<span class="highlight-red">${kw}</span>`);
+    });
+    return formatted;
+}
+
+function renderQuestion(index) {
+    const q = quizData.questions[index];
+    const status = userAnswers[index];
+    const shuffledOpts = shuffledOptionsMap[index];
+
+    // Tags
+    const tagsContainer = document.getElementById('questionTags');
+    tagsContainer.innerHTML = `<span class="tag ${q.tagClass}">${q.tag}</span> <span class="tag tag-tech">題號 ${q.id}</span>`;
+
+    // Text
+    document.getElementById('questionText').innerHTML = formatQuestionText(q.text);
+
+    // Image (if any)
+    const imgContainer = document.getElementById('questionImageContainer');
+    const img = document.getElementById('questionImage');
+    if (q.img) {
+        img.src = q.img;
+        imgContainer.style.display = 'block';
+    } else {
+        imgContainer.style.display = 'none';
+    }
+
+    // Options
+    const grid = document.getElementById('optionsGrid');
+    grid.innerHTML = '';
+    
+    const labels = ['A', 'B', 'C', 'D', 'E'];
+
+    shuffledOpts.forEach((opt, optIndex) => {
+        const el = document.createElement('div');
+        let className = 'option-item';
+        
+        // Restore state if answered
+        if (status.completed) {
+            className += ' disabled';
+            const isSelected = status.selectedIndices.includes(optIndex);
+            const isActuallyCorrect = q.correct.includes(opt.text);
+
+            if (isSelected && isActuallyCorrect) className += ' correct';
+            else if (isSelected && !isActuallyCorrect) className += ' wrong';
+            else if (!isSelected && isActuallyCorrect) className += ' correct'; // Show missed correct answers
+        } else {
+            if (status.selectedIndices.includes(optIndex)) className += ' selected';
+        }
+
+        el.className = className;
+        el.innerHTML = `
+            <div class="option-label">${labels[optIndex]}</div>
+            <div class="option-content">${opt.text}</div>
+        `;
+        
+        if (!status.completed) {
+            el.onclick = () => toggleOption(index, optIndex);
+        }
+        
+        grid.appendChild(el);
+    });
+
+    // Button State
+    const btn = document.getElementById('actionBtn');
+    if (status.completed) {
+        btn.innerText = '重新作答';
+        btn.className = 'btn-primary btn-retry';
+        btn.onclick = () => resetQuestion(index);
+        
+        // Show Explanation
+        renderExplanation(q);
+        document.getElementById('explanation').classList.add('show');
+    } else {
+        btn.innerText = '送出答案';
+        btn.className = 'btn-primary';
+        btn.onclick = handleAction;
+        document.getElementById('explanation').classList.remove('show');
+    }
+}
+
+function renderExplanation(q) {
+    const ana = q.analysis;
+    const container = document.getElementById('expContent');
+    
+    // Check items HTML generator
+    let checkItemsHtml = '';
+    if (ana.check && Array.isArray(ana.check)) {
+        ana.check.forEach(item => {
+            checkItemsHtml += `
+                <div class="self-check-item">
+                    <details>
+                        <summary>${item.q}</summary>
+                        <div class="check-answer">${item.a}</div>
+                    </details>
+                </div>
+            `;
+        });
+    }
+
+    container.innerHTML = `
+        <div class="exp-block">
+            <span class="step-badge badge-1">【第一步：找關鍵字】</span>
+            <div class="exp-text"><strong>關鍵字：</strong>${ana.step1}</div>
+        </div>
+
+        <div class="exp-block">
+            <span class="step-badge badge-2">【第二步：白話翻譯】</span>
+            <div class="exp-text">${ana.step2}</div>
+        </div>
+
+        <div class="exp-block">
+            <span class="step-badge badge-3">【第三步：解題思路】</span>
+            <div class="exp-text">${ana.step3}</div>
+        </div>
+
+        <div class="exp-block">
+            <span class="step-badge badge-4">【第四步：選項分析】</span>
+            <div class="exp-text">${ana.step4}</div>
+        </div>
+
+        <div class="exp-block">
+            <span class="step-badge badge-gray">【觀念補充與延伸】</span>
+            <div class="exp-text">${ana.extension}</div>
+        </div>
+
+        <div class="exp-block">
+            <span class="step-badge badge-gold">【記憶口訣】</span>
+            <div class="exp-text" style="font-size: 1.1em; color: #e65100; font-weight: bold;">「${ana.mnemonic}」</div>
+        </div>
+
+        <div class="exp-block">
+            <span class="step-badge badge-red">【常見陷阱】</span>
+            <div class="exp-text">${ana.pitfall}</div>
+        </div>
+
+        <div class="exp-block">
+            <span class="step-badge badge-gray">【自我檢測】</span>
+            <div class="self-check-container">
+                ${checkItemsHtml}
+            </div>
+        </div>
+    `;
+}
+
+function toggleOption(qIndex, optIndex) {
+    const q = quizData.questions[qIndex];
+    const status = userAnswers[qIndex];
+
+    if (q.type === 'single') {
+        status.selectedIndices = [optIndex];
+    } else {
+        // Multi-select toggle
+        const pos = status.selectedIndices.indexOf(optIndex);
+        if (pos === -1) status.selectedIndices.push(optIndex);
+        else status.selectedIndices.splice(pos, 1);
+    }
+    
+    // Re-render just styles would be faster, but full render is safer for sync
+    renderQuestion(qIndex);
+}
+
+function handleAction() {
+    const qIndex = currentTab;
+    const q = quizData.questions[qIndex];
+    const status = userAnswers[qIndex];
+    const shuffledOpts = shuffledOptionsMap[qIndex];
+
+    if (status.selectedIndices.length === 0) {
+        alert("請至少選擇一個答案");
+        return;
+    }
+
+    // Check Logic
+    // Get text of selected options
+    const selectedTexts = status.selectedIndices.map(idx => shuffledOpts[idx].text);
+    
+    // Compare sets
+    const isCorrect = 
+        selectedTexts.length === q.correct.length && 
+        selectedTexts.every(t => q.correct.includes(t));
+
+    status.completed = true;
+    status.isCorrect = isCorrect;
+
+    renderHeader(); // Update progress
+    renderTabs();   // Update icons
+    renderQuestion(qIndex); // Lock UI and show explanation
+}
+
+function resetQuestion(index) {
+    // Reset state for this question
+    userAnswers[index] = { selectedIndices: [], isCorrect: false, completed: false };
+    
+    // Re-shuffle options for a fresh attempt? 
+    // UX Decision: Let's re-shuffle to prevent position memory.
+    const q = quizData.questions[index];
+    const optionsObj = q.options.map(opt => ({ text: opt }));
+    shuffledOptionsMap[index] = shuffleArray(optionsObj);
+
+    renderHeader();
+    renderTabs();
+    renderQuestion(index);
+    
+    window.scrollTo({ top: document.querySelector('.question-card').offsetTop - 20, behavior: 'smooth' });
+}
+
+// Start
+init();
+
+</script>
+</body>
+</html>

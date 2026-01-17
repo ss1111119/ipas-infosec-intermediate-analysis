@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資安題庫解析 - HSTS 風險分析</title>
+    
+    <!-- 引入 Bootstrap 5 (CSS) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <!-- 引入 FontAwesome (Icon) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- 引入 Google Fonts (Noto Sans TC) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- 認知友善配色系統 (Tokens) --- */
+        :root {
+            --primary-color: #2563eb;       /* 專業藍 */
+            --highlight-bg: #fef9c3;        /* 記憶高亮 (柔和黃) */
+            --success-color: #059669;       /* 正確綠 */
+            --error-color: #dc2626;         /* 錯誤紅 */
+            --text-main: #1f2937;           /* 主要文字 */
+            --text-secondary: #4b5563;      /* 次要文字 */
+            --bg-body: #f3f4f6;             /* 背景灰 */
+            
+            /* 標籤色 */
+            --tag-network: #3b82f6;         /* 網路 (藍) */
+            --step-header: #4f46e5;         /* 步驟標題色 */
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* --- 容器與卡片規範 --- */
+        .main-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 20px 10px;
+                padding: 20px 16px;
+            }
+            h4 { font-size: 1.2rem; }
+            .btn { height: 48px; display: flex; align-items: center; justify-content: center; }
+        }
+
+        /* --- Header --- */
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .question-badge {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .tag-badge {
+            background-color: var(--tag-network);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        /* --- Context & Question --- */
+        .context-card {
+            background-color: #f8fafc;
+            border-left: 5px solid var(--primary-color);
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 0 8px 8px 0;
+            font-size: 1.05rem;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .negative-word {
+            color: var(--error-color);
+            font-weight: 900;
+            text-decoration: underline;
+        }
+        
+        .keyword-highlight {
+            background-color: var(--highlight-bg);
+            padding: 0 4px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #d97706;
+        }
+
+        /* --- Options --- */
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-item {
+            position: relative;
+            padding: 15px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-item:hover {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .option-item.selected {
+            border-color: var(--primary-color);
+            background-color: #e0e7ff;
+            font-weight: 500;
+        }
+
+        .option-input {
+            margin-top: 5px;
+            margin-right: 15px;
+            accent-color: var(--primary-color);
+            transform: scale(1.2);
+        }
+
+        /* --- Feedback States --- */
+        .option-item.correct-answer {
+            border-color: var(--success-color);
+            background-color: #d1fae5; /* 淺綠 */
+        }
+        
+        .option-item.wrong-choice {
+            border-color: var(--error-color);
+            background-color: #fee2e2; /* 淺紅 */
+        }
+
+        .feedback-area {
+            margin-top: 25px;
+            display: none; /* 初始隱藏 */
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-custom {
+            border-radius: 10px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: start;
+        }
+        
+        .alert-success-custom {
+            background-color: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+        }
+
+        .alert-danger-custom {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        /* --- Action Area --- */
+        .action-area {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 40px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            transition: transform 0.1s;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.95);
+        }
+
+        .btn-retry {
+            background-color: #6b7280;
+            color: white;
+            padding: 12px 40px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            display: none; /* 初始隱藏 */
+        }
+
+        /* --- Explain Card --- */
+        .explain-card {
+            margin-top: 25px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .explain-header {
+            background-color: #f3f4f6;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+        }
+
+        .explain-body {
+            padding: 25px;
+            background-color: #fff;
+            display: none; /* 預設收合 */
+        }
+
+        .step-title {
+            color: var(--step-header);
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .step-block {
+            margin-bottom: 25px;
+            border-bottom: 1px dashed #e5e7eb;
+            padding-bottom: 20px;
+        }
+
+        .step-block:last-child {
+            border-bottom: none;
+        }
+
+        /* --- Specific Content Styling --- */
+        .life-example {
+            background-color: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            color: #0369a1;
+        }
+
+        .blindspot-box {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 15px;
+            border-radius: 8px;
+            color: #991b1b;
+        }
+
+        .mnemonic-box {
+            background-color: #fffbeb;
+            border: 2px solid #fcd34d;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* --- Self Check --- */
+        .self-check-container {
+            margin-top: 30px;
+            padding: 25px;
+            background-color: #f0fdf4;
+            border-radius: 16px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .check-item {
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 8px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .check-question {
+            padding: 12px 15px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .check-question:hover {
+            background-color: #f9fafb;
+        }
+        
+        .check-answer {
+            padding: 15px;
+            background-color: #ecfdf5;
+            color: #065f46;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.95rem;
+        }
+
+        /* Utility */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="main-container">
+        
+        <!-- Header -->
+        <div class="exam-header">
+            <div>
+                <span class="question-badge">第 32 題</span>
+                <span class="tag-badge">網路安全</span>
+            </div>
+            <div id="status-badge" class="text-secondary fw-bold">
+                <i class="fa-regular fa-circle-question"></i> 等待作答
+            </div>
+        </div>
+
+        <!-- Context -->
+        <div class="context-card">
+            <i class="fa-solid fa-magnifying-glass me-2"></i>
+            情境：在進行網站檢查時，發現其<span class="negative-word">未設定</span> HTTP Strict Transport Security（HSTS，HTTP 嚴格傳輸安全）標頭。
+        </div>
+
+        <!-- Question -->
+        <div class="mb-4">
+            <div class="question-text">
+                請問下列敘述哪些較為適切？（複選）
+            </div>
+            
+            <div class="options-group" id="options-container">
+                <!-- JS 將在此渲染隨機選項 -->
+            </div>
+        </div>
+
+        <!-- Action Area -->
+        <div class="action-area">
+            <button class="btn btn-submit shadow-sm" id="submit-btn" onclick="checkAnswer()">
+                <i class="fa-regular fa-paper-plane me-2"></i>送出答案
+            </button>
+            <button class="btn btn-retry shadow-sm" id="retry-btn" onclick="resetExam()">
+                <i class="fa-solid fa-rotate-right me-2"></i>重新挑戰
+            </button>
+        </div>
+
+        <!-- Feedback -->
+        <div class="feedback-area" id="feedback-area">
+            <div class="alert-custom" id="feedback-alert">
+                <div class="me-3 fs-4" id="feedback-icon"></div>
+                <div>
+                    <h5 class="alert-heading fw-bold mb-1" id="feedback-title"></h5>
+                    <p class="mb-0" id="feedback-text"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deep Dive Analysis (The Core Content) -->
+        <div class="explain-card mt-4" id="explain-card">
+            <div class="explain-header" onclick="toggleExplain()">
+                <span><i class="fa-solid fa-book-open me-2"></i> 逐步解題與深度解析 (點擊展開)</span>
+                <i class="fa-solid fa-chevron-down" id="explain-arrow"></i>
+            </div>
+            <div class="explain-body" id="explain-body">
+                
+                <!-- 第一步：找關鍵字 -->
+                <div class="step-block">
+                    <h5 class="step-title"><i class="fa-solid fa-1 me-2"></i>第一步：找關鍵字</h5>
+                    <p>
+                        <span class="keyword-highlight">未設定 HSTS</span>：本題核心，代表瀏覽器「沒有」被強制只能用 HTTPS。<br>
+                        <span class="keyword-highlight">中間人攻擊 (MITM)</span>：傳輸未加密時常見攻擊。<br>
+                        <span class="keyword-highlight">SSLStrip</span>：針對「降級」的攻擊手法。<br>
+                        <span class="keyword-highlight">Port 80 / 443</span>：分別代表 HTTP 與 HTTPS，考驗修補觀念。
+                    </p>
+                </div>
+
+                <!-- 第二步：白話翻譯 -->
+                <div class="step-block">
+                    <h5 class="step-title"><i class="fa-solid fa-2 me-2"></i>第二步：白話翻譯</h5>
+                    <p>這題在問：「如果一個網站沒有設定 HSTS，會帶來哪些風險？以及哪些『修補方式』其實是錯誤的？」</p>
+                </div>
+
+                <!-- 第三步：解題思路 -->
+                <div class="step-block">
+                    <h5 class="step-title"><i class="fa-solid fa-3 me-2"></i>第三步：解題思路 (原理與生活例子)</h5>
+                    <p><b>原理與規則：</b></p>
+                    <ul>
+                        <li><b>HSTS</b>：告訴瀏覽器「以後這個網站只能用 HTTPS，就算使用者打 http:// 也要自動轉成 https://」。</li>
+                        <li><b>風險</b>：沒有 HSTS，攻擊者可以在使用者第一次連線時，把 HTTPS 偷偷「降級」成 HTTP，這就是 SSLStrip。</li>
+                    </ul>
+                    
+                    <div class="life-example">
+                        <i class="fa-solid fa-mug-hot me-2"></i><b>生活例子：</b><br>
+                        HSTS 就像學校規定「一定要走有警衛的正門 (HTTPS)」。<br>
+                        沒有 HSTS，雖然有正門，但學生第一次來可能會誤走沒警衛的側門 (HTTP)，這時壞人就能在側門埋伏。
+                    </div>
+                </div>
+
+                <!-- 第四步：選項分析 -->
+                <div class="step-block">
+                    <h5 class="step-title"><i class="fa-solid fa-4 me-2"></i>第四步：選項分析</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item border-0 px-0">
+                            <i class="fa-solid fa-check text-success me-2"></i><b>(A) 可能遭受中間人攻擊 (MITM)</b>：<br>
+                            未強制加密，攻擊者可攔截流量。
+                        </li>
+                        <li class="list-group-item border-0 px-0">
+                            <i class="fa-solid fa-check text-success me-2"></i><b>(B) 可能遭受 SSLStrip 攻擊</b>：<br>
+                            SSLStrip 專門利用沒有 HSTS 的弱點進行降級攻擊。
+                        </li>
+                        <li class="list-group-item border-0 px-0">
+                            <i class="fa-solid fa-xmark text-danger me-2"></i><b>(C) 停用 Port 80</b>：<br>
+                            錯誤觀念！停用 Port 80 會讓直接輸入網址的使用者無法連線。正確是開著但設定 301 轉址 + HSTS。
+                        </li>
+                        <li class="list-group-item border-0 px-0">
+                            <i class="fa-solid fa-xmark text-danger me-2"></i><b>(D) 停用 Port 443</b>：<br>
+                            自殺行為！Port 443 是加密連線用的，停用它等於完全放棄安全性。
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 觀念補充與延伸 -->
+                <div class="step-block">
+                    <h5 class="step-title"><i class="fa-solid fa-plus me-2"></i>觀念補充與觸類旁通</h5>
+                    <p><b>觸類旁通 (舉一反三)：</b></p>
+                    <ul>
+                        <li><b>變形題</b>：如果問「哪一種 Header 可防止降級攻擊？」答案就是 HSTS。</li>
+                        <li><b>進階</b>：即使有 HSTS，第一次連線仍有風險，所以更進階的做法是申請加入瀏覽器的 <b>HSTS Preload List</b> (預載清單)。</li>
+                    </ul>
+                </div>
+
+                <!-- 常見陷阱與盲點 -->
+                <div class="step-block">
+                    <h5 class="step-title"><i class="fa-solid fa-exclamation-triangle me-2"></i>常見陷阱與避坑指南</h5>
+                    <div class="blindspot-box">
+                        <p class="mb-2"><b>🧠 心理盲點：</b></p>
+                        學生常以為「把不安全的門 (Port 80) 關掉就安全了」。<br>
+                        但 HSTS 是「瀏覽器的規則」，關閉伺服器 Port 80 並不能讓瀏覽器記住「下次要強制走 HTTPS」，反而造成服務中斷。
+                    </div>
+                </div>
+
+                <!-- 記憶口訣 -->
+                <div class="mnemonic-box">
+                    <h5 class="fw-bold mb-2"><i class="fa-solid fa-lightbulb me-2 text-warning"></i>記憶口訣</h5>
+                    <p class="mb-0 fs-5 fw-bold text-dark">「沒 HSTS，會被降；被降級，就被看光光」</p>
+                    <small class="text-secondary">(沒 HSTS → 遭 SSLStrip 降級 → 變回 HTTP 明文 → 被看光)</small>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 7. Self Check (Updated Logic) -->
+        <div class="self-check-container">
+            <h5 class="fw-bold text-success mb-3"><i class="fa-solid fa-clipboard-check me-2"></i>自我檢測 (點擊題目看答案)</h5>
+            
+            <div class="check-item">
+                <details>
+                    <summary class="check-question">
+                        <span>1. 為什麼 HSTS 對「第一次連線」特別重要？</span>
+                        <i class="fa-solid fa-chevron-down text-secondary"></i>
+                    </summary>
+                    <div class="check-answer">
+                        因為第一次連線時，瀏覽器還沒收到 HSTS 標頭，攻擊者最有機會在此時進行降級攻擊（除非網站有加入 HSTS Preload List）。
+                    </div>
+                </details>
+            </div>
+
+            <div class="check-item">
+                <details>
+                    <summary class="check-question">
+                        <span>2. 只用 HTTPS，但不設定 HSTS，還有什麼風險？</span>
+                        <i class="fa-solid fa-chevron-down text-secondary"></i>
+                    </summary>
+                    <div class="check-answer">
+                        使用者若手動輸入 http:// 或點擊到 http連結，攻擊者仍可攔截並阻止轉址到 HTTPS，導致使用者繼續在不安全的環境下傳輸。
+                    </div>
+                </details>
+            </div>
+
+            <div class="check-item">
+                <details>
+                    <summary class="check-question">
+                        <span>3. HSTS 與 HTTP 301 轉址，在安全性上有什麼差別？</span>
+                        <i class="fa-solid fa-chevron-down text-secondary"></i>
+                    </summary>
+                    <div class="check-answer">
+                        301 只是伺服器「建議」瀏覽器換網址，攻擊者可以攔截這個建議；HSTS 則是瀏覽器「強制」記住規則，下次連線直接走 HTTPS，不經過伺服器轉址。
+                    </div>
+                </details>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // --- 題目資料 ---
+    const questionData = [
+        { id: 'A', text: '可能遭受中間人攻擊（Man-in-the-Middle，MITM）', correct: true },
+        { id: 'B', text: '可能遭受 SSLStrip 攻擊', correct: true },
+        { id: 'C', text: '可於網站伺服器中停用 Port 80 的服務來修補這問題', correct: false },
+        { id: 'D', text: '可於網站伺服器中停用 Port 443 的服務來修補這問題', correct: false }
+    ];
+
+    let shuffledOptions = [];
+
+    // --- 初始化 ---
+    window.onload = function() {
+        initExam();
+    };
+
+    function initExam() {
+        // 1. 隨機排序選項 (Fisher-Yates Shuffle)
+        shuffledOptions = [...questionData];
+        for (let i = shuffledOptions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+        }
+
+        // 2. 渲染選項
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        
+        shuffledOptions.forEach((opt, index) => {
+            const div = document.createElement('div');
+            div.className = 'option-item';
+            div.id = `option-box-${opt.id}`;
+            div.onclick = () => toggleSelection(opt.id);
+            
+            div.innerHTML = `
+                <input type="checkbox" class="option-input form-check-input" id="opt-${opt.id}" value="${opt.id}">
+                <label class="form-check-label flex-grow-1" style="cursor:pointer;" for="opt-${opt.id}">
+                    <span class="fw-bold me-2">(${String.fromCharCode(65 + index)})</span> ${opt.text} 
+                </label>
+            `;
+            container.appendChild(div);
+        });
+
+        // 3. 重置狀態
+        document.getElementById('feedback-area').style.display = 'none';
+        document.getElementById('explain-body').style.display = 'none';
+        document.getElementById('explain-arrow').className = 'fa-solid fa-chevron-down';
+        document.getElementById('submit-btn').style.display = 'inline-block';
+        document.getElementById('retry-btn').style.display = 'none';
+        document.getElementById('status-badge').innerHTML = '<i class="fa-regular fa-circle-question"></i> 等待作答';
+        document.getElementById('status-badge').className = 'text-secondary fw-bold';
+        
+        // 4. 重置自我檢測 (收合所有詳解)
+        document.querySelectorAll('.self-check-container details').forEach(d => d.removeAttribute('open'));
+    }
+
+    // --- 互動邏輯 ---
+    function toggleSelection(id) {
+        if(document.getElementById('retry-btn').style.display === 'inline-block') return;
+
+        const checkbox = document.getElementById(`opt-${id}`);
+        // 這裡不需要手動設定 checked，因為 input 在 label 內或透過原生行為會自動切換
+        // 但我們需要手動觸發樣式更新
+        setTimeout(() => updateStyles(), 10);
+    }
+
+    // 監聽所有 checkbox 變化
+    document.addEventListener('change', function(e) {
+        if(e.target.classList.contains('option-input')) {
+            updateStyles();
+        }
+    });
+
+    function updateStyles() {
+        document.querySelectorAll('.option-input').forEach(input => {
+            const box = document.getElementById(`option-box-${input.value}`);
+            if(input.checked) {
+                box.classList.add('selected');
+            } else {
+                box.classList.remove('selected');
+            }
+        });
+    }
+
+    function checkAnswer() {
+        // 1. 獲取使用者選擇
+        const selectedIds = Array.from(document.querySelectorAll('.option-input:checked')).map(el => el.value);
+        
+        if (selectedIds.length === 0) {
+            alert("請至少選擇一個選項！");
+            return;
+        }
+
+        // 2. 判定結果
+        const correctIds = questionData.filter(q => q.correct).map(q => q.id);
+        const isCorrect = selectedIds.length === correctIds.length && 
+                          selectedIds.every(id => correctIds.includes(id));
+
+        // 3. UI 鎖定與回饋
+        const inputs = document.querySelectorAll('.option-input');
+        inputs.forEach(input => input.disabled = true);
+        
+        questionData.forEach(q => {
+            const box = document.getElementById(`option-box-${q.id}`);
+            const input = document.getElementById(`opt-${q.id}`);
+            
+            if (q.correct) {
+                box.classList.add('correct-answer');
+                if (!box.innerHTML.includes('fa-check')) {
+                     box.innerHTML += '<i class="fa-solid fa-check text-success ms-auto fs-4"></i>';
+                }
+            } else if (input.checked) {
+                box.classList.add('wrong-choice');
+                if (!box.innerHTML.includes('fa-xmark')) {
+                    box.innerHTML += '<i class="fa-solid fa-xmark text-danger ms-auto fs-4"></i>';
+                }
+            }
+        });
+
+        // 4. 顯示結果卡片
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackAlert = document.getElementById('feedback-alert');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const statusBadge = document.getElementById('status-badge');
+
+        feedbackArea.style.display = 'block';
+
+        if (isCorrect) {
+            feedbackAlert.className = 'alert-custom alert-success-custom';
+            feedbackIcon.innerHTML = '<i class="fa-solid fa-trophy"></i>';
+            feedbackTitle.innerText = '完全正確！';
+            feedbackText.innerText = '觀念非常清晰，您已掌握 HSTS 與中間人攻擊的核心關聯。';
+            statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> 答題正確';
+            statusBadge.className = 'text-success fw-bold';
+            
+            // 自動展開詳解
+            const explainBody = document.getElementById('explain-body');
+            if (explainBody.style.display !== 'block') {
+                toggleExplain();
+            }
+
+        } else {
+            feedbackAlert.className = 'alert-custom alert-danger-custom';
+            feedbackIcon.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+            feedbackTitle.innerText = '差了一點點！';
+            feedbackText.innerText = '請參考下方逐步解析，特別注意「常見陷阱」與「心理盲點」的說明。';
+            statusBadge.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> 答題錯誤';
+            statusBadge.className = 'text-danger fw-bold';
+        }
+
+        // 5. 切換按鈕
+        document.getElementById('submit-btn').style.display = 'none';
+        document.getElementById('retry-btn').style.display = 'inline-block';
+    }
+
+    function resetExam() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => {
+            initExam();
+        }, 300);
+    }
+
+    function toggleExplain() {
+        const body = document.getElementById('explain-body');
+        const arrow = document.getElementById('explain-arrow');
+        
+        if (body.style.display === 'none' || body.style.display === '') {
+            body.style.display = 'block';
+            arrow.className = 'fa-solid fa-chevron-up';
+        } else {
+            body.style.display = 'none';
+            arrow.className = 'fa-solid fa-chevron-down';
+        }
+    }
+</script>
+
+</body>
+</html>

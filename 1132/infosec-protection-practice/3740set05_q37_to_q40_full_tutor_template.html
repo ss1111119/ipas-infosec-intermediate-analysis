@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>題組 5｜完整教學模板｜Q37–Q40</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --error: #c0392b;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-light: #666666;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --radius: 16px;
+            
+            /* Tags */
+            --tag-law: #607d8b;
+            --tag-iso: #27ae60;
+            --tag-zt: #8e44ad;
+            --tag-net: #2980b9;
+            --tag-sec: #c0392b;
+            --tag-mgm: #d35400;
+
+            /* State Backgrounds */
+            --bg-correct: #e8f5e9;
+            --bg-wrong: #fce4ec;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: system-ui, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            font-size: 16px;
+            padding-bottom: 60px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 24px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .progress-track {
+            flex: 1;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Global Context */
+        .global-context {
+            background: #e3f2fd;
+            border-left: 5px solid var(--accent);
+            padding: 16px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        /* Tabs */
+        .tabs-wrapper {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            scrollbar-width: none; /* Firefox */
+        }
+        .tabs-wrapper::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        .tab-btn {
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            padding: 10px 20px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            white-space: nowrap;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            height: 48px;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .tab-btn.correct {
+            border-color: var(--success);
+            color: var(--success);
+        }
+        .tab-btn.active.correct {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .tab-btn.wrong {
+            border-color: var(--error);
+            color: var(--error);
+        }
+        .tab-btn.active.wrong {
+            background: var(--error);
+            color: #fff;
+        }
+
+        /* Main Card */
+        .question-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Question Meta */
+        .q-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .q-id {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-light);
+        }
+
+        .tag {
+            padding: 4px 12px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .tag-law { background-color: var(--tag-law); }
+        .tag-iso { background-color: var(--tag-iso); }
+        .tag-zt { background-color: var(--tag-zt); }
+        .tag-net { background-color: var(--tag-net); }
+        .tag-sec { background-color: var(--tag-sec); }
+        .tag-mgm { background-color: var(--tag-mgm); }
+
+        /* Question Content */
+        .q-text {
+            font-size: 1.15rem;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .highlight-negative {
+            color: var(--error);
+            font-weight: 800;
+            border-bottom: 2px solid var(--error);
+        }
+
+        .q-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 12px 0 20px 0;
+            border: 1px solid #eee;
+            display: block;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            line-height: 1.5;
+            color: var(--text-main);
+            min-height: 56px; /* Touch friendly */
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #e3f2fd;
+            border-color: var(--accent);
+        }
+
+        .option-btn.selected {
+            background: #e3f2fd;
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .option-btn.correct-answer {
+            background: var(--bg-correct) !important;
+            border-color: var(--success) !important;
+            color: #1b5e20;
+        }
+
+        .option-btn.wrong-answer {
+            background: var(--bg-wrong) !important;
+            border-color: var(--error) !important;
+            color: #b71c1c;
+            opacity: 0.8;
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+        }
+
+        .opt-label {
+            font-weight: 700;
+            min-width: 24px;
+        }
+
+        /* Action Area */
+        .action-area {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
+            transition: transform 0.2s;
+            min-height: 48px;
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-reset {
+            background: #7f8c8d;
+            box-shadow: 0 4px 6px rgba(127, 140, 141, 0.3);
+        }
+
+        /* Detailed Explanation Section */
+        .explanation-section {
+            margin-top: 32px;
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .exp-card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .exp-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary);
+            border-bottom: 2px solid rgba(0,0,0,0.05);
+            padding-bottom: 8px;
+        }
+        
+        .exp-icon {
+            font-size: 1.4rem;
+        }
+
+        .exp-body {
+            color: #444;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* Specific Colors for Sections */
+        .sec-keywords .exp-header { color: #d35400; border-color: #d35400; }
+        .sec-translation .exp-header { color: #2980b9; border-color: #2980b9; }
+        .sec-logic .exp-header { color: #8e44ad; border-color: #8e44ad; }
+        .sec-example .exp-header { color: #27ae60; border-color: #27ae60; }
+        .sec-options .exp-header { color: #c0392b; border-color: #c0392b; }
+        .sec-concept .exp-header { color: #2c3e50; border-color: #2c3e50; }
+        .sec-golden .exp-header { color: #f39c12; border-color: #f39c12; }
+        .sec-trap .exp-header { color: #c0392b; border-color: #c0392b; }
+
+        /* Self Check Styles */
+        .self-check-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .sc-question {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .sc-answer-toggle {
+            cursor: pointer;
+            color: var(--accent);
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 4px;
+            user-select: none;
+        }
+        .sc-answer-toggle:hover { text-decoration: underline; }
+        
+        details.sc-details summary {
+            list-style: none;
+            cursor: pointer;
+            color: white;
+            background-color: var(--accent);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        details.sc-details summary::-webkit-details-marker { display: none; }
+        
+        .sc-answer-content {
+            margin-top: 8px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 6px;
+            color: #2e7d32;
+            font-size: 0.95rem;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            h1 { font-size: 1.25rem; }
+            .q-text { font-size: 1rem; }
+            .option-btn { padding: 12px; }
+            .action-area { flex-direction: column; }
+            .btn-primary { width: 100%; }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1 id="group-title">載入中...</h1>
+        <div class="progress-container">
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-bar"></div>
+            </div>
+            <span class="progress-text" id="progress-text">0/0 完成</span>
+        </div>
+    </header>
+
+    <div class="global-context" id="global-context">
+        <!-- 題組情境 -->
+    </div>
+
+    <div class="tabs-wrapper" id="tabs-container">
+        <!-- Tabs generate here -->
+    </div>
+
+    <main class="question-card" id="main-card">
+        <!-- Dynamic Content -->
+    </main>
+</div>
+
+<script>
+    // --- 題目資料 (Q37-Q40 完整擴充版) ---
+    const quizData = {
+        groupTitle: "題組 5｜完整教學模板｜Q37–Q40",
+        groupScenario: "本題組涵蓋供應鏈安全、入侵跡證辨識、資料庫合規與資安事件處理等實務情境。",
+        questions: [
+            {
+                id: 37,
+                tag: "供應鏈安全",
+                tagClass: "tag-mgm",
+                text: "第三方套件供應商提交了一份源碼檢測報告，報告內容僅顯示受測軟體的版本、程式碼的行數、受測主件檔案的雜湊值，你發現報告中完全查無任何弱點，連資訊等級的弱點都沒有，你該如何向甲方證明所採用的套件在當下是安全無虞？<br><br><img src='https://i.meee.com.tw/LcPHqur.png' class='q-image' alt='情境圖'>",
+                options: [
+                    "請第三方套件供應商再提供一份其它檢測報告",
+                    "請第三方套件供應商提交一份源碼檢測的歷程報告",
+                    "直接交付第三方套件供應商提交的源碼檢測報告給甲方",
+                    "自己針對第三方套件進行黑箱檢測並撰寫報告提交於甲方"
+                ],
+                correct: [1], // Index of correct option (B)
+                detailedAnalysis: {
+                    keywords: "第三方套件供應商、源碼檢測報告、僅顯示版本/行數/雜湊值、查無弱點、證明安全。",
+                    translation: "供應商給你一張「看起來像報告」的東西，但上面只有版本、行數、檔案指紋（雜湊值），完全沒有說它怎麼掃、掃到哪、用什麼規則掃。你要怎麼跟甲方說：這套件現在真的安全、不是隨便交差？",
+                    logic: "1. <b>判斷目前報告缺什麼</b>：缺少「檢測過程與範圍」與「工具/規則/設定」等可驗證資訊。<br>2. <b>找能補足「可稽核證據」的文件</b>：歷程（log/scan history）比第二份結果報告更能證明真的做了事。<br>3. <b>原理</b>：資安驗證不是只看「結果為零弱點」；要看「是否真的用正確方法掃描」（工具、規則、範圍、例外清單）。",
+                    example: "你請人幫你做健康檢查，他只給你一張紙寫「身高、體重、身份證字號」，然後說「你完全沒問題」。你會相信嗎？你會想要看到：驗血、X 光、心電圖做了哪些項目、檢查時間、檢驗數值，才叫證據。",
+                    optionAnalysis: "(A) <b>錯</b>：「再一份結果」不等於「可驗證」。如果對方同樣只給摘要，你仍然無法證明有完整掃描。<br>(B) <b>對</b>：歷程報告可直接補齊「過程證據」，可稽核、可追溯，最能向甲方證明。<br>(C) <b>錯</b>：這份報告缺乏證據鏈，甲方若懂資安一定會質疑。<br>(D) <b>不選</b>：黑箱檢測對「源碼等級」與「供應商掃描品質」的佐證有限，且成本高。",
+                    conceptExtension: "<b>供應鏈安全 (Supply Chain Security)</b>：你用到別人做的東西也要能證明安全。<br><b>可稽核證據鏈 (Audit Trail)</b>：過程與結果能被第三方檢查與重現。",
+                    analogy: "<b>比較</b>：SAST (源碼) vs DAST (動態) vs SCA (成分分析)。<br><b>變化題</b>：若題目改成「只有掃描結果，沒有掃描範圍」問你要補什麼證據，答案也是要找 Log 或設定檔。",
+                    golden: "「只給結果不算數，過程紀錄才可查。」",
+                    trap: "<b>學生誤區</b>：以為「零弱點」就等於「安全」。<br><b>避坑指南</b>：看到掃描報告先做 3 問檢查：1) 用什麼工具/規則？ 2) 掃到哪些範圍？ 3) 有沒有 log/歷程？",
+                    selfCheck: [
+                        { q: "Q1. 如果報告有列出「工具名稱與規則集版本」，但仍顯示 0 弱點，你還需要什麼來加強可信度？", a: "需要掃描 Log/原始輸出、規則命中統計、以及複測或抽樣檢視證據（確保不是掃描失敗或規則未載入）。" },
+                        { q: "Q2. 若第三方套件是「編譯後的二進位」沒有源碼，你會改用哪一類檢測來驗證？", a: "改用 DAST（動態測試）與二進位分析/模糊測試（Fuzzing）等。" },
+                        { q: "Q3. 若甲方要求「供應鏈風險」證據，你除了歷程報告外，還會補哪一種分析報告？", a: "SCA（成分分析）與 SBOM（軟體物料清單）。" }
+                    ]
+                }
+            },
+            {
+                id: 38,
+                tag: "入侵鑑識",
+                tagClass: "tag-sec",
+                text: "滲透測試的外包商在進行檢測時，發現網站根目錄下存在不少的 PHP 檔案，例如有 1111.PHP, Shell.php, probe.php，還發現了一些副檔名為 .dump 的檔案，其中有一個檔案開啟後呈現密碼雜湊與驗證結果（如附圖情境）。請問此 .dump 檔案最可能為下列何項工具的產出？<br><br><img src='https://i.meee.com.tw/szaGQ4g.png' class='q-image' alt='工具輸出圖'>",
+                options: [
+                    "這是偵錯的 log 檔案",
+                    "這是登入成功、失敗的安全性事件",
+                    "這是 CRACKMAPEXEC 分析密碼的結果檔",
+                    "這是 mimikatz 另存出來的結果檔"
+                ],
+                correct: [2], // Index of correct option (C)
+                detailedAnalysis: {
+                    keywords: "網站根目錄、PHP 檔案 (Shell.php, probe.php)、副檔名 .dump、附圖一 (密碼/雜湊/驗證結果)。",
+                    translation: "測試人員在網站資料夾看到很多像後門的 PHP 檔，還有一堆 dump 檔，其中一個打開長得像某個駭客工具的輸出。這個 dump 檔最像哪一種工具的結果？",
+                    logic: "1. <b>判斷情境</b>：根目錄有 Shell.php，表示可能被植入後門。<br>2. <b>分析檔案</b>：.dump 可能是「帳密/雜湊」或「工具輸出」。<br>3. <b>對照特徵</b>：CrackMapExec (CME) 常用於 SMB/AD 驗證，輸出常呈現「主機/協定/帳號/密碼/成功與否」，符合描述。",
+                    example: "像你在教室地上撿到一張紙，上面寫著「誰的帳號、哪台電腦、密碼試了成功或失敗」，這不像是老師點名紀錄，而像是有人在測試門鎖密碼的紀錄。",
+                    optionAnalysis: "(A) <b>錯</b>：偵錯 log 通常是程式錯誤堆疊，不會長得像攻擊工具的驗證清單。<br>(B) <b>錯</b>：安全性事件 (Event Log) 有固定格式 (ID, Source)，與工具輸出不同。<br>(C) <b>對</b>：CME 常把「帳密驗證結果、主機回應、成功/失敗」輸出並另存。<br>(D) <b>錯</b>：mimikatz 輸出常見 'sekurlsa::logonpasswords'、票證或 LSA 資訊。",
+                    conceptExtension: "<b>入侵跡證辨識 (IOC)</b>：攻擊者留下的檔案、紀錄、指令碼。<br><b>橫向移動工具</b>：CrackMapExec (測試帳密/執行指令) vs Mimikatz (抓取記憶體憑證)。",
+                    analogy: "<b>Web Shell</b> (Shell.php) vs <b>系統層工具</b> (CME/mimikatz)。<br>變化題：給你一段輸出，問你是 nmap、sqlmap 還是 hydra。",
+                    golden: "「CME 會列主機帳密成敗；mimi 多談票證與 LSA。」",
+                    trap: "<b>盲點</b>：看到 .dump 就以為是系統崩潰檔 (Crash Dump) 或資料庫備份。<br><b>避坑</b>：看內容像「程式錯誤」還是「攻擊清單」？有帳號/成功失敗就是攻擊工具。",
+                    selfCheck: [
+                        { q: "Q1. 如果根目錄看到 shell.php，你第一時間要做的三件事是什麼（由急到緩）？", a: "1. 隔離主機/下線；2. 保存證據（打包檔案、記錄時間）；3. 清除與弱點修補。" },
+                        { q: "Q2. 若 .dump 內出現 “sekurlsa::logonpasswords”，答案會改成哪個？", a: "會改成 (D) mimikatz。" },
+                        { q: "Q3. 看到大量 probe.php 這類檔案，你如何判斷是「測試遺留」還是「入侵者後門」？", a: "看檔案時間戳、內容功能（是否可執行任意命令）、是否有混淆/加密、是否與可疑連線/日誌對應。" }
+                    ]
+                }
+            },
+            {
+                id: 39,
+                tag: "合規檢測",
+                tagClass: "tag-iso",
+                text: "資料查核到資料庫時，發現資料庫有很大量的合規要求都沒有做到，但要調整設定必須在不影響資料庫的運作的前提下，確認資料庫是否安全，可以透過下列何種方法進行初步的驗證最為合適？<br><br><img src='https://i.meee.com.tw/LcPHqur.png' class='q-image' alt='情境圖'>",
+                options: [
+                    "以應用程式弱點檢測報告提交",
+                    "以資安健檢的資料庫安全健檢提交報告",
+                    "以滲透測試報告提交報告",
+                    "提交一份主機弱點檢測報告"
+                ],
+                correct: [1], // Index of correct option (B)
+                detailedAnalysis: {
+                    keywords: "資料庫、大量合規要求未做、不影響運作、初步驗證。",
+                    translation: "資料庫很多設定不符合規定，但你又不能亂動設定（怕影響系統）。那你要先用哪種方法，最安全、最適合用來先確認資料庫大致安不安全？",
+                    logic: "1. <b>限制</b>：不能影響運作 → 排除滲透測試等高侵入性。<br>2. <b>目標</b>：資料庫合規 → 需資料庫專項檢核。<br>3. <b>選擇</b>：「資料庫安全健檢」最對題，符合所有條件。",
+                    example: "像你要檢查瓦斯爐安不安全，先看「有沒有漏氣、管線有沒有老化、開關有沒有鬆」，而不是直接拿打火機去點看看會不會爆。",
+                    optionAnalysis: "(A) <b>錯</b>：應用程式弱掃主要測 Web/API，不足以覆蓋資料庫合規。<br>(B) <b>對</b>：符合「合規缺失」、「不影響運作」、「初步驗證」。<br>(C) <b>錯</b>：滲透測試風險高，且目標是攻擊驗證非合規盤點。<br>(D) <b>錯</b>：主機弱掃測 OS 層，無法深入 DB 內部設定。",
+                    conceptExtension: "<b>資安健檢 (Health Check)</b>：低風險、合規導向、設定盤點 (Hardening)。<br><b>滲透測試 (PT)</b>：高風險、攻擊導向、路徑驗證。",
+                    analogy: "<b>健檢/稽核</b> vs <b>滲透測試</b>。<br>若題目改「驗證是否可被攻破」，才選滲透測試。",
+                    golden: "「不動系統先健檢；要證明能打才滲透。」",
+                    trap: "<b>盲點</b>：覺得「測到打得進去」最真實，忽略題目強調的「不影響運作」與「初步」。<br><b>避坑</b>：題目一出現「不影響運作」「初步驗證」「合規」→ 先想到健檢。",
+                    selfCheck: [
+                        { q: "Q1. 題目若改成「要驗證是否存在可被利用的 SQL Injection 造成資料庫外洩」，選項會改選哪個？", a: "可能改選 (C) 滲透測試或 (A) 應用程式弱掃。" },
+                        { q: "Q2. 資料庫安全健檢通常會檢哪些設定？請至少說三項。", a: "權限最小化、稽核紀錄開啟、連線加密 (TLS)、預設帳號移除、強密碼政策。" },
+                        { q: "Q3. 如果不能停機，你要如何安排「修正合規設定」才比較安全？", a: "分批變更、先測試環境驗證、設定變更有回復方案、避開尖峰、監控與回滾機制。" }
+                    ]
+                }
+            },
+            {
+                id: 40,
+                tag: "事件處理",
+                tagClass: "tag-mgm",
+                text: "作為跨國企業的資安管理人員，您在進行核心系統滲透測試時發現了外部系統曾被惡意攻擊，並留下攻擊殘餘的指令碼。下列哪些安全風險及處理的描述較為適當？（複選）<br><br><img src='https://i.meee.com.tw/LcPHqur.png' class='q-image' alt='情境圖'>",
+                options: [
+                    "系統存在未修補的漏洞，需要立即更新",
+                    "需要對系統進行更深入的檢視",
+                    "需要增強員工對釣魚攻擊和社交工程的警覺性",
+                    "應該檢查並更新防火牆和入侵檢測系統的配置"
+                ],
+                correct: [0, 1, 3], // Indices of correct options (A, B, D)
+                detailedAnalysis: {
+                    keywords: "核心系統滲透測試、外部系統曾被攻擊、殘留指令碼、風險及處理。",
+                    translation: "發現外部系統被駭過且留有腳本。哪些是正確的風險推論與處理方式？",
+                    logic: "1. <b>殘留腳本</b> → 代表曾被入侵，可能利用了漏洞 (A)。<br>2. <b>既已入侵</b> → 需檢查有無後門/橫向痕跡 (B)。<br>3. <b>外部系統淪陷</b> → 邊界防護/偵測可能有缺口 (D)。<br>4. <b>排除</b>：(C) 釣魚/社交工程無直接證據，屬過度推論。",
+                    example: "家門口有撬鎖痕跡與工具。做法：修門鎖 (A)、檢查家裡有無被翻 (B)、檢查警報器 (D)。不能直接說是鄰居騙你開門 (C)。",
+                    optionAnalysis: "(A) <b>對</b>：攻擊成功通常意味著漏洞或弱點，修補是必要方向。<br>(B) <b>對</b>：需鑑識有無後門或其他惡意檔。<br>(C) <b>不選</b>：題目未提郵件或欺騙，且優先順序較低。<br>(D) <b>對</b>：外部系統遭駭，防火牆/IDS 可能配置不當或漏報。",
+                    conceptExtension: "<b>事件處理 (IR)</b>：Containment (隔離) -> Eradication (清除) -> Recovery (復原)。<br><b>數位鑑識</b>：保留證據、回推手法。",
+                    analogy: "<b>立即處置</b> (修補/檢查) vs <b>長期猜測</b> (教育訓練)。<br>若題目提到「郵件引導員工輸入密碼」則 (C) 合理。",
+                    golden: "「殘留腳本三件事：補洞、深查、調配置。」",
+                    trap: "<b>盲點</b>：把所有「好事」都選上 (如教育訓練)，忽略「證據導向」。<br><b>避坑</b>：先把「題目已經給的證據」寫出來，能直接對應的優先選。",
+                    selfCheck: [
+                        { q: "Q1. 如果題目補充「是因員工點擊釣魚郵件導致帳密外洩」，哪個選項會新增？", a: "會把 (C) 加入。" },
+                        { q: "Q2. 「更深入的檢視」你會優先查哪三類資料？", a: "系統/安全日誌、帳號權限與登入紀錄、檔案完整性。" },
+                        { q: "Q3. 防火牆與入侵偵測常見的兩個問題？", a: "規則過寬（放行太多）、偵測規則未更新或閾值不當造成漏報。" }
+                    ]
+                }
+            }
+        ]
+    };
+
+    // --- 全域狀態管理 ---
+    let state = {
+        currentTab: 0,
+        userAnswers: {}, // { qIndex: [optionIndex, ...] }
+        shuffledMap: {}, // { qIndex: [originalIndex, originalIndex, ...] }
+        questionStatus: {} // { qIndex: 'unanswered' | 'correct' | 'wrong' }
+    };
+
+    // --- 初始化 ---
+    function init() {
+        document.getElementById('group-title').innerText = quizData.groupTitle;
+        document.getElementById('global-context').innerText = quizData.groupScenario;
+        
+        // 預先洗牌所有題目的選項
+        quizData.questions.forEach((q, index) => {
+            state.shuffledMap[index] = shuffleArray([...Array(q.options.length).keys()]);
+            state.questionStatus[index] = 'unanswered';
+        });
+
+        renderTabs();
+        renderQuestion(0);
+        updateProgress();
+    }
+
+    // --- 洗牌演算法 (Fisher-Yates) ---
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // --- 渲染分頁 ---
+    function renderTabs() {
+        const container = document.getElementById('tabs-container');
+        container.innerHTML = '';
+        
+        quizData.questions.forEach((q, index) => {
+            const btn = document.createElement('button');
+            let statusClass = '';
+            let icon = '';
+
+            if (state.questionStatus[index] === 'correct') {
+                statusClass = 'correct';
+                icon = '✓ ';
+            } else if (state.questionStatus[index] === 'wrong') {
+                statusClass = 'wrong';
+                icon = '✗ ';
+            }
+
+            btn.className = `tab-btn ${index === state.currentTab ? 'active' : ''} ${statusClass}`;
+            btn.innerText = `${icon}第 ${index + 1} 題`;
+            btn.onclick = () => switchTab(index);
+            container.appendChild(btn);
+        });
+    }
+
+    function switchTab(index) {
+        state.currentTab = index;
+        renderTabs();
+        renderQuestion(index);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- 關鍵字標示 ---
+    function highlightKeywords(text) {
+        const negativeKeywords = ["不正確", "不是", "錯誤", "最不適用", "沒有", "無法"];
+        let processedText = text;
+        negativeKeywords.forEach(kw => {
+            const regex = new RegExp(kw, "g");
+            processedText = processedText.replace(regex, `<span class="highlight-negative">${kw}</span>`);
+        });
+        return processedText;
+    }
+
+    // --- 渲染題目主體 ---
+    function renderQuestion(index) {
+        const q = quizData.questions[index];
+        const card = document.getElementById('main-card');
+        const isAnswered = state.userAnswers[index] !== undefined;
+        const shuffledOrder = state.shuffledMap[index]; // 取得該題的亂數排序
+        
+        // 判斷是否為複選題
+        const isMulti = q.correct.length > 1;
+        const typeText = isMulti ? '（複選題）' : '';
+
+        // 題目 HTML
+        let html = `
+            <div class="q-meta">
+                <span class="q-id">題目 ${q.id}</span>
+                <span class="tag ${q.tagClass}">${q.tag}</span>
+            </div>
+            <div class="q-text">
+                ${highlightKeywords(q.text)} 
+                <small style="color:var(--text-light); font-weight:bold;">${typeText}</small>
+            </div>
+            <div class="options-grid">
+        `;
+
+        // 渲染選項
+        const labels = ['(A)', '(B)', '(C)', '(D)', '(E)'];
+        
+        shuffledOrder.forEach((originalIndex, i) => {
+            const optionText = q.options[originalIndex];
+            const isSelected = state.userAnswers[index]?.includes(originalIndex);
+            
+            // 決定按鈕樣式 (若已回答，顯示對錯)
+            let btnClass = 'option-btn';
+            if (isAnswered) {
+                // 如果這個選項是正確答案
+                if (q.correct.includes(originalIndex)) {
+                    btnClass += ' correct-answer';
+                }
+                // 如果使用者選了這個選項，但它不是正確答案 (錯的被選中)
+                else if (isSelected) {
+                    btnClass += ' wrong-answer';
+                }
+                // 剩下的保持原樣
+            } else if (isSelected) {
+                btnClass += ' selected';
+            }
+
+            html += `
+                <button class="${btnClass}" 
+                    onclick="toggleOption(${index}, ${originalIndex})" 
+                    ${isAnswered ? 'disabled' : ''} 
+                    id="opt-btn-${originalIndex}">
+                    <span class="opt-label">${labels[i]}</span>
+                    <span>${optionText}</span>
+                </button>
+            `;
+        });
+
+        html += `</div>`; // End options grid
+
+        // 操作區
+        html += `<div class="action-area">`;
+        if (isAnswered) {
+            html += `<button class="btn-primary btn-reset" onclick="resetQuestion(${index})">重新作答</button>`;
+        } else {
+            html += `<button class="btn-primary" onclick="submitAnswer(${index})">送出答案</button>`;
+        }
+        html += `</div>`;
+
+        // 詳解區 (僅已作答顯示)
+        if (isAnswered) {
+            const da = q.detailedAnalysis;
+            
+            // Self Check Item Generation
+            let selfCheckHtml = '';
+            da.selfCheck.forEach((item, idx) => {
+                selfCheckHtml += `
+                    <div class="self-check-item">
+                        <div class="sc-question">${item.q}</div>
+                        <details class="sc-details">
+                            <summary>查看答案</summary>
+                            <div class="sc-answer-content">${item.a}</div>
+                        </details>
+                    </div>
+                `;
+            });
+
+            html += `
+                <div class="explanation-section" style="display:block">
+                    
+                    <div class="exp-card sec-keywords">
+                        <div class="exp-header"><span class="exp-icon">🔍</span> 第一步：找關鍵字</div>
+                        <div class="exp-body">${da.keywords}</div>
+                    </div>
+
+                    <div class="exp-card sec-translation">
+                        <div class="exp-header"><span class="exp-icon">💬</span> 第二步：白話翻譯</div>
+                        <div class="exp-body">${da.translation}</div>
+                    </div>
+
+                    <div class="exp-card sec-logic">
+                        <div class="exp-header"><span class="exp-icon">🧠</span> 第三步：解題思路</div>
+                        <div class="exp-body">${da.logic}</div>
+                    </div>
+
+                    <div class="exp-card sec-example">
+                        <div class="exp-header"><span class="exp-icon">🏠</span> 生活例子</div>
+                        <div class="exp-body">${da.example}</div>
+                    </div>
+
+                    <div class="exp-card sec-options">
+                        <div class="exp-header"><span class="exp-icon">⚖️</span> 第四步：選項分析</div>
+                        <div class="exp-body">${da.optionAnalysis}</div>
+                    </div>
+
+                    <div class="exp-card sec-concept">
+                        <div class="exp-header"><span class="exp-icon">📚</span> 觀念補充與觸類旁通</div>
+                        <div class="exp-body">
+                            <p>${da.conceptExtension}</p>
+                            <hr style="margin:12px 0; border:0; border-top:1px dashed #ccc;">
+                            <p>${da.analogy}</p>
+                        </div>
+                    </div>
+
+                    <div class="exp-card sec-golden">
+                        <div class="exp-header"><span class="exp-icon">🔑</span> 記憶口訣</div>
+                        <div class="exp-body" style="font-weight:bold;">${da.golden}</div>
+                    </div>
+
+                    <div class="exp-card sec-trap">
+                        <div class="exp-header"><span class="exp-icon">💣</span> 常見陷阱與避坑指南</div>
+                        <div class="exp-body">${da.trap}</div>
+                    </div>
+
+                    <div class="exp-card sec-selfcheck">
+                        <div class="exp-header" style="color:#2c3e50; border-color:#2c3e50;"><span class="exp-icon">✅</span> 自我檢測</div>
+                        <div class="exp-body">
+                            ${selfCheckHtml}
+                        </div>
+                    </div>
+
+                </div>
+            `;
+        }
+
+        card.innerHTML = html;
+    }
+
+    // --- 選項點擊邏輯 ---
+    function toggleOption(qIndex, originalIndex) {
+        const isMulti = quizData.questions[qIndex].correct.length > 1;
+        const btnId = `opt-btn-${originalIndex}`;
+        const allBtns = document.querySelectorAll('.option-btn');
+        
+        if (!isMulti) {
+            allBtns.forEach(btn => btn.classList.remove('selected'));
+            document.getElementById(btnId).classList.add('selected');
+        } else {
+            document.getElementById(btnId).classList.toggle('selected');
+        }
+    }
+
+    // --- 送出答案 ---
+    function submitAnswer(qIndex) {
+        const selectedBtns = document.querySelectorAll('.option-btn.selected');
+        if (selectedBtns.length === 0) {
+            alert("請先選擇一個答案！");
+            return;
+        }
+
+        const selectedIndices = Array.from(selectedBtns).map(btn => {
+            return parseInt(btn.id.replace('opt-btn-', ''));
+        });
+
+        state.userAnswers[qIndex] = selectedIndices;
+
+        const correctIndices = quizData.questions[qIndex].correct;
+        const isCorrect = JSON.stringify(selectedIndices.sort()) === JSON.stringify(correctIndices.sort());
+
+        state.questionStatus[qIndex] = isCorrect ? 'correct' : 'wrong';
+
+        renderTabs();
+        renderQuestion(qIndex);
+        updateProgress();
+        
+        setTimeout(() => {
+            const expSection = document.querySelector('.explanation-section');
+            if(expSection) {
+                expSection.scrollIntoView({behavior: "smooth", block: "start"});
+            }
+        }, 100);
+    }
+
+    // --- 重置題目 ---
+    function resetQuestion(qIndex) {
+        delete state.userAnswers[qIndex];
+        state.questionStatus[qIndex] = 'unanswered';
+        state.shuffledMap[qIndex] = shuffleArray([...Array(quizData.questions[qIndex].options.length).keys()]);
+
+        renderTabs();
+        renderQuestion(qIndex);
+        updateProgress();
+    }
+
+    // --- 進度條更新 ---
+    function updateProgress() {
+        const total = quizData.questions.length;
+        const answered = Object.keys(state.userAnswers).length;
+        const percent = (answered / total) * 100;
+        
+        document.getElementById('progress-bar').style.width = `${percent}%`;
+        document.getElementById('progress-text').innerText = `${answered}/${total} 完成`;
+    }
+
+    init();
+
+</script>
+
+</body>
+</html>

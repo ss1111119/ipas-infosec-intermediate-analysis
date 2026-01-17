@@ -3,363 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>資安實務題庫導航 (Q01-Q30)</title>
+    <title>資訊安全實務題庫導航 (Q01-Q40)</title>
     <style>
-        :root {
-            --primary-bg: #1a1a2e; /* 深色背景 */
-            --secondary-bg: #16213e;
-            --accent-color: #0f3460;
-            --highlight: #e94560; /* 強調色 */
-            --text-main: #e0e0e0;
-            --text-sub: #a0a0a0;
-            --card-bg: #ffffff;
-            --light-bg: #f4f6f9;
-        }
-
-        body {
-            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
-            background-color: var(--light-bg);
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: var(--primary-bg);
-            color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        h1 { margin: 0; font-size: 1.8em; }
-        .subtitle { color: #ccc; margin-top: 5px; font-size: 0.9em; }
-
-        .search-box {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            border-radius: 5px;
-            border: none;
-            font-size: 1em;
-            box-sizing: border-box;
-        }
-
-        .section-title {
-            margin-top: 30px;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: var(--secondary-bg);
-            border-left: 5px solid var(--highlight);
-            padding-left: 10px;
-            display: flex;
-            align-items: center;
-        }
-
-        .file-list {
-            list-style: none;
-            padding: 0;
-            display: grid;
-            gap: 10px;
-        }
-
-        .file-item {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid #eee;
-        }
-
-        .file-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border-color: #badcff;
-        }
-
-        .file-link {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            text-decoration: none;
-            color: #333;
-        }
-
-        .icon {
-            font-size: 1.5em;
-            margin-right: 15px;
-            width: 30px;
-            text-align: center;
-        }
-
-        .details { flex-grow: 1; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; max-width: 900px; margin: 40px auto; padding: 0 20px; color: #333; background-color: #fcfcfc; }
+        h1 { border-bottom: 2px solid #c0392b; padding-bottom: 10px; color: #c0392b; }
+        .alert { background: #fff5b1; padding: 15px; border-radius: 5px; border: 1px solid #e6d35c; margin-bottom: 20px; font-size: 0.95em; }
         
-        .filename {
-            font-weight: bold;
-            font-size: 1.05em;
-            display: block;
-            margin-bottom: 4px;
-        }
+        /* 搜尋框樣式 */
+        .search-container { margin-bottom: 20px; }
+        .search-box { width: 100%; padding: 12px; border: 1px solid #d1d5da; border-radius: 6px; font-size: 1em; box-sizing: border-box; }
 
-        .meta {
-            font-size: 0.8em;
-            color: #666;
-            background-color: #f0f0f0;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-        }
+        /* 標籤說明圖例樣式 */
+        .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; padding: 15px; background: #fff; border: 1px dashed #ccc; border-radius: 8px; }
+        .legend-item { display: flex; align-items: center; font-size: 0.85em; margin-right: 15px; }
 
-        /* 標籤樣式 */
-        .tag {
-            font-size: 0.75em;
-            padding: 2px 8px;
-            border-radius: 10px;
-            color: white;
-            margin-left: 10px;
-            vertical-align: middle;
-        }
-        .tag-blue { background-color: #3498db; }
-        .tag-red { background-color: #e74c3c; }
-        .tag-green { background-color: #27ae60; }
-        .tag-purple { background-color: #9b59b6; }
-
+        ul { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 10px; }
+        li { background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #d1d5da; transition: 0.2s; display: flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        li:hover { background: #fdf2f2; border-color: #c0392b; transform: translateY(-2px); }
+        
+        a { text-decoration: none; color: #0366d6; font-weight: bold; flex-grow: 1; display: block; word-break: break-word; }
+        .tag { font-size: 0.75em; padding: 3px 8px; border-radius: 4px; margin-right: 12px; color: white; font-weight: bold; min-width: 45px; text-align: center; flex-shrink: 0; }
+        
+        /* 資安專用標籤顏色 */
+        .tag-law { background-color: #6c757d; } /* 灰色 - 法規/合規 */
+        .tag-iso { background-color: #28a745; } /* 綠色 - 標準/ISO/CNS */
+        .tag-zt  { background-color: #6610f2; } /* 紫色 - 零信任 */
+        .tag-net { background-color: #17a2b8; } /* 藍綠 - 網路/遠距 */
+        .tag-sec { background-color: #dc3545; } /* 紅色 - 攻防/技術/CIA */
+        .tag-mgm { background-color: #e83e8c; } /* 粉紅 - 風險管理/營運持續 */
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>資訊安全實務題庫導航</h1>
-        <p class="subtitle">涵蓋 MITRE ATT&CK, NIST CSF, 滲透測試與威脅情資 (Q01-Q30)</p>
-        <input type="text" id="searchInput" class="search-box" placeholder="輸入關鍵字搜尋題目 (例如: STIX, DDoS, SQL)...">
-    </header>
-
-    <div class="section-title">
-        <span class="icon">🕵️</span> 最新更新：威脅情資與滲透測試 (Q21-Q30)
+    <h1>📂 資訊安全實務題庫導航</h1>
+    <h3>互動式練習題目錄 (全 40 題)</h3>
+    
+    <div class="alert">
+        📝 <strong>更新說明：</strong> 已更新至 Q40，涵蓋 PTES、HSTS、OWASP Top 10 與風險管理實務。
     </div>
-    <ul class="file-list">
-        <li class="file-item">
-            <a href="21threat-intelligence-format-stix.html" class="file-link">
-                <span class="icon">📜</span>
-                <div class="details">
-                    <span class="filename">Q21. 威脅情資交換格式 (STIX) <span class="tag tag-purple">New</span></span>
-                    <span class="meta">21threat-intelligence-format-stix.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="22incident-response-priority-admin-account.html" class="file-link">
-                <span class="icon">🚨</span>
-                <div class="details">
-                    <span class="filename">Q22. 事件應變優先順序 (Admin Account) <span class="tag tag-purple">New</span></span>
-                    <span class="meta">22incident-response-priority-admin-account.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="23email-server-incident-prevention.html" class="file-link">
-                <span class="icon">📧</span>
-                <div class="details">
-                    <span class="filename">Q23. 電子郵件伺服器事件預防 <span class="tag tag-purple">New</span></span>
-                    <span class="meta">23email-server-incident-prevention.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="2427incident-analysis-question-group-3-full.html" class="file-link">
-                <span class="icon">🧩</span>
-                <div class="details">
-                    <span class="filename">Q24-27. 資安事件分析題組 (Incident Analysis) <span class="tag tag-blue">Group</span></span>
-                    <span class="meta">2427incident-analysis-question-group-3-full.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="28penetration-test-scope-misconception.html" class="file-link">
-                <span class="icon">🎯</span>
-                <div class="details">
-                    <span class="filename">Q28. 滲透測試範圍誤解 (Scope Misconception) <span class="tag tag-purple">New</span></span>
-                    <span class="meta">28penetration-test-scope-misconception.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="29penetration-testing-tools-correct-usage.html" class="file-link">
-                <span class="icon">🧰</span>
-                <div class="details">
-                    <span class="filename">Q29. 滲透測試工具正確使用 <span class="tag tag-purple">New</span></span>
-                    <span class="meta">29penetration-testing-tools-correct-usage.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="30metasploit-primary-use-case.html" class="file-link">
-                <span class="icon">🦊</span>
-                <div class="details">
-                    <span class="filename">Q30. Metasploit 主要用途 <span class="tag tag-purple">New</span></span>
-                    <span class="meta">30metasploit-primary-use-case.html</span>
-                </div>
-            </a>
-        </li>
-    </ul>
 
-    <div class="section-title">
-        <span class="icon">🛡️</span> 進階防禦與合規 (Q11-Q20)
+    <div class="legend">
+        <div class="legend-item"><span class="tag tag-sec">SEC</span> 技術防護 / 攻防</div>
+        <div class="legend-item"><span class="tag tag-mgm">MGM</span> 風險管理 / 營運</div>
+        <div class="legend-item"><span class="tag tag-net">NET</span> 網路安全 / 傳輸</div>
+        <div class="legend-item"><span class="tag tag-iso">ISO</span> 標準 / 框架</div>
     </div>
-    <ul class="file-list">
-        <li class="file-item">
-            <a href="11APT_File_Upload_Mitigation_Q11.html" class="file-link">
-                <span class="icon">📂</span>
-                <div class="details">
-                    <span class="filename">Q11. APT 檔案上傳緩解措施</span>
-                    <span class="meta">11APT_File_Upload_Mitigation_Q11.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="12Q12_AVAS_vs_OWASPTop10.html" class="file-link">
-                <span class="icon">🆚</span>
-                <div class="details">
-                    <span class="filename">Q12. AVAS vs OWASP Top 10</span>
-                    <span class="meta">12Q12_AVAS_vs_OWASPTop10.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="13_CVE2023-3519_SSLVPN_Webshell_LDAP_Protection.html" class="file-link">
-                <span class="icon">🐛</span>
-                <div class="details">
-                    <span class="filename">Q13. CVE-2023-3519 SSLVPN & Webshell 防護</span>
-                    <span class="meta">13_CVE2023-3519_SSLVPN_Webshell_LDAP_Protection.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="14_Authentication_Password_Policy_CAPTCHA.html" class="file-link">
-                <span class="icon">🔐</span>
-                <div class="details">
-                    <span class="filename">Q14. 身份驗證與密碼政策 (CAPTCHA)</span>
-                    <span class="meta">14_Authentication_Password_Policy_CAPTCHA.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="1518Group2_Q15-18_Full_Tutorial.html" class="file-link">
-                <span class="icon">📚</span>
-                <div class="details">
-                    <span class="filename">Q15-18. 整合題組 (Full Tutorial) <span class="tag tag-blue">Group</span></span>
-                    <span class="meta">1518Group2_Q15-18_Full_Tutorial.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="19_Remote_Networking_Encryption_Symmetric_Asymmetric_Key_Exchange.html" class="file-link">
-                <span class="icon">🔑</span>
-                <div class="details">
-                    <span class="filename">Q19. 遠端網路加密與金鑰交換</span>
-                    <span class="meta">19_Remote_Networking_Encryption...html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="20_Backup_3-2-1_Rule_Explanation.html" class="file-link">
-                <span class="icon">💾</span>
-                <div class="details">
-                    <span class="filename">Q20. 備份 3-2-1 原則</span>
-                    <span class="meta">20_Backup_3-2-1_Rule_Explanation.html</span>
-                </div>
-            </a>
-        </li>
-    </ul>
 
-    <div class="section-title">
-        <span class="icon">🧱</span> 基礎架構與標準 (Q01-Q10)
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 輸入關鍵字搜尋題目 (例如: PTES, SQL, 風險)...">
     </div>
-    <ul class="file-list">
-        <li class="file-item">
-            <a href="01MITRE_ATTCK_Credential_Access_Q1.html" class="file-link">
-                <span class="icon">🥷</span>
-                <div class="details">
-                    <span class="filename">Q01. MITRE ATT&CK 憑證存取</span>
-                    <span class="meta">01MITRE_ATTCK_Credential_Access_Q1.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="02Vulnerability_Scanning_Basics_Q2.html" class="file-link">
-                <span class="icon">🔍</span>
-                <div class="details">
-                    <span class="filename">Q02. 弱點掃描基礎</span>
-                    <span class="meta">02Vulnerability_Scanning_Basics_Q2.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="03Red_Team_Exercise_Attack_Methods_Q3.html" class="file-link">
-                <span class="icon">🔴</span>
-                <div class="details">
-                    <span class="filename">Q03. 紅隊演練攻擊手法</span>
-                    <span class="meta">03Red_Team_Exercise_Attack_Methods_Q3.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="0407Risk_Assessment_Vulnerability_Q4-Q7_Full.html" class="file-link">
-                <span class="icon">📉</span>
-                <div class="details">
-                    <span class="filename">Q04-07. 風險評鑑與弱點管理題組 <span class="tag tag-blue">Group</span></span>
-                    <span class="meta">0407Risk_Assessment_Vulnerability_Q4-Q7_Full.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="08NIST_CSF_Referenced_Standards_Q8.html" class="file-link">
-                <span class="icon">📏</span>
-                <div class="details">
-                    <span class="filename">Q08. NIST CSF 參考標準</span>
-                    <span class="meta">08NIST_CSF_Referenced_Standards_Q8.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="09OWASP_CDM_Cyber_Defense_Matrix_Q9.html" class="file-link">
-                <span class="icon">♟️</span>
-                <div class="details">
-                    <span class="filename">Q09. OWASP CDM 網路防禦矩陣</span>
-                    <span class="meta">09OWASP_CDM_Cyber_Defense_Matrix_Q9.html</span>
-                </div>
-            </a>
-        </li>
-        <li class="file-item">
-            <a href="10DNS_DDoS_Mitigation_Q10.html" class="file-link">
-                <span class="icon">🌐</span>
-                <div class="details">
-                    <span class="filename">Q10. DNS DDoS 緩解措施</span>
-                    <span class="meta">10DNS_DDoS_Mitigation_Q10.html</span>
-                </div>
-            </a>
-        </li>
+
+    <ul id="fileList">
+        <li><span class="tag tag-sec">01</span><a href="01MITRE_ATTCK_Credential_Access_Q1.html">MITRE ATT&CK 憑證存取 (Credential Access)</a></li>
+        <li><span class="tag tag-sec">02</span><a href="02Vulnerability_Scanning_Basics_Q2.html">弱點掃描基礎與 CVSS</a></li>
+        <li><span class="tag tag-sec">03</span><a href="03Red_Team_Exercise_Attack_Methods_Q3.html">紅隊演練 (Red Team) 攻擊手法</a></li>
+        <li><span class="tag tag-mgm">04</span><a href="0407Risk_Assessment_Vulnerability_Q4-Q7_Full.html">風險評鑑與弱點管理題組 (Q4-Q7)</a></li>
+        <li><span class="tag tag-iso">08</span><a href="08NIST_CSF_Referenced_Standards_Q8.html">NIST CSF 參考標準框架</a></li>
+        <li><span class="tag tag-iso">09</span><a href="09OWASP_CDM_Cyber_Defense_Matrix_Q9.html">OWASP CDM 網路防禦矩陣</a></li>
+        <li><span class="tag tag-net">10</span><a href="10DNS_DDoS_Mitigation_Q10.html">DNS DDoS 緩解措施</a></li>
+
+        <li><span class="tag tag-sec">11</span><a href="11APT_File_Upload_Mitigation_Q11.html">APT 檔案上傳漏洞緩解</a></li>
+        <li><span class="tag tag-iso">12</span><a href="12Q12_AVAS_vs_OWASPTop10.html">AVAS vs OWASP Top 10 比較</a></li>
+        <li><span class="tag tag-sec">13</span><a href="13_CVE2023-3519_SSLVPN_Webshell_LDAP_Protection.html">CVE-2023-3519 SSLVPN 與 Webshell 防護</a></li>
+        <li><span class="tag tag-sec">14</span><a href="14_Authentication_Password_Policy_CAPTCHA.html">身份驗證與密碼政策 (CAPTCHA)</a></li>
+        <li><span class="tag tag-sec">15</span><a href="1518Group2_Q15-18_Full_Tutorial.html">實務整合題組 (Q15-Q18)</a></li>
+        <li><span class="tag tag-net">19</span><a href="19_Remote_Networking_Encryption_Symmetric_Asymmetric_Key_Exchange.html">遠端網路加密與金鑰交換</a></li>
+        <li><span class="tag tag-mgm">20</span><a href="20_Backup_3-2-1_Rule_Explanation.html">資料備份 3-2-1 原則</a></li>
+
+        <li><span class="tag tag-net">21</span><a href="21threat-intelligence-format-stix.html">威脅情資交換格式 (STIX)</a></li>
+        <li><span class="tag tag-mgm">22</span><a href="22incident-response-priority-admin-account.html">事件應變優先順序 (Admin Account)</a></li>
+        <li><span class="tag tag-net">23</span><a href="23email-server-incident-prevention.html">電子郵件伺服器事件預防</a></li>
+        <li><span class="tag tag-mgm">24</span><a href="2427incident-analysis-question-group-3-full.html">資安事件分析題組 (Q24-Q27)</a></li>
+        <li><span class="tag tag-mgm">28</span><a href="28penetration-test-scope-misconception.html">滲透測試範圍誤解 (Scope)</a></li>
+        <li><span class="tag tag-sec">29</span><a href="29penetration-testing-tools-correct-usage.html">滲透測試工具正確使用</a></li>
+        <li><span class="tag tag-sec">30</span><a href="30metasploit-primary-use-case.html">Metasploit 主要用途</a></li>
+
+        <li><span class="tag tag-iso">31</span><a href="31ptes_process_with_image_analysis.html">PTES 滲透測試執行標準流程</a></li>
+        <li><span class="tag tag-net">32</span><a href="32hsts_missing_analysis.html">HSTS 缺失分析與安全性</a></li>
+        <li><span class="tag tag-sec">33</span><a href="3336owasp_top10_scenario_group4_full_explanation.html">OWASP Top 10 實務題組 (Q33-Q36)</a></li>
+        <li><span class="tag tag-sec">37</span><a href="3740set05_q37_to_q40_full_tutor_template.html">綜合演練題組 Set 05 (Q37-Q40)</a></li>
     </ul>
-</div>
 
 <script>
     document.getElementById('searchInput').addEventListener('keyup', function(e) {
         const searchText = e.target.value.toLowerCase();
-        const items = document.querySelectorAll('.file-item');
+        const items = document.querySelectorAll('#fileList li');
         
         items.forEach(item => {
             const text = item.innerText.toLowerCase();
             if(text.includes(searchText)) {
-                item.style.display = 'block';
+                item.style.display = 'flex';
             } else {
                 item.style.display = 'none';
             }
